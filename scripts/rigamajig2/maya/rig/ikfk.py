@@ -303,10 +303,13 @@ class IkFkLimb(IkFkBase):
                 ["{}.{}".format(jnt1PvDist, 'distance'), "{}.{}".format(jnt2PvDist, 'distance'), 1],
                 [abs(jnt1Dist), abs(jnt2Dist), 1], operation='div', name=grp + '_pvDist')
 
+            normPvScale = node.multiplyDivide("{}.{}".format(pvMultiplier, "output"), "{}.outputScale".format(scale),
+                                              operation='div', name=grp + '_pvNormScale')
+
             # create a blend between the multipler and 1
             pvDistBlend = node.blendColors([1, 1, 1],
-                                           ["{}.{}".format(pvMultiplier, 'outputX'),
-                                            "{}.{}".format(pvMultiplier, 'outputY'), 1],
+                                           ["{}.{}".format(normPvScale, 'outputX'),
+                                            "{}.{}".format(normPvScale, 'outputY'), 1],
                                            weight=pvPinAttr, name=grp + '_pvBlend')
 
             # get the proper multipler. normalized with the TopStretch and BotStretch

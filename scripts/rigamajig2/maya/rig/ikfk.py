@@ -249,7 +249,7 @@ class IkFkLimb(IkFkBase):
         """
         # get the joints influenced by the IK handle
         jnts = IkFkLimb.getJointsFromHandle(ikHandle)
-
+        pvNode = IkFkLimb.getPoleVectorFromHandle(ikHandle)
         if not grp or not cmds.objExists(grp):
             grp = cmds.createNode("transform", name='ikfk_stretch_hrc')
 
@@ -286,8 +286,43 @@ class IkFkLimb(IkFkBase):
         jnt1Dist = cmds.getAttr('{}.t{}'.format(jnts[1], aimAxis))
         jnt2Dist = cmds.getAttr('{}.t{}'.format(jnts[2], aimAxis))
         jntLength = jnt1Dist + jnt2Dist
-        jnt1baseLen = node.multDoubleLinear(stretchTopAttr, jnt1Dist, name=jnts[1] + '_baseLen')
-        jnt2baseLen = node.multDoubleLinear(stretchBotAttr, jnt2Dist, name=jnts[2] + '_baseLen')
+
+        # if a pole vector node is found add the pv setup!
+        if pvNode:
+            # add pole vector pinning attributes
+            cmds.addAttr(grp, ln='pvPin', at='double', dv=0, min=0, max=1, k=True)
+            pvPinAttr = '{}.pvPin'.format(grp)
+
+            # get the distance from the wrist and shoulder to pole vector
+            pvdcmp = node.decomposeMatrix("{}.{}".format(pvNode, 'worldMatrix'), name=pvNode)
+            jnt1PvDist = node.distance(startTgt, "{}.{}".format(pvdcmp, 'outputTranslate'), name=grp + '_upperPvPin')
+            jnt2PvDist = node.distance(endTgt, "{}.{}".format(pvdcmp, 'outputTranslate'), name=grp + '_lowerPvPin')
+
+            # get the pole vector distance as a multiplier
+            pvMultiplier = node.multiplyDivide(
+                ["{}.{}".format(jnt1PvDist, 'distance'), "{}.{}".format(jnt2PvDist, 'distance'), 1],
+                [abs(jnt1Dist), abs(jnt2Dist), 1], operation='div', name=grp + '_pvDist')
+
+            # create a blend between the multipler and 1
+            pvDistBlend = node.blendColors([1, 1, 1],
+                                           ["{}.{}".format(pvMultiplier, 'outputX'),
+                                            "{}.{}".format(pvMultiplier, 'outputY'), 1],
+                                           weight=pvPinAttr, name=grp + '_pvBlend')
+
+            # get the proper multipler. normalized with the TopStretch and BotStretch
+            jnt1multiplier = node.plusMinusAverage1D([-1, stretchTopAttr, str("{}.{}".format(pvDistBlend, 'outputR'))],
+                                                     operation='sum', name=jnts[1] + '_lenMult')
+            jnt2multiplier = node.plusMinusAverage1D([-1, stretchBotAttr, str("{}.{}".format(pvDistBlend, 'outputG'))],
+                                                     operation='sum', name=jnts[2] + '_lenMult')
+
+            # connect the final multipler to the base length of the joint.
+            jnt1baseLen = node.multDoubleLinear("{}.{}".format(jnt1multiplier, 'output1D'), jnt1Dist,
+                                                name=jnts[1] + '_baseLen')
+            jnt2baseLen = node.multDoubleLinear("{}.{}".format(jnt2multiplier, 'output1D'), jnt2Dist,
+                                                name=jnts[2] + '_baseLen')
+        else:
+            jnt1baseLen = node.multDoubleLinear(stretchTopAttr, jnt1Dist, name=jnts[1] + '_baseLen')
+            jnt2baseLen = node.multDoubleLinear(stretchBotAttr, jnt2Dist, name=jnts[2] + '_baseLen')
 
         actualDist = node.addDoubleLinear('{}.output'.format(jnt1baseLen), '{}.output'.format(jnt2baseLen),
                                           name=ikHandle + '_actualDist')
@@ -348,33 +383,6 @@ class IkFkLimb(IkFkBase):
         cmds.setAttr("{}.v".format(ikHandle), 0)
 
         return [startTgt, endTgt]
-
-    @staticmethod
-    def createPvPin(ikHandle, pv, grp=None):
-        jnts = IkFkLimb.getJointsFromHandle(ikHandle)
-
-        if not grp or not cmds.objExists(grp):
-            grp = cmds.createNode("transform", name='ikfk_stretch_hrc')
-
-        cmds.addAttr(grp, ln='pvLock', at='double', dv=0, min=0, max=1, k=True)
-        pvLockAttr = '{}.pvLock'.format(grp)
-
-        switch = node.plusMinusAverage1D([1, "{}.{}".format(grp, 'ikfk')], operation='sub', name=grp + "_rev")
-        pvPin = node.multDoubleLinear("{}.{}".format(switch, 'output1D'), "{}.{}".format(grp, 'pvLock'), name=grp + '_pvPin')
-
-        pvdcmp = node.decomposeMatrix("{}.{}".format(pv, 'worldMatrix'), name=pv)
-        shoulderToPv = node.distance(jnts[0], "{}.{}".format(pvdcmp, 'outputTranslate'), name=grp + '_upperPvPin')
-        elbowToPv = node.distance(jnts[1], "{}.{}".format(pvdcmp, 'outputTranslate'), name=grp + '_lowerPvPin')
-
-        shoulderToElbow = mathUtils.distanceNodes(jnts[0], jnts[1])
-        elbowToWrist = mathUtils.distanceNodes(jnts[1], jnts[2])
-
-        distance = node.multiplyDivide(
-            ["{}.{}".format(shoulderToPv, 'distance'), "{}.{}".format(elbowToPv, 'distance'), 0],
-            [shoulderToElbow, elbowToWrist, 0], operation='div', name=grp + '_pvDist')
-
-
-
 
     @staticmethod
     def ikMatchFk():
@@ -445,7 +453,23 @@ class IkFkLimb(IkFkBase):
         return joints
 
     @staticmethod
-    def getPoleVectorFromHandle(ikHandle, magnitude=10):
+    def getPoleVectorFromHandle(ikHandle):
+        """
+        Get Pole Vector affecting the ikHandle
+        :param ikHandle: Ik handle to get the pole vector from
+        :return: list of joints affected by the Ik handle
+        """
+        if not cmds.objExists(ikHandle): raise Exception('ikHandle {} does not exist'.format(ikHandle))
+        if cmds.objectType(ikHandle) != 'ikHandle': raise Exception(
+            'Object {} is not a valid ikHandle'.format(ikHandle))
+        connected = cmds.listConnections("{}.{}".format(ikHandle, 'poleVectorX'), s=True)
+        if connected:
+            node = cmds.listConnections("{}.{}".format(connected[0], 'target[0].targetTranslate'), s=True)
+            return node[0]
+        return None
+
+    @staticmethod
+    def getPoleVectorPosFromHandle(ikHandle, magnitude=10):
         """
         Get the pole vector position from an ikHandle
         :param ikHandle: Ik handle to get the joints from

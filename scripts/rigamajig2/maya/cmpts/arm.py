@@ -79,8 +79,13 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
     def rigSetup(self):
         """Add the self.rig setup"""
         self.ikfk = ikfk.IkFkLimb(self.input[1:])
-        self.ikfk.setGroup(self.root)
+        self.ikfk.setGroup(self.name + '_ikfk')
         self.ikfk.create()
+        cmds.parent(self.ikfk.getGroup(), self.root)
+
+        # create a pole vector contraint
+        cmds.poleVectorConstraint(self.arm_pv[-1], self.ikfk.getHandle())
+
         self._ikStartTgt, self._ikEndTgt = self.ikfk.createStretchyIk(self.ikfk.getHandle(), grp=self.ikfk.getGroup())
 
         # connect the shoulderSwing to the other chains
@@ -96,9 +101,6 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         cmds.pointConstraint(self.arm_ik[-1], self._ikEndTgt, mo=True)
         cmds.orientConstraint(self.arm_ik[-1], self.ikfk.getIkJointList()[-1], mo=True)
 
-        # create a pole vector contraint
-        cmds.poleVectorConstraint(self.arm_pv[-1], self.ikfk.getHandle())
-
         self.setupProxyAttributes()
 
     def postRigSetup(self):
@@ -106,12 +108,13 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:])
 
     def setupProxyAttributes(self):
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.root, 'ikfk'), self.controlers)
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'ikfk'), self.controlers)
 
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.root, 'stretch'), self.arm_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.root, 'stretchTop'), self.arm_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.root, 'stretchBot'), self.arm_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.root, 'softStretch'), self.arm_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretch'), self.arm_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchTop'), self.arm_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchBot'), self.arm_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'softStretch'), self.arm_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'), [self.arm_ik[-1], self.arm_pv[-1]])
 
     def finalize(self):
         pass

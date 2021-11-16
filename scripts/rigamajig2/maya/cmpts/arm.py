@@ -66,7 +66,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
                                          hideAttrs=['s', 'v'], size=self.size, color='blue',
                                          parent=self.control,
                                          shape='cube', position=cmds.xform(self.input[-1], q=True, ws=True, t=True))
-        pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:])
+        pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:], magnitude=0)
         self.arm_pv = rig_control.create("arm_pv_{}".format(self.side), hierarchy=['trsBuffer', 'spaces_trs'],
                                          hideAttrs=['r', 's', 'v'],
                                          size=self.size, color='blue', shape='diamond', position=pv_pos,

@@ -112,7 +112,8 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:])
 
     def setupProxyAttributes(self):
-        rigamajig2.maya.attr.addSeparator(self.arm_ik[-1], '----')
+        for control in self.controlers:
+            rigamajig2.maya.attr.addSeparator(control, '----')
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'ikfk'), self.controlers)
 
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretch'), self.arm_ik[-1])

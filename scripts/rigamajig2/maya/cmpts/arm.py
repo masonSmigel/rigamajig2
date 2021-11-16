@@ -69,7 +69,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:])
         self.arm_pv = rig_control.create("arm_pv_{}".format(self.side), hierarchy=['trsBuffer', 'spaces_trs'],
                                          hideAttrs=['r', 's', 'v'],
-                                         size=self.size, color='blue', shape='pyramid', position=pv_pos,
+                                         size=self.size, color='blue', shape='diamond', position=pv_pos,
                                          parent=self.control, shapeAim='z')
 
         # add the controls to our controller list
@@ -101,6 +101,10 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         cmds.pointConstraint(self.arm_ik[-1], self._ikEndTgt, mo=True)
         cmds.orientConstraint(self.arm_ik[-1], self.ikfk.getIkJointList()[-1], mo=True)
 
+        # connect twist of ikHandle to ik arm
+        cmds.addAttr(self.ikfk.getGroup(), ln='twist', at='float', k=True)
+        cmds.connectAttr("{}.{}".format(self.ikfk.getGroup(), 'twist'), "{}.{}".format(self.ikfk.getHandle(), 'twist'))
+
         self.setupProxyAttributes()
 
     def postRigSetup(self):
@@ -108,6 +112,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:])
 
     def setupProxyAttributes(self):
+        rigamajig2.maya.attr.addSeparator(self.arm_ik[-1], '----')
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'ikfk'), self.controlers)
 
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretch'), self.arm_ik[-1])
@@ -115,6 +120,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchBot'), self.arm_ik[-1])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'softStretch'), self.arm_ik[-1])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'), [self.arm_ik[-1], self.arm_pv[-1]])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'twist'), self.arm_ik[-1])
 
     def finalize(self):
         pass

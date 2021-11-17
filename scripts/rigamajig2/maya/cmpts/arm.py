@@ -80,7 +80,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         self.controlers += [self.clavical[-1], self.shoulderSwing[-1]] + self.fkControls + self.ikControls
 
     def rigSetup(self):
-        """Add the self.rig setup"""
+        """Add the rig setup"""
         self.ikfk = ikfk.IkFkLimb(self.input[1:])
         self.ikfk.setGroup(self.name + '_ikfk')
         self.ikfk.create()
@@ -106,6 +106,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
 
         # TODO: add a better tiwst. look at eyad's arrow pv system.
         # maybe implement that, but use an attribute not a control
+
         # connect twist of ikHandle to ik arm
         cmds.addAttr(self.ikfk.getGroup(), ln='twist', at='float', k=True)
         cmds.connectAttr("{}.{}".format(self.ikfk.getGroup(), 'twist'), "{}.{}".format(self.ikfk.getHandle(), 'twist'))

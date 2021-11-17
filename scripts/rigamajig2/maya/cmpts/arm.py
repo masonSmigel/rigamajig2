@@ -143,7 +143,5 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
             spaces.addSpace(self.shoulderSwing[1], ['trs_motion'], nameList=['world'], constraintType='orient')
 
     def setAttrs(self):
-        """
-        Set some attributes to values that make more sense
-        """
+        """Set some attributes to values that make more sense for the inital setup."""
         cmds.setAttr("{}.{}".format(self.arm_ik[-1], 'softStretch'), 0.2)

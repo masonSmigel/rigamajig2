@@ -75,8 +75,9 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
                                          parent=self.control, shapeAim='z')
 
         # add the controls to our controller list
-        self.controlers += [self.clavical[-1], self.shoulderSwing[-1], self.shoulder[-1], self.elbow[-1],
-                            self.wrist[-1], self.arm_ik[-1], self.arm_pv[-1]]
+        self.fkControls = [self.shoulder[-1], self.elbow[-1], self.wrist[-1]]
+        self.ikControls = [self.arm_ik[-1], self.arm_pv[-1]]
+        self.controlers += [self.clavical[-1], self.shoulderSwing[-1]] + self.fkControls + self.ikControls
 
     def rigSetup(self):
         """Add the self.rig setup"""
@@ -113,6 +114,8 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
     def postRigSetup(self):
         # connect the blend chain to the bind chain
         rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:])
+        rigamajig2.maya.rig.ikfk.IkFkBase.connnectIkFkVisibility(self.ikfk.getGroup(), 'ikfk',
+                                                                 ikList=self.ikControls, fkList=self.fkControls)
 
     def setupProxyAttributes(self):
         for control in self.controlers:

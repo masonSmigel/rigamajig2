@@ -92,12 +92,14 @@ class CurveData(node_data.NodeData):
                                 cmds.rename(shapeNode, shape)
                                 cmds.parent(shape, node, r=True, s=True)
                                 cmds.delete(curveTrs)
+                                created = True
 
-                            if not created and cmds.objExists(shape):
-                                for i, position in enumerate(self._data[node]['shapes'][shape][attribute]):
-                                    cmds.setAttr('{}.controlPoints[{}]'.format(shape, i), *position)
+                        if not created and cmds.objExists(shape):
+                            for i, position in enumerate(self._data[node]['shapes'][shape][attribute]):
+                                cmds.setAttr('{}.controlPoints[{}]'.format(shape, i), *position)
                 result.append(node)
         return result
+
 
 if __name__ == '__main__':
     # d = CurveData()

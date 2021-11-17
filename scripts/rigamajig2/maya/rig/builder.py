@@ -24,6 +24,7 @@ PRE_SCRIPT = 'pre_script'
 POST_SCRIPT = 'post_script'
 
 SKELETON_FILE = "skeleton.ma"
+CONTROL_SHAPES_FILE = "controlShapes.json"
 
 
 class Builder(object):
@@ -128,6 +129,25 @@ class Builder(object):
             cmpt._optimize_cmpt()
         logger.info("optimize -- complete")
 
+    def load_controlShapes(self, path=None):
+        """
+        Load the control shapes
+        :param path:
+        :return:
+        """
+        import rigamajig2.maya.data.curve_data as curve_data
+
+        cd = curve_data.CurveData()
+        if path:
+            cd.read(path)
+        elif os.path.exists(os.path.join(self.path, CONTROL_SHAPES_FILE)):
+            cd.read(os.path.join(self.path, CONTROL_SHAPES_FILE))
+
+        controls = cd.getData().keys()
+        cd.applyData(controls)
+        logger.info("loading shapes for {} controls".format(len(controls)))
+        logger.info("control shapes -- complete")
+
     def load_data(self):
         """
         Load other data, this is stuff like skinweights, blendshapes, clusters etc.
@@ -163,6 +183,7 @@ class Builder(object):
         self.build()
         self.connect()
         self.finalize()
+        self.load_controlShapes()
         if optimize: self.optimize()
         self.load_data()
         self.post_script()

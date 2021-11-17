@@ -4,6 +4,7 @@ main component
 import maya.cmds as cmds
 import rigamajig2.maya.cmpts.base
 import rigamajig2.maya.rig.control as rig_control
+import rigamajig2.maya.rig.spaces as spaces
 import rigamajig2.maya.rig.ikfk as ikfk
 import rigamajig2.maya.transform as rig_transform
 import rigamajig2.shared.common as common
@@ -37,6 +38,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         """Build the initial hirarchy"""
         self.root = cmds.createNode('transform', n=self.name + '_cmpt')
         self.control = cmds.createNode('transform', n=self.name + '_control', parent=self.root)
+        self.spaces = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root)
 
         # clavical/swing controls
         self.clavical = rig_control.createAtObject("clavical_{}".format(self.side), hierarchy=['trsBuffer'],
@@ -101,6 +103,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         cmds.pointConstraint(self.arm_ik[-1], self._ikEndTgt, mo=True)
         cmds.orientConstraint(self.arm_ik[-1], self.ikfk.getIkJointList()[-1], mo=True)
 
+        # TODO: add a better tiwst. look at eyad's arrow pv system.
         # connect twist of ikHandle to ik arm
         cmds.addAttr(self.ikfk.getGroup(), ln='twist', at='float', k=True)
         cmds.connectAttr("{}.{}".format(self.ikfk.getGroup(), 'twist'), "{}.{}".format(self.ikfk.getHandle(), 'twist'))
@@ -123,8 +126,18 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'), [self.arm_ik[-1], self.arm_pv[-1]])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'twist'), self.arm_ik[-1])
 
-    def finalize(self):
-        pass
+    def connect(self):
+        """Create the connection"""
+        spaces.create(self.shoulderSwing[1], self.shoulderSwing[-1], parent=self.spaces)
+        spaces.create(self.arm_ik[1], self.arm_ik[-1], parent=self.spaces, defaultName='world')
+        spaces.create(self.arm_pv[1], self.arm_pv[-1], parent=self.spaces, defaultName='world')
+
+        # TODO: rework all this in a smarter way
+        spaces.addSpace(self.arm_pv[1], [self.arm_ik[-1]], nameList=['hand'], constraintType='parent')
+        spaces.addSpace(self.arm_ik[1], [self.shoulderSwing[-1]], nameList=['shoulder'], constraintType='parent')
+        # if the main control exists connect the world space
+        if cmds.objExists('trs_motion'):
+            spaces.addSpace(self.shoulderSwing[1], ['trs_motion'], nameList=['world'], constraintType='orient')
 
     def setAttrs(self):
         """

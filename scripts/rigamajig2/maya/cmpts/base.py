@@ -48,7 +48,6 @@ class Base(object):
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.preScript()
                 self.initalHierachy()
-                self.addAnimParams()
             self.set_step(1)
         else:
             logger.warning('component {} already initalized.'.format(self.name))
@@ -76,7 +75,9 @@ class Base(object):
         """ connect components within the rig"""
         if not self.get_step() >= 3:
             with rigamajig2.maya.container.ActiveContainer(self.container):
-                pass
+                self.initConnect()
+                self.connect()
+                self.postConnect()
             self.set_step(3)
         else:
             logger.warning('component {} already connected.'.format(self.name))
@@ -127,10 +128,6 @@ class Base(object):
         """Setup the inital Hirarchy"""
         pass
 
-    def addAnimParams(self):
-        """ Add all attributes needed"""
-        pass
-
     def preRigSetup(self):
         """Pre rig setup"""
         pass
@@ -143,8 +140,16 @@ class Base(object):
         """Add the rig setup"""
         pass
 
-    def addBindJoints(self):
-        """Add bind joints to the rig"""
+    def initConnect(self):
+        """initalize the connection"""
+        pass
+
+    def connect(self):
+        """create the connection"""
+        pass
+
+    def postConnect(self):
+        """any final cleanup after the connection"""
         pass
 
     def publishNodes(self):

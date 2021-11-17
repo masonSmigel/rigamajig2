@@ -144,8 +144,8 @@ class Builder(object):
             cd.read(os.path.join(self.path, CONTROL_SHAPES_FILE))
 
         controls = cd.getData().keys()
-        cd.applyData(controls)
         logger.info("loading shapes for {} controls".format(len(controls)))
+        cd.applyData(controls)
         logger.info("control shapes -- complete")
 
     def load_data(self):

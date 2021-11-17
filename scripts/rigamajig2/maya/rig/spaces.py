@@ -98,9 +98,11 @@ def addSpace(node, targetList, nameList, constraintType='parent'):
         offset = rigamajig2.maya.matrix.matrixMult(cmds.getAttr('{}.worldMatrix'.format(newSpace)),
                                                    cmds.getAttr('{}.worldInverseMatrix'.format(target)))
         if constraintType == 'orient':
-            rig_node.multMatrix([offset, target + '.worldMatrix', spaceGroup + '.worldInverseMatrix'], newSpace, r=True)
+            rig_node.multMatrix([offset, target + '.worldMatrix', spaceGroup + '.worldInverseMatrix'], newSpace, r=True,
+                                name="{}_{}".format(node, name))
         else:
-            rig_node.multMatrix([offset, target + '.worldMatrix', spaceGroup + '.worldInverseMatrix'], newSpace, t=True, r=True)
+            rig_node.multMatrix([offset, target + '.worldMatrix', spaceGroup + '.worldInverseMatrix'], newSpace, t=True,
+                                r=True, name="{}_{}".format(node, name))
 
         # connect the world matrix of the new space to our choice node.
         choice_input = rig_attr.getNextAvailableElement(choice + '.input')

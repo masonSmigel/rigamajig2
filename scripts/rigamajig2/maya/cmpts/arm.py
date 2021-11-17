@@ -105,6 +105,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.arm_ik[-1], self.ikfk.getIkJointList()[-1], mo=True)
 
         # TODO: add a better tiwst. look at eyad's arrow pv system.
+        # maybe implement that, but use an attribute not a control
         # connect twist of ikHandle to ik arm
         cmds.addAttr(self.ikfk.getGroup(), ln='twist', at='float', k=True)
         cmds.connectAttr("{}.{}".format(self.ikfk.getGroup(), 'twist'), "{}.{}".format(self.ikfk.getHandle(), 'twist'))

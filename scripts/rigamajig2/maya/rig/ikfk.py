@@ -184,6 +184,36 @@ class IkFkBase(object):
                 for attr in ['{}{}'.format(x, y) for x in 'trs' for y in 'xyz']:
                     cmds.setAttr("{}.{}".format(blendJnt, attr), e=True, lock=True)
 
+    @staticmethod
+    def connnectIkFkVisibility(attrHolder, attr='ikfk', ikList=[], fkList=[]):
+        """
+        Connect the fk and Ik visibility. Mostly used for controls
+        :param attrHolder: node that holds the attribute
+        :param attr: node to switch between ik and fk
+        :param ikList:
+        :param fkList:
+        :return:
+        """
+        if not cmds.objExists(attrHolder):
+            raise RuntimeError('Node {} does not exist'.format(attrHolder))
+        if not cmds.objExists("{}.{}".format(attrHolder, attr)):
+            raise RuntimeError('attribute "{}.{}" does not exist'.format(attrHolder, attr))
+
+        # TODO: implement a message attribute here to make sure we only make one reverse node
+        rev = node.reverse("{}.{}".format(attrHolder, attr), name="{}_{}".format(attrHolder, attr))
+
+        for ikNode in ikList:
+            shapes = cmds.listRelatives(ikNode, s=True)
+            for shape in shapes:
+                print shape
+                cmds.connectAttr("{}.{}".format(rev, 'outputX'), "{}.{}".format(shape, 'v'))
+
+        for fkNode in fkList:
+            shapes = cmds.listRelatives(fkNode, s=True)
+            for shape in shapes:
+                print shape
+                cmds.connectAttr("{}.{}".format(attrHolder, attr), "{}.{}".format(shape, 'v'))
+
 
 class IkFkLimb(IkFkBase):
     """

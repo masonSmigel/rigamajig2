@@ -43,7 +43,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         # clavical/swing controls
         self.clavical = rig_control.createAtObject("clavical_{}".format(self.side), hierarchy=['trsBuffer'],
                                                    size=self.size, color='blue', parent=self.control, shape='square',
-                                                   xformObj=self.input[0])
+                                                   xformObj=self.input[0], hideAttrs=['v', 's'])
         self.shoulderSwing = rig_control.createAtObject("shoulderSwing_{}".format(self.side),
                                                         hierarchy=['trsBuffer', 'spaces_trs'],
                                                         hideAttrs=['v', 's'], size=self.size, color='blue',

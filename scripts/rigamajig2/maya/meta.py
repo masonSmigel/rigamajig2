@@ -3,6 +3,7 @@ Functions to add metadata to nodes
 """
 import maya.cmds as cmds
 import rigamajig2.shared.common as common
+import rigamajig2.maya.attr as attr
 
 
 def tag(nodes, tag, type=None):
@@ -58,17 +59,45 @@ def getTagged(tag, namespace=None):
         return [s.split(".")[0] for s in cmds.ls("{}:*.__{}__".format(namespace, tag))]
 
 
-def messageNameConnection(sourceNode, dataNode, dataAttr):
+def messageConnection(sourceNode, dataNode, sourceAttr, dataAttr=None):
     """
     Add a message connection between a source and target node
     :param sourceNode: source node of the message connection
     :param dataNode: destination of the message connection
+    :param sourceAttr: name of the source attribute
     :param dataAttr: name of the destination attribute
     """
     if cmds.objExists("{}.{}".format(dataNode, dataAttr)):
         raise RuntimeError("The desination '{}.{}' already exist".format(dataNode, dataAttr))
+    if not cmds.objExists("{}.{}".format(sourceNode, sourceAttr)):
+        cmds.addAttr(sourceNode, ln=sourceAttr, at='message')
+    if dataAttr is None:
+        dataAttr = sourceAttr
     cmds.addAttr(dataNode, ln=dataAttr, at='message')
-    cmds.connectAttr("{}.{}".format(sourceNode, 'message'), "{}.{}".format(dataNode, dataAttr))
+    cmds.connectAttr("{}.{}".format(sourceNode, sourceAttr), "{}.{}".format(dataNode, dataAttr))
+
+
+def messageListConnection(sourceNode, dataList, sourceAttr, dataAttr=None):
+    """
+    Add a message connection between a source and list of data nodes
+    :param sourceNode: source node of the message connection
+    :param dataList: destination of the message connection
+    :param sourceAttr: name of the source attribute
+    :param dataAttr: name of the destination attribute
+    """
+    dataList = common.toList(dataList)
+    for dataNode in dataList:
+        if cmds.objExists("{}.{}".format(dataNode, dataAttr)):
+            raise RuntimeError("The desination '{}.{}' already exist".format(dataNode, dataAttr))
+    if not cmds.objExists("{}.{}".format(sourceNode, sourceAttr)):
+        cmds.addAttr(sourceNode, ln=sourceAttr, at='message', m=True)
+    if dataAttr is None:
+        dataAttr = sourceAttr
+    for dataNode in dataList:
+        nextIndex = attr.getNextAvailableElement("{}.{}".format(sourceNode, sourceAttr))
+        print nextIndex
+        cmds.addAttr(dataNode, ln=dataAttr, at='message')
+        cmds.connectAttr(nextIndex, "{}.{}".format(dataNode, dataAttr))
 
 
 def getMessageConnection(dataPlug, silent=True):
@@ -76,11 +105,15 @@ def getMessageConnection(dataPlug, silent=True):
     Get the data connected to the given plug.
     :param dataPlug: plug to get the message for
     :param silent: if the function fails return None instead of erroring
-    :return:
+    :return: nodes connected to the message attribute. if the attribute has multiconnections return a list.
     """
 
     if cmds.objExists(dataPlug):
-        return common.getFirstIndex(cmds.listConnections(dataPlug, d=True))
+        data = cmds.listConnections(dataPlug, d=True)
+        if len(data) > 1:
+            return data
+        else:
+            return common.getFirstIndex(data)
     elif not silent:
         raise RuntimeError('Plug "{}" does not exist'.format(dataPlug))
     else:

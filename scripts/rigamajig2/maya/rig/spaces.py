@@ -57,10 +57,12 @@ def create(node, attrHolder=None, parent=None, spaceAttrName='space', defaultNam
         name="{}_{}".format(node, 'spaces'))
 
     # make some meta data connections
-    meta.messageNameConnection(attrHolder, node, 'attrHolder')
-    meta.messageNameConnection(choice, node, 'choiceNode')
-    meta.messageNameConnection(mm, node, 'multMatrixNode')
-    meta.messageNameConnection(grp, node, 'spaceGroup')
+    meta.messageConnection(attrHolder, node, 'attrHolder')
+    meta.messageConnection(choice, node, 'choiceNode')
+    meta.messageConnection(mm, node, 'multMatrixNode')
+    meta.messageConnection(grp, node, 'spaceGroup')
+
+    rig_attr.lockAndHide(grp, ['t', 'r', 's', 'v'])
     return grp
 
 
@@ -77,9 +79,9 @@ def addSpace(node, targetList, nameList, constraintType='parent'):
     :type constraintType: str
     """
     if cmds.objExists("{}.spaceGroup".format(node)):
-        attrHolder = common.getFirstIndex(cmds.listConnections(node + '.attrHolder', d=True))
-        spaceGroup = common.getFirstIndex(cmds.listConnections(node + '.spaceGroup', d=True))
-        choice = common.getFirstIndex(cmds.listConnections(node + '.choiceNode', d=True))
+        spaceGroup = meta.getMessageConnection(node + '.spaceGroup')
+        attrHolder = meta.getMessageConnection(node + '.attrHolder')
+        choice = meta.getMessageConnection(node + '.choiceNode')
 
     targetList = common.toList(targetList)
     nameList = common.toList(nameList)

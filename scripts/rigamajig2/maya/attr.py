@@ -156,7 +156,7 @@ def addEnum(node, longName, enum, value=None, niceName=None, shortName=None,
     return plug
 
 
-def addSeparator(node, label, repeat=16):
+def addSeparator(node, label, repeat=4):
     """
     Add a separator attribute to visually separate groups of attributes.
     Separator is an enum
@@ -170,7 +170,7 @@ def addSeparator(node, label, repeat=16):
 
     addEnum(node, longName=sep, niceName=("-" * repeat), enum=[label])
     plug = node + "." + sep
-    cmds.setAttr(plug, l=True, cb=True)
+    cmds.setAttr(plug, k=True, cb=True)
 
     return plug
 

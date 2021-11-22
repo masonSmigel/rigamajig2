@@ -8,6 +8,7 @@ import rigamajig2.maya.rig.spaces as spaces
 import rigamajig2.maya.rig.ikfk as ikfk
 import rigamajig2.maya.transform as rig_transform
 import rigamajig2.shared.common as common
+import rigamajig2.maya.meta as meta
 import rigamajig2.maya.container
 import rigamajig2.maya.node
 import rigamajig2.maya.attr
@@ -29,6 +30,8 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         super(Arm, self).__init__(name, input=input, size=size)
         self.side = common.getSide(self.name)
         self.metaData['component_side'] = self.side
+        # define control names
+        self.controlNames = ['clavical', 'shoulderSwing', 'shoulder_fk', 'elbow_fk', 'wrist_fk', 'arm_ik', 'arm_pv']
 
         # noinspection PyTypeChecker
         if len(self.input) != 4:
@@ -40,37 +43,41 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         self.control = cmds.createNode('transform', n=self.name + '_control', parent=self.root)
         self.spaces = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root)
 
+        # define the control names
+        claviCtlName = "{}_{}".format(self.controlNames[0], self.side)
+        SwingCtlName = "{}_{}".format(self.controlNames[1], self.side)
+        shoulCtlName = "{}_{}".format(self.controlNames[2], self.side)
+        elbowCtlName = "{}_{}".format(self.controlNames[3], self.side)
+        wirstCtlName = "{}_{}".format(self.controlNames[4], self.side)
+        armIkCtlName = "{}_{}".format(self.controlNames[5], self.side)
+        armPvCtlName = "{}_{}".format(self.controlNames[6], self.side)
+
         # clavical/swing controls
-        self.clavical = rig_control.createAtObject("clavical_{}".format(self.side), hierarchy=['trsBuffer'],
+        self.clavical = rig_control.createAtObject(claviCtlName, hierarchy=['trsBuffer'], hideAttrs=['v', 's'],
                                                    size=self.size, color='blue', parent=self.control, shape='square',
-                                                   xformObj=self.input[0], hideAttrs=['v', 's'])
-        self.shoulderSwing = rig_control.createAtObject("shoulderSwing_{}".format(self.side),
-                                                        hierarchy=['trsBuffer', 'spaces_trs'],
+                                                   xformObj=self.input[0])
+        self.shoulderSwing = rig_control.createAtObject(SwingCtlName, hierarchy=['trsBuffer', 'spaces_trs'],
                                                         hideAttrs=['v', 's'], size=self.size, color='blue',
-                                                        parent=self.clavical[-1],
-                                                        shape='square', xformObj=self.input[1])
+                                                        parent=self.clavical[-1], shape='square',
+                                                        xformObj=self.input[1])
         # fk controls
-        self.shoulder = rig_control.createAtObject("shoulder_fk_{}".format(self.side),
-                                                   hierarchy=['trsBuffer', 'spaces_trs'], hideAttrs=['v', 't', 's'],
-                                                   size=self.size, color='blue', parent=self.control, shape='circle',
-                                                   xformObj=self.input[1], shapeAim='x')
-        self.elbow = rig_control.createAtObject("elbow_fk_{}".format(self.side), hierarchy=['trsBuffer'],
-                                                hideAttrs=['v', 't', 's'],
+        self.shoulder = rig_control.createAtObject(shoulCtlName, hierarchy=['trsBuffer', 'spaces_trs'],
+                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
+                                                   parent=self.control, shape='circle', shapeAim='x',
+                                                   xformObj=self.input[1])
+        self.elbow = rig_control.createAtObject(elbowCtlName, hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
                                                 size=self.size, color='blue', parent=self.shoulder[-1], shape='circle',
-                                                xformObj=self.input[2], shapeAim='x')
-        self.wrist = rig_control.createAtObject("wrist_fk_{}".format(self.side), hierarchy=['trsBuffer'],
-                                                hideAttrs=['v', 't', 's'],
+                                                shapeAim='x', xformObj=self.input[2])
+        self.wrist = rig_control.createAtObject(wirstCtlName, hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
                                                 size=self.size, color='blue', parent=self.elbow[-1], shape='circle',
-                                                xformObj=self.input[3], shapeAim='x')
+                                                shapeAim='x', xformObj=self.input[3])
 
         # Ik controls
-        self.arm_ik = rig_control.create("arm_ik_{}".format(self.side), hierarchy=['trsBuffer', 'spaces_trs'],
-                                         hideAttrs=['s', 'v'], size=self.size, color='blue',
-                                         parent=self.control,
-                                         shape='cube', position=cmds.xform(self.input[-1], q=True, ws=True, t=True))
+        self.arm_ik = rig_control.create(armIkCtlName, hierarchy=['trsBuffer', 'spaces_trs'], hideAttrs=['s', 'v'],
+                                         size=self.size, color='blue', parent=self.control, shape='cube',
+                                         position=cmds.xform(self.input[-1], q=True, ws=True, t=True))
         pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:], magnitude=0)
-        self.arm_pv = rig_control.create("arm_pv_{}".format(self.side), hierarchy=['trsBuffer', 'spaces_trs'],
-                                         hideAttrs=['r', 's', 'v'],
+        self.arm_pv = rig_control.create(armPvCtlName, hierarchy=['trsBuffer', 'spaces_trs'], hideAttrs=['r', 's', 'v'],
                                          size=self.size, color='blue', shape='diamond', position=pv_pos,
                                          parent=self.control, shapeAim='z')
 
@@ -112,6 +119,19 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         cmds.connectAttr("{}.{}".format(self.ikfk.getGroup(), 'twist'), "{}.{}".format(self.ikfk.getHandle(), 'twist'))
 
         self.setupProxyAttributes()
+        self.ikfkMatchSetup()
+
+    def ikfkMatchSetup(self):
+        """Setup the ikFKMatching"""
+        wristIkOffset = cmds.createNode('transform', name="{}_ikMatch".format(self.input[3]), p=self.ikfk.getFkJointList()[-1])
+        rig_transform.matchTransform(self.arm_ik[-1], wristIkOffset)
+        rigamajig2.maya.attr.lock(wristIkOffset, ['t', 'r', 's', 'v'])
+
+        # add required data to the ikFkSwitchGroup
+        meta.messageListConnection(self.ikfk.getGroup(), dataList=self.ikfk.getFkJointList()[:-1] + [wristIkOffset], sourceAttr='fkMatchList', dataAttr='matchNode')
+        meta.messageListConnection(self.ikfk.getGroup(), dataList=self.ikfk.getIkJointList(), sourceAttr='ikMatchList', dataAttr='matchNode')
+        meta.messageListConnection(self.ikfk.getGroup(), dataList=self.fkControls, sourceAttr='fkControls', dataAttr='matchNode')
+        meta.messageListConnection(self.ikfk.getGroup(), dataList=[self.arm_ik[-1], self.arm_pv[-1]], sourceAttr='ikControls', dataAttr='matchNode')
 
     def postRigSetup(self):
         # connect the blend chain to the bind chain

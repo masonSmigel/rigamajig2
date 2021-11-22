@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class Arm(rigamajig2.maya.cmpts.base.Base):
-    def __init__(self, name, input=[], size=1):
+    def __init__(self, name, input=[], size=1, controlNames=None):
         """
         Create a main control
         :param name:
@@ -31,7 +31,11 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         self.side = common.getSide(self.name)
         self.metaData['component_side'] = self.side
         # define control names
-        self.controlNames = ['clavical', 'shoulderSwing', 'shoulder_fk', 'elbow_fk', 'wrist_fk', 'arm_ik', 'arm_pv']
+        # TODO: cleanup control names
+        if not controlNames:
+            self.controlNames = ['clavical', 'shoulderSwing', 'shoulder_fk', 'elbow_fk', 'wrist_fk', 'arm_ik', 'arm_pv']
+        else:
+            self.controlNames = controlNames
 
         # noinspection PyTypeChecker
         if len(self.input) != 4:
@@ -123,12 +127,14 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
 
     def ikfkMatchSetup(self):
         """Setup the ikFKMatching"""
-        wristIkOffset = cmds.createNode('transform', name="{}_ikMatch".format(self.input[3]), p=self.ikfk.getFkJointList()[-1])
+        wristIkOffset = cmds.createNode('transform', name="{}_ikMatch".format(self.input[3]),
+                                        p=self.ikfk.getFkJointList()[-1])
         rig_transform.matchTransform(self.arm_ik[-1], wristIkOffset)
         rigamajig2.maya.attr.lock(wristIkOffset, ['t', 'r', 's', 'v'])
 
         # add required data to the ikFkSwitchGroup
-        meta.messageListConnection(self.ikfk.getGroup(), self.ikfk.getFkJointList()[:-1] + [wristIkOffset], 'fkMatchList','matchNode')
+        meta.messageListConnection(self.ikfk.getGroup(), self.ikfk.getFkJointList()[:-1] + [wristIkOffset],
+                                   'fkMatchList', 'matchNode')
         meta.messageListConnection(self.ikfk.getGroup(), self.ikfk.getIkJointList(), 'ikMatchList', 'matchNode')
         meta.messageListConnection(self.ikfk.getGroup(), self.fkControls, sourceAttr='fkControls', dataAttr='matchNode')
         meta.messageListConnection(self.ikfk.getGroup(), [self.arm_ik[-1], self.arm_pv[-1]], 'ikControls', 'matchNode')

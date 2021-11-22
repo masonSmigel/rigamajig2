@@ -2,14 +2,15 @@
 Geometry utilities
 """
 import maya.cmds as cmds
+import maya.OpenMaya as om
+import maya.api.OpenMaya as om2
+
+import operator
 
 import rigamajig2.shared.common as common
-
 import rigamajig2.maya.shape as shape
 import rigamajig2.maya.utils as utils
 
-import maya.OpenMaya as om
-import maya.api.OpenMaya as om2
 
 
 def isMesh(node):
@@ -48,7 +49,6 @@ def getVertPositions(mesh, world=True):
 
     meshFn = om2.MFnMesh(dagPath)
 
-    points = om2.MPointArray()
     if world:
         points = meshFn.getPoints(space=om2.MSpace.kWorld)
     else:
@@ -124,6 +124,26 @@ def getVerts(mesh):
 
     verts = cmds.ls("{}.vtx[*]".format(mesh))
     return common.flattenList(verts)
+
+
+def getClosestVertex(mesh, point=[0, 0, 0]):
+    """
+    Get the closest point on a surface
+    :param mesh: mesh to get the closest vertex of
+    :param point: world space position to get the closest point to
+    :return: tuple of vertex id and distance to point
+    :rtype: tuple
+    """
+    pos = om2.MPoint(point)
+    sel = om2.MSelectionList()
+    sel.add(mesh)
+    mfn_mesh = om2.MFnMesh(sel.getDagPath(0))
+
+    index = mfn_mesh.getClosestPoint(pos, space=om2.MSpace.kWorld)[1]
+    faceVtx = mfn_mesh.getPolygonVertices(index)
+    vtxDist = [(vtx, mfn_mesh.getPoint(vtx, om2.MSpace.kWorld).distanceTo(pos))for vtx in faceVtx]
+
+    return min(vtxDist, key=operator.itemgetter(1))
 
 
 def cleanShapes(nodes):

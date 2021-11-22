@@ -53,7 +53,7 @@ def cleanRougePanels():
         // Error: line 1: Cannot find procedure "DCF_updateViewportList". //
     """
 
-    EVIL_METHOD_NAMES = ['DCF_updateViewportList', 'CgAbBlastPanelOptChangeCallback']
+    EVIL_METHOD_NAMES = ['DCF_updateViewportList', 'CgAbBlastPanelOptChangeCallback', 'onModelChange3dc']
     capitalEvilMethodNames = [name.upper() for name in EVIL_METHOD_NAMES]
     modelPanelLabel = mel.eval('localizedPanelLabel("ModelPanel")')
     processedPanelNames = []

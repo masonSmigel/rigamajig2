@@ -17,6 +17,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         :param input:
         """
         super(Main, self).__init__(name=name, input=input)
+        self.name = name
         self.size = size
 
     def initalHierachy(self):

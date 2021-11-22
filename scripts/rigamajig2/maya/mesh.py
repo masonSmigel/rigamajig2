@@ -152,7 +152,6 @@ def cleanShapes(nodes):
     :param nodes:
     :return:
     """
-
     nodes = common.toList(nodes)
     for node in nodes:
         if cmds.nodeType(node) in ['nurbsSurface', 'mesh', 'nurbsCurve']:

@@ -128,10 +128,10 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.lock(wristIkOffset, ['t', 'r', 's', 'v'])
 
         # add required data to the ikFkSwitchGroup
-        meta.messageListConnection(self.ikfk.getGroup(), dataList=self.ikfk.getFkJointList()[:-1] + [wristIkOffset], sourceAttr='fkMatchList', dataAttr='matchNode')
-        meta.messageListConnection(self.ikfk.getGroup(), dataList=self.ikfk.getIkJointList(), sourceAttr='ikMatchList', dataAttr='matchNode')
-        meta.messageListConnection(self.ikfk.getGroup(), dataList=self.fkControls, sourceAttr='fkControls', dataAttr='matchNode')
-        meta.messageListConnection(self.ikfk.getGroup(), dataList=[self.arm_ik[-1], self.arm_pv[-1]], sourceAttr='ikControls', dataAttr='matchNode')
+        meta.messageListConnection(self.ikfk.getGroup(), self.ikfk.getFkJointList()[:-1] + [wristIkOffset], 'fkMatchList','matchNode')
+        meta.messageListConnection(self.ikfk.getGroup(), self.ikfk.getIkJointList(), 'ikMatchList', 'matchNode')
+        meta.messageListConnection(self.ikfk.getGroup(), self.fkControls, sourceAttr='fkControls', dataAttr='matchNode')
+        meta.messageListConnection(self.ikfk.getGroup(), [self.arm_ik[-1], self.arm_pv[-1]], 'ikControls', 'matchNode')
 
     def postRigSetup(self):
         # connect the blend chain to the bind chain

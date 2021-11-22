@@ -186,19 +186,17 @@ class Base(object):
         step 2 - build component
         step 3 - connect component
         step 4 - finalize component
-        step 4 - optimize component
+        step 5 - optimize component
 
         :param step:
         :return:
         """
         if not cmds.objExists("{}.{}".format(self.container, 'build_step')):
-            r_attr.addAttr(self.container, 'build_step', attributeType='long', value=0, minValue=0,
+            r_attr.addEnum(self.container, 'build_step', value=0,
+                           enum=['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize'],
                            keyable=False, channelBox=False)
-            r_attr.lock(self.container, 'build_step')
 
-        r_attr.unlock(self.container, 'build_step')
         cmds.setAttr("{}.{}".format(self.container, 'build_step'), step)
-        r_attr.lock(self.container, 'build_step')
 
     def get_step(self):
         """

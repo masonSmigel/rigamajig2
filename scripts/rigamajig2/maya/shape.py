@@ -5,6 +5,7 @@ import maya.cmds as cmds
 import maya.OpenMaya as om
 
 import rigamajig2.maya.omUtils
+import rigamajig2.shared.common as common
 
 
 def getType(node):
@@ -16,7 +17,7 @@ def getType(node):
 
     nodeType = cmds.nodeType(node)
     if nodeType == 'transform':
-        shapes = getShapes(node)
+        shapes = common.toList(getShapes(node))
         shapeTypes = list()
         for shape in shapes:
             shapeTypes.append(cmds.nodeType(shape))
@@ -36,7 +37,6 @@ def getShapes(node):
     """
     shape_types = ['mesh', 'nurbsSurface', 'nurbsCurve', 'subdiv']
     node_type = cmds.nodeType(node)
-
     if node_type in shape_types:
         return node
 

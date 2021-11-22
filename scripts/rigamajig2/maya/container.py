@@ -206,34 +206,9 @@ def sainityCheck():
     cmds.channelBox('mainChannelBox', e=True, containerAtTop=False)
     outliners = cmds.getPanel(typ='outlinerPanel')
     for outlinerPanel in outliners:
-        cmds.outlinerEditor(outlinerPanel, e=True, showContainerContents=1)
+        cmds.outlinerEditor(outlinerPanel, e=True, showContainerContents=0)
         cmds.outlinerEditor(outlinerPanel, e=True, showContainedOnly=0)
 
-
-# # decorator to add nodes to the container
-# def currentContainer(func, container):
-#     """
-#     Decorator to preserve the selection before running a function
-#     :param func: funtion to wrap
-#     :param container: container to set
-#     :return:
-#     """
-#
-#     @wraps(func)
-#     def wrap(*args, **kwargs):
-#         cmds.container(container, e=True, c=True)
-#
-#         try:
-#             return func(*args, **kwargs)
-#
-#         except Exception as e:
-#             raise e
-#
-#         finally:
-#             if selection:
-#                 cmds.container(container, e=True, c=False)
-#
-#     return wrap
 
 class ActiveContainer(object):
     def __init__(self, container):

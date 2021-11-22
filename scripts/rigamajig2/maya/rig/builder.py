@@ -22,6 +22,7 @@ _EXCLUDED_FILES = ['__init__.py', 'base.py']
 # BUILD ENVIORNMENT GLOBLALS
 PRE_SCRIPT = 'pre_script'
 POST_SCRIPT = 'post_script'
+PUB_SCRIPT = 'pub_script'
 
 SKELETON_FILE = "skeleton.ma"
 CONTROL_SHAPES_FILE = "controlShapes.json"
@@ -169,6 +170,21 @@ class Builder(object):
             runScript.run_script(script)
         logger.info("post scripts -- complete")
 
+    def pub_script(self, scripts=[]):
+        """
+        Run Post Scripts. You can add scripts by path, but the main use is through the POST SCRIPT path
+        :param scripts:
+        :return:
+        """
+        if self.path:
+            scripts_path = os.path.join(self.path, PUB_SCRIPT)
+            for script in runScript.find_scripts(scripts_path):
+                scripts.append(script)
+
+        for script in scripts:
+            runScript.run_script(script)
+        logger.info("publish scripts -- complete")
+
     def run(self, optimize=True):
         if not self.path:
             logger.error('you must provide a build enviornment path. Use Bulder.set_path()')
@@ -212,3 +228,7 @@ class Builder(object):
         cmpts = common.toList(cmpts)
         for cmpt in cmpts:
             self.cmpts.append(cmpt)
+
+
+def build_directory():
+    pass

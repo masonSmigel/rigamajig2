@@ -217,10 +217,9 @@ class ActiveContainer(object):
         :param container:
         """
         self.container = container
-        cmds.container(self.container, e=True, c=True)
 
     def __enter__(self):
-        pass
+        cmds.container(self.container, e=True, c=True)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
         cmds.container(self.container, e=True, c=False)

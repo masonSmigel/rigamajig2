@@ -12,6 +12,7 @@ import rigamajig2.maya.node as node
 import rigamajig2.maya.joint as joint
 import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.debug as debug
+import rigamajig2.maya.meta as meta
 
 
 class IkFkBase(object):
@@ -128,7 +129,7 @@ class IkFkBase(object):
 
     def create(self):
         """
-        This will create the ik/fk joints and connect them to the blendchain.
+        This will create the ik/fkControls joints and connect them to the blendchain.
         IT WILL NOT RIG THEM in any way
         """
         if not cmds.objExists(self._group):
@@ -187,12 +188,11 @@ class IkFkBase(object):
     @staticmethod
     def connnectIkFkVisibility(attrHolder, attr='ikfk', ikList=[], fkList=[]):
         """
-        Connect the fk and Ik visibility. Mostly used for controls
+        Connect the fkControls and Ik visibility. Mostly used for controls
         :param attrHolder: node that holds the attribute
-        :param attr: node to switch between ik and fk
-        :param ikList:
-        :param fkList:
-        :return:
+        :param attr: node to switch between ik and fkControls
+        :param ikList: list of ik controls
+        :param fkList: list of fkControls controls
         """
         if not cmds.objExists(attrHolder):
             raise RuntimeError('Node {} does not exist'.format(attrHolder))
@@ -200,7 +200,11 @@ class IkFkBase(object):
             raise RuntimeError('attribute "{}.{}" does not exist'.format(attrHolder, attr))
 
         # TODO: implement a message attribute here to make sure we only make one reverse node
-        rev = node.reverse("{}.{}".format(attrHolder, attr), name="{}_{}".format(attrHolder, attr))
+        if not cmds.objExists("{}.ikfkReverseNode".format(attrHolder)):
+            rev = node.reverse("{}.{}".format(attrHolder, attr), name="{}_{}".format(attrHolder, attr))
+            meta.messageConnection(attrHolder, rev, 'ikfkReverseNode')
+        else:
+            rev = meta.getMessageConnection('{}.ikfkReverseNode'.format(attrHolder))
 
         for ikNode in ikList:
             shapes = cmds.listRelatives(ikNode, s=True)
@@ -217,7 +221,7 @@ class IkFkBase(object):
 
 class IkFkLimb(IkFkBase):
     """
-    This class creates a blending ik/fk system with a rotate plane solver
+    This class creates a blending ik/fkControls system with a rotate plane solver
     """
 
     def __init__(self, jointList):
@@ -418,12 +422,34 @@ class IkFkLimb(IkFkBase):
         return [startTgt, endTgt]
 
     @staticmethod
-    def ikMatchFk():
-        pass
+    def ikMatchFk(fkMatchList, ik, pv):
+        """
+        Match Ik controls to Fk
+        :param fkMatchList: list of FK joints
+        :param ik: Ik Driver. This can be the IK controler or ikHandle.
+        :param pv: Pole Vector Driver.
+        """
+        newPvPos = IkFkLimb.getPoleVectorPos(fkMatchList)
+        endJntMatrix = cmds.xform(fkMatchList[2], q=True, ws=True, matrix=True)
+
+        cmds.xform(ik, ws=True, matrix=endJntMatrix)
+        cmds.xform(pv, ws=True, t=newPvPos)
 
     @staticmethod
-    def fkMatchIk():
-        pass
+    def fkMatchIk(fkControls, ikJoints):
+        """
+        Match Fk controls to Ik
+        :param fkControls: list of fk controls
+        :param ikJoints: list of Ik joints
+        :return:
+        """
+        if not isinstance(fkControls, (list, tuple)):
+            raise RuntimeError("{} must be a list of 3 fkControls controls".format(fkControls))
+        if len(fkControls) !=3:
+            raise RuntimeError("{} must be a length of 3".format(fkControls))
+        for fk, ikJnt in zip(fkControls, ikJoints):
+            mat = cmds.xform(ikJnt, q=True, ws=True, matrix=True)
+            cmds.xform(fk, ws=True, matrix=mat)
 
     @staticmethod
     def getPoleVectorPos(matchList, magnitude=10):

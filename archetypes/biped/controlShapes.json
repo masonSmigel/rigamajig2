@@ -1,7 +1,7 @@
 {
     "type": "CurveData", 
     "user": "masonsmigel", 
-    "time": "2021-11-17 00:49:43", 
+    "time": "2021-11-23 19:35:03", 
     "data": {
         "wrist_fk_r": {
             "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|shoulder_fk_r_trsBuffer|shoulder_fk_r_spaces_trs|shoulder_fk_r|elbow_fk_r_trsBuffer|elbow_fk_r|wrist_fk_r_trsBuffer|wrist_fk_r", 
@@ -22,7 +22,7 @@
             ], 
             "world_translate": [
                 -61.10599899291992, 
-                124.0179977416992, 
+                124.01799774169915, 
                 -2.0560500621795654
             ], 
             "world_rotate": [
@@ -33,7 +33,7 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 6, 
+            "overrideColor": 13, 
             "shapes": {
                 "wrist_fk_rShape": {
                     "points": [
@@ -101,9 +101,9 @@
                 1.0
             ], 
             "world_translate": [
-                61.10600080261242, 
-                124.0179977416854, 
-                -2.0560499713134583
+                61.10600080261243, 
+                124.01799774168536, 
+                -2.0560499713134592
             ], 
             "world_rotate": [
                 90.00000000000001, 
@@ -172,7 +172,7 @@
             ], 
             "rotate": [
                 0.0, 
-                0.0, 
+                -0.0, 
                 0.0
             ], 
             "scale": [
@@ -256,7 +256,7 @@
             ], 
             "rotate": [
                 0.0, 
-                0.0, 
+                -0.0, 
                 0.0
             ], 
             "scale": [
@@ -336,7 +336,7 @@
             ], 
             "rotate": [
                 0.0, 
-                0.0, 
+                -0.0, 
                 0.0
             ], 
             "scale": [
@@ -426,7 +426,7 @@
             ], 
             "world_translate": [
                 -18.815900802612305, 
-                124.01799774169923, 
+                124.01799774169918, 
                 -2.344079971313477
             ], 
             "world_rotate": [
@@ -437,7 +437,7 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 6, 
+            "overrideColor": 13, 
             "shapes": {
                 "shoulder_fk_rShape": {
                     "points": [
@@ -505,9 +505,9 @@
                 1.0
             ], 
             "world_translate": [
-                18.815900802612315, 
-                124.01799774169918, 
-                -2.3440799713134766
+                18.81590080261232, 
+                124.01799774169913, 
+                -2.344079971313477
             ], 
             "world_rotate": [
                 90.00000000000001, 
@@ -586,7 +586,7 @@
             ], 
             "world_translate": [
                 -18.815900802612305, 
-                124.01799774169922, 
+                124.01799774169916, 
                 -2.344079971313477
             ], 
             "world_rotate": [
@@ -597,7 +597,7 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 6, 
+            "overrideColor": 13, 
             "shapes": {
                 "shoulderSwing_rShape": {
                     "points": [
@@ -650,9 +650,9 @@
                 1.0
             ], 
             "world_translate": [
-                18.815900802612315, 
-                124.01799774169919, 
-                -2.3440799713134766
+                18.81590080261232, 
+                124.01799774169915, 
+                -2.344079971313477
             ], 
             "world_rotate": [
                 90.00000000000001, 
@@ -716,7 +716,7 @@
             ], 
             "world_translate": [
                 -38.31489944458008, 
-                124.01799774169925, 
+                124.01799774169919, 
                 -4.050019741058351
             ], 
             "world_rotate": [
@@ -727,7 +727,7 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 6, 
+            "overrideColor": 13, 
             "shapes": {
                 "elbow_fk_rShape": {
                     "points": [
@@ -795,9 +795,9 @@
                 1.0
             ], 
             "world_translate": [
-                38.31490080261234, 
-                124.01799774169578, 
-                -4.0500199713134695
+                38.31490080261235, 
+                124.01799774169574, 
+                -4.05001997131347
             ], 
             "world_rotate": [
                 90.00000000000001, 
@@ -887,7 +887,7 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 6, 
+            "overrideColor": 13, 
             "shapes": {
                 "clavical_rShape": {
                     "points": [
@@ -1017,7 +1017,7 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 6, 
+            "overrideColor": 13, 
             "shapes": {
                 "arm_pv_rShape": {
                     "points": [
@@ -1257,7 +1257,7 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 6, 
+            "overrideColor": 13, 
             "shapes": {
                 "arm_ik_rShape": {
                     "points": [

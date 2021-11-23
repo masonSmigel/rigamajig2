@@ -130,10 +130,11 @@ class Builder(object):
             cmpt._optimize_cmpt()
         logger.info("optimize -- complete")
 
-    def load_controlShapes(self, path=None):
+    def load_controlShapes(self, path=None, applyColor=True):
         """
         Load the control shapes
         :param path:
+        :param applyColor: Apply the control colors.
         :return:
         """
         import rigamajig2.maya.data.curve_data as curve_data
@@ -146,7 +147,7 @@ class Builder(object):
 
         controls = cd.getData().keys()
         logger.info("loading shapes for {} controls".format(len(controls)))
-        cd.applyData(controls)
+        cd.applyData(controls, applyColor=applyColor)
         logger.info("control shapes -- complete")
 
     def load_data(self):

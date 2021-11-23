@@ -46,7 +46,7 @@ class CurveData(node_data.NodeData):
                 data['shapes'][shape]['degree'] = cmds.getAttr("{}.degree".format(shape))
         self._data[node].update(data)
 
-    def applyData(self, nodes, attributes=None, create=False):
+    def applyData(self, nodes, attributes=None, create=False, applyColor=True):
         """
         Applies the data for given nodes. Optional argument to create curves if no nodes are present
         :param nodes: Array of nodes to apply the data to
@@ -58,8 +58,9 @@ class CurveData(node_data.NodeData):
         :param create: Create curves for curves without nodes in the scene
         :type create: bool
         """
-        super(CurveData, self).applyData(nodes, attributes=["overrideEnabled", "overrideRGBColors",
-                                                            "overrideColorRGB", "overrideColor"])
+        if applyColor:
+            super(CurveData, self).applyData(nodes, attributes=["overrideEnabled", "overrideRGBColors",
+                                                                "overrideColorRGB", "overrideColor"])
         nodes = common.toList(nodes)
         result = list()
         for node in nodes:

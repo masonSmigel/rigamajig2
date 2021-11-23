@@ -20,6 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 class Arm(rigamajig2.maya.cmpts.base.Base):
+    DEFAULT_CONTROL_NAMES = ['clavical', 'shoulderSwing', 'shoulder_fk', 'elbow_fk', 'wrist_fk', 'arm_ik', 'arm_pv']
+
     def __init__(self, name, input=[], size=1, controlNames=None):
         """
         Create a main control
@@ -29,17 +31,17 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         """
         super(Arm, self).__init__(name, input=input, size=size)
         self.side = common.getSide(self.name)
+        self.controlNames = controlNames
+
         self.metaData['component_side'] = self.side
-        # define control names
-        # TODO: cleanup control names
-        if not controlNames:
-            self.controlNames = ['clavical', 'shoulderSwing', 'shoulder_fk', 'elbow_fk', 'wrist_fk', 'arm_ik', 'arm_pv']
-        else:
-            self.controlNames = controlNames
+
+        # TODO: cleanup control names. this is kinda dumb
+        if self.controlNames is None:
+            self.controlNames = self.DEFAULT_CONTROL_NAMES
 
         # noinspection PyTypeChecker
         if len(self.input) != 4:
-            logger.error('Input list must have a length of 4')
+            raise RuntimeError('Input list must have a length of 4')
 
     def initalHierachy(self):
         """Build the initial hirarchy"""

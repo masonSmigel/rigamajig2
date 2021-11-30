@@ -28,13 +28,11 @@ def create(name, nodes=None, dagContainer=False):
     :return:
     """
     if cmds.objExists(name):
-        cmds.error("Object {} already exists. Cannot create a container with that name".format(name))
-        return
+        raise RuntimeError("Object {} already exists. Cannot create a container with that name".format(name))
     if nodes:
         for node in nodes:
             if not cmds.objExists(node):
-                cmds.error("Node {} does not exist. Cannot add it to the container".format(node))
-                return
+                raise RuntimeError("Node {} does not exist. Cannot add it to the container".format(node))
 
     if not dagContainer:
         containerNode = cmds.container(n=name)
@@ -74,7 +72,7 @@ def listNodes(container):
     :return: list of nodes within the container
     """
     if not isContainer(container):
-        cmds.error("{} is not a container.".format(container))
+        raise RuntimeError("{} is not a container.".format(container))
     nodeList = cmds.container(container, q=True, nodeList=True) or []
     return nodeList
 
@@ -101,8 +99,7 @@ def addPublishAttr(attr, assetAttrName=None, bind=True):
     :type bind: bool
     """
     if not cmds.objExists(attr):
-        cmds.error("Attribute {} does not exist. Cannot publish attribute".format(attr))
-        return
+        raise RuntimeError("Attribute {} does not exist. Cannot publish attribute".format(attr))
 
     if not assetAttrName: assetAttrName = attr.replace('.', '_')
 
@@ -128,8 +125,7 @@ def addPublishNodes(nodes, container=None, bind=True):
     nodes = common.toList(nodes)
     for node in nodes:
         if not cmds.objExists(node):
-            cmds.error("Node {} does not exist. Cannot publish Node".format(node))
-            return
+            raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
 
         assetNodeName = node
 
@@ -154,8 +150,7 @@ def addParentAnchor(node, container=None, assetNodeName=None):
     """
     node = common.getFirstIndex(node)
     if not cmds.objExists(node):
-        cmds.error("Node {} does not exist. Cannot publish Node".format(node))
-        return
+        raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
 
     if not assetNodeName: assetNodeName = 'parent'
 
@@ -178,8 +173,7 @@ def addChildAnchor(node, container=None, assetNodeName=None):
     """
     node = common.getFirstIndex(node)
     if not cmds.objExists(node):
-        cmds.error("Node {} does not exist. Cannot publish Node".format(node))
-        return
+        raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
 
     if not assetNodeName: assetNodeName = 'child'
 

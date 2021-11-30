@@ -57,10 +57,10 @@ def create(node, attrHolder=None, parent=None, spaceAttrName='space', defaultNam
         name="{}_{}".format(node, 'spaces'))
 
     # make some meta data connections
-    meta.messageConnection(attrHolder, node, 'attrHolder')
-    meta.messageConnection(choice, node, 'choiceNode')
-    meta.messageConnection(mm, node, 'multMatrixNode')
-    meta.messageConnection(grp, node, 'spaceGroup')
+    meta.addMessageConnection(attrHolder, node, 'attrHolder')
+    meta.addMessageConnection(choice, node, 'choiceNode')
+    meta.addMessageConnection(mm, node, 'multMatrixNode')
+    meta.addMessageConnection(grp, node, 'spaceGroup')
 
     rig_attr.lockAndHide(grp, ['t', 'r', 's', 'v'])
     return grp

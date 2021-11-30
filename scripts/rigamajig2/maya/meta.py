@@ -1,6 +1,7 @@
 """
 Functions to add metadata to nodes
 """
+import json
 import maya.cmds as cmds
 import rigamajig2.shared.common as common
 import rigamajig2.maya.attr as attr
@@ -59,7 +60,7 @@ def getTagged(tag, namespace=None):
         return [s.split(".")[0] for s in cmds.ls("{}:*.__{}__".format(namespace, tag))]
 
 
-def messageConnection(sourceNode, dataNode, sourceAttr, dataAttr=None):
+def addMessageConnection(sourceNode, dataNode, sourceAttr, dataAttr=None):
     """
     Add a message connection between a source and target node
     :param sourceNode: source node of the message connection
@@ -77,7 +78,7 @@ def messageConnection(sourceNode, dataNode, sourceAttr, dataAttr=None):
     cmds.connectAttr("{}.{}".format(sourceNode, sourceAttr), "{}.{}".format(dataNode, dataAttr))
 
 
-def messageListConnection(sourceNode, dataList, sourceAttr, dataAttr=None):
+def addMessageListConnection(sourceNode, dataList, sourceAttr, dataAttr=None):
     """
     Add a message connection between a source and list of data nodes
     :param sourceNode: source node of the message connection
@@ -118,3 +119,15 @@ def getMessageConnection(dataPlug, silent=True):
         raise RuntimeError('Plug "{}" does not exist'.format(dataPlug))
     else:
         return None
+
+
+class mayaJson(object):
+    def __init__(self, node):
+        self.node = node
+
+    def getData(self):
+        pass
+
+    def setData(self):
+        pass
+

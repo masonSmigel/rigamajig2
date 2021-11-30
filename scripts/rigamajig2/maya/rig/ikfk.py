@@ -202,7 +202,7 @@ class IkFkBase(object):
         # TODO: implement a message attribute here to make sure we only make one reverse node
         if not cmds.objExists("{}.ikfkReverseNode".format(attrHolder)):
             rev = node.reverse("{}.{}".format(attrHolder, attr), name="{}_{}".format(attrHolder, attr))
-            meta.messageConnection(attrHolder, rev, 'ikfkReverseNode')
+            meta.addMessageConnection(attrHolder, rev, 'ikfkReverseNode')
         else:
             rev = meta.getMessageConnection('{}.ikfkReverseNode'.format(attrHolder))
 

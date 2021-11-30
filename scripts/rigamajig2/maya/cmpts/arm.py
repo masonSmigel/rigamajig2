@@ -97,6 +97,9 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         self.ikfk = ikfk.IkFkLimb(self.input[1:])
         self.ikfk.setGroup(self.name + '_ikfk')
         self.ikfk.create()
+        self.ikJnts = self.ikfk.getIkJointList()
+        self.fkJnts = self.ikfk.getFkJointList()
+
         cmds.parent(self.ikfk.getGroup(), self.root)
 
         # create a pole vector contraint
@@ -110,8 +113,7 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         cmds.parentConstraint(self.shoulderSwing[-1], self._ikStartTgt, mo=True)
 
         # connect fk controls to fk joints
-        rigamajig2.maya.skeleton.connectChains([self.shoulder[-1], self.elbow[-1], self.wrist[-1]],
-                                               self.ikfk.getFkJointList())
+        rigamajig2.maya.skeleton.connectChains([self.shoulder[-1], self.elbow[-1], self.wrist[-1]], self.fkJnts)
 
         # connect the IkHandle to the end Target
         cmds.pointConstraint(self.arm_ik[-1], self._ikEndTgt, mo=True)
@@ -127,37 +129,10 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         self.setupProxyAttributes()
         self.ikfkMatchSetup()
 
-    def ikfkMatchSetup(self):
-        """Setup the ikFKMatching"""
-        wristIkOffset = cmds.createNode('transform', name="{}_ikMatch".format(self.input[3]),
-                                        p=self.ikfk.getFkJointList()[-1])
-        rig_transform.matchTransform(self.arm_ik[-1], wristIkOffset)
-        rigamajig2.maya.attr.lock(wristIkOffset, ['t', 'r', 's', 'v'])
-
-        # add required data to the ikFkSwitchGroup
-        meta.messageListConnection(self.ikfk.getGroup(), self.ikfk.getFkJointList()[:-1] + [wristIkOffset],
-                                   'fkMatchList', 'matchNode')
-        meta.messageListConnection(self.ikfk.getGroup(), self.ikfk.getIkJointList(), 'ikMatchList', 'matchNode')
-        meta.messageListConnection(self.ikfk.getGroup(), self.fkControls, sourceAttr='fkControls', dataAttr='matchNode')
-        meta.messageListConnection(self.ikfk.getGroup(), [self.arm_ik[-1], self.arm_pv[-1]], 'ikControls', 'matchNode')
-
     def postRigSetup(self):
         # connect the blend chain to the bind chain
         rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:])
-        rigamajig2.maya.rig.ikfk.IkFkBase.connnectIkFkVisibility(self.ikfk.getGroup(), 'ikfk',
-                                                                 ikList=self.ikControls, fkList=self.fkControls)
-
-    def setupProxyAttributes(self):
-        for control in self.controlers:
-            rigamajig2.maya.attr.addSeparator(control, '----')
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'ikfk'), self.controlers)
-
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretch'), self.arm_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchTop'), self.arm_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchBot'), self.arm_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'softStretch'), self.arm_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'), [self.arm_ik[-1], self.arm_pv[-1]])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'twist'), self.arm_ik[-1])
+        ikfk.IkFkBase.connnectIkFkVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
 
     def connect(self):
         """Create the connection"""
@@ -175,3 +150,35 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
     def setAttrs(self):
         """Set some attributes to values that make more sense for the inital setup."""
         cmds.setAttr("{}.{}".format(self.arm_ik[-1], 'softStretch'), 0.2)
+
+    def finalize(self):
+        rigamajig2.maya.attr.lockAndHide(self.root, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+        rigamajig2.maya.attr.lockAndHide(self.control, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+        rigamajig2.maya.attr.lockAndHide(self.spaces, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+        rigamajig2.maya.attr.lockAndHide(self.ikfk.getGroup(), rigamajig2.maya.attr.TRANSFORMS + ['v'])
+
+    # --------------------------------------------------------------------------------
+    # helper functions to shorten functions.
+    # --------------------------------------------------------------------------------
+    def ikfkMatchSetup(self):
+        """Setup the ikFKMatching"""
+        wristIkOffset = cmds.createNode('transform', name="{}_ikMatch".format(self.input[3]), p=self.fkJnts[-1])
+        rig_transform.matchTransform(self.arm_ik[-1], wristIkOffset)
+        rigamajig2.maya.attr.lock(wristIkOffset, ['t', 'r', 's', 'v'])
+
+        # add required data to the ikFkSwitchGroup
+        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkJnts[:-1] + [wristIkOffset], 'fkMatchList', 'matchNode')
+        meta.addMessageListConnection(self.ikfk.getGroup(), self.ikJnts, 'ikMatchList', 'matchNode')
+        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkControls, 'fkControls', 'matchNode')
+        meta.addMessageListConnection(self.ikfk.getGroup(), [self.arm_ik[-1], self.arm_pv[-1]], 'ikControls', 'matchNode')
+
+    def setupProxyAttributes(self):
+        for control in self.controlers:
+            rigamajig2.maya.attr.addSeparator(control, '----')
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'ikfk'), self.controlers)
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretch'), self.arm_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchTop'), self.arm_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchBot'), self.arm_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'softStretch'), self.arm_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'), [self.arm_ik[-1], self.arm_pv[-1]])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'twist'), self.arm_ik[-1])

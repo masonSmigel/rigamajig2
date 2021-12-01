@@ -186,11 +186,6 @@ def addChildAnchor(node, container=None, assetNodeName=None):
     cmds.container(containerNode, e=True, publishAsChild=[node, assetNodeName])
 
 
-def blackbox(container):
-    # TODO
-    pass
-
-
 def sainityCheck():
     """Run several checks to make sure maya is setup to work with containers.
      There are a couple 'gotcha's' to look out for """

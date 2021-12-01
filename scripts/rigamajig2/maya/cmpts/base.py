@@ -22,7 +22,7 @@ class Base(object):
         self.cmpt_type = self.__class__.__name__.lower()
         self.input = input
         self.size = size
-        self.container = self.name + "_" + self.cmpt_type + '_container'
+        self.container = self.name + '_container'
 
         # element lists
         self.joints = list()

@@ -199,7 +199,6 @@ class IkFkBase(object):
         if not cmds.objExists("{}.{}".format(attrHolder, attr)):
             raise RuntimeError('attribute "{}.{}" does not exist'.format(attrHolder, attr))
 
-        # TODO: implement a message attribute here to make sure we only make one reverse node
         if not cmds.objExists("{}.ikfkReverseNode".format(attrHolder)):
             rev = node.reverse("{}.{}".format(attrHolder, attr), name="{}_{}".format(attrHolder, attr))
             meta.addMessageConnection(attrHolder, rev, 'ikfkReverseNode')

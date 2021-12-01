@@ -296,7 +296,6 @@ def decomposeRotation(node, twistAxis='x'):
     output = cmds.createNode("decomposeMatrix", name='{}_output_{}'.format(node, common.DECOMPOSEMATRIX))
     cmds.connectAttr("{}.outputMatrix".format(rotationMatrix), "{}.inputMatrix".format(output))
 
-    # TODO: ensure the swing and twist works properly.
     # connect the output to the start
     for axis in 'XYZ':
         if axis == twistAxis.upper():

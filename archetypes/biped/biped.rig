@@ -11,6 +11,7 @@
         "pub_scripts": [], 
         "l_color": "blue", 
         "r_color": "red", 
-        "c_color": "yellow"
+        "c_color": "yellow", 
+        "use_proxy_attrs": true
     }
 }

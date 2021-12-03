@@ -2,10 +2,12 @@
 base component
 """
 import maya.cmds as cmds
+from collections import OrderedDict
 
 import rigamajig2.maya.container
 import rigamajig2.maya.attr as r_attr
 import logging
+import rigamajig2.maya.meta
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +30,12 @@ class Base(object):
         self.joints = list()
         self.controlers = list()
 
+        # node metaData
         self.metaData = {'component_name': self.name,
                          'component_type': self.cmpt_type}
+        # node cmpt settings
+        self.cmptSettings = OrderedDict(size=self.size)
+        self.userSettings = OrderedDict()
 
     def _intialize_cmpt(self):
         """
@@ -38,16 +44,18 @@ class Base(object):
         process order:
             self.createContainer
             self.preScript
-            self.initHierachy
-            self.addAnimParams
         """
         if not self.get_step() >= 1:
-            self.createContainer(self.metaData)
+            # fullDict = dict(self.metaData, **self.cmptSettings)
+            self.createContainer()
+            # Store
+            metaNode = rigamajig2.maya.meta.MetaNode(self.container)
+            metaNode.setDataDict(data=self.metaData, hide=True, lock=True)
+            metaNode.setDataDict(data=self.cmptSettings, hide=True)
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
-                self.preScript()
-                self.initalHierachy()
+                self.preScript()  # run any pre-build scripts
             self.set_step(1)
         else:
             logger.warning('component {} already initalized.'.format(self.name))
@@ -57,6 +65,7 @@ class Base(object):
         build the rig
 
         process order:
+            self.initalHierachy
             self.preRigSetup
             self.rigSetup
             self.postRigSetup
@@ -64,6 +73,7 @@ class Base(object):
         if not self.get_step() >= 2:
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
+                self.initalHierachy()
                 self.preRigSetup()
                 self.rigSetup()
                 self.postRigSetup()
@@ -119,10 +129,6 @@ class Base(object):
         """Create a Container for the component"""
         if not cmds.objExists(self.container):
             self.container = rigamajig2.maya.container.create(self.container)
-
-            for key in data.keys():
-                r_attr.addAttr(self.container, key, attributeType='string', value=data[key])
-                r_attr.lock(self.container, key)
 
     def initalHierachy(self):
         """Setup the inital Hirarchy"""

@@ -140,7 +140,7 @@ def validateDataType(val):
     if issubclass(type(val), tuple): return 'complex'
 
 
-class mayaJson(object):
+class MetaNode(object):
     def __init__(self, node):
         """
         Constructor for mayaJson.
@@ -149,9 +149,30 @@ class mayaJson(object):
         """
         self.node = node
 
-    def getData(self, excludedAttrs=[]):
+    def getData(self, attr):
         """
-        Retrieve data from the maya node. Y
+        Retrieve  data of a specific attribute. deserialized data from json.
+        :param attr:
+        :return: value of the attribute. as the serialized type.
+        :rtype: str | float | list | dict
+        """
+        if not cmds.objExists("{}.{}".format(self.node, attr)):
+            raise RuntimeError("Attribute {} does not exist on the node {}".format(attr, self.node))
+
+        value = cmds.getAttr("{}.{}".format(self.node, attr), silent=True)
+        attrType = cmds.getAttr("{}.{}".format(self.node, attr), type=True)
+
+        # TODO : what are we gonnna do with message attributes?!??
+        if attrType == 'message':
+            return None
+        if attrType == 'string':
+            try: value = self.__deserializeComplex(value)  # if the data is a string try to deserialize it.
+            except: logger.debug('string {} is not json deserializable'.format(value))
+        return value
+
+    def getAllData(self, excludedAttrs=[]):
+        """
+        Retrieve all data from the maya node.
         :param excludedAttrs: Optoinal - list of attributes to data collection from.
         :return: dictionary of data on the node
         :rtype: OrderedDict
@@ -160,25 +181,18 @@ class mayaJson(object):
         data = OrderedDict()
         for attr in userAttrs:
             if attr in EXCLUDED_JSON_ATTRS + excludedAttrs: continue
-            value = cmds.getAttr("{}.{}".format(self.node, attr), silent=True)
-            attrType = cmds.getAttr("{}.{}".format(self.node, attr), type=True)
-            # TODO : what are we gonnna do with message attributes?!??
-            if attrType == 'message':
-                continue
-            if attrType == 'string':
-                try:
-                    value = self.__deserializeComplex(value)  # if the data is a string try to deserialize it.
-                except:
-                    logger.debug('string {} is not json deserializable'.format(value))
-            data[attr] = value  # add the data to our dictionary
+            data[attr] = self.getData(attr)
         return data
 
-    def setData(self, data, hidden=True):
+    def setData(self, attr, value, hide=True, lock=False):
         """
-        Store a dictionary into custom attributes on a maya node
-        :param data: dictonary to set data to.
-        :param hidden: hide the nodes from the channelbox. Note string attributes cannot be keyable!!
+        Add data to a node. Stored as serialized json data
+        :param attr: attribute to hold the data
+        :param value: value to store
+        :param hide: hide the attributes from the channelbox. Note string attributes cannot be keyable!!
+        :param lock: lock the attributes from the channelbox.
         """
+
         data_type_dict = {'string': {'dt': 'string'},
                           'unicode': {'dt': 'string'},
                           'int': {'at': 'long'},
@@ -189,23 +203,35 @@ class mayaJson(object):
                           'enum': {'at': 'enum'},
                           'complex': {'dt': 'string'}}
 
-        for attr, value in data.items():
+        attrType = validateDataType(value)
+
+        if attrType == 'complex':
+            value = self.__serializeComplex(value)
             attrType = validateDataType(value)
+        # if the attribute does not exist then add the attribute
+        if not cmds.objExists("{}.{}".format(self.node, attr)):
+            cmds.addAttr(self.node, longName=attr, **data_type_dict[attrType])
+        else:
+            # Todo: try to change the attribute data if it doesnt match
+            pass
 
-            if attrType == 'complex':
-                value = self.__serializeComplex(value)
-                attrType = validateDataType(value)
-            # if the attribute does not exist then add the attribute
-            if not cmds.objExists("{}.{}".format(self.node, attr)):
-                cmds.addAttr(self.node, longName=attr, **data_type_dict[attrType])
-            else:
-                # Todo: try to change the attribute data if it doesnt match
-                pass
+        rig_attr.setPlugValue("{}.{}".format(self.node, attr), value=value)
 
-            if not hidden:
-                cmds.setAttr("{}.{}".format(self.node, attr), k=True)
+        if not hide:
+            cmds.setAttr("{}.{}".format(self.node, attr), k=True)
+        if lock:
+            cmds.setAttr("{}.{}".format(self.node, attr), l=True)
 
-            rig_attr.setPlugValue("{}.{}".format(self.node, attr), value=value)
+    def setDataDict(self, data, hide=True, lock=False):
+        """
+        Store a dictionary into custom attributes on a maya node
+        :param data: dictonary to set data to.
+        :param hide: hide the attributes from the channelbox. Note string attributes cannot be keyable!!
+        :param lock: lock the attributes from the channelbox.
+        """
+
+        for attr, value in data.items():
+            self.setData(attr, value, hide=hide, lock=lock)
 
     def __serializeComplex(self, data):
         """

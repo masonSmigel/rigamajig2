@@ -421,36 +421,6 @@ class IkFkLimb(IkFkBase):
         return [startTgt, endTgt]
 
     @staticmethod
-    def ikMatchFk(fkMatchList, ik, pv):
-        """
-        Match Ik controls to Fk
-        :param fkMatchList: list of FK joints
-        :param ik: Ik Driver. This can be the IK controler or ikHandle.
-        :param pv: Pole Vector Driver.
-        """
-        newPvPos = IkFkLimb.getPoleVectorPos(fkMatchList)
-        endJntMatrix = cmds.xform(fkMatchList[2], q=True, ws=True, matrix=True)
-
-        cmds.xform(ik, ws=True, matrix=endJntMatrix)
-        cmds.xform(pv, ws=True, t=newPvPos)
-
-    @staticmethod
-    def fkMatchIk(fkControls, ikJoints):
-        """
-        Match Fk controls to Ik
-        :param fkControls: list of fk controls
-        :param ikJoints: list of Ik joints
-        :return:
-        """
-        if not isinstance(fkControls, (list, tuple)):
-            raise RuntimeError("{} must be a list of 3 fkControls controls".format(fkControls))
-        if len(fkControls) !=3:
-            raise RuntimeError("{} must be a length of 3".format(fkControls))
-        for fk, ikJnt in zip(fkControls, ikJoints):
-            mat = cmds.xform(ikJnt, q=True, ws=True, matrix=True)
-            cmds.xform(fk, ws=True, matrix=mat)
-
-    @staticmethod
     def getPoleVectorPos(matchList, magnitude=10):
         """
         Return the position for a pole vector

@@ -104,11 +104,16 @@ class SplineBase(object):
             cmds.rename(self._group, value)
         self._group = value
 
-    def create(self):
+    def create(self, clusters=4):
         """
         This will create the ik spline and connect them to the jointList.
+        :param clusters: number of clusters to make
         """
         ikParent = self._group
+
+        if clusters < 4:
+            cmds.warning('Cannot create ikSpline with less than 4 controls')
+            clusters = 4
 
         for joint in self._jointList:
             if not cmds.objExists(joint):
@@ -140,13 +145,14 @@ class SplineBase(object):
         # create a curve from our joints and make an IkHandle
         curve = rig_curve.createCurveFromTransform([self._ikJointList[0], self._ikJointList[1],
                                                     self._ikJointList[-2], self._ikJointList[-1]],
-                                                   degree=2, name="{}_crv".format(self._name))
-
+                                                   degree=1, name="{}_crv".format(self._name))
         self._handle, self._effector, self._curve = cmds.ikHandle(name="{}_handle".format(self._name),
-                                                                  pcv=0, ns=1, sol='ikSplineSolver',
+                                                                  pcv=0, ns=(clusters - 3), sol='ikSplineSolver',
                                                                   sj=startJoint, ee=endJoint, curve=curve,
                                                                   freezeJoints=True)
+
         self._curve = cmds.rename(self._curve, "{}_crv".format(self._name))
+
         cmds.parent(self._handle, self._curve, self._group)
 
         cvs = rig_curve.getCvs(self._curve)
@@ -155,6 +161,8 @@ class SplineBase(object):
             self._clusters.append(handle)
             cmds.parent(handle, self._group)
             rig_cluster.localize(cluster, self._group, self._group, weightedCompensation=True)
+
+        # CLUSTERS SCALE
 
         # STRETCH
         curve_info = cmds.rename(cmds.arclen(self._curve, ch=True), self._name + '_curveInfo')
@@ -195,8 +203,7 @@ class SplineBase(object):
         endTwist = rig_transform.decomposeRotation(self._endTwist, aimAxis)[list('xyz').index(aimAxis)]
 
         # The overall twist is calculated as roll = startTwist, twist =  (endTwist - startTwist)
-        reverseStartTwist = node.multDoubleLinear(startTwist, -1,
-                                                  name="{}_reserveStart".format(self._name))
+        reverseStartTwist = node.multDoubleLinear(startTwist, -1, name="{}_reserveStart".format(self._name))
         twistSum = node.addDoubleLinear(endTwist, "{}.output".format(reverseStartTwist),
                                         name="{}_addTwist".format(self._name))
         cmds.connectAttr(startTwist, "{}.roll".format(self._handle))
@@ -209,13 +216,12 @@ class SplineBase(object):
             # Calculate the volume perservation
             cmds.addAttr(self._group, ln="scale_{}".format(i), at='double', min=0, max=1, dv=1)
 
-            scaleReversed = node.reverse("{}.scale_{}".format(self._group, i),
-                                         name='{}_scaleRev'.format(ik))
+            scaleReversed = node.reverse("{}.scale_{}".format(self._group, i), name='{}_scaleRev'.format(ik))
             exponent = node.plusMinusAverage1D([1, "{}.outputX".format(scaleReversed)], operation='sub',
                                                name='{}_exponent'.format(ik))
             volume = node.multDoubleLinear("{}.output1D".format(exponent), volumeAttr, name='{}_volume'.format(ik))
-            factor = node.multiplyDivide("{}.outputX".format(scaleInvert), "{}.output".format(volume),
-                                         operation='pow', name='{}_factor'.format(ik))
+            factor = node.multiplyDivide("{}.outputX".format(scaleInvert), "{}.output".format(volume), operation='pow',
+                                         name='{}_factor'.format(ik))
 
             scaleAttrs = ['x', 'y', 'z']
             scaleAttrs.pop(scaleAttrs.index(aimAxis))
@@ -230,14 +236,11 @@ class SplineBase(object):
 
         # set the interpolations
         setScaleList = list(self._ikJointList)
-        value = float(self._scaleFactor)
         size = len(setScaleList)
-        valueScale = value / size
         for i in range(size):
-            midIndex = (len(setScaleList) - 1) / 2
-            cmds.setAttr("{}.scale_{}".format(self._group, self._ikJointList.index(setScaleList[midIndex])), value)
-            value -= valueScale
-            setScaleList.pop(midIndex)
+            percent = i / float(size - 1)
+            value = mathUtils.parabolainterp(0, 1, percent)
+            cmds.setAttr("{}.scale_{}".format(self._group, self._ikJointList.index(setScaleList[i])), value)
 
         # Hide the targets and parent them under the group.
         for jnt in [start, end]:

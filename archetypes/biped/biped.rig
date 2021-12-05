@@ -6,12 +6,13 @@
         "model_file": "../../../../../jobs/animAide/aide_maya/assets/baseMale/mdl_baseMale_v003.0012.ma", 
         "skeleton_file": "skeleton.ma", 
         "skeleton_pos": "skeleton_pos.json", 
-        "pre_scripts": [], 
-        "post_scripts": [], 
-        "pub_scripts": [], 
+        "pre_script_path": "pre_script", 
+        "post_script_path": "post_script", 
+        "post_script_path": "pub_script", 
         "l_color": "blue", 
         "r_color": "red", 
         "c_color": "yellow", 
-        "use_proxy_attrs": true
+        "use_proxy_attrs": true, 
+        "control_shapes" : "controlShapes.json"
     }
 }

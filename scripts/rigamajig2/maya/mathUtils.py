@@ -267,7 +267,18 @@ def slerp(min, max, percent, smooth=1.0):
 
 def parabolainterp(min, max, percent):
     """
-    interpolate values between a min and max value using a parabola
+    Interpolate values between a min and max value with a parabola interpolation.
+
+
+    |
+    |                     .
+    |                 .		  .
+    |
+    |              .		      .
+    |
+    |            .				    .
+    _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _
+
     :param min: minimum value
     :param max: maximim value
     :param percent: percent of interperlation

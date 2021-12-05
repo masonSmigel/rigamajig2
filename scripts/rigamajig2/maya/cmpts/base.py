@@ -222,7 +222,13 @@ class Base(object):
         return 0
 
     def save(self):
-        pass
+        """Return the settings of component name"""
+        self._load_meta_to_component()
+        return self._userSettings
+
+    def load(self, meta):
+        mayaJson = rigamajig2.maya.meta.MetaNode(self.container)
+        mayaJson.setDataDict(meta)
 
     def _load_meta_to_component(self):
         """

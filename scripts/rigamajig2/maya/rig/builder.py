@@ -47,7 +47,7 @@ class Builder(object):
         # varibles we need
         self.top_skeleton_nodes = list()
 
-        logger.info('Initalize Rig Builder: {0}\n'.format(self.path))
+        logger.info('Initalize Rig Builder: {0}'.format(self.path))
 
     def getComponents(self):
         path = CMPT_PATH

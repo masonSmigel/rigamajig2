@@ -139,6 +139,48 @@ def normalize(vector):
     return [v[0], v[1], v[1]]
 
 
+def remapValue(value, nMin, nMax, oMin=0, oMax=1):
+    """
+    remap a value
+    :param value:
+    :param nMin:
+    :param nMax:
+    :param oMin:
+    :param oMax:
+    :return:
+    """
+    # range check
+    if oMin == oMax:
+        raise ValueError("Warning: Zero output range")
+
+    if nMin == nMax:
+        raise ValueError("Warning: Zero output range")
+
+    # check reversed input range
+    reverseInput = False
+    oldMin = min(oMin, oMax)
+    oldMax = max(oMin, oMax)
+    if not oldMin == oMin:
+        reverseInput = True
+
+    # check reversed output range
+    reverseOutput = False
+    newMin = min(nMin, nMax)
+    newMax = max(nMin, nMax)
+    if not newMin == nMin:
+        reverseOutput = True
+
+    portion = (value - oldMin) * (newMax - newMin) / (oldMax - oldMin)
+    if reverseInput:
+        portion = (oldMax - x) * (newMax - newMin) / (oldMax - oldMin)
+
+    result = portion + newMin
+    if reverseOutput:
+        result = newMax - portion
+
+    return result
+
+
 def lerp(min, max, percent):
     """
     returns linear interpolation between floats min and max at float percent
@@ -223,21 +265,17 @@ def slerp(min, max, percent, smooth=1.0):
     return value
 
 
-def plerp(min, max, percent, ease='out'):
+def parabolainterp(min, max, percent):
     """
-    exponential interperlation. This is a made up word, but its kinda fun.
-    :param min: minimum value of interperlation range
-    :param max:  maximum value of interperlation range
+    interpolate values between a min and max value using a parabola
+    :param min: minimum value
+    :param max: maximim value
     :param percent: percent of interperlation
-    :param ease: controls the method of easing. Valid values are 'in' or out'
     :return:
     """
-    range_val = max - min
+    # get the percent on the of the value
+    parabola = -pow(2 * percent - 1, 2) + 1
 
-    if ease == 'out':
-        a = pow(range_val, 0.5)
-        value = (pow((a * percent), 2.0)) + min
-    else:
-        a = pow(range_val, 0.5)
-        value = (10)*(pow(percent, 0.5)) + min
+    # remap the 0 to 1 value of the parabola between the min and max ranges
+    value = remapValue(parabola, nMin=min, nMax=max, oMin=0, oMax=1)
     return value

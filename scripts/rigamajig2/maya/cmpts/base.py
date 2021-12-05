@@ -35,7 +35,7 @@ class Base(object):
                          'component_type': self.cmpt_type}
         # node cmpt settings
         self.cmptSettings = OrderedDict(size=self.size)
-        self.userSettings = OrderedDict()
+        self._userSettings = OrderedDict()
 
     def _intialize_cmpt(self):
         """
@@ -70,6 +70,8 @@ class Base(object):
             self.rigSetup
             self.postRigSetup
         """
+        self._load_meta_to_component()
+
         if not self.get_step() >= 2:
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -83,6 +85,8 @@ class Base(object):
 
     def _connect_cmpt(self):
         """ connect components within the rig"""
+        self._load_meta_to_component()
+
         if not self.get_step() >= 3:
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.initConnect()
@@ -102,6 +106,8 @@ class Base(object):
             self.finalize
             self.postScripts
         """
+        self._load_meta_to_component()
+
         if not self.get_step() >= 4:
             self.publishNodes()
             self.publishAttributes()
@@ -115,6 +121,8 @@ class Base(object):
 
     def _optimize_cmpt(self):
         """"""
+        self._load_meta_to_component()
+
         if not self.get_step() >= 5:
             self.optimize()
             self.set_step(5)
@@ -216,5 +224,11 @@ class Base(object):
     def save(self):
         pass
 
-    def load(self):
-        pass
+    def _load_meta_to_component(self):
+        """
+        load meta data from the settings node into a dictionary
+        """
+        self._userSettings = OrderedDict()
+        mayaJson = rigamajig2.maya.meta.MetaNode(self.container)
+        for key in self.cmptSettings.keys():
+            self._userSettings[key] = mayaJson.getData(key)

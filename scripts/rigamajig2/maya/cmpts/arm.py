@@ -22,22 +22,31 @@ logger = logging.getLogger(__name__)
 class Arm(rigamajig2.maya.cmpts.base.Base):
     DEFAULT_CONTROL_NAMES = ['clavical', 'shoulderSwing', 'shoulder_fk', 'elbow_fk', 'wrist_fk', 'arm_ik', 'arm_pv']
 
-    def __init__(self, name, input=[], size=1, controlNames=None):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict()):
         """
         Create a main control
         :param name:
         :param input: list of input joints. This must be a length of 4
         :type input: list
+        :param: ikSpaces: dictionary of key and space for the ik control.
+        :type ikSpaces: dict
+        :param: pvSpaces: dictionary of key and space for the pv control.
+        :type pvSpaces: dict
         """
         super(Arm, self).__init__(name, input=input, size=size)
         self.side = common.getSide(self.name)
-        self.controlNames = controlNames
 
         self.metaData['component_side'] = self.side
-
-        # TODO: cleanup control names. this is kinda dumb
-        if self.controlNames is None:
-            self.controlNames = self.DEFAULT_CONTROL_NAMES
+        # initalize cmpt settings.
+        self.cmptSettings['clavicalName'] = 'clavical'
+        self.cmptSettings['shoulderSwingName'] = 'shoulderSwing'
+        self.cmptSettings['shoulder_fkName'] = 'shoulder_fk'
+        self.cmptSettings['elbow_fkName'] = 'elbow_fk'
+        self.cmptSettings['wrist_fkName'] = 'wrist_fk'
+        self.cmptSettings['arm_ikName'] = 'arm_ik'
+        self.cmptSettings['arm_pvName'] = 'arm_pv'
+        self.cmptSettings['ikSpaces'] = ikSpaces
+        self.cmptSettings['pvSpaces'] = pvSpaces
 
         # noinspection PyTypeChecker
         if len(self.input) != 4:
@@ -49,43 +58,42 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         self.control = cmds.createNode('transform', n=self.name + '_control', parent=self.root)
         self.spaces = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root)
 
-        # define the control names
-        claviCtlName = "{}_{}".format(self.controlNames[0], self.side)
-        SwingCtlName = "{}_{}".format(self.controlNames[1], self.side)
-        shoulCtlName = "{}_{}".format(self.controlNames[2], self.side)
-        elbowCtlName = "{}_{}".format(self.controlNames[3], self.side)
-        wirstCtlName = "{}_{}".format(self.controlNames[4], self.side)
-        armIkCtlName = "{}_{}".format(self.controlNames[5], self.side)
-        armPvCtlName = "{}_{}".format(self.controlNames[6], self.side)
-
         # clavical/swing controls
-        self.clavical = rig_control.createAtObject(claviCtlName, hierarchy=['trsBuffer'], hideAttrs=['v', 's'],
+        self.clavical = rig_control.createAtObject(self._userSettings['clavicalName'], self.side,
+                                                   hierarchy=['trsBuffer'], hideAttrs=['v', 's'],
                                                    size=self.size, color='blue', parent=self.control, shape='square',
                                                    xformObj=self.input[0])
-        self.shoulderSwing = rig_control.createAtObject(SwingCtlName, hierarchy=['trsBuffer', 'spaces_trs'],
+        self.shoulderSwing = rig_control.createAtObject(self._userSettings['shoulderSwingName'], self.side,
+                                                        hierarchy=['trsBuffer', 'spaces_trs'],
                                                         hideAttrs=['v', 's'], size=self.size, color='blue',
                                                         parent=self.clavical[-1], shape='square',
                                                         xformObj=self.input[1])
+
         # fk controls
-        self.shoulder = rig_control.createAtObject(shoulCtlName, hierarchy=['trsBuffer', 'spaces_trs'],
+        self.shoulder = rig_control.createAtObject(self._userSettings['shoulder_fkName'], self.side,
+                                                   hierarchy=['trsBuffer', 'spaces_trs'],
                                                    hideAttrs=['v', 't', 's'], size=self.size, color='blue',
                                                    parent=self.control, shape='circle', shapeAim='x',
                                                    xformObj=self.input[1])
-        self.elbow = rig_control.createAtObject(elbowCtlName, hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
+        self.elbow = rig_control.createAtObject(self._userSettings['elbow_fkName'], self.side,
+                                                hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
                                                 size=self.size, color='blue', parent=self.shoulder[-1], shape='circle',
                                                 shapeAim='x', xformObj=self.input[2])
-        self.wrist = rig_control.createAtObject(wirstCtlName, hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
+        self.wrist = rig_control.createAtObject(self._userSettings['wrist_fkName'], self.side,
+                                                hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
                                                 size=self.size, color='blue', parent=self.elbow[-1], shape='circle',
                                                 shapeAim='x', xformObj=self.input[3])
 
         # Ik controls
-        self.arm_ik = rig_control.create(armIkCtlName, hierarchy=['trsBuffer', 'spaces_trs'], hideAttrs=['s', 'v'],
-                                         size=self.size, color='blue', parent=self.control, shape='cube',
-                                         position=cmds.xform(self.input[-1], q=True, ws=True, t=True))
+        self.arm_ik = rig_control.create(self._userSettings['arm_ikName'], self.side,
+                                         hierarchy=['trsBuffer', 'spaces_trs'],
+                                         hideAttrs=['s', 'v'], size=self.size, color='blue', parent=self.control,
+                                         shape='cube', position=cmds.xform(self.input[-1], q=True, ws=True, t=True))
         pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:], magnitude=0)
-        self.arm_pv = rig_control.create(armPvCtlName, hierarchy=['trsBuffer', 'spaces_trs'], hideAttrs=['r', 's', 'v'],
-                                         size=self.size, color='blue', shape='diamond', position=pv_pos,
-                                         parent=self.control, shapeAim='z')
+        self.arm_pv = rig_control.create(self._userSettings['arm_pvName'], self.side,
+                                         hierarchy=['trsBuffer', 'spaces_trs'],
+                                         hideAttrs=['r', 's', 'v'], size=self.size, color='blue', shape='diamond',
+                                         position=pv_pos, parent=self.control, shapeAim='z')
 
         # add the controls to our controller list
         self.fkControls = [self.shoulder[-1], self.elbow[-1], self.wrist[-1]]
@@ -119,9 +127,6 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         cmds.pointConstraint(self.arm_ik[-1], self._ikEndTgt, mo=True)
         cmds.orientConstraint(self.arm_ik[-1], self.ikfk.getIkJointList()[-1], mo=True)
 
-        # TODO: add a better tiwst. look at eyad's arrow pv system.
-        # maybe implement that, but use an attribute not a control
-
         # connect twist of ikHandle to ik arm
         cmds.addAttr(self.ikfk.getGroup(), ln='twist', at='float', k=True)
         cmds.connectAttr("{}.{}".format(self.ikfk.getGroup(), 'twist'), "{}.{}".format(self.ikfk.getHandle(), 'twist'))
@@ -146,6 +151,14 @@ class Arm(rigamajig2.maya.cmpts.base.Base):
         # if the main control exists connect the world space
         if cmds.objExists('trs_motion'):
             spaces.addSpace(self.shoulderSwing[1], ['trs_motion'], nameList=['world'], constraintType='orient')
+
+        if self._userSettings['ikSpaces']:
+            spaces.addSpace(self.arm_ik[1], [self._userSettings['ikSpaces'][k] for k in self._userSettings['ikSpaces'].keys()],
+                            self._userSettings['ikSpaces'].keys(), 'parent')
+
+        if self._userSettings['pvSpaces']:
+            spaces.addSpace(self.arm_pv[1], [self._userSettings['pvSpaces'][k] for k in self._userSettings['pvSpaces'].keys()],
+                            self._userSettings['pvSpaces'].keys(), 'parent')
 
     def setAttrs(self):
         """Set some attributes to values that make more sense for the inital setup."""

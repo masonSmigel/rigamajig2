@@ -21,13 +21,16 @@ CONTROLSHAPES = rigamajig2.shared.path.clean_path(os.path.join(os.path.dirname(_
 CONTROLTAG = 'control'
 
 
-def create(name, shape='circle', hierarchy=['trsBuffer'], parent=None, position=[0, 0, 0], rotation=[0, 0, 0], size=1,
-           hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz', trasformType='transform', shapeAim='y'):
+def create(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None, position=[0, 0, 0], rotation=[0, 0, 0],
+           size=1, hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz', trasformType='transform', shapeAim='y'):
     """
     Create a control. It will also create a hierarchy above the control based on the hierarchy list.
 
     :param name: Name of the control.
     :type name: str
+
+    :param side: Optional name of the side
+    :type side: str
 
     :param shape: Shape of the control.
     :type shape: str
@@ -66,7 +69,10 @@ def create(name, shape='circle', hierarchy=['trsBuffer'], parent=None, position=
     :return: list of hierarchy created above the control plus the control:
     :rtype: list | tuple
     """
-    name = rigamajig2.maya.naming.getUniqueName(name)
+    if side:
+        name = rigamajig2.maya.naming.getUniqueName("{}_{}".format(name, side))
+    else:
+        name = rigamajig2.maya.naming.getUniqueName(name)
     control = cmds.createNode(trasformType, name=name)
     topNode = control
 
@@ -127,12 +133,15 @@ def create(name, shape='circle', hierarchy=['trsBuffer'], parent=None, position=
     return hierarchyList + [control]
 
 
-def createAtObject(name, shape='circle', hierarchy=['trsBuffer'], parent=None, xformObj=None, size=1,
+def createAtObject(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None, xformObj=None, size=1,
                    hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz', trasformType='transform', shapeAim='y'):
     """
     Wrapper to create a control at the position of a node.
     :param name: Name of the control.
     :type name: str
+
+    :param side: Optional name of the side
+    :type side: str
 
     :param shape: Shape of the control.
     :type shape: str
@@ -180,9 +189,9 @@ def createAtObject(name, shape='circle', hierarchy=['trsBuffer'], parent=None, x
     xformObj = rigamajig2.shared.common.getFirstIndex(xformObj)
 
     position = cmds.xform(xformObj, q=True, ws=True, translation=True)
-    controlHierarchy = create(name=name, shape=shape, hierarchy=hierarchy, parent=parent, position=position, size=size,
-                              rotation=[0, 0, 0], hideAttrs=hideAttrs, color=color, type=type, rotateOrder=rotateOrder,
-                              trasformType=trasformType, shapeAim=shapeAim)
+    controlHierarchy = create(name=name, side=side, shape=shape, hierarchy=hierarchy, parent=parent, position=position,
+                              size=size, rotation=[0, 0, 0], hideAttrs=hideAttrs, color=color, type=type,
+                              rotateOrder=rotateOrder, trasformType=trasformType, shapeAim=shapeAim)
     rigamajig2.maya.transform.matchRotate(xformObj, controlHierarchy[0])
     return controlHierarchy
 

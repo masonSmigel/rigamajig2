@@ -32,12 +32,12 @@ CONTROL_SHAPES = "control_shapes"
 
 
 class Builder(object):
-    def __init__(self, path=None):
+    def __init__(self, rigFile=None):
         """
         Initalize the builder
-        :param path: path to build enviornment
+        :param rigFile: path to the rig file
         """
-        self.set_path(path)
+        self.set_rig_file(rigFile)
         self.cmpts = list()
 
         self._cmpts_path_dict = dict()
@@ -159,7 +159,7 @@ class Builder(object):
     # RUN SCRIPTS
     def pre_script(self, scripts=[]):
         """
-         Run pre scripts. You can add scripts by path, but the main use is through the PRE SCRIPT path
+        Run pre scripts. You can add scripts by path, but the main use is through the PRE SCRIPT path
         :param scripts: path to scripts to run
         """
         if self.path:
@@ -203,7 +203,7 @@ class Builder(object):
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
     def run(self, optimize=True):
         if not self.path:
-            logger.error('you must provide a build enviornment path. Use Bulder.set_path()')
+            logger.error('you must provide a build enviornment path. Use Bulder.set_rig_file()')
             return
 
         start_time = time.time()
@@ -216,21 +216,33 @@ class Builder(object):
         self.connect()
         self.finalize()
         self.load_controlShapes()
-        if optimize: self.optimize()
         self.load_data()
         self.post_script()
+        if optimize: self.optimize()
         end_time = time.time()
         final_time = end_time - start_time
 
         print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}'.format(final_time, '-' * 70))
 
     # UTILITY FUNCTIONS
-    def set_path(self, path):
-        self.path = path
-        self.rig_file = os.path.join(self.path, self.path.split(os.sep)[-1] + '.rig')
+    def set_rig_file(self, rigFile):
+        if not os.path.exists(rigFile):
+            # TODO: give the user the option to create a rig file somewhere
+            raise RuntimeError("'{0}' does not exist".format(rigFile))
+        self.rig_file = rigFile
+
+        rig_data = abstract_data.AbstractData()
+        rig_data.read(self.rig_file)
+        data = rig_data.getData()
+        if not data.has_key("rig_env"): rig_env_path = '../'
+        else: rig_env_path = data["rig_env"]
+        self.path = os.path.abspath(os.path.join(self.rig_file, rig_env_path))
 
     def get_path(self):
         return self.path
+
+    def get_rig_file(self):
+        return self.rig_file
 
     def set_cmpts(self, cmpts):
         """

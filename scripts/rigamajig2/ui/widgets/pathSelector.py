@@ -11,12 +11,16 @@ import maya.cmds as cmds
 
 
 class PathSelector(QtWidgets.QWidget):
-    def __init__(self, cap='Select a file or Folder', ff="All Files (*.*)", fm=1, relativeTo=None, parent=None):
+    def __init__(self, label=None, cap='Select a file or Folder', ff="All Files (*.*)", fm=1, relativeTo=None,
+                 parent=None):
         super(PathSelector, self).__init__(parent)
         self.cap = cap
         self.ff = ff
         self.fm = fm
         self.relaiveTo = relativeTo
+        self.label = label
+
+        self.path_label = QtWidgets.QLabel()
 
         self.path_le = QtWidgets.QLineEdit()
         self.path_le.setPlaceholderText("path/to/file/or/folder")
@@ -34,11 +38,24 @@ class PathSelector(QtWidgets.QWidget):
         self.main_layout = QtWidgets.QHBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(4)
+        if self.label is not None:
+            self.main_layout.addWidget(self.path_label)
+            self.set_label_text(self.label)
+            self.path_label.setFixedWidth(50)
+
         self.main_layout.addWidget(self.path_le)
         self.main_layout.addWidget(self.select_path_btn)
         self.main_layout.addWidget(self.show_in_folder_btn)
 
+    def set_path(self, path):
+        self.path_le.setText(path)
+
     def select_path(self, path=None):
+        """
+        Select an existing path. this is smarter than set path because it will create a dailog and check if the path exists.
+        :param path:
+        :return:
+        """
         current_path = self.path_le.text()
         if not current_path:
             current_path = self.path_le.placeholderText()
@@ -105,7 +122,14 @@ class PathSelector(QtWidgets.QWidget):
         return self.path_le.text()
 
     def get_abs_path(self):
-        if self.relaiveTo:
-            return os.path.abspath(os.path.join(self.relaiveTo, self.path_le.text()))
-        else:
-            return self.path_le.text()
+        if self.path_le.text():
+            if self.relaiveTo:
+                return os.path.abspath(os.path.join(self.relaiveTo, self.path_le.text()))
+            else:
+                return self.path_le.text()
+
+    def set_relativeTo(self, relativeTo):
+        self.relaiveTo = relativeTo
+
+    def set_label_text(self, text):
+        self.path_label.setText(text)

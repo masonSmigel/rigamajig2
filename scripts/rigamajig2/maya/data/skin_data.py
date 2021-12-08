@@ -11,7 +11,6 @@ class SkinData(maya_data.MayaData):
     def __init__(self):
         super(SkinData, self).__init__()
 
-
     def gatherData(self, node):
 
         if cmds.nodeType(node) in {'nurbsCurve', 'nurbsSurface', 'mesh'}:
@@ -20,4 +19,3 @@ class SkinData(maya_data.MayaData):
             node = skinCluster.getSkinCluster(node)
 
         super(CurveData, self).gatherData(node)
-

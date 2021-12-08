@@ -36,6 +36,10 @@ class ScriptRunner(QtWidgets.QWidget):
         self.run_script_action.setIcon(QtGui.QIcon(":play_S_100.png"))
         self.run_script_action.triggered.connect(self.run_selected_scripts)
 
+        self.show_in_folder_action = QtWidgets.QAction("Show in Folder", self)
+        self.show_in_folder_action.setIcon(QtGui.QIcon(":folder-open.png"))
+        self.show_in_folder_action.triggered.connect(self.show_in_folder)
+
         self.del_script_action = QtWidgets.QAction("Delete Script", self)
         self.del_script_action.setIcon(QtGui.QIcon(":trash.png"))
         self.del_script_action.triggered.connect(self.delete_selected_scripts)
@@ -43,16 +47,17 @@ class ScriptRunner(QtWidgets.QWidget):
     def create_widgets(self):
         self.script_list = QtWidgets.QListWidget()
         self.script_list.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        # self.script_list.setSpacing(1)
         self.script_list.setFixedHeight(155)
 
         self.script_list.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.script_list.addAction(self.run_script_action)
+        self.script_list.addAction(self.show_in_folder_action)
         self.script_list.addAction(self.del_script_action)
 
         self.add_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":fileNew.png"), "")
-        self.add_directory_btn = QtWidgets.QPushButton(QtGui.QIcon(":folder-new.png"), "")
+        self.add_directory_btn = QtWidgets.QPushButton(QtGui.QIcon(":folder-closed.png"), "")
         self.clear_scripts_btn = QtWidgets.QPushButton(QtGui.QIcon(":hotkeyFieldClear.png"), "")
+        self.create_new_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":cmdWndIcon.png"), "")
         self.execute_scripts_btn = QtWidgets.QPushButton(QtGui.QIcon(":play_S_100.png"), "Execute All")
 
     def create_layouts(self):
@@ -62,6 +67,7 @@ class ScriptRunner(QtWidgets.QWidget):
         btn_layout.addWidget(self.add_script_btn)
         btn_layout.addWidget(self.add_directory_btn)
         btn_layout.addWidget(self.clear_scripts_btn)
+        btn_layout.addWidget(self.create_new_script_btn)
         btn_layout.addWidget(self.execute_scripts_btn)
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
@@ -75,6 +81,7 @@ class ScriptRunner(QtWidgets.QWidget):
         self.add_script_btn.clicked.connect(self.add_script_browser)
         self.add_directory_btn.clicked.connect(self.add_scripts_dir_browser)
         self.clear_scripts_btn.clicked.connect(self.clear_scripts)
+        self.create_new_script_btn.clicked.connect(self.create_new_script)
         self.execute_scripts_btn.clicked.connect(self.execute_all_scripts)
 
     def add_item(self, name, data=None, icon=None):
@@ -103,6 +110,14 @@ class ScriptRunner(QtWidgets.QWidget):
     def add_scripts_dir_browser(self):
         file_path = QtWidgets.QFileDialog.getExistingDirectory(self, "Select Directory", "")
         self.add_scripts_from_dir(file_path)
+
+    def create_new_script(self):
+        file_path, selected_filter = QtWidgets.QFileDialog.getSaveFileName(self, "Select File", "",
+                                                                           "Python (*.py) ;; Mel (*.mel)")
+        f = open(file_path, "w")
+        f.write("")
+        f.close()
+        self.add_script(file_path)
 
     def add_scripts_from_dir(self, directory):
         file_info = QtCore.QFileInfo(directory)
@@ -146,6 +161,47 @@ class ScriptRunner(QtWidgets.QWidget):
 
     def get_sel_items(self):
         return [i for i in self.script_list.selectedItems()]
+
+    def show_in_folder(self):
+        items = self.get_sel_items()
+
+        for item in items:
+            file_path = item.data(QtCore.Qt.UserRole)
+
+            if cmds.about(windows=True):
+                if self.open_in_exporer(file_path):
+                    return
+            elif cmds.about(macOS=True):
+                if self.open_in_finder(file_path):
+                    return
+
+            file_info = QtCore.QFileInfo(file_path)
+            if file_info.exists():
+                if file_info.isDir():
+                    QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(file_path))
+                else:
+                    QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(file_info.path()))
+            else:
+                cmds.error("Invalid Directory")
+
+    def open_in_exporer(self, file_path):
+        file_info = QtCore.QFileInfo(file_path)
+        args = []
+        if not file_info.isDir():
+            args.append("/select,")
+        args.append(QtCore.QDir.toNativeSeparators(file_path))
+
+        if QtCore.QProcess.startDetached("explorer", args):
+            return True
+        return False
+
+    def open_in_finder(self, file_path):
+        args = ['-e', 'tell application "Finder"', '-e', 'activate', '-e', 'select POSIX file "{0}"'.format(file_path),
+                '-e', 'end tell', '-e', 'return']
+
+        if QtCore.QProcess.startDetached("/usr/bin/osascript", args):
+            return True
+        return False
 
 
 class TestDialog(QtWidgets.QDialog):

@@ -2,6 +2,7 @@
 This file contains the UI for the main rig builder
 """
 import sys
+import logging
 
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -11,7 +12,12 @@ from shiboken2 import wrapInstance
 import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
-from rigamajig2.ui.widgets import pathSelector
+import rigamajig2.shared.common as common
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
+import rigamajig2.maya.rig.builder as builder
+
+logger = logging.getLogger(__name__)
+logger.setLevel(5)
 
 
 class RigamajigBuilderUi(QtWidgets.QDialog):
@@ -37,6 +43,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
             maya_main_window = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
         super(RigamajigBuilderUi, self).__init__(maya_main_window)
+        self.rig_env = None
 
         self.setWindowTitle(self.WINDOW_TITLE)
         if cmds.about(ntOS=True):
@@ -94,6 +101,55 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.clone_rig_env_btn = QtWidgets.QPushButton("Clone rig env")
         self.create_rig_env_btn.setToolTip("Create a new rig enviornment from an existing enviornment")
 
+        # Pre- script section
+        self.preScript_wdgt = collapseableWidget.CollapsibleWidget('Pre-Script')
+        self.preScript_scriptRunnder = scriptRunner.ScriptRunner()
+
+        # Model Section
+        self.model_wdgt = collapseableWidget.CollapsibleWidget('Model')
+        self.model_path_selector = pathSelector.PathSelector("model:", cap="Select a Model file",
+                                                             ff="Maya Files (*.ma;; *.mb)", fm=1)
+        self.import_model_btn = QtWidgets.QPushButton('Import Model')
+        self.check_model_btn = QtWidgets.QPushButton('Check Model')
+        self.check_model_btn.setFixedWidth(100)
+
+        # Skeleton Section
+        self.skeleton_wdgt = collapseableWidget.CollapsibleWidget('Skeleton')
+        self.skel_path_selector = pathSelector.PathSelector("skeleton:", cap="Select a Skeleton file",
+                                                            ff="Maya Files (*.ma;; *.mb)", fm=1)
+        self.joint_pos_path_selector = pathSelector.PathSelector("joint pos: ", cap="Select a Skeleton position file",
+                                                                 ff="Json Files (*.json)", fm=1)
+        self.import_skeleton_btn = QtWidgets.QPushButton("Import skeleton")
+        self.save_skeleton_btn = QtWidgets.QPushButton("Save skeleton")
+        self.load_jnt_pos_btn = QtWidgets.QPushButton("Load joint pos")
+        self.save_jnt_pos_btn = QtWidgets.QPushButton("Save joint pos")
+
+        # Component Section
+        self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Component')
+
+        # Build Section
+        self.build_wdgt = collapseableWidget.CollapsibleWidget('Build')
+        self.build_rig_btn = QtWidgets.QPushButton("Build")
+
+        # Post - script section
+        self.postScript_wdgt = collapseableWidget.CollapsibleWidget('Post-Script')
+        # Control Shape Section
+        self.ctlShape_wdgt = collapseableWidget.CollapsibleWidget('Controls')
+        self.ctl_selector = pathSelector.PathSelector("Controls:", cap="Select a Control Shape file",
+                                                      ff="Json Files (*.json)", fm=1)
+        self.load_color_cb = QtWidgets.QCheckBox()
+        self.load_color_cb.setChecked(True)
+        self.load_color_cb.setFixedWidth(25)
+        self.load_ctl_btn = QtWidgets.QPushButton("Load Controls")
+        self.save_ctl_btn = QtWidgets.QPushButton("Save Controls")
+
+        # Deformation Section
+        self.deformations_wdgt = collapseableWidget.CollapsibleWidget('Deformations')
+        # Publish Section
+        self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish')
+
+        self.close_btn = QtWidgets.QPushButton("Close")
+
     def create_layouts(self):
         rig_env_btn_layout = QtWidgets.QHBoxLayout()
         rig_env_btn_layout.addWidget(self.create_rig_env_btn)
@@ -103,20 +159,113 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         rig_env_layout.addWidget(self.rig_path_selector)
         rig_env_layout.addLayout(rig_env_btn_layout)
 
+        build_layout = QtWidgets.QVBoxLayout()
+        build_layout.addWidget(self.preScript_wdgt)
+
+        self.preScript_wdgt.addWidget(self.preScript_scriptRunnder)
+
+        # Model
+        build_layout.addWidget(self.model_wdgt)
+        model_btn_layout = QtWidgets.QHBoxLayout()
+        model_btn_layout.setContentsMargins(0, 0, 0, 0)
+        model_btn_layout.setSpacing(4)
+        model_btn_layout.addWidget(self.import_model_btn)
+        model_btn_layout.addWidget(self.check_model_btn)
+
+        self.model_wdgt.addWidget(self.model_path_selector)
+        self.model_wdgt.addLayout(model_btn_layout)
+
+        build_layout.addWidget(self.skeleton_wdgt)
+        save_load_skeleton_layout = QtWidgets.QHBoxLayout()
+        save_load_skeleton_layout.addWidget(self.import_skeleton_btn)
+        save_load_skeleton_layout.addWidget(self.save_skeleton_btn)
+
+        save_load_jnt_layout = QtWidgets.QHBoxLayout()
+        save_load_jnt_layout.addWidget(self.load_jnt_pos_btn)
+        save_load_jnt_layout.addWidget(self.save_jnt_pos_btn)
+
+        skeleton_btn_layout = QtWidgets.QVBoxLayout()
+        skeleton_btn_layout.setContentsMargins(0, 0, 0, 0)
+        skeleton_btn_layout.setSpacing(4)
+        skeleton_btn_layout.addLayout(save_load_skeleton_layout)
+        skeleton_btn_layout.addLayout(save_load_jnt_layout)
+
+        self.skeleton_wdgt.addWidget(self.skel_path_selector)
+        self.skeleton_wdgt.addWidget(self.joint_pos_path_selector)
+        self.skeleton_wdgt.addLayout(skeleton_btn_layout)
+
+        build_layout.addWidget(self.cmpt_wdgt)
+
+        build_layout.addWidget(self.build_wdgt)
+        self.build_wdgt.addWidget(self.build_rig_btn)
+
+        # Post Script
+        build_layout.addWidget(self.postScript_wdgt)
+
+        # Control shapes
+        build_layout.addWidget(self.ctlShape_wdgt)
+
+        control_btn_layout = QtWidgets.QHBoxLayout()
+        control_btn_layout.setSpacing(4)
+        load_color_label = QtWidgets.QLabel("load color:")
+        load_color_label.setFixedWidth(60)
+
+        control_btn_layout.addWidget(load_color_label)
+        control_btn_layout.addWidget(self.load_color_cb)
+        control_btn_layout.addWidget(self.load_ctl_btn)
+        control_btn_layout.addWidget(self.save_ctl_btn)
+        self.ctlShape_wdgt.addWidget(self.ctl_selector)
+        self.ctlShape_wdgt.addLayout(control_btn_layout)
+
+        # Deformations
+        build_layout.addWidget(self.deformations_wdgt)
+
+        # Publish
+        build_layout.addWidget(self.publish_wdgt)
+        build_layout.addStretch()
+
+        # lower persistant buttons (AKA close, script editor)
+        low_buttons_layout = QtWidgets.QHBoxLayout()
+        low_buttons_layout.addWidget(self.close_btn)
+
+        # groups
         rig_env_grp = QtWidgets.QGroupBox('Rig Enviornment')
         rig_env_grp.setLayout(rig_env_layout)
 
+        build_grp = QtWidgets.QGroupBox('Build')
+        build_grp.setLayout(build_layout)
+
+        # scrollable area
+        body_wdg = QtWidgets.QWidget()
+        body_layout = QtWidgets.QVBoxLayout(body_wdg)
+        body_layout.setContentsMargins(0, 0, 0, 0)
+        body_layout.addWidget(rig_env_grp)
+        body_layout.addWidget(build_grp)
+
+        body_scroll_area = QtWidgets.QScrollArea()
+        body_scroll_area.setFrameShape(QtWidgets.QFrame.NoFrame)
+        body_scroll_area.setWidgetResizable(True)
+        body_scroll_area.setWidget(body_wdg)
+
+        # main layout
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.setContentsMargins(4, 4, 4, 4)
         main_layout.setSpacing(4)
         main_layout.setMenuBar(self.main_menu)
-        main_layout.addWidget(rig_env_grp)
-        main_layout.addStretch()
+        main_layout.addWidget(body_scroll_area)
+        main_layout.addLayout(low_buttons_layout)
 
     def create_connections(self):
         self.create_rig_env_btn.clicked.connect(self.create_rig_env)
         self.clone_rig_env_btn.clicked.connect(self.clone_rig_env)
-        # self.rig_file_path_select_btn.clicked.connect(self.select_rig_file)
+
+        self.import_skeleton_btn.clicked.connect(self.import_skeleton)
+        self.load_jnt_pos_btn.clicked.connect(self.load_joint_positions)
+        self.save_jnt_pos_btn.clicked.connect(self.save_joint_positions)
+
+        self.load_ctl_btn.clicked.connect(self.load_controlShapes)
+        self.save_ctl_btn.clicked.connect(self.save_controlShapes)
+        self.close_btn.clicked.connect(self.close)
 
     # Connections
     def load_rig_file(self):
@@ -133,15 +282,61 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def set_rig_file(self, path=None):
         self.rig_path_selector.select_path(path=path)
+        file_info = QtCore.QFileInfo(self.rig_path_selector.get_abs_path())
+        self.rig_env = file_info.path()
+        self.rig_file = file_info.filePath()
 
-    def load_data_from_rig_file(self):
-        pass
+        # set all path selectors to be realive to the new rig enviornment
+        self.model_path_selector.set_relativeTo(self.rig_env)
+        self.skel_path_selector.set_relativeTo(self.rig_env)
+        self.joint_pos_path_selector.set_relativeTo(self.rig_env)
+        self.ctl_selector.set_relativeTo(self.rig_env)
 
+        self.rig_builder = builder.Builder(self.rig_file)
+        self.update_ui_with_rig_data()
+
+    def update_ui_with_rig_data(self):
+        tmp_builder = builder.Builder()
+        if not self.rig_file:
+            return
+
+        mod_file = tmp_builder.get_rig_data(self.rig_file, builder.MODEL_FILE)
+        if mod_file: self.model_path_selector.set_path(mod_file)
+
+        skel_file = tmp_builder.get_rig_data(self.rig_file, builder.SKELETON_FILE)
+        if skel_file: self.skel_path_selector.set_path(skel_file)
+
+        skel_pos_file = tmp_builder.get_rig_data(self.rig_file, builder.SKELETON_POS)
+        if skel_pos_file: self.joint_pos_path_selector.set_path(skel_pos_file)
+
+        ctl_file = tmp_builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES)
+        if ctl_file: self.ctl_selector.set_path(ctl_file)
+
+    # UTILITIY FUNCTIONS
     def create_rig_env(self):
         print "TODO : create a rig environment"
 
     def clone_rig_env(self):
         print "TODO : clone a rig environment"
+
+    # BULDER FUNCTIONS
+    def import_model(self):
+        print "TODO: Import model"
+
+    def import_skeleton(self):
+        self.rig_builder.import_skeleton(self.skel_path_selector.get_abs_path())
+
+    def load_joint_positions(self):
+        self.rig_builder.load_joint_positions(self.joint_pos_path_selector.get_abs_path())
+
+    def save_joint_positions(self):
+        self.rig_builder.save_joint_positions(self.joint_pos_path_selector.get_abs_path())
+
+    def load_controlShapes(self):
+        self.rig_builder.load_controlShapes(self.ctl_selector.get_abs_path(), self.load_color_cb.isChecked())
+
+    def save_controlShapes(self):
+        self.rig_builder.save_controlShapes(self.ctl_selector.get_abs_path())
 
 
 if __name__ == '__main__':

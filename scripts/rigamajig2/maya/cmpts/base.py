@@ -123,7 +123,7 @@ class Base(object):
         """"""
         self._load_meta_to_component()
 
-        if not self.get_step() >= 5:
+        if not self.get_step() == 5:
             self.optimize()
             self.set_step(5)
         else:
@@ -137,6 +137,7 @@ class Base(object):
         """Create a Container for the component"""
         if not cmds.objExists(self.container):
             self.container = rigamajig2.maya.container.create(self.container)
+            rigamajig2.maya.meta.tag(self.container, 'component')
 
     def initalHierachy(self):
         """Setup the inital Hirarchy"""

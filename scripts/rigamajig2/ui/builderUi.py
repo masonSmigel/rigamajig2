@@ -3,6 +3,7 @@ This file contains the UI for the main rig builder
 """
 import sys
 import logging
+import os
 
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -13,7 +14,7 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
 import rigamajig2.shared.common as common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager
 import rigamajig2.maya.rig.builder as builder
 
 logger = logging.getLogger(__name__)
@@ -103,7 +104,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Pre- script section
         self.preScript_wdgt = collapseableWidget.CollapsibleWidget('Pre-Script')
-        self.preScript_scriptRunnder = scriptRunner.ScriptRunner()
+        self.preScript_scriptRunner = scriptRunner.ScriptRunner()
 
         # Model Section
         self.model_wdgt = collapseableWidget.CollapsibleWidget('Model')
@@ -126,6 +127,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Component Section
         self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Component')
+        self.cmpt_manager = componentManager.ComponentManager()
 
         # Build Section
         self.build_wdgt = collapseableWidget.CollapsibleWidget('Build')
@@ -133,6 +135,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Post - script section
         self.postScript_wdgt = collapseableWidget.CollapsibleWidget('Post-Script')
+        self.postScript_scriptRunner = scriptRunner.ScriptRunner()
+
         # Control Shape Section
         self.ctlShape_wdgt = collapseableWidget.CollapsibleWidget('Controls')
         self.ctl_selector = pathSelector.PathSelector("Controls:", cap="Select a Control Shape file",
@@ -147,6 +151,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.deformations_wdgt = collapseableWidget.CollapsibleWidget('Deformations')
         # Publish Section
         self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish')
+        self.publishScript_scriptRunner = scriptRunner.ScriptRunner()
 
         self.close_btn = QtWidgets.QPushButton("Close")
 
@@ -162,7 +167,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         build_layout = QtWidgets.QVBoxLayout()
         build_layout.addWidget(self.preScript_wdgt)
 
-        self.preScript_wdgt.addWidget(self.preScript_scriptRunnder)
+        self.preScript_wdgt.addWidget(self.preScript_scriptRunner)
 
         # Model
         build_layout.addWidget(self.model_wdgt)
@@ -175,6 +180,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.model_wdgt.addWidget(self.model_path_selector)
         self.model_wdgt.addLayout(model_btn_layout)
 
+        # Skeleton
         build_layout.addWidget(self.skeleton_wdgt)
         save_load_skeleton_layout = QtWidgets.QHBoxLayout()
         save_load_skeleton_layout.addWidget(self.import_skeleton_btn)
@@ -194,13 +200,17 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.skeleton_wdgt.addWidget(self.joint_pos_path_selector)
         self.skeleton_wdgt.addLayout(skeleton_btn_layout)
 
+        # Components
         build_layout.addWidget(self.cmpt_wdgt)
+        self.cmpt_wdgt.addWidget(self.cmpt_manager)
 
+        # Build
         build_layout.addWidget(self.build_wdgt)
         self.build_wdgt.addWidget(self.build_rig_btn)
 
         # Post Script
         build_layout.addWidget(self.postScript_wdgt)
+        self.postScript_wdgt.addWidget(self.postScript_scriptRunner)
 
         # Control shapes
         build_layout.addWidget(self.ctlShape_wdgt)
@@ -222,6 +232,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Publish
         build_layout.addWidget(self.publish_wdgt)
+        self.publish_wdgt.addWidget(self.publishScript_scriptRunner)
+
         build_layout.addStretch()
 
         # lower persistant buttons (AKA close, script editor)
@@ -258,6 +270,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def create_connections(self):
         self.create_rig_env_btn.clicked.connect(self.create_rig_env)
         self.clone_rig_env_btn.clicked.connect(self.clone_rig_env)
+
+        self.import_model_btn.clicked.connect(self.import_model)
 
         self.import_skeleton_btn.clicked.connect(self.import_skeleton)
         self.load_jnt_pos_btn.clicked.connect(self.load_joint_positions)
@@ -300,6 +314,18 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         if not self.rig_file:
             return
 
+        pre_script_path = os.path.join(self.rig_env, builder.PRE_SCRIPT_PATH)
+        if QtCore.QFileInfo(pre_script_path).exists():
+            self.preScript_scriptRunner.add_scripts_from_dir(pre_script_path)
+
+        post_script_path = os.path.join(self.rig_env, builder.POST_SCRIPT_PATH)
+        if QtCore.QFileInfo(post_script_path).exists():
+            self.postScript_scriptRunner.add_scripts_from_dir(post_script_path)
+
+        pub_script_path = os.path.join(self.rig_env, builder.PUB_SCRIPT_PATH)
+        if QtCore.QFileInfo(pub_script_path).exists():
+            self.publishScript_scriptRunner.add_scripts_from_dir(pub_script_path)
+
         mod_file = tmp_builder.get_rig_data(self.rig_file, builder.MODEL_FILE)
         if mod_file: self.model_path_selector.set_path(mod_file)
 
@@ -321,7 +347,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     # BULDER FUNCTIONS
     def import_model(self):
-        print "TODO: Import model"
+        self.rig_builder.import_model(self.model_path_selector.get_abs_path())
 
     def import_skeleton(self):
         self.rig_builder.import_skeleton(self.skel_path_selector.get_abs_path())

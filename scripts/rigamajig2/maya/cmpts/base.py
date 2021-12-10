@@ -37,6 +37,8 @@ class Base(object):
         self.cmptSettings = OrderedDict(size=self.size)
         self._userSettings = OrderedDict()
 
+        self.proxySetupGrp = self.name + "_proxy"
+
     def _intialize_cmpt(self):
         """
         setup all intialize functions for the component
@@ -47,11 +49,12 @@ class Base(object):
         """
         if not self.get_step() >= 1:
             # fullDict = dict(self.metaData, **self.cmptSettings)
+            self.setInitalData()
             self.createContainer()
             # Store
-            metaNode = rigamajig2.maya.meta.MetaNode(self.container)
-            metaNode.setDataDict(data=self.metaData, hide=True, lock=True)
-            metaNode.setDataDict(data=self.cmptSettings, hide=True)
+            self.metaNode = rigamajig2.maya.meta.MetaNode(self.container)
+            self.metaNode.setDataDict(data=self.metaData, hide=True, lock=True)
+            self.metaNode.setDataDict(data=self.cmptSettings, hide=True)
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -73,6 +76,10 @@ class Base(object):
         self._load_meta_to_component()
 
         if not self.get_step() >= 2:
+            # if a proxy setup exists delete it.
+            if self.proxy_setup_exists():
+                self.deleteAdvancedProxy()
+
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.initalHierachy()
@@ -133,6 +140,10 @@ class Base(object):
     def preScript(self):
         pass
 
+    def setInitalData(self):
+        """Set inital component data. This needs to be done in a compont so we control attrribute settings in subclasses."""
+        pass
+
     def createContainer(self, data={}):
         """Create a Container for the component"""
         if not cmds.objExists(self.container):
@@ -177,7 +188,7 @@ class Base(object):
         """publish attributes"""
         pass
 
-    def finalize(self):
+    def efinalize(self):
         """Finalize a component"""
         pass
 
@@ -191,6 +202,14 @@ class Base(object):
     def optimize(self):
         """Optimize a component"""
         pass
+
+    def showAdvancedProxy(self):
+        """ Show advanved proxy attributes """
+        pass
+
+    def deleteAdvancedProxy(self):
+        """ Delete the advanced proxy """
+        cmds.delete(self.proxySetupGrp)
 
     def set_step(self, step=0):
         """
@@ -222,20 +241,21 @@ class Base(object):
             return cmds.getAttr("{}.{}".format(self.container, 'build_step'))
         return 0
 
+    def proxy_setup_exists(self):
+        return True if self.proxySetupGrp and cmds.objExists(self.proxySetupGrp) else False
+
     def save(self):
         """Return the settings of component name"""
         self._load_meta_to_component()
         return self._userSettings
 
     def load(self, meta):
-        mayaJson = rigamajig2.maya.meta.MetaNode(self.container)
-        mayaJson.setDataDict(meta)
+        self.metaNode.setDataDict(meta)
 
     def _load_meta_to_component(self):
         """
         load meta data from the settings node into a dictionary
         """
         self._userSettings = OrderedDict()
-        mayaJson = rigamajig2.maya.meta.MetaNode(self.container)
         for key in self.cmptSettings.keys():
-            self._userSettings[key] = mayaJson.getData(key)
+            self._userSettings[key] = self.metaNode.getData(key)

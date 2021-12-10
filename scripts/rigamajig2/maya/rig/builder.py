@@ -221,6 +221,22 @@ class Builder(object):
         """
         logger.info("data loading -- complete")
 
+    def show_advanced_proxy(self):
+        """
+        Show the advanced proxy attributes for the components
+        :return:
+        """
+        for cmpt in self.cmpts:
+            if cmpt.get_step()  >= 2:
+                logger.warning("component {} is already build. No use creating proxy feedback".format(cmpt))
+            else:
+                cmpt.showAdvancedProxy()
+
+    def delete_advanced_proxy(self):
+        for cmpt in self.cmpts:
+            if cmpt.proxy_setup_exists():
+                cmpt.deleteAdvancedProxy()
+
     # RUN SCRIPTS
     def pre_script(self, scripts=[]):
         """

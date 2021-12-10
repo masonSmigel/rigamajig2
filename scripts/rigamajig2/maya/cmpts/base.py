@@ -188,7 +188,7 @@ class Base(object):
         """publish attributes"""
         pass
 
-    def efinalize(self):
+    def finalize(self):
         """Finalize a component"""
         pass
 

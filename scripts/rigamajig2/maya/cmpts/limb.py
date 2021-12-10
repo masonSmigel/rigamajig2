@@ -85,8 +85,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.limb_ik = rig_control.create(self._userSettings['limb_ikName'], self.side,
                                           hierarchy=['trsBuffer', 'spaces_trs'],
                                           hideAttrs=['s', 'v'], size=self.size, color='blue', parent=self.control,
-                                          shape='cube', position=cmds.xform(self.input[-1], q=True, ws=True, t=True))
-        pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:], magnitude=0)
+                                          shape='cube', position=cmds.xform(self.input[3], q=True, ws=True, t=True))
+        print self.input[1:4]
+        pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:4], magnitude=0)
         self.limb_pv = rig_control.create(self._userSettings['limb_pvName'], self.side,
                                           hierarchy=['trsBuffer', 'spaces_trs'],
                                           hideAttrs=['r', 's', 'v'], size=self.size, color='blue', shape='diamond',
@@ -99,7 +100,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
     def rigSetup(self):
         """Add the rig setup"""
-        self.ikfk = ikfk.IkFkLimb(self.input[1:])
+        self.ikfk = ikfk.IkFkLimb(self.input[1:4])
         self.ikfk.setGroup(self.name + '_ikfk')
         self.ikfk.create()
         self.ikJnts = self.ikfk.getIkJointList()
@@ -133,8 +134,12 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
-        rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:])
+        rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
         ikfk.IkFkBase.connnectIkFkVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
+
+        # connect the base to the main bind chain
+        cmds.parentConstraint(self.limbBase[-1], self.input[0])
+        rigamajig2.maya.attr.lock(self.input[0], rigamajig2.maya.attr.TRANSFORMS + ['v'])
 
     def connect(self):
         """Create the connection"""

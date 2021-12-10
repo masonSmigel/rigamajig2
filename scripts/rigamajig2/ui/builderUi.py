@@ -14,7 +14,7 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
 import rigamajig2.shared.common as common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager, QLine
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager
 import rigamajig2.maya.rig.builder as builder
 
 logger = logging.getLogger(__name__)

@@ -14,7 +14,7 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
 import rigamajig2.shared.common as common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager, QLine
 import rigamajig2.maya.rig.builder as builder
 
 logger = logging.getLogger(__name__)
@@ -128,6 +128,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         # Component Section
         self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Component')
         self.cmpt_manager = componentManager.ComponentManager()
+        self.initalize_sel_btn = QtWidgets.QPushButton("Initalize Selected")
+        self.initalize_all_btn = QtWidgets.QPushButton("Initalize All")
+        self.show_advanced_proxy_cb = QtWidgets.QCheckBox()
+        self.show_advanced_proxy_cb.setFixedWidth(25)
 
         # Build Section
         self.build_wdgt = collapseableWidget.CollapsibleWidget('Build')
@@ -202,7 +206,18 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Components
         build_layout.addWidget(self.cmpt_wdgt)
+
+        cmpt_btn_layout = QtWidgets.QHBoxLayout()
+        cmpt_btn_layout.setSpacing(4)
+        show_proxy_label = QtWidgets.QLabel("show proxy:")
+        show_proxy_label.setFixedWidth(70)
+
+        cmpt_btn_layout.addWidget(show_proxy_label)
+        cmpt_btn_layout.addWidget(self.show_advanced_proxy_cb)
+        cmpt_btn_layout.addWidget(self.initalize_sel_btn)
+        cmpt_btn_layout.addWidget(self.initalize_all_btn)
         self.cmpt_wdgt.addWidget(self.cmpt_manager)
+        self.cmpt_wdgt.addLayout(cmpt_btn_layout)
 
         # Build
         build_layout.addWidget(self.build_wdgt)
@@ -276,6 +291,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.import_skeleton_btn.clicked.connect(self.import_skeleton)
         self.load_jnt_pos_btn.clicked.connect(self.load_joint_positions)
         self.save_jnt_pos_btn.clicked.connect(self.save_joint_positions)
+
+        self.show_advanced_proxy_cb.toggled.connect(self.toggle_advanced_proxy)
 
         self.load_ctl_btn.clicked.connect(self.load_controlShapes)
         self.save_ctl_btn.clicked.connect(self.save_controlShapes)
@@ -363,6 +380,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def save_controlShapes(self):
         self.rig_builder.save_controlShapes(self.ctl_selector.get_abs_path())
+
+    def toggle_advanced_proxy(self):
+        """ Toggle the advanced proxy attributes """
+        if self.show_advanced_proxy_cb.isChecked():
+            self.rig_builder.show_advanced_proxy()
+        else:
+            self.rig_builder.delete_advanced_proxy()
 
 
 if __name__ == '__main__':

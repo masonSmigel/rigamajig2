@@ -26,6 +26,8 @@ def createlivePoleVector(matchList, poleVectorNode=None):
     # if we dont have a poleVectorNode then make one.
     if not poleVectorNode:
         poleVectorNode = cmds.spaceLocator(name=matchList[1] + '_pvPos_' + common.TARGET)[0]
+        cmds.setAttr("{}.overrideEnabled".format(poleVectorNode), 1)
+        cmds.setAttr("{}.overrideColor".format(poleVectorNode), 29)
     if not cmds.objExists(poleVectorNode):
         raise RuntimeError("The poleVector node '{}' does not exist in the scene".format(poleVectorNode))
 
@@ -110,6 +112,7 @@ def createlivePoleVector(matchList, poleVectorNode=None):
 
     # connect our pvPos to the poleVectorNode
     cmds.connectAttr("{}.output3D".format(pvPos), "{}.t".format(poleVectorNode), f=True)
+    return poleVectorNode
 
 
 def createLiveMirror(jointList, axis='x', mode='rotate'):

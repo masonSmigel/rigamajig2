@@ -199,11 +199,11 @@ class IkFkBase(object):
         if not cmds.objExists("{}.{}".format(attrHolder, attr)):
             raise RuntimeError('attribute "{}.{}" does not exist'.format(attrHolder, attr))
 
-        if not cmds.objExists("{}.ikfkReverseNode".format(attrHolder)):
+        if not cmds.objExists("{}.ikVisNode".format(attrHolder)):
             rev = node.reverse("{}.{}".format(attrHolder, attr), name="{}_{}".format(attrHolder, attr))
             meta.addMessageConnection(attrHolder, rev, 'ikfkReverseNode')
         else:
-            rev = meta.getMessageConnection('{}.ikfkReverseNode'.format(attrHolder))
+            rev = meta.getMessageConnection('{}.ikVisNode'.format(attrHolder))
 
         for ikNode in ikList:
             shapes = cmds.listRelatives(ikNode, s=True)
@@ -324,7 +324,7 @@ class IkFkLimb(IkFkBase):
             cmds.addAttr(grp, ln='pvPin', at='double', dv=0, min=0, max=1, k=True)
             pvPinAttr = '{}.pvPin'.format(grp)
 
-            # get the distance from the wrist and shoulder to pole vector
+            # get the distance from the joint3_fk and joint1_fk to pole vector
             pvdcmp = node.decomposeMatrix("{}.{}".format(pvNode, 'worldMatrix'), name=pvNode)
             jnt1PvDist = node.distance(startTgt, "{}.{}".format(pvdcmp, 'outputTranslate'), name=grp + '_upperPvPin')
             jnt2PvDist = node.distance(endTgt, "{}.{}".format(pvdcmp, 'outputTranslate'), name=grp + '_lowerPvPin')

@@ -296,8 +296,45 @@ def addColorAttr(node, longName, value=False, niceName=None, shortName=None,
 def moveAttribute(attr, source, target):
     """
     Move an attribute keeping the connections intact
+    :param attr: attribute to move
+    :type attr: str
+    :param source: source node of the attribute
+    :type source: str
+    :param target: node to move the attribute to
+    :type target: str
     """
-    pass
+    if not cmds.objExists("{}.{}".format(source, attr)):
+        raise RuntimeError("Source attribute does not exist")
+
+    if not cmds.objExists("{}.{}".format(target, attr)):
+        kwargs = dict()
+        kwargs['niceName'] = cmds.attributeQuery(attr, n=source, nn=True)
+        kwargs['keyable'] = cmds.getAttr("{}.{}".format(source, attr), k=True)
+        kwargs['channelBox'] = cmds.getAttr("{}.{}".format(source, attr), cb=True)
+        value = cmds.getAttr("{}.{}".format(source, attr))
+
+        # add Enum
+        if cmds.attributeQuery(attr, n=source, le=True):
+            kwargs['enum'] = cmds.attributeQuery(attr, n=source, le=True)
+            addEnum(target, longName=attr, **kwargs)
+
+        # add attr
+        else:
+            kwargs['attributeType'] = cmds.attributeQuery(attr, n=source, at=True)
+            if cmds.attributeQuery(attr, n=source, mne=True):       # check if the attribute has a minimum
+                kwargs['minValue'] = cmds.attributeQuery(attr, n=source, min=True)[0]
+            if cmds.attributeQuery(attr, n=source, mxe=True):       # check if the attribute has a maximum
+                kwargs['maxValue'] = cmds.attributeQuery(attr, n=source, max=True)[0]
+            addAttr(target, longName=attr, **kwargs)
+
+        cmds.setAttr("{}.{}".format(target, attr), value)           # set the value of the attribtue
+
+    source_connections = cmds.listConnections("{}.{}".format(source, attr), s=True, d=False, plugs=True) or []
+    destination_connections = cmds.listConnections("{}.{}".format(source, attr), d=True, s=False, plugs=True) or []
+
+    # connect source and  destination attributes
+    for plug in source_connections: cmds.connectAttr(plug, "{}.{}".format(target, attr), f=True)
+    for plug in destination_connections: cmds.connectAttr("{}.{}".format(target, attr), plug, f=True)
 
 
 def unlock(nodes, attrs):

@@ -195,7 +195,6 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     def setAttrs(self):
         """ Set some attributes to values that make more sense for the inital setup."""
         cmds.setAttr("{}.{}".format(self.limb_ik[-1], 'softStretch'), 0.2)
-        cmds.setAttr("{}.{}".format(self.ikfk.getGroup(), 'softStretchCompensate'), -0.003)
 
     # --------------------------------------------------------------------------------
     # helper functions to shorten functions.

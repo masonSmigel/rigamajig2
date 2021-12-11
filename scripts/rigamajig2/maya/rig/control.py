@@ -21,7 +21,8 @@ CONTROLSHAPES = rigamajig2.shared.path.clean_path(os.path.join(os.path.dirname(_
 CONTROLTAG = 'control'
 
 
-def create(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None, position=[0, 0, 0], rotation=[0, 0, 0],
+def create(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None, position=[0, 0, 0],
+           rotation=[0, 0, 0],
            size=1, hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz', trasformType='transform', shapeAim='y'):
     """
     Create a control. It will also create a hierarchy above the control based on the hierarchy list.
@@ -76,15 +77,7 @@ def create(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None
     control = cmds.createNode(trasformType, name=name)
     topNode = control
 
-    controlData = rigamajig2.maya.data.curve_data.CurveData()
-    controlData.read(CONTROLSHAPES)
-    control_data = controlData.getData()
-    if shape in control_data.keys():
-        source = controlData.applyData(shape, create=True)[0]
-        rigamajig2.maya.curve.copyShape(source, control)
-        cmds.delete(source)
-    else:
-        cmds.setAttr("{}.displayHandle".format(control), 1)
+    setControlShape(control, shape)
 
     hierarchyList = list()
     if hierarchy:
@@ -196,7 +189,7 @@ def createAtObject(name, side=None, shape='circle', hierarchy=['trsBuffer'], par
     return controlHierarchy
 
 
-def getControlShapes():
+def getAvailableControlShapes():
     """
     Get a list of available control shapes
     """
@@ -276,6 +269,28 @@ def createDisplayLine(point1, point2, name=None, parent=None, displayType='ref')
     displayLineShape = cmds.listRelatives(displayLine, s=True) or []
     cmds.connectAttr(dcmp1 + '.outputTranslate', displayLineShape[0] + '.controlPoints[0]', f=True)
     cmds.connectAttr(dcmp2 + '.outputTranslate', displayLineShape[0] + '.controlPoints[1]', f=True)
+
+
+def setControlShape(control, shape, clearExisting=True):
+    """
+    Set the control shape
+    :param control:
+    :param shape:
+    :param clearExisting:
+    :return:
+    """
+    if clearExisting:
+        rigamajig2.maya.curve.wipeCurveShape(control)
+
+    controlData = rigamajig2.maya.data.curve_data.CurveData()
+    controlData.read(CONTROLSHAPES)
+    control_data = controlData.getData()
+    if shape in control_data.keys():
+        source = controlData.applyData(shape, create=True)[0]
+        rigamajig2.maya.curve.copyShape(source, control)
+        cmds.delete(source)
+    else:
+        cmds.setAttr("{}.displayHandle".format(control), 1)
 
 
 def translateShapes(shape, translation=(0, 0, 0), world=False):

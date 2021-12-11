@@ -83,7 +83,7 @@ class CollapsibleWidget(QtWidgets.QWidget):
         self.body_wdg = QtWidgets.QWidget()
         self.body_layout = QtWidgets.QVBoxLayout(self.body_wdg)
         self.body_layout.setContentsMargins(4, 2, 4, 2)
-        self.body_layout.setSpacing(3)
+        self.body_layout.setSpacing(5)
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.main_layout.setContentsMargins(0, 0, 0, 0)

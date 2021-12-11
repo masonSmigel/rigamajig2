@@ -1,8 +1,12 @@
+import maya.cmds as cmds
 import rigamajig2.maya.meta as meta
+import maya.api.OpenMaya as om2
 import rigamajig2.shared.common as common
 import logging
 
 logger = logging.getLogger(__name__)
+
+IDENTITY_MATRIX = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 
 
 class IkFkSwitch(object):
@@ -33,7 +37,7 @@ class IkFkSwitch(object):
             cmds.setAttr('{}.stretchTop'.format(self.node), 1)
             cmds.setAttr('{}.stretchBot'.format(self.node), 1)
 
-            self.ikMatchFk(self.fkMatchList, self.ikControls[0], self.ikControls[1])
+            self.ikMatchFk(self.fkMatchList, self.ikControls[0], self.ikControls[1], self.ikControls[2])
         else:
             cmds.setAttr('{}.ikfk'.format(self.node), value)
             self.fkMatchIk(self.fkControls, self.ikMatchList)
@@ -48,24 +52,30 @@ class IkFkSwitch(object):
         """
         if not isinstance(fkControls, (list, tuple)):
             raise RuntimeError("{} must be a list of 3 fkControls controls".format(fkControls))
-        if len(fkControls) != 3:
-            raise RuntimeError("{} must be a length of 3".format(fkControls))
-        for fk, ikJnt in zip(fkControls, ikJoints):
+        if len(fkControls) < 3:
+            raise RuntimeError("{} must be a length of 3 or more".format(fkControls))
+
+        for fk, ikJnt in zip(fkControls[:-1], ikJoints):
             mat = cmds.xform(ikJnt, q=True, ws=True, matrix=True)
             cmds.xform(fk, ws=True, matrix=mat)
 
+        # reset the gimble fk control
+        cmds.xform(fkControls[-1], matrix=IDENTITY_MATRIX)
+
     @staticmethod
-    def ikMatchFk(fkMatchList, ik, pv):
+    def ikMatchFk(fkMatchList, ik, ikGimble, pv):
         """
         Match Ik controls to Fk
         :param fkMatchList: list of FK joints
         :param ik: Ik Driver. This can be the IK controler or ikHandle.
+        :param ikGimble: Ik Gimble control
         :param pv: Pole Vector Driver.
         """
-        newPvPos = IkFkLimb.getPoleVectorPos(fkMatchList)
+        newPvPos = IkFkSwitch.getPoleVectorPos(fkMatchList)
         endJntMatrix = cmds.xform(fkMatchList[2], q=True, ws=True, matrix=True)
 
         cmds.xform(ik, ws=True, matrix=endJntMatrix)
+        cmds.xform(ikGimble, matrix=IDENTITY_MATRIX)
         cmds.xform(pv, ws=True, t=newPvPos)
 
     @staticmethod
@@ -100,7 +110,5 @@ class IkFkSwitch(object):
 
 if __name__ == '__main__':
     switcher = IkFkSwitch('arm_l_ikfk')
-    if cmds.getAttr('{}.ikfk'.format('arm_l_ikfk')):
-        switcher.switch(0)
-    else:
-        switcher.switch(1)
+    switcher.switch(not cmds.getAttr('{}.ikfk'.format('arm_l_ikfk')))
+

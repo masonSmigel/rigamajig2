@@ -211,7 +211,7 @@ class IkFkBase(object):
                 cmds.connectAttr("{}.{}".format(rev, 'outputX'), "{}.{}".format(shape, 'v'))
 
         for fkNode in fkList:
-            shapes = cmds.listRelatives(fkNode, s=True)
+            shapes = cmds.listRelatives(fkNode, s=True) or []
             for shape in shapes:
                 cmds.connectAttr("{}.{}".format(attrHolder, attr), "{}.{}".format(shape, 'v'))
 

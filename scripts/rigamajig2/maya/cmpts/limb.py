@@ -44,7 +44,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['joint1_fkName'] = inputBaseNames[1] + "_fk"
         self.cmptSettings['joint2_fkName'] = inputBaseNames[2] + "_fk"
         self.cmptSettings['joint3_fkName'] = inputBaseNames[3] + "_fk"
+        self.cmptSettings['joint3Gimble_fkName'] = inputBaseNames[3] + "Gimble_fk"
         self.cmptSettings['limb_ikName'] = self.name.split("_")[0] + "_ik"
+        self.cmptSettings['limbGimble_ikName'] = self.name.split("_")[0] + "Gimble_ik"
         self.cmptSettings['limb_pvName'] = self.name.split("_")[0] + "_pv"
         self.cmptSettings['ikSpaces'] = ikSpaces
         self.cmptSettings['pvSpaces'] = pvSpaces
@@ -80,13 +82,22 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                                                     hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
                                                     size=self.size, color='blue', parent=self.joint2_fk[-1],
                                                     shape='circle', shapeAim='x', xformObj=self.input[3])
+        self.joint3Gimble_fk = rig_control.createAtObject(self._userSettings['joint3Gimble_fkName'], self.side,
+                                                          hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
+                                                          size=self.size, color='blue', parent=self.joint3_fk[-1],
+                                                          shape='circle', shapeAim='x', xformObj=self.input[3])
 
         # Ik controls
         self.limb_ik = rig_control.create(self._userSettings['limb_ikName'], self.side,
                                           hierarchy=['trsBuffer', 'spaces_trs'],
                                           hideAttrs=['s', 'v'], size=self.size, color='blue', parent=self.control,
                                           shape='cube', position=cmds.xform(self.input[3], q=True, ws=True, t=True))
-        print self.input[1:4]
+
+        self.limbGimble_ik = rig_control.create(self._userSettings['limbGimble_ikName'], self.side,
+                                                hierarchy=['trsBuffer'], hideAttrs=['s', 'v'], size=self.size,
+                                                color='blue', parent=self.limb_ik[-1], shape='sphere',
+                                                position=cmds.xform(self.input[3], q=True, ws=True, t=True))
+
         pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:4], magnitude=0)
         self.limb_pv = rig_control.create(self._userSettings['limb_pvName'], self.side,
                                           hierarchy=['trsBuffer', 'spaces_trs'],
@@ -94,8 +105,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                                           position=pv_pos, parent=self.control, shapeAim='z')
 
         # add the controls to our controller list
-        self.fkControls = [self.joint1_fk[-1], self.joint2_fk[-1], self.joint3_fk[-1]]
-        self.ikControls = [self.limb_ik[-1], self.limb_pv[-1]]
+        self.fkControls = [self.joint1_fk[-1], self.joint2_fk[-1], self.joint3_fk[-1], self.joint3Gimble_fk[-1]]
+        self.ikControls = [self.limb_ik[-1], self.limbGimble_ik[-1],self.limb_pv[-1]]
         self.controlers += [self.limbBase[-1], self.limbSwing[-1]] + self.fkControls + self.ikControls
 
     def rigSetup(self):
@@ -119,11 +130,12 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         cmds.parentConstraint(self.limbSwing[-1], self._ikStartTgt, mo=True)
 
         # connect fk controls to fk joints
-        rigamajig2.maya.skeleton.connectChains([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3_fk[-1]], self.fkJnts)
+        rigamajig2.maya.skeleton.connectChains([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3Gimble_fk[-1]],
+                                               self.fkJnts)
 
         # connect the IkHandle to the end Target
-        cmds.pointConstraint(self.limb_ik[-1], self._ikEndTgt, mo=True)
-        cmds.orientConstraint(self.limb_ik[-1], self.ikfk.getIkJointList()[-1], mo=True)
+        cmds.pointConstraint(self.limbGimble_ik[-1], self._ikEndTgt, mo=True)
+        cmds.orientConstraint(self.limbGimble_ik[-1], self.ikfk.getIkJointList()[-1], mo=True)
 
         # connect twist of ikHandle to ik arm
         cmds.addAttr(self.ikfk.getGroup(), ln='twist', at='float', k=True)
@@ -135,7 +147,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
         rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
-        ikfk.IkFkBase.connnectIkFkVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
+        ikfk.IkFkBase.connnectIkFkVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls,
+                                             fkList=self.fkControls)
 
         # connect the base to the main bind chain
         cmds.parentConstraint(self.limbBase[-1], self.input[0])
@@ -152,11 +165,13 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             spaces.addSpace(self.limbSwing[1], ['trs_motion'], nameList=['world'], constraintType='orient')
 
         if self._userSettings['ikSpaces']:
-            spaces.addSpace(self.limb_ik[1], [self._userSettings['ikSpaces'][k] for k in self._userSettings['ikSpaces'].keys()],
+            spaces.addSpace(self.limb_ik[1],
+                            [self._userSettings['ikSpaces'][k] for k in self._userSettings['ikSpaces'].keys()],
                             self._userSettings['ikSpaces'].keys(), 'parent')
 
         if self._userSettings['pvSpaces']:
-            spaces.addSpace(self.limb_pv[1], [self._userSettings['pvSpaces'][k] for k in self._userSettings['pvSpaces'].keys()],
+            spaces.addSpace(self.limb_pv[1],
+                            [self._userSettings['pvSpaces'][k] for k in self._userSettings['pvSpaces'].keys()],
                             self._userSettings['pvSpaces'].keys(), 'parent')
 
     def finalize(self):
@@ -173,8 +188,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.proxySetupGrp = cmds.createNode("transform", n=self.proxySetupGrp)
         tmpPv = live.createlivePoleVector(self.input[1:4])
         cmds.parent(tmpPv, self.proxySetupGrp)
-        rig_control.createDisplayLine(self.input[2], tmpPv, "{}_pvLine".format(self.name), self.proxySetupGrp,'temp')
-        rig_control.createDisplayLine(self.input[1], self.input[3], "{}_ikLine".format(self.name), self.proxySetupGrp, "temp")
+        rig_control.createDisplayLine(self.input[2], tmpPv, "{}_pvLine".format(self.name), self.proxySetupGrp, 'temp')
+        rig_control.createDisplayLine(self.input[1], self.input[3], "{}_ikLine".format(self.name), self.proxySetupGrp,
+                                      "temp")
 
     # --------------------------------------------------------------------------------
     # helper functions to shorten functions.
@@ -186,10 +202,11 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.lock(wristIkOffset, ['t', 'r', 's', 'v'])
 
         # add required data to the ikFkSwitchGroup
-        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkJnts[:-1] + [wristIkOffset], 'fkMatchList', 'matchNode')
+        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkJnts[:-1] + [wristIkOffset], 'fkMatchList',
+                                      'matchNode')
         meta.addMessageListConnection(self.ikfk.getGroup(), self.ikJnts, 'ikMatchList', 'matchNode')
         meta.addMessageListConnection(self.ikfk.getGroup(), self.fkControls, 'fkControls', 'matchNode')
-        meta.addMessageListConnection(self.ikfk.getGroup(), [self.limb_ik[-1], self.limb_pv[-1]], 'ikControls', 'matchNode')
+        meta.addMessageListConnection(self.ikfk.getGroup(), self.ikControls, 'ikControls', 'matchNode')
 
     def setupProxyAttributes(self):
         for control in self.controlers:
@@ -199,5 +216,6 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchTop'), self.limb_ik[-1])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchBot'), self.limb_ik[-1])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'softStretch'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'), [self.limb_ik[-1], self.limb_pv[-1]])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'),
+                                      [self.limb_ik[-1], self.limb_pv[-1]])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'twist'), self.limb_ik[-1])

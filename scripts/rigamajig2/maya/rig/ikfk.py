@@ -293,10 +293,12 @@ class IkFkLimb(IkFkBase):
         cmds.addAttr(grp, ln='stretchTop', at='double', dv=1, k=True)
         cmds.addAttr(grp, ln='stretchBot', at='double', dv=1, k=True)
         cmds.addAttr(grp, ln='softStretch', at='double', dv=.001, min=.001, max=1, k=True)
+        cmds.addAttr(grp, ln='softStretchCompensate', at='double', dv=0, min=-1, max=0, k=False)
         stretchAttr = '{}.stretch'.format(grp)
         stretchTopAttr = '{}.stretchTop'.format(grp)
         stretchBotAttr = '{}.stretchBot'.format(grp)
         softStretchAttr = '{}.softStretch'.format(grp)
+        softStretchCompensateAttr = '{}.softStretchCompensate'.format(grp)
 
         # create target joints for the distance calulation
         startTgt = cmds.createNode('joint', n="{}_{}".format(jnts[0], common.TARGET))
@@ -344,9 +346,9 @@ class IkFkLimb(IkFkBase):
                                            weight=pvPinAttr, name=grp + '_pvBlend')
 
             # get the proper multipler. normalized with the TopStretch and BotStretch
-            jnt1multiplier = node.plusMinusAverage1D([-1, stretchTopAttr, str("{}.{}".format(pvDistBlend, 'outputR'))],
+            jnt1multiplier = node.plusMinusAverage1D([-1, stretchTopAttr, str("{}.{}".format(pvDistBlend, 'outputR')), softStretchCompensateAttr],
                                                      operation='sum', name=jnts[1] + '_lenMult')
-            jnt2multiplier = node.plusMinusAverage1D([-1, stretchBotAttr, str("{}.{}".format(pvDistBlend, 'outputG'))],
+            jnt2multiplier = node.plusMinusAverage1D([-1, stretchBotAttr, str("{}.{}".format(pvDistBlend, 'outputG')), softStretchCompensateAttr],
                                                      operation='sum', name=jnts[2] + '_lenMult')
 
             # connect the final multipler to the base length of the joint.
@@ -361,7 +363,7 @@ class IkFkLimb(IkFkBase):
         actualDist = node.addDoubleLinear('{}.output'.format(jnt1baseLen), '{}.output'.format(jnt2baseLen),
                                           name=ikHandle + '_actualDist')
         # get the soft distance (full distance - the actual distance - )
-        softDist = node.plusMinusAverage1D(['{}.output'.format(actualDist), softStretchAttr], operation='sum',
+        softDist = node.plusMinusAverage1D(['{}.output'.format(actualDist), softStretchAttr], operation='sub',
                                            name=ikHandle + '_softDist')
 
         # Get the soft distance
@@ -400,7 +402,7 @@ class IkFkLimb(IkFkBase):
             # If the joints are negative then adjust the opperation to less than and sum.
             cmds.setAttr("{}.operation".format(cond), 4)
             cmds.setAttr("{}.operation".format(softDistSoftP), 1)
-            cmds.setAttr("{}.operation".format(softDist), 2)
+            cmds.setAttr("{}.operation".format(softDist), 1)
             cmds.setAttr("{}.operation".format(addStretch), 1)
 
         # Connect the output to the translate of the joint.

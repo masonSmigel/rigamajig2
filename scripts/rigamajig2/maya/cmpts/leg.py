@@ -69,10 +69,6 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         """Create the connection"""
         super(Leg, self).connect()
 
-    def setAttrs(self):
-        """ Set some attributes to values that make more sense for the inital setup."""
-        cmds.setAttr("{}.{}".format(self.limb_ik[-1], 'softStretch'), 0.2)
-
     def finalize(self):
         """ Lock some attributes we dont want to see"""
         super(Leg, self).finalize()

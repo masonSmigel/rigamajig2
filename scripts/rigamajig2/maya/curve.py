@@ -198,6 +198,8 @@ def copyShape(source, destinations):
             cmds.delete(curveTrs)
 
 
+@utils.oneUndo
+@utils.preserveSelection
 def mirror(curves, axis='x', mode='replace'):
     """
     :param curves: curve to mirror

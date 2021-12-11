@@ -149,6 +149,16 @@ def setCvPositions(curve, cvList, world=True):
             cmds.xform(cv, ws=False, t=cvList[i])
 
 
+def wipeCurveShape(curve):
+    """
+    Wipe control curves
+    :param curve: wipe all control curves
+    """
+    if cmds.listRelatives(curve, shapes=True, pa=True):
+        for shape in cmds.listRelatives(curve, shapes=True, pa=True):
+            cmds.delete(shape)
+
+
 @utils.oneUndo
 @utils.preserveSelection
 def copyShape(source, destinations):
@@ -197,16 +207,6 @@ def copyShape(source, destinations):
             newShape = cmds.rename(shapeNode, "{}Shape".format(destination))
             cmds.parent(newShape, destination, r=True, s=True)
             cmds.delete(curveTrs)
-
-
-def wipeCurveShape(curve):
-    """
-    Wipe control curves
-    :param curve: wipe all control curves
-    """
-    if cmds.listRelatives(curve, shapes=True, pa=True):
-        for shape in cmds.listRelatives(curve, shapes=True, pa=True):
-            cmds.delete(shape)
 
 
 @utils.oneUndo

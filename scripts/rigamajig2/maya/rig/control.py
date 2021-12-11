@@ -15,6 +15,7 @@ import rigamajig2.maya.transform
 import rigamajig2.maya.meta
 import rigamajig2.maya.shape
 import rigamajig2.maya.attr
+import rigamajig2.maya.utils
 
 CONTROLSHAPES = rigamajig2.shared.path.clean_path(os.path.join(os.path.dirname(__file__), "controlShapes.data"))
 
@@ -271,6 +272,7 @@ def createDisplayLine(point1, point2, name=None, parent=None, displayType='ref')
     cmds.connectAttr(dcmp2 + '.outputTranslate', displayLineShape[0] + '.controlPoints[1]', f=True)
 
 
+@rigamajig2.maya.utils.oneUndo
 def setControlShape(control, shape, clearExisting=True):
     """
     Set the control shape

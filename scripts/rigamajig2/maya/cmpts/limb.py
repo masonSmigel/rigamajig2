@@ -171,7 +171,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         import rigamajig2.maya.rig.live as live
 
         self.proxySetupGrp = cmds.createNode("transform", n=self.proxySetupGrp)
-        tmpPv = live.createlivePoleVector(self.input[1:])
+        tmpPv = live.createlivePoleVector(self.input[1:4])
         cmds.parent(tmpPv, self.proxySetupGrp)
         rig_control.createDisplayLine(self.input[2], tmpPv, "{}_pvLine".format(self.name), self.proxySetupGrp,'temp')
         rig_control.createDisplayLine(self.input[1], self.input[3], "{}_ikLine".format(self.name), self.proxySetupGrp, "temp")

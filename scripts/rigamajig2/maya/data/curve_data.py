@@ -57,10 +57,10 @@ class CurveData(node_data.NodeData):
 
         :param create: Create curves for curves without nodes in the scene
         :type create: bool
+
+        :param applyColor: apply color to created curves
+        :type applyColor: bool
         """
-        if applyColor:
-            super(CurveData, self).applyData(nodes, attributes=["overrideEnabled", "overrideRGBColors",
-                                                                "overrideColorRGB", "overrideColor"])
         nodes = common.toList(nodes)
         result = list()
         for node in nodes:
@@ -99,6 +99,10 @@ class CurveData(node_data.NodeData):
                             for i, position in enumerate(self._data[node]['shapes'][shape][attribute]):
                                 cmds.setAttr('{}.controlPoints[{}]'.format(shape, i), *position)
                 result.append(node)
+
+        if applyColor:
+            super(CurveData, self).applyData(nodes, attributes=["overrideEnabled", "overrideRGBColors",
+                                                                "overrideColorRGB", "overrideColor"])
         return result
 
 

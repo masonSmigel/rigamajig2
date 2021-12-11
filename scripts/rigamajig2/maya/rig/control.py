@@ -276,10 +276,9 @@ def createDisplayLine(point1, point2, name=None, parent=None, displayType='ref')
 def setControlShape(control, shape, clearExisting=True):
     """
     Set the control shape
-    :param control:
-    :param shape:
-    :param clearExisting:
-    :return:
+    :param control: control to change the shape of
+    :param shape: name of the shape to set
+    :param clearExisting: clear any existing shapes
     """
     if clearExisting:
         rigamajig2.maya.curve.wipeCurveShape(control)

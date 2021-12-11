@@ -1,9 +1,9 @@
 """ Naming Functions """
 
 import re
+import maya.cmds as cmds
 from collections import OrderedDict
 import rigamajig2.shared.common as common
-import maya.cmds as cmds
 
 DELIMINATOR = '_'
 

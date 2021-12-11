@@ -1,7 +1,6 @@
 """ Curve functions """
 from collections import OrderedDict
 
-import maya.OpenMaya as OpenMaya
 import maya.cmds as cmds
 
 import rigamajig2.shared.common as common

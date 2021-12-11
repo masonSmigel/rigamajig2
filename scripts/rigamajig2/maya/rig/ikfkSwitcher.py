@@ -71,7 +71,7 @@ class IkFkSwitch(object):
         :param ikGimble: Ik Gimble control
         :param pv: Pole Vector Driver.
         """
-        newPvPos = IkFkSwitch.getPoleVectorPos(fkMatchList)
+        newPvPos = IkFkSwitch.getPoleVectorPos(fkMatchList, magnitude=0)
         endJntMatrix = cmds.xform(fkMatchList[2], q=True, ws=True, matrix=True)
 
         cmds.xform(ik, ws=True, matrix=endJntMatrix)

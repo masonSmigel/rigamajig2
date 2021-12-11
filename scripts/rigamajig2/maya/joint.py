@@ -224,6 +224,7 @@ def toRotation(joints):
         cmds.xform(jnt, ws=True, rotation=orientation)
 
 
+@utils.oneUndo
 @utils.preserveSelection
 def mirror(joints, axis='x', mode='rotate', zeroRotation=True):
     """

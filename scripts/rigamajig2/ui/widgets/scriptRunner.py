@@ -97,9 +97,9 @@ class ScriptRunner(QtWidgets.QWidget):
     def add_script(self, script):
         file_info = QtCore.QFileInfo(script)
         if file_info.exists():
-            iconProvider = QtWidgets.QFileIconProvider()
-            icon = iconProvider.icon(file_info)
-            self.add_item(file_info.fileName(), data=file_info.filePath(), icon=icon)
+            # iconProvider = QtWidgets.QFileIconProvider()
+            # icon = iconProvider.icon(file_info)
+            self.add_item(file_info.fileName(), data=file_info.filePath(), icon=QtGui.QIcon(":fileNew.png"))
 
     def add_script_browser(self):
         file_path, selected_filter = QtWidgets.QFileDialog.getOpenFileName(self, "Select File", "",

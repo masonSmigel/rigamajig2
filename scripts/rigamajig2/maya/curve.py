@@ -198,6 +198,16 @@ def copyShape(source, destinations):
             cmds.delete(curveTrs)
 
 
+def wipeCurveShape(curve):
+    """
+    Wipe control curves
+    :param curve: wipe all control curves
+    """
+    if cmds.listRelatives(curve, shapes=True, pa=True):
+        for shape in cmds.listRelatives(curve, shapes=True, pa=True):
+            cmds.delete(shape)
+
+
 @utils.oneUndo
 @utils.preserveSelection
 def mirror(curves, axis='x', mode='replace'):
@@ -233,9 +243,7 @@ def mirror(curves, axis='x', mode='replace'):
             shapeList = [curveNode]
         destinationCurve = common.getMirrorName(curve)
         if mode == 'replace':
-            if cmds.listRelatives(destinationCurve, shapes=True, pa=True):
-                for shape in cmds.listRelatives(destinationCurve, shapes=True, pa=True):
-                    cmds.delete(shape)
+            wipeCurveShape(destinationCurve)
             copyShape(curve, destinationCurve)
 
         for shape in shapeList:

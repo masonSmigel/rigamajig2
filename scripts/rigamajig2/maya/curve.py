@@ -149,6 +149,7 @@ def setCvPositions(curve, cvList, world=True):
             cmds.xform(cv, ws=False, t=cvList[i])
 
 
+@utils.oneUndo
 @utils.preserveSelection
 def copyShape(source, destinations):
     """

@@ -14,11 +14,14 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
 import rigamajig2.shared.common as common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager, overrideColorer
 import rigamajig2.maya.rig.builder as builder
 
 logger = logging.getLogger(__name__)
 logger.setLevel(5)
+
+MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
+JSON_FILTER = "Json Files (*.json)"
 
 
 class RigamajigBuilderUi(QtWidgets.QDialog):
@@ -108,22 +111,34 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Model Section
         self.model_wdgt = collapseableWidget.CollapsibleWidget('Model')
-        self.model_path_selector = pathSelector.PathSelector("model:", cap="Select a Model file",
-                                                             ff="Maya Files (*.ma;; *.mb)", fm=1)
+        self.model_path_selector = pathSelector.PathSelector("model:", cap="Select a Model file", ff=MAYA_FILTER, fm=1)
         self.import_model_btn = QtWidgets.QPushButton('Import Model')
-        self.check_model_btn = QtWidgets.QPushButton('Check Model')
-        self.check_model_btn.setFixedWidth(100)
+        self.open_model_btn = QtWidgets.QPushButton('Open Model')
+        self.open_model_btn.setFixedWidth(100)
 
         # Skeleton Section
         self.skeleton_wdgt = collapseableWidget.CollapsibleWidget('Skeleton')
-        self.skel_path_selector = pathSelector.PathSelector("skeleton:", cap="Select a Skeleton file",
-                                                            ff="Maya Files (*.ma;; *.mb)", fm=1)
-        self.joint_pos_path_selector = pathSelector.PathSelector("joint pos: ", cap="Select a Skeleton position file",
-                                                                 ff="Json Files (*.json)", fm=1)
+        self.skel_path_selector = pathSelector.PathSelector("skeleton:", cap="Select a Skeleton file", ff=MAYA_FILTER, fm=1)
+        self.joint_pos_path_selector = pathSelector.PathSelector("joint pos: ", cap="Select a Skeleton position file", ff=JSON_FILTER, fm=1)
         self.import_skeleton_btn = QtWidgets.QPushButton("Import skeleton")
         self.save_skeleton_btn = QtWidgets.QPushButton("Save skeleton")
         self.load_jnt_pos_btn = QtWidgets.QPushButton("Load joint pos")
         self.save_jnt_pos_btn = QtWidgets.QPushButton("Save joint pos")
+
+        self.skeletonEdit_wdgt = collapseableWidget.CollapsibleWidget('Edit Skeleton')
+        self.jnt_to_rot_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Rotation")
+        self.jnt_to_ori_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Orientation")
+        self.jntAxisX_rb = QtWidgets.QRadioButton('x')
+        self.jntAxisX_rb.setChecked(True)
+        self.jntAxisY_rb = QtWidgets.QRadioButton('y')
+        self.jntAxisZ_rb = QtWidgets.QRadioButton('z')
+
+        self.mirrorJntMode_cbox = QtWidgets.QComboBox()
+        self.mirrorJntMode_cbox.setFixedHeight(24)
+        self.mirrorJntMode_cbox.addItem("rotate")
+        self.mirrorJntMode_cbox.addItem("translate")
+        self.mirrorJnt_btn = QtWidgets.QPushButton(QtGui.QIcon(":kinMirrorJoint_S"), "Mirror")
+        self.mirrorJnt_btn.setFixedHeight(24)
 
         # Component Section
         self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Component')
@@ -143,13 +158,26 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Control Shape Section
         self.ctlShape_wdgt = collapseableWidget.CollapsibleWidget('Controls')
-        self.ctl_selector = pathSelector.PathSelector("Controls:", cap="Select a Control Shape file",
-                                                      ff="Json Files (*.json)", fm=1)
+        self.ctl_selector = pathSelector.PathSelector("Controls:", cap="Select a Control Shape file", ff=JSON_FILTER, fm=1)
         self.load_color_cb = QtWidgets.QCheckBox()
         self.load_color_cb.setChecked(True)
         self.load_color_cb.setFixedWidth(25)
         self.load_ctl_btn = QtWidgets.QPushButton("Load Controls")
         self.save_ctl_btn = QtWidgets.QPushButton("Save Controls")
+
+        self.controlEdit_wgt = collapseableWidget.CollapsibleWidget('Edit Controls')
+
+        self.ctlAxisX_rb = QtWidgets.QRadioButton('x')
+        self.ctlAxisX_rb.setChecked(True)
+        self.ctlAxisY_rb = QtWidgets.QRadioButton('y')
+        self.ctlAxisZ_rb = QtWidgets.QRadioButton('z')
+        self.mirrorCtlMode_cbox = QtWidgets.QComboBox()
+        self.mirrorCtlMode_cbox.setFixedHeight(24)
+        self.mirrorCtlMode_cbox.addItem("match")
+        self.mirrorCtlMode_cbox.addItem("replace")
+        self.mirror_control_btn = QtWidgets.QPushButton("Mirror")
+
+        self.ctlColor_ovrcol = overrideColorer.OverrideColorer()
 
         # Deformation Section
         self.deformations_wdgt = collapseableWidget.CollapsibleWidget('Deformations')
@@ -175,11 +203,12 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Model
         build_layout.addWidget(self.model_wdgt)
+
         model_btn_layout = QtWidgets.QHBoxLayout()
         model_btn_layout.setContentsMargins(0, 0, 0, 0)
         model_btn_layout.setSpacing(4)
         model_btn_layout.addWidget(self.import_model_btn)
-        model_btn_layout.addWidget(self.check_model_btn)
+        model_btn_layout.addWidget(self.open_model_btn)
 
         self.model_wdgt.addWidget(self.model_path_selector)
         self.model_wdgt.addLayout(model_btn_layout)
@@ -200,27 +229,49 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         skeleton_btn_layout.addLayout(save_load_skeleton_layout)
         skeleton_btn_layout.addLayout(save_load_jnt_layout)
 
+        jointOrientation_layout = QtWidgets.QHBoxLayout()
+        jointOrientation_layout.addWidget(self.jnt_to_rot_btn)
+        jointOrientation_layout.addWidget(self.jnt_to_ori_btn)
+
+        mirrorJoint_layout = QtWidgets.QHBoxLayout()
+        mirrorJoint_layout.setSpacing(4)
+        jointMirrorAxis_layout = QtWidgets.QHBoxLayout()
+        jointMirrorAxis_layout.addWidget(QtWidgets.QLabel("Axis: "))
+        jointMirrorAxis_layout.addWidget(self.jntAxisX_rb)
+        jointMirrorAxis_layout.addWidget(self.jntAxisY_rb)
+        jointMirrorAxis_layout.addWidget(self.jntAxisZ_rb)
+
+        mirrorJoint_layout.addLayout(jointMirrorAxis_layout)
+        mirrorJoint_layout.addWidget(self.mirrorJntMode_cbox)
+        mirrorJoint_layout.addWidget(self.mirrorJnt_btn)
+
         self.skeleton_wdgt.addWidget(self.skel_path_selector)
         self.skeleton_wdgt.addWidget(self.joint_pos_path_selector)
         self.skeleton_wdgt.addLayout(skeleton_btn_layout)
+        self.skeleton_wdgt.addWidget(self.skeletonEdit_wdgt)
+
+        self.skeletonEdit_wdgt.addLayout(jointOrientation_layout)
+        self.skeletonEdit_wdgt.addLayout(mirrorJoint_layout)
 
         # Components
         build_layout.addWidget(self.cmpt_wdgt)
 
         cmpt_btn_layout = QtWidgets.QHBoxLayout()
         cmpt_btn_layout.setSpacing(4)
-        show_proxy_label = QtWidgets.QLabel("show proxy:")
+        show_proxy_label = QtWidgets.QLabel("Show Proxy:")
         show_proxy_label.setFixedWidth(70)
 
         cmpt_btn_layout.addWidget(show_proxy_label)
         cmpt_btn_layout.addWidget(self.show_advanced_proxy_cb)
         cmpt_btn_layout.addWidget(self.initalize_sel_btn)
         cmpt_btn_layout.addWidget(self.initalize_all_btn)
+
         self.cmpt_wdgt.addWidget(self.cmpt_manager)
         self.cmpt_wdgt.addLayout(cmpt_btn_layout)
 
         # Build
         build_layout.addWidget(self.build_wdgt)
+
         self.build_wdgt.addWidget(self.build_rig_btn)
 
         # Post Script
@@ -232,15 +283,31 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         control_btn_layout = QtWidgets.QHBoxLayout()
         control_btn_layout.setSpacing(4)
-        load_color_label = QtWidgets.QLabel("load color:")
+        load_color_label = QtWidgets.QLabel("Load Color:")
         load_color_label.setFixedWidth(60)
 
         control_btn_layout.addWidget(load_color_label)
         control_btn_layout.addWidget(self.load_color_cb)
         control_btn_layout.addWidget(self.load_ctl_btn)
         control_btn_layout.addWidget(self.save_ctl_btn)
+
+        mirrorControl_layout = QtWidgets.QHBoxLayout()
+        mirrorControl_layout.setSpacing(4)
+        controlMirrorAxis_layout = QtWidgets.QHBoxLayout()
+        controlMirrorAxis_layout.addWidget(QtWidgets.QLabel("Axis: "))
+        controlMirrorAxis_layout.addWidget(self.ctlAxisX_rb)
+        controlMirrorAxis_layout.addWidget(self.ctlAxisY_rb)
+        controlMirrorAxis_layout.addWidget(self.ctlAxisZ_rb)
+
+        mirrorControl_layout.addLayout(controlMirrorAxis_layout)
+        mirrorControl_layout.addWidget(self.mirrorCtlMode_cbox)
+        mirrorControl_layout.addWidget(self.mirror_control_btn)
+
         self.ctlShape_wdgt.addWidget(self.ctl_selector)
         self.ctlShape_wdgt.addLayout(control_btn_layout)
+        self.ctlShape_wdgt.addWidget(self.controlEdit_wgt)
+        self.controlEdit_wgt.addLayout(mirrorControl_layout)
+        self.controlEdit_wgt.addWidget(self.ctlColor_ovrcol)
 
         # Deformations
         build_layout.addWidget(self.deformations_wdgt)
@@ -291,11 +358,16 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.import_skeleton_btn.clicked.connect(self.import_skeleton)
         self.load_jnt_pos_btn.clicked.connect(self.load_joint_positions)
         self.save_jnt_pos_btn.clicked.connect(self.save_joint_positions)
+        self.jnt_to_rot_btn.clicked.connect(self.jnt_to_rotation)
+        self.jnt_to_ori_btn.clicked.connect(self.jnt_to_orientation)
+        self.mirrorJnt_btn.clicked.connect(self.mirror_joint)
 
         self.show_advanced_proxy_cb.toggled.connect(self.toggle_advanced_proxy)
 
         self.load_ctl_btn.clicked.connect(self.load_controlShapes)
         self.save_ctl_btn.clicked.connect(self.save_controlShapes)
+        self.mirror_control_btn.clicked.connect(self.mirror_control)
+
         self.close_btn.clicked.connect(self.close)
 
     # Connections
@@ -361,6 +433,33 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def clone_rig_env(self):
         print "TODO : clone a rig environment"
+
+    def mirror_joint(self):
+        """ mirror joint"""
+        import rigamajig2.maya.joint
+        axis = 'x'
+        if self.jntAxisY_rb.isChecked(): axis = 'y'
+        if self.jntAxisZ_rb.isChecked(): axis = 'z'
+        mirrorMode = self.mirrorJntMode_cbox.currentText()
+        for joint in cmds.ls(sl=True):
+            joints = cmds.listRelatives(cmds.ls(sl=True, type='joint'), ad=True, type='joint') or []
+            rigamajig2.maya.joint.mirror(joints + [joint], axis=axis, mode=mirrorMode)
+
+    def jnt_to_rotation(self):
+        import rigamajig2.maya.joint
+        rigamajig2.maya.joint.toRotation(cmds.ls(sl=True, type='joint'))
+
+    def jnt_to_orientation(self):
+        import rigamajig2.maya.joint
+        rigamajig2.maya.joint.toOrientation(cmds.ls(sl=True, type='joint'))
+
+    def mirror_control(self):
+        import rigamajig2.maya.curve
+        axis = 'x'
+        if self.ctlAxisY_rb.isChecked(): axis = 'y'
+        if self.ctlAxisZ_rb.isChecked(): axis = 'z'
+        mirrorMode = self.mirrorCtlMode_cbox.currentText()
+        rigamajig2.maya.curve.mirror(cmds.ls(sl=True, type='transform'), axis=axis, mode=mirrorMode)
 
     # BULDER FUNCTIONS
     def import_model(self):

@@ -144,7 +144,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Component')
         self.cmpt_manager = componentManager.ComponentManager()
         self.initalize_sel_btn = QtWidgets.QPushButton("Initalize Selected")
-        self.initalize_all_btn = QtWidgets.QPushButton("Initalize All")
+        self.initalize_all_btn = QtWidgets.QPushButton("Init All Components ")
         self.show_advanced_proxy_cb = QtWidgets.QCheckBox()
         self.show_advanced_proxy_cb.setFixedWidth(25)
 
@@ -173,11 +173,18 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.ctlAxisZ_rb = QtWidgets.QRadioButton('z')
         self.mirrorCtlMode_cbox = QtWidgets.QComboBox()
         self.mirrorCtlMode_cbox.setFixedHeight(24)
-        self.mirrorCtlMode_cbox.addItem("match")
         self.mirrorCtlMode_cbox.addItem("replace")
+        self.mirrorCtlMode_cbox.addItem("match")
         self.mirror_control_btn = QtWidgets.QPushButton("Mirror")
 
         self.ctlColor_ovrcol = overrideColorer.OverrideColorer()
+
+        self.ctlShape_cbox = QtWidgets.QComboBox()
+        self.ctlShape_cbox.setFixedHeight(24)
+        self.set_ctlShape_items()
+        self.setCtlShape_btn = QtWidgets.QPushButton("Set Shape")
+
+        self.replace_ctl_btn = QtWidgets.QPushButton("Replace Control Shape ")
 
         # Deformation Section
         self.deformations_wdgt = collapseableWidget.CollapsibleWidget('Deformations')
@@ -303,11 +310,17 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         mirrorControl_layout.addWidget(self.mirrorCtlMode_cbox)
         mirrorControl_layout.addWidget(self.mirror_control_btn)
 
+        setControlShape_layout = QtWidgets.QHBoxLayout()
+        setControlShape_layout.addWidget(self.ctlShape_cbox)
+        setControlShape_layout.addWidget(self.setCtlShape_btn)
+
         self.ctlShape_wdgt.addWidget(self.ctl_selector)
         self.ctlShape_wdgt.addLayout(control_btn_layout)
         self.ctlShape_wdgt.addWidget(self.controlEdit_wgt)
         self.controlEdit_wgt.addLayout(mirrorControl_layout)
         self.controlEdit_wgt.addWidget(self.ctlColor_ovrcol)
+        self.controlEdit_wgt.addLayout(setControlShape_layout)
+        self.controlEdit_wgt.addWidget(self.replace_ctl_btn)
 
         # Deformations
         build_layout.addWidget(self.deformations_wdgt)
@@ -367,6 +380,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.load_ctl_btn.clicked.connect(self.load_controlShapes)
         self.save_ctl_btn.clicked.connect(self.save_controlShapes)
         self.mirror_control_btn.clicked.connect(self.mirror_control)
+        self.setCtlShape_btn.clicked.connect(self.set_controlShape)
+        self.replace_ctl_btn.clicked.connect(self.replace_controlShape)
 
         self.close_btn.clicked.connect(self.close)
 
@@ -427,6 +442,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         ctl_file = tmp_builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES)
         if ctl_file: self.ctl_selector.set_path(ctl_file)
 
+    # UI FUNCTIONS
+    def set_ctlShape_items(self):
+        import rigamajig2.maya.rig.control
+        control_shapes = rigamajig2.maya.rig.control.getAvailableControlShapes()
+        for control_shape in control_shapes:
+            self.ctlShape_cbox.addItem(control_shape)
+
     # UTILITIY FUNCTIONS
     def create_rig_env(self):
         print "TODO : create a rig environment"
@@ -479,6 +501,24 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def save_controlShapes(self):
         self.rig_builder.save_controlShapes(self.ctl_selector.get_abs_path())
+
+    def set_controlShape(self):
+        """Set the control shape of the selected node"""
+        import rigamajig2.maya.rig.control
+        shape = self.ctlShape_cbox.currentText()
+        for node in cmds.ls(sl=True, type='transform'):
+            rigamajig2.maya.rig.control.setControlShape(node, shape)
+
+    def replace_controlShape(self):
+        """Replace the control shape"""
+        import rigamajig2.maya.curve
+        selection = cmds.ls(sl=True, type='transform')
+        if len(selection) >= 2:
+            for dest in selection[1:]:
+                if cmds.listRelatives(dest, shapes=True, pa=True):
+                    for shape in cmds.listRelatives(dest, shapes=True, pa=True):
+                        cmds.delete(shape)
+                rigamajig2.maya.curve.copyShape(selection[0], dest)
 
     def toggle_advanced_proxy(self):
         """ Toggle the advanced proxy attributes """

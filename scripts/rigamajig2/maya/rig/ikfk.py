@@ -7,6 +7,7 @@ import maya.api.OpenMaya as om2
 from maya.api.OpenMaya import MVector
 
 import rigamajig2.shared.common as common
+import rigamajig2.maya.hierarchy as rig_hierarchy
 import rigamajig2.maya.transform as transform
 import rigamajig2.maya.node as node
 import rigamajig2.maya.joint as joint
@@ -346,10 +347,12 @@ class IkFkLimb(IkFkBase):
                                            weight=pvPinAttr, name=grp + '_pvBlend')
 
             # get the proper multipler. normalized with the TopStretch and BotStretch
-            jnt1multiplier = node.plusMinusAverage1D([-1, stretchTopAttr, str("{}.{}".format(pvDistBlend, 'outputR')), softStretchCompensateAttr],
-                                                     operation='sum', name=jnts[1] + '_lenMult')
-            jnt2multiplier = node.plusMinusAverage1D([-1, stretchBotAttr, str("{}.{}".format(pvDistBlend, 'outputG')), softStretchCompensateAttr],
-                                                     operation='sum', name=jnts[2] + '_lenMult')
+            jnt1multiplier = node.plusMinusAverage1D(
+                [-1, stretchTopAttr, str("{}.{}".format(pvDistBlend, 'outputR')), softStretchCompensateAttr],
+                operation='sum', name=jnts[1] + '_lenMult')
+            jnt2multiplier = node.plusMinusAverage1D(
+                [-1, stretchBotAttr, str("{}.{}".format(pvDistBlend, 'outputG')), softStretchCompensateAttr],
+                operation='sum', name=jnts[2] + '_lenMult')
 
             # connect the final multipler to the base length of the joint.
             jnt1baseLen = node.multDoubleLinear("{}.{}".format(jnt1multiplier, 'output1D'), jnt1Dist,
@@ -507,3 +510,170 @@ class IkFkLimb(IkFkBase):
         jointList = IkFkLimb.getJointsFromHandle(ikHandle)
         pv_pos = IkFkLimb.getPoleVectorPos(jointList, magnitude)
         return pv_pos
+
+
+class IkFkFoot(IkFkBase):
+    def __init__(self, jointList, heelPivot=None, innPivot=None, outPivot=None):
+        super(IkFkFoot, self).__init__(jointList)
+
+        self.setJointList(jointList)
+        self._handles = list()
+        self.ankleHandle = str()
+        self._pivotList = list()
+
+        # additional pivots
+        self._heel_piviot = heelPivot
+        self._inn_piviot = innPivot
+        self._out_piviot = outPivot
+
+    def getHandles(self):
+        return self._handles
+
+    def setPiviotList(self, value):
+        if len(value) != 8:
+            raise RuntimeError("Piviot list be have a length of 8")
+
+        self._pivotList = value
+
+    def getPivotList(self):
+        return self._pivotList
+
+    def setJointList(self, value):
+        """
+       Set the self._jointList attribute to a given list of joints.
+       Checks the length of the joint list to ensure only 3 joints are in the list
+       :param value: list of joints to create/use in this instance
+       :type value: list
+       """
+        if len(value) != 3:
+            raise RuntimeError("Joint list be have a length of 3")
+
+        super(IkFkFoot, self).setJointList(value)
+
+    def create(self):
+        """
+        construct the ikfk system
+        """
+        if not self._ikJointList:
+            super(IkFkFoot, self).create()
+
+        ankleConnections = cmds.listConnections("{}.tx".format(self._ikJointList[0]), source=False, destination=True)
+        if ankleConnections:
+            effectors = cmds.ls(ankleConnections, type='ikEffector')
+            if effectors:
+                self.ankleHandle = cmds.listConnections("{}.handlePath[0]".format(effectors[0]))[0]
+
+        if not self._pivotList:
+            self.createPiviots()
+
+        if not self._handles:
+            self._handles.append(cmds.ikHandle(sj=self._ikJointList[0], ee=self._ikJointList[1],
+                                               sol='ikSCsolver', name='{}_hdl'.format(self._ikJointList[1]))[0])
+            self._handles.append(cmds.ikHandle(sj=self._ikJointList[1], ee=self._ikJointList[2],
+                                               sol='ikSCsolver', name='{}_hdl'.format(self._ikJointList[2]))[0])
+
+            # unlock the ik handle
+            cmds.setAttr(self.ankleHandle + '.tx', l=0)
+            cmds.setAttr(self.ankleHandle + '.ty', l=0)
+            cmds.setAttr(self.ankleHandle + '.tz', l=0)
+
+            # parent stuff
+            cmds.parent(self._handles[1], self._pivotList[-1])
+            if cmds.objExists(self.ankleHandle):
+                cmds.parent(self.ankleHandle, self._pivotList[-2])
+            cmds.parent(self._handles[0], self._pivotList[-2])
+
+            for handle in self._handles:
+                cmds.setAttr("{}.v".format(handle), 0)
+
+    @staticmethod
+    def createFootRoll(pivotList, grp=None):
+        """
+        Create our advanced footroll setup
+        :param pivotList: list of foot pivots
+        :param grp: Optional-group to hold attributes and calculate scale
+        :return:
+        """
+        if len(pivotList) != 8:
+            raise RuntimeError("Pivot list must have a length of 8")
+
+        if not grp or not cmds.objExists(grp):
+            grp = cmds.createNode("transform", name='ikfk_foot_hrc')
+
+        cmds.addAttr(grp, ln='roll', at='double', dv=0, min=-90, max=180, k=True)
+        cmds.addAttr(grp, ln='bank', at='double', dv=0, k=True)
+        cmds.addAttr(grp, ln='heelSwivel', at='double', dv=0, k=True)
+        cmds.addAttr(grp, ln='toeSwivel', at='double', dv=0, k=True)
+        cmds.addAttr(grp, ln='toeTap', at='double', dv=0, k=True)
+        cmds.addAttr(grp, ln='ballAngle', at='double', dv=45, min=0, k=True)
+        cmds.addAttr(grp, ln='toeStraightAngle', at='double', dv=70, min=0, k=True)
+        rollAttr = '{}.roll'.format(grp)
+        ballAngleAttr = '{}.ballAngle'.format(grp)
+        toeStraightAngleAttr = '{}.toeStraightAngle'.format(grp)
+        bankAttr = '{}.bank'.format(grp)
+        heelSwivelAttr = '{}.heelSwivel'.format(grp)
+        toeSwivelAttr = '{}.toeSwivel'.format(grp)
+        toeTapAttr = '{}.toeTap'.format(grp)
+
+        # Direct connections
+        cmds.connectAttr(heelSwivelAttr, "{}.ry".format(pivotList[1]))
+        cmds.connectAttr(toeSwivelAttr, "{}.ry".format(pivotList[4]))
+        cmds.connectAttr(toeTapAttr, "{}.rx".format(pivotList[7]))
+
+        # Setup the bank
+        bankCond = node.condition(bankAttr, 0, ifTrue=[bankAttr, 0,0], ifFalse=[0,bankAttr, 0], operation='>', name="{}_bank".format(grp))
+        cmds.connectAttr("{}.outColorR".format(bankCond), "{}.rz".format(pivotList[2]))
+        cmds.connectAttr("{}.outColorG".format(bankCond), "{}.rz".format(pivotList[3]))
+
+        # check to see if its on the right side.
+        inn_pos = cmds.xform(pivotList[2], q=True, ws=True, t=True)
+        out_pos = cmds.xform(pivotList[3], q=True, ws=True, t=True)
+        if out_pos < inn_pos:
+            cmds.setAttr("{}.operation".format(bankCond), 4)
+
+        # Setup the foot roll
+        heelClamp = node.clamp(rollAttr, inMin=-180, inMax=0, output="{}.rx".format(pivotList[1]), name="{}_heel".format(grp))
+        ballClamp = node.clamp(rollAttr, inMin=0, inMax=ballAngleAttr,  name="{}_ball".format(grp))
+        toeClamp = node.clamp(rollAttr, inMin=ballAngleAttr, inMax=toeStraightAngleAttr,  name="{}_toe".format(grp))
+
+        toeRemap = node.remapValue("{}.outputR".format(toeClamp), inMin=ballAngleAttr, inMax=toeStraightAngleAttr, outMin=0, outMax=1, name="{}_toe".format(grp))
+        toeRotate = node.multDoubleLinear("{}.outValue".format(toeRemap), rollAttr, output="{}.rx".format(pivotList[4]),name="{}_toeRotate".format(grp))
+
+        ballRemap = node.remapValue("{}.outputR".format(ballClamp), inMin=0, inMax=ballAngleAttr, outMin=0, outMax=1, name="{}_ball".format(grp))
+        ballRotateInvert = node.plusMinusAverage1D([1, "{}.outValue".format(toeRemap)], operation='sub', name='{}_ballInvert'.format(grp))
+        ballRotateMult = node.multDoubleLinear("{}.output1D".format(ballRotateInvert), "{}.outValue".format(ballRemap), name='{}_ballMult'.format(grp))
+        toeRotate = node.multDoubleLinear("{}.output".format(ballRotateMult), rollAttr, output="{}.rx".format(pivotList[5]),name="{}_ballRotate".format(grp))
+
+    def createPiviots(self):
+        piviot_dict = {
+            'root': {
+                'heel': {
+                    'inn': {
+                        'out': {
+                            'end': {
+                                'ball': {'ankle': None},
+                                'toe': None}
+                            }
+                        }
+                    }
+                }
+            }
+
+        piv_hierarchy = rig_hierarchy.hierarchyFromDict(piviot_dict, parent=self._group, prefix=self._group + "_",
+                                                        suffix='_piv')
+        piv_hierarchy.create()
+        self._pivotList = piv_hierarchy.getNodes()
+
+        if not cmds.objExists(self._heel_piviot) or not cmds.objExists(self._inn_piviot) or not cmds.objExists(
+                self._out_piviot):
+            raise RuntimeError("missing required addional piviots. Please supply a heel, inn and out piviot")
+
+        # matchup the piviots to their correct spots
+        transform.matchTranslate(self._ikJointList[0], self._pivotList[0])
+        transform.matchTranslate(self._heel_piviot, self._pivotList[1])
+        transform.matchTranslate(self._inn_piviot, self._pivotList[2])
+        transform.matchTranslate(self._out_piviot, self._pivotList[3])
+        transform.matchTranslate(self._ikJointList[2], self._pivotList[4])
+        transform.matchTranslate(self._ikJointList[1], self._pivotList[5])
+        transform.matchTranslate(self._ikJointList[0], self._pivotList[6])
+        transform.matchTranslate(self._ikJointList[1], self._pivotList[7])

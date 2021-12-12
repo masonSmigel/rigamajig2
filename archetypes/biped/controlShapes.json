@@ -1,7 +1,7 @@
 {
     "type": "CurveData", 
     "user": "masonsmigel", 
-    "time": "2021-12-11 18:14:08", 
+    "time": "2021-12-12 15:22:15", 
     "data": {
         "wrist_fk_r": {
             "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|shoulder_fk_r_trsBuffer|shoulder_fk_r_spaces_trs|shoulder_fk_r|elbow_fk_r_trsBuffer|elbow_fk_r|wrist_fk_r_trsBuffer|wrist_fk_r", 

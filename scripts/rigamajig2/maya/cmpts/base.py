@@ -59,6 +59,7 @@ class Base(object):
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.preScript()  # run any pre-build scripts
+                self.createBuildGuides()
             self.set_step(1)
         else:
             logger.warning('component {} already initalized.'.format(self.name))
@@ -86,6 +87,7 @@ class Base(object):
                 self.preRigSetup()
                 self.rigSetup()
                 self.postRigSetup()
+                self.setupProxyAttributes()
             self.set_step(2)
         else:
             logger.warning('component {} already built.'.format(self.name))
@@ -140,6 +142,10 @@ class Base(object):
     def preScript(self):
         pass
 
+    def createBuildGuides(self):
+        """Add additional guides"""
+        pass
+
     def setInitalData(self):
         """Set inital component data. This needs to be done in a compont so we control attrribute settings in subclasses."""
         pass
@@ -164,6 +170,10 @@ class Base(object):
 
     def postRigSetup(self):
         """Add the rig setup"""
+        pass
+
+    def setupProxyAttributes(self):
+        """Setup proxy attributes"""
         pass
 
     def initConnect(self):

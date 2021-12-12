@@ -9,17 +9,6 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
 
-def maya_main_window():
-    """
-    Return the Maya main window widget as a Python object
-    """
-    main_window_ptr = omui.MQtUtil.mainWindow()
-    if sys.version_info.major >= 3:
-        return wrapInstance(int(main_window_ptr), QtWidgets.QWidget)
-    else:
-        return wrapInstance(long(main_window_ptr), QtWidgets.QWidget)
-
-
 class CollapsibleHeader(QtWidgets.QWidget):
     COLLASPED_PIXMAP = QtGui.QPixmap(':teRightArrow.png')
     EXPANDED_PIXMAP = QtGui.QPixmap(':teDownArrow.png')
@@ -109,6 +98,17 @@ class CollapsibleWidget(QtWidgets.QWidget):
 
     def on_header_clicked(self):
         self.set_expanded(not self.header_wdg.is_expanded())
+
+
+def maya_main_window():
+    """
+    Return the Maya main window widget as a Python object
+    """
+    main_window_ptr = omui.MQtUtil.mainWindow()
+    if sys.version_info.major >= 3:
+        return wrapInstance(int(main_window_ptr), QtWidgets.QWidget)
+    else:
+        return wrapInstance(long(main_window_ptr), QtWidgets.QWidget)
 
 
 class TestDialog(QtWidgets.QDialog):

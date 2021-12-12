@@ -141,7 +141,6 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         cmds.addAttr(self.ikfk.getGroup(), ln='twist', at='float', k=True)
         cmds.connectAttr("{}.{}".format(self.ikfk.getGroup(), 'twist'), "{}.{}".format(self.ikfk.getHandle(), 'twist'))
 
-        self.setupProxyAttributes()
         self.ikfkMatchSetup()
 
     def postRigSetup(self):
@@ -220,6 +219,5 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchTop'), self.limb_ik[-1])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchBot'), self.limb_ik[-1])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'softStretch'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'),
-                                      [self.limb_ik[-1], self.limb_pv[-1]])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'), [self.limb_ik[-1], self.limb_pv[-1]])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'twist'), self.limb_ik[-1])

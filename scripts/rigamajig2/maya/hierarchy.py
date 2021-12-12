@@ -45,8 +45,50 @@ def create(node, hierarchy=None, above=True, matchTransform=True, nodeType='tran
 
     if parent and above: cmds.parent(newHierachy[0], parent)
 
-    if above: cmds.parent(node, newHierachy[-1])
-    else: cmds.parent(newHierachy[0], node)
+    if above:
+        cmds.parent(node, newHierachy[-1])
+    else:
+        cmds.parent(newHierachy[0], node)
+
+
+class hierarchyFromDict(object):
+    def __init__(self, hierarchy=dict(), parent=None, prefix=None, suffix=None, nodeType='transform'):
+        self.hierarchy = hierarchy
+        self.parent = parent
+        self.prefix = prefix or ""
+        self.suffix = "_hrc" if suffix is None else suffix
+        self.nodeType = nodeType
+
+        self._nodes = list()
+
+    def create(self, hierarchy=None, parent=None):
+        """
+        Create a Node hiearchy from a dictionary
+        :param hierarchy:
+        :param parent=None
+        """
+        if not hierarchy:
+            hierarchy = self.hierarchy
+        if not parent:
+            parent = self.parent
+
+        for name, children in hierarchy.items():
+            node = "{}{}{}".format(self.prefix, name, self.suffix)
+            self._nodes.append(node)
+            if not cmds.objExists(node):
+                node = cmds.createNode(self.nodeType, name=node)
+            if parent:
+                currentParent = cmds.listRelatives(node, parent=True, path=True)
+                if currentParent:
+                    currentParent = currentParent[0]
+                if currentParent != parent:
+                    cmds.parent(node, parent)
+
+            if children:
+                self.create(children, node)
+
+    def getNodes(self):
+        return self._nodes
 
 
 def getTopParent(node):

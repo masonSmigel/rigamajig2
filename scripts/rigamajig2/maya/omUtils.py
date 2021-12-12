@@ -21,7 +21,7 @@ def getMObject(name):
 
 def getMObject2(name):
     """
-    Get an MObject for the specifiec object (using api2)
+    Get an MObject for the specifiec object (For maya api 2 )
     :param name: object to get the MObject for
     :return: MObject
     """

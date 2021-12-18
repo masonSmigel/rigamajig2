@@ -1,4 +1,5 @@
 import sys
+from os.path import relpath
 
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -23,8 +24,10 @@ def maya_main_window():
 
 
 class ScriptRunner(QtWidgets.QWidget):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, startDir=None, *args, **kwargs):
         super(ScriptRunner, self).__init__(*args, **kwargs)
+
+        self.startDir = startDir
 
         self.create_actions()
         self.create_widgets()
@@ -97,14 +100,15 @@ class ScriptRunner(QtWidgets.QWidget):
     def add_script(self, script):
         file_info = QtCore.QFileInfo(script)
         if file_info.exists():
-            # iconProvider = QtWidgets.QFileIconProvider()
-            # icon = iconProvider.icon(file_info)
-            self.add_item(file_info.fileName(), data=file_info.filePath(), icon=QtGui.QIcon(":fileNew.png"))
+            if self.startDir:
+                file_name = relpath(file_info.filePath(), self.startDir)
+            else:
+                file_name = file_info.fileName()
+            self.add_item(file_name, data=file_info.filePath(), icon=QtGui.QIcon(":fileNew.png"))
 
     def add_script_browser(self):
         file_path, selected_filter = QtWidgets.QFileDialog.getOpenFileName(self, "Select File", "",
                                                                            "Python (*.py) ;; Mel (*.mel)")
-        print file_path
         self.add_script(file_path)
 
     def add_scripts_dir_browser(self):
@@ -202,6 +206,9 @@ class ScriptRunner(QtWidgets.QWidget):
         if QtCore.QProcess.startDetached("/usr/bin/osascript", args):
             return True
         return False
+
+    def set_start_dir(self, value):
+        self.startDir = value
 
 
 class TestDialog(QtWidgets.QDialog):

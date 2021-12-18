@@ -1,7 +1,7 @@
 """
-Functions to Navigate the Directed Acyclic Graph (hirarchy)
+Functions to Navigate the Directed Acyclic Graph (DAG)
 """
-
+from collections import OrderedDict
 import maya.cmds as cmds
 
 import rigamajig2.shared.common as common
@@ -51,12 +51,12 @@ def create(node, hierarchy=None, above=True, matchTransform=True, nodeType='tran
         cmds.parent(newHierachy[0], node)
 
 
-class hierarchyFromDict(object):
+class DictHierarchy(object):
     def __init__(self, hierarchy=dict(), parent=None, prefix=None, suffix=None, nodeType='transform'):
         self.hierarchy = hierarchy
         self.parent = parent
         self.prefix = prefix or ""
-        self.suffix = "_hrc" if suffix is None else suffix
+        self.suffix = "" if suffix is None else suffix
         self.nodeType = nodeType
 
         self._nodes = list()
@@ -88,7 +88,32 @@ class hierarchyFromDict(object):
                 self.create(children, node)
 
     def getNodes(self):
+        """return the nodes in the heirarchy"""
         return self._nodes
+
+    @staticmethod
+    def getHirarchy(node):
+        """
+        save a heirarchy of nodes into a dictionary
+        :param node:
+        :return:
+        """
+        node = common.getFirstIndex(node)
+        heirarchy_dict = OrderedDict()
+
+        def getChildren(n, heirarchy_dict):
+            children = cmds.listRelatives(n, c=True, pa=True, type='transform')
+            if children:
+                heirarchy_dict[n] = OrderedDict()
+                for child in children:
+                    heirarchy_dict[n][child] = OrderedDict()
+                    getChildren(child, heirarchy_dict[n])
+            else:
+                heirarchy_dict[n] = None
+
+        getChildren(node, heirarchy_dict)
+
+        return heirarchy_dict
 
 
 def getTopParent(node):

@@ -6,10 +6,9 @@ import getpass
 import json
 from collections import OrderedDict
 import maya.cmds as cmds
-from rigamajig2 import Logger
 import rigamajig2.shared.common as common
 import rigamajig2.maya.data.maya_data as maya_data
-import rigamajig2.maya.hierarchy as dag
+import rigamajig2.maya.hierarchy as hierarchy
 
 
 class HirachyData(maya_data.MayaData):
@@ -26,41 +25,17 @@ class HirachyData(maya_data.MayaData):
         :return:
         """
         super(HirachyData, self).gatherData(node)
-
         data = OrderedDict()
-
-        def getChildren(n):
-            children = cmds.listRelatives(n, c=True, pa=True, type='transform')
-            if children:
-                data[n] = children
-                for child in children:
-                    getChildren(child)
-
-        getChildren(node)
+        data['hierarchy'] = hierarchy.DictHierarchy.getHirarchy(node)
 
         self._data[node].update(data)
 
-    def applyData(self, nodes, create=True):
+    def applyData(self, nodes):
 
         nodes = common.toList(nodes)
 
         for node in nodes:
-            for parent, children in self._data[node].iteritems():
-                if parent == "dagPath":
-                    continue
-
-                if not cmds.objExists(parent):
-                    cmds.error('Hirarchy Root {} does not exist'.format(parent))
-                    return
-
-                for child in children:
-                    shortName = child.split('|')[-1]
-                    if not cmds.objExists(child) and create:
-                        cmds.createNode('transform', n=shortName)
-                    if cmds.objExists(child):
-                        try:
-                            cmds.parent(child, parent)
-                        except:
-                            pass
-                    else:
-                        cmds.parent("|{}".format(shortName), parent)
+            if not self._data.has_key(node):
+                continue
+            hi = hierarchy.DictHierarchy(hierarchy=self._data[node]['hierarchy'])
+            hi.create()

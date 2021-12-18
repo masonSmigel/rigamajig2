@@ -659,8 +659,8 @@ class IkFkFoot(IkFkBase):
                 }
             }
 
-        piv_hierarchy = rig_hierarchy.hierarchyFromDict(piviot_dict, parent=self._group, prefix=self._group + "_",
-                                                        suffix='_piv')
+        piv_hierarchy = rig_hierarchy.DictHierarchy(piviot_dict, parent=self._group, prefix=self._group + "_",
+                                                    suffix='_piv')
         piv_hierarchy.create()
         self._pivotList = piv_hierarchy.getNodes()
 

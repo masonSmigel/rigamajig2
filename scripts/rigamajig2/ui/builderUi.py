@@ -420,14 +420,17 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         pre_script_path = os.path.join(self.rig_env, builder.PRE_SCRIPT_PATH)
         if QtCore.QFileInfo(pre_script_path).exists():
+            self.preScript_scriptRunner.set_start_dir(pre_script_path)
             self.preScript_scriptRunner.add_scripts_from_dir(pre_script_path)
 
         post_script_path = os.path.join(self.rig_env, builder.POST_SCRIPT_PATH)
         if QtCore.QFileInfo(post_script_path).exists():
+            self.postScript_scriptRunner.set_start_dir(post_script_path)
             self.postScript_scriptRunner.add_scripts_from_dir(post_script_path)
 
         pub_script_path = os.path.join(self.rig_env, builder.PUB_SCRIPT_PATH)
         if QtCore.QFileInfo(pub_script_path).exists():
+            self.publishScript_scriptRunner.set_start_dir(pub_script_path)
             self.publishScript_scriptRunner.add_scripts_from_dir(pub_script_path)
 
         mod_file = tmp_builder.get_rig_data(self.rig_file, builder.MODEL_FILE)

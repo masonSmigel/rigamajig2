@@ -139,8 +139,5 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         rigamajig2.maya.attr.addSeparator(self.limb_ik[-1], '----')
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'roll'), self.limb_ik[-1])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'bank'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'heelSwivel'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'toeSwivel'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'toeTap'), self.limb_ik[-1])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'ballAngle'), self.limb_ik[-1])
         rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'toeStraightAngle'), self.limb_ik[-1])

@@ -602,23 +602,12 @@ class IkFkFoot(IkFkBase):
 
         cmds.addAttr(grp, ln='roll', at='double', dv=0, min=-90, max=180, k=True)
         cmds.addAttr(grp, ln='bank', at='double', dv=0, k=True)
-        cmds.addAttr(grp, ln='heelSwivel', at='double', dv=0, k=True)
-        cmds.addAttr(grp, ln='toeSwivel', at='double', dv=0, k=True)
-        cmds.addAttr(grp, ln='toeTap', at='double', dv=0, k=True)
         cmds.addAttr(grp, ln='ballAngle', at='double', dv=45, min=0, k=True)
         cmds.addAttr(grp, ln='toeStraightAngle', at='double', dv=70, min=0, k=True)
         rollAttr = '{}.roll'.format(grp)
         ballAngleAttr = '{}.ballAngle'.format(grp)
         toeStraightAngleAttr = '{}.toeStraightAngle'.format(grp)
         bankAttr = '{}.bank'.format(grp)
-        heelSwivelAttr = '{}.heelSwivel'.format(grp)
-        toeSwivelAttr = '{}.toeSwivel'.format(grp)
-        toeTapAttr = '{}.toeTap'.format(grp)
-
-        # Direct connections
-        cmds.connectAttr(heelSwivelAttr, "{}.ry".format(pivotList[1]))
-        cmds.connectAttr(toeSwivelAttr, "{}.ry".format(pivotList[4]))
-        cmds.connectAttr(toeTapAttr, "{}.rx".format(pivotList[7]))
 
         # Setup the bank
         bankCond = node.condition(bankAttr, 0, ifTrue=[bankAttr, 0, 0], ifFalse=[0, bankAttr, 0], operation='>',

@@ -146,8 +146,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
         rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
-        ikfk.IkFkBase.connnectIkFkVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls,
-                                             fkList=self.fkControls)
+        ikfk.IkFkBase.connectVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls,
+                                        fkList=self.fkControls)
 
         # connect the base to the main bind chain
         cmds.parentConstraint(self.limbBase[-1], self.input[0])

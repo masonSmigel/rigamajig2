@@ -1,0 +1,307 @@
+{
+    "type": "NodeData", 
+    "user": "masonsmigel", 
+    "time": "2021-12-19 06:59:56", 
+    "data": {
+        "leg_l_heel": {
+            "dagPath": "|leg_l_guide|leg_l_heel", 
+            "translate": [
+                6.5443, 
+                0.0, 
+                -6.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "world_translate": [
+                6.5443, 
+                0.0, 
+                -6.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false
+        }, 
+        "leg_l_inn": {
+            "dagPath": "|leg_l_guide|leg_l_inn", 
+            "translate": [
+                4.0, 
+                0.0, 
+                4.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "world_translate": [
+                4.0, 
+                0.0, 
+                4.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false
+        }, 
+        "leg_l_out": {
+            "dagPath": "|leg_l_guide|leg_l_out", 
+            "translate": [
+                9.0, 
+                0.0, 
+                4.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "world_translate": [
+                9.0, 
+                0.0, 
+                4.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false
+        }, 
+        "leg_l_ball": {
+            "dagPath": "|leg_l_guide|leg_l_ball", 
+            "translate": [
+                6.5443, 
+                0.7892, 
+                3.9701
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "world_translate": [
+                6.544313430786133, 
+                0.7891700267791748, 
+                3.970060110092163
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false
+        }, 
+        "leg_l_toe": {
+            "dagPath": "|leg_l_guide|leg_l_toe", 
+            "translate": [
+                6.5443, 
+                0.7892, 
+                7.7421
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "world_translate": [
+                6.544313430786133, 
+                0.7891700267791748, 
+                7.742119789123535
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false
+        }, 
+        "leg_r_heel": {
+            "dagPath": "|leg_r_guide|leg_r_heel", 
+            "translate": [
+                -6.5443, 
+                0.0, 
+                -6.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.5443, 
+                0.0, 
+                -6.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false
+        }, 
+        "leg_r_inn": {
+            "dagPath": "|leg_r_guide|leg_r_inn", 
+            "translate": [
+                -4.0, 
+                0.0, 
+                4.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -4.0, 
+                0.0, 
+                4.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false
+        }, 
+        "leg_r_out": {
+            "dagPath": "|leg_r_guide|leg_r_out", 
+            "translate": [
+                -9.0, 
+                0.0, 
+                4.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -9.0, 
+                0.0, 
+                4.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false
+        }, 
+        "leg_r_ball": {
+            "dagPath": "|leg_r_guide|leg_r_ball", 
+            "translate": [
+                -6.5443, 
+                0.7892, 
+                3.9701
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.544313430786133, 
+                0.7891700267791748, 
+                3.970060110092163
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false
+        }, 
+        "leg_r_toe": {
+            "dagPath": "|leg_r_guide|leg_r_toe", 
+            "translate": [
+                -6.5443, 
+                0.7892, 
+                7.7421
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.544313430786133, 
+                0.7891700267791748, 
+                7.742119789123535
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false
+        }
+    }
+}

@@ -50,8 +50,10 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         self._heel_piv = cmds.spaceLocator(name="{}_heel".format(self.name))[0]
         self._inn_piv = cmds.spaceLocator(name="{}_inn".format(self.name))[0]
         self._out_piv = cmds.spaceLocator(name="{}_out".format(self.name))[0]
+        self._ball_piv = cmds.spaceLocator(name="{}_ball".format(self.name))[0]
+        self._toe_piv = cmds.spaceLocator(name="{}_toe".format(self.name))[0]
 
-        cmds.parent(self._heel_piv, self._inn_piv, self._out_piv, self.guides)
+        cmds.parent(self._heel_piv, self._inn_piv, self._out_piv, self._ball_piv, self._toe_piv, self.guides)
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
@@ -71,12 +73,12 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
                                                   hierarchy=['trsBuffer'],
                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
                                                   parent=self.control, shape='cube', shapeAim='x',
-                                                  xformObj=self.input[4])
+                                                  xformObj=self._ball_piv)
         self.toes_ik = rig_control.createAtObject(self._userSettings['toes_ikName'], self.side,
                                                   hierarchy=['trsBuffer'],
                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
                                                   parent=self.control, shape='cube', shapeAim='x',
-                                                  xformObj=self.input[5])
+                                                  xformObj=self._toe_piv)
 
         self.ikControls += [self.heel_ik[-1], self.ball_ik[-1], self.toes_ik[-1]]
 
@@ -91,7 +93,7 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         ikfk.IkFkFoot.createFootRoll(self.footikfk.getPivotList(), self.footikfk.getGroup())
 
         # connect the Foot IKFK to the ankle IK
-        cmds.parent(self._ikEndTgt, self.footikfk.getPivotList()[-2])
+        cmds.parent(self._ikEndTgt, self.footikfk.getPivotList()[6])
         cmds.parent(self.footikfk.getPivotList()[0], self.limbGimble_ik[-1])
         cmds.delete(cmds.listRelatives(self._ikEndTgt, ad=True, type='pointConstraint'))
 
@@ -117,7 +119,7 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         blendedJointlist = self.ikfk.getBlendJointList() + [self.toes_fk[-1]]
         rigamajig2.maya.skeleton.connectChains(blendedJointlist, self.input[1:-1])
         rigamajig2.maya.attr.lock(self.input[-1], rigamajig2.maya.attr.TRANSFORMS + ['v'])
-        ikfk.IkFkBase.connnectIkFkVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
+        ikfk.IkFkBase.connectVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
 
         # connect the base to the main bind chain
         cmds.parentConstraint(self.limbBase[-1], self.input[0])

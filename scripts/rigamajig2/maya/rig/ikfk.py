@@ -187,7 +187,7 @@ class IkFkBase(object):
                     cmds.setAttr("{}.{}".format(blendJnt, attr), e=True, lock=True)
 
     @staticmethod
-    def connnectIkFkVisibility(attrHolder, attr='ikfk', ikList=[], fkList=[]):
+    def connectVisibility(attrHolder, attr='ikfk', ikList=[], fkList=[]):
         """
         Connect the fkControls and Ik visibility. Mostly used for controls
         :param attrHolder: node that holds the attribute

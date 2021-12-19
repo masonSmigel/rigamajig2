@@ -621,7 +621,8 @@ class IkFkFoot(IkFkBase):
         cmds.connectAttr(toeTapAttr, "{}.rx".format(pivotList[7]))
 
         # Setup the bank
-        bankCond = node.condition(bankAttr, 0, ifTrue=[bankAttr, 0,0], ifFalse=[0,bankAttr, 0], operation='>', name="{}_bank".format(grp))
+        bankCond = node.condition(bankAttr, 0, ifTrue=[bankAttr, 0, 0], ifFalse=[0, bankAttr, 0], operation='>',
+                                  name="{}_bank".format(grp))
         cmds.connectAttr("{}.outColorR".format(bankCond), "{}.rz".format(pivotList[2]))
         cmds.connectAttr("{}.outColorG".format(bankCond), "{}.rz".format(pivotList[3]))
 
@@ -632,19 +633,40 @@ class IkFkFoot(IkFkBase):
             cmds.setAttr("{}.operation".format(bankCond), 4)
 
         # Setup the foot roll
-        heelClamp = node.clamp(rollAttr, inMin=-180, inMax=0, output="{}.rx".format(pivotList[1]), name="{}_heel".format(grp))
-        ballClamp = node.clamp(rollAttr, inMin=0, inMax=ballAngleAttr,  name="{}_ball".format(grp))
-        toeClamp = node.clamp(rollAttr, inMin=ballAngleAttr, inMax=toeStraightAngleAttr,  name="{}_toe".format(grp))
+        heelClamp = node.clamp(rollAttr, inMin=-180, inMax=0, output="{}.rx".format(pivotList[1]),
+                               name="{}_heel".format(grp))
+        ballClamp = node.clamp(rollAttr, inMin=0, inMax=ballAngleAttr, name="{}_ball".format(grp))
+        toeClamp = node.clamp(rollAttr, inMin=ballAngleAttr, inMax=toeStraightAngleAttr, name="{}_toe".format(grp))
 
-        toeRemap = node.remapValue("{}.outputR".format(toeClamp), inMin=ballAngleAttr, inMax=toeStraightAngleAttr, outMin=0, outMax=1, name="{}_toe".format(grp))
-        toeRotate = node.multDoubleLinear("{}.outValue".format(toeRemap), rollAttr, output="{}.rx".format(pivotList[4]),name="{}_toeRotate".format(grp))
+        toeRemap = node.remapValue("{}.outputR".format(toeClamp), inMin=ballAngleAttr, inMax=toeStraightAngleAttr,
+                                   outMin=0, outMax=1, name="{}_toe".format(grp))
+        toeRotate = node.multDoubleLinear("{}.outValue".format(toeRemap), rollAttr, output="{}.rx".format(pivotList[4]),
+                                          name="{}_toeRotate".format(grp))
 
-        ballRemap = node.remapValue("{}.outputR".format(ballClamp), inMin=0, inMax=ballAngleAttr, outMin=0, outMax=1, name="{}_ball".format(grp))
-        ballRotateInvert = node.plusMinusAverage1D([1, "{}.outValue".format(toeRemap)], operation='sub', name='{}_ballInvert'.format(grp))
-        ballRotateMult = node.multDoubleLinear("{}.output1D".format(ballRotateInvert), "{}.outValue".format(ballRemap), name='{}_ballMult'.format(grp))
-        toeRotate = node.multDoubleLinear("{}.output".format(ballRotateMult), rollAttr, output="{}.rx".format(pivotList[5]),name="{}_ballRotate".format(grp))
+        ballRemap = node.remapValue("{}.outputR".format(ballClamp), inMin=0, inMax=ballAngleAttr, outMin=0, outMax=1,
+                                    name="{}_ball".format(grp))
+        ballRotateInvert = node.plusMinusAverage1D([1, "{}.outValue".format(toeRemap)], operation='sub',
+                                                   name='{}_ballInvert'.format(grp))
+        ballRotateMult = node.multDoubleLinear("{}.output1D".format(ballRotateInvert), "{}.outValue".format(ballRemap),
+                                               name='{}_ballMult'.format(grp))
+        toeRotate = node.multDoubleLinear("{}.output".format(ballRotateMult), rollAttr,
+                                          output="{}.rx".format(pivotList[5]), name="{}_ballRotate".format(grp))
 
     def createPiviots(self):
+        """
+        Create a nessesary pivots.
+
+        Piviot indecies are as follows:
+            0 - root
+            1 - heel
+            2 - inn
+            3 - out
+            4 - end (toes)
+            5 - ball
+            6 - ankle
+            7 - toe tap
+        """
+
         piviot_dict = {
             'root': {
                 'heel': {

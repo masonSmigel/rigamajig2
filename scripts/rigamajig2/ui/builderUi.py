@@ -149,8 +149,6 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.cmpt_manager = componentManager.ComponentManager()
         self.initalize_all_btn = QtWidgets.QPushButton("Initalize All Components ")
         self.initalize_all_btn.setFixedHeight(LARGE_BTN_HEIGHT)
-        self.show_advanced_proxy_cb = QtWidgets.QCheckBox()
-        self.show_advanced_proxy_cb.setFixedWidth(25)
 
         self.guide_path_selector = pathSelector.PathSelector("guides:", cap="Select a guide file", ff=JSON_FILTER, fm=1)
         self.load_guides_btn = QtWidgets.QPushButton("Load Guides")
@@ -274,11 +272,6 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         cmpt_btn_layout = QtWidgets.QHBoxLayout()
         cmpt_btn_layout.setSpacing(4)
-        show_proxy_label = QtWidgets.QLabel("Show Proxy:")
-        show_proxy_label.setFixedWidth(70)
-
-        cmpt_btn_layout.addWidget(show_proxy_label)
-        cmpt_btn_layout.addWidget(self.show_advanced_proxy_cb)
         cmpt_btn_layout.addWidget(self.initalize_all_btn)
 
         guide_load_layout = QtWidgets.QHBoxLayout()
@@ -390,7 +383,6 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.jnt_to_ori_btn.clicked.connect(self.jnt_to_orientation)
         self.mirrorJnt_btn.clicked.connect(self.mirror_joint)
 
-        self.show_advanced_proxy_cb.toggled.connect(self.toggle_advanced_proxy)
         self.load_guides_btn.clicked.connect(self.load_guides)
         self.save_guides_btn.clicked.connect(self.save_guides)
 

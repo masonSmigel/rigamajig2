@@ -22,14 +22,14 @@ class Main(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
-        self.root = cmds.createNode('transform', n=self.name)
-        self.rig = cmds.createNode('transform', n='rig', parent=self.root)
-        self.bind = cmds.createNode('transform', n='bind', parent=self.root)
-        self.model = cmds.createNode('transform', n='model', parent=self.root)
+        self.root_hrc = cmds.createNode('transform', n=self.name)
+        self.rig_hrc = cmds.createNode('transform', n='rig', parent=self.root_hrc)
+        self.bind_hrc = cmds.createNode('transform', n='bind', parent=self.root_hrc)
+        self.model_hrc = cmds.createNode('transform', n='model', parent=self.root_hrc)
 
         # Build our controls
         self.trs_global = rig_control.create('trs_global', hierarchy=[], size=self.size * 1.2,
-                                             color='yellow', parent=self.root)[0]
+                                             color='yellow', parent=self.root_hrc)[0]
         self.trs_shot = rig_control.create('trs_shot', hierarchy=[], size=self.size * 1.1,
                                            color='lightgreenyellow', parent=self.trs_global)[0]
         self.trs_motion = rig_control.create('trs_motion', hierarchy=[], size=self.size,
@@ -46,7 +46,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.node.multMatrix([(self.trs_motion + '.matrix'),
                                          self.trs_shot + '.matrix',
                                          self.trs_global + '.matrix'],
-                                        outputs=[self.rig, self.bind],
+                                        outputs=[self.rig_hrc, self.bind_hrc],
                                         t=True, r=True, s=True,
                                         name='main')
 
@@ -61,7 +61,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         cmds.connectAttr(ovrmod, self.model + '.overrideDisplayType')
 
     def finalize(self):
-        rigamajig2.maya.attr.lockAndHide(self.root, rigamajig2.maya.attr.TRANSFORMS + ['v'])
-        rigamajig2.maya.attr.lock(self.rig, rigamajig2.maya.attr.TRANSFORMS)
-        rigamajig2.maya.attr.lock(self.bind, rigamajig2.maya.attr.TRANSFORMS)
+        rigamajig2.maya.attr.lockAndHide(self.root_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+        rigamajig2.maya.attr.lock(self.rig_hrc, rigamajig2.maya.attr.TRANSFORMS)
+        rigamajig2.maya.attr.lock(self.bind_hrc, rigamajig2.maya.attr.TRANSFORMS)
         rigamajig2.maya.attr.lock(self.model, rigamajig2.maya.attr.TRANSFORMS)

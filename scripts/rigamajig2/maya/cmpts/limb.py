@@ -53,14 +53,14 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
-        self.root = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.control = cmds.createNode('transform', n=self.name + '_control', parent=self.root)
-        self.spaces = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root)
+        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
+        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
+        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
 
         # limbBase/swing controls
         self.limbBase = rig_control.createAtObject(self._userSettings['limbBaseName'], self.side,
                                                    hierarchy=['trsBuffer'], hideAttrs=['v', 's'],
-                                                   size=self.size, color='blue', parent=self.control,
+                                                   size=self.size, color='blue', parent=self.control_hrc,
                                                    shape='square', xformObj=self.input[0])
         self.limbSwing = rig_control.createAtObject(self._userSettings['limbSwingName'], self.side,
                                                     hierarchy=['trsBuffer', 'spaces_trs'],
@@ -72,7 +72,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.joint1_fk = rig_control.createAtObject(self._userSettings['joint1_fkName'], self.side,
                                                     hierarchy=['trsBuffer', 'spaces_trs'],
                                                     hideAttrs=['v', 't', 's'], size=self.size, color='blue',
-                                                    parent=self.control, shape='circle', shapeAim='x',
+                                                    parent=self.control_hrc, shape='circle', shapeAim='x',
                                                     xformObj=self.input[1])
         self.joint2_fk = rig_control.createAtObject(self._userSettings['joint2_fkName'], self.side,
                                                     hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
@@ -90,7 +90,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # Ik controls
         self.limb_ik = rig_control.create(self._userSettings['limb_ikName'], self.side,
                                           hierarchy=['trsBuffer', 'spaces_trs'],
-                                          hideAttrs=['s', 'v'], size=self.size, color='blue', parent=self.control,
+                                          hideAttrs=['s', 'v'], size=self.size, color='blue', parent=self.control_hrc,
                                           shape='cube', position=cmds.xform(self.input[3], q=True, ws=True, t=True))
 
         self.limbGimble_ik = rig_control.create(self._userSettings['limbGimble_ikName'], self.side,
@@ -102,7 +102,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.limb_pv = rig_control.create(self._userSettings['limb_pvName'], self.side,
                                           hierarchy=['trsBuffer', 'spaces_trs'],
                                           hideAttrs=['r', 's', 'v'], size=self.size, color='blue', shape='diamond',
-                                          position=pv_pos, parent=self.control, shapeAim='z')
+                                          position=pv_pos, parent=self.control_hrc, shapeAim='z')
 
         # add the controls to our controller list
         self.fkControls = [self.joint1_fk[-1], self.joint2_fk[-1], self.joint3_fk[-1], self.joint3Gimble_fk[-1]]
@@ -117,7 +117,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.ikJnts = self.ikfk.getIkJointList()
         self.fkJnts = self.ikfk.getFkJointList()
 
-        cmds.parent(self.ikfk.getGroup(), self.root)
+        cmds.parent(self.ikfk.getGroup(), self.root_hrc)
 
         # create a pole vector contraint
         cmds.poleVectorConstraint(self.limb_pv[-1], self.ikfk.getHandle())
@@ -155,9 +155,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
     def connect(self):
         """Create the connection"""
-        spaces.create(self.limbSwing[1], self.limbSwing[-1], parent=self.spaces)
-        spaces.create(self.limb_ik[1], self.limb_ik[-1], parent=self.spaces, defaultName='world')
-        spaces.create(self.limb_pv[1], self.limb_pv[-1], parent=self.spaces, defaultName='world')
+        spaces.create(self.limbSwing[1], self.limbSwing[-1], parent=self.spaces_hrc)
+        spaces.create(self.limb_ik[1], self.limb_ik[-1], parent=self.spaces_hrc, defaultName='world')
+        spaces.create(self.limb_pv[1], self.limb_pv[-1], parent=self.spaces_hrc, defaultName='world')
 
         # if the main control exists connect the world space
         if cmds.objExists('trs_motion'):
@@ -175,9 +175,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
     def finalize(self):
         """ Lock some attributes we dont want to see"""
-        rigamajig2.maya.attr.lockAndHide(self.root, rigamajig2.maya.attr.TRANSFORMS + ['v'])
-        rigamajig2.maya.attr.lockAndHide(self.control, rigamajig2.maya.attr.TRANSFORMS + ['v'])
-        rigamajig2.maya.attr.lockAndHide(self.spaces, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+        rigamajig2.maya.attr.lockAndHide(self.root_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+        rigamajig2.maya.attr.lockAndHide(self.control_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+        rigamajig2.maya.attr.lockAndHide(self.spaces_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
         rigamajig2.maya.attr.lockAndHide(self.ikfk.getGroup(), rigamajig2.maya.attr.TRANSFORMS + ['v'])
 
     def showAdvancedProxy(self):

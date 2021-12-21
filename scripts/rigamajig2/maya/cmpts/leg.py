@@ -45,15 +45,14 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         self.cmptSettings['pvSpaces']['foot'] = self.cmptSettings['limb_ikName'] + '_' + self.side
 
     def createBuildGuides(self):
-        """ create build guides """
-        self.guides = cmds.createNode("transform", name='{}_guide'.format(self.name))
-        self._heel_piv = cmds.spaceLocator(name="{}_heel".format(self.name))[0]
-        self._inn_piv = cmds.spaceLocator(name="{}_inn".format(self.name))[0]
-        self._out_piv = cmds.spaceLocator(name="{}_out".format(self.name))[0]
-        self._ball_piv = cmds.spaceLocator(name="{}_ball".format(self.name))[0]
-        self._toe_piv = cmds.spaceLocator(name="{}_toe".format(self.name))[0]
+        """ create build guides_hrc """
+        self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
-        cmds.parent(self._heel_piv, self._inn_piv, self._out_piv, self._ball_piv, self._toe_piv, self.guides)
+        self._heel_piv = rig_control.createGuide("{}_heel".format(self.name), parent=self.guides_hrc)
+        self._inn_piv = rig_control.createGuide("{}_inn".format(self.name), parent=self.guides_hrc)
+        self._out_piv = rig_control.createGuide("{}_out".format(self.name), parent=self.guides_hrc)
+        self._ball_piv = rig_control.createGuide("{}_ball".format(self.name), parent=self.guides_hrc)
+        self._toe_piv = rig_control.createGuide("{}_toe".format(self.name), parent=self.guides_hrc)
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
@@ -61,23 +60,23 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         self.toes_fk = rig_control.createAtObject(self._userSettings['toes_fkName'], self.side,
                                                   hierarchy=['trsBuffer'],
                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
-                                                  parent=self.control, shape='square', shapeAim='x',
+                                                  parent=self.control_hrc, shape='square', shapeAim='x',
                                                   xformObj=self.input[4])
         # create ik piviot controls
         self.heel_ik = rig_control.createAtObject(self._userSettings['heel_ikName'], self.side,
                                                   hierarchy=['trsBuffer'],
                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
-                                                  parent=self.control, shape='cube', shapeAim='x',
+                                                  parent=self.control_hrc, shape='cube', shapeAim='x',
                                                   xformObj=self._heel_piv)
         self.ball_ik = rig_control.createAtObject(self._userSettings['ball_ikName'], self.side,
                                                   hierarchy=['trsBuffer'],
                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
-                                                  parent=self.control, shape='cube', shapeAim='x',
+                                                  parent=self.control_hrc, shape='cube', shapeAim='x',
                                                   xformObj=self._ball_piv)
         self.toes_ik = rig_control.createAtObject(self._userSettings['toes_ikName'], self.side,
                                                   hierarchy=['trsBuffer'],
                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
-                                                  parent=self.control, shape='cube', shapeAim='x',
+                                                  parent=self.control_hrc, shape='cube', shapeAim='x',
                                                   xformObj=self._toe_piv)
 
         self.ikControls += [self.heel_ik[-1], self.ball_ik[-1], self.toes_ik[-1]]
@@ -111,8 +110,8 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         # setup the toes
         cmds.parentConstraint(self.footikfk.getBlendJointList()[2], self.toes_fk[0], mo=True)
 
-        # Delete the proxy guides:
-        cmds.delete(self.guides)
+        # Delete the proxy guides_hrc:
+        cmds.delete(self.guides_hrc)
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""

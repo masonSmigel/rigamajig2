@@ -137,7 +137,7 @@ class Builder(object):
             cmpt._build_cmpt()
             # if the component is not a main parent the cmpt.root_hrc to the rig
             if cmds.objExists('rig') and not isinstance(cmpt, main.Main):
-                cmds.parent(cmpt.root, 'rig')
+                cmds.parent(cmpt.root_hrc, 'rig')
 
         # parent the bind joints to the bind group. if one exists
         if cmds.objExists('bind'):

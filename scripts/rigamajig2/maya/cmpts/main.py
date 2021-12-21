@@ -51,17 +51,17 @@ class Main(rigamajig2.maya.cmpts.base.Base):
                                         name='main')
 
         # turn off inherit transform so we dont get double transformations
-        cmds.setAttr("{}.{}".format(self.model, 'inheritsTransform'), 0)
+        cmds.setAttr("{}.{}".format(self.model_hrc, 'inheritsTransform'), 0)
 
         # Add the attribute for model override.
         ovrmod = rigamajig2.maya.attr.addEnum(self.trs_shot, longName='modDisplay',
                                               enum=['normal', 'template', 'reference'],
                                               value=2, keyable=False, channelBox=True)
-        cmds.setAttr(self.model + '.overrideEnabled', 1)
-        cmds.connectAttr(ovrmod, self.model + '.overrideDisplayType')
+        cmds.setAttr(self.model_hrc + '.overrideEnabled', 1)
+        cmds.connectAttr(ovrmod, self.model_hrc + '.overrideDisplayType')
 
     def finalize(self):
         rigamajig2.maya.attr.lockAndHide(self.root_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
         rigamajig2.maya.attr.lock(self.rig_hrc, rigamajig2.maya.attr.TRANSFORMS)
         rigamajig2.maya.attr.lock(self.bind_hrc, rigamajig2.maya.attr.TRANSFORMS)
-        rigamajig2.maya.attr.lock(self.model, rigamajig2.maya.attr.TRANSFORMS)
+        rigamajig2.maya.attr.lock(self.model_hrc, rigamajig2.maya.attr.TRANSFORMS)

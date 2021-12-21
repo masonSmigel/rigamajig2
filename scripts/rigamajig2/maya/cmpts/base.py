@@ -190,8 +190,8 @@ class Base(object):
 
     def publishNodes(self):
         """Publush nodes"""
-        rigamajig2.maya.container.addParentAnchor(self.root, container=self.container)
-        rigamajig2.maya.container.addChildAnchor(self.root, container=self.container)
+        rigamajig2.maya.container.addParentAnchor(self.root_hrc, container=self.container)
+        rigamajig2.maya.container.addChildAnchor(self.root_hrc, container=self.container)
         rigamajig2.maya.container.addPublishNodes(self.controlers)
 
     def publishAttributes(self):

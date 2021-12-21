@@ -31,6 +31,7 @@ MODEL_FILE = "model_file"
 SKELETON_FILE = "skeleton_file"
 SKELETON_POS = "skeleton_pos"
 CONTROL_SHAPES = "control_shapes"
+GUIDES = "guides_hrc"
 
 
 class Builder(object):
@@ -65,25 +66,26 @@ class Builder(object):
                     self._cmpts_path_dict[r] = path + r
         self._available_cmpts += toReturn
 
-    def absPath(self, path):
-        return os.path.join(self.path, path)
+    def _absPath(self, path):
+        if path:
+            return os.path.join(self.path, path)
 
     # RIG BUILD STEPS
     def import_model(self, path=None):
-        if path and os.path.exists(path=path):
-            model = file.import_(path, ns=None)
-        elif os.path.exists(self.absPath(self.get_rig_data(self.rig_file, MODEL_FILE))):
-            model = file.import_(self.absPath(self.get_rig_data(self.rig_file, MODEL_FILE)), ns=None)
-        else:
-            return
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, MODEL_FILE))
+
+        if path and os.path.exists(path):
+            file.import_(path, ns=None)
+            logger.info("model imported")
 
     def import_skeleton(self, path=None):
-        if path and os.path.exists(path=path):
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, SKELETON_FILE))
+
+        if os.path.exists(path):
             nodes = file.import_(path, ns=None)
-        elif os.path.exists(self.absPath(self.get_rig_data(self.rig_file, SKELETON_FILE))):
-            nodes = file.import_(self.absPath(self.get_rig_data(self.rig_file, SKELETON_FILE)), ns=None)
-        else:
-            return
+            logger.info("skeleton imported")
 
         # get top level nodes in the skeleton
         for node in cmds.ls(nodes, l=True, type='transform'):
@@ -91,50 +93,41 @@ class Builder(object):
                 # self.top_skeleton_nodes.append(node)
                 meta.tag(node, 'skeleton_root')
 
-        logger.info("skeleton imported")
-
     def load_joint_positions(self, path=None):
         import rigamajig2.maya.data.joint_data as joint_data
-        if path and os.path.exists(path=path):
-            joint_pos_path = path
-        elif os.path.exists(self.absPath(self.get_rig_data(self.rig_file, SKELETON_POS))):
-            joint_pos_path = self.absPath(self.get_rig_data(self.rig_file, SKELETON_POS))
-        else:
-            return
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, SKELETON_POS))
 
-        if os.path.exists(joint_pos_path):
+        if os.path.exists(path):
             data_obj = joint_data.JointData()
-            data_obj.read(joint_pos_path)
+            data_obj.read(path)
             data_obj.applyData(data_obj.getData().keys())
-            logger.info("Joint positions loaded from: {}".format(joint_pos_path))
+            logger.info("Joint positions loaded from: {}".format(path))
 
     def save_joint_positions(self, path=None):
         import rigamajig2.maya.data.joint_data as joint_data
 
-        if path:
-            joint_pos_path = path
-        elif self.get_rig_data(self.rig_file, SKELETON_POS):
-            joint_pos_path = self.absPath(self.get_rig_data(self.rig_file, SKELETON_POS))
-        else:
-            return
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, SKELETON_POS))
 
         # find all skeleton roots and get the positions of their children
         skeleton_roots = common.toList(meta.getTagged('skeleton_root'))
         if len(skeleton_roots) > 0:
             data_obj = joint_data.JointData()
             for root in skeleton_roots:
-                logger.debug("Gathering data of joints under skeleton root: {}".format(root))
+                logger.debug("Gathering data of joints under skeleton root_hrc: {}".format(root))
                 data_obj.gatherDataIterate(cmds.listRelatives(root, allDescendents=True, type='joint'))
-            data_obj.write(joint_pos_path)
-            logger.info("Joint positions saved to: {}".format(joint_pos_path))
+            data_obj.write(path)
+            logger.info("Joint positions saved to: {}".format(path))
         else:
-            raise RuntimeError("the root joint {} does not exists".format(skeleton_roots))
+            raise RuntimeError("the root_hrc joint {} does not exists".format(skeleton_roots))
 
     def initalize(self):
         """Initalize rig (this is where the user can make changes)"""
         for cmpt in self.cmpts:
             logger.info('Initalizing: {}'.format(cmpt.name))
             cmpt._intialize_cmpt()
+        self.load_guide_data()
         logger.info("initalize -- complete")
 
     def build(self):
@@ -142,7 +135,7 @@ class Builder(object):
         for cmpt in self.cmpts:
             logger.info('Building: {}'.format(cmpt.name))
             cmpt._build_cmpt()
-            # if the component is not a main parent the cmpt.root to the rig
+            # if the component is not a main parent the cmpt.root_hrc to the rig
             if cmds.objExists('rig') and not isinstance(cmpt, main.Main):
                 cmds.parent(cmpt.root, 'rig')
 
@@ -183,36 +176,46 @@ class Builder(object):
         """
         import rigamajig2.maya.data.curve_data as curve_data
 
-        if path and os.path.exists(path=path):
-            control_shape_path = path
-        elif os.path.exists(self.absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))):
-            control_shape_path = self.absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))
-        else:
-            return
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))
 
         cd = curve_data.CurveData()
-        cd.read(control_shape_path)
+        cd.read(path)
 
-        controls = cd.getData().keys()
-        logger.info("loading shapes for {} controls".format(len(controls)))
-        cd.applyData(controls, applyColor=applyColor)
-        logger.info("control shapes -- complete")
+        if os.path.exists(path):
+            controls = cd.getData().keys()
+            logger.info("loading shapes for {} controls".format(len(controls)))
+            cd.applyData(controls, applyColor=applyColor)
+            logger.info("control shapes -- complete")
 
     def save_controlShapes(self, path=None):
         import rigamajig2.maya.data.curve_data as curve_data
 
-        if path:
-            control_shape_path = path
-        elif self.get_rig_data(self.rig_file, CONTROL_SHAPES):
-            control_shape_path = self.absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))
-        else:
-            return
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))
 
-        print control_shape_path
-        cd = curve_data.CurveData()
-        cd.gatherDataIterate(meta.getTagged("control"))
-        cd.write(control_shape_path)
-        logger.info("control shapes saved to: {}".format(control_shape_path))
+        if path:
+            cd = curve_data.CurveData()
+            cd.gatherDataIterate(meta.getTagged("control"))
+            cd.write(path)
+            logger.info("control shapes saved to: {}".format(path))
+
+    def load_guide_data(self, path=None, nodes=None):
+        """
+        Load guide data
+        :return:
+        """
+        import rigamajig2.maya.data.node_data as node_data
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, GUIDES))
+
+        if os.path.exists(path):
+            nd = node_data.NodeData()
+            nd.read(path)
+            if not nodes:
+                nodes = nd.getData().keys()
+            nd.applyData(nodes=nodes)
+            logger.info("guides_hrc loaded")
 
     def load_data(self):
         """
@@ -227,7 +230,7 @@ class Builder(object):
         :return:
         """
         for cmpt in self.cmpts:
-            if cmpt.get_step()  >= 2:
+            if cmpt.get_step() >= 2:
                 logger.warning("component {} is already build. No use creating proxy feedback".format(cmpt))
             else:
                 cmpt.showAdvancedProxy()
@@ -244,7 +247,7 @@ class Builder(object):
         :param scripts: path to scripts to run
         """
         if self.path:
-            scripts_path = self.absPath(PRE_SCRIPT_PATH)
+            scripts_path = self._absPath(PRE_SCRIPT_PATH)
             for script in runScript.find_scripts(scripts_path):
                 scripts.append(script)
 
@@ -258,7 +261,7 @@ class Builder(object):
         :param scripts: path to scripts to run
         """
         if self.path:
-            scripts_path = self.absPath(POST_SCRIPT_PATH)
+            scripts_path = self._absPath(POST_SCRIPT_PATH)
             for script in runScript.find_scripts(scripts_path):
                 scripts.append(script)
 
@@ -273,7 +276,7 @@ class Builder(object):
         :return:
         """
         if self.path:
-            scripts_path = self.absPath(PUB_SCRIPT_PATH)
+            scripts_path = self._absPath(PUB_SCRIPT_PATH)
             for script in runScript.find_scripts(scripts_path):
                 scripts.append(script)
 

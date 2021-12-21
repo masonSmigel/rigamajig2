@@ -31,7 +31,7 @@ MODEL_FILE = "model_file"
 SKELETON_FILE = "skeleton_file"
 SKELETON_POS = "skeleton_pos"
 CONTROL_SHAPES = "control_shapes"
-GUIDES = "guides_hrc"
+GUIDES = "guides"
 
 
 class Builder(object):

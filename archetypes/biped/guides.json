@@ -31,7 +31,7 @@
                 0.0
             ], 
             "rotateOrder": 0, 
-            "overrideEnabled": false
+            "overrideEnabled": true
         }, 
         "leg_l_inn": {
             "dagPath": "|leg_l_guide|leg_l_inn", 
@@ -61,7 +61,7 @@
                 0.0
             ], 
             "rotateOrder": 0, 
-            "overrideEnabled": false
+            "overrideEnabled": true
         }, 
         "leg_l_out": {
             "dagPath": "|leg_l_guide|leg_l_out", 
@@ -91,7 +91,7 @@
                 0.0
             ], 
             "rotateOrder": 0, 
-            "overrideEnabled": false
+            "overrideEnabled": true
         }, 
         "leg_l_ball": {
             "dagPath": "|leg_l_guide|leg_l_ball", 
@@ -121,7 +121,7 @@
                 0.0
             ], 
             "rotateOrder": 0, 
-            "overrideEnabled": false
+            "overrideEnabled": true
         }, 
         "leg_l_toe": {
             "dagPath": "|leg_l_guide|leg_l_toe", 
@@ -151,7 +151,7 @@
                 0.0
             ], 
             "rotateOrder": 0, 
-            "overrideEnabled": false
+            "overrideEnabled": true
         }, 
         "leg_r_heel": {
             "dagPath": "|leg_r_guide|leg_r_heel", 
@@ -181,7 +181,7 @@
                 0.0
             ], 
             "rotateOrder": 0, 
-            "overrideEnabled": false
+            "overrideEnabled": true
         }, 
         "leg_r_inn": {
             "dagPath": "|leg_r_guide|leg_r_inn", 
@@ -211,7 +211,7 @@
                 0.0
             ], 
             "rotateOrder": 0, 
-            "overrideEnabled": false
+            "overrideEnabled": true
         }, 
         "leg_r_out": {
             "dagPath": "|leg_r_guide|leg_r_out", 
@@ -241,7 +241,7 @@
                 0.0
             ], 
             "rotateOrder": 0, 
-            "overrideEnabled": false
+            "overrideEnabled": true
         }, 
         "leg_r_ball": {
             "dagPath": "|leg_r_guide|leg_r_ball", 
@@ -271,7 +271,7 @@
                 0.0
             ], 
             "rotateOrder": 0, 
-            "overrideEnabled": false
+            "overrideEnabled": true
         }, 
         "leg_r_toe": {
             "dagPath": "|leg_r_guide|leg_r_toe", 
@@ -301,7 +301,7 @@
                 0.0
             ], 
             "rotateOrder": 0, 
-            "overrideEnabled": false
+            "overrideEnabled": true
         }
     }
 }

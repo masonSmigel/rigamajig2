@@ -3,7 +3,7 @@
     "user": "masonsmigel", 
     "time": "2021-11-22 23:12:13", 
     "data": {
-        "model_file": "../../../../../jobs/animAide/aide_maya/assets/baseMale/mdl_baseMale_v003.0012.ma", 
+        "model_file": null, 
         "skeleton_file": "skeleton.ma", 
         "skeleton_pos": "skeleton_pos.json", 
         "pre_scripts": [], 
@@ -13,6 +13,7 @@
         "r_color": "red", 
         "c_color": "yellow", 
         "use_proxy_attrs": true, 
-        "control_shapes" : "controlShapes.json"
+        "control_shapes" : "controlShapes.json", 
+        "guides": "guides.json"
     }
 }

@@ -59,7 +59,7 @@ class OverrideColorer(QtWidgets.QWidget):
         self.colorPresets_menu = QtWidgets.QMenu()
         for color in sorted(rig_color.getAvailableColors()):
             action = QtWidgets.QAction(color, self)
-            action.setIcon(QtGui.QIcon(self.get_pixmap_from_name(color)))
+            action.setIcon(QtGui.QIcon(self.__get_pixmap_from_name(color)))
             self.colorPresets_menu.addAction(action)
             action.triggered.connect(partial(self.set_color_text, color))
         return self.colorPresets_menu
@@ -74,7 +74,7 @@ class OverrideColorer(QtWidgets.QWidget):
         set the color
         :param color: color as a string
         """
-        self.color_swatch.setPixmap(self.get_pixmap_from_name(color))
+        self.color_swatch.setPixmap(self.__get_pixmap_from_name(color))
 
     def set_color_text(self, text):
         self.color_le.setText(text)
@@ -84,7 +84,7 @@ class OverrideColorer(QtWidgets.QWidget):
         if color in rig_color.COLORS:
             self.set_color_swatch(color=color)
 
-    def get_pixmap_from_name(self, name):
+    def __get_pixmap_from_name(self, name):
         pixmap = QtGui.QPixmap(32, 32)
         pixmap.fill(QtGui.QColor(rig_color.COLORS[name][0], rig_color.COLORS[name][1], rig_color.COLORS[name][2]))
         return pixmap

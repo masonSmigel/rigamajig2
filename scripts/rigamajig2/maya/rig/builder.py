@@ -200,7 +200,7 @@ class Builder(object):
             cd.write(path)
             logger.info("control shapes saved to: {}".format(path))
 
-    def load_guide_data(self, path=None, nodes=None):
+    def load_guide_data(self, path=None):
         """
         Load guide data
         :return:
@@ -212,10 +212,24 @@ class Builder(object):
         if os.path.exists(path):
             nd = node_data.NodeData()
             nd.read(path)
-            if not nodes:
-                nodes = nd.getData().keys()
-            nd.applyData(nodes=nodes)
-            logger.info("guides_hrc loaded")
+            nd.applyData(nodes=nd.getData().keys())
+            logger.info("guides loaded")
+
+    def save_guide_data(self, path=None):
+        """
+        Save guides data
+        :param path:
+        :return:
+        """
+        import rigamajig2.maya.data.node_data as node_data
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, GUIDES))
+
+        if path:
+            nd = node_data.NodeData()
+            nd.gatherDataIterate(meta.getTagged("guide"))
+            nd.write(path)
+            logger.info("guides saved to: {}".format(path))
 
     def load_data(self):
         """

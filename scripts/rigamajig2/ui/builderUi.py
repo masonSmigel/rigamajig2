@@ -23,6 +23,8 @@ logger.setLevel(5)
 MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
 JSON_FILTER = "Json Files (*.json)"
 
+LARGE_BTN_HEIGHT = 35
+
 
 class RigamajigBuilderUi(QtWidgets.QDialog):
     WINDOW_TITLE = "Rigamajig2 Builder"
@@ -124,6 +126,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.save_skeleton_btn = QtWidgets.QPushButton("Save skeleton")
         self.load_jnt_pos_btn = QtWidgets.QPushButton("Load joint pos")
         self.save_jnt_pos_btn = QtWidgets.QPushButton("Save joint pos")
+        self.import_load_skeleton_btn = QtWidgets.QPushButton("Import and Load Joint Positions")
+        self.import_load_skeleton_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
         self.skeletonEdit_wdgt = collapseableWidget.CollapsibleWidget('Edit Skeleton')
         self.jnt_to_rot_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Rotation")
@@ -143,10 +147,14 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         # Component Section
         self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Component')
         self.cmpt_manager = componentManager.ComponentManager()
-        self.initalize_sel_btn = QtWidgets.QPushButton("Initalize Selected")
-        self.initalize_all_btn = QtWidgets.QPushButton("Init All Components ")
+        self.initalize_all_btn = QtWidgets.QPushButton("Initalize All Components ")
+        self.initalize_all_btn.setFixedHeight(LARGE_BTN_HEIGHT)
         self.show_advanced_proxy_cb = QtWidgets.QCheckBox()
         self.show_advanced_proxy_cb.setFixedWidth(25)
+
+        self.guide_path_selector = pathSelector.PathSelector("guides:", cap="Select a guide file", ff=JSON_FILTER, fm=1)
+        self.load_guides_btn = QtWidgets.QPushButton("Load Guides")
+        self.save_guides_btn = QtWidgets.QPushButton("Save Guides")
 
         # Build Section
         self.build_wdgt = collapseableWidget.CollapsibleWidget('Build')
@@ -255,6 +263,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.skeleton_wdgt.addWidget(self.skel_path_selector)
         self.skeleton_wdgt.addWidget(self.joint_pos_path_selector)
         self.skeleton_wdgt.addLayout(skeleton_btn_layout)
+        self.skeleton_wdgt.addWidget(self.import_load_skeleton_btn)
         self.skeleton_wdgt.addWidget(self.skeletonEdit_wdgt)
 
         self.skeletonEdit_wdgt.addLayout(jointOrientation_layout)
@@ -270,11 +279,16 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         cmpt_btn_layout.addWidget(show_proxy_label)
         cmpt_btn_layout.addWidget(self.show_advanced_proxy_cb)
-        cmpt_btn_layout.addWidget(self.initalize_sel_btn)
         cmpt_btn_layout.addWidget(self.initalize_all_btn)
+
+        guide_load_layout = QtWidgets.QHBoxLayout()
+        guide_load_layout.addWidget(self.load_guides_btn)
+        guide_load_layout.addWidget(self.save_guides_btn)
 
         self.cmpt_wdgt.addWidget(self.cmpt_manager)
         self.cmpt_wdgt.addLayout(cmpt_btn_layout)
+        self.cmpt_wdgt.addWidget(self.guide_path_selector)
+        self.cmpt_wdgt.addLayout(guide_load_layout)
 
         # Build
         build_layout.addWidget(self.build_wdgt)
@@ -368,6 +382,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         self.import_model_btn.clicked.connect(self.import_model)
 
+        self.import_load_skeleton_btn.clicked.connect(self.import_load_skeleton)
         self.import_skeleton_btn.clicked.connect(self.import_skeleton)
         self.load_jnt_pos_btn.clicked.connect(self.load_joint_positions)
         self.save_jnt_pos_btn.clicked.connect(self.save_joint_positions)
@@ -376,6 +391,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.mirrorJnt_btn.clicked.connect(self.mirror_joint)
 
         self.show_advanced_proxy_cb.toggled.connect(self.toggle_advanced_proxy)
+        self.load_guides_btn.clicked.connect(self.load_guides)
+        self.save_guides_btn.clicked.connect(self.save_guides)
 
         self.load_ctl_btn.clicked.connect(self.load_controlShapes)
         self.save_ctl_btn.clicked.connect(self.save_controlShapes)
@@ -408,6 +425,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.model_path_selector.set_relativeTo(self.rig_env)
         self.skel_path_selector.set_relativeTo(self.rig_env)
         self.joint_pos_path_selector.set_relativeTo(self.rig_env)
+        self.guide_path_selector.set_relativeTo(self.rig_env)
         self.ctl_selector.set_relativeTo(self.rig_env)
 
         self.rig_builder = builder.Builder(self.rig_file)
@@ -441,6 +459,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         skel_pos_file = tmp_builder.get_rig_data(self.rig_file, builder.SKELETON_POS)
         if skel_pos_file: self.joint_pos_path_selector.set_path(skel_pos_file)
+
+        guide_file = tmp_builder.get_rig_data(self.rig_file, builder.GUIDES)
+        if guide_file: self.guide_path_selector.set_path(guide_file)
 
         ctl_file = tmp_builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES)
         if ctl_file: self.ctl_selector.set_path(ctl_file)
@@ -490,6 +511,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def import_model(self):
         self.rig_builder.import_model(self.model_path_selector.get_abs_path())
 
+    def import_load_skeleton(self):
+        self.import_skeleton()
+        self.load_joint_positions()
+
     def import_skeleton(self):
         self.rig_builder.import_skeleton(self.skel_path_selector.get_abs_path())
 
@@ -498,6 +523,12 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def save_joint_positions(self):
         self.rig_builder.save_joint_positions(self.joint_pos_path_selector.get_abs_path())
+
+    def load_guides(self):
+        self.rig_builder.load_guide_data(self.guide_path_selector.get_abs_path())
+
+    def save_guides(self):
+        self.rig_builder.save_guide_data(self.guide_path_selector.get_abs_path())
 
     def load_controlShapes(self):
         self.rig_builder.load_controlShapes(self.ctl_selector.get_abs_path(), self.load_color_cb.isChecked())

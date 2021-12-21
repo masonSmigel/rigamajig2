@@ -45,14 +45,13 @@ class Builder(object):
 
         self._cmpts_path_dict = dict()
         self._available_cmpts = list()
-        self.getComponents()
+        self.__lookForComponents(CMPT_PATH)
 
         # varibles we need
         self.top_skeleton_nodes = list()
 
     def getComponents(self):
-        path = CMPT_PATH
-        self.__lookForComponents(path)
+        return self._available_cmpts
 
     def __lookForComponents(self, path):
         res = os.listdir(path)
@@ -137,12 +136,14 @@ class Builder(object):
             cmpt._build_cmpt()
             # if the component is not a main parent the cmpt.root_hrc to the rig
             if cmds.objExists('rig') and not isinstance(cmpt, main.Main):
-                cmds.parent(cmpt.root_hrc, 'rig')
+                if not cmds.listRelatives(cmpt.root_hrc, p=True):
+                    cmds.parent(cmpt.root_hrc, 'rig')
 
         # parent the bind joints to the bind group. if one exists
         if cmds.objExists('bind'):
             top_skeleton_nodes = meta.getTagged('skeleton_root')
-            cmds.parent(top_skeleton_nodes, 'bind')
+            if not cmds.listRelatives(top_skeleton_nodes, p=True):
+                cmds.parent(top_skeleton_nodes, 'bind')
 
         logger.info("build -- complete")
 

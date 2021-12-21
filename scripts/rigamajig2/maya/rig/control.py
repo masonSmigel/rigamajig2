@@ -23,8 +23,8 @@ CONTROLTAG = 'control'
 
 
 def create(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None, position=[0, 0, 0],
-           rotation=[0, 0, 0],
-           size=1, hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz', trasformType='transform', shapeAim='y'):
+           rotation=[0, 0, 0], size=1, hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz',
+           trasformType='transform', shapeAim='y'):
     """
     Create a control. It will also create a hierarchy above the control based on the hierarchy list.
 
@@ -340,3 +340,50 @@ def scaleShapes(shape, scale=(1, 1, 1)):
         cmds.scale(scale[0], scale[1], scale[2],
                    rigamajig2.maya.curve.getCvs(shape),
                    relative=True, objectSpace=True)
+
+
+def createGuide(name, side=None, parent=None, position=[0,0,0], rotation=[0,0,0], size=1, hideAttrs=['sx', 'sy', 'sz','v'], color='turquoise'):
+    """
+    Create a guide controler
+    :param name: Name of the guide
+    :param side: Optional - name of the side
+    :param parent: Optional - Parent the guide in the control hierarchy
+    :param position: Optional - Point in world space to position the control
+    :param rotation: Optional - Rotation in world space to rotate the control
+    :param size: Optional - Size of the guide
+    :param hideAttrs: Optional - list of attributes to lock and hide. Default is ['s', 'v']
+    :param color: Optional - Color of the guide
+    :return: Control created
+    """
+    if side:
+        name = rigamajig2.maya.naming.getUniqueName("{}_{}".format(name, side))
+    else:
+        name = rigamajig2.maya.naming.getUniqueName(name)
+
+    guide = cmds.createNode('joint', name=name)
+    loc = cmds.createNode('locator', p=guide, n="{}Shape".format(name))
+    cmds.setAttr("{}.drawStyle".format(guide), 2)
+    hideAttrs.append('radius')
+
+    for attr in hideAttrs:
+        if cmds.objExists("{}.{}".format(guide, attr)):
+            rigamajig2.maya.attr.lockAndHide(guide, attr)
+
+    if parent:
+        cmds.parent(guide, parent)
+    if position:
+        cmds.xform(guide, ws=True, translation=position)
+    if rotation:
+        cmds.xform(guide, ws=True, rotation=rotation)
+    if color:
+        rigamajig2.maya.color.setOverrideColor(guide, color)
+
+    # scale the shape
+    if size > 0:
+        cmds.setAttr("{}.localScale".format(loc), size, size, size, type="double3")
+
+    rigamajig2.maya.meta.tag(guide, 'guide')
+
+    return guide
+
+

@@ -27,7 +27,7 @@ def createlivePoleVector(matchList, poleVectorNode=None):
     if not poleVectorNode:
         poleVectorNode = cmds.spaceLocator(name=matchList[1] + '_pvPos_' + common.TARGET)[0]
         cmds.setAttr("{}.overrideEnabled".format(poleVectorNode), 1)
-        cmds.setAttr("{}.overrideColor".format(poleVectorNode), 29)
+        cmds.setAttr("{}.overrideColor".format(poleVectorNode), 28)
     if not cmds.objExists(poleVectorNode):
         raise RuntimeError("The poleVector node '{}' does not exist in the scene".format(poleVectorNode))
 

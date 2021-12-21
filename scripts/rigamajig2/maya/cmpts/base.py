@@ -21,7 +21,7 @@ class Base(object):
         :type input
         """
         self.name = name
-        self.cmpt_type = self.__class__.__name__.lower()
+        self.cmpt_type = ".".join([self.__module__.split('cmpts.')[-1],  self.__class__.__name__])
         self.input = input
         self.size = size
         self.container = self.name + '_container'

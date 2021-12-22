@@ -46,7 +46,6 @@ class Builder(object):
         self.set_rig_file(rigFile)
         self.cmpts = list()
 
-        self._cmpts_path_dict = dict()
         self._available_cmpts = list()
         self.__lookForComponents(CMPT_PATH)
 
@@ -74,7 +73,6 @@ class Builder(object):
                     for cls in inspect.getmembers(module_object, inspect.isclass):
                         toReturn.append("{}.{}".format(module_file, cls[0]))
 
-                    self._cmpts_path_dict[r] = os.path.join(path, r)
         self._available_cmpts += toReturn
 
     def _absPath(self, path):

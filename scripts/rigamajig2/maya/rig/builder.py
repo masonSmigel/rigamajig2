@@ -1,8 +1,11 @@
 """
 This module contains our rig builder
 """
+import sys
 import os
 import time
+import inspect
+import imp
 
 import maya.cmds as cmds
 import rigamajig2.shared.common as common
@@ -57,12 +60,21 @@ class Builder(object):
         res = os.listdir(path)
         toReturn = list()
         for r in res:
+            full_path = os.path.join(path, r)
             if r not in _EXCLUDED_FOLDERS and os.path.isdir(path + '/' + r) == True:
                 self.__lookForComponents()
             if r.find('.py') != -1 and r.find('.pyc') == -1 and r not in _EXCLUDED_FILES:
                 if r.find('reload') == -1:
-                    toReturn.append(r)
-                    self._cmpts_path_dict[r] = path + r
+
+                    # find classes in the file path
+                    module_file = r.split('.')[0]
+                    modulesPath = 'rigamajig2.maya.cmpts.{}'
+                    module_name = modulesPath.format(module_file)
+                    module_object = __import__(module_name, globals(), locals(), ["*"], -1)
+                    for cls in inspect.getmembers(module_object, inspect.isclass):
+                        toReturn.append("{}.{}".format(module_file, cls[0]))
+
+                    self._cmpts_path_dict[r] = os.path.join(path, r)
         self._available_cmpts += toReturn
 
     def _absPath(self, path):

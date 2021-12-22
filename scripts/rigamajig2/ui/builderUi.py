@@ -385,6 +385,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         self.load_guides_btn.clicked.connect(self.load_guides)
         self.save_guides_btn.clicked.connect(self.save_guides)
+        self.initalize_all_btn.clicked.connect(self.cmpt_manager.initalize_all_cmpts)
 
         self.load_ctl_btn.clicked.connect(self.load_controlShapes)
         self.save_ctl_btn.clicked.connect(self.save_controlShapes)

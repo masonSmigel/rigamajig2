@@ -258,12 +258,12 @@ class Builder(object):
             if cmpt.get_step() >= 2:
                 logger.warning("component {} is already build. No use creating proxy feedback".format(cmpt))
             else:
-                cmpt.showAdvancedProxy()
+                cmpt._show_advanced_proxy()
 
     def delete_advanced_proxy(self):
         for cmpt in self.cmpts:
             if cmpt.proxy_setup_exists():
-                cmpt.deleteAdvancedProxy()
+                cmpt._delete_advanced_proxy()
 
     # RUN SCRIPTS
     def pre_script(self, scripts=[]):

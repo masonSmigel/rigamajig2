@@ -64,6 +64,13 @@ class Base(object):
         else:
             logger.warning('component {} already initalized.'.format(self.name))
 
+    def _show_advanced_proxy(self):
+        """
+        Show our advanced proxy setup
+        """
+        with rigamajig2.maya.container.ActiveContainer(self.container):
+            self.showAdvancedProxy()
+
     def _build_cmpt(self):
         """
         build the rig
@@ -79,7 +86,7 @@ class Base(object):
         if not self.get_step() >= 2:
             # if a proxy setup exists delete it.
             if self.proxy_setup_exists():
-                self.deleteAdvancedProxy()
+                self._delete_advanced_proxy()
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -138,7 +145,13 @@ class Base(object):
         else:
             logger.warning('component {} already optimized.'.format(self.name))
 
+    def _delete_advanced_proxy(self):
+        """ Delete the advanced proxy """
+        cmds.delete(self.proxySetupGrp)
+
+    # --------------------------------------------------------------------------------
     # functions
+    # --------------------------------------------------------------------------------
     def preScript(self):
         pass
 
@@ -216,10 +229,6 @@ class Base(object):
     def showAdvancedProxy(self):
         """ Show advanved proxy attributes """
         pass
-
-    def deleteAdvancedProxy(self):
-        """ Delete the advanced proxy """
-        cmds.delete(self.proxySetupGrp)
 
     def set_step(self, step=0):
         """

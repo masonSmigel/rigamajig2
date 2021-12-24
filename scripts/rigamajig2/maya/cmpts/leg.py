@@ -57,23 +57,23 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
     def initalHierachy(self):
         """Build the initial hirarchy"""
         super(Leg, self).initalHierachy()
-        self.toes_fk = rig_control.createAtObject(self._userSettings['toes_fkName'], self.side,
+        self.toes_fk = rig_control.createAtObject(self.toes_fkName, self.side,
                                                   hierarchy=['trsBuffer'],
                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
                                                   parent=self.control_hrc, shape='square', shapeAim='x',
                                                   xformObj=self.input[4])
         # create ik piviot controls
-        self.heel_ik = rig_control.createAtObject(self._userSettings['heel_ikName'], self.side,
+        self.heel_ik = rig_control.createAtObject(self.heel_ikName, self.side,
                                                   hierarchy=['trsBuffer'],
                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
                                                   parent=self.control_hrc, shape='cube', shapeAim='x',
                                                   xformObj=self._heel_piv)
-        self.ball_ik = rig_control.createAtObject(self._userSettings['ball_ikName'], self.side,
+        self.ball_ik = rig_control.createAtObject(self.ball_ikName, self.side,
                                                   hierarchy=['trsBuffer'],
                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
                                                   parent=self.control_hrc, shape='cube', shapeAim='x',
                                                   xformObj=self._ball_piv)
-        self.toes_ik = rig_control.createAtObject(self._userSettings['toes_ikName'], self.side,
+        self.toes_ik = rig_control.createAtObject(self.toes_ikName, self.side,
                                                   hierarchy=['trsBuffer'],
                                                   hideAttrs=['v', 't', 's'], size=self.size, color='blue',
                                                   parent=self.control_hrc, shape='cube', shapeAim='x',

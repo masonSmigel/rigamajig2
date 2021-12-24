@@ -16,9 +16,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         :param name:
         :param input:
         """
-        super(Main, self).__init__(name=name, input=input)
-        self.name = name
-        self.size = size
+        super(Main, self).__init__(name=name, input=input, size=size)
 
     def initalHierachy(self):
         """Build the initial hirarchy"""

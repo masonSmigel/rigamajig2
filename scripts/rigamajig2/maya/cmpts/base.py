@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class Base(object):
 
-    def __init__(self, name, input=[], size=1):
+    def __init__(self, name, input=[], size=1, useProxyAttrs=True):
         """
         :param name:
         :param input:
@@ -23,7 +23,6 @@ class Base(object):
         self.name = name
         self.cmpt_type = ".".join([self.__module__.split('cmpts.')[-1],  self.__class__.__name__])
         self.input = input
-        self.size = size
         self.container = self.name + '_container'
 
         # element lists
@@ -34,8 +33,7 @@ class Base(object):
         self.metaData = {'component_name': self.name,
                          'component_type': self.cmpt_type}
         # node cmpt settings
-        self.cmptSettings = OrderedDict(size=self.size)
-        self._userSettings = OrderedDict()
+        self.cmptSettings = OrderedDict(size=size, useProxyAttrs=useProxyAttrs)
 
         self.proxySetupGrp = self.name + "_proxy"
 
@@ -275,6 +273,5 @@ class Base(object):
         """
         load meta data from the settings node into a dictionary
         """
-        self._userSettings = OrderedDict()
         for key in self.cmptSettings.keys():
-            self._userSettings[key] = self.metaNode.getData(key)
+            setattr(self, key, self.metaNode.getData(key))

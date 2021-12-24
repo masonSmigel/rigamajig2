@@ -1,5 +1,5 @@
 """
-spine component
+basic component
 """
 import maya.cmds as cmds
 import rigamajig2.maya.cmpts.base
@@ -15,7 +15,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Spine(rigamajig2.maya.cmpts.base.Base):
+class Basic(rigamajig2.maya.cmpts.base.Base):
 
     def __init__(self, name, input=[], size=1):
-        super(Spine, self).__init__(name, input=input, size=size)
+        super(Basic, self).__init__(name, input=input, size=size)

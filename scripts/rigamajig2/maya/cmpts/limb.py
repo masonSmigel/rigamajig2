@@ -9,7 +9,6 @@ import rigamajig2.maya.rig.ikfk as ikfk
 import rigamajig2.maya.transform as rig_transform
 import rigamajig2.shared.common as common
 import rigamajig2.maya.meta as meta
-import rigamajig2.maya.container
 import rigamajig2.maya.node
 import rigamajig2.maya.attr
 import rigamajig2.maya.skeleton

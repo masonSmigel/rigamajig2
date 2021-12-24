@@ -145,12 +145,22 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
         rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
-        ikfk.IkFkBase.connectVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls,
-                                        fkList=self.fkControls)
+        ikfk.IkFkBase.connectVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
 
         # connect the base to the main bind chain
         cmds.parentConstraint(self.limbBase[-1], self.input[0])
         rigamajig2.maya.attr.lock(self.input[0], rigamajig2.maya.attr.TRANSFORMS + ['v'])
+
+    def setupProxyAttributes(self):
+        for control in self.controlers:
+            rigamajig2.maya.attr.addSeparator(control, '----')
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'ikfk'), self.controlers)
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretch'), self.limb_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchTop'), self.limb_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchBot'), self.limb_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'softStretch'), self.limb_ik[-1])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'), [self.limb_ik[-1], self.limb_pv[-1]])
+        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'twist'), self.limb_ik[-1])
 
     def connect(self):
         """Create the connection"""
@@ -163,14 +173,10 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             spaces.addSpace(self.limbSwing[1], ['trs_motion'], nameList=['world'], constraintType='orient')
 
         if self.ikSpaces:
-            spaces.addSpace(self.limb_ik[1],
-                            [self.ikSpaces[k] for k in self.ikSpaces.keys()],
-                            self.ikSpaces.keys(), 'parent')
+            spaces.addSpace(self.limb_ik[1], [self.ikSpaces[k] for k in self.ikSpaces.keys()], self.ikSpaces.keys(), 'parent')
 
         if self.pvSpaces:
-            spaces.addSpace(self.limb_pv[1],
-                            [self.pvSpaces[k] for k in self.pvSpaces.keys()],
-                            self.pvSpaces.keys(), 'parent')
+            spaces.addSpace(self.limb_pv[1], [self.pvSpaces[k] for k in self.pvSpaces.keys()], self.pvSpaces.keys(), 'parent')
 
     def finalize(self):
         """ Lock some attributes we dont want to see"""
@@ -210,13 +216,3 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         meta.addMessageListConnection(self.ikfk.getGroup(), self.fkControls, 'fkControls', 'matchNode')
         meta.addMessageListConnection(self.ikfk.getGroup(), self.ikControls, 'ikControls', 'matchNode')
 
-    def setupProxyAttributes(self):
-        for control in self.controlers:
-            rigamajig2.maya.attr.addSeparator(control, '----')
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'ikfk'), self.controlers)
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretch'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchTop'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchBot'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'softStretch'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'), [self.limb_ik[-1], self.limb_pv[-1]])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'twist'), self.limb_ik[-1])

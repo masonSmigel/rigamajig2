@@ -1,7 +1,7 @@
 {
     "type": "JointData", 
     "user": "masonsmigel", 
-    "time": "2021-12-12 15:18:59", 
+    "time": "2021-12-24 03:38:28", 
     "data": {
         "toes_l_bind": {
             "dagPath": "|biped|hips_bind|pelivs_l_bind|thigh_l_bind|knee_l_bind|ankle_l_bind|ball_l_bind|toes_l_bind", 
@@ -2876,7 +2876,7 @@
         "chest_bind": {
             "dagPath": "|biped|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind", 
             "translate": [
-                5.7383, 
+                0.9832, 
                 -0.0, 
                 -0.0
             ], 
@@ -2893,7 +2893,7 @@
             "world_translate": [
                 1.7788240297928452e-14, 
                 111.32537147304214, 
-                1.6630017596119124e-14
+                1.6630017596119118e-14
             ], 
             "world_rotate": [
                 -90.00000000000001, 
@@ -2917,7 +2917,7 @@
         "spine_5_bind": {
             "dagPath": "|biped|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind", 
             "translate": [
-                5.7383, 
+                6.6894, 
                 -0.0, 
                 -0.0
             ], 
@@ -2932,9 +2932,9 @@
                 1.0
             ], 
             "world_translate": [
-                1.5239906943536796e-14, 
-                105.58703490041508, 
-                1.3429428214760171e-14
+                1.5767834649885794e-14, 
+                110.34218494359875, 
+                1.4485283627458137e-14
             ], 
             "world_rotate": [
                 -90.00000000000001, 
@@ -2958,7 +2958,7 @@
         "spine_4_bind": {
             "dagPath": "|biped|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind", 
             "translate": [
-                5.7383, 
+                6.6894, 
                 -0.0, 
                 -0.0
             ], 
@@ -2973,9 +2973,9 @@
                 1.0
             ], 
             "world_translate": [
-                1.2691573589145129e-14, 
-                99.848698327788, 
-                1.0103938743130886e-14
+                1.3113915754224327e-14, 
+                103.65281836233494, 
+                1.0948623073289258e-14
             ], 
             "world_rotate": [
                 -90.00000000000001, 
@@ -2999,7 +2999,7 @@
         "spine_3_bind": {
             "dagPath": "|biped|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind", 
             "translate": [
-                5.7383, 
+                6.6894, 
                 -0.0, 
                 -0.0
             ], 
@@ -3014,9 +3014,9 @@
                 1.0
             ], 
             "world_translate": [
-                1.0143240234753452e-14, 
-                94.11036175516094, 
-                6.889471573964119e-15
+                1.0459996858562851e-14, 
+                96.96345178107114, 
+                7.522984821582898e-15
             ], 
             "world_rotate": [
                 -90.00000000000001, 
@@ -3040,7 +3040,7 @@
         "spine_2_bind": {
             "dagPath": "|biped|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind", 
             "translate": [
-                5.7383, 
+                6.6894, 
                 -0.0, 
                 -0.0
             ], 
@@ -3055,9 +3055,9 @@
                 1.0
             ], 
             "world_translate": [
-                7.594906880361777e-15, 
-                88.37202518253386, 
-                3.452959799872319e-15
+                7.806077962901376e-15, 
+                90.27408519980733, 
+                3.875301964951505e-15
             ], 
             "world_rotate": [
                 -90.00000000000001, 
@@ -3081,7 +3081,7 @@
         "spine_1_bind": {
             "dagPath": "|biped|hips_bind|spine_0_bind|spine_1_bind", 
             "translate": [
-                5.7383, 
+                6.6894, 
                 -0.0, 
                 -0.0
             ], 
@@ -3096,9 +3096,9 @@
                 1.0
             ], 
             "world_translate": [
-                5.046573525970093e-15, 
-                82.63368860990676, 
-                1.5126593079013712e-15
+                5.152159067239892e-15, 
+                83.58471861854349, 
+                1.723830390440964e-15
             ], 
             "world_rotate": [
                 -90.00000000000001, 

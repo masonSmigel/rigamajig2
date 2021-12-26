@@ -110,7 +110,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         # if we dont want to use proxy attributes then create an attribute to hold attributes
         if not self.useProxyAttrs:
-            self.ikfk_control = rig_control.createAtObject(self.name, self.side,
+            self.ikfk_control = rig_control.createAtObject(self.name,
                                                            hierarchy=['trsBuffer'], hideAttrs=['t','r', 's', 'v'],
                                                            size=self.size, color='lightorange', shape='peakedCube',
                                                            xformObj=self.input[3], parent=self.control_hrc,
@@ -240,8 +240,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.lock(wristIkOffset, ['t', 'r', 's', 'v'])
 
         # add required data to the ikFkSwitchGroup
-        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkJnts[:-1] + [wristIkOffset], 'fkMatchList',
-                                      'matchNode')
-        meta.addMessageListConnection(self.ikfk.getGroup(), self.ikJnts, 'ikMatchList', 'matchNode')
-        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkControls, 'fkControls', 'matchNode')
-        meta.addMessageListConnection(self.ikfk.getGroup(), self.ikControls, 'ikControls', 'matchNode')
+        # TODO: try to check this out. maybe use the ikfk group instead of the attribute
+        storeNode = self.ikfk.getGroup() if self.useProxyAttrs else self.ikfk_control[-1]
+        meta.addMessageListConnection(storeNode, self.fkJnts[:-1] + [wristIkOffset], 'fkMatchList','matchNode')
+        meta.addMessageListConnection(storeNode, self.ikJnts, 'ikMatchList', 'matchNode')
+        meta.addMessageListConnection(storeNode, self.fkControls, 'fkControls', 'matchNode')
+        meta.addMessageListConnection(storeNode, self.ikControls, 'ikControls', 'matchNode')

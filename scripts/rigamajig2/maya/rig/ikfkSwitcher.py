@@ -30,7 +30,6 @@ class IkFkSwitch(object):
 
         if value == 0:
             cmds.setAttr('{}.ikfk'.format(self.node), value)
-
             cmds.setAttr('{}.pvPin'.format(self.node), 0)
             cmds.setAttr('{}.twist'.format(self.node), 0)
             cmds.setAttr('{}.stretch'.format(self.node), 1)

@@ -31,12 +31,12 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         :param: pvSpaces: dictionary of key and space for the pv control.
         :type pvSpaces: dict
         """
-        super(Limb, self).__init__(name, input=input, size=size, useProxyAttrs=useProxyAttrs)
+        super(Limb, self).__init__(name, input=input, size=size)
         self.side = common.getSide(self.name)
 
         self.metaData['component_side'] = self.side
         # initalize cmpt settings.
-
+        self.cmptSettings['useProxyAttrs'] = useProxyAttrs
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['limbBaseName'] = inputBaseNames[0]
         self.cmptSettings['limbSwingName'] = inputBaseNames[1] + "Swing"

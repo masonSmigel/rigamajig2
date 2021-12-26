@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class Base(object):
 
-    def __init__(self, name, input=[], size=1, useProxyAttrs=True):
+    def __init__(self, name, input=[], size=1):
         """
         :param name:
         :param input:
@@ -33,7 +33,7 @@ class Base(object):
         self.metaData = {'component_name': self.name,
                          'component_type': self.cmpt_type}
         # node cmpt settings
-        self.cmptSettings = OrderedDict(size=size, useProxyAttrs=useProxyAttrs)
+        self.cmptSettings = OrderedDict(size=size)
 
         self.proxySetupGrp = self.name + "_proxy"
 

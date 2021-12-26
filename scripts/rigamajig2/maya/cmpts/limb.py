@@ -30,6 +30,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         :type ikSpaces: dict
         :param: pvSpaces: dictionary of key and space for the pv control.
         :type pvSpaces: dict
+        :useProxyAttrs: use proxy attributes instead of an ikfk control
+        :type useProxyAttrs: bool
         """
         super(Limb, self).__init__(name, input=input, size=size)
         self.side = common.getSide(self.name)

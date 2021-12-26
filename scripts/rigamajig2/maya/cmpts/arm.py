@@ -24,6 +24,8 @@ class Arm(rigamajig2.maya.cmpts.limb.Limb):
         :type ikSpaces: dict
         :param: pvSpaces: dictionary of key and space for the pv control.
         :type pvSpaces: dict
+        :useProxyAttrs: use proxy attributes instead of an ikfk control
+        :type useProxyAttrs: bool
         """
         super(Arm, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces, useProxyAttrs=useProxyAttrs)
 

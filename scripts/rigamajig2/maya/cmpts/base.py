@@ -16,9 +16,12 @@ class Base(object):
 
     def __init__(self, name, input=[], size=1):
         """
-        :param name:
-        :param input:
-        :type input
+        :param name: name of the components
+        :type name: str
+        :param input: list of input joints. This must be a length of 4
+        :type input: list
+        :param size: default size of the controls:
+        :type size: float
         """
         self.name = name
         self.cmpt_type = ".".join([self.__module__.split('cmpts.')[-1],  self.__class__.__name__])

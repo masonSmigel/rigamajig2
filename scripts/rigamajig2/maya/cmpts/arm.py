@@ -17,9 +17,12 @@ class Arm(rigamajig2.maya.cmpts.limb.Limb):
     def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True):
         """
         Create a main control
-        :param name:
+        :param name: name of the components
+        :type name: str
         :param input: list of input joints. This must be a length of 4
         :type input: list
+        :param size: default size of the controls:
+        :type size: float
         :param: ikSpaces: dictionary of key and space for the ik control.
         :type ikSpaces: dict
         :param: pvSpaces: dictionary of key and space for the pv control.

@@ -293,9 +293,9 @@ def addColorAttr(node, longName, value=False, niceName=None, shortName=None,
     return str(node + '.' + longName)
 
 
-def moveAttribute(attr, source, target):
+def copyAttribute(attr, source, target):
     """
-    Move an attribute keeping the connections intact
+    Create a copy of an attribute on a new target node
     :param attr: attribute to move
     :type attr: str
     :param source: source node of the attribute
@@ -329,12 +329,40 @@ def moveAttribute(attr, source, target):
 
         cmds.setAttr("{}.{}".format(target, attr), value)           # set the value of the attribtue
 
+
+def moveAttribute(attr, source, target):
+    """
+    Move an attribute keeping the connections intact
+    :param attr: attribute to move
+    :type attr: str
+    :param source: source node of the attribute
+    :type source: str
+    :param target: node to move the attribute to
+    :type target: str
+    """
+    copyAttribute(attr=attr, source=source, target=target)
+
     source_connections = cmds.listConnections("{}.{}".format(source, attr), s=True, d=False, plugs=True) or []
     destination_connections = cmds.listConnections("{}.{}".format(source, attr), d=True, s=False, plugs=True) or []
 
     # connect source and  destination attributes
     for plug in source_connections: cmds.connectAttr(plug, "{}.{}".format(target, attr), f=True)
     for plug in destination_connections: cmds.connectAttr("{}.{}".format(target, attr), plug, f=True)
+
+
+def driveAttribute(attr, source, target):
+    """
+    Create an identical attribute on a target node and drive the source
+    :param attr: attribute to move
+    :type attr: str
+    :param source: source node of the attribute
+    :type source: str
+    :param target: node to move the attribute to
+    :type target: str
+    """
+    copyAttribute(attr=attr, source=source, target=target)
+
+    cmds.connectAttr("{}.{}".format(target, attr), "{}.{}".format(source, attr), f=True)
 
 
 def unlock(nodes, attrs):

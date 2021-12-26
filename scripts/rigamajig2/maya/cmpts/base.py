@@ -92,7 +92,7 @@ class Base(object):
                 self.preRigSetup()
                 self.rigSetup()
                 self.postRigSetup()
-                self.setupProxyAttributes()
+                self.setupAnimAttrs()
             self.set_step(2)
         else:
             logger.warning('component {} already built.'.format(self.name))
@@ -183,8 +183,8 @@ class Base(object):
         """Add the rig setup"""
         pass
 
-    def setupProxyAttributes(self):
-        """Setup proxy attributes"""
+    def setupAnimAttrs(self):
+        """Setup animation attributes"""
         pass
 
     def initConnect(self):

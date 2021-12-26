@@ -194,7 +194,7 @@ class Builder(object):
         cd.read(path)
 
         if os.path.exists(path):
-            controls = cd.getData().keys()
+            controls = [ctl for ctl in cd.getData().keys() if cmds.objExists(ctl)]
             logger.info("loading shapes for {} controls".format(len(controls)))
             cd.applyData(controls, applyColor=applyColor)
             logger.info("control shapes -- complete")

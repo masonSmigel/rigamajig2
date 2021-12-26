@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class Leg(rigamajig2.maya.cmpts.limb.Limb):
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict()):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True):
         """
         Create a main control
         :param name:
@@ -31,7 +31,7 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         :param: pvSpaces: dictionary of key and space for the pv control.
         :type pvSpaces: dict
         """
-        super(Leg, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces)
+        super(Leg, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces, useProxyAttrs=useProxyAttrs)
         self.cmptSettings['toes_fkName'] = 'toes_fk'
         self.cmptSettings['toes_ikName'] = 'toes_ik'
         self.cmptSettings['ball_ikName'] = 'ball_ik'
@@ -124,6 +124,16 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         cmds.parentConstraint(self.limbBase[-1], self.input[0])
         rigamajig2.maya.attr.lock(self.input[0], rigamajig2.maya.attr.TRANSFORMS + ['v'])
 
+    def setupAnimAttrs(self):
+        """ setup animation attributes"""
+        super(Leg, self).setupAnimAttrs()
+        # connect the fook ik attributes to the foot control
+        rigamajig2.maya.attr.addSeparator(self.limb_ik[-1], '----')
+        rigamajig2.maya.attr.driveAttribute('roll', self.ikfk.getGroup(), self.limb_ik[-1])
+        rigamajig2.maya.attr.driveAttribute('bank', self.ikfk.getGroup(), self.limb_ik[-1])
+        rigamajig2.maya.attr.driveAttribute('ballAngle', self.ikfk.getGroup(), self.limb_ik[-1])
+        rigamajig2.maya.attr.driveAttribute('toeStraightAngle', self.ikfk.getGroup(), self.limb_ik[-1])
+
     def connect(self):
         """Create the connection"""
         super(Leg, self).connect()
@@ -131,12 +141,3 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
     def finalize(self):
         """ Lock some attributes we dont want to see"""
         super(Leg, self).finalize()
-
-    def setupProxyAttributes(self):
-        """Setup the proxy attributes """
-        super(Leg, self).setupProxyAttributes()
-        rigamajig2.maya.attr.addSeparator(self.limb_ik[-1], '----')
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'roll'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'bank'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'ballAngle'), self.limb_ik[-1])
-        rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'toeStraightAngle'), self.limb_ik[-1])

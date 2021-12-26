@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class Arm(rigamajig2.maya.cmpts.limb.Limb):
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict()):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True):
         """
         Create a main control
         :param name:
@@ -25,7 +25,7 @@ class Arm(rigamajig2.maya.cmpts.limb.Limb):
         :param: pvSpaces: dictionary of key and space for the pv control.
         :type pvSpaces: dict
         """
-        super(Arm, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces)
+        super(Arm, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces, useProxyAttrs=useProxyAttrs)
 
         # noinspection PyTypeChecker
         if len(self.input) != 4:

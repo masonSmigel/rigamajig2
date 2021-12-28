@@ -39,8 +39,8 @@ def negate(driver, driven, translate=False, rotate=False, scale=False):
 
     if rotate:
         node.unitConversion('{}.{}'.format(driver, 'r'), '{}.{}'.format(driven, 'r'), -1, name=driven + '_r_neg')
-        driver_ro = cmds.getAttr('%s.rotateOrder' % driver)
-        ro = [5, 3, 4, 1, 2, 0][driver_ro]
+        # get the opposite rotate order. this is hard coded.
+        ro = [5, 3, 4, 1, 2, 0][cmds.getAttr('%s.rotateOrder' % driver)]
         cmds.setAttr("{}.{}".format(driven, 'rotateOrder'), ro)
 
     if scale:

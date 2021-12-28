@@ -126,6 +126,15 @@ def getCvPositions(curve, world=True):
     return cvPos
 
 
+def getArcLen(curve):
+    """
+    Get the arc length of a curve. This is a simple wrapper
+    :param curve: curve to get the length of
+    :return: length of the given curve
+    """
+    return cmds.arclen(curve, ch=False)
+
+
 def setCvPositions(curve, cvList, world=True):
     """
     Using a list of positions set the positions of each Cv in a curve

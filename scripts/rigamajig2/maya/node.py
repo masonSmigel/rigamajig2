@@ -143,6 +143,32 @@ def multiplyDivide(input1=None, input2=None, operation='mult', output=None, name
     return node
 
 
+def unitConversion(input=None, output=None, conversionFactor=None, name=None):
+    """
+    Create a unit conversion node
+    :param input: input node
+    :param output: output node
+    :param conversionFactor: conversion factor
+    :param name: Optional - give the created node a name. (a suffix is added from the common module)
+    :type name: str
+    :return: name of the node created
+    """
+    if name:
+        node = cmds.createNode('unitConversion', name=name + '_' + common.UNITCONVERSION)
+    else:
+        node = cmds.createNode('multiplyDivide')
+
+    if input:
+        _setConnection(node + '.' + 'input', input)
+    if conversionFactor:
+        _setConnection(node + '.' + 'conversionFactor', conversionFactor)
+    if output:
+        # use the regular old connect attribute for this since it can be super flexible and doesnt need checks
+        cmds.connectAttr(node + '.output', output)
+
+    return node
+
+
 def plusMinusAverage1D(inputs, operation='sum', output=None, name=None):
     """
     Create a PlusMinusAverage node using the input 1D connections.

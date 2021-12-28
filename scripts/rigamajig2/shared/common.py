@@ -64,6 +64,7 @@ CLAMP = 'clamp'
 REMAP = 'rmv'
 QUATTOEULER = 'quatToEuler'
 EULERTOQUAT = 'eulerToQuat'
+UNITCONVERSION = 'uc'
 
 # Type Constants
 COMPONENT = 'cmpnt'

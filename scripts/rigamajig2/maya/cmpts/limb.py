@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class Limb(rigamajig2.maya.cmpts.base.Base):
 
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, rigParent=str()):
         """
         Create a main control
         :param name: name of the components
@@ -42,6 +42,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.metaData['component_side'] = self.side
         # initalize cmpt settings.
         self.cmptSettings['useProxyAttrs'] = useProxyAttrs
+        self.cmptSettings['rigParent'] = rigParent
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['limbBaseName'] = inputBaseNames[0]
         self.cmptSettings['limbSwingName'] = inputBaseNames[1] + "Swing"
@@ -190,6 +191,12 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
     def connect(self):
         """Create the connection"""
+
+        # connect the rig to is rigParent
+        if cmds.objExists(self.rigParent):
+            cmds.parentConstraint(self.rigParent, self.limbBase[0],mo=True)
+
+        # setup the spaces
         spaces.create(self.limbSwing[1], self.limbSwing[-1], parent=self.spaces_hrc)
         spaces.create(self.limb_ik[1], self.limb_ik[-1], parent=self.spaces_hrc, defaultName='world')
         spaces.create(self.limb_pv[1], self.limb_pv[-1], parent=self.spaces_hrc, defaultName='world')

@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 class Leg(rigamajig2.maya.cmpts.limb.Limb):
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, rigParent=str()):
         """
         Create a main control
         :param name: name of the components
@@ -35,7 +35,8 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         :param: pvSpaces: dictionary of key and space for the pv control.
         :type pvSpaces: dict
         """
-        super(Leg, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces, useProxyAttrs=useProxyAttrs)
+        super(Leg, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces,
+                                  useProxyAttrs=useProxyAttrs, rigParent=rigParent)
         self.cmptSettings['toes_fkName'] = 'toes_fk'
         self.cmptSettings['toes_ikName'] = 'toes_ik'
         self.cmptSettings['ball_ikName'] = 'ball_ik'

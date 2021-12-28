@@ -50,6 +50,8 @@ def create(node, hierarchy=None, above=True, matchTransform=True, nodeType='tran
     else:
         cmds.parent(newHierachy[0], node)
 
+    return newHierachy
+
 
 class DictHierarchy(object):
     def __init__(self, hierarchy=dict(), parent=None, prefix=None, suffix=None, nodeType='transform'):

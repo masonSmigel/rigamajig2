@@ -35,7 +35,7 @@ def negate(driver, driven, translate=False, rotate=False, scale=False):
         raise RuntimeError("driven is not a child of the driver")
 
     if translate:
-        node.multiplyDivide('{}.{}'.format(driver, 't'), [-1,-1,-1], output='{}.{}'.format(driven, 't'), name=driven + '_t_neg')
+        node.unitConversion('{}.{}'.format(driver, 't'), '{}.{}'.format(driven, 't'), -1, name=driven + '_t_neg')
 
     if rotate:
         node.unitConversion('{}.{}'.format(driver, 'r'), '{}.{}'.format(driven, 'r'), -1, name=driven + '_r_neg')

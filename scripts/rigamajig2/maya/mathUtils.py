@@ -204,6 +204,18 @@ def vectorLerp(min, max, percent):
     return [x, y, z]
 
 
+def nodePosLerp(minNode, maxNode, percent):
+    """
+    returns linear interpolation between positions of a min and max node at float percent
+    :param minNode: minimum vector
+    :param maxNode: maximim vector
+    :param percent: percent of interperlation
+    """
+    min = cmds.xform(minNode, q=True, ws=True, t=True)
+    max = cmds.xform(maxNode, q=True, ws=True, t=True)
+    return vectorLerp(min, max, percent)
+
+
 def offsetVector(point0, point1):
     """
     returns the offset vector between two points

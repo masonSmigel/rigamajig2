@@ -13,6 +13,7 @@ import rigamajig2.maya.container
 import rigamajig2.maya.node
 import rigamajig2.maya.attr
 import rigamajig2.maya.skeleton
+import rigamajig2.maya.constrain as constrain
 
 import logging
 
@@ -124,8 +125,7 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         ikfk.IkFkBase.connectVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
 
         # connect the base to the main bind chain
-        cmds.parentConstraint(self.limbBase[-1], self.input[0])
-        rigamajig2.maya.attr.lock(self.input[0], rigamajig2.maya.attr.TRANSFORMS + ['v'])
+        rigamajig2.maya.skeleton.connectChains(self.limbBase[-1], self.input[0])
 
     def setupAnimAttrs(self):
         """ setup animation attributes"""

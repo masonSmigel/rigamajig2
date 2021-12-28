@@ -1,10 +1,6 @@
 import maya.cmds as cmds
 import rigamajig2.maya.meta as meta
 import maya.api.OpenMaya as om2
-import rigamajig2.shared.common as common
-import logging
-
-logger = logging.getLogger(__name__)
 
 IDENTITY_MATRIX = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 
@@ -29,16 +25,16 @@ class IkFkSwitch(object):
         """
 
         if value == 0:
-            cmds.setAttr('{}.ikfk'.format(self.node), value)
-            cmds.setAttr('{}.pvPin'.format(self.node), 0)
-            cmds.setAttr('{}.twist'.format(self.node), 0)
-            cmds.setAttr('{}.stretch'.format(self.node), 1)
-            cmds.setAttr('{}.stretchTop'.format(self.node), 1)
-            cmds.setAttr('{}.stretchBot'.format(self.node), 1)
+            self.__setSourceAttr('{}.ikfk'.format(self.node), value)
+            self.__setSourceAttr('{}.pvPin'.format(self.node), 0)
+            self.__setSourceAttr('{}.twist'.format(self.node), 0)
+            self.__setSourceAttr('{}.stretch'.format(self.node), 1)
+            self.__setSourceAttr('{}.stretchTop'.format(self.node), 1)
+            self.__setSourceAttr('{}.stretchBot'.format(self.node), 1)
 
             self.ikMatchFk(self.fkMatchList, self.ikControls[0], self.ikControls[1], self.ikControls[2])
         else:
-            cmds.setAttr('{}.ikfk'.format(self.node), value)
+            self.__setSourceAttr('{}.ikfk'.format(self.node), value)
             self.fkMatchIk(self.fkControls, self.ikMatchList)
 
     @staticmethod
@@ -50,7 +46,7 @@ class IkFkSwitch(object):
         :return:
         """
         if not isinstance(fkControls, (list, tuple)):
-            raise RuntimeError("{} must be a list of 3 fkControls controls".format(fkControls))
+            raise RuntimeError("{} must be a list of 4 fkControls controls".format(fkControls))
         if len(fkControls) < 3:
             raise RuntimeError("{} must be a length of 3 or more".format(fkControls))
 
@@ -106,8 +102,16 @@ class IkFkSwitch(object):
 
         return pv_pos
 
+    @staticmethod
+    def __setSourceAttr(attribute, value):
+        connection = cmds.listConnections(attribute, s=True, d=False)
+        if connection and len(connection) > 0:
+            src = cmds.listConnections(attribute, s=True, d=False, plugs=True)[0]
+            cmds.setAttr(src, value)
+        else:
+            cmds.setAttr(attribute, value)
+
 
 if __name__ == '__main__':
     switcher = IkFkSwitch('arm_l_ikfk')
     switcher.switch(not cmds.getAttr('{}.ikfk'.format('arm_l_ikfk')))
-

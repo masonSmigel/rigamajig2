@@ -240,8 +240,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         # add required data to the ikFkSwitchGroup
         # TODO: try to check this out. maybe use the ikfk group instead of the attribute
-        storeNode = self.ikfk.getGroup() if self.useProxyAttrs else self.ikfk_control[-1]
-        meta.addMessageListConnection(storeNode, self.fkJnts[:-1] + [wristIkOffset], 'fkMatchList','matchNode')
-        meta.addMessageListConnection(storeNode, self.ikJnts, 'ikMatchList', 'matchNode')
-        meta.addMessageListConnection(storeNode, self.fkControls, 'fkControls', 'matchNode')
-        meta.addMessageListConnection(storeNode, self.ikControls, 'ikControls', 'matchNode')
+        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkJnts[:-1] + [wristIkOffset], 'fkMatchList','matchNode')
+        meta.addMessageListConnection(self.ikfk.getGroup(), self.ikJnts, 'ikMatchList', 'matchNode')
+        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkControls, 'fkControls', 'matchNode')
+        meta.addMessageListConnection(self.ikfk.getGroup(), self.ikControls, 'ikControls', 'matchNode')

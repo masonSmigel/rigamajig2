@@ -31,7 +31,6 @@ class SplineBase(object):
         self._handle = str()
         self._ikJointList = list()
         self._clusters = list()
-        self._len_clusters = list()
         self._startTwist = str()
         self._endTwist = str()
         self._scaleFactor = scaleFactor
@@ -44,14 +43,6 @@ class SplineBase(object):
         :rtype: list
         """
         return self._jointList
-
-    def getIkJointList(self):
-        """
-        Return a list of Ik joints used or created
-        :return: list of joints
-        :rtype: list
-        """
-        return self._ikJointList
 
     def getGroup(self):
         """
@@ -68,14 +59,6 @@ class SplineBase(object):
         :rtype: list
         """
         return self._clusters
-
-    def getPreserveLengthClusters(self):
-        """
-        Return the preserve length clusters
-        :return: clusters
-        :rtype: list
-        """
-        return self._len_clusters
 
     def getCurve(self):
         """
@@ -121,11 +104,10 @@ class SplineBase(object):
             cmds.rename(self._group, value)
         self._group = value
 
-    def create(self, clusters=4, preserveLen=False):
+    def create(self, clusters=4):
         """
         This will create the ik spline and connect them to the jointList.
         :param clusters: number of clusters to make
-        :param preserveLen: create a second curve and use it to preserve the length
         """
         ikParent = self._group
 
@@ -144,10 +126,6 @@ class SplineBase(object):
         cmds.addAttr(self._group, ln='volumeFactor', at='double', dv=1, min=0, k=True)
         stretchyAttr = '{}.stretchy'.format(self._group)
         volumeAttr = '{}.volumeFactor'.format(self._group)
-
-        if preserveLen:
-            cmds.addAttr(self._group, ln='preserve_len', at='double', dv=1, min=0, max=1, k=True)
-            preserveLenAttr = '{}.preserve_len'.format(self._group)
 
         # create a duplicate joint chain, if we dont have an ikJointChain
         for i, joint in enumerate(self._jointList):
@@ -184,6 +162,8 @@ class SplineBase(object):
             cmds.parent(handle, self._group)
             rig_cluster.localize(cluster, self._group, self._group, weightedCompensation=True)
 
+        # CLUSTERS SCALE
+
         # STRETCH
         curve_info = cmds.rename(cmds.arclen(self._curve, ch=True), self._name + '_curveInfo')
         cmds.connectAttr(self._curve + '.local', curve_info + '.inputCurve', f=True)
@@ -196,6 +176,7 @@ class SplineBase(object):
 
         # get aim axis and rotate order
         aimAxis = rig_transform.getAimAxis(self._ikJointList[1], allowNegative=False)
+        rotOrder = cmds.getAttr('{}.ro'.format(self._ikJointList[1]))
 
         for i, joint in enumerate(self._ikJointList[1:]):
             if i > 0:
@@ -207,29 +188,6 @@ class SplineBase(object):
             node.multDoubleLinear("{}.outputX".format(scaleAll), jnt_len,
                                   output="{}.t{}".format(joint, aimAxis),
                                   name='{}_stretch'.format(joint))
-        # LEN_CURVE
-        if preserveLen:
-            self._len_curve = cmds.duplicate(self._curve, name=self._curve + '_len')[0]
-
-            len_cvs = rig_curve.getCvs(self._len_curve)
-            for i, cv in enumerate(len_cvs):
-                cluster, handle = cmds.cluster(cv, n='{}_cls_{}_len'.format(self._name, i))
-                self._len_clusters.append(handle)
-                cmds.parent(handle, self._group)
-                rig_cluster.localize(cluster, self._group, self._group, weightedCompensation=True)
-
-            len_curve_info = cmds.rename(cmds.arclen(self._len_curve, ch=True), self._name + '_curveInfo')
-            cmds.connectAttr(self._len_curve + '.local', len_curve_info + '.inputCurve', f=True)
-            preserveLenBta = node.blendTwoAttrs("{}.arcLength".format(curve_info),
-                                                "{}.arcLength".format(len_curve_info),
-                                                weight=preserveLenAttr, name="{}_preserveLen".format(self._name))
-            cmds.connectAttr("{}.output".format(preserveLenBta), "{}.input1X".format(scaleAll), f=True)
-            # delete unneeded stuff
-            cmds.delete(stretchBta)
-            for cls in self._len_clusters:
-                cmds.setAttr("{}.v".format(cls), 0)
-            cmds.setAttr("{}.v".format(self._len_curve), 0)
-
         # start twist decompose
         startgrp = cmds.createNode('transform', n=self._name + '_start_buffer', p=self._group)
         start = cmds.createNode('joint', n=self._name + '_start_' + common.TARGET, p=startgrp)
@@ -289,5 +247,3 @@ class SplineBase(object):
             cmds.setAttr('{}.drawStyle'.format(jnt), 2)
         debug.hide(self._ikJointList)
         cmds.setAttr("{}.v".format(self._handle), 0)
-        for cls in self._clusters:
-            cmds.setAttr("{}.v".format(cls), 0)

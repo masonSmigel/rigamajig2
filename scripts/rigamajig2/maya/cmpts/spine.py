@@ -31,6 +31,8 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['torso_name'] = 'torso'
         self.cmptSettings['chest_name'] = 'chest'
         self.cmptSettings['chestTop_name'] = 'chestTop'
+        self.cmptSettings['hipTanget_name'] = 'hipTan'
+        self.cmptSettings['chestTanget_name'] = 'chestTan'
         self.cmptSettings['hipSwivel_percent'] = 0.333
         self.cmptSettings['torso_percent'] = 0.1
 
@@ -86,12 +88,24 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
                                            parent=self.chest[-1], shape='cube', shapeAim='x',
                                            position=chest_pos)
 
+        self.hipTanget = rig_control.create(self.hipTanget_name, self.side,
+                                            hierarchy=['trsBuffer'],
+                                            hideAttrs=['r','s', 'v'], size=self.size, color='yellow',
+                                            parent=self.hip_swing[-1], shape='diamond', shapeAim='x',
+                                            position=hip_pos)
+
+        self.chestTanget = rig_control.create(self.chestTanget_name, self.side,
+                                              hierarchy=['trsBuffer'],
+                                              hideAttrs=['r','s', 'v'], size=self.size, color='yellow',
+                                              parent=self.chest[-1], shape='diamond', shapeAim='x',
+                                              position=chest_pos)
+
     def rigSetup(self):
         """Add the rig setup"""
         # create the spline ik
         self.ikspline = spline.SplineBase(self.input[1:-1])
         self.ikspline.setGroup(self.name + '_ik')
-        self.ikspline.create()
+        self.ikspline.create(clusters=4)
         cmds.parent(self.ikspline.getGroup(), self.root_hrc)
 
         # setup the hipSwivel
@@ -101,10 +115,20 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         # create the pivot negate
         constrain.negate(self.hips_pivot[-1], self.hips[1], t=True)
 
-        # create the chest piviot offset
+        # create  attributes
         rig_attr.addSeparator(self.chest[-1], '----')
+        rig_attr.addSeparator(self.hip_swing[-1], '----')
         rig_attr.addAttr(self.chest[-1], 'pivotHeight', attributeType='float', value=3.5, minValue=0, maxValue=10)
+        # connect the some attributes
+        rig_attr.addAttr(self.chest[-1], 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
+        cmds.connectAttr("{}.volumeFactor".format(self.chest[-1]), "{}.volumeFactor".format(self.ikspline.getGroup()))
+        # connect the tangets to the visablity
+        rig_attr.addAttr(self.chest[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
+        cmds.connectAttr("{}.tangentVis".format(self.chest[-1]), "{}.v".format(self.chestTanget[0]))
+        rig_attr.addAttr(self.hip_swing[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
+        cmds.connectAttr("{}.tangentVis".format(self.hip_swing[-1]), "{}.v".format(self.hipTanget[0]))
 
+        # create the chest piviot offset
         axis = rig_transform.getAimAxis(self.chest[-1])
         remap = rigamajig2.maya.node.remapValue('{}.{}'.format(self.chest[-1], 'pivotHeight'),
                                                 inMin=0, inMax=10, outMin=0,
@@ -115,12 +139,25 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
                                               name=self.chest[-1] + "height")
 
         # connect the clusters to the spline
-        cmds.parent(self.ikspline.getClusters()[0], self.ikspline.getClusters()[1], self.hips_swing_trs)
-        cmds.parent(self.ikspline.getClusters()[2],self.ikspline.getClusters()[3], self.chest[-1])
+        cmds.parent(self.ikspline.getClusters()[0], self.hips_swing_trs)
+        cmds.parent(self.ikspline.getClusters()[3], self.chest[-1])
+
+        rig_transform.matchTransform(self.ikspline.getClusters()[1], self.hipTanget[0])
+        cmds.parent(self.ikspline.getClusters()[1], self.hipTanget[-1])
+
+        rig_transform.matchTransform(self.ikspline.getClusters()[2], self.chestTanget[0])
+        cmds.parent(self.ikspline.getClusters()[2], self.chestTanget[-1])
 
         # connect the start and end targets
+        chesttop_trs = hierarchy.create(self.chestTop[-1], ['{}_input_trsBuffer'.format(self.chestTop[-1]),
+                                                            '{}_input_trs'.format(self.chestTop[-1])], above=False)
+        cmds.parent(chesttop_trs[0], self.chest[-1])
+        cmds.pointConstraint(self.ikspline.getIkJointList()[-1], chesttop_trs[-1], mo=True)
+        cmds.connectAttr("{}.t".format(chesttop_trs[-1]), "{}.t".format(self.chestTop[-1]))
+
         cmds.orientConstraint(self.hips[-1], self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.chestTop[-1], self.ikspline._endTwist, mo=True)
+
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""

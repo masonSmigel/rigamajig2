@@ -90,13 +90,13 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
         self.hipTanget = rig_control.create(self.hipTanget_name, self.side,
                                             hierarchy=['trsBuffer'],
-                                            hideAttrs=['r','s', 'v'], size=self.size, color='yellow',
+                                            hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
                                             parent=self.hip_swing[-1], shape='diamond', shapeAim='x',
                                             position=hip_pos)
 
         self.chestTanget = rig_control.create(self.chestTanget_name, self.side,
                                               hierarchy=['trsBuffer'],
-                                              hideAttrs=['r','s', 'v'], size=self.size, color='yellow',
+                                              hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
                                               parent=self.chest[-1], shape='diamond', shapeAim='x',
                                               position=chest_pos)
 
@@ -158,6 +158,8 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.hips[-1], self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.chestTop[-1], self.ikspline._endTwist, mo=True)
 
+        cmds.parentConstraint(self.hipsGimble[-1], self.ikspline.getGroup())
+        rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""

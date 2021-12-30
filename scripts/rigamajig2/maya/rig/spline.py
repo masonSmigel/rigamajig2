@@ -44,6 +44,14 @@ class SplineBase(object):
         """
         return self._jointList
 
+    def getIkJointList(self):
+        """
+        Return a list of ik joints used or created
+        :return: list of joints
+        :rtype: list
+        """
+        return self._ikJointList
+
     def getGroup(self):
         """
         Return the group
@@ -245,5 +253,7 @@ class SplineBase(object):
         # Hide the targets and parent them under the group.
         for jnt in [start, end]:
             cmds.setAttr('{}.drawStyle'.format(jnt), 2)
+        for cls in self._clusters:
+            cmds.setAttr('{}.v'.format(cls), 0)
         debug.hide(self._ikJointList)
         cmds.setAttr("{}.v".format(self._handle), 0)

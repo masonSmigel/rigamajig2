@@ -51,6 +51,7 @@ class ScriptRunner(QtWidgets.QWidget):
         self.script_list = QtWidgets.QListWidget()
         self.script_list.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.script_list.setFixedHeight(155)
+        self.script_list.setAlternatingRowColors(True)
 
         self.script_list.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.script_list.addAction(self.run_script_action)

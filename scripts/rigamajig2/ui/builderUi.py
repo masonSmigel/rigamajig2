@@ -145,7 +145,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.mirrorJnt_btn.setFixedHeight(24)
 
         # Component Section
-        self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Component')
+        self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Components')
         self.cmpt_manager = componentManager.ComponentManager()
         self.initalize_all_btn = QtWidgets.QPushButton("Initalize All Components ")
         self.initalize_all_btn.setFixedHeight(LARGE_BTN_HEIGHT)
@@ -154,9 +154,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.load_guides_btn = QtWidgets.QPushButton("Load Guides")
         self.save_guides_btn = QtWidgets.QPushButton("Save Guides")
 
-        # Build Section
-        self.build_wdgt = collapseableWidget.CollapsibleWidget('Build')
         self.build_rig_btn = QtWidgets.QPushButton("Build")
+        self.connect_rig_btn = QtWidgets.QPushButton("Connect")
+        self.finalize_rig_btn = QtWidgets.QPushButton("Finalize")
+        self.complete_build_btn = QtWidgets.QPushButton("Full Build")
+        self.complete_build_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
         # Post - script section
         self.postScript_wdgt = collapseableWidget.CollapsibleWidget('Post-Script')
@@ -209,14 +211,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         rig_env_layout.addWidget(self.rig_path_selector)
         rig_env_layout.addLayout(rig_env_btn_layout)
 
-        build_layout = QtWidgets.QVBoxLayout()
-        build_layout.addWidget(self.preScript_wdgt)
-
+        # prescript
         self.preScript_wdgt.addWidget(self.preScript_scriptRunner)
 
         # Model
-        build_layout.addWidget(self.model_wdgt)
-
         model_btn_layout = QtWidgets.QHBoxLayout()
         model_btn_layout.setContentsMargins(0, 0, 0, 0)
         model_btn_layout.setSpacing(4)
@@ -227,7 +225,6 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.model_wdgt.addLayout(model_btn_layout)
 
         # Skeleton
-        build_layout.addWidget(self.skeleton_wdgt)
         save_load_skeleton_layout = QtWidgets.QHBoxLayout()
         save_load_skeleton_layout.addWidget(self.import_skeleton_btn)
         save_load_skeleton_layout.addWidget(self.save_skeleton_btn)
@@ -268,8 +265,6 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.skeletonEdit_wdgt.addLayout(mirrorJoint_layout)
 
         # Components
-        build_layout.addWidget(self.cmpt_wdgt)
-
         cmpt_btn_layout = QtWidgets.QHBoxLayout()
         cmpt_btn_layout.setSpacing(4)
         cmpt_btn_layout.addWidget(self.initalize_all_btn)
@@ -282,19 +277,17 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.cmpt_wdgt.addLayout(cmpt_btn_layout)
         self.cmpt_wdgt.addWidget(self.guide_path_selector)
         self.cmpt_wdgt.addLayout(guide_load_layout)
-
-        # Build
-        build_layout.addWidget(self.build_wdgt)
-
-        self.build_wdgt.addWidget(self.build_rig_btn)
+        build_step_layout = QtWidgets.QHBoxLayout()
+        build_step_layout.addWidget(self.build_rig_btn)
+        build_step_layout.addWidget(self.connect_rig_btn)
+        build_step_layout.addWidget(self.finalize_rig_btn)
+        self.cmpt_wdgt.addLayout(build_step_layout)
+        self.cmpt_wdgt.addWidget(self.complete_build_btn)
 
         # Post Script
-        build_layout.addWidget(self.postScript_wdgt)
         self.postScript_wdgt.addWidget(self.postScript_scriptRunner)
 
         # Control shapes
-        build_layout.addWidget(self.ctlShape_wdgt)
-
         control_btn_layout = QtWidgets.QHBoxLayout()
         control_btn_layout.setSpacing(4)
         load_color_label = QtWidgets.QLabel("Load Color:")
@@ -330,17 +323,20 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.controlEdit_wgt.addWidget(self.replace_ctl_btn)
 
         # Deformations
-        build_layout.addWidget(self.deformations_wdgt)
 
         # Publish
+
+        # add the collapseable widgets
+        build_layout = QtWidgets.QVBoxLayout()
+        build_layout.addWidget(self.preScript_wdgt)
+        build_layout.addWidget(self.model_wdgt)
+        build_layout.addWidget(self.skeleton_wdgt)
+        build_layout.addWidget(self.cmpt_wdgt)
+        build_layout.addWidget(self.ctlShape_wdgt)
+        build_layout.addWidget(self.deformations_wdgt)
+        build_layout.addWidget(self.postScript_wdgt)
         build_layout.addWidget(self.publish_wdgt)
-        self.publish_wdgt.addWidget(self.publishScript_scriptRunner)
-
         build_layout.addStretch()
-
-        # lower persistant buttons (AKA close, script editor)
-        low_buttons_layout = QtWidgets.QHBoxLayout()
-        low_buttons_layout.addWidget(self.close_btn)
 
         # groups
         rig_env_grp = QtWidgets.QGroupBox('Rig Enviornment')
@@ -348,6 +344,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         build_grp = QtWidgets.QGroupBox('Build')
         build_grp.setLayout(build_layout)
+
+        # lower persistant buttons (AKA close)
+        low_buttons_layout = QtWidgets.QHBoxLayout()
+        low_buttons_layout.addWidget(self.close_btn)
 
         # scrollable area
         body_wdg = QtWidgets.QWidget()

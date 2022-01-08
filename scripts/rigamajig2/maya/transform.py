@@ -99,7 +99,6 @@ def connectOffsetParentMatrix(driver, driven):
             mm = cmds.createNode("multMatrix", name="{}_{}_mm".format(driver, driven))
             cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(mm, 'matrixIn[0]'), f=True)
             cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[1]'), f=True)
-
             cmds.connectAttr("{}.{}".format(mm, 'matrixSum'), "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
         else:
             cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(driven, 'offsetParentMatrix'), f=True)

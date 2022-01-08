@@ -178,11 +178,26 @@ class IkFkBase(object):
 
             debug.hide([fkJnt, ikJnt, blendJnt])
 
-            # connect the IKFK to the blend joint
+            # connect the IKFK joints to the blend joint
             if not blendJntExists:
-                node.pairBlend(ikJnt, fkJnt, ikfkAttr, blendJnt, name=blendJnt + '_tr', rotInterp='quat')
-                node.blendColors(ikJnt + '.s', fkJnt + '.s', ikfkAttr, blendJnt + '.s', name=blendJnt + '_s')
+                # create a blend matrix node
+                blendMatrix = cmds.createNode("blendMatrix", n='{}_blendMatrix'.format(blendJnt))
+                cmds.connectAttr("{}.{}".format(ikJnt, 'worldMatrix'), "{}.{}".format(blendMatrix, "inputMatrix"), f=True)
+                cmds.connectAttr("{}.{}".format(fkJnt, 'worldMatrix'), "{}.{}".format(blendMatrix, "target[0].targetMatrix"), f=True)
+                cmds.connectAttr(ikfkAttr, "{}.{}".format(blendMatrix, "target[0].weight"), f=True)
 
+                # if the node has a parent create a mult matrix to account for the offset
+                parent = cmds.listRelatives(blendJnt, parent=True, path=True)[0] or None
+                if parent:
+                    mm = cmds.createNode("multMatrix", name="{}_mm".format(blendJnt))
+                    cmds.connectAttr("{}.{}".format(blendMatrix, 'outputMatrix'), "{}.{}".format(mm, 'matrixIn[0]'), f=True)
+                    cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[1]'), f=True)
+                    cmds.connectAttr("{}.{}".format(mm, 'matrixSum'), "{}.{}".format(blendJnt, 'offsetParentMatrix'), f=True)
+                else:
+                    cmds.connectAttr("{}.{}".format(blendMatrix, "outputMatrix"), "{}.{}".format(blendJnt, "offsetParentMatrix"))
+
+                # reset the transformations
+                transform.resetTransformations(blendJnt)
                 for attr in ['{}{}'.format(x, y) for x in 'trs' for y in 'xyz']:
                     cmds.setAttr("{}.{}".format(blendJnt, attr), e=True, lock=True)
 

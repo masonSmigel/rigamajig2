@@ -120,6 +120,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         # connect the some attributes
         rig_attr.addAttr(self.chest[-1], 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
         cmds.connectAttr("{}.volumeFactor".format(self.chest[-1]), "{}.volumeFactor".format(self.ikspline.getGroup()))
+
         # connect the tangets to the visablity
         rig_attr.addAttr(self.chest[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.chest[-1]), "{}.v".format(self.chestTanget[0]))
@@ -139,10 +140,8 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         # connect the clusters to the spline
         cmds.parent(self.ikspline.getClusters()[0], self.hips_swing_trs)
         cmds.parent(self.ikspline.getClusters()[3], self.chest[-1])
-
         rig_transform.matchTransform(self.ikspline.getClusters()[1], self.hipTanget[0])
         cmds.parent(self.ikspline.getClusters()[1], self.hipTanget[-1])
-
         rig_transform.matchTransform(self.ikspline.getClusters()[2], self.chestTanget[0])
         cmds.parent(self.ikspline.getClusters()[2], self.chestTanget[-1])
 
@@ -150,6 +149,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         self.chest_top_trs = hierarchy.create(self.chestTop[-1], ['{}_trs'.format(self.input[-1])], above=False)[0]
         rig_transform.matchTransform(self.input[-1], self.chest_top_trs)
 
+        # connect the orient constraint to the twist controls
         cmds.orientConstraint(self.hips[-1], self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.chestTop[-1], self.ikspline._endTwist, mo=True)
 

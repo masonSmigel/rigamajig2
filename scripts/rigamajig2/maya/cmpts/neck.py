@@ -17,15 +17,19 @@ import rigamajig2.maya.meta as meta
 
 
 class Neck(rigamajig2.maya.cmpts.base.Base):
-    def __init__(self, name, input=[], size=1, rigParent=str()):
+    def __init__(self, name, input=[], size=1, headSpaces=dict(), neckSpaces=dict(),rigParent=str()):
         super(Neck, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
         self.cmptSettings['neck_name'] = 'neck'
         self.cmptSettings['head_name'] = 'head'
         self.cmptSettings['headGimble_name'] = 'headGimble'
-        self.cmptSettings['skull_name'] = 'headGimble'
+        self.cmptSettings['headTangent_name'] = 'headTan'
+        self.cmptSettings['neckTangent_name'] = 'neckTan'
+        self.cmptSettings['skull_name'] = 'skull'
         self.cmptSettings['head_percent'] = 0.7
+        self.cmptSettings['neckSpaces'] = neckSpaces
+        self.cmptSettings['headSpaces'] = headSpaces
 
     def initalHierachy(self):
         self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
@@ -34,17 +38,17 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
 
         neck_pos = cmds.xform(self.input[0], q=True, ws=True, t=True)
         self.neck = rig_control.create(self.neck_name, self.side,
-                                       hierarchy=['trsBuffer'],
+                                       hierarchy=['trsBuffer', 'spaces_trs'],
                                        hideAttrs=['s', 'v'], size=self.size, color='yellow',
                                        parent=self.control_hrc, shape='cube', shapeAim='x',
                                        position=neck_pos)
         head_pos = mathUtils.nodePosLerp(self.input[0], self.input[-1], self.head_percent)
         self.head = rig_control.create(self.head_name, self.side,
-                                       hierarchy=['trsBuffer'],
+                                       hierarchy=['trsBuffer', 'spaces_trs'],
                                        hideAttrs=['s', 'v'], size=self.size, color='yellow',
                                        parent=self.neck[-1], shape='cube', shapeAim='x',
                                        position=head_pos)
-        self.neckGimble = rig_control.create(self.skull_name, self.side,
+        self.headGimble = rig_control.create(self.headGimble_name, self.side,
                                              hierarchy=['trsBuffer'],
                                              hideAttrs=['s', 'v'], size=self.size, color='yellow',
                                              parent=self.head[-1], shape='cube', shapeAim='x',
@@ -53,8 +57,18 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         self.skull = rig_control.create(self.skull_name, self.side,
                                         hierarchy=['trsBuffer'],
                                         hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                        parent=self.neckGimble[-1], shape='cube', shapeAim='x',
+                                        parent=self.headGimble[-1], shape='cube', shapeAim='x',
                                         position=skull_pos)
+        self.headTanget = rig_control.create(self.headTangent_name, self.side,
+                                             hierarchy=['trsBuffer'],
+                                             hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
+                                             parent=self.headGimble[-1], shape='diamond', shapeAim='x',
+                                             position=head_pos)
+        self.neckTanget = rig_control.create(self.neckTangent_name, self.side,
+                                             hierarchy=['trsBuffer'],
+                                             hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
+                                             parent=self.neck[-1], shape='diamond', shapeAim='x',
+                                             position=neck_pos)
 
     def rigSetup(self):
         """Add the rig setup"""
@@ -64,3 +78,47 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         self.ikspline.create(clusters=4)
         cmds.parent(self.ikspline.getGroup(), self.root_hrc)
 
+        # connect the tangents visability
+        rig_attr.addAttr(self.neck[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
+        cmds.connectAttr("{}.tangentVis".format(self.neck[-1]), "{}.v".format(self.neckTanget[0]))
+        rig_transform.matchTransform(self.ikspline.getClusters()[1], self.neckTanget[0])
+
+        rig_attr.addAttr(self.head[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
+        cmds.connectAttr("{}.tangentVis".format(self.head[-1]), "{}.v".format(self.headTanget[0]))
+        rig_transform.matchTransform(self.ikspline.getClusters()[2], self.headTanget[0])
+
+        cmds.parent(self.ikspline.getClusters()[1], self.neckTanget[-1])
+        cmds.parent(self.ikspline.getClusters()[2], self.headTanget[-1])
+        cmds.parent(self.ikspline.getClusters()[3], self.headGimble[-1])
+
+        self.skull_trs = hierarchy.create(self.skull[-1], ['{}_trs'.format(self.input[-1])], above=False)[0]
+        rig_transform.matchTransform(self.input[-1], self.skull_trs)
+        rig_transform.connectOffsetParentMatrix(self.skull_trs, self.input[-1])
+
+        # connect the orient constraint to the twist controls
+        cmds.orientConstraint(self.neck[-1], self.ikspline._startTwist, mo=True)
+        cmds.orientConstraint(self.headGimble[-1], self.ikspline._endTwist, mo=True)
+
+        cmds.parentConstraint(self.neck[-1], self.ikspline.getGroup(), mo=True)
+        rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
+
+    def connect(self):
+        """Create the connection"""
+
+        # connect the rig to is rigParent
+        if cmds.objExists(self.rigParent):
+            cmds.parentConstraint(self.rigParent, self.neck[0], mo=True)
+
+        spaces.create(self.neck[1], self.neck[-1], parent=self.spaces_hrc)
+        spaces.create(self.head[1], self.head[-1], parent=self.spaces_hrc)
+
+        # if the main control exists connect the world space
+        if cmds.objExists('trs_motion'):
+            spaces.addSpace(self.neck[1], ['trs_motion'], nameList=['world'], constraintType='orient')
+            spaces.addSpace(self.head[1], ['trs_motion'], nameList=['world'], constraintType='orient')
+
+        if self.neckSpaces:
+            spaces.addSpace(self.head[1], [self.neckSpaces[k] for k in self.neckSpaces.keys()], self.neckSpaces.keys(), 'orient')
+
+        if self.headSpaces:
+            spaces.addSpace(self.head[1], [self.headSpaces[k] for k in self.headSpaces.keys()], self.headSpaces.keys(), 'orient')

@@ -9,6 +9,19 @@ import rigamajig2.maya.meta as meta
 import maya.cmds as cmds
 
 
+def connectOffsetParentMatrix(driver, driven):
+    """
+    Create a connection between a driver and driven node using the offset parent matrix
+    :param driver: driver node
+    :param driven: driven node(s)
+    :return:
+    """
+    if cmds.about(api=True) < 20200000:
+        raise RuntimeError("OffsetParentMatrix is only available in Maya 2020 and beyond")
+    cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
+    # now we need to reset the trs.
+
+
 def parentConstraint(driver, driven):
     """
     Create a matrix based 'parent constraint'
@@ -133,4 +146,5 @@ def negate(driver, driven, t=False, r=False, s=False):
             cmds.setAttr("{}.{}".format(driven, 'rotateOrder'), ro)
 
         if s:
-            node.multiplyDivide([1,1,1], '{}.{}'.format(driver, 's'), operation='div', output='{}.{}'.format(driven, 's'), name=driven + '_s_neg')
+            node.multiplyDivide([1, 1, 1], '{}.{}'.format(driver, 's'), operation='div',
+                                output='{}.{}'.format(driven, 's'), name=driven + '_s_neg')

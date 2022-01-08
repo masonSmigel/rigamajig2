@@ -8,6 +8,8 @@ import rigamajig2.maya.utils as utils
 import rigamajig2.maya.axis as axis
 import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.naming as naming
+import rigamajig2.maya.attr as attr
+import rigamajig2.maya.transform as transform
 
 
 def isJoint(joint):
@@ -424,3 +426,19 @@ def getCrossUpVector(trs0, trs1, trs2):
     crossProd.normalize()
     crossProd = mathUtils.scalarMult(crossProd, -1)
     return crossProd
+
+
+def connectChains(source, destination):
+    """
+    Connect two skeletons
+    """
+
+    source = common.toList(source)
+    destination = common.toList(destination)
+    if not len(source) == len(destination):
+        raise RuntimeError('List mismatch. Source and destination must have equal lengths')
+
+    for source_jnt, dest_jnt in zip(source, destination):
+        transform.connectOffsetParentMatrix(source_jnt, dest_jnt)
+        # cmds.parentConstraint(source_jnt, dest_jnt, mo=True)
+        attr.lock(dest_jnt, attr.TRANSFORMS + ['v'])

@@ -21,7 +21,8 @@ def reloadModule(name='rigamajig2', log=True):
     :param log: log the modules reloaded
     :return:
     """
-    for mod in sys.modules.keys():
+    keys_list = sys.modules.keys()
+    for mod in keys_list:
         if mod.startswith(name):
             if log:
                 logger.info("Reloaded module: {}".format(mod))

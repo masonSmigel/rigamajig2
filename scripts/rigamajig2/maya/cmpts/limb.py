@@ -11,7 +11,7 @@ import rigamajig2.shared.common as common
 import rigamajig2.maya.meta as meta
 import rigamajig2.maya.node
 import rigamajig2.maya.attr
-import rigamajig2.maya.skeleton
+import rigamajig2.maya.joint
 
 import logging
 
@@ -36,13 +36,12 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         :useProxyAttrs: use proxy attributes instead of an ikfk control
         :type useProxyAttrs: bool
         """
-        super(Limb, self).__init__(name, input=input, size=size)
+        super(Limb, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
         self.metaData['component_side'] = self.side
         # initalize cmpt settings.
         self.cmptSettings['useProxyAttrs'] = useProxyAttrs
-        self.cmptSettings['rigParent'] = rigParent
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['limbBaseName'] = inputBaseNames[0]
         self.cmptSettings['limbSwingName'] = inputBaseNames[1] + "Swing"
@@ -143,7 +142,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         cmds.parentConstraint(self.limbSwing[-1], self._ikStartTgt, mo=True)
 
         # connect fk controls to fk joints
-        rigamajig2.maya.skeleton.connectChains([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3Gimble_fk[-1]],
+        rigamajig2.maya.joint.connectChains([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3Gimble_fk[-1]],
                                                self.fkJnts)
 
         # connect the IkHandle to the end Target
@@ -162,11 +161,11 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
-        rigamajig2.maya.skeleton.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
+        rigamajig2.maya.joint.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
         ikfk.IkFkBase.connectVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
 
         # connect the base to the main bind chain
-        rigamajig2.maya.skeleton.connectChains(self.limbBase[-1], self.input[0])
+        rigamajig2.maya.joint.connectChains(self.limbBase[-1], self.input[0])
 
     def setupAnimAttrs(self):
 

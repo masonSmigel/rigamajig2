@@ -14,13 +14,14 @@ logger = logging.getLogger(__name__)
 
 class Base(object):
 
-    def __init__(self, name, input=[], size=1):
+    def __init__(self, name, input=[], size=1, rigParent=str()):
         """
         :param name: name of the components
         :type name: str
         :param input: list of input joints. This must be a length of 4
         :type input: list
         :param size: default size of the controls:
+        :param rigParent: node to parent to connect the component to in the heirarchy
         :type size: float
         """
         self.name = name
@@ -36,7 +37,7 @@ class Base(object):
         self.metaData = {'component_name': self.name,
                          'component_type': self.cmpt_type}
         # node cmpt settings
-        self.cmptSettings = OrderedDict(size=size)
+        self.cmptSettings = OrderedDict(size=size, rigParent=rigParent)
 
         self.proxySetupGrp = self.name + "_proxy"
 

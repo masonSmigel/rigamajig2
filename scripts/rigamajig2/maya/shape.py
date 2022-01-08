@@ -65,4 +65,4 @@ def getPointCount(shape):
 
 
 if __name__ == '__main__':
-    print getDeformShape('head_Cluster_geo')
+    print(getDeformShape('head_Cluster_geo'))

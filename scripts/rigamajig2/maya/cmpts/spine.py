@@ -19,11 +19,9 @@ import rigamajig2.maya.meta as meta
 class Spine(rigamajig2.maya.cmpts.base.Base):
 
     def __init__(self, name, input=[], size=1, rigParent=str()):
-        super(Spine, self).__init__(name, input=input, size=size)
+        super(Spine, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
-        inputBaseNames = [x.split("_")[0] for x in self.input]
-        self.cmptSettings['rigParent'] = rigParent
         self.cmptSettings['hips_name'] = 'hips'
         self.cmptSettings['hipsGimble_name'] = 'hipsGimble'
         self.cmptSettings['hipsPivot_name'] = 'hips_pivot'
@@ -52,12 +50,12 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         self.hips = rig_control.create(self.hips_name, self.side,
                                        hierarchy=['trsBuffer', 'neg'],
                                        hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                       parent=self.control_hrc, shape='square', shapeAim='x',
+                                       parent=self.control_hrc, shape='cube', shapeAim='x',
                                        position=hip_pos)
         self.hipsGimble = rig_control.create(self.hipsGimble_name, self.side,
                                              hierarchy=['trsBuffer'],
                                              hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                             parent=self.hips[-1], shape='square', shapeAim='x',
+                                             parent=self.hips[-1], shape='cube', shapeAim='x',
                                              position=hip_pos)
         # build the hips swivel control
         hipSwivel_pos = mathUtils.nodePosLerp(self.input[0], self.input[-1], self.hipSwivel_percent)
@@ -83,7 +81,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
                                         position=spineEnd_pos)
         chest_pos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
         self.chestTop = rig_control.create(self.chestTop_name, self.side,
-                                           hierarchy=['len', 'trsBuffer'],
+                                           hierarchy=['trsBuffer', 'len'],
                                            hideAttrs=['s', 'v'], size=self.size, color='yellow',
                                            parent=self.chest[-1], shape='cube', shapeAim='x',
                                            position=chest_pos)
@@ -149,11 +147,8 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         cmds.parent(self.ikspline.getClusters()[2], self.chestTanget[-1])
 
         # connect the start and end targets
-        chesttop_trs = hierarchy.create(self.chestTop[-1], ['{}_input_trsBuffer'.format(self.chestTop[-1]),
-                                                            '{}_input_trs'.format(self.chestTop[-1])], above=False)
-        cmds.parent(chesttop_trs[0], self.chest[-1])
-        cmds.pointConstraint(self.ikspline.getIkJointList()[-1], chesttop_trs[-1], mo=True)
-        cmds.connectAttr("{}.t".format(chesttop_trs[-1]), "{}.t".format(self.chestTop[-1]))
+        self.chest_top_trs = hierarchy.create(self.chestTop[-1], ['{}_trs'.format(self.input[-1])], above=False)[0]
+        rig_transform.matchTransform(self.input[-1], self.chest_top_trs)
 
         cmds.orientConstraint(self.hips[-1], self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.chestTop[-1], self.ikspline._endTwist, mo=True)
@@ -163,8 +158,8 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
-        cmds.parentConstraint(self.hips_swing_trs, self.input[0], mo=False)
-        cmds.parentConstraint(self.chestTop[-1], self.input[-1], mo=True)
+        rig_transform.connectOffsetParentMatrix(self.hips_swing_trs, self.input[0])
+        rig_transform.connectOffsetParentMatrix(self.chest_top_trs, self.input[-1])
 
     def connect(self):
         """Create the connection"""

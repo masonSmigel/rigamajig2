@@ -8,6 +8,7 @@ import rigamajig2.maya.curve as rig_curve
 import rigamajig2.maya.cluster as rig_cluster
 import rigamajig2.maya.node as node
 import rigamajig2.maya.transform as rig_transform
+import rigamajig2.maya.attr as rig_attr
 import rigamajig2.maya.mathUtils as mathUtils
 
 
@@ -237,9 +238,8 @@ class SplineBase(object):
                 cmds.connectAttr(".outputX".format(factor), '{}.s{}'.format(ik, attr))
 
             # Connect the Ik joint to the bind joint
-            cmds.pointConstraint(ik, bind, mo=True)
-            cmds.orientConstraint(ik, bind, mo=True)
-            cmds.connectAttr("{}.s".format(ik), "{}.s".format(bind))
+            rig_transform.connectOffsetParentMatrix(ik, bind)
+            rig_attr.lock(bind, rig_attr.TRANSFORMS + ['v'])
             i += 1
 
         # set the interpolations

@@ -61,7 +61,7 @@ class Builder(object):
         for r in res:
             full_path = os.path.join(path, r)
             if r not in _EXCLUDED_FOLDERS and os.path.isdir(path + '/' + r) == True:
-                self.__lookForComponents()
+                self.__lookForComponents(full_path)
             if r.find('.py') != -1 and r.find('.pyc') == -1 and r not in _EXCLUDED_FILES:
                 if r.find('reload') == -1:
 
@@ -146,8 +146,9 @@ class Builder(object):
             cmpt._build_cmpt()
             # if the component is not a main parent the cmpt.root_hrc to the rig
             if cmds.objExists('rig') and not isinstance(cmpt, main.Main):
-                if not cmds.listRelatives(cmpt.root_hrc, p=True):
-                    cmds.parent(cmpt.root_hrc, 'rig')
+                if hasattr(cmpt, "root_hrc"):
+                    if not cmds.listRelatives(cmpt.root_hrc, p=True):
+                        cmds.parent(cmpt.root_hrc, 'rig')
 
         # parent the bind joints to the bind group. if one exists
         if cmds.objExists('bind'):

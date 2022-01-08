@@ -79,16 +79,32 @@ def freezeToParentOffset(nodes):
     for node in nodes:
         offset = localOffset(node)
         cmds.setAttr("{}.{}".format(node, 'offsetParentMatrix'), list(offset), type="matrix")
-        for attr in ["jo", 'ra']:
-            if cmds.objExists("{}.{}".format(node, attr)):
-                cmds.setAttr("{}.{}".format(node, attr), 0, 0, 0)
-        for attr in ["{}{}".format(x, y) for x in 'trs' for y in 'xyz']:
-            is_locked = cmds.getAttr("{}.{}".format(node, attr), lock=True)
-            if is_locked:
-                cmds.setAttr("{}.{}".format(node, attr), lock=False)
-            value = 1.0 if attr.startswith('s') else 0.0
-            cmds.setAttr("{}.{}".format(node, attr), value)
-            if is_locked:  cmds.setAttr("{}.{}".format(node, attr), lock=True)
+        resetTransformations(node)
+
+
+def connectOffsetParentMatrix(driver, driven):
+    """
+    Create a connection between a driver and driven node using the offset parent matrix
+    :param driver: driver node
+    :param driven: driven node(s)
+    :return:
+    """
+    if cmds.about(api=True) < 20200000:
+        raise RuntimeError("OffsetParentMatrix is only available in Maya 2020 and beyond")
+    drivens = common.toList(driven)
+
+    for driven in drivens:
+        parent = cmds.listRelatives(driven, parent=True, path=True)[0] or None
+        if parent:
+            mm = cmds.createNode("multMatrix", name="{}_{}_mm".format(driver, driven))
+            cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(mm, 'matrixIn[0]'), f=True)
+            cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[1]'), f=True)
+
+            cmds.connectAttr("{}.{}".format(mm, 'matrixSum'), "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
+        else:
+            cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
+        # now we need to reset the trs.
+        resetTransformations(driven)
 
 
 def localOffset(node):
@@ -306,3 +322,23 @@ def decomposeRotation(node, twistAxis='x'):
 
     # return the three attributes
     return ["{}.decompose{}".format(node, axis) for axis in 'XYZ']
+
+
+def resetTransformations(nodes):
+    """
+    Reset the channel box transformations of a given node.
+    :param nodes:
+    :return:
+    """
+    nodes = common.toList(nodes)
+    for node in nodes:
+        for attr in ["jo", 'ra']:
+            if cmds.objExists("{}.{}".format(node, attr)):
+                cmds.setAttr("{}.{}".format(node, attr), 0, 0, 0)
+        for attr in ["{}{}".format(x, y) for x in 'trs' for y in 'xyz']:
+            is_locked = cmds.getAttr("{}.{}".format(node, attr), lock=True)
+            if is_locked:
+                cmds.setAttr("{}.{}".format(node, attr), lock=False)
+            value = 1.0 if attr.startswith('s') else 0.0
+            cmds.setAttr("{}.{}".format(node, attr), value)
+            if is_locked:  cmds.setAttr("{}.{}".format(node, attr), lock=True)

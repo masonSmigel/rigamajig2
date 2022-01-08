@@ -82,11 +82,15 @@ def freezeToParentOffset(nodes):
         resetTransformations(node)
 
 
-def connectOffsetParentMatrix(driver, driven):
+def connectOffsetParentMatrix(driver, driven, mo=False):
     """
-    Create a connection between a driver and driven node using the offset parent matrix
+    Create a connection between a driver and driven node using the offset parent matrix.
+    the maintain offset option creates a transform node to store the offset.
+    the t, r, s, sh attributes can be used to select only some transformations to affect the driven using a pickMatrix node.
+
     :param driver: driver node
     :param driven: driven node(s)
+    :param mo: add a transform node to store the offset between the driver and driven nodes
     :return:
     """
     if cmds.about(api=True) < 20200000:
@@ -94,6 +98,12 @@ def connectOffsetParentMatrix(driver, driven):
     drivens = common.toList(driven)
 
     for driven in drivens:
+        if mo:
+            offset = cmds.createNode('transform', n="{}_trsOffset".format(driven))
+            matchTransform(driven, offset)
+            cmds.parent(offset, driver)
+            driver = offset
+
         parent = cmds.listRelatives(driven, parent=True, path=True)[0] or None
         if parent:
             mm = cmds.createNode("multMatrix", name="{}_{}_mm".format(driver, driven))

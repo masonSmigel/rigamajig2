@@ -145,21 +145,17 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         rig_transform.matchTransform(self.ikspline.getClusters()[2], self.chestTanget[0])
         cmds.parent(self.ikspline.getClusters()[2], self.chestTanget[-1])
 
-        # connect the start and end targets
-        self.chest_top_trs = hierarchy.create(self.chestTop[-1], ['{}_trs'.format(self.input[-1])], above=False)[0]
-        rig_transform.matchTransform(self.input[-1], self.chest_top_trs)
-
         # connect the orient constraint to the twist controls
         cmds.orientConstraint(self.hips[-1], self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.chestTop[-1], self.ikspline._endTwist, mo=True)
 
-        cmds.parentConstraint(self.hipsGimble[-1], self.ikspline.getGroup())
+        rig_transform.connectOffsetParentMatrix(self.hipsGimble[-1], self.ikspline.getGroup(), mo=True)
         rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
         rig_transform.connectOffsetParentMatrix(self.hips_swing_trs, self.input[0])
-        rig_transform.connectOffsetParentMatrix(self.chest_top_trs, self.input[-1])
+        rig_transform.connectOffsetParentMatrix(self.chestTop[-1], self.input[-1], mo=True)
 
     def connect(self):
         """Create the connection"""

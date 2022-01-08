@@ -13,7 +13,6 @@ import rigamajig2.maya.container
 import rigamajig2.maya.node
 import rigamajig2.maya.attr
 import rigamajig2.maya.joint
-import rigamajig2.maya.constrain as constrain
 
 import logging
 
@@ -113,8 +112,7 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         cmds.parent(self.footikfk.getPivotList()[6], self.ball_ik[-1])
 
         # setup the toes
-        cmds.parentConstraint(self.footikfk.getBlendJointList()[2], self.toes_fk[0], mo=True)
-
+        rig_transform.connectOffsetParentMatrix(self.footikfk.getBlendJointList()[2], self.toes_fk[0], mo=True)
         # Delete the proxy guides_hrc:
         cmds.delete(self.guides_hrc)
 

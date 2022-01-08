@@ -99,7 +99,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.neck[-1], self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.headGimble[-1], self.ikspline._endTwist, mo=True)
 
-        cmds.parentConstraint(self.neck[-1], self.ikspline.getGroup(), mo=True)
+        rig_transform.connectOffsetParentMatrix(self.neck[-1], self.ikspline.getGroup(), mo=True)
         rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
 
     def connect(self):
@@ -107,7 +107,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
 
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            cmds.parentConstraint(self.rigParent, self.neck[0], mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.neck[0], mo=True)
 
         spaces.create(self.neck[1], self.neck[-1], parent=self.spaces_hrc)
         spaces.create(self.head[1], self.head[-1], parent=self.spaces_hrc)

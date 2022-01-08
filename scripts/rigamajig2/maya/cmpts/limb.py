@@ -137,16 +137,16 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self._ikStartTgt, self._ikEndTgt = self.ikfk.createStretchyIk(self.ikfk.getHandle(), grp=self.ikfk.getGroup())
 
         # connect the limbSwing to the other chains
-        cmds.parentConstraint(self.limbSwing[-1], self.joint1_fk[0], mo=True)
-        cmds.parentConstraint(self.limbSwing[-1], self.ikfk.getIkJointList()[0], mo=True)
-        cmds.parentConstraint(self.limbSwing[-1], self._ikStartTgt, mo=True)
+        rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self.joint1_fk[0])
+        rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self.ikfk.getIkJointList()[0])
+        rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self._ikStartTgt)
 
         # connect fk controls to fk joints
-        rigamajig2.maya.joint.connectChains([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3Gimble_fk[-1]],
-                                               self.fkJnts)
+        rigamajig2.maya.joint.connectChains([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3Gimble_fk[-1]], self.fkJnts)
 
         # connect the IkHandle to the end Target
         cmds.pointConstraint(self.limbGimble_ik[-1], self._ikEndTgt, mo=True)
+        # TODO: think about a way to take this out. use OffsetParentMatrix instead
         cmds.orientConstraint(self.limbGimble_ik[-1], self.ikfk.getIkJointList()[-1], mo=True)
 
         # connect twist of ikHandle to ik arm
@@ -155,7 +155,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         # if not using proxy attributes then setup our ikfk controller
         if not self.useProxyAttrs:
-            cmds.parentConstraint(self.input[3], self.ikfk_control[0], mo=False)
+            rig_transform.connectOffsetParentMatrix(self.input[3], self.ikfk_control[0])
 
         self.ikfkMatchSetup()
 
@@ -193,7 +193,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            cmds.parentConstraint(self.rigParent, self.limbBase[0],mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.limbBase[0],mo=True)
 
         # setup the spaces
         spaces.create(self.limbSwing[1], self.limbSwing[-1], parent=self.spaces_hrc)

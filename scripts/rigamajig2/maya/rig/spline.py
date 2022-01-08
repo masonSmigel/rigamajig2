@@ -113,6 +113,15 @@ class SplineBase(object):
             cmds.rename(self._group, value)
         self._group = value
 
+    def setName(self, name):
+        """
+        Set the attribute of the self._name
+        :param name: name to set
+        :type name: str
+        :return:
+        """
+        self._name = name
+
     def create(self, clusters=4):
         """
         This will create the ik spline and connect them to the jointList.

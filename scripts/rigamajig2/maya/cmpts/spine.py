@@ -101,7 +101,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
     def rigSetup(self):
         """Add the rig setup"""
         # create the spline ik
-        self.ikspline = spline.SplineBase(self.input[1:-1])
+        self.ikspline = spline.SplineBase(self.input[1:-1], name=self.name)
         self.ikspline.setGroup(self.name + '_ik')
         self.ikspline.create(clusters=4)
         cmds.parent(self.ikspline.getGroup(), self.root_hrc)

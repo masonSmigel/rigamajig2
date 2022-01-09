@@ -79,8 +79,7 @@ def createSdk(driver, driven, values, preInfinity=False, postInfinity=False, tan
     :type preInfinity: bool
     :param postInfinity:If true set the tanget to postInfinity to linear
     :type postInfinity: bool
-    :param tangent: type of tangent for the curve.
-                    Valid values are: "spline", "linear" "fast", "slow", "flat", "step", "clamped". Default is "linear"
+    :param tangent: type of tangent for the curve. Valid values are: "spline", "linear" "fast", "slow", "flat", "step", "clamped". Default is "linear"
     :type tangent: str
     :return: the name of the SDK node created
     :rtype: str

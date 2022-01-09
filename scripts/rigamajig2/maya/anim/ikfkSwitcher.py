@@ -115,3 +115,4 @@ class IkFkSwitch(object):
 if __name__ == '__main__':
     switcher = IkFkSwitch('arm_l_ikfk')
     switcher.switch(not cmds.getAttr('{}.ikfk'.format('arm_l_ikfk')))
+

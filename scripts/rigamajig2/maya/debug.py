@@ -25,3 +25,30 @@ def hide(nodes):
     """
     if not common.DEBUG:
         cmds.hide(nodes)
+
+
+def createProxyGeo(joints):
+    """
+    Joints to use to create proxy geometry for
+    :param joints:
+    :return:
+    """
+    import rigamajig2.maya.joint as joint
+    import rigamajig2.maya.transform as rig_transform
+
+    for jnt in joints:
+        if joint.isEndJoint(jnt):
+            continue
+        node, shape = cmds.polyCube(n=jnt + '_prxyGeo')
+        decendents = cmds.ls(cmds.listRelatives(jnt, c=True) or [], type='joint')
+        childJoint = decendents[0]
+        rig_transform.matchTranslate([jnt,childJoint], node)
+        rig_transform.matchRotate(jnt, node)
+
+        axis = rig_transform.getAimAxis(jnt, allowNegative=False)
+        cmds.setAttr("{}.s{}".format(node, axis), joint.length(jnt))
+        cmds.setAttr("{}.s{}".format(node, axis), lock=True)
+
+        for attr in ["{}{}".format(x, y) for x in 'tr' for y in 'xyz']:
+            cmds.setAttr("{}.{}".format(node, attr), lock=True, k=False)
+            cmds.setAttr("{}.{}".format(node, attr), cb=False)

@@ -4,6 +4,10 @@ This is the json module for maya transform data
 from collections import OrderedDict
 import rigamajig2.maya.data.maya_data as maya_data
 import maya.cmds as cmds
+import sys
+
+if sys.version_info.major >= 3:
+    basestring = str
 
 
 class NodeData(maya_data.MayaData):
@@ -54,22 +58,22 @@ class NodeData(maya_data.MayaData):
         """
         gather_attrs_from_file = False
         for node in nodes:
-            if not self._data.has_key(node):
+            if node not in self._data:
                 continue
             if not attributes:
                 gather_attrs_from_file = True
                 attributes = self._data[node].keys()
 
             if worldSpace:
-                if not (not ('translate' in attributes) or not self._data[node].has_key('world_translate')):
+                if not (not ('translate' in attributes) or 'world_translate' not in self._data[node]):
                     cmds.xform(node, ws=True, t=self._data[node]['world_translate'])
                     attributes.pop(attributes.index('translate'))
-                if 'rotate' in attributes and self._data[node].has_key('world_rotate'):
+                if 'rotate' in attributes and 'world_rotate' in self._data[node]:
                     cmds.xform(node, ws=True, ro=self._data[node]['world_rotate'])
                     attributes.pop(attributes.index('rotate'))
 
             for attribute in attributes:
-                if self._data[node].has_key(attribute) and attribute in cmds.listAttr(node):
+                if attribute in self._data[node] and attribute in cmds.listAttr(node):
                     setAttr = True
                     for attr in cmds.listAttr("{0}.{1}".format(node, attribute)):
                         if cmds.listConnections("{0}.{1}".format(node, attr), d=False, s=True) or \

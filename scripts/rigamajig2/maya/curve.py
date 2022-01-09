@@ -203,7 +203,7 @@ def copyShape(source, destinations):
     for destination in destinations:
         for shape in data['shapes'].keys():
             form = 'Open'
-            if data['shapes'][shape].has_key('form'):
+            if 'form' in data['shapes'][shape]:
                 form = data['shapes'][shape]['form']
             curveTrs = createCurve(points=data['shapes'][shape]['points'],
                                    degree=data['shapes'][shape]['degree'],

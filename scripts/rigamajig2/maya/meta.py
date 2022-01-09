@@ -2,8 +2,10 @@
 Functions to add metadata to nodes
 """
 import json
+import sys
 import logging
 from collections import OrderedDict
+from ast import literal_eval
 import maya.cmds as cmds
 import rigamajig2.shared.common as common
 import rigamajig2.maya.attr as rig_attr
@@ -11,6 +13,9 @@ import rigamajig2.maya.attr as rig_attr
 logger = logging.getLogger(__name__)
 
 EXCLUDED_JSON_ATTRS = ['attributeAliasList']
+
+if sys.version_info.major >= 3:
+    basestring = str
 
 
 def tag(nodes, tag, type=None):
@@ -130,8 +135,15 @@ def validateDataType(val):
     """
     Validate the attribute type for all the  handling
     """
-    if issubclass(type(val), str): return 'string'
-    if issubclass(type(val), unicode): return 'unicode'
+    if issubclass(type(val), basestring):
+        try:
+            val = literal_eval(val)
+        except:
+            return "string"
+        if issubclass(type(val), dict): return 'complex'
+        if issubclass(type(val), list): return 'complex'
+        if issubclass(type(val), tuple): return 'complex'
+
     if issubclass(type(val), bool): return 'bool'
     if issubclass(type(val), int): return 'int'
     if issubclass(type(val), float): return 'float'
@@ -166,8 +178,10 @@ class MetaNode(object):
         if attrType == 'message':
             return None
         if attrType == 'string':
-            try: value = self.__deserializeComplex(value)  # if the data is a string try to deserialize it.
-            except: logger.debug('string {} is not json deserializable'.format(value))
+            try:
+                value = self.__deserializeComplex(value)  # if the data is a string try to deserialize it.
+            except:
+                logger.debug('string {} is not json deserializable'.format(value))
         return value
 
     def getAllData(self, excludedAttrs=[]):
@@ -250,6 +264,6 @@ class MetaNode(object):
         :param data: data to deserialize
         :return: deserialized data
         """
-        if isinstance(data, unicode):
+        if isinstance(data, basestring):
             return json.loads(str(data))
         return json.loads(data)

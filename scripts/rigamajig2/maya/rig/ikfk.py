@@ -2,10 +2,10 @@
 Module for Ik/Fk stuff
 """
 
+import sys
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 from maya.api.OpenMaya import MVector
-
 import rigamajig2.shared.common as common
 import rigamajig2.maya.hierarchy as rig_hierarchy
 import rigamajig2.maya.transform as transform
@@ -14,6 +14,9 @@ import rigamajig2.maya.joint as joint
 import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.debug as debug
 import rigamajig2.maya.meta as meta
+
+if sys.version_info.major >= 3:
+    basestring = str
 
 
 class IkFkBase(object):

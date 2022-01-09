@@ -78,6 +78,9 @@ def addSpace(node, targetList, nameList, constraintType='parent'):
     :param constraintType: constraining method. Valid Values are 'parent', 'orient'
     :type constraintType: str
     """
+    if not isinstance(nameList, list):
+        nameList = list(nameList)
+
     if cmds.objExists("{}.spaceGroup".format(node)):
         spaceGroup = meta.getMessageConnection(node + '.spaceGroup')
         attrHolder = meta.getMessageConnection(node + '.attrHolder')

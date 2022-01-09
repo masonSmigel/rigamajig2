@@ -5,6 +5,7 @@ This is the json module
 import getpass
 import json
 import os
+import sys
 from collections import OrderedDict
 from time import gmtime, strftime
 import rigamajig2.shared.common as common
@@ -151,7 +152,10 @@ class AbstractData(object):
             raise RuntimeError("The file {0} does not exists.".format(filepath))
 
         f = open(filepath, 'r')
-        data = json.loads(f.read().decode('utf-8'), object_pairs_hook=OrderedDict)
+        if sys.version_info.major == 3:
+            data = json.loads(f.read(), object_pairs_hook=OrderedDict)
+        else:
+            data = json.loads(f.read().decode('utf-8'), object_pairs_hook=OrderedDict)
         f.close()
 
         # Set the new filepath on the class

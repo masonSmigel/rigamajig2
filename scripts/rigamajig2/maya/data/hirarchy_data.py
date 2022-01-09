@@ -35,7 +35,7 @@ class HirachyData(maya_data.MayaData):
         nodes = common.toList(nodes)
 
         for node in nodes:
-            if not self._data.has_key(node):
+            if node not in self._data:
                 continue
             hi = hierarchy.DictHierarchy(hierarchy=self._data[node]['hierarchy'])
             hi.create()

@@ -67,7 +67,7 @@ class CurveData(node_data.NodeData):
             if node not in self._data:
                 continue
             if not attributes:
-                attributes = self._data[node].keys() + ["points"]
+                attributes = list(self._data[node].keys()) + ["points"]
 
             for attribute in attributes:
                 if attribute == 'points':
@@ -82,7 +82,7 @@ class CurveData(node_data.NodeData):
                                 cmds.createNode('transform', n=node)
 
                             if not cmds.objExists(shape):
-                                if self._data[node]['shapes'][shape].has_key('form'):
+                                if 'form' in self._data[node]['shapes'][shape]:
                                     form = self._data[node]['shapes'][shape]['form']
                                 curveTrs = curve.createCurve(points=self._data[node]['shapes'][shape][attribute],
                                                              degree=self._data[node]['shapes'][shape]['degree'],

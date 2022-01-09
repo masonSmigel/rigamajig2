@@ -1,6 +1,7 @@
 """
 Module for Ik Spline
 """
+import sys
 import maya.cmds as cmds
 import rigamajig2.shared.common as common
 import rigamajig2.maya.debug as debug
@@ -10,6 +11,9 @@ import rigamajig2.maya.node as node
 import rigamajig2.maya.transform as rig_transform
 import rigamajig2.maya.attr as rig_attr
 import rigamajig2.maya.mathUtils as mathUtils
+
+if sys.version_info[0] >= 3:
+    basestring = str
 
 
 class SplineBase(object):

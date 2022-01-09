@@ -69,7 +69,7 @@ class Builder(object):
                     module_file = r.split('.')[0]
                     modulesPath = 'rigamajig2.maya.cmpts.{}'
                     module_name = modulesPath.format(module_file)
-                    module_object = __import__(module_name, globals(), locals(), ["*"], -1)
+                    module_object = __import__(module_name, globals(), locals(), ["*"], 0)
                     for cls in inspect.getmembers(module_object, inspect.isclass):
                         toReturn.append("{}.{}".format(module_file, cls[0]))
 
@@ -347,7 +347,7 @@ class Builder(object):
         rig_data = abstract_data.AbstractData()
         rig_data.read(self.rig_file)
         data = rig_data.getData()
-        if not data.has_key("rig_env"):
+        if "rig_env" not in data:
             rig_env_path = '../'
         else:
             rig_env_path = data["rig_env"]
@@ -391,7 +391,7 @@ class Builder(object):
 
         data = abstract_data.AbstractData()
         data.read(rig_file)
-        if data.getData().has_key(key):
+        if key in data.getData():
             return data.getData()[key]
         return None
 

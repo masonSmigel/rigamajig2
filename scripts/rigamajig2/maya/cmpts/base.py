@@ -279,3 +279,11 @@ class Base(object):
         """
         for key in self.cmptSettings.keys():
             setattr(self, key, self.metaNode.getData(key))
+
+    # GET
+    def getContainer(self):
+        """
+        get the component container
+        :return:
+        """
+        return self.container

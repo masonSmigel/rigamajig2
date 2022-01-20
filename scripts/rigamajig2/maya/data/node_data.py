@@ -90,6 +90,6 @@ class NodeData(maya_data.MayaData):
                     else:
                         cmds.setAttr("{0}.{1}".format(node, attribute), value)
 
-        # clear out attributes if getting from file
-        if gather_attrs_from_file:
-            attributes = None
+            # clear out attributes if getting from file
+            if gather_attrs_from_file:
+                attributes = None

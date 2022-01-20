@@ -65,6 +65,25 @@ def addNodes(nodes, container, addShape=True):
     return nodes
 
 
+def removeNodes(nodes, container, removeShapes=True):
+    """
+    remove nodes from the given container
+    :param nodes:
+    :param container:
+    :param removeShapes: 
+    :return:
+    """
+    if not isContainer(container):
+        raise Exception("{} is not a container.".format(container))
+    cmds.container(container, e=True, removeNode=nodes)
+    nodes = common.toList(nodes)
+    if removeShapes:
+        for node in nodes:
+            shapes = cmds.listRelatives(node, s=True)
+            if shapes:
+                [cmds.container(container, e=True, removeNode=shape) for shape in shapes]
+
+
 def listNodes(container):
     """
     get the nodes within a container

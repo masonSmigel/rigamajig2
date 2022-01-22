@@ -611,6 +611,40 @@ def composeMatrix(inputTranslate=[0, 0, 0], inputRotate=[0, 0, 0], inputScale=[1
     return node
 
 
+def pickMatrix(inputMatrix=None, outputs=None, t=True, r=True, s=True, sh=True, name=None):
+    """
+    Create a pick matrix node
+    :param inputMatrix: input matrix to use
+    :param outputs:  Optional- connect the node to a given plug
+    :param t: use translate in the picked matrix
+    :param r: use rotate in the picked matrix
+    :param s: use scale in the picked matrix
+    :param sh: use shear in the picked matrix
+    :param name: Optional - give the created node a name. (a suffix is added from the common module)
+    :return: name of the node created
+    """
+
+    if name:
+        node = cmds.createNode('pickMatrix', name=name + '_' + common.PICKMATRIX)
+    else:
+        node = cmds.createNode('pickMatrix')
+
+    if inputMatrix:
+        cmds.connectAttr(inputMatrix, node + '.inputMatrix'.format())
+
+    cmds.setAttr(node + '.useTranslate', t)
+    cmds.setAttr(node + '.useRotate', r)
+    cmds.setAttr(node + '.useScale', s)
+    cmds.setAttr(node + '.useShear', sh)
+
+    if outputs:
+        outputs = common.toList(outputs)
+        for output in outputs:
+            cmds.connectAttr(node + '.outputMatrix', output)
+
+    return node
+
+
 def clamp(input, inMin=None, inMax=None, output=None, name=None):
     """
     Creates a clamp node.

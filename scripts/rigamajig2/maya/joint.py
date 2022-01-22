@@ -156,7 +156,7 @@ def insertJoints(startJoint, endJoint, amount=1, name=None):
     return jointList
 
 
-def inbetweenJoints(start, end):
+def getInbetweenJoints(start, end):
     """
     Return a list of joints between the start and end joints
     :param start: start joint
@@ -168,7 +168,7 @@ def inbetweenJoints(start, end):
     parents = cmds.ls(end, long=True)[0].split("|")[1:-1]
     for jnt in parents:
         if jnt in children:
-            btwnJoints.append(jnt)
+            btwnJoints.append(str(jnt))
     return [start] + btwnJoints + [end]
 
 

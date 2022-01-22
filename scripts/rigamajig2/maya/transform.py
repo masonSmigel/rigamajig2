@@ -82,7 +82,7 @@ def freezeToParentOffset(nodes):
         resetTransformations(node)
 
 
-def connectOffsetParentMatrix(driver, driven, mo=False):
+def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, sh=True):
     """
     Create a connection between a driver and driven node using the offset parent matrix.
     the maintain offset option creates a transform node to store the offset.
@@ -91,6 +91,10 @@ def connectOffsetParentMatrix(driver, driven, mo=False):
     :param driver: driver node
     :param driven: driven node(s)
     :param mo: add a transform node to store the offset between the driver and driven nodes
+    :param t: Apply translation transformations
+    :param r: Apply rotation transformations
+    :param s: Apply scale transformations
+    :param sh: Apply shear transformations
     :return:
     """
     if cmds.about(api=True) < 20200000:
@@ -104,15 +108,30 @@ def connectOffsetParentMatrix(driver, driven, mo=False):
             cmds.parent(offset, driver)
             driver = offset
 
-        parent = cmds.listRelatives(driven, parent=True, path=True)[0] or None
+        parentList = cmds.listRelatives(driven, parent=True, path=True)
+        parent = parentList[0] if parentList else None
         if parent:
             mm = cmds.createNode("multMatrix", name="{}_{}_mm".format(driver, driven))
             cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(mm, 'matrixIn[0]'), f=True)
             cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[1]'), f=True)
-            cmds.connectAttr("{}.{}".format(mm, 'matrixSum'), "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
+            outputPlug = "{}.{}".format(mm, 'matrixSum')
         else:
-            cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
-        # now we need to reset the trs.
+            outputPlug = "{}.{}".format(driver, 'worldMatrix')
+
+        if not t or not r or not s or not sh:
+            # connect the output into a pick matrix node
+            pickMat = cmds.createNode('pickMatrix', name="{}_{}_pickMatrix".format(driver, driven))
+            cmds.connectAttr(outputPlug, "{}.inputMatrix".format(pickMat))
+            cmds.setAttr(pickMat + '.useTranslate', t)
+            cmds.setAttr(pickMat + '.useRotate', r)
+            cmds.setAttr(pickMat + '.useScale', s)
+            cmds.setAttr(pickMat + '.useShear', sh)
+            cmds.connectAttr(pickMat + '.outputMatrix', "{}.{}".format(driven, 'offsetParentMatrix'))
+        else:
+            # normal connection
+            cmds.connectAttr(outputPlug, "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
+
+        # now we need to reset the trs
         resetTransformations(driven)
 
 
@@ -346,8 +365,14 @@ def resetTransformations(nodes):
                 cmds.setAttr("{}.{}".format(node, attr), 0, 0, 0)
         for attr in ["{}{}".format(x, y) for x in 'trs' for y in 'xyz']:
             is_locked = cmds.getAttr("{}.{}".format(node, attr), lock=True)
+            connection = cmds.listConnections("{}.{}".format(node, attr), s=True, d=False, plugs=True) or []
+            is_connected = len(connection)
             if is_locked:
                 cmds.setAttr("{}.{}".format(node, attr), lock=False)
+            if is_connected:
+                cmds.disconnectAttr(connection[0], "{}.{}".format(node, attr))
+
             value = 1.0 if attr.startswith('s') else 0.0
             cmds.setAttr("{}.{}".format(node, attr), value)
+            if is_connected: cmds.connectAttr(connection[0], "{}.{}".format(node, attr), f=True)
             if is_locked:  cmds.setAttr("{}.{}".format(node, attr), lock=True)

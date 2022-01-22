@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class Limb(rigamajig2.maya.cmpts.base.Base):
 
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, rigParent=str()):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True, rigParent=str()):
         """
         Create a main control
         :param name: name of the components
@@ -35,6 +35,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         :type pvSpaces: dict
         :useProxyAttrs: use proxy attributes instead of an ikfk control
         :type useProxyAttrs: bool
+        :param useScale: use scale on the controls
+        :type useScale: bool
         """
         super(Limb, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
@@ -42,6 +44,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.metaData['component_side'] = self.side
         # initalize cmpt settings.
         self.cmptSettings['useProxyAttrs'] = useProxyAttrs
+        self.cmptSettings['useScale'] = useScale
+
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['limbBaseName'] = inputBaseNames[0]
         self.cmptSettings['limbSwingName'] = inputBaseNames[1] + "Swing"
@@ -61,9 +65,12 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
         self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
 
+        if self.useScale:hideAttrs = []
+        else: hideAttrs = ['s']
+
         # limbBase/swing controls
         self.limbBase = rig_control.createAtObject(self.limbBaseName, self.side,
-                                                   hierarchy=['trsBuffer'], hideAttrs=['v', 's'],
+                                                   hierarchy=['trsBuffer'], hideAttrs=['v'] + hideAttrs,
                                                    size=self.size, color='blue', parent=self.control_hrc,
                                                    shape='square', xformObj=self.input[0])
         self.limbSwing = rig_control.createAtObject(self.limbSwingName, self.side,
@@ -75,15 +82,15 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # fk controls
         self.joint1_fk = rig_control.createAtObject(self.joint1_fkName, self.side,
                                                     hierarchy=['trsBuffer', 'spaces_trs'],
-                                                    hideAttrs=['v', 't', 's'], size=self.size, color='blue',
+                                                    hideAttrs=['v', 't'] + hideAttrs, size=self.size, color='blue',
                                                     parent=self.control_hrc, shape='circle', shapeAim='x',
                                                     xformObj=self.input[1])
         self.joint2_fk = rig_control.createAtObject(self.joint2_fkName, self.side,
-                                                    hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
+                                                    hierarchy=['trsBuffer'], hideAttrs=['v', 't'] + hideAttrs,
                                                     size=self.size, color='blue', parent=self.joint1_fk[-1],
                                                     shape='circle', shapeAim='x', xformObj=self.input[2])
         self.joint3_fk = rig_control.createAtObject(self.joint3_fkName, self.side,
-                                                    hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
+                                                    hierarchy=['trsBuffer'], hideAttrs=['v', 't'] + hideAttrs,
                                                     size=self.size, color='blue', parent=self.joint2_fk[-1],
                                                     shape='circle', shapeAim='x', xformObj=self.input[3])
         self.joint3Gimble_fk = rig_control.createAtObject(self.joint3Gimble_fkName, self.side,
@@ -94,11 +101,11 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # Ik controls
         self.limb_ik = rig_control.create(self.limb_ikName, self.side,
                                           hierarchy=['trsBuffer', 'spaces_trs'],
-                                          hideAttrs=['s', 'v'], size=self.size, color='blue', parent=self.control_hrc,
+                                          hideAttrs=['v'] + hideAttrs, size=self.size, color='blue', parent=self.control_hrc,
                                           shape='cube', position=cmds.xform(self.input[3], q=True, ws=True, t=True))
 
         self.limbGimble_ik = rig_control.create(self.limbGimble_ikName, self.side,
-                                                hierarchy=['trsBuffer'], hideAttrs=['s', 'v'], size=self.size,
+                                                hierarchy=['trsBuffer'], hideAttrs=['v', 's'], size=self.size,
                                                 color='blue', parent=self.limb_ik[-1], shape='sphere',
                                                 position=cmds.xform(self.input[3], q=True, ws=True, t=True))
 
@@ -138,7 +145,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         # connect the limbSwing to the other chains
         rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self.joint1_fk[0])
-        rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self.ikfk.getIkJointList()[0])
+        rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self.ikfk.getIkJointList()[0], s=False)
         rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self._ikStartTgt)
 
         # connect fk controls to fk joints
@@ -148,6 +155,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         cmds.pointConstraint(self.limbGimble_ik[-1], self._ikEndTgt, mo=True)
         # TODO: think about a way to take this out. use OffsetParentMatrix instead
         cmds.orientConstraint(self.limbGimble_ik[-1], self.ikfk.getIkJointList()[-1], mo=True)
+        # decompose the scale of the gimble control
+        cmds.connectAttr("{}.{}".format(self.limb_ik[-1], 's'), "{}.{}".format(self.ikfk.getIkJointList()[-1], 's'))
 
         # connect twist of ikHandle to ik arm
         cmds.addAttr(self.ikfk.getGroup(), ln='twist', at='float', k=True)

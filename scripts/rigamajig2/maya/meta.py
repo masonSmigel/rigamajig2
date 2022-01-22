@@ -16,6 +16,7 @@ EXCLUDED_JSON_ATTRS = ['attributeAliasList']
 
 if sys.version_info.major >= 3:
     basestring = str
+    unicode = basestring
 
 
 def tag(nodes, tag, type=None):
@@ -135,7 +136,7 @@ def validateDataType(val):
     """
     Validate the attribute type for all the  handling
     """
-    if issubclass(type(val), basestring):
+    if issubclass(type(val), str):
         try:
             val = literal_eval(val)
         except:
@@ -143,7 +144,7 @@ def validateDataType(val):
         if issubclass(type(val), dict): return 'complex'
         if issubclass(type(val), list): return 'complex'
         if issubclass(type(val), tuple): return 'complex'
-
+    if issubclass(type(val), unicode): return 'string'
     if issubclass(type(val), bool): return 'bool'
     if issubclass(type(val), int): return 'int'
     if issubclass(type(val), float): return 'float'
@@ -218,6 +219,8 @@ class MetaNode(object):
                           'complex': {'dt': 'string'}}
 
         attrType = validateDataType(value)
+        if attrType is None:
+            return
 
         if attrType == 'complex':
             value = self.__serializeComplex(value)

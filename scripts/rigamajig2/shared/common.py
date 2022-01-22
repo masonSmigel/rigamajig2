@@ -5,6 +5,7 @@ from collections import OrderedDict
 import re
 
 DEBUG = False
+REQUIRED_PLUGINS = ['quatNodes', 'matrixNodes']
 
 # Side constants
 LEFT = 'l'
@@ -60,6 +61,7 @@ VECTORPRODUCT = "vpn"
 DECOMPOSEMATRIX = 'dcmp'
 COMPOSEMATRIX = 'cmp'
 MULTMATRIX = 'mm'
+PICKMATRIX = 'pickMatrix'
 CLAMP = 'clamp'
 REMAP = 'rmv'
 QUATTOEULER = 'quatToEuler'

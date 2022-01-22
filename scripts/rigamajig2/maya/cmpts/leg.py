@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 
 class Leg(rigamajig2.maya.cmpts.limb.Limb):
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, rigParent=str()):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True, rigParent=str()):
         """
         Create a main control
         :param name: name of the components
@@ -35,7 +35,7 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         :type pvSpaces: dict
         """
         super(Leg, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces,
-                                  useProxyAttrs=useProxyAttrs, rigParent=rigParent)
+                                  useProxyAttrs=useProxyAttrs,useScale=useScale, rigParent=rigParent)
         self.cmptSettings['toes_fkName'] = 'toes_fk'
         self.cmptSettings['toes_ikName'] = 'toes_ik'
         self.cmptSettings['ball_ikName'] = 'ball_ik'
@@ -113,6 +113,7 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
 
         # setup the toes
         rig_transform.connectOffsetParentMatrix(self.footikfk.getBlendJointList()[2], self.toes_fk[0], mo=True)
+        cmds.setAttr("{}.{}".format(self.footikfk.getIkJointList()[1], 'segmentScaleCompensate'), 0)
         # Delete the proxy guides_hrc:
         cmds.delete(self.guides_hrc)
 

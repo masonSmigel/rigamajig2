@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 
 class Arm(rigamajig2.maya.cmpts.limb.Limb):
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, rigParent=str()):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True, rigParent=str()):
         """
         Create a main control
         :param name: name of the components
@@ -31,7 +31,7 @@ class Arm(rigamajig2.maya.cmpts.limb.Limb):
         :type useProxyAttrs: bool
         """
         super(Arm, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces,
-                                  useProxyAttrs=useProxyAttrs, rigParent=rigParent)
+                                  useProxyAttrs=useProxyAttrs, useScale=useScale, rigParent=rigParent)
 
         # noinspection PyTypeChecker
         if len(self.input) != 4:

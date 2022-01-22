@@ -34,6 +34,7 @@ def new(f=False):
     cmds.file(new=True, f=f)
     # run the container sainity check
     import rigamajig2.maya.container as container
+    if om.MGlobal.mayaState(): return
     container.sainityCheck()
 
 

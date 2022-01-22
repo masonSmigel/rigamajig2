@@ -32,7 +32,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['hipTanget_name'] = 'hipTan'
         self.cmptSettings['chestTanget_name'] = 'chestTan'
         self.cmptSettings['hipSwivel_percent'] = 0.333
-        self.cmptSettings['torso_percent'] = 0.1
+        self.cmptSettings['torso_percent'] = 0.15
 
     def initalHierachy(self):
         """Build the initial hirarchy"""

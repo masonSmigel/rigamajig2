@@ -287,3 +287,10 @@ class Base(object):
         :return:
         """
         return self.container
+
+    def get_inputs(self):
+        return self.input
+
+    # SET
+    def set_inputs(self, value):
+        self.input = value

@@ -270,3 +270,5 @@ class SplineBase(object):
             cmds.setAttr('{}.v'.format(cls), 0)
         debug.hide(self._ikJointList)
         cmds.setAttr("{}.v".format(self._handle), 0)
+        cmds.setAttr("{}.overrideEnabled".format(self._curve), 1)
+        cmds.setAttr("{}.overrideDisplayType".format(self._curve), 1)

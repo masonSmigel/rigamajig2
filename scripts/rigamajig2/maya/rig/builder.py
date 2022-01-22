@@ -13,7 +13,8 @@ import rigamajig2.shared.runScript as runScript
 import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
-from rigamajig2.maya.cmpts import *
+
+import rigamajig2.maya.cmpts.main as main
 
 import logging
 
@@ -43,6 +44,7 @@ class Builder(object):
         Initalize the builder
         :param rigFile: path to the rig file
         """
+        self.path = None
         self.set_rig_file(rigFile)
         self.cmpts = list()
 
@@ -267,6 +269,17 @@ class Builder(object):
                 cmpt._delete_advanced_proxy()
 
     # RUN SCRIPTS
+    def load_required_plugins(self):
+        """
+        load required plugins
+        NOTE: there are plugins REQUIRED for rigamajig. for other plug-ins needed in production add them as a pre-script.
+        """
+        loaded_plugins = cmds.pluginInfo(query=True, listPlugins=True)
+
+        for plugin in common.REQUIRED_PLUGINS:
+            if plugin not in loaded_plugins:
+                cmds.loadPlugin(plugin)
+
     def pre_script(self, scripts=[]):
         """
         Run pre scripts. You can add scripts by path, but the main use is through the PRE SCRIPT path
@@ -318,6 +331,7 @@ class Builder(object):
 
         start_time = time.time()
         print('\nBegin Rig Build\n{0}\nbuild env: {1}\n'.format('-' * 70, self.path))
+        self.load_required_plugins()
         self.pre_script()
         self.import_model()
         self.import_skeleton()

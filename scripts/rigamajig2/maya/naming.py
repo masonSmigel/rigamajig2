@@ -85,7 +85,7 @@ def getUniqueName(name, indexPosition=-1):
         # Get the location in the name the index appears.
         # Then incriment the index and replace the original in the nameSplit
         indexPosition = nameSplit.index(str(indexStr[-1]))
-        oldIndex = (int(indexStr[-1]) if s else -1)
+        oldIndex = (int(indexStr[-1]) if indexStr else -1)
         newIndex = oldIndex + 1
     else:
         # if the index is '-1' add the new index to the end of the string instead of inserting it.

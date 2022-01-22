@@ -113,6 +113,7 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
 
         # setup the toes
         rig_transform.connectOffsetParentMatrix(self.footikfk.getBlendJointList()[2], self.toes_fk[0], mo=True)
+        # TODO: this is alittle hacky... maybe fix it later
         cmds.setAttr("{}.{}".format(self.footikfk.getIkJointList()[1], 'segmentScaleCompensate'), 0)
         # Delete the proxy guides_hrc:
         cmds.delete(self.guides_hrc)

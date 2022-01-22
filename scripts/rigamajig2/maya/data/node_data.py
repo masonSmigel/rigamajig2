@@ -62,15 +62,15 @@ class NodeData(maya_data.MayaData):
                 continue
             if not attributes:
                 gather_attrs_from_file = True
-                attributes = self._data[node].keys()
+                attributes = list(self._data[node].keys())
 
             if worldSpace:
                 if not (not ('translate' in attributes) or 'world_translate' not in self._data[node]):
                     cmds.xform(node, ws=True, t=self._data[node]['world_translate'])
-                    attributes.pop(attributes.index('translate'))
+                    attributes.remove('translate')
                 if 'rotate' in attributes and 'world_rotate' in self._data[node]:
                     cmds.xform(node, ws=True, ro=self._data[node]['world_rotate'])
-                    attributes.pop(attributes.index('rotate'))
+                    attributes.remove('rotate')
 
             for attribute in attributes:
                 if attribute in self._data[node] and attribute in cmds.listAttr(node):

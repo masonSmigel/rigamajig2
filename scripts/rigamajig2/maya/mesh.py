@@ -146,7 +146,7 @@ def getClosestVertex(mesh, point=[0, 0, 0]):
 
 def cleanShapes(nodes):
     """
-    Cleanup a shape
+    Cleanup a shape nodes. removes intermediate
     :param nodes:
     :return:
     """
@@ -161,6 +161,7 @@ def cleanShapes(nodes):
         else:
             intermidiate_shapes = [x for x in shapes if cmds.getAttr('{}.intermediateObject'.format(x))]
             cmds.delete(intermidiate_shapes)
+            print("Deleted Intermeidate Shapes: {}".format(intermidiate_shapes))
 
 
 def cleanModel(nodes):
@@ -170,8 +171,8 @@ def cleanModel(nodes):
     """
     nodes = common.toList(nodes)
     for node in nodes:
-        cmds.makeIdentity(node, apply=True, t=True, r=True, s=True, n=0, pn=1)
         cmds.delete(node, ch=True)
+        cmds.makeIdentity(node, apply=True, t=True, r=True, s=True, n=0, pn=1)
         cmds.xform(node, a=True, ws=True, rp=(0, 0, 0), sp=(0, 0, 0))
         if isMesh(node):
             cleanShapes(node)

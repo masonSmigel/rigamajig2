@@ -4,6 +4,7 @@ uv functions
 import maya.cmds as cmds
 import maya.mel as mel
 import rigamajig2.maya.shape
+import rigamajig2.shared.common as common
 
 
 def hasUvs(obj):
@@ -35,3 +36,36 @@ def getUvCoordsFromVertex(geometry, vertexId):
     uvs = cmds.polyEditUV(q=True)
     cmds.select(clear=True)
     return uvs[0], uvs[1]
+
+
+def transferUvsToRigged(source, targets):
+    """
+    transfer Uvs to a rigged model.
+    :param source: mesh with the uvs to transfer to targets
+    :param targets: mesh(s) to transfer the Uvs to
+    :return:
+    """
+    source = common.getFirstIndex(source)
+    targets = common.toList(targets)
+
+    for target in targets:
+        target_shapes = cmds.listRelatives(target, s=True, pa=True)
+        orig = None
+        for shape in target_shapes:
+            if cmds.getAttr('{}.intermediateObject'.format(shape)):
+                orig = shape
+                break
+
+        if orig is None:
+            raise Exception("Target mesh '{}' has no origin shape".format(target))
+
+        # turn off the indermidate object switch temporaily to transfer the UVs
+        cmds.setAttr("{}.intermediateObject".format(orig), 0)
+        cmds.transferAttributes(source, orig, transferUVs=True, searchMethod=3)
+
+        # delete construction history and turn the intermidete object back on
+        cmds.delete(orig, ch=True)
+        cmds.setAttr("{}.intermediateObject".format(orig), 1)
+        print("\tsuccessfully transfered Uvs from '{}' to '{}'".format(source, orig))
+
+

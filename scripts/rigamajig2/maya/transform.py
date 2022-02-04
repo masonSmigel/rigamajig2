@@ -82,6 +82,23 @@ def freezeToParentOffset(nodes):
         resetTransformations(node)
 
 
+def unfreezeToTransform(nodes):
+    """
+    remove postional information from the offset parent matrix and add it to the main transformation
+    :param nodes: nodes to match mostions
+    :return:
+    """
+    nodes = common.toList(nodes)
+    identity_matrix = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+
+    if cmds.about(api=True) < 20200000:
+        raise RuntimeError("OffsetParentMatrix is only available in Maya 2020 and beyond")
+    for node in nodes:
+        offest = localOffset(node)
+        cmds.xform(node, m=offest)
+        cmds.setAttr("{}.offsetParentMatrix".format(node), identity_matrix, type='matrix')
+
+
 def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, sh=True):
     """
     Create a connection between a driver and driven node using the offset parent matrix.
@@ -191,7 +208,7 @@ def mirror(trs, axis='x', mode='rotate'):
         raise ValueError("Keyword Argument: 'axis' not of accepted value ('x', 'y', 'z').")
 
     for transform in trs:
-        if not cmds.nodeType(transform) in ['transform']:
+        if not cmds.nodeType(transform) in ['transform', '']:
             cmds.warning("{} is not a transform and connot be mirrored".format(transform))
             return
 

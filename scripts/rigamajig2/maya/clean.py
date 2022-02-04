@@ -45,15 +45,34 @@ def cleanPlugins():
                 pass
 
 
-def cleanRougePanels():
+def cleanScriptNodes(excludedScriptNodes=list(), excludePrefix='rigamajig2'):
+    """
+    Clean all scriptnodes in the scene
+    :param excludedScriptNodes: list of script nodes to be kept
+    :param excludePrefix: prefix used to filter script nodes. All nodes with the prefix are kept.
+    :return:
+    """
+    all_script_nodes = cmds.ls(type='script')
+    for script_node in all_script_nodes:
+        if script_node.startswith(excludePrefix):
+            continue
+        if script_node in excludedScriptNodes:
+            continue
+
+        cmds.delete(script_node)
+        logger.info("Cleaned Script Node: '{}'".format(script_node))
+
+
+def cleanRougePanels(panels=list()):
     """
     cleanup rouge procedures from all modelPanels
     It will remove errors like:
         // Error: line 1: Cannot find procedure "CgAbBlastPanelOptChangeCallback". //
         // Error: line 1: Cannot find procedure "DCF_updateViewportList". //
     """
-
-    EVIL_METHOD_NAMES = ['DCF_updateViewportList', 'CgAbBlastPanelOptChangeCallback', 'onModelChange3dc']
+    if not isinstance(panels, (list, tuple)):
+        panels = [panels]
+    EVIL_METHOD_NAMES = ['DCF_updateViewportList', 'CgAbBlastPanelOptChangeCallback', 'onModelChange3dc'] + panels
     capitalEvilMethodNames = [name.upper() for name in EVIL_METHOD_NAMES]
     modelPanelLabel = mel.eval('localizedPanelLabel("ModelPanel")')
     processedPanelNames = []

@@ -4,6 +4,7 @@ This file contains the UI for the main rig builder
 import sys
 import logging
 import os
+from collections import OrderedDict
 
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -16,6 +17,7 @@ import maya.OpenMayaUI as omui
 import rigamajig2.shared.common as common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager, overrideColorer
 import rigamajig2.maya.rig.builder as builder
+import rigamajig2.maya.data.abstract_data as abstract_data
 
 logger = logging.getLogger(__name__)
 logger.setLevel(5)
@@ -120,8 +122,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Skeleton Section
         self.skeleton_wdgt = collapseableWidget.CollapsibleWidget('Skeleton')
-        self.skel_path_selector = pathSelector.PathSelector("skeleton:", cap="Select a Skeleton file", ff=MAYA_FILTER, fm=1)
-        self.joint_pos_path_selector = pathSelector.PathSelector("joint pos: ", cap="Select a Skeleton position file", ff=JSON_FILTER, fm=1)
+        self.skel_path_selector = pathSelector.PathSelector("skeleton:", cap="Select a Skeleton file", ff=MAYA_FILTER,
+                                                            fm=1)
+        self.joint_pos_path_selector = pathSelector.PathSelector("joint pos: ", cap="Select a Skeleton position file",
+                                                                 ff=JSON_FILTER, fm=1)
         self.import_skeleton_btn = QtWidgets.QPushButton("Import skeleton")
         self.save_skeleton_btn = QtWidgets.QPushButton("Save skeleton")
         self.load_jnt_pos_btn = QtWidgets.QPushButton("Load joint pos")
@@ -166,7 +170,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Control Shape Section
         self.ctlShape_wdgt = collapseableWidget.CollapsibleWidget('Controls')
-        self.ctl_selector = pathSelector.PathSelector("Controls:", cap="Select a Control Shape file", ff=JSON_FILTER, fm=1)
+        self.ctl_path_selector = pathSelector.PathSelector("Controls:", cap="Select a Control Shape file",
+                                                           ff=JSON_FILTER,
+                                                           fm=1)
         self.load_color_cb = QtWidgets.QCheckBox()
         self.load_color_cb.setChecked(True)
         self.load_color_cb.setFixedWidth(25)
@@ -314,7 +320,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         setControlShape_layout.addWidget(self.ctlShape_cbox)
         setControlShape_layout.addWidget(self.setCtlShape_btn)
 
-        self.ctlShape_wdgt.addWidget(self.ctl_selector)
+        self.ctlShape_wdgt.addWidget(self.ctl_path_selector)
         self.ctlShape_wdgt.addLayout(control_btn_layout)
         self.ctlShape_wdgt.addWidget(self.controlEdit_wgt)
         self.controlEdit_wgt.addLayout(mirrorControl_layout)
@@ -397,10 +403,30 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     # Connections
     def load_rig_file(self):
-        pass
+        new_path = cmds.fileDialog2(ds=2, cap="Select a rig file", ff="Rig Files (*.rig)", fm=1, okc='Select',
+                                    dir=self.rig_env)
+        if new_path:
+            self.set_rig_file(new_path[0])
 
     def save_rig_file(self):
-        pass
+        """
+        Save out a rig file
+        :return:
+        """
+        data = abstract_data.AbstractData()
+        data.read(self.rig_file)
+        new_data = OrderedDict()
+        new_data = data.getData()
+
+        # TODO: Keep this updated as we add stuff to the builder
+        new_data['model_file'] = self.model_path_selector.get_path()
+        new_data['skeleton_file'] = self.skel_path_selector.get_path()
+        new_data['skeleton_pos'] = self.joint_pos_path_selector.get_path()
+        new_data['guides'] = self.guide_path_selector.get_path()
+        new_data['control_shapes'] = self.ctl_path_selector.get_path()
+
+        data.setData(new_data)
+        data.write(self.rig_file)
 
     def show_documentation(self):
         pass
@@ -419,7 +445,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.skel_path_selector.set_relativeTo(self.rig_env)
         self.joint_pos_path_selector.set_relativeTo(self.rig_env)
         self.guide_path_selector.set_relativeTo(self.rig_env)
-        self.ctl_selector.set_relativeTo(self.rig_env)
+        self.ctl_path_selector.set_relativeTo(self.rig_env)
 
         self.rig_builder = builder.Builder(self.rig_file)
         self.update_ui_with_rig_data()
@@ -429,16 +455,24 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         if not self.rig_file:
             return
 
+        # clear script runners
+        self.preScript_scriptRunner.clear_scripts()
+        self.postScript_scriptRunner.clear_scripts()
+        self.publishScript_scriptRunner.clear_scripts()
+
+        # load prescripts from file or rig_env
         pre_script_path = os.path.join(self.rig_env, builder.PRE_SCRIPT_PATH)
         if QtCore.QFileInfo(pre_script_path).exists():
             self.preScript_scriptRunner.set_start_dir(pre_script_path)
             self.preScript_scriptRunner.add_scripts_from_dir(pre_script_path)
 
+        # load post scripts from file or rig_env
         post_script_path = os.path.join(self.rig_env, builder.POST_SCRIPT_PATH)
         if QtCore.QFileInfo(post_script_path).exists():
             self.postScript_scriptRunner.set_start_dir(post_script_path)
             self.postScript_scriptRunner.add_scripts_from_dir(post_script_path)
 
+        # load pub scripts from file or rig_env
         pub_script_path = os.path.join(self.rig_env, builder.PUB_SCRIPT_PATH)
         if QtCore.QFileInfo(pub_script_path).exists():
             self.publishScript_scriptRunner.set_start_dir(pub_script_path)
@@ -457,7 +491,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         if guide_file: self.guide_path_selector.set_path(guide_file)
 
         ctl_file = tmp_builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES)
-        if ctl_file: self.ctl_selector.set_path(ctl_file)
+        if ctl_file: self.ctl_path_selector.set_path(ctl_file)
 
     # UI FUNCTIONS
     def set_ctlShape_items(self):
@@ -468,11 +502,12 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     # UTILITIY FUNCTIONS
     def create_rig_env(self):
-        print "TODO : create a rig environment"
+        print("TODO : create a rig environment")
 
     def clone_rig_env(self):
-        print "TODO : clone a rig environment"
+        print("TODO : clone a rig environment")
 
+    # CONNECTIONS
     def mirror_joint(self):
         """ mirror joint"""
         import rigamajig2.maya.joint
@@ -524,10 +559,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.rig_builder.save_guide_data(self.guide_path_selector.get_abs_path())
 
     def load_controlShapes(self):
-        self.rig_builder.load_controlShapes(self.ctl_selector.get_abs_path(), self.load_color_cb.isChecked())
+        self.rig_builder.load_controlShapes(self.ctl_path_selector.get_abs_path(), self.load_color_cb.isChecked())
 
     def save_controlShapes(self):
-        self.rig_builder.save_controlShapes(self.ctl_selector.get_abs_path())
+        self.rig_builder.save_controlShapes(self.ctl_path_selector.get_abs_path())
 
     def set_controlShape(self):
         """Set the control shape of the selected node"""

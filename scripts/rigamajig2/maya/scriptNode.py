@@ -72,6 +72,7 @@ def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None
                                  beforeScript=beforeScript,
                                  afterScript=afterScript,
                                  )
+    print("New script node {} created".format(name))
     return scriptNode
 
 
@@ -108,6 +109,10 @@ def createFromFile(name, scriptType='Open/Close', beforeScript=None, afterScript
 
 def getScriptNodes():
     return cmds.ls(type='script')
+
+
+def removeAllScriptNodes():
+    cmds.delete(cmds.ls(type='script'))
 
 
 def validateScriptString(script, defaultImports=''):

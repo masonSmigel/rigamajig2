@@ -146,7 +146,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         cmds.parent(self.ikspline.getClusters()[2], self.chestTanget[-1])
 
         # connect the orient constraint to the twist controls
-        cmds.orientConstraint(self.hips[-1], self.ikspline._startTwist, mo=True)
+        cmds.orientConstraint(self.hip_swing[-1], self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.chestTop[-1], self.ikspline._endTwist, mo=True)
 
         rig_transform.connectOffsetParentMatrix(self.hipsGimble[-1], self.ikspline.getGroup(), mo=True)

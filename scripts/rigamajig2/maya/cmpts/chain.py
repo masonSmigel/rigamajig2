@@ -40,7 +40,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         super(Chain, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
-        self.metaData['component_side'] = self.side
+        self.cmptData['component_side'] = self.side
         # initalize cmpt settings.
         self.cmptSettings['useProxyAttrs'] = useProxyAttrs
         self.cmptSettings['useScale'] = useScale

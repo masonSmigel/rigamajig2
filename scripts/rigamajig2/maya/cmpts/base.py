@@ -275,12 +275,14 @@ class Base(object):
         self._load_meta_to_component()
         return self._userSettings
 
-    def load(self, meta):
-        self.metaNode.setDataDict(meta)
+    def load_settings(self, data):
+        keys_to_remove = ['name', 'type', 'input']
+        new_dict = {key:val for key, val in data.items() if key not in keys_to_remove}
+        self.metaNode.setDataDict(new_dict)
 
     def _load_meta_to_component(self):
         """
-        load meta data from the settings node into a dictionary
+        load_settings meta data from the settings node into a dictionary
         """
         new_cmpt_data = OrderedDict()
         for key in self.cmptSettings.keys():
@@ -312,3 +314,8 @@ class Base(object):
     # SET
     def set_inputs(self, value):
         self.input = value
+
+    def set_name(self, value):
+        self.name = value
+
+

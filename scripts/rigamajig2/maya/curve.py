@@ -253,7 +253,16 @@ def mirror(curves, axis='x', mode='replace'):
         destinationCurve = common.getMirrorName(curve)
         if mode == 'replace':
             wipeCurveShape(destinationCurve)
+
+            # store any incomming connections to the FIRST curve.
+            connections = cmds.listConnections(shapeList[0], d=False, s=True, p=True)
             copyShape(curve, destinationCurve)
+
+            # if the curve had incoming connections re-create them. 
+            if connections:
+                for connection in connections:
+                    for shape in cmds.listRelatives(destinationCurve, c=True, shapes=True, type="nurbsCurve", ni=1):
+                        cmds.connectAttr(connection, "{}.v".format(shape))
 
         for shape in shapeList:
             destinationShape = common.getMirrorName(shape)

@@ -30,7 +30,8 @@ class NodeData(maya_data.MayaData):
         for attr in ['translate', 'rotate', 'scale']:
             data[attr] = [round(value, 4) for value in cmds.getAttr("{0}.{1}".format(node, attr))[0]]
 
-        data['offsetParentMatrix'] = cmds.getAttr("{0}.offsetParentMatrix".format(node))
+        if cmds.about(api=True) > 20200000:
+            data['offsetParentMatrix'] = cmds.getAttr("{0}.offsetParentMatrix".format(node))
         data['world_translate'] = cmds.xform(node, q=True, ws=True, t=True)
         data['world_rotate'] = cmds.xform(node, q=True, ws=True, ro=True)
         data['rotateOrder'] = cmds.getAttr("{0}.rotateOrder".format(node))
@@ -75,9 +76,10 @@ class NodeData(maya_data.MayaData):
                     attributes.remove('rotate')
 
             # get set the offset parent matrix
-            if 'offsetParentMatrix' in attributes:
-                cmds.setAttr("{}.offsetParentMatrix".format(node), self._data[node]['offsetParentMatrix'], type='matrix')
-                attributes.remove('offsetParentMatrix')
+            if cmds.about(api=True) > 20200000:
+                if 'offsetParentMatrix' in attributes:
+                    cmds.setAttr("{}.offsetParentMatrix".format(node), self._data[node]['offsetParentMatrix'], type='matrix')
+                    attributes.remove('offsetParentMatrix')
 
             for attribute in attributes:
                 if attribute in self._data[node] and attribute in cmds.listAttr(node):

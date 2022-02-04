@@ -30,10 +30,10 @@ class NodeData(maya_data.MayaData):
         for attr in ['translate', 'rotate', 'scale']:
             data[attr] = [round(value, 4) for value in cmds.getAttr("{0}.{1}".format(node, attr))[0]]
 
+        data['offsetParentMatrix'] = cmds.getAttr("{0}.offsetParentMatrix".format(node))
         data['world_translate'] = cmds.xform(node, q=True, ws=True, t=True)
         data['world_rotate'] = cmds.xform(node, q=True, ws=True, ro=True)
         data['rotateOrder'] = cmds.getAttr("{0}.rotateOrder".format(node))
-
         data['overrideEnabled'] = cmds.getAttr("{}.overrideEnabled".format(node))
         if cmds.getAttr("{}.overrideEnabled".format(node)):
             data['overrideRGBColors'] = cmds.getAttr("{}.overrideRGBColors".format(node))
@@ -60,6 +60,8 @@ class NodeData(maya_data.MayaData):
         for node in nodes:
             if node not in self._data:
                 continue
+            if not cmds.objExists(node):
+                continue
             if not attributes:
                 gather_attrs_from_file = True
                 attributes = list(self._data[node].keys())
@@ -72,6 +74,11 @@ class NodeData(maya_data.MayaData):
                     cmds.xform(node, ws=True, ro=self._data[node]['world_rotate'])
                     attributes.remove('rotate')
 
+            # get set the offset parent matrix
+            if 'offsetParentMatrix' in attributes:
+                cmds.setAttr("{}.offsetParentMatrix".format(node), self._data[node]['offsetParentMatrix'], type='matrix')
+                attributes.remove('offsetParentMatrix')
+
             for attribute in attributes:
                 if attribute in self._data[node] and attribute in cmds.listAttr(node):
                     setAttr = True
@@ -82,6 +89,7 @@ class NodeData(maya_data.MayaData):
                             break
                     if not setAttr:
                         continue
+
                     value = self._data[node][attribute]
                     if isinstance(value, (list, tuple)):
                         cmds.setAttr("{0}.{1}".format(node, attribute), *value)

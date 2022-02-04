@@ -14,6 +14,7 @@
         "c_color": "yellow", 
         "use_proxy_attrs": true, 
         "control_shapes" : "controlShapes.json", 
-        "guides": "guides.json"
+        "guides": "guides.json",
+        "components": "components.json"
     }
 }

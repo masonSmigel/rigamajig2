@@ -460,19 +460,19 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.postScript_scriptRunner.clear_scripts()
         self.publishScript_scriptRunner.clear_scripts()
 
-        # load prescripts from file or rig_env
+        # load_settings prescripts from file or rig_env
         pre_script_path = os.path.join(self.rig_env, builder.PRE_SCRIPT_PATH)
         if QtCore.QFileInfo(pre_script_path).exists():
             self.preScript_scriptRunner.set_start_dir(pre_script_path)
             self.preScript_scriptRunner.add_scripts_from_dir(pre_script_path)
 
-        # load post scripts from file or rig_env
+        # load_settings post scripts from file or rig_env
         post_script_path = os.path.join(self.rig_env, builder.POST_SCRIPT_PATH)
         if QtCore.QFileInfo(post_script_path).exists():
             self.postScript_scriptRunner.set_start_dir(post_script_path)
             self.postScript_scriptRunner.add_scripts_from_dir(post_script_path)
 
-        # load pub scripts from file or rig_env
+        # load_settings pub scripts from file or rig_env
         pub_script_path = os.path.join(self.rig_env, builder.PUB_SCRIPT_PATH)
         if QtCore.QFileInfo(pub_script_path).exists():
             self.publishScript_scriptRunner.set_start_dir(pub_script_path)

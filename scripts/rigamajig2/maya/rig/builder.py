@@ -5,7 +5,7 @@ import sys
 import os
 import time
 import inspect
-import imp
+from collections import OrderedDict
 
 import maya.cmds as cmds
 import rigamajig2.shared.common as common
@@ -13,6 +13,7 @@ import rigamajig2.shared.runScript as runScript
 import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
+from rigamajig2.maya.cmpts import *
 
 import rigamajig2.maya.cmpts.main as main
 
@@ -36,6 +37,7 @@ SKELETON_FILE = "skeleton_file"
 SKELETON_POS = "skeleton_pos"
 CONTROL_SHAPES = "control_shapes"
 GUIDES = "guides"
+COMPONENTS = "components"
 
 
 class Builder(object):
@@ -181,6 +183,60 @@ class Builder(object):
             cmpt._optimize_cmpt()
         logger.info("optimize -- complete")
 
+    def save_components(self, path=None):
+        """
+        Save out components
+        :param path: path to components
+        :return:
+        """
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, COMPONENTS))
+
+        cmpt_data = OrderedDict()
+        cd = abstract_data.AbstractData()
+        for cmpt in self.cmpts:
+            cmpt_data[cmpt.name] = cmpt.get_cmpt_data()
+
+        cd.setData(cmpt_data)
+        cd.write(path)
+        logger.info("Components saved to: {}".format(path))
+
+    def load_components(self, path=None):
+        """
+        Load components
+        :param path:
+        :return:
+        """
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, COMPONENTS))
+        cd = abstract_data.AbstractData()
+        cd.read(path)
+        cmpt_data = cd.getData()
+
+        for cmpt in list(cmpt_data.keys()):
+            module_name, class_name = cmpt_data[cmpt]['type'].split(".")
+            module = globals()[cmpt_data[cmpt]['type'].split(".")[0]]
+            cmpt_class = getattr(module, class_name)
+            instance = cmpt_class(cmpt_data[cmpt]['name'], cmpt_data[cmpt]['input'])
+            self.append_cmpts(instance)
+
+        logger.info("components loaded -- complete")
+
+    def load_component_settings(self, path=None):
+        """
+        load_settings component settings
+        :param path:
+        :return:
+        """
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, COMPONENTS))
+
+        cd = abstract_data.AbstractData()
+        cd.read(path)
+        cmpt_data = cd.getData()
+        for cmpt in self.cmpts:
+            cmpt.load_settings(cmpt_data[cmpt.name])
+
     def load_controlShapes(self, path=None, applyColor=True):
         """
         Load the control shapes
@@ -245,7 +301,7 @@ class Builder(object):
             nd.write(path)
             logger.info("guides saved to: {}".format(path))
 
-    def load_data(self):
+    def load_deform_data(self):
         """
         Load other data, this is stuff like skinweights, blendshapes, clusters etc.
         :return:
@@ -271,7 +327,7 @@ class Builder(object):
     # RUN SCRIPTS
     def load_required_plugins(self):
         """
-        load required plugins
+        load_settings required plugins
         NOTE: there are plugins REQUIRED for rigamajig. for other plug-ins needed in production add them as a pre-script.
         """
         loaded_plugins = cmds.pluginInfo(query=True, listPlugins=True)
@@ -335,12 +391,15 @@ class Builder(object):
         self.pre_script()
         self.import_model()
         self.import_skeleton()
+        self.load_joint_positions()
+        self.load_components()
         self.initalize()
+        self.load_component_settings()
         self.build()
         self.connect()
         self.finalize()
         self.load_controlShapes()
-        self.load_data()
+        self.load_deform_data()
         self.post_script()
         if optimize: self.optimize()
         end_time = time.time()
@@ -368,12 +427,14 @@ class Builder(object):
         self.path = os.path.abspath(os.path.join(self.rig_file, rig_env_path))
         logger.info('Rig Enviornment path: {0}'.format(self.path))
 
+    # GET
     def get_path(self):
         return self.path
 
     def get_rig_file(self):
         return self.rig_file
 
+    # SET
     def set_cmpts(self, cmpts):
         """
         Set the self.cmpts

@@ -8,6 +8,8 @@ import rigamajig2.maya.container
 import rigamajig2.maya.attr as r_attr
 import logging
 import rigamajig2.maya.meta
+import rigamajig2.maya.data.joint_data as joint_data
+import rigamajig2.maya.transform as transform
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +27,7 @@ class Base(object):
         :type size: float
         """
         self.name = name
-        self.cmpt_type = ".".join([self.__module__.split('cmpts.')[-1],  self.__class__.__name__])
+        self.cmpt_type = ".".join([self.__module__.split('cmpts.')[-1], self.__class__.__name__])
         self.input = input
         self.container = self.name + '_container'
 
@@ -34,8 +36,10 @@ class Base(object):
         self.controlers = list()
 
         # node metaData
-        self.metaData = {'component_name': self.name,
-                         'component_type': self.cmpt_type}
+        self.cmptData = OrderedDict()
+        self.cmptData['name'] = self.name
+        self.cmptData['type'] = self.cmpt_type
+        self.cmptData['input'] = self.input
         # node cmpt settings
         self.cmptSettings = OrderedDict(size=size, rigParent=rigParent)
 
@@ -53,9 +57,10 @@ class Base(object):
             # fullDict = dict(self.metaData, **self.cmptSettings)
             self.setInitalData()
             self.createContainer()
-            # Store
+
+            # Store to component node
             self.metaNode = rigamajig2.maya.meta.MetaNode(self.container)
-            self.metaNode.setDataDict(data=self.metaData, hide=True, lock=True)
+            self.metaNode.setDataDict(data=self.cmptData, hide=True, lock=True)
             self.metaNode.setDataDict(data=self.cmptSettings, hide=True)
 
             # anything that manages or creates nodes should set the active container
@@ -277,8 +282,12 @@ class Base(object):
         """
         load meta data from the settings node into a dictionary
         """
+        new_cmpt_data = OrderedDict()
         for key in self.cmptSettings.keys():
             setattr(self, key, self.metaNode.getData(key))
+            new_cmpt_data[key] = self.metaNode.getData(key)
+
+        self.cmptSettings.update(new_cmpt_data)
 
     # GET
     def getContainer(self):
@@ -290,6 +299,15 @@ class Base(object):
 
     def get_inputs(self):
         return self.input
+
+    def get_cmpt_data(self):
+        # create an info dictionary with the important component settings. This is used to save the component to a file
+        info_dict = OrderedDict()
+        info_dict['name'] = self.name
+        info_dict['type'] = self.cmpt_type
+        info_dict['input'] = self.input
+        info_dict.update(self.cmptSettings)
+        return info_dict
 
     # SET
     def set_inputs(self, value):

@@ -77,7 +77,7 @@ class PathSelector(QtWidgets.QWidget):
         file_path = self.get_abs_path()
 
         if cmds.about(windows=True):
-            if self.open_in_exporer(file_path):
+            if self.open_in_explorer(file_path):
                 return
         elif cmds.about(macOS=True):
             if self.open_in_finder(file_path):
@@ -92,7 +92,7 @@ class PathSelector(QtWidgets.QWidget):
         else:
             cmds.error("Invalid Directory")
 
-    def open_in_exporer(self, file_path):
+    def open_in_explorer(self, file_path):
         file_info = QtCore.QFileInfo(file_path)
         args = []
         if not file_info.isDir():

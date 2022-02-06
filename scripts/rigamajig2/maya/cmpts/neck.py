@@ -17,7 +17,7 @@ import rigamajig2.maya.meta as meta
 
 
 class Neck(rigamajig2.maya.cmpts.base.Base):
-    def __init__(self, name, input=[], size=1, headSpaces=dict(), neckSpaces=dict(), rigParent=str()):
+    def __init__(self, name, input=[], size=1, headSpaces=dict(), neckSpaces=dict(),rigParent=str()):
         super(Neck, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
@@ -27,6 +27,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['headTangent_name'] = 'headTan'
         self.cmptSettings['neckTangent_name'] = 'neckTan'
         self.cmptSettings['skull_name'] = 'skull'
+        self.cmptSettings['head_percent'] = 0.7
         self.cmptSettings['neckSpaces'] = neckSpaces
         self.cmptSettings['headSpaces'] = headSpaces
 
@@ -41,7 +42,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
                                        hideAttrs=['s', 'v'], size=self.size, color='yellow',
                                        parent=self.control_hrc, shape='cube', shapeAim='x',
                                        position=neck_pos)
-        head_pos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
+        head_pos = mathUtils.nodePosLerp(self.input[0], self.input[-1], self.head_percent)
         self.head = rig_control.create(self.head_name, self.side,
                                        hierarchy=['trsBuffer', 'spaces_trs'],
                                        hideAttrs=['s', 'v'], size=self.size, color='yellow',
@@ -94,17 +95,6 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         rig_transform.matchTransform(self.input[-1], self.skull_trs)
         rig_transform.connectOffsetParentMatrix(self.skull_trs, self.input[-1])
 
-        # create the neck piviot offset
-        rig_attr.addAttr(self.head[-1], 'pivotHeight', attributeType='float', value=3.5, minValue=0, maxValue=10)
-        axis = rig_transform.getAimAxis(self.neck[-1])
-        remap = node.remapValue('{}.{}'.format(self.head[-1], 'pivotHeight'),
-                                inMin=0, inMax=10, outMin=0,
-                                outMax=cmds.arclen(self.ikspline.getCurve(), ch=False),
-                                name=self.head[-1] + "height")
-        node.multDoubleLinear('{}.{}'.format(remap, 'outValue'), -1,
-                              output='{}.{}'.format(self.head[-1], 'rotatePivot' + axis.upper()),
-                              name=self.head[-1] + "height")
-
         # connect the orient constraint to the twist controls
         cmds.orientConstraint(self.neck[-1], self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.headGimble[-1], self.ikspline._endTwist, mo=True)
@@ -128,9 +118,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
             spaces.addSpace(self.head[1], ['trs_motion'], nameList=['world'], constraintType='orient')
 
         if self.neckSpaces:
-            spaces.addSpace(self.head[1], [self.neckSpaces[k] for k in self.neckSpaces.keys()], self.neckSpaces.keys(),
-                            'orient')
+            spaces.addSpace(self.head[1], [self.neckSpaces[k] for k in self.neckSpaces.keys()], self.neckSpaces.keys(), 'orient')
 
         if self.headSpaces:
-            spaces.addSpace(self.head[1], [self.headSpaces[k] for k in self.headSpaces.keys()], self.headSpaces.keys(),
-                            'orient')
+            spaces.addSpace(self.head[1], [self.headSpaces[k] for k in self.headSpaces.keys()], self.headSpaces.keys(), 'orient')

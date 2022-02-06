@@ -142,10 +142,6 @@ class ComponentManager(QtWidgets.QWidget):
             item_dict = self.get_data_from_item(item)
             cmds.select(item_dict['container'], add=True)
 
-    def initalize_all_cmpts(self):
-        """ initalize all components """
-        print([item.data(QtCore.Qt.UserRole, 0) for item in self.get_all_cmpts()])
-
     def clear_cmpt_tree(self):
         """ clear the component tree"""
         self.component_tree.clear()

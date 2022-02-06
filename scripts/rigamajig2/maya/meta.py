@@ -72,6 +72,20 @@ def getTagged(tag, namespace=None):
         return [s.split(".")[0] for s in cmds.ls("{}:*.__{}__".format(namespace, tag))]
 
 
+def hasTag(node, tag):
+    """
+    Check if a node has a given tag
+    :param node: nodes to check tag
+    :param tag: tag to check for
+    :return: True if node has tag. false if it doesnt.
+    :rtype: bool
+    """
+    node = common.getFirstIndex(node)
+    if cmds.objExists("{}.__{}__".format(node, tag)):
+        return True
+    return False
+
+
 def addMessageConnection(sourceNode, dataNode, sourceAttr, dataAttr=None):
     """
     Add a message connection between a source and target node

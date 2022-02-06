@@ -352,12 +352,10 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             spaces.addSpace(self.limbSwing[1], ['trs_motion'], nameList=['world'], constraintType='orient')
 
         if self.ikSpaces:
-            spaces.addSpace(self.limb_ik[1], [self.ikSpaces[k] for k in self.ikSpaces.keys()], self.ikSpaces.keys(),
-                            'parent')
+            spaces.addSpace(self.limb_ik[1], [self.ikSpaces[k] for k in self.ikSpaces.keys()], self.ikSpaces.keys(), 'parent')
 
         if self.pvSpaces:
-            spaces.addSpace(self.limb_pv[1], [self.pvSpaces[k] for k in self.pvSpaces.keys()], self.pvSpaces.keys(),
-                            'parent')
+            spaces.addSpace(self.limb_pv[1], [self.pvSpaces[k] for k in self.pvSpaces.keys()], self.pvSpaces.keys(), 'parent')
 
     def finalize(self):
         """ Lock some attributes we dont want to see"""

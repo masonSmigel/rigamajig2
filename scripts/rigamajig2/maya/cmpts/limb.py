@@ -146,7 +146,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             self.bend_ctl_hrc = cmds.createNode("transform", n=self.name + "_bendControl", parent=self.control_hrc)
 
             self.bend1 = rig_control.create(self.bend1Name, self.side, hierarchy=['trsBuffer'],
-                                            hideAttrs=['v', 's'], size=self.size,
+                                            hideAttrs=['v', 'r','s'], size=self.size,
                                             color='blue', shape='circle', shapeAim='x',
                                             position=cmds.xform(self.input[1], q=True, ws=True, t=True),
                                             parent=self.bend_ctl_hrc)
@@ -158,7 +158,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                                             position=bend2_pos, parent=self.bend_ctl_hrc)
 
             self.bend3 = rig_control.create(self.bend3Name, self.side,
-                                            hierarchy=['trsBuffer'], hideAttrs=['v', 's'], size=self.size,
+                                            hierarchy=['trsBuffer'], hideAttrs=['v', 'r', 's'], size=self.size,
                                             color='blue', shape='circle', shapeAim='x',
                                             position=cmds.xform(self.input[2], q=True, ws=True, t=True),
                                             parent=self.bend_ctl_hrc)
@@ -170,7 +170,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                                             position=bend4_pos, parent=self.bend_ctl_hrc)
 
             self.bend5 = rig_control.create(self.bend4Name, self.side,
-                                            hierarchy=['trsBuffer'], hideAttrs=['v', 's'], size=self.size,
+                                            hierarchy=['trsBuffer'], hideAttrs=['v','r', 's'], size=self.size,
                                             color='blue', shape='circle', shapeAim='x',
                                             position=cmds.xform(self.input[3], q=True, ws=True, t=True),
                                             parent=self.bend_ctl_hrc)
@@ -283,6 +283,24 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 rig_transform.connectOffsetParentMatrix(self.bend4[-1], low_targets[1], mo=True)
                 rig_transform.connectOffsetParentMatrix(self.bend5[-1], low_targets[2], mo=True)
 
+            # create attributes for the volume factor
+            volumePlug = rigamajig2.maya.attr.addAttr(self.ikfk.getGroup(), "volumeFactor", 'float',value=1, minValue=0)
+            cmds.connectAttr(volumePlug, "{}.{}".format(upp_spline.getGroup(), "volumeFactor"))
+            cmds.connectAttr(volumePlug, "{}.{}".format(low_spline.getGroup(), "volumeFactor"))
+
+            # re-create a smoother interpolation:
+            setScaleList = list(upp_spline._ikJointList)
+            for i in range(len(setScaleList)):
+                percent = i / float(len(setScaleList) - 1)
+                value = mathUtils.lerp(0, 1, percent)
+                cmds.setAttr("{}.scale_{}".format(upp_spline._group, upp_spline._ikJointList.index(setScaleList[i])), value)
+
+            setScaleList = list(low_spline._ikJointList)
+            for i in range(len(setScaleList)):
+                percent = i / float(len(setScaleList) - 1)
+                value = mathUtils.lerp(1, 0, percent)
+                cmds.setAttr("{}.scale_{}".format(low_spline._group, low_spline._ikJointList.index(setScaleList[i])), value)
+
         self.ikfkMatchSetup()
 
     def postRigSetup(self):
@@ -303,9 +321,10 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchTop'), self.limb_ik[-1])
             rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchBot'), self.limb_ik[-1])
             rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'softStretch'), self.limb_ik[-1])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'),
-                                          [self.limb_ik[-1], self.limb_pv[-1]])
+            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'),[self.limb_ik[-1], self.limb_pv[-1]])
             rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'twist'), self.limb_ik[-1])
+            if self.addTwistJoints and self.addBendies:
+                rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'volumeFactor'), self.limb_ik[-1])
         else:
             rigamajig2.maya.attr.driveAttribute('ikfk', self.ikfk.getGroup(), self.ikfk_control[-1])
             rigamajig2.maya.attr.driveAttribute('stretch', self.ikfk.getGroup(), self.ikfk_control[-1])
@@ -313,6 +332,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             rigamajig2.maya.attr.driveAttribute('stretchBot', self.ikfk.getGroup(), self.ikfk_control[-1])
             rigamajig2.maya.attr.driveAttribute('softStretch', self.ikfk.getGroup(), self.ikfk_control[-1])
             rigamajig2.maya.attr.driveAttribute('pvPin', self.ikfk.getGroup(), self.ikfk_control[-1])
+            if self.addTwistJoints and self.addBendies:
+                rigamajig2.maya.attr.driveAttribute('volumeFactor', self.ikfk.getGroup(), self.ikfk_control[-1])
 
     def connect(self):
         """Create the connection"""

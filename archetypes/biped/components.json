@@ -1,7 +1,7 @@
 {
     "type": "AbstractData", 
     "user": "masonsmigel", 
-    "time": "2022-02-05 17:20:12", 
+    "time": "2022-02-06 17:54:20", 
     "data": {
         "main": {
             "name": "main", 
@@ -55,7 +55,6 @@
             "headTangent_name": "headTan", 
             "neckTangent_name": "neckTan", 
             "skull_name": "skull", 
-            "head_percent": 0.7, 
             "neckSpaces": {}, 
             "headSpaces": {}
         }, 
@@ -246,6 +245,42 @@
             "useProxyAttrs": true, 
             "useScale": true, 
             "addFKSpace": false
+        }, 
+        "eyes": {
+            "name": "eyes", 
+            "type": "lookAt.LookAt", 
+            "input": [
+                "eye_l_bind", 
+                "eye_r_bind"
+            ], 
+            "rigParent": "head_bind", 
+            "size": 1, 
+            "aimTargetName": "eyes_aim", 
+            "lookAtSpaces": {
+                "local": "head_bind"
+            }, 
+            "eye_l_bindName": "eye_l", 
+            "eye_l_bind_aimVector": [
+                1, 
+                0, 
+                0
+            ], 
+            "eye_l_bind_upVector": [
+                0, 
+                1, 
+                0
+            ], 
+            "eye_r_bindName": "eye_r", 
+            "eye_r_bind_aimVector": [
+                1, 
+                0, 
+                0
+            ], 
+            "eye_r_bind_upVector": [
+                0, 
+                1, 
+                0
+            ]
         }
     }
 }

@@ -2,6 +2,7 @@
 main component
 """
 import maya.cmds as cmds
+import maya.api.OpenMaya as om2
 
 import rigamajig2.maya.cmpts.base
 import rigamajig2.maya.rig.control as rig_control
@@ -236,23 +237,35 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             self.twist_hrc = cmds.createNode("transform", n="{}_twist".format(self.name), p=self.root_hrc)
 
             upp_targets, upp_spline = spline.addTwistJoints(self.input[1], self.input[2], name=self.name + "_upp_twist",
-                                                            bind_parent=self.input[1], rig_parent=self.twist_hrc,
-                                                            anchorTwistStart=True)
+                                                            bind_parent=self.input[1], rig_parent=self.twist_hrc)
             low_targets, low_spline = spline.addTwistJoints(self.input[2], self.input[3], name=self.name + "_low_twist",
-                                                            bind_parent=self.input[2], rig_parent=self.twist_hrc,
-                                                            anchorTwistStart=False)
+                                                            bind_parent=self.input[2], rig_parent=self.twist_hrc)
+
+            # calculate an inverted rotation to negate the upp twist start.
+            # This gives a more natural twist down the limb
+            twist_mm, twist_dcmp = rigamajig2.maya.node.multMatrix(["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(
+                                                                    self.input[0])], outputs=[""], name="{}_invStartTist".format(upp_spline._startTwist))
+            if "-" not in rig_transform.getAimAxis(self.input[1]):
+                rigamajig2.maya.node.unitConversion("{}.outputRotate".format(twist_dcmp),
+                                                    output="{}.r".format(upp_spline._startTwist),
+                                                    conversionFactor=-1,
+                                                    name="{}_invStartTwistRev".format(self.input[1]))
+                ro = [5, 3, 4, 1, 2, 0][cmds.getAttr('{}.rotateOrder'.format(self.input[1]))]
+                cmds.setAttr("{}.{}".format(upp_spline._startTwist, 'rotateOrder'), ro)
+            else:
+                cmds.connectAttr("{}.outputRotate".format(twist_dcmp), "{}.r".format(upp_spline._startTwist))
 
             # tag the new joints as bind joints
             for jnt in upp_spline.getJointList() + low_spline.getJointList():
                 meta.tag(jnt, "bind")
             meta.untag([self.input[1], self.input[2]], "bind")
 
+            aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(self.input[1], allowNegative=True))
             if self.addBendies:
                 rig_transform.connectOffsetParentMatrix(self.input[1], self.bend1[0], mo=True)
                 rig_transform.connectOffsetParentMatrix(self.input[2], self.bend3[0], mo=True)
                 rig_transform.connectOffsetParentMatrix(self.input[3], self.bend5[0], mo=True)
 
-                aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(self.input[1], allowNegative=True))
                 # out aim contraints will use the offset groups as an up rotation vector
                 cmds.pointConstraint(self.bend1[-1], self.bend3[-1], self.bend2[0])
                 cmds.aimConstraint(self.bend3[-1], self.bend2[0], aim=aimVector, u=(0, 1, 0),

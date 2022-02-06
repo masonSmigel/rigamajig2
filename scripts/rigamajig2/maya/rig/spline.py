@@ -3,7 +3,6 @@ Module for Ik Spline
 """
 import sys
 import maya.cmds as cmds
-import maya.api.OpenMaya as om2
 
 import rigamajig2.shared.common as common
 import rigamajig2.maya.debug as debug
@@ -289,7 +288,7 @@ class SplineBase(object):
         meta.untag(self._ikJointList, "bind")
 
 
-def addTwistJoints(start, end, jnts=4, name="twist", bind_parent=None, rig_parent=None, anchorTwistStart=False):
+def addTwistJoints(start, end, jnts=4, name="twist", bind_parent=None, rig_parent=None):
     """
     add twist and bend joints between a start and end joint
     :param start: start joint
@@ -298,7 +297,6 @@ def addTwistJoints(start, end, jnts=4, name="twist", bind_parent=None, rig_paren
     :param name: name of the group
     :param bind_parent: parent the bind group here
     :param rig_parent: parent the rig group
-    :param anchorTwistStart: anchor the start twist
     :return: returns a list of targets and a spline object created.
             reminder: to get the first target you must first acess the list. ex addTwistJoints[0][0]
     """
@@ -362,21 +360,6 @@ def addTwistJoints(start, end, jnts=4, name="twist", bind_parent=None, rig_paren
     rig_transform.connectOffsetParentMatrix(start, spline_.getGroup(), mo=True)
     cmds.orientConstraint(end, spline_._endTwist, mo=True)
 
-    if anchorTwistStart:
-        # create an invert matrix
-        ws_matrix = cmds.xform(start, q=True, ws=True, m=True)
-        inv_ws_matrix = om2.MMatrix(ws_matrix).inverse()
-        start_inv_mm, start_inv_dcmp = node.multMatrix(["{}.worldMatrix".format(start)], outputs=[""],
-                                                       name="{}_invStartTist".format( spline_._startTwist))
-        print spline_._startTwist
-        cmds.setAttr("{}.matrixIn[1]".format(start_inv_mm), inv_ws_matrix, type='matrix')
-        if "-" not in rig_transform.getAimAxis(startJnt):
-            node.unitConversion("{}.outputRotate".format(start_inv_dcmp), output="{}.r".format( spline_._startTwist),
-                                conversionFactor=-1, name="{}_invStartTwistRev".format(start))
-            ro = [5, 3, 4, 1, 2, 0][cmds.getAttr('{}.rotateOrder'.format(start))]
-            cmds.setAttr("{}.{}".format( spline_._startTwist, 'rotateOrder'), ro)
-        else:
-            cmds.connectAttr("{}.outputRotate".format(start_inv_dcmp), "{}.r".format( spline_._startTwist))
     # general cleanup
     for jnt in [startTgt, midTgt, endTgt]:
         cmds.setAttr('{}.drawStyle'.format(jnt), 2)

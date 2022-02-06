@@ -150,9 +150,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Component Section
         self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Components')
+        self.cmpt_path_selector = pathSelector.PathSelector("cmpts:", cap="Select a Component File",
+                                                            ff=JSON_FILTER, fm=1)
+        self.load_components_btn = QtWidgets.QPushButton("Load Components")
+        self.append_components_btn = QtWidgets.QPushButton("Append Components")
         self.cmpt_manager = componentManager.ComponentManager()
-        self.initalize_all_btn = QtWidgets.QPushButton("Initalize All Components ")
-        self.initalize_all_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
         self.guide_path_selector = pathSelector.PathSelector("guides:", cap="Select a guide file", ff=JSON_FILTER, fm=1)
         self.load_guides_btn = QtWidgets.QPushButton("Load Guides")
@@ -161,7 +163,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.build_rig_btn = QtWidgets.QPushButton("Build")
         self.connect_rig_btn = QtWidgets.QPushButton("Connect")
         self.finalize_rig_btn = QtWidgets.QPushButton("Finalize")
-        self.complete_build_btn = QtWidgets.QPushButton("Full Build")
+        self.complete_build_btn = QtWidgets.QPushButton("Complete Build")
         self.complete_build_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
         # Post - script section
@@ -273,12 +275,17 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         # Components
         cmpt_btn_layout = QtWidgets.QHBoxLayout()
         cmpt_btn_layout.setSpacing(4)
-        cmpt_btn_layout.addWidget(self.initalize_all_btn)
 
         guide_load_layout = QtWidgets.QHBoxLayout()
         guide_load_layout.addWidget(self.load_guides_btn)
         guide_load_layout.addWidget(self.save_guides_btn)
 
+        cmpt_load_layout = QtWidgets.QHBoxLayout()
+        cmpt_load_layout.addWidget(self.load_components_btn)
+        cmpt_load_layout.addWidget(self.append_components_btn)
+
+        self.cmpt_wdgt.addWidget(self.cmpt_path_selector)
+        self.cmpt_wdgt.addLayout(cmpt_load_layout)
         self.cmpt_wdgt.addWidget(self.cmpt_manager)
         self.cmpt_wdgt.addLayout(cmpt_btn_layout)
         self.cmpt_wdgt.addWidget(self.guide_path_selector)
@@ -392,7 +399,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         self.load_guides_btn.clicked.connect(self.load_guides)
         self.save_guides_btn.clicked.connect(self.save_guides)
-        self.initalize_all_btn.clicked.connect(self.cmpt_manager.initalize_all_cmpts)
+        self.load_components_btn.clicked.connect(self.load_components)
+        self.build_rig_btn.clicked.connect(self.build_rig)
+        self.connect_rig_btn.clicked.connect(self.connect_rig)
+        self.finalize_rig_btn.clicked.connect(self.finalize_rig)
+        self.complete_build_btn.clicked.connect(self.complete_build)
 
         self.load_ctl_btn.clicked.connect(self.load_controlShapes)
         self.save_ctl_btn.clicked.connect(self.save_controlShapes)
@@ -450,6 +461,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.model_path_selector.set_relativeTo(self.rig_env)
         self.skel_path_selector.set_relativeTo(self.rig_env)
         self.joint_pos_path_selector.set_relativeTo(self.rig_env)
+        self.cmpt_path_selector.set_relativeTo(self.rig_env)
         self.guide_path_selector.set_relativeTo(self.rig_env)
         self.ctl_path_selector.set_relativeTo(self.rig_env)
 
@@ -492,6 +504,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         skel_pos_file = tmp_builder.get_rig_data(self.rig_file, builder.SKELETON_POS)
         if skel_pos_file: self.joint_pos_path_selector.set_path(skel_pos_file)
+
+        cmpt_file = tmp_builder.get_rig_data(self.rig_file, builder.COMPONENTS)
+        if cmpt_file: self.cmpt_path_selector.set_path(cmpt_file)
 
         guide_file = tmp_builder.get_rig_data(self.rig_file, builder.GUIDES)
         if guide_file: self.guide_path_selector.set_path(guide_file)
@@ -557,6 +572,27 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def save_joint_positions(self):
         self.rig_builder.save_joint_positions(self.joint_pos_path_selector.get_abs_path())
+
+    def load_components(self):
+        self.rig_builder.set_cmpts(list())
+        self.rig_builder.load_components(self.cmpt_path_selector.get_abs_path())
+        self.rig_builder.initalize()
+        self.rig_builder.load_component_settings(self.cmpt_path_selector.get_abs_path())
+        self.cmpt_manager.load_cmpts_from_scene()
+
+    def build_rig(self):
+        self.rig_builder.build()
+
+    def connect_rig(self):
+        self.rig_builder.connect()
+
+    def finalize_rig(self):
+        self.rig_builder.finalize()
+
+    def complete_build(self):
+        self.rig_builder.build()
+        self.rig_builder.connect()
+        self.rig_builder.finalize()
 
     def load_guides(self):
         self.rig_builder.load_guide_data(self.guide_path_selector.get_abs_path())

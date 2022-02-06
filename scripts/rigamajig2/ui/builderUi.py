@@ -376,6 +376,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         main_layout.addLayout(low_buttons_layout)
 
     def create_connections(self):
+        self.rig_path_selector.select_path_btn.clicked.connect(self.path_selector_load_rig_file)
         self.create_rig_env_btn.clicked.connect(self.create_rig_env)
         self.clone_rig_env_btn.clicked.connect(self.clone_rig_env)
 
@@ -407,6 +408,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
                                     dir=self.rig_env)
         if new_path:
             self.set_rig_file(new_path[0])
+
+    def path_selector_load_rig_file(self):
+        new_path = self.rig_path_selector.get_abs_path()
+        if new_path:
+            self.set_rig_file(new_path)
 
     def save_rig_file(self):
         """

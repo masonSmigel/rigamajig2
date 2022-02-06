@@ -100,6 +100,10 @@ class Builder(object):
             nodes = file.import_(path, ns=None)
             logger.info("skeleton imported")
 
+        # tag all bind joints
+        for jnt in cmds.ls("*_bind", type='joint'):
+            meta.tag(jnt, "bind")
+
         # get top level nodes in the skeleton
         for node in cmds.ls(nodes, l=True, type='transform'):
             if not len(node.split('|')) > 2:

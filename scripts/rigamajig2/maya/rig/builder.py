@@ -13,7 +13,6 @@ import rigamajig2.shared.runScript as runScript
 import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
-from rigamajig2.maya.cmpts import *
 
 import rigamajig2.maya.cmpts.main as main
 
@@ -219,9 +218,13 @@ class Builder(object):
         cmpt_data = cd.getData()
 
         for cmpt in list(cmpt_data.keys()):
+            # dynamically load component module into python
             module_name, class_name = cmpt_data[cmpt]['type'].split(".")
-            module = globals()[cmpt_data[cmpt]['type'].split(".")[0]]
-            cmpt_class = getattr(module, class_name)
+            modulesPath = 'rigamajig2.maya.cmpts.{}'
+            module_name = modulesPath.format(module_name)
+            module_object = __import__(module_name, globals(), locals(), ["*"], 0)
+
+            cmpt_class = getattr(module_object, class_name)
             instance = cmpt_class(cmpt_data[cmpt]['name'], cmpt_data[cmpt]['input'])
             self.append_cmpts(instance)
             self.load_cmpts_from_file = True

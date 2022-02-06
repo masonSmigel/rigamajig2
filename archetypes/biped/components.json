@@ -1,0 +1,251 @@
+{
+    "type": "AbstractData", 
+    "user": "masonsmigel", 
+    "time": "2022-02-05 17:20:12", 
+    "data": {
+        "main": {
+            "name": "main", 
+            "type": "main.Main", 
+            "input": [], 
+            "rigParent": "", 
+            "size": 15
+        }, 
+        "spine": {
+            "name": "spine", 
+            "type": "spine.Spine", 
+            "input": [
+                "hips_bind", 
+                "spine_0_bind", 
+                "spine_1_bind", 
+                "spine_2_bind", 
+                "spine_3_bind", 
+                "spine_4_bind", 
+                "spine_5_bind", 
+                "chest_bind"
+            ], 
+            "rigParent": "", 
+            "size": 4, 
+            "hips_name": "hips", 
+            "hipsGimble_name": "hipsGimble", 
+            "hipsPivot_name": "hips_pivot", 
+            "hipsSwing_name": "hip_swing", 
+            "torso_name": "torso", 
+            "chest_name": "chest", 
+            "chestTop_name": "chestTop", 
+            "hipTanget_name": "hipTan", 
+            "chestTanget_name": "chestTan", 
+            "hipSwivel_percent": 0.333, 
+            "torso_percent": 0.15
+        }, 
+        "neck": {
+            "name": "neck", 
+            "type": "neck.Neck", 
+            "input": [
+                "neck_0_bind", 
+                "neck_1_bind", 
+                "neck_2_bind", 
+                "neck_3_bind", 
+                "head_bind"
+            ], 
+            "rigParent": "chestTop", 
+            "size": 4, 
+            "neck_name": "neck", 
+            "head_name": "head", 
+            "headGimble_name": "headGimble", 
+            "headTangent_name": "headTan", 
+            "neckTangent_name": "neckTan", 
+            "skull_name": "skull", 
+            "head_percent": 0.7, 
+            "neckSpaces": {}, 
+            "headSpaces": {}
+        }, 
+        "arm_l": {
+            "name": "arm_l", 
+            "type": "arm.Arm", 
+            "input": [
+                "clavical_l_bind", 
+                "shoulder_l_bind", 
+                "elbow_l_bind", 
+                "wrist_l_bind"
+            ], 
+            "rigParent": "chestTop", 
+            "size": 4, 
+            "useProxyAttrs": false, 
+            "useScale": true, 
+            "addTwistJoints": true, 
+            "addBendies": true, 
+            "limbBaseName": "clavical", 
+            "limbSwingName": "shoulderSwing", 
+            "joint1_fkName": "shoulder_fk", 
+            "joint2_fkName": "elbow_fk", 
+            "joint3_fkName": "wrist_fk", 
+            "joint3Gimble_fkName": "wristGimble_fk", 
+            "limb_ikName": "arm_ik", 
+            "limbGimble_ikName": "armGimble_ik", 
+            "limb_pvName": "arm_pv", 
+            "bend1Name": "arm_1_bend", 
+            "bend2Name": "arm_2_bend", 
+            "bend3Name": "arm_3_bend", 
+            "bend4Name": "arm_4_bend", 
+            "bend5Name": "arm_5_bend", 
+            "ikSpaces": {
+                "shoulder": "shoulderSwing_l"
+            }, 
+            "pvSpaces": {
+                "hand": "arm_ik_l"
+            }
+        }, 
+        "arm_r": {
+            "name": "arm_r", 
+            "type": "arm.Arm", 
+            "input": [
+                "clavical_r_bind", 
+                "shoulder_r_bind", 
+                "elbow_r_bind", 
+                "wrist_r_bind"
+            ], 
+            "rigParent": "chestTop", 
+            "size": 4, 
+            "useProxyAttrs": false, 
+            "useScale": true, 
+            "addTwistJoints": true, 
+            "addBendies": true, 
+            "limbBaseName": "clavical", 
+            "limbSwingName": "shoulderSwing", 
+            "joint1_fkName": "shoulder_fk", 
+            "joint2_fkName": "elbow_fk", 
+            "joint3_fkName": "wrist_fk", 
+            "joint3Gimble_fkName": "wristGimble_fk", 
+            "limb_ikName": "arm_ik", 
+            "limbGimble_ikName": "armGimble_ik", 
+            "limb_pvName": "arm_pv", 
+            "bend1Name": "arm_1_bend", 
+            "bend2Name": "arm_2_bend", 
+            "bend3Name": "arm_3_bend", 
+            "bend4Name": "arm_4_bend", 
+            "bend5Name": "arm_5_bend", 
+            "ikSpaces": {
+                "shoulder": "shoulderSwing_r"
+            }, 
+            "pvSpaces": {
+                "hand": "arm_ik_r"
+            }
+        }, 
+        "leg_l": {
+            "name": "leg_l", 
+            "type": "leg.Leg", 
+            "input": [
+                "pelivs_l_bind", 
+                "thigh_l_bind", 
+                "knee_l_bind", 
+                "ankle_l_bind", 
+                "ball_l_bind", 
+                "toes_l_bind"
+            ], 
+            "rigParent": "hip_swing", 
+            "size": 4, 
+            "useProxyAttrs": false, 
+            "useScale": true, 
+            "addTwistJoints": true, 
+            "addBendies": true, 
+            "limbBaseName": "pelivs", 
+            "limbSwingName": "thighSwing", 
+            "joint1_fkName": "thigh_fk", 
+            "joint2_fkName": "knee_fk", 
+            "joint3_fkName": "ankle_fk", 
+            "joint3Gimble_fkName": "ankleGimble_fk", 
+            "limb_ikName": "leg_ik", 
+            "limbGimble_ikName": "legGimble_ik", 
+            "limb_pvName": "leg_pv", 
+            "bend1Name": "leg_1_bend", 
+            "bend2Name": "leg_2_bend", 
+            "bend3Name": "leg_3_bend", 
+            "bend4Name": "leg_4_bend", 
+            "bend5Name": "leg_5_bend", 
+            "ikSpaces": {
+                "hip": "thighSwing_l"
+            }, 
+            "pvSpaces": {
+                "foot": "leg_ik_l"
+            }, 
+            "toes_fkName": "toes_fk", 
+            "toes_ikName": "toes_ik", 
+            "ball_ikName": "ball_ik", 
+            "heel_ikName": "heel_ik"
+        }, 
+        "leg_r": {
+            "name": "leg_r", 
+            "type": "leg.Leg", 
+            "input": [
+                "pelivs_r_bind", 
+                "thigh_r_bind", 
+                "knee_r_bind", 
+                "ankle_r_bind", 
+                "ball_r_bind", 
+                "toes_r_bind"
+            ], 
+            "rigParent": "hip_swing", 
+            "size": 4, 
+            "useProxyAttrs": false, 
+            "useScale": true, 
+            "addTwistJoints": true, 
+            "addBendies": true, 
+            "limbBaseName": "pelivs", 
+            "limbSwingName": "thighSwing", 
+            "joint1_fkName": "thigh_fk", 
+            "joint2_fkName": "knee_fk", 
+            "joint3_fkName": "ankle_fk", 
+            "joint3Gimble_fkName": "ankleGimble_fk", 
+            "limb_ikName": "leg_ik", 
+            "limbGimble_ikName": "legGimble_ik", 
+            "limb_pvName": "leg_pv", 
+            "bend1Name": "leg_1_bend", 
+            "bend2Name": "leg_2_bend", 
+            "bend3Name": "leg_3_bend", 
+            "bend4Name": "leg_4_bend", 
+            "bend5Name": "leg_5_bend", 
+            "ikSpaces": {
+                "hip": "thighSwing_r"
+            }, 
+            "pvSpaces": {
+                "foot": "leg_ik_r"
+            }, 
+            "toes_fkName": "toes_fk", 
+            "toes_ikName": "toes_ik", 
+            "ball_ikName": "ball_ik", 
+            "heel_ikName": "heel_ik"
+        }, 
+        "hand_l": {
+            "name": "hand_l", 
+            "type": "hand.Hand", 
+            "input": [
+                "pinky_0_l_bind", 
+                "ring_0_l_bind", 
+                "middle_0_l_bind", 
+                "index_0_l_bind", 
+                "thumb_0_l_bind"
+            ], 
+            "rigParent": "wrist_l_bind", 
+            "size": 1, 
+            "useProxyAttrs": true, 
+            "useScale": true, 
+            "addFKSpace": false
+        }, 
+        "hand_r": {
+            "name": "hand_r", 
+            "type": "hand.Hand", 
+            "input": [
+                "pinky_0_r_bind", 
+                "ring_0_r_bind", 
+                "middle_0_r_bind", 
+                "index_0_r_bind", 
+                "thumb_0_r_bind"
+            ], 
+            "rigParent": "wrist_r_bind", 
+            "size": 1, 
+            "useProxyAttrs": true, 
+            "useScale": true, 
+            "addFKSpace": false
+        }
+    }
+}

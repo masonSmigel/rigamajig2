@@ -106,11 +106,13 @@ class ComponentManager(QtWidgets.QWidget):
         components = meta.getTagged('component')
 
         for component in components:
-            name = cmds.getAttr("{}.component_name".format(component))
-            cmpt = cmds.getAttr("{}.component_type".format(component))
+            name = cmds.getAttr("{}.name".format(component))
+            cmpt = cmds.getAttr("{}.type".format(component))
             build_step_str = cmds.attributeQuery("build_step", n=component, le=True)[0].split(":")
             build_step = build_step_str[cmds.getAttr("{}.build_step".format(component))]
-            self.add_component(name=name, cmpt=cmpt, build_step=build_step, container=component)
+            isSubComponent = meta.hasTag(component, "subComponent")
+            if not isSubComponent:
+                self.add_component(name=name, cmpt=cmpt, build_step=build_step, container=component)
 
     def get_data_from_item(self, item):
         """

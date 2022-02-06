@@ -67,6 +67,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
                                                             rigParent=self.rigParent)
             finger_cmpt._intialize_cmpt()
             cmds.container(self.container, e=True, f=True, addNode=finger_cmpt.getContainer())
+            meta.tag(finger_cmpt.getContainer(), 'subComponent')
             self.finger_cmpt_list.append(finger_cmpt)
 
     def rigSetup(self):
@@ -82,3 +83,14 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
     def connect(self):
         for cmpt in self.finger_cmpt_list:
             cmpt._connect_cmpt()
+
+    def finalize(self):
+        # navigate around container parenting since we have already parented the containers to the hand container
+        for cmpt in self.finger_cmpt_list:
+            cmpt.finalize()
+            cmpt.setAttrs()
+            cmpt.postScript()
+
+    def optimize(self):
+        for cmpt in self.finger_cmpt_list:
+            cmpt._optimize_cmpt()

@@ -10,7 +10,6 @@ import rigamajig2.maya.hierarchy
 import rigamajig2.maya.data.curve_data
 import rigamajig2.maya.curve
 import rigamajig2.maya.color
-import rigamajig2.maya.axis
 import rigamajig2.maya.transform
 import rigamajig2.maya.meta
 import rigamajig2.maya.shape
@@ -106,8 +105,8 @@ def create(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None
     if color:
         rigamajig2.maya.color.setOverrideColor(control, color)
 
-    if rotateOrder in rigamajig2.maya.axis.ROTATEORDER:
-        cmds.setAttr("{}.rotateOrder".format(control), rigamajig2.maya.axis.ROTATEORDER.index(rotateOrder))
+    if rotateOrder in rigamajig2.maya.transform.ROTATEORDER:
+        cmds.setAttr("{}.rotateOrder".format(control), rigamajig2.maya.transform.ROTATEORDER.index(rotateOrder))
 
     # scale the control shape
     if size > 0:

@@ -55,6 +55,7 @@ class Builder(object):
 
         # varibles we need
         self.top_skeleton_nodes = list()
+        self.load_cmpts_from_file = False
 
     def getComponents(self):
         return self._available_cmpts
@@ -223,6 +224,7 @@ class Builder(object):
             cmpt_class = getattr(module, class_name)
             instance = cmpt_class(cmpt_data[cmpt]['name'], cmpt_data[cmpt]['input'])
             self.append_cmpts(instance)
+            self.load_cmpts_from_file = True
 
         logger.info("components loaded -- complete")
 
@@ -235,11 +237,12 @@ class Builder(object):
         if not path:
             path = self._absPath(self.get_rig_data(self.rig_file, COMPONENTS))
 
-        cd = abstract_data.AbstractData()
-        cd.read(path)
-        cmpt_data = cd.getData()
-        for cmpt in self.cmpts:
-            cmpt.load_settings(cmpt_data[cmpt.name])
+        if self.load_cmpts_from_file:
+            cd = abstract_data.AbstractData()
+            cd.read(path)
+            cmpt_data = cd.getData()
+            for cmpt in self.cmpts:
+                cmpt.load_settings(cmpt_data[cmpt.name])
 
     def load_controlShapes(self, path=None, applyColor=True):
         """

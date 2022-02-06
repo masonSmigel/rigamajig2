@@ -100,6 +100,12 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
     def rigSetup(self):
         """Add the rig setup"""
+
+        # the spline might shift slightly when the ik is created.
+        # If built first this could affect the input of joints downstream
+        # To comabt this  first we'll use the last joint to anchor the end of the spine to the chest top control
+        rig_transform.connectOffsetParentMatrix(self.chestTop[-1], self.input[-1], mo=True)
+
         # create the spline ik
         self.ikspline = spline.SplineBase(self.input[1:-1], name=self.name)
         self.ikspline.setGroup(self.name + '_ik')
@@ -109,6 +115,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         # setup the hipSwivel
         self.hips_swing_trs = hierarchy.create(self.hip_swing[-1], ['{}_trs'.format(self.input[0])], above=False)[0]
         rig_transform.matchTransform(self.input[0], self.hips_swing_trs)
+        rig_transform.connectOffsetParentMatrix(self.hips_swing_trs, self.input[0])
 
         # create the pivot negate
         constrain.negate(self.hips_pivot[-1], self.hips[1], t=True)
@@ -151,11 +158,6 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
         rig_transform.connectOffsetParentMatrix(self.hipsGimble[-1], self.ikspline.getGroup(), mo=True)
         rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
-
-    def postRigSetup(self):
-        """ Connect the blend chain to the bind chain"""
-        rig_transform.connectOffsetParentMatrix(self.hips_swing_trs, self.input[0])
-        rig_transform.connectOffsetParentMatrix(self.chestTop[-1], self.input[-1], mo=True)
 
     def connect(self):
         """Create the connection"""

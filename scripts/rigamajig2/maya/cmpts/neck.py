@@ -78,7 +78,10 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         self.ikspline.create(clusters=4)
         cmds.parent(self.ikspline.getGroup(), self.root_hrc)
 
-        # connect the tangents visability
+        # connect the volume factor and tangents visability attributes
+        rig_attr.addAttr(self.head[-1], 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
+        cmds.connectAttr("{}.volumeFactor".format(self.head[-1]), "{}.volumeFactor".format(self.ikspline.getGroup()))
+
         rig_attr.addAttr(self.neck[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.neck[-1]), "{}.v".format(self.neckTanget[0]))
         rig_transform.matchTransform(self.ikspline.getClusters()[1], self.neckTanget[0])
@@ -87,6 +90,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         cmds.connectAttr("{}.tangentVis".format(self.head[-1]), "{}.v".format(self.headTanget[0]))
         rig_transform.matchTransform(self.ikspline.getClusters()[2], self.headTanget[0])
 
+        # parent clusters to tangent controls
         cmds.parent(self.ikspline.getClusters()[1], self.neckTanget[-1])
         cmds.parent(self.ikspline.getClusters()[2], self.headTanget[-1])
         cmds.parent(self.ikspline.getClusters()[3], self.headGimble[-1])

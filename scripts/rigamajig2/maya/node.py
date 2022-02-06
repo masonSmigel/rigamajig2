@@ -499,9 +499,6 @@ def multMatrix(inputs=None, outputs=None, t=False, r=False, s=False, name=None):
     else:
         node = cmds.createNode('multMatrix')
 
-    if len(inputs) < 2:
-        raise ValueError("less then two inputs provided. Use a decomp matrix node instead")
-
     if inputs:
         for i, input in enumerate(inputs):
             if isinstance(input, (list, tuple)):

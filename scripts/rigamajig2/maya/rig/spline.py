@@ -3,6 +3,8 @@ Module for Ik Spline
 """
 import sys
 import maya.cmds as cmds
+import maya.api.OpenMaya as om2
+
 import rigamajig2.shared.common as common
 import rigamajig2.maya.debug as debug
 import rigamajig2.maya.curve as rig_curve
@@ -10,7 +12,9 @@ import rigamajig2.maya.cluster as rig_cluster
 import rigamajig2.maya.node as node
 import rigamajig2.maya.transform as rig_transform
 import rigamajig2.maya.attr as rig_attr
+import rigamajig2.maya.joint as joint
 import rigamajig2.maya.mathUtils as mathUtils
+import rigamajig2.maya.meta as meta
 
 if sys.version_info[0] >= 3:
     basestring = str
@@ -197,6 +201,7 @@ class SplineBase(object):
                                        name="{}_scale".format(self._name))
 
         # get aim axis and rotate order
+        isNegative = True if '-' in rig_transform.getAimAxis(self._ikJointList[1], allowNegative=True) else False
         aimAxis = rig_transform.getAimAxis(self._ikJointList[1], allowNegative=False)
         rotOrder = cmds.getAttr('{}.ro'.format(self._ikJointList[1]))
 
@@ -205,6 +210,9 @@ class SplineBase(object):
                 jnt_len = mathUtils.distanceNodes(self._ikJointList[i], self._ikJointList[i + 1])
             else:
                 jnt_len = mathUtils.distanceNodes(self._ikJointList[0], self._ikJointList[i + 1])
+
+            if isNegative:
+                jnt_len *= -1
 
             # Connect the stretch to the joint translation
             node.multDoubleLinear("{}.outputX".format(scaleAll), jnt_len,
@@ -225,7 +233,12 @@ class SplineBase(object):
         endTwist = rig_transform.decomposeRotation(self._endTwist, aimAxis)[list('xyz').index(aimAxis)]
 
         # The overall twist is calculated as roll = startTwist, twist =  (endTwist - startTwist)
-        reverseStartTwist = node.multDoubleLinear(startTwist, -1, name="{}_reserveStart".format(self._name))
+        twist_multipler = -1 if isNegative else -1
+        reverseStartTwist = node.multDoubleLinear(startTwist, twist_multipler,
+                                                  name="{}_reverseStart".format(self._name))
+        if isNegative:
+            endReverse = node.multDoubleLinear(endTwist, -1, name="{}_reverseEnd".format(self._name))
+            endTwist = "{}.output".format(endReverse)
         twistSum = node.addDoubleLinear(endTwist, "{}.output".format(reverseStartTwist),
                                         name="{}_addTwist".format(self._name))
         cmds.connectAttr(startTwist, "{}.roll".format(self._handle))
@@ -272,3 +285,100 @@ class SplineBase(object):
         cmds.setAttr("{}.v".format(self._handle), 0)
         cmds.setAttr("{}.overrideEnabled".format(self._curve), 1)
         cmds.setAttr("{}.overrideDisplayType".format(self._curve), 1)
+
+        meta.untag(self._ikJointList, "bind")
+
+
+def addTwistJoints(start, end, jnts=4, name="twist", bind_parent=None, rig_parent=None, anchorTwistStart=False):
+    """
+    add twist and bend joints between a start and end joint
+    :param start: start joint
+    :param end: end joint
+    :param jnts: number of joints to add
+    :param name: name of the group
+    :param bind_parent: parent the bind group here
+    :param rig_parent: parent the rig group
+    :param anchorTwistStart: anchor the start twist
+    :return: returns a list of targets and a spline object created.
+            reminder: to get the first target you must first acess the list. ex addTwistJoints[0][0]
+    """
+
+    start = common.getFirstIndex(start)
+    end = common.getFirstIndex(end)
+
+    startJnt = "{}_0".format(name)
+    cmds.duplicate(start, parentOnly=True, returnRootsOnly=True, name=startJnt)
+    rig_attr.unlock(startJnt, rig_attr.KEYABLE(startJnt))
+    # cmds.parent(startJnt, bind_grp)
+
+    endJnt = "{}_{}".format(end, jnts + 1)
+    cmds.duplicate(end, parentOnly=True, returnRootsOnly=True, name=endJnt)
+    rig_attr.unlock(endJnt, rig_attr.KEYABLE(endJnt))
+    cmds.parent(endJnt, startJnt)
+
+    insertJnts = joint.insertJoints(startJnt, endJnt, amount=jnts)
+    jointList = [startJnt] + insertJnts + [endJnt]
+
+    # ensure all transformation takes place on the main nodes
+    rig_transform.unfreezeToTransform(jointList)
+    joint.toOrientation(jointList)
+
+    spline_ = SplineBase(jointList=jointList, name=name)
+    if not cmds.objExists(spline_.getGroup()):
+        cmds.createNode("transform", n=spline_.getGroup())
+
+    # parent the bind group
+    rig_group = spline_.getGroup()
+    if bind_parent and cmds.objExists(bind_parent):
+        cmds.parent(jointList[0], bind_parent)
+    else:
+        rig_group = [rig_group] + [bind_grp]
+
+    # parent the rig group
+    if rig_parent and cmds.objExists(rig_parent):
+        cmds.parent(rig_group, rig_parent)
+
+    spline_.create()
+
+    # create three output joints
+    startTgt = cmds.createNode('joint', n="{}_start_spline_{}".format(name, common.TARGET))
+    rig_transform.matchTransform(jointList[0], startTgt)
+
+    midTgt = cmds.createNode('joint', n="{}_mid_spline_{}".format(name, common.TARGET))
+    rig_transform.matchTranslate(jointList[::len(jointList) - 1], midTgt)
+    rig_transform.matchRotate(jointList[0], midTgt)
+
+    endTgt = cmds.createNode('joint', n="{}_end_spline_{}".format(name, common.TARGET))
+    rig_transform.matchTransform(jointList[-1], endTgt)
+
+    cmds.parent(startTgt, midTgt, endTgt, spline_.getGroup())
+
+    # connect the targets to the main joints source
+    cmds.parent(spline_.getClusters()[0], startTgt)
+    cmds.parent(spline_.getClusters()[1:-1], midTgt)
+    cmds.parent(spline_.getClusters()[-1], endTgt)
+
+    # connect to the twist of the joints
+    rig_transform.connectOffsetParentMatrix(start, spline_.getGroup(), mo=True)
+    cmds.orientConstraint(end, spline_._endTwist, mo=True)
+
+    if anchorTwistStart:
+        # create an invert matrix
+        ws_matrix = cmds.xform(start, q=True, ws=True, m=True)
+        inv_ws_matrix = om2.MMatrix(ws_matrix).inverse()
+        start_inv_mm, start_inv_dcmp = node.multMatrix(["{}.worldMatrix".format(start)], outputs=[""],
+                                                       name="{}_invStartTist".format( spline_._startTwist))
+        print spline_._startTwist
+        cmds.setAttr("{}.matrixIn[1]".format(start_inv_mm), inv_ws_matrix, type='matrix')
+        if "-" not in rig_transform.getAimAxis(startJnt):
+            node.unitConversion("{}.outputRotate".format(start_inv_dcmp), output="{}.r".format( spline_._startTwist),
+                                conversionFactor=-1, name="{}_invStartTwistRev".format(start))
+            ro = [5, 3, 4, 1, 2, 0][cmds.getAttr('{}.rotateOrder'.format(start))]
+            cmds.setAttr("{}.{}".format( spline_._startTwist, 'rotateOrder'), ro)
+        else:
+            cmds.connectAttr("{}.outputRotate".format(start_inv_dcmp), "{}.r".format( spline_._startTwist))
+    # general cleanup
+    for jnt in [startTgt, midTgt, endTgt]:
+        cmds.setAttr('{}.drawStyle'.format(jnt), 2)
+
+    return [startTgt, midTgt, endTgt], spline_

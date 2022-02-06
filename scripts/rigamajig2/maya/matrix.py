@@ -75,3 +75,4 @@ def decompMatrix(matrix, rotateOrder='xyz'):
 
     # Return Values
     return [trans.x, trans.y, trans.z], angles, scale
+

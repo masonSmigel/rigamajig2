@@ -203,6 +203,7 @@ class IkFkBase(object):
                 transform.resetTransformations(blendJnt)
                 for attr in ['{}{}'.format(x, y) for x in 'trs' for y in 'xyz']:
                     cmds.setAttr("{}.{}".format(blendJnt, attr), e=True, lock=True)
+            meta.untag(self._ikJointList + self._fkJointList + self._blendJointList, "bind")
 
     @staticmethod
     def connectVisibility(attrHolder, attr='ikfk', ikList=[], fkList=[]):

@@ -5,7 +5,6 @@ import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 import rigamajig2.shared.common as common
 import rigamajig2.maya.utils as utils
-import rigamajig2.maya.axis as axis
 import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.naming as naming
 import rigamajig2.maya.attr as attr
@@ -153,6 +152,7 @@ def insertJoints(startJoint, endJoint, amount=1, name=None):
         if i != (len(reverseList) - 1):
             cmds.parent(reverseList[i], reverseList[i + 1])
 
+    addJointOrientToChannelBox(jointList)
     return jointList
 
 
@@ -332,8 +332,8 @@ def orientJoints(joints, aimAxis='x', upAxis='y', worldUpVector=(0, 1, 0), autoU
     :param autoUpVector: Auto guess the up vector using the vector pependicular to the joints.
     :return:
     """
-    aimVector = axis.getVectorFromAxis(aimAxis)
-    upVector = axis.getVectorFromAxis(upAxis)
+    aimVector = transform.getVectorFromAxis(aimAxis)
+    upVector = transform.getVectorFromAxis(upAxis)
 
     prevUp = (0, 0, 0)
     for i, joint in enumerate(joints):

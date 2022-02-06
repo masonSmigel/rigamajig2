@@ -2,6 +2,7 @@
 main component
 """
 import maya.cmds as cmds
+
 import rigamajig2.maya.cmpts.base
 import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.rig.spaces as spaces
@@ -9,9 +10,12 @@ import rigamajig2.maya.rig.ikfk as ikfk
 import rigamajig2.maya.transform as rig_transform
 import rigamajig2.shared.common as common
 import rigamajig2.maya.meta as meta
+import rigamajig2.maya.mathUtils as mathUtils
+import rigamajig2.maya.constrain as constrain
 import rigamajig2.maya.node
 import rigamajig2.maya.attr
 import rigamajig2.maya.joint
+import rigamajig2.maya.rig.spline as spline
 
 import logging
 
@@ -20,7 +24,9 @@ logger = logging.getLogger(__name__)
 
 class Limb(rigamajig2.maya.cmpts.base.Base):
 
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True, rigParent=str()):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(),
+                 useProxyAttrs=True, useScale=True, addTwistJoints=True, addBendies=True,
+                 rigParent=str()):
         """
         Create a main control
         :param name: name of the components
@@ -45,6 +51,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # initalize cmpt settings.
         self.cmptSettings['useProxyAttrs'] = useProxyAttrs
         self.cmptSettings['useScale'] = useScale
+        self.cmptSettings['addTwistJoints'] = addTwistJoints
+        self.cmptSettings['addBendies'] = addBendies
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['limbBaseName'] = inputBaseNames[0]
@@ -56,6 +64,13 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['limb_ikName'] = self.name.split("_")[0] + "_ik"
         self.cmptSettings['limbGimble_ikName'] = self.name.split("_")[0] + "Gimble_ik"
         self.cmptSettings['limb_pvName'] = self.name.split("_")[0] + "_pv"
+
+        self.cmptSettings['bend1Name'] = self.name.split("_")[0] + "_1_bend"
+        self.cmptSettings['bend2Name'] = self.name.split("_")[0] + "_2_bend"
+        self.cmptSettings['bend3Name'] = self.name.split("_")[0] + "_3_bend"
+        self.cmptSettings['bend4Name'] = self.name.split("_")[0] + "_4_bend"
+        self.cmptSettings['bend5Name'] = self.name.split("_")[0] + "_5_bend"
+
         self.cmptSettings['ikSpaces'] = ikSpaces
         self.cmptSettings['pvSpaces'] = pvSpaces
 
@@ -65,8 +80,10 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
         self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
 
-        if self.useScale:hideAttrs = []
-        else: hideAttrs = ['s']
+        if self.useScale:
+            hideAttrs = []
+        else:
+            hideAttrs = ['s']
 
         # limbBase/swing controls
         self.limbBase = rig_control.createAtObject(self.limbBaseName, self.side,
@@ -101,7 +118,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # Ik controls
         self.limb_ik = rig_control.create(self.limb_ikName, self.side,
                                           hierarchy=['trsBuffer', 'spaces_trs'],
-                                          hideAttrs=['v'] + hideAttrs, size=self.size, color='blue', parent=self.control_hrc,
+                                          hideAttrs=['v'] + hideAttrs, size=self.size, color='blue',
+                                          parent=self.control_hrc,
                                           shape='cube', position=cmds.xform(self.input[3], q=True, ws=True, t=True))
 
         self.limbGimble_ik = rig_control.create(self.limbGimble_ikName, self.side,
@@ -118,10 +136,57 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # if we dont want to use proxy attributes then create an attribute to hold attributes
         if not self.useProxyAttrs:
             self.ikfk_control = rig_control.createAtObject(self.name,
-                                                           hierarchy=['trsBuffer'], hideAttrs=['t','r', 's', 'v'],
+                                                           hierarchy=['trsBuffer'], hideAttrs=['t', 'r', 's', 'v'],
                                                            size=self.size, color='lightorange', shape='peakedCube',
                                                            xformObj=self.input[3], parent=self.control_hrc,
                                                            shapeAim='x')
+
+        if self.addTwistJoints and self.addBendies:
+            self.bend_ctl_hrc = cmds.createNode("transform", n=self.name + "_bendControl", parent=self.control_hrc)
+
+            self.bend1 = rig_control.create(self.bend1Name, self.side, hierarchy=['trsBuffer'],
+                                            hideAttrs=['v', 's'], size=self.size,
+                                            color='blue', shape='circle', shapeAim='x',
+                                            position=cmds.xform(self.input[1], q=True, ws=True, t=True),
+                                            parent=self.bend_ctl_hrc)
+
+            bend2_pos = mathUtils.nodePosLerp(self.input[1], self.input[2], 0.5)
+            self.bend2 = rig_control.create(self.bend2Name, self.side,
+                                            hierarchy=['trsBuffer'], hideAttrs=['v', 's'], size=self.size,
+                                            color='blue', shape='circle', shapeAim='x',
+                                            position=bend2_pos, parent=self.bend_ctl_hrc)
+
+            self.bend3 = rig_control.create(self.bend3Name, self.side,
+                                            hierarchy=['trsBuffer'], hideAttrs=['v', 's'], size=self.size,
+                                            color='blue', shape='circle', shapeAim='x',
+                                            position=cmds.xform(self.input[2], q=True, ws=True, t=True),
+                                            parent=self.bend_ctl_hrc)
+
+            bend4_pos = mathUtils.nodePosLerp(self.input[2], self.input[3], 0.5)
+            self.bend4 = rig_control.create(self.bend2Name, self.side,
+                                            hierarchy=['trsBuffer'], hideAttrs=['v', 's'], size=self.size,
+                                            color='blue', shape='circle', shapeAim='x',
+                                            position=bend4_pos, parent=self.bend_ctl_hrc)
+
+            self.bend5 = rig_control.create(self.bend4Name, self.side,
+                                            hierarchy=['trsBuffer'], hideAttrs=['v', 's'], size=self.size,
+                                            color='blue', shape='circle', shapeAim='x',
+                                            position=cmds.xform(self.input[3], q=True, ws=True, t=True),
+                                            parent=self.bend_ctl_hrc)
+
+            bend_aim_list = [b[0] for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]]
+            aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(self.input[1], allowNegative=True))
+            for i in range(len(bend_aim_list)):
+                upVector = (0, 0, 1)
+
+                if i == 4:
+                    aimVector = mathUtils.scalarMult(aimVector, -1)
+                    cmds.delete(cmds.aimConstraint(bend_aim_list[i - 1], bend_aim_list[i], aim=aimVector, u=upVector,
+                                                   wut='object', wuo=self.limb_pv[0], mo=False))
+                else:
+                    cmds.delete(cmds.aimConstraint(bend_aim_list[i + 1], bend_aim_list[i], aim=aimVector, u=upVector,
+                                                   wut='object', wuo=self.limb_pv[0], mo=False))
+            self.bendControls = [b[-1] for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]]
 
         # add the controls to our controller list
         self.fkControls = [self.joint1_fk[-1], self.joint2_fk[-1], self.joint3_fk[-1], self.joint3Gimble_fk[-1]]
@@ -149,7 +214,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self._ikStartTgt)
 
         # connect fk controls to fk joints
-        rigamajig2.maya.joint.connectChains([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3Gimble_fk[-1]], self.fkJnts)
+        rigamajig2.maya.joint.connectChains([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3Gimble_fk[-1]],
+                                            self.fkJnts)
 
         # connect the IkHandle to the end Target
         cmds.pointConstraint(self.limbGimble_ik[-1], self._ikEndTgt, mo=True)
@@ -165,6 +231,44 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # if not using proxy attributes then setup our ikfk controller
         if not self.useProxyAttrs:
             rig_transform.connectOffsetParentMatrix(self.input[3], self.ikfk_control[0])
+
+        if self.addTwistJoints:
+            self.twist_hrc = cmds.createNode("transform", n="{}_twist".format(self.name), p=self.root_hrc)
+
+            upp_targets, upp_spline = spline.addTwistJoints(self.input[1], self.input[2], name=self.name + "_upp_twist",
+                                                            bind_parent=self.input[1], rig_parent=self.twist_hrc,
+                                                            anchorTwistStart=True)
+            low_targets, low_spline = spline.addTwistJoints(self.input[2], self.input[3], name=self.name + "_low_twist",
+                                                            bind_parent=self.input[2], rig_parent=self.twist_hrc,
+                                                            anchorTwistStart=False)
+
+            # tag the new joints as bind joints
+            for jnt in upp_spline.getJointList() + low_spline.getJointList():
+                meta.tag(jnt, "bind")
+            meta.untag([self.input[1], self.input[2]], "bind")
+
+            if self.addBendies:
+                rig_transform.connectOffsetParentMatrix(self.input[1], self.bend1[0], mo=True)
+                rig_transform.connectOffsetParentMatrix(self.input[2], self.bend3[0], mo=True)
+                rig_transform.connectOffsetParentMatrix(self.input[3], self.bend5[0], mo=True)
+
+                aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(self.input[1], allowNegative=True))
+                # out aim contraints will use the offset groups as an up rotation vector
+                cmds.pointConstraint(self.bend1[-1], self.bend3[-1], self.bend2[0])
+                cmds.aimConstraint(self.bend3[-1], self.bend2[0], aim=aimVector, u=(0, 1, 0),
+                                   wut='objectrotation', wuo=self.bend1[0], mo=True)
+                cmds.pointConstraint(self.bend3[-1], self.bend5[-1], self.bend4[0])
+                cmds.aimConstraint(self.bend5[-1], self.bend4[0], aim=aimVector, u=(0, 1, 0),
+                                   wut='objectrotation', wuo=self.bend3[0], mo=True)
+
+                # create the twist setup
+                rig_transform.connectOffsetParentMatrix(self.bend1[-1], upp_targets[0], mo=True)
+                rig_transform.connectOffsetParentMatrix(self.bend2[-1], upp_targets[1], mo=True)
+                rig_transform.connectOffsetParentMatrix(self.bend3[-1], upp_targets[2], mo=True)
+
+                rig_transform.connectOffsetParentMatrix(self.bend3[-1], low_targets[0], mo=True)
+                rig_transform.connectOffsetParentMatrix(self.bend4[-1], low_targets[1], mo=True)
+                rig_transform.connectOffsetParentMatrix(self.bend5[-1], low_targets[2], mo=True)
 
         self.ikfkMatchSetup()
 
@@ -202,7 +306,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.limbBase[0],mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.limbBase[0], mo=True)
 
         # setup the spaces
         spaces.create(self.limbSwing[1], self.limbSwing[-1], parent=self.spaces_hrc)
@@ -214,10 +318,12 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             spaces.addSpace(self.limbSwing[1], ['trs_motion'], nameList=['world'], constraintType='orient')
 
         if self.ikSpaces:
-            spaces.addSpace(self.limb_ik[1], [self.ikSpaces[k] for k in self.ikSpaces.keys()], self.ikSpaces.keys(), 'parent')
+            spaces.addSpace(self.limb_ik[1], [self.ikSpaces[k] for k in self.ikSpaces.keys()], self.ikSpaces.keys(),
+                            'parent')
 
         if self.pvSpaces:
-            spaces.addSpace(self.limb_pv[1], [self.pvSpaces[k] for k in self.pvSpaces.keys()], self.pvSpaces.keys(), 'parent')
+            spaces.addSpace(self.limb_pv[1], [self.pvSpaces[k] for k in self.pvSpaces.keys()], self.pvSpaces.keys(),
+                            'parent')
 
     def finalize(self):
         """ Lock some attributes we dont want to see"""
@@ -255,7 +361,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         # add required data to the ikFkSwitchGroup
         # TODO: try to check this out. maybe use the ikfk group instead of the attribute
-        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkJnts[:-1] + [wristIkOffset], 'fkMatchList','matchNode')
+        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkJnts[:-1] + [wristIkOffset], 'fkMatchList',
+                                      'matchNode')
         meta.addMessageListConnection(self.ikfk.getGroup(), self.ikJnts, 'ikMatchList', 'matchNode')
         meta.addMessageListConnection(self.ikfk.getGroup(), self.fkControls, 'fkControls', 'matchNode')
         meta.addMessageListConnection(self.ikfk.getGroup(), self.ikControls, 'ikControls', 'matchNode')

@@ -66,15 +66,20 @@ def createAxisMarker(nodes):
     if not isinstance(nodes, (list, tuple)):
         nodes = [nodes]
 
-    asset = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../other/axis_marker.ma"))
+    asset = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../misc/axis_marker.ma"))
     print asset
 
-    if not cmds.objExists("axisMarkers_hrc"):
+    if not cmds.objExists("axisMarker_hrc"):
         cmds.createNode("transform", name="axisMarker_hrc")
 
     for node in nodes:
-        marker_node = cmds.ls(cmds.file(asset, i=True, returnNewNodes=True, ns='marker'), type='transform')
+        if not cmds.objExists(node):
+            continue
         marker = '{}_marker'.format(node)
+        if cmds.objExists(marker):
+            raise RuntimeError("A marker already exists with the name '{}'".format(marker))
+
+        marker_node = cmds.ls(cmds.file(asset, i=True, returnNewNodes=True, ns='marker'), type='transform')
         cmds.rename(marker_node,marker)
         cmds.parent(marker, "axisMarker_hrc")
 

@@ -289,6 +289,7 @@ def getAimAxis(transform, allowNegative=True):
     return axis
 
 
+#TODO: rewrite to account for offset parent matrix
 def decomposeRotation(node, twistAxis='x'):
     """
     decompose the swing and twist of a transform.

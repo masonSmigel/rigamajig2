@@ -30,6 +30,7 @@ class Base(object):
         self.cmpt_type = ".".join([self.__module__.split('cmpts.')[-1], self.__class__.__name__])
         self.input = input
         self.container = self.name + '_container'
+        self.metaNode = None
 
         # element lists
         self.joints = list()
@@ -278,7 +279,8 @@ class Base(object):
     def load_settings(self, data):
         keys_to_remove = ['name', 'type', 'input']
         new_dict = {key:val for key, val in data.items() if key not in keys_to_remove}
-        self.metaNode.setDataDict(new_dict)
+        if self.metaNode:
+            self.metaNode.setDataDict(new_dict)
 
     def _load_meta_to_component(self):
         """

@@ -15,7 +15,7 @@ class CollapsibleHeader(QtWidgets.QWidget):
 
     clicked = QtCore.Signal()
 
-    def __init__(self, text, parent=None):
+    def __init__(self, text, parent=None, addCheckbox=False):
         super(CollapsibleHeader, self).__init__(parent)
 
         self.setAutoFillBackground(True)
@@ -24,13 +24,19 @@ class CollapsibleHeader(QtWidgets.QWidget):
         self.icon_label = QtWidgets.QLabel()
         self.icon_label.setFixedWidth(self.COLLASPED_PIXMAP.width())
 
+        if addCheckbox:
+            self.checkbox = QtWidgets.QCheckBox()
+
         self.text_label = QtWidgets.QLabel()
         self.text_label.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
 
         self.main_layout = QtWidgets.QHBoxLayout(self)
         self.main_layout.setContentsMargins(3, 3, 3, 3)
         self.main_layout.addWidget(self.icon_label)
+        if addCheckbox:
+            self.main_layout.addWidget(self.checkbox)
         self.main_layout.addWidget(self.text_label)
+        self.main_layout.addStretch()
 
         self.set_text(text)
         self.set_expanded(False)
@@ -63,10 +69,10 @@ class CollapsibleHeader(QtWidgets.QWidget):
 
 class CollapsibleWidget(QtWidgets.QWidget):
 
-    def __init__(self, text, parent=None):
+    def __init__(self, text, parent=None, addCheckbox=False):
         super(CollapsibleWidget, self).__init__(parent)
 
-        self.header_wdg = CollapsibleHeader(text)
+        self.header_wdg = CollapsibleHeader(text, addCheckbox=addCheckbox)
         self.header_wdg.clicked.connect(self.on_header_clicked)
 
         self.body_wdg = QtWidgets.QWidget()

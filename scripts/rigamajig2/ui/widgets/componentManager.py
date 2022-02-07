@@ -50,7 +50,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.component_tree.addAction(self.select_container_action)
 
         self.reload_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":refresh.png"), "")
-        self.remove_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":hotkeyFieldClear.png"), "")
+        self.clear_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":hotkeyFieldClear.png"), "")
         self.cmpt_settings_btn = QtWidgets.QPushButton(QtGui.QIcon(":QR_settings.png"), "")
         self.add_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":freeformOff.png"), "Add Component")
 
@@ -59,7 +59,7 @@ class ComponentManager(QtWidgets.QWidget):
         btn_layout.setContentsMargins(0, 0, 0, 0)
         btn_layout.addStretch()
         btn_layout.addWidget(self.reload_cmpt_btn)
-        btn_layout.addWidget(self.remove_cmpt_btn)
+        btn_layout.addWidget(self.clear_cmpt_btn)
         btn_layout.addWidget(self.cmpt_settings_btn)
         btn_layout.addWidget(self.add_cmpt_btn)
 
@@ -72,6 +72,7 @@ class ComponentManager(QtWidgets.QWidget):
 
     def create_connections(self):
         self.reload_cmpt_btn.clicked.connect(self.load_cmpts_from_scene)
+        self.clear_cmpt_btn.clicked.connect(self.clear_cmpt_tree)
         self.add_cmpt_btn.clicked.connect(self.create_context_menu)
 
     def add_component(self, name, cmpt, build_step='unbuilt', container=None):

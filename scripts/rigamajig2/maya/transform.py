@@ -121,21 +121,25 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
     drivens = common.toList(driven)
 
     for driven in drivens:
+        offset = list()
         if mo:
-            offset = cmds.createNode('transform', n="{}_trsOffset".format(driven))
-            matchTransform(driven, offset)
-            cmds.parent(offset, driver)
-            driver = offset
+            offset = offsetMatrix(driver, driven)
 
         parentList = cmds.listRelatives(driven, parent=True, path=True)
         parent = parentList[0] if parentList else None
-        if parent:
-            mm = cmds.createNode("multMatrix", name="{}_{}_mm".format(driver, driven))
-            cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(mm, 'matrixIn[0]'), f=True)
-            cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[1]'), f=True)
-            outputPlug = "{}.{}".format(mm, 'matrixSum')
-        else:
+
+        if not parent and not mo:
             outputPlug = "{}.{}".format(driver, 'worldMatrix')
+        else:
+            mm = cmds.createNode("multMatrix", name="{}_{}_mm".format(driver, driven))
+            if offset:
+                cmds.setAttr("{}.{}".format(mm, "matrixIn[0]"), offset, type='matrix')
+
+            cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(mm, 'matrixIn[1]'), f=True)
+
+            if parent:
+                cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[2]'), f=True)
+            outputPlug = "{}.{}".format(mm, 'matrixSum')
 
         if not t or not r or not s or not sh:
             # connect the output into a pick matrix node
@@ -165,6 +169,24 @@ def localOffset(node):
     if parent:
         parentInverse = om2.MMatrix(cmds.getAttr('{}.{}'.format(parent[0], 'worldInverseMatrix')))
         offset *= parentInverse
+    return offset
+
+
+def offsetMatrix(node1, node2):
+    """
+    Calculate an offset matrix between two nodes. 
+    Returns the matrix of node2 relative to node 1
+    :param node1:
+    :param node2:
+    :return:
+    """
+    node1_mat = om2.MMatrix(cmds.getAttr("{}.{}".format(node1, 'worldMatrix')))
+    node2_mat = om2.MMatrix(cmds.getAttr("{}.{}".format(node2, 'worldMatrix')))
+
+    # invert the parent matrix
+    node1_inverted = om2.MTransformationMatrix(node1_mat).asMatrixInverse()
+    offset = node2_mat * node1_inverted
+    
     return offset
 
 

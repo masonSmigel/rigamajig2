@@ -110,18 +110,18 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.create_rig_env_btn.setToolTip("Create a new rig enviornment from an existing enviornment")
 
         # Pre- script section
-        self.preScript_wdgt = collapseableWidget.CollapsibleWidget('Pre-Script')
+        self.preScript_wdgt = collapseableWidget.CollapsibleWidget('Pre-Script', addCheckbox=True)
         self.preScript_scriptRunner = scriptRunner.ScriptRunner()
 
         # Model Section
-        self.model_wdgt = collapseableWidget.CollapsibleWidget('Model')
+        self.model_wdgt = collapseableWidget.CollapsibleWidget('Model', addCheckbox=True)
         self.model_path_selector = pathSelector.PathSelector("model:", cap="Select a Model file", ff=MAYA_FILTER, fm=1)
         self.import_model_btn = QtWidgets.QPushButton('Import Model')
         self.open_model_btn = QtWidgets.QPushButton('Open Model')
         self.open_model_btn.setFixedWidth(100)
 
         # Skeleton Section
-        self.skeleton_wdgt = collapseableWidget.CollapsibleWidget('Skeleton')
+        self.skeleton_wdgt = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
         self.skel_path_selector = pathSelector.PathSelector("skeleton:", cap="Select a Skeleton file", ff=MAYA_FILTER,
                                                             fm=1)
         self.joint_pos_path_selector = pathSelector.PathSelector("joint pos: ", cap="Select a Skeleton position file",
@@ -149,11 +149,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.mirrorJnt_btn.setFixedHeight(24)
 
         # Component Section
-        self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Components')
-        self.cmpt_path_selector = pathSelector.PathSelector("cmpts:", cap="Select a Component File",
-                                                            ff=JSON_FILTER, fm=1)
-        self.load_components_btn = QtWidgets.QPushButton("Load Components")
-        self.append_components_btn = QtWidgets.QPushButton("Append Components")
+        self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Components', addCheckbox=True)
+        self.cmpt_path_selector = pathSelector.PathSelector("cmpts:", cap="Select a Component File", ff=JSON_FILTER, fm=1)
+        self.load_components_btn = QtWidgets.QPushButton("Load Cmpts")
+        self.append_components_btn = QtWidgets.QPushButton("Append Cmpts")
+        self.save_components_btn = QtWidgets.QPushButton("Save Cmpts")
         self.cmpt_manager = componentManager.ComponentManager()
 
         self.guide_path_selector = pathSelector.PathSelector("guides:", cap="Select a guide file", ff=JSON_FILTER, fm=1)
@@ -167,14 +167,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.complete_build_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
         # Post - script section
-        self.postScript_wdgt = collapseableWidget.CollapsibleWidget('Post-Script')
+        self.postScript_wdgt = collapseableWidget.CollapsibleWidget('Post-Script', addCheckbox=True)
         self.postScript_scriptRunner = scriptRunner.ScriptRunner()
 
         # Control Shape Section
-        self.ctlShape_wdgt = collapseableWidget.CollapsibleWidget('Controls')
+        self.ctlShape_wdgt = collapseableWidget.CollapsibleWidget('Controls', addCheckbox=True)
         self.ctl_path_selector = pathSelector.PathSelector("Controls:", cap="Select a Control Shape file",
-                                                           ff=JSON_FILTER,
-                                                           fm=1)
+                                                           ff=JSON_FILTER, fm=1)
         self.load_color_cb = QtWidgets.QCheckBox()
         self.load_color_cb.setChecked(True)
         self.load_color_cb.setFixedWidth(25)
@@ -203,11 +202,14 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.replace_ctl_btn = QtWidgets.QPushButton("Replace Control Shape ")
 
         # Deformation Section
-        self.deformations_wdgt = collapseableWidget.CollapsibleWidget('Deformations')
+        self.deformations_wdgt = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
         # Publish Section
-        self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish')
+        self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
         self.publishScript_scriptRunner = scriptRunner.ScriptRunner()
 
+        self.run_selected_btn = QtWidgets.QPushButton("Run Selected")
+        self.run_btn = QtWidgets.QPushButton("Run")
+        self.run_btn.setFixedWidth(80)
         self.close_btn = QtWidgets.QPushButton("Close")
 
     def create_layouts(self):
@@ -283,6 +285,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         cmpt_load_layout = QtWidgets.QHBoxLayout()
         cmpt_load_layout.addWidget(self.load_components_btn)
         cmpt_load_layout.addWidget(self.append_components_btn)
+        cmpt_load_layout.addWidget(self.save_components_btn)
 
         self.cmpt_wdgt.addWidget(self.cmpt_path_selector)
         self.cmpt_wdgt.addLayout(cmpt_load_layout)
@@ -359,7 +362,12 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         build_grp.setLayout(build_layout)
 
         # lower persistant buttons (AKA close)
-        low_buttons_layout = QtWidgets.QHBoxLayout()
+        low_buttons_layout = QtWidgets.QVBoxLayout()
+        run_buttons_layout = QtWidgets.QHBoxLayout()
+        run_buttons_layout.addWidget(self.run_selected_btn)
+        run_buttons_layout.addWidget(self.run_btn)
+
+        low_buttons_layout.addLayout(run_buttons_layout)
         low_buttons_layout.addWidget(self.close_btn)
 
         # scrollable area
@@ -400,6 +408,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.load_guides_btn.clicked.connect(self.load_guides)
         self.save_guides_btn.clicked.connect(self.save_guides)
         self.load_components_btn.clicked.connect(self.load_components)
+        self.cmpt_manager.clear_cmpt_btn.clicked.connect(self.clear_components)
+
         self.build_rig_btn.clicked.connect(self.build_rig)
         self.connect_rig_btn.clicked.connect(self.connect_rig)
         self.finalize_rig_btn.clicked.connect(self.finalize_rig)
@@ -411,6 +421,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.setCtlShape_btn.clicked.connect(self.set_controlShape)
         self.replace_ctl_btn.clicked.connect(self.replace_controlShape)
 
+        self.run_selected_btn.clicked.connect(self.run_selected)
+        self.run_btn.clicked.connect(self.run_all)
         self.close_btn.clicked.connect(self.close)
 
     # Connections
@@ -580,19 +592,26 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.rig_builder.load_component_settings(self.cmpt_path_selector.get_abs_path())
         self.cmpt_manager.load_cmpts_from_scene()
 
+    def clear_components(self):
+        self.rig_builder.set_cmpts(list())
+
     def build_rig(self):
         self.rig_builder.build()
+        self.cmpt_manager.load_cmpts_from_scene()
 
     def connect_rig(self):
         self.rig_builder.connect()
+        self.cmpt_manager.load_cmpts_from_scene()
 
     def finalize_rig(self):
         self.rig_builder.finalize()
+        self.cmpt_manager.load_cmpts_from_scene()
 
     def complete_build(self):
         self.rig_builder.build()
         self.rig_builder.connect()
         self.rig_builder.finalize()
+        self.cmpt_manager.load_cmpts_from_scene()
 
     def load_guides(self):
         self.rig_builder.load_guide_data(self.guide_path_selector.get_abs_path())
@@ -631,6 +650,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         else:
             self.rig_builder.delete_advanced_proxy()
 
+    def run_selected(self):
+        pass
+
+    def run_all(self):
+        self.rig_builder.run()
 
 if __name__ == '__main__':
     try:

@@ -29,11 +29,11 @@ def getTranslation(matrix):
     return decompMatrix(matrix)[0]
 
 
-def getRotation(matrix, rotateOrder):
+def getRotation(matrix, rotateOrder='xyz'):
     """
     Get the rotation of a matrix. Must provide a rotate order for accurate Euler values
-    :param matrix:
-    :param rotateOrder:
+    :param matrix: matrix to get the rotation of
+    :param rotateOrder: rotate order of the matrix. Default is 'xyz'
     :return: list of angles
     """
     return decompMatrix(matrix, rotateOrder)[1]

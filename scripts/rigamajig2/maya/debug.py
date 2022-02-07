@@ -66,7 +66,7 @@ def createAxisMarker(nodes):
     if not isinstance(nodes, (list, tuple)):
         nodes = [nodes]
 
-    asset = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../other/axis.ma"))
+    asset = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../other/axis_marker.ma"))
     print asset
 
     if not cmds.objExists("axisMarkers_hrc"):

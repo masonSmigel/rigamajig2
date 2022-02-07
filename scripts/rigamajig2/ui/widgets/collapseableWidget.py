@@ -21,6 +21,8 @@ class CollapsibleHeader(QtWidgets.QWidget):
         self.setAutoFillBackground(True)
         self.set_background_color(None)
 
+        self._haschbx = addCheckbox
+
         self.icon_label = QtWidgets.QLabel()
         self.icon_label.setFixedWidth(self.COLLASPED_PIXMAP.width())
 
@@ -104,6 +106,12 @@ class CollapsibleWidget(QtWidgets.QWidget):
 
     def on_header_clicked(self):
         self.set_expanded(not self.header_wdg.is_expanded())
+
+    def isChecked(self):
+        if self.header_wdg._haschbx:
+            if self.header_wdg.checkbox.isChecked():
+                return True
+        return False
 
 
 def maya_main_window():

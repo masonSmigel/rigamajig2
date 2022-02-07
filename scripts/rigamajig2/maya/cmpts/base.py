@@ -168,7 +168,10 @@ class Base(object):
         pass
 
     def setInitalData(self):
-        """Set inital component data. This needs to be done in a compont so we control attrribute settings in subclasses."""
+        """
+        Set inital component data.
+        This needs to be done in a compont so we control attrribute settings in subclasses.
+        """
         pass
 
     def createContainer(self, data={}):
@@ -305,7 +308,8 @@ class Base(object):
         return self.input
 
     def get_cmpt_data(self):
-        # create an info dictionary with the important component settings. This is used to save the component to a file
+        # create an info dictionary with the important component settings.
+        # This is used to save the component to a file
         info_dict = OrderedDict()
         info_dict['name'] = self.name
         info_dict['type'] = self.cmpt_type

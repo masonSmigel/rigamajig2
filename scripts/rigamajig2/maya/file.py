@@ -129,11 +129,12 @@ def import_(path=None, ns=False, f=False):
     if not path:
         path = _pathDialog(cap='Import', okc='Import', fm=0, ff=IMPORT_FILE_FILTER)
 
+    kwargs = {"i": True, "f": f, "rnn":True}
     if ns:
         namespace = os.path.basename(path).split('.')[0]
-        file_ = cmds.file(path, i=True, f=f, ns=namespace, rnn=True)
-    else:
-        file_ = cmds.file(path, i=True, f=f, rnn=True)
+        kwargs["ns"] = namespace
+
+    file_ = cmds.file(path, **kwargs)
     return file_
 
 

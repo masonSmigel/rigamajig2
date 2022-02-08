@@ -278,7 +278,7 @@ class TestResult(unittest.TextTestResult):
         if Settings.buffer_output:
             # Disable any logging while running tests. By disabling critical, we are disabling logging
             # at all levels below critical as well
-            logging.disable(logging.CRITICAL)
+            logging.disable(logging.DEBUG)
 
     def stopTestRun(self):
         """Called after all tests are run. """

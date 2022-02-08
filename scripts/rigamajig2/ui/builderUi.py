@@ -79,6 +79,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         # UTILS
         # ...
 
+        #TOOLS
+        self.run_performance_test_action = QtWidgets.QAction("Run Performance Test", self)
+        self.run_performance_test_action.triggered.connect(self.run_performace_test)
+
         # HELP
         self.show_documentation_action = QtWidgets.QAction("Documentation", self)
         self.show_documentation_action.triggered.connect(self.show_documentation)
@@ -96,10 +100,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         utils_menu = self.main_menu.addMenu("Utils")
         tools_menu = self.main_menu.addMenu("Tools")
+        tools_menu.addAction(self.run_performance_test_action)
+
 
         help_menu = self.main_menu.addMenu("Help")
         help_menu.addAction(self.show_documentation_action)
         help_menu.addAction(self.show_about_action)
+
 
     def create_widgets(self):
         self.rig_path_selector = pathSelector.PathSelector(cap='Select a Rig File', ff="Rig Files (*.rig)", fm=1)
@@ -678,6 +685,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def run_all(self):
         self.rig_builder.run()
+
+    # TOOLS MENU
+    def run_performace_test(self):
+        import maya.app.evaluationToolkit.evaluationToolkit as et
+        et.runEMPerformanceTest()
 
 
 if __name__ == '__main__':

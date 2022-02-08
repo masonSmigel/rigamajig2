@@ -119,7 +119,7 @@ class Builder(object):
             data_obj = joint_data.JointData()
             data_obj.read(path)
             data_obj.applyData(data_obj.getData().keys())
-            logger.info("Joint positions loaded from: {}".format(path))
+            logger.info("Joint positions loaded")
 
     def save_joint_positions(self, path=None):
         import rigamajig2.maya.data.joint_data as joint_data
@@ -217,6 +217,7 @@ class Builder(object):
         cd.read(path)
         cmpt_data = cd.getData()
 
+        self.set_cmpts(list())
         for cmpt in list(cmpt_data.keys()):
             # dynamically load component module into python
             module_name, class_name = cmpt_data[cmpt]['type'].split(".")
@@ -415,7 +416,7 @@ class Builder(object):
         end_time = time.time()
         final_time = end_time - start_time
 
-        print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}'.format(final_time, '-' * 70))
+        print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(final_time, '-' * 70))
 
     # UTILITY FUNCTIONS
     def set_rig_file(self, rigFile):
@@ -435,7 +436,7 @@ class Builder(object):
         else:
             rig_env_path = data["rig_env"]
         self.path = os.path.abspath(os.path.join(self.rig_file, rig_env_path))
-        logger.info('Rig Enviornment path: {0}'.format(self.path))
+        logger.info('\n\nRig Enviornment path: {0}'.format(self.path))
 
     # GET
     def get_path(self):

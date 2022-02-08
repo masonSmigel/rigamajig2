@@ -2,6 +2,7 @@
 This file contains the UI for the main rig builder
 """
 import sys
+import time
 import logging
 import os
 from collections import OrderedDict
@@ -397,7 +398,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         self.import_model_btn.clicked.connect(self.import_model)
 
-        self.import_load_skeleton_btn.clicked.connect(self.import_load_skeleton)
+        self.import_load_skeleton_btn.clicked.connect(self.import_and_load_skeleton)
         self.import_skeleton_btn.clicked.connect(self.import_skeleton)
         self.load_jnt_pos_btn.clicked.connect(self.load_joint_positions)
         self.save_jnt_pos_btn.clicked.connect(self.save_joint_positions)
@@ -572,7 +573,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def import_model(self):
         self.rig_builder.import_model(self.model_path_selector.get_abs_path())
 
-    def import_load_skeleton(self):
+    def import_and_load_skeleton(self):
         self.import_skeleton()
         self.load_joint_positions()
 
@@ -651,10 +652,33 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
             self.rig_builder.delete_advanced_proxy()
 
     def run_selected(self):
-        pass
+        """run selected steps"""
+        startTime = time.time()
+
+        if self.preScript_wdgt.isChecked():
+            self.preScript_scriptRunner.execute_all_scripts()
+        if self.model_wdgt.isChecked():
+            self.import_model()
+        if self.skeleton_wdgt.isChecked():
+            self.import_and_load_skeleton()
+        if self.cmpt_wdgt.isChecked():
+            self.load_components()
+            self.complete_build()
+        if self.ctlShape_wdgt.isChecked():
+            self.load_controlShapes()
+        if self.deformations_wdgt.isChecked():
+            pass
+        if self.postScript_wdgt.isChecked():
+            self.postScript_scriptRunner.execute_all_scripts()
+        if self.publish_wdgt.isChecked():
+            self.publishScript_scriptRunner.execute_all_scripts()
+
+        runTime = time.time() - startTime
+        print("Time Elapsed: {}".format(str(runTime)))
 
     def run_all(self):
         self.rig_builder.run()
+
 
 if __name__ == '__main__':
     try:

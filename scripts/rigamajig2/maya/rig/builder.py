@@ -88,9 +88,17 @@ class Builder(object):
         if not path:
             path = self._absPath(self.get_rig_data(self.rig_file, MODEL_FILE))
 
+        nodes = list()
         if path and os.path.exists(path):
-            file.import_(path, ns=None)
+            nodes = file.import_(path, ns=None)
             logger.info("model imported")
+
+        # get top level nodes in the skeleton
+        if nodes:
+            for node in cmds.ls(nodes, l=True, type='transform'):
+                if not len(node.split('|')) > 2:
+                    # self.top_skeleton_nodes.append(node)
+                    meta.tag(node, 'model_root')
 
     def import_skeleton(self, path=None):
         if not path:
@@ -163,6 +171,12 @@ class Builder(object):
             top_skeleton_nodes = meta.getTagged('skeleton_root')
             if not cmds.listRelatives(top_skeleton_nodes, p=True):
                 cmds.parent(top_skeleton_nodes, 'bind')
+
+        # if the model group exists. parent the model
+        if cmds.objExists('model'):
+            top_model_nodes = meta.getTagged('model_root')
+            if not cmds.listRelatives(top_model_nodes, p=True):
+                cmds.parent(top_model_nodes, 'model')
 
         logger.info("build -- complete")
 

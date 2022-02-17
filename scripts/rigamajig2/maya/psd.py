@@ -30,10 +30,17 @@ def deletePsdReader(joints):
     joints = common.toList(joints)
 
     for jnt in joints:
-        reader_hrc = meta.getMessageConnection("{}.{}".format(jnt,"SwingPsdHrc"))
+        reader_hrc = meta.getMessageConnection("{}.{}".format(jnt, "PsdHrc"))
         cmds.delete(reader_hrc)
-        cmds.deleteAttr("{}.{}".format(jnt,"SwingPsdHrc"))
-        cmds.deleteAttr("{}.{}".format(jnt,"SwingPsdReader"))
+        cmds.deleteAttr("{}.{}".format(jnt, "PsdHrc"))
+        cmds.deleteAttr("{}.{}".format(jnt, "SwingPsdReader"))
+
+
+def initalizePsds():
+    if not cmds.objExists("pose_readers"):
+        root = cmds.createNode("transform", n="pose_readers")
+        if cmds.objExists("rig"):
+            cmds.parent(root, "rig")
 
 
 def createPsdReader(joint, twist=False, swing=True, parent=False):
@@ -45,6 +52,9 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     :param parent: Parent in the rig for the pose reader
     :return:
     """
+    # initalize an envornment for our Psds to go to
+    initalizePsds()
+
     joint = common.getFirstIndex(joint)
     aimJoint = joint
     if not cmds.listRelatives(joint, type="joint"):
@@ -70,7 +80,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
         if not cmds.objExists("{}.{}".format(joint, "SwingPsdReader")):
             pose_reader, pose_pt = createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc)
             meta.addMessageConnection(joint, pose_reader, sourceAttr="SwingPsdReader")
-            meta.addMessageConnection(joint, hrc, sourceAttr="SwingPsdHrc")
+            meta.addMessageConnection(joint, hrc, sourceAttr="PsdHrc")
         else:
             cmds.warning("Pose reader already exists on the joint '{}'".format(joint))
 
@@ -187,7 +197,8 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None):
         merge_m = cmds.createNode("multMatrix", n='{}_mergeMat'.format(joint))
         cmds.connectAttr("{}.{}".format(t_pick, "outputMatrix"), "{}.{}".format(merge_m, 'matrixIn[1]'))
         cmds.connectAttr("{}.{}".format(r_pick, "outputMatrix"), "{}.{}".format(merge_m, 'matrixIn[0]'))
-        cmds.connectAttr("{}.{}".format(merge_m, 'matrixSum'), "{}.{}".format(pose_reader, 'offsetParentMatrix'), f=True)
+        cmds.connectAttr("{}.{}".format(merge_m, 'matrixSum'), "{}.{}".format(pose_reader, 'offsetParentMatrix'),
+                         f=True)
 
     # cleanup the setup
     meta.tag(pose_reader, "poseReader")

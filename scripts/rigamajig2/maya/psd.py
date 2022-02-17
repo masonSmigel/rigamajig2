@@ -10,12 +10,14 @@ import rigamajig2.maya.attr as attr
 
 
 def showPsdReaders():
+    """ Show all Psd Readers in the scene"""
     readers = meta.getTagged("poseReader")
     for reader in readers:
         cmds.setAttr("{}.{}".format(reader, "v"), 1)
 
 
 def hidePsdReaders():
+    """ Hide all Psd readers in the scene"""
     readers = meta.getTagged("poseReader")
     for reader in readers:
         cmds.setAttr("{}.{}".format(reader, "v"), 0)
@@ -37,6 +39,7 @@ def deletePsdReader(joints):
 
 
 def initalizePsds():
+    """This will initalize the pose reader parent group"""
     if not cmds.objExists("pose_readers"):
         root = cmds.createNode("transform", n="pose_readers")
         if cmds.objExists("rig"):

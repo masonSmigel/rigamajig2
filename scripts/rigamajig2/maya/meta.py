@@ -133,17 +133,19 @@ def getMessageConnection(dataPlug, silent=True):
     :param silent: if the function fails return None instead of erroring
     :return: nodes connected to the message attribute. if the attribute has multiconnections return a list.
     """
-
     if cmds.objExists(dataPlug):
         data = cmds.listConnections(dataPlug, d=True)
+        if not data:
+            data = cmds.listConnections(dataPlug, s=True)
+
         if len(data) > 1:
             return data
         else:
             return common.getFirstIndex(data)
     elif not silent:
         raise RuntimeError('Plug "{}" does not exist'.format(dataPlug))
-    else:
-        return None
+
+    return None
 
 
 def validateDataType(val):

@@ -57,7 +57,7 @@ def createProxyGeo(joints):
             cmds.setAttr("{}.{}".format(node, attr), cb=False)
 
 
-def createAxisMarker(nodes):
+def createAxisMarker(nodes=None):
     """
     Create an axis marker geometry on the given nodes.
     his can be helpful over LRA's since the geometry will show scale as well as orientation
@@ -66,6 +66,10 @@ def createAxisMarker(nodes):
     """
     if not isinstance(nodes, (list, tuple)):
         nodes = [nodes]
+
+    # if we dont have any nodes. use the selection
+    if not nodes:
+        nodes = cmds.ls(sl=True)
 
     asset = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../misc/axis_marker.ma"))
     print asset

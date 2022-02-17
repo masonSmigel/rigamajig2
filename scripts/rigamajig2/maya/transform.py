@@ -138,9 +138,11 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
             cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(mm, 'matrixIn[1]'), f=True)
 
             if parent:
-                cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[2]'), f=True)
+                cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[2]'),
+                                 f=True)
             outputPlug = "{}.{}".format(mm, 'matrixSum')
 
+        pickMat = None
         if not t or not r or not s or not sh:
             # connect the output into a pick matrix node
             pickMat = cmds.createNode('pickMatrix', name="{}_{}_pickMatrix".format(driver, driven))
@@ -149,13 +151,14 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
             cmds.setAttr(pickMat + '.useRotate', r)
             cmds.setAttr(pickMat + '.useScale', s)
             cmds.setAttr(pickMat + '.useShear', sh)
-            cmds.connectAttr(pickMat + '.outputMatrix', "{}.{}".format(driven, 'offsetParentMatrix'))
-        else:
-            # normal connection
-            cmds.connectAttr(outputPlug, "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
+            outputPlug = pickMat + '.outputMatrix'
+
+        cmds.connectAttr(outputPlug, "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
 
         # now we need to reset the trs
         resetTransformations(driven)
+
+    return mm, pickMat
 
 
 def localOffset(node):
@@ -186,7 +189,7 @@ def offsetMatrix(node1, node2):
     # invert the parent matrix
     node1_inverted = om2.MTransformationMatrix(node1_mat).asMatrixInverse()
     offset = node2_mat * node1_inverted
-    
+
     return offset
 
 
@@ -311,7 +314,7 @@ def getAimAxis(transform, allowNegative=True):
     return axis
 
 
-#TODO: rewrite to account for offset parent matrix
+# TODO: rewrite to account for offset parent matrix
 def decomposeRotation(node, twistAxis='x'):
     """
     decompose the swing and twist of a transform.

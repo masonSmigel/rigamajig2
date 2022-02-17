@@ -73,6 +73,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
         hrc = cmds.createNode("transform", n="{}_poseReader_hrc".format(joint))
     rig_transform.matchTransform(joint, hrc)
 
+    # TODO: add twist reader
     if twist:
         cmds.addAttr(joint, longName='twist_{}'.format(aimAxis))
 
@@ -153,6 +154,7 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None):
                 cmds.setAttr("{}.colorEntryList[{}].color".format(v_ramp, zone), 1, 1, 1, type="double3")
             else:
                 cmds.setAttr("{}.colorEntryList[{}].color".format(v_ramp, zone), 0, 0, 0, type="double3")
+
             # if it is the first zone make the last zone white too
             if i == 0: cmds.setAttr("{}.colorEntryList[{}].color".format(v_ramp, zone_num), 1, 1, 1, type="double3")
             cmds.setAttr("{}.colorEntryList[{}].position".format(v_ramp, zone), float(zone) * 1 / float(zone_num))

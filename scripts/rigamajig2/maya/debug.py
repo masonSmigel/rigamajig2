@@ -3,7 +3,6 @@ import os.path
 import maya.cmds as cmds
 import rigamajig2.shared.common as common
 import rigamajig2.maya.transform as rig_transform
-import rigamajig2.maya.meta as meta
 
 
 def showLocalRotationAxis(nodes):
@@ -90,40 +89,3 @@ def createAxisMarker(nodes=None):
 
         rig_transform.matchTransform(node, marker)
         rig_transform.connectOffsetParentMatrix(node, marker)
-
-
-def generateRandomAnim(nodes=None, attributes=list(), keysIncriment=10):
-    """
-    Generate random animation channels for nodes.
-    If no nodes are provided use all controls in the scne
-    :param nodes: nodes to animate
-    :param attributes: attributes to generate animation for
-    :param keysIncriment: incriment for how often keyframes are generated
-    :return:
-    """
-    import random
-
-    if not nodes:
-        nodes = meta.getTagged("control")
-
-    if not isinstance(nodes, (list, tuple)):
-        nodes = [nodes]
-
-    if not attributes:
-        attributes = ['tx', 'ty', 'tz', 'rx', 'ry', 'rz', 's']
-
-    time_max = cmds.playbackOptions(q=True, maxTime=True)
-    for i in range(int(time_max-1 / keysIncriment)):
-        for control in nodes:
-            current_time = keysIncriment * i
-            if current_time > time_max:
-                break
-
-            for attr in attributes:
-                value = float(random.uniform(0, 5))
-                if 't' in attr: value = float(random.uniform(-25, 25))
-                if 'r' in attr: value = float(random.uniform(-360, 360))
-                if 's' in attr: value = float(random.uniform(0.01, 3))
-
-                cmds.setKeyframe(control, attribute=attr, v=value, t=current_time)
-    print("Generated Test animation for {} nodes with time range of {}.".format(len(nodes), time_max))

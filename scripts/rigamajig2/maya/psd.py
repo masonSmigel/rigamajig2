@@ -108,7 +108,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
                 if not cmds.objExists("{}.swing_{}".format(output, axis)):
                     cmds.addAttr(output, longName='swing_{}'.format(axis), k=True)
                 outputAttrsList.append("{}.{}".format(output, 'swing_{}'.format(axis)))
-             __createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputAttrsList)
+                __createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputAttrsList)
         else:
             cmds.warning("Pose reader already exists on the joint '{}'".format(joint))
 

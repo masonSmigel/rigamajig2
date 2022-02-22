@@ -9,20 +9,9 @@ import rigamajig2.maya.node as node
 import rigamajig2.shared.common as common
 import rigamajig2.maya.meta as meta
 import rigamajig2.maya.attr as attr
+import logging
 
-
-def showPsdReaders():
-    """ Show all Psd Readers in the scene"""
-    readers = meta.getTagged("poseReader")
-    for reader in readers:
-        cmds.setAttr("{}.{}".format(reader, "v"), 1)
-
-
-def hidePsdReaders():
-    """ Hide all Psd readers in the scene"""
-    readers = meta.getTagged("poseReader")
-    for reader in readers:
-        cmds.setAttr("{}.{}".format(reader, "v"), 0)
+logger = logging.getLogger(__name__)
 
 
 def deletePsdReader(joints):
@@ -34,14 +23,14 @@ def deletePsdReader(joints):
     joints = common.toList(joints)
 
     for jnt in joints:
-        if not cmds.objExists("{}.{}".format(jnt, "PsdHrc")):
+        if not cmds.objExists("{}.{}".format(jnt, "poseReaderRoot")):
             continue
-        reader_hrc = meta.getMessageConnection("{}.{}".format(jnt, "PsdHrc"))
+        reader_hrc = meta.getMessageConnection("{}.{}".format(jnt, "poseReaderRoot"))
         if reader_hrc:
             cmds.delete(reader_hrc)
 
         # delete the attrs if they exist
-        for attr in ["PsdHrc", "PsdOutput", "SwingPsdReader"]:
+        for attr in ["poseReaderRoot", "poseReaderOut", "swingPsdReaderNurbs"]:
             if cmds.objExists("{}.{}".format(jnt, attr)):
                 cmds.deleteAttr("{}.{}".format(jnt, attr))
 
@@ -75,6 +64,9 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     if not parent:
         parent = 'pose_readers'
 
+    if cmds.objExists("{}.{}".format(joint, "poseReaderRoot")):
+        raise RuntimeError("Joint {} already as a pose reader".format(joint))
+
     # Create a group for the pose reader hierarchy
     hrc = "{}_poseReader_hrc".format(joint)
     if not cmds.objExists(hrc):
@@ -82,14 +74,15 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     # setup the hirarchy node.
     rig_transform.matchTransform(joint, hrc)
     attr.lock(hrc, attr.TRANSFORMS + ['v'])
-    meta.addMessageConnection(joint, hrc, sourceAttr="PsdHrc")
+    meta.addMessageConnection(joint, hrc, sourceAttr="poseReaderRoot")
+    meta.tag(hrc, "poseReader")
 
     # create and setup the output parameter node.
     # This is stored on a separate node to reduce any cycle clusters in parallel eval.
     output = cmds.createNode("transform", n="{}_poseReader_out".format(joint))
     attr.lockAndHide(output, attr.TRANSFORMS + ['v'])
     cmds.parent(output, hrc)
-    meta.addMessageConnection(joint, output, sourceAttr="PsdOutput")
+    meta.addMessageConnection(joint, output, sourceAttr="poseReaderOut")
 
     # TODO: add twist reader
     # add attributes to the joint so we have an access point for later
@@ -101,14 +94,14 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
         __createTwistPsdReader(joint, aimAxis=aimAxis, outputAttr=twistAttr)
 
     if swing:
-        if not cmds.objExists("{}.{}".format(joint, "SwingPsdReader")):
+        if not cmds.objExists("{}.{}".format(joint, "swingPsdReaderNurbs")):
             outputAttrsList = list()
             # build the attributes and add them to a list!
             for axis in [a for a in 'xyz' if a != aimAxis]:
                 if not cmds.objExists("{}.swing_{}".format(output, axis)):
                     cmds.addAttr(output, longName='swing_{}'.format(axis), k=True)
                 outputAttrsList.append("{}.{}".format(output, 'swing_{}'.format(axis)))
-                __createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputAttrsList)
+            __createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputAttrsList)
         else:
             cmds.warning("Pose reader already exists on the joint '{}'".format(joint))
 
@@ -116,6 +109,8 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
         hrc_parent = cmds.listRelatives(hrc, p=True) or ['']
         if hrc_parent[0] != parent:
             cmds.parent(hrc, parent)
+
+    logger.info("Created pose reader on joint '{}'. Twist={}, Swing={}".format(joint, twist, swing))
 
 
 def __createTwistPsdReader(joint, aimAxis='x', outputAttr=None):
@@ -147,14 +142,14 @@ def __createTwistPsdReader(joint, aimAxis='x', outputAttr=None):
     cmds.connectAttr("{}.outputQuat{}".format(rotation, aimAxis.upper()), "{}.inputQuat{}".format(twist, aimAxis.upper()))
     twistEuler = cmds.createNode("quatToEuler", name="{}_twistEuler_quatToEuler".format(joint))
     cmds.setAttr("{}.inputRotateOrder".format(twistEuler), cmds.getAttr("{}.rotateOrder".format(joint)))
-    cmds.connectAttr("{}.outputQuat".format(twist),"{}.inputQuat".format(twistEuler))
+    cmds.connectAttr("{}.outputQuat".format(twist), "{}.inputQuat".format(twistEuler))
 
     remap = cmds.createNode("remapValue", name="{}_normalizeValue_remap".format(joint))
     cmds.connectAttr("{}.outputRotate{}".format(twistEuler, aimAxis.upper()), "{}.inputValue".format(remap))
     cmds.setAttr("{}.inputMin".format(remap), -180)
-    cmds.setAttr("{}.inputMax".format(remap),  180)
+    cmds.setAttr("{}.inputMax".format(remap), 180)
     cmds.setAttr("{}.outputMin".format(remap), -2)
-    cmds.setAttr("{}.outputMax".format(remap),  2)
+    cmds.setAttr("{}.outputMax".format(remap), 2)
 
     # # connect outputs
     if cmds.objExists(outputAttr):
@@ -270,9 +265,8 @@ def __createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outpu
                          f=True)
 
     # cleanup the setup
-    meta.tag(pose_reader, "poseReader")
     attr.lockAndHide(pose_reader, attr.TRANSFORMS)
     cmds.setAttr("{}.{}".format(pose_reader, "v"), 0)
-    meta.addMessageConnection(joint, pose_reader, sourceAttr="SwingPsdReader")
+    meta.addMessageConnection(joint, pose_reader, sourceAttr="swingPsdReaderNurbs")
 
     return pose_reader

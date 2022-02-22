@@ -95,7 +95,6 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     # add attributes to the joint so we have an access point for later
     aimAxis = rig_transform.getAimAxis(aimJoint, allowNegative=False)
     if twist:
-        twistAttr = None
         if not cmds.objExists("{}.twist_{}".format(output, aimAxis)):
             cmds.addAttr(output, longName='twist_{}'.format(aimAxis), k=True)
         twistAttr = "{}.{}".format(output, 'twist_{}'.format(aimAxis))
@@ -109,8 +108,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
                 if not cmds.objExists("{}.swing_{}".format(output, axis)):
                     cmds.addAttr(output, longName='swing_{}'.format(axis), k=True)
                 outputAttrsList.append("{}.{}".format(output, 'swing_{}'.format(axis)))
-
-            pose_reader = __createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputAttrsList)
+             __createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputAttrsList)
         else:
             cmds.warning("Pose reader already exists on the joint '{}'".format(joint))
 

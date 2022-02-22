@@ -39,20 +39,23 @@ def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
     for node in nodes:
         keyables = filter(lambda x: not cmds.getAttr("{}.{}".format(node, x), type=True) in SKIPS,
                           cmds.listAttr(node, k=True))
-
+        translates = cmds.attributeQuery("translate", node=node, listChildren=True)
         rotates = cmds.attributeQuery("rotate", node=node, listChildren=True)
         scales = cmds.attributeQuery("scale", node=node, listChildren=True)
 
         for attr in keyables:
             if attr in scales or has_scale_token(node, attr):
                 r_start, r_end = 1.0, 1.2
-            elif attr in rotates or "Anlge" in cmds.getAttr("{}.{}".format(node, attr), type=True):
+            elif attr in rotates or "Angle" in cmds.getAttr("{}.{}".format(node, attr), type=True):
                 r_start, r_end = -10, 10
-            else:
+            elif attr in translates:
                 r_start, r_end = -1, 1
+            else:
+                r_start, r_end = 0, 1
 
             r_start, r_end = map(float, [r_start, r_end])
             for frame in key_frames:
                 value = random.uniform(r_start, r_end)
                 cmds.setKeyframe(node, attribute=attr, v=value, t=frame)
+
     print("Generated Test animation for {} nodes with time range of {}-{}.".format(len(nodes), start, end))

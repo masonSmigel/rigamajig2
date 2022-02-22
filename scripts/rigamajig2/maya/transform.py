@@ -347,8 +347,7 @@ def decomposeRotation(node, twistAxis='x'):
                      "{}.inputMatrix".format(rotation))
 
     twist = cmds.createNode('quatNormalize', name='{}_twist_{}'.format(node, 'quatNormalize'))
-    cmds.connectAttr("{}.outputQuatW".format(rotation),
-                     "{}.inputQuatW".format(twist))
+    cmds.connectAttr("{}.outputQuatW".format(rotation), "{}.inputQuatW".format(twist))
 
     cmds.connectAttr("{}.outputQuat{}".format(rotation, twistAxis.upper()),
                      "{}.inputQuat{}".format(twist, twistAxis.upper()))

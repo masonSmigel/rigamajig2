@@ -2,6 +2,8 @@
 This Module contains
 """
 import maya.cmds as cmds
+import maya.api.OpenMaya as om2
+
 import rigamajig2.maya.transform as rig_transform
 import rigamajig2.maya.node as node
 import rigamajig2.shared.common as common
@@ -37,9 +39,11 @@ def deletePsdReader(joints):
         reader_hrc = meta.getMessageConnection("{}.{}".format(jnt, "PsdHrc"))
         if reader_hrc:
             cmds.delete(reader_hrc)
-        cmds.deleteAttr("{}.{}".format(jnt, "PsdHrc"))
-        cmds.deleteAttr("{}.{}".format(jnt, "PsdOutput"))
-        cmds.deleteAttr("{}.{}".format(jnt, "SwingPsdReader"))
+
+        # delete the attrs if they exist
+        for attr in ["PsdHrc", "PsdOutput", "SwingPsdReader"]:
+            if cmds.objExists("{}.{}".format(jnt, attr)):
+                cmds.deleteAttr("{}.{}".format(jnt, attr))
 
 
 def initalizePsds():
@@ -85,7 +89,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     output = cmds.createNode("transform", n="{}_poseReader_out".format(joint))
     attr.lockAndHide(output, attr.TRANSFORMS + ['v'])
     cmds.parent(output, hrc)
-    meta.addMessageConnection(joint, hrc, sourceAttr="PsdOutput")
+    meta.addMessageConnection(joint, output, sourceAttr="PsdOutput")
 
     # TODO: add twist reader
     # add attributes to the joint so we have an access point for later
@@ -94,7 +98,8 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
         twistAttr = None
         if not cmds.objExists("{}.twist_{}".format(output, aimAxis)):
             cmds.addAttr(output, longName='twist_{}'.format(aimAxis), k=True)
-        twistAttr = "{}.{}".format(output, 'swing_{}'.format(aimAxis))
+        twistAttr = "{}.{}".format(output, 'twist_{}'.format(aimAxis))
+        __createTwistPsdReader(joint, aimAxis=aimAxis, outputAttr=twistAttr)
 
     if swing:
         if not cmds.objExists("{}.{}".format(joint, "SwingPsdReader")):
@@ -105,8 +110,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
                     cmds.addAttr(output, longName='swing_{}'.format(axis), k=True)
                 outputAttrsList.append("{}.{}".format(output, 'swing_{}'.format(axis)))
 
-            pose_reader = createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputAttrsList)
-            meta.addMessageConnection(joint, pose_reader, sourceAttr="SwingPsdReader")
+            pose_reader = __createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputAttrsList)
         else:
             cmds.warning("Pose reader already exists on the joint '{}'".format(joint))
 
@@ -116,9 +120,50 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
             cmds.parent(hrc, parent)
 
 
+def __createTwistPsdReader(joint, aimAxis='x', outputAttr=None):
+    """create a twist pose reader"""
+
+    parentList = cmds.listRelatives(joint, parent=True, path=True)
+    parent_trs = parentList[0] if parentList else None
+
+    mm = cmds.createNode("multMatrix", name="{}_local_mm".format(joint))
+    worldMatrix = "{}.worldMatrix[0]".format(joint)
+    cmds.connectAttr(worldMatrix, "{}.matrixIn[0]".format(mm))
+
+    if parent_trs:
+        parentInverse = "{}.worldInverseMatrix[0]".format(parent_trs)
+        cmds.connectAttr(parentInverse, "{}.matrixIn[1]".format(mm))
+
+        # inverse the parent matrix
+        pinv = om2.MMatrix(cmds.getAttr(parentInverse))
+        m = om2.MMatrix(cmds.getAttr(worldMatrix))
+        invLocalRest = (m * pinv).inverse()
+        cmds.setAttr("{}.matrixIn[2]".format(mm), list(invLocalRest), type='matrix')
+
+    rotation = cmds.createNode("decomposeMatrix", name='{}_rotation_{}'.format(joint, "dcmp"))
+
+    cmds.connectAttr("{}.matrixSum".format(mm), "{}.inputMatrix".format(rotation))
+    twist = cmds.createNode('quatNormalize', name='{}_twist_{}'.format(joint, 'quatNormalize'))
+    cmds.connectAttr("{}.outputQuatW".format(rotation), "{}.inputQuatW".format(twist))
+
+    cmds.connectAttr("{}.outputQuat{}".format(rotation, aimAxis.upper()), "{}.inputQuat{}".format(twist, aimAxis.upper()))
+    twistEuler = cmds.createNode("quatToEuler", name="{}_twistEuler_quatToEuler".format(joint))
+    cmds.setAttr("{}.inputRotateOrder".format(twistEuler), cmds.getAttr("{}.rotateOrder".format(joint)))
+    cmds.connectAttr("{}.outputQuat".format(twist),"{}.inputQuat".format(twistEuler))
+
+    remap = cmds.createNode("remapValue", name="{}_normalizeValue_remap".format(joint))
+    cmds.connectAttr("{}.outputRotate{}".format(twistEuler, aimAxis.upper()), "{}.inputValue".format(remap))
+    cmds.setAttr("{}.inputMin".format(remap), -180)
+    cmds.setAttr("{}.inputMax".format(remap),  180)
+    cmds.setAttr("{}.outputMin".format(remap), -2)
+    cmds.setAttr("{}.outputMax".format(remap),  2)
+
+    # # connect outputs
+    if cmds.objExists(outputAttr):
+        cmds.connectAttr("{}.outValue".format(remap), outputAttr)
 
 
-def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outputAttrs=list()):
+def __createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outputAttrs=list()):
     """ create a swing pose reader """
     if not aimJoint:
         aimJoint = joint
@@ -230,5 +275,6 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outputA
     meta.tag(pose_reader, "poseReader")
     attr.lockAndHide(pose_reader, attr.TRANSFORMS)
     cmds.setAttr("{}.{}".format(pose_reader, "v"), 0)
+    meta.addMessageConnection(joint, pose_reader, sourceAttr="SwingPsdReader")
 
     return pose_reader

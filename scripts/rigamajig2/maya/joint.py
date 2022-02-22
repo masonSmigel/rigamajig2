@@ -440,5 +440,5 @@ def connectChains(source, destination):
 
     for source_jnt, dest_jnt in zip(source, destination):
         transform.connectOffsetParentMatrix(source_jnt, dest_jnt)
-        # cmds.parentConstraint(source_jnt, dest_jnt, mo=True)
+        # TODO: Longterm - this should be done with constraints
         attr.lock(dest_jnt, attr.TRANSFORMS + ['v'])

@@ -32,9 +32,13 @@ def deletePsdReader(joints):
     joints = common.toList(joints)
 
     for jnt in joints:
+        if not cmds.objExists("{}.{}".format(jnt, "PsdHrc")):
+            continue
         reader_hrc = meta.getMessageConnection("{}.{}".format(jnt, "PsdHrc"))
-        cmds.delete(reader_hrc)
+        if reader_hrc:
+            cmds.delete(reader_hrc)
         cmds.deleteAttr("{}.{}".format(jnt, "PsdHrc"))
+        cmds.deleteAttr("{}.{}".format(jnt, "PsdOutput"))
         cmds.deleteAttr("{}.{}".format(jnt, "SwingPsdReader"))
 
 
@@ -67,24 +71,42 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     if not parent:
         parent = 'pose_readers'
 
-    # add attributes to the joint so we have an access point for later
-    aimAxis = rig_transform.getAimAxis(aimJoint, allowNegative=False)
-
     # Create a group for the pose reader hierarchy
     hrc = "{}_poseReader_hrc".format(joint)
     if not cmds.objExists(hrc):
         hrc = cmds.createNode("transform", n="{}_poseReader_hrc".format(joint))
+    # setup the hirarchy node.
     rig_transform.matchTransform(joint, hrc)
+    attr.lock(hrc, attr.TRANSFORMS + ['v'])
+    meta.addMessageConnection(joint, hrc, sourceAttr="PsdHrc")
+
+    # create and setup the output parameter node.
+    # This is stored on a separate node to reduce any cycle clusters in parallel eval.
+    output = cmds.createNode("transform", n="{}_poseReader_out".format(joint))
+    attr.lockAndHide(output, attr.TRANSFORMS + ['v'])
+    cmds.parent(output, hrc)
+    meta.addMessageConnection(joint, hrc, sourceAttr="PsdOutput")
 
     # TODO: add twist reader
+    # add attributes to the joint so we have an access point for later
+    aimAxis = rig_transform.getAimAxis(aimJoint, allowNegative=False)
     if twist:
-        cmds.addAttr(joint, longName='twist_{}'.format(aimAxis))
+        twistAttr = None
+        if not cmds.objExists("{}.twist_{}".format(output, aimAxis)):
+            cmds.addAttr(output, longName='twist_{}'.format(aimAxis), k=True)
+        twistAttr = "{}.{}".format(output, 'swing_{}'.format(aimAxis))
 
     if swing:
         if not cmds.objExists("{}.{}".format(joint, "SwingPsdReader")):
-            pose_reader, pose_pt = createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc)
+            outputAttrsList = list()
+            # build the attributes and add them to a list!
+            for axis in [a for a in 'xyz' if a != aimAxis]:
+                if not cmds.objExists("{}.swing_{}".format(output, axis)):
+                    cmds.addAttr(output, longName='swing_{}'.format(axis), k=True)
+                outputAttrsList.append("{}.{}".format(output, 'swing_{}'.format(axis)))
+
+            pose_reader = createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputAttrsList)
             meta.addMessageConnection(joint, pose_reader, sourceAttr="SwingPsdReader")
-            meta.addMessageConnection(joint, hrc, sourceAttr="PsdHrc")
         else:
             cmds.warning("Pose reader already exists on the joint '{}'".format(joint))
 
@@ -94,19 +116,14 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
             cmds.parent(hrc, parent)
 
 
-def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None):
+
+
+def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outputAttrs=list()):
     """ create a swing pose reader """
     if not aimJoint:
         aimJoint = joint
 
     aimAxisVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(aimJoint))
-
-    # create a point to reference
-    reader_pt = cmds.createNode("transform", n="{}_posePoint".format(joint))
-    rig_transform.matchTransform(joint, reader_pt)
-    cmds.move(aimAxisVector[0], aimAxisVector[1], aimAxisVector[2], reader_pt, r=True, os=True)
-    cmds.parent(reader_pt, parent)
-    rig_transform.connectOffsetParentMatrix(joint, reader_pt, mo=True)
 
     # create the pose reader nurbs.
     pose_reader = cmds.sphere(s=2, nsp=2, axis=aimAxisVector, n=joint + "_poseReader", ch=False)[0]
@@ -115,21 +132,25 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None):
     rig_transform.matchTransform(joint, pose_reader)
     cmds.parent(pose_reader, parent)
 
-    # add the attributes
-    outputAttrsList = list()
-    for axis in [a for a in 'xyz' if a != aimAxis]:
-        if not cmds.objExists("{}.swing_{}".format(pose_reader, axis)):
-            cmds.addAttr(pose_reader, longName='swing_{}'.format(axis), k=True)
-        outputAttrsList.append("{}.{}".format(pose_reader, 'swing_{}'.format(axis)))
+    # create a point to reference. This is alittle Hacky.
+    # We build a transform to offset in the proper space
+    # then create a offset matrix relationship and hijack the output and delete the created node.
+    reader_pt = cmds.createNode("transform", n="{}_posePoint".format(joint))
+    rig_transform.matchTransform(joint, reader_pt)
+    cmds.move(aimAxisVector[0], aimAxisVector[1], aimAxisVector[2], reader_pt, r=True, os=True)
+    mm, dcmp = rig_transform.connectOffsetParentMatrix(joint, reader_pt, mo=True)
 
     # Create the closest point node network
     vprod = cmds.createNode("vectorProduct", n="{}_vprod".format(joint))
     closest = cmds.createNode("closestPointOnSurface", n="{}_closestPointOnSurface".format(joint))
 
-    cmds.connectAttr("{}.worldMatrix".format(reader_pt), "{}.matrix".format(vprod))
+    cmds.connectAttr("{}.matrixSum".format(mm), "{}.matrix".format(vprod))
     cmds.setAttr("{}.operation".format(vprod), 4)
     cmds.connectAttr("{}.output".format(vprod), "{}.inPosition".format(closest))
     cmds.connectAttr("{}.worldSpace".format(pose_reader_shape), "{}.inputSurface".format(closest))
+
+    # after we use the reader point delete the node
+    cmds.delete(reader_pt)
 
     suffix_list = ["z_neg", 'y_neg', 'z_pos', 'y_pos']
     zone_num = 4
@@ -188,7 +209,7 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None):
         cmds.setAttr("{}.{}".format(cond, "operation"), 2)
         cmds.connectAttr("{}.{}".format(neg_zone, 'output'), "{}.{}".format(cond, "colorIfFalseR"))
         cmds.connectAttr("{}.{}".format(pos_zone, 'output'), "{}.{}".format(cond, "colorIfTrueR"))
-        cmds.connectAttr("{}.{}".format(cond, "outColorR"), outputAttrsList[i])
+        cmds.connectAttr("{}.{}".format(cond, "outColorR"), outputAttrs[i])
 
         rig_transform.matchTranslate(joint, pose_reader)
 
@@ -209,6 +230,5 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None):
     meta.tag(pose_reader, "poseReader")
     attr.lockAndHide(pose_reader, attr.TRANSFORMS)
     cmds.setAttr("{}.{}".format(pose_reader, "v"), 0)
-    attr.lock(reader_pt, attr.TRANSFORMS + ['v'])
 
-    return pose_reader, reader_pt
+    return pose_reader

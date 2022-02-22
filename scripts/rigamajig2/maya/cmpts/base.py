@@ -317,6 +317,9 @@ class Base(object):
         info_dict.update(self.cmptSettings)
         return info_dict
 
+    def get_cmpt_type(self):
+        return self.cmpt_type
+
     # SET
     def set_inputs(self, value):
         self.input = value

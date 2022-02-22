@@ -161,7 +161,7 @@ class Builder(object):
             logger.info('Building: {}'.format(cmpt.name))
             cmpt._build_cmpt()
             # if the component is not a main parent the cmpt.root_hrc to the rig
-            if cmds.objExists('rig') and not isinstance(cmpt, main.Main):
+            if cmds.objExists('rig') and cmpt.get_cmpt_type() != 'main.Main':
                 if hasattr(cmpt, "root_hrc"):
                     if not cmds.listRelatives(cmpt.root_hrc, p=True):
                         cmds.parent(cmpt.root_hrc, 'rig')

@@ -137,7 +137,8 @@ def getMessageConnection(dataPlug, silent=True):
         data = cmds.listConnections(dataPlug, d=True)
         if not data:
             data = cmds.listConnections(dataPlug, s=True)
-
+        if data is None:
+            return
         if len(data) > 1:
             return data
         else:

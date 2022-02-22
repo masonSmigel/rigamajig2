@@ -215,8 +215,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self._ikStartTgt)
 
         # connect fk controls to fk joints
-        rigamajig2.maya.joint.connectChains([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3Gimble_fk[-1]],
-                                            self.fkJnts)
+        for ctl, jnt in zip([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3Gimble_fk[-1]], self.fkJnts):
+            rig_transform.connectOffsetParentMatrix(ctl, jnt)
+            rigamajig2.maya.attr.lock(jnt, rigamajig2.maya.attr.TRANSFORMS + ['v'])
 
         # connect the IkHandle to the end Target
         cmds.pointConstraint(self.limbGimble_ik[-1], self._ikEndTgt, mo=True)

@@ -213,6 +213,16 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Deformation Section
         self.deformations_wdgt = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
+        self.psd_path_selector = pathSelector.PathSelector("psd:", cap="Select a Pose Reader File", ff=JSON_FILTER, fm=1)
+
+        self.load_psd_btn = QtWidgets.QPushButton("Load Pose Readers")
+        self.save_psd_btn = QtWidgets.QPushButton("Save Pose Readers")
+
+        self.load_psd_mode_cbox = QtWidgets.QComboBox()
+        self.load_psd_mode_cbox.setFixedHeight(24)
+        self.load_psd_mode_cbox.addItem("append")
+        self.load_psd_mode_cbox.addItem("replace")
+
         # Publish Section
         self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
         self.publishScript_scriptRunner = scriptRunner.ScriptRunner()
@@ -349,6 +359,15 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.controlEdit_wgt.addWidget(self.replace_ctl_btn)
 
         # Deformations
+        psd_btn_layout = QtWidgets.QHBoxLayout()
+        psd_btn_layout.setContentsMargins(0, 0, 0, 0)
+        psd_btn_layout.setSpacing(4)
+        psd_btn_layout.addWidget(self.load_psd_btn)
+        psd_btn_layout.addWidget(self.save_psd_btn)
+        psd_btn_layout.addWidget(self.load_psd_mode_cbox)
+
+        self.deformations_wdgt.addWidget(self.psd_path_selector)
+        self.deformations_wdgt.addLayout(psd_btn_layout)
 
         # Publish
 
@@ -431,6 +450,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.setCtlShape_btn.clicked.connect(self.set_controlShape)
         self.replace_ctl_btn.clicked.connect(self.replace_controlShape)
 
+        self.load_psd_btn.clicked.connect(self.load_posereaders)
+        self.save_psd_btn.clicked.connect(self.save_posereaders)
+
         self.run_selected_btn.clicked.connect(self.run_selected)
         self.run_btn.clicked.connect(self.run_all)
         self.close_btn.clicked.connect(self.close)
@@ -486,6 +508,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.cmpt_path_selector.set_relativeTo(self.rig_env)
         self.guide_path_selector.set_relativeTo(self.rig_env)
         self.ctl_path_selector.set_relativeTo(self.rig_env)
+        self.psd_path_selector.set_relativeTo(self.rig_env)
 
         self.rig_builder = builder.Builder(self.rig_file)
         self.update_ui_with_rig_data()
@@ -535,6 +558,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         ctl_file = tmp_builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES)
         if ctl_file: self.ctl_path_selector.set_path(ctl_file)
+
+        psd_file = tmp_builder.get_rig_data(self.rig_file, builder.PSD)
+        if ctl_file: self.psd_path_selector.set_path(psd_file)
 
     # UI FUNCTIONS
     def set_ctlShape_items(self):
@@ -653,12 +679,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
                         cmds.delete(shape)
                 rigamajig2.maya.curve.copyShape(selection[0], dest)
 
-    def toggle_advanced_proxy(self):
-        """ Toggle the advanced proxy attributes """
-        if self.show_advanced_proxy_cb.isChecked():
-            self.rig_builder.show_advanced_proxy()
-        else:
-            self.rig_builder.delete_advanced_proxy()
+    def load_posereaders(self):
+        self.rig_builder.load_poseReaders(self.psd_path_selector.get_abs_path(), replace=self.load_psd_mode_cbox.currentIndex())
+
+    def save_posereaders(self):
+        self.rig_builder.save_poseReaders(self.psd_path_selector.get_abs_path())
 
     def run_selected(self):
         """run selected steps"""

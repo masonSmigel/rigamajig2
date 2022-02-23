@@ -43,6 +43,10 @@ def initalizePsds():
             cmds.parent(root, "rig")
 
 
+def getPoseReaders():
+    return meta.getTagged('poseReader')
+
+
 def createPsdReader(joint, twist=False, swing=True, parent=False):
     """
     Create a Pose space reader on the given joint
@@ -84,7 +88,6 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     cmds.parent(output, hrc)
     meta.addMessageConnection(joint, output, sourceAttr="poseReaderOut")
 
-    # TODO: add twist reader
     # add attributes to the joint so we have an access point for later
     aimAxis = rig_transform.getAimAxis(aimJoint, allowNegative=False)
     if twist:
@@ -139,7 +142,8 @@ def __createTwistPsdReader(joint, aimAxis='x', outputAttr=None):
     twist = cmds.createNode('quatNormalize', name='{}_twist_{}'.format(joint, 'quatNormalize'))
     cmds.connectAttr("{}.outputQuatW".format(rotation), "{}.inputQuatW".format(twist))
 
-    cmds.connectAttr("{}.outputQuat{}".format(rotation, aimAxis.upper()), "{}.inputQuat{}".format(twist, aimAxis.upper()))
+    cmds.connectAttr("{}.outputQuat{}".format(rotation, aimAxis.upper()),
+                     "{}.inputQuat{}".format(twist, aimAxis.upper()))
     twistEuler = cmds.createNode("quatToEuler", name="{}_twistEuler_quatToEuler".format(joint))
     cmds.setAttr("{}.inputRotateOrder".format(twistEuler), cmds.getAttr("{}.rotateOrder".format(joint)))
     cmds.connectAttr("{}.outputQuat".format(twist), "{}.inputQuat".format(twistEuler))
@@ -229,6 +233,7 @@ def __createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outpu
         rev = cmds.createNode("multDoubleLinear", n='{}_{}_reverse_mdl'.format(joint, suffix_list[i]))
         cmds.connectAttr("{}.{}".format(mdl, "output"), "{}.{}".format(rev, "input1"))
 
+        # TODO: check if the axis semi-aligns with the world axises.
         if 'neg' in suffix_list[i]:
             cmds.setAttr("{}.{}".format(rev, "input2"), -2)
         else:

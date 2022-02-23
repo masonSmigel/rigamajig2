@@ -438,7 +438,23 @@ def connectChains(source, destination):
     if not len(source) == len(destination):
         raise RuntimeError('List mismatch. Source and destination must have equal lengths')
 
-    for source_jnt, dest_jnt in zip(source, destination):
-        transform.connectOffsetParentMatrix(source_jnt, dest_jnt)
-        # TODO: Longterm - this should be done with constraints
-        attr.lock(dest_jnt, attr.TRANSFORMS + ['v'])
+    for driver, driven in zip(source, destination):
+        # transform.connectOffsetParentMatrix(driver, driven)
+        cmds.parentConstraint(driver, driven, mo=False)
+
+        parent = 'bind' if cmds.objExists("bind") else None
+
+        mult = cmds.createNode('multMatrix', name="{}_local_{}".format(driven, "mm"))
+        worldMatrix = "{}.worldMatrix[0]".format(driver)
+        cmds.connectAttr(worldMatrix, "{}.matrixIn[0]".format(mult))
+        if parent:
+            parentInverse = "{}.worldInverseMatrix[0]".format(parent)
+            cmds.connectAttr(parentInverse, "{}.matrixIn[1]".format(mult))
+
+        dcmp = cmds.createNode('decomposeMatrix', n=driver + '_mm_' + "dcmp")
+        cmds.connectAttr(mult + '.matrixSum', dcmp + '.inputMatrix')
+
+        cmds.connectAttr(dcmp + '.outputScale', driven + ".scale", f=True)
+        cmds.connectAttr(dcmp + '.outputShear', driven + ".shear", f=True)
+
+        attr.lock(driven, attr.TRANSFORMS + ['v'])

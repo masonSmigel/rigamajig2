@@ -432,7 +432,6 @@ def connectChains(source, destination):
     """
     Connect two skeletons
     """
-
     source = common.toList(source)
     destination = common.toList(destination)
     if not len(source) == len(destination):

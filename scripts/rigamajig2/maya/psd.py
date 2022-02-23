@@ -14,6 +14,22 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+def getAssociateJoint(node):
+    """
+    returns the joint associated with the pose reader node
+    :param node: node to get pose reader from.
+    :return:
+    """
+    # first check what node we got. it should be the joint.
+    if not cmds.objExists("{}.poseReaderRoot".format(node)):
+        raise RuntimeError("'{}' does not have a pose reader assiciated with it.".format(node))
+    if meta.hasTag(node, "poseReader"):
+        node = meta.getMessageConnection("{}.poseReaderRoot".format(node))
+        node = common.getFirstIndex(node)
+
+    return node
+
+
 def deletePsdReader(joints):
     """
     Delete the pose reader associated with a given joint
@@ -23,6 +39,8 @@ def deletePsdReader(joints):
     joints = common.toList(joints)
 
     for jnt in joints:
+        jnt = getAssociateJoint(jnt)
+
         if not cmds.objExists("{}.{}".format(jnt, "poseReaderRoot")):
             continue
         reader_hrc = meta.getMessageConnection("{}.{}".format(jnt, "poseReaderRoot"))
@@ -43,7 +61,7 @@ def initalizePsds():
             cmds.parent(root, "rig")
 
 
-def getPoseReaders():
+def getAllPoseReaders():
     return meta.getTagged('poseReader')
 
 
@@ -69,7 +87,8 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
         parent = 'pose_readers'
 
     if cmds.objExists("{}.{}".format(joint, "poseReaderRoot")):
-        raise RuntimeError("Joint {} already as a pose reader".format(joint))
+        logger.warning("Joint {} already has a pose reader".format(joint))
+        return
 
     # Create a group for the pose reader hierarchy
     hrc = "{}_poseReader_hrc".format(joint)

@@ -37,6 +37,8 @@ SKELETON_POS = "skeleton_pos"
 CONTROL_SHAPES = "control_shapes"
 GUIDES = "guides"
 COMPONENTS = "components"
+PSD = 'psd'
+OUTPUT_RIG = 'psd'
 
 
 class Builder(object):
@@ -318,7 +320,7 @@ class Builder(object):
         """
         import rigamajig2.maya.data.node_data as node_data
         if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, GUIDES))
+            path = self._absPath(self.get_rig_data(self.rig_file, GUIDES)) or ''
 
         if path:
             nd = node_data.NodeData()
@@ -326,11 +328,35 @@ class Builder(object):
             nd.write(path)
             logger.info("guides saved to: {}".format(path))
 
+    def save_poseReaders(self, path=None):
+        """Save out pose readers"""
+        import rigamajig2.maya.data.psd_data as psd_data
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, PSD))
+
+        if path:
+            pd = psd_data.PSDData()
+            pd.gatherDataIterate(meta.getTagged("poseReader"))
+            pd.write(path)
+
+    def load_poseReaders(self, path=None, replace=True):
+        """ Load pose readers"""
+        import rigamajig2.maya.data.psd_data as psd_data
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, PSD)) or ''
+
+        if os.path.exists(path):
+            pd = psd_data.PSDData()
+            pd.read(path)
+            pd.applyData(nodes=pd.getData().keys(), replace=replace)
+            logger.info("pose readers loaded")
+
     def load_deform_data(self):
         """
         Load other data, this is stuff like skinweights, blendshapes, clusters etc.
         :return:
         """
+        self.load_poseReaders()
         logger.info("data loading -- complete")
 
     def show_advanced_proxy(self):
@@ -405,7 +431,7 @@ class Builder(object):
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
-    def run(self, optimize=True):
+    def run(self):
         if not self.path:
             logger.error('you must provide a build enviornment path. Use Bulder.set_rig_file()')
             return
@@ -426,11 +452,14 @@ class Builder(object):
         self.load_controlShapes()
         self.load_deform_data()
         self.post_script()
-        if optimize: self.optimize()
         end_time = time.time()
         final_time = end_time - start_time
 
         print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(final_time, '-' * 70))
+
+    # UTILITY FUNCTION TO PUBLISH THE RIG
+    def publish(self, outputfile=None):
+        self.optimize()
 
     # UTILITY FUNCTIONS
     def set_rig_file(self, rigFile):

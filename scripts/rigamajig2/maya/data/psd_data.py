@@ -17,12 +17,13 @@ class PSDData(maya_data.MayaData):
     def gatherData(self, node):
         """gather data from node"""
 
-        # first check what node we got. it should be the joint.
-        if not cmds.objExists("{}.poseReaderRoot".format(node)):
-            raise RuntimeError("'{}' does not have a pose reader assiciated with it.".format(node))
-        if meta.hasTag(node, "poseReader"):
-            node = meta.getMessageConnection("{}.poseReaderRoot".format(node))
-            node = common.getFirstIndex(node)
+        node = psd.getAssociateJoint(node)
+        # # first check what node we got. it should be the joint.
+        # if not cmds.objExists("{}.poseReaderRoot".format(node)):
+        #     raise RuntimeError("'{}' does not have a pose reader assiciated with it.".format(node))
+        # if meta.hasTag(node, "poseReader"):
+        #     node = meta.getMessageConnection("{}.poseReaderRoot".format(node))
+        #     node = common.getFirstIndex(node)
 
         super(PSDData, self).gatherData(node)
 
@@ -39,8 +40,16 @@ class PSDData(maya_data.MayaData):
 
         self._data[node].update(data)
 
-    def applyData(self, nodes):
-        """Apply settings from the pose reader if one exists in the file"""
+    def applyData(self, nodes, replace=False):
+        """
+        Apply settings from the pose reader if one exists in the file
+        :param nodes:
+        :param replace: delete all existing pose readers before creating new ones
+        """
+        if replace:
+            readers = psd.getAllPoseReaders()
+            psd.deletePsdReader(readers)
+
         for node in nodes:
             if node not in list(self._data.keys()):
                 continue

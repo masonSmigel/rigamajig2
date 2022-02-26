@@ -2,14 +2,17 @@
 base component
 """
 import maya.cmds as cmds
+import maya.mel as mel
 from collections import OrderedDict
 
 import rigamajig2.maya.container
 import rigamajig2.maya.attr as r_attr
-import logging
 import rigamajig2.maya.meta
 import rigamajig2.maya.data.joint_data as joint_data
 import rigamajig2.maya.transform as transform
+from rigamajig2.maya.utils import ScriptEditorState
+
+import logging
 
 logger = logging.getLogger(__name__)
 
@@ -245,16 +248,8 @@ class Base(object):
         """ delete the rig setup"""
         # TODO: this is a WIP
         logger.info("deleting component {}".format(self.name))
-        for input in self.input:
-            intial_pos = cmds.xform(input, q=True, ws=True, m=True)
-            rigamajig2.maya.attr.unlock(input, rigamajig2.maya.attr.TRANSFORMS)
-            rigamajig2.maya.attr.disconnectAttrs(input,source=True, destination=False, skipAttrs=['inverseScale'])
-            cmds.xform(input, ws=True, m=intial_pos)
-
-        # cmds.delete(self.container)
-
-        # for i, input in enumerate(self.input):
-        #     cmds.xform(input, ws=True, m=initial_pos_list[i])
+        cmds.select(self.container, r=True)
+        mel.eval("doDelete;")
 
     def set_step(self, step=0):
         """
@@ -296,7 +291,7 @@ class Base(object):
 
     def load_settings(self, data):
         keys_to_remove = ['name', 'type', 'input']
-        new_dict = {key:val for key, val in data.items() if key not in keys_to_remove}
+        new_dict = {key: val for key, val in data.items() if key not in keys_to_remove}
         if self.metaNode:
             self.metaNode.setDataDict(new_dict)
 
@@ -341,5 +336,3 @@ class Base(object):
 
     def set_name(self, value):
         self.name = value
-
-

@@ -533,10 +533,11 @@ def disconnectAttrs(node, source=True, destination=True, skipAttrs=list()):
         if conns:
             connectionPairs.extend(zip(conns[::2], conns[1::2]))
 
-    for pair in connectionPairs:
-        for skipAttr in skipAttrs:
-            if "{}.{}".format(node, skipAttr) in pair:
-                connectionPairs.remove(pair)
+    if skipAttrs:
+        for pair in connectionPairs:
+            for skipAttr in skipAttrs:
+                if "{}.{}".format(node, skipAttr) in pair:
+                    connectionPairs.remove(pair)
 
     for srcAttr, destAttr in connectionPairs:
         cmds.disconnectAttr(srcAttr, destAttr)

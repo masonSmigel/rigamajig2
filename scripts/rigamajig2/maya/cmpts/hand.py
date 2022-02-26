@@ -96,5 +96,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
             cmpt._optimize_cmpt()
 
     def delete_setup(self):
+        
         for cmpt in self.finger_cmpt_list:
             cmpt.delete_setup()
+        super(Hand, self).delete_setup()

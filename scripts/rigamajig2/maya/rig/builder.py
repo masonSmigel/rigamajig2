@@ -378,8 +378,7 @@ class Builder(object):
     def delete_cmpts(self):
         for cmpt in self.cmpts:
             if cmds.objExists(cmpt.container) and cmpt.get_cmpt_type() != 'main.Main':
-                cmpt.deleteSetup()
-                # cmds.delete(cmpt.container)
+                cmpt.delete_setup()
 
     # RUN SCRIPTS
     def load_required_plugins(self):

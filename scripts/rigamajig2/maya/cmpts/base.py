@@ -241,19 +241,15 @@ class Base(object):
         """ Show advanved proxy attributes """
         pass
 
-    def deleteSetup(self):
+    def delete_setup(self):
         """ delete the rig setup"""
+        # TODO: this is a WIP
         logger.info("deleting component {}".format(self.name))
-        initial_pos_list = list()
         for input in self.input:
             intial_pos = cmds.xform(input, q=True, ws=True, m=True)
             rigamajig2.maya.attr.unlock(input, rigamajig2.maya.attr.TRANSFORMS)
-            rigamajig2.maya.attr.disconnectAttrs(input,source=True, destination=True, skipAttrs=['inverseScale'])
+            rigamajig2.maya.attr.disconnectAttrs(input,source=True, destination=False, skipAttrs=['inverseScale'])
             cmds.xform(input, ws=True, m=intial_pos)
-
-            # rigamajig2.maya.transform.unfreezeToTransform(input)
-            # intial_pos = cmds.xform(input, q=True, ws=True, m=True)
-            # initial_pos_list.append(intial_pos)
 
         # cmds.delete(self.container)
 

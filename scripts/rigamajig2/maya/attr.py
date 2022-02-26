@@ -321,13 +321,13 @@ def copyAttribute(attr, source, target):
         # add attr
         else:
             kwargs['attributeType'] = cmds.attributeQuery(attr, n=source, at=True)
-            if cmds.attributeQuery(attr, n=source, mne=True):       # check if the attribute has a minimum
+            if cmds.attributeQuery(attr, n=source, mne=True):  # check if the attribute has a minimum
                 kwargs['minValue'] = cmds.attributeQuery(attr, n=source, min=True)[0]
-            if cmds.attributeQuery(attr, n=source, mxe=True):       # check if the attribute has a maximum
+            if cmds.attributeQuery(attr, n=source, mxe=True):  # check if the attribute has a maximum
                 kwargs['maxValue'] = cmds.attributeQuery(attr, n=source, max=True)[0]
             addAttr(target, longName=attr, **kwargs)
 
-        cmds.setAttr("{}.{}".format(target, attr), value)           # set the value of the attribtue
+        cmds.setAttr("{}.{}".format(target, attr), value)  # set the value of the attribtue
 
 
 def moveAttribute(attr, source, target):
@@ -518,6 +518,28 @@ def resetDefault(nodes, attrs):
                     dv = cmds.attributeQuery(attr, node=node, listDefault=True)
                     if dv:
                         setAttr(node, attr, dv[0])
+
+
+def disconnectAttrs(node, source=True, destination=True, skipAttrs=list()):
+    connectionPairs = []
+    skipAttrs = common.toList(skipAttrs)
+    if source:
+        conns = cmds.listConnections(node, plugs=True, connections=True, destination=False)
+        if conns:
+            connectionPairs.extend(zip(conns[1::2], conns[::2]))
+
+    if destination:
+        conns = cmds.listConnections(node, plugs=True, connections=True, source=False)
+        if conns:
+            connectionPairs.extend(zip(conns[::2], conns[1::2]))
+
+    for pair in connectionPairs:
+        for skipAttr in skipAttrs:
+            if "{}.{}".format(node, skipAttr) in pair:
+                connectionPairs.remove(pair)
+
+    for srcAttr, destAttr in connectionPairs:
+        cmds.disconnectAttr(srcAttr, destAttr)
 
 
 def hasAttr(node, attr):

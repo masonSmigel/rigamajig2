@@ -224,7 +224,11 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # TODO: think about a way to take this out. use OffsetParentMatrix instead
         cmds.orientConstraint(self.limbGimble_ik[-1], self.ikfk.getIkJointList()[-1], mo=True)
         # decompose the scale of the gimble control
-        cmds.connectAttr("{}.{}".format(self.limb_ik[-1], 's'), "{}.{}".format(self.ikfk.getIkJointList()[-1], 's'))
+        worldMatrix = "{}.worldMatrix[0]".format(self.limb_ik[-1])
+        parentInverse = "{}.worldInverseMatrix[0]".format(self.ikfk.getIkJointList()[-2])
+        offset = rig_transform.offsetMatrix(self.limb_ik[-1], self.ikfk.getIkJointList()[-1])
+        rigamajig2.maya.node.multMatrix([list(om2.MMatrix(offset)), worldMatrix, parentInverse], self.ikfk.getIkJointList()[-1], s=True,
+                                        name='{}_scale'.format(self.ikfk.getIkJointList()[-1]))
 
         # connect twist of ikHandle to ik arm
         cmds.addAttr(self.ikfk.getGroup(), ln='twist', at='float', k=True)

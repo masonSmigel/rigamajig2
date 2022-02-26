@@ -84,7 +84,8 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
                                worldUpType='object', worldUpObject=upVectorTrs, mo=True)
 
             # connect the control to input joint
-            rig_transform.connectOffsetParentMatrix(lookAt_ctl[-1], input)
+            joint.connectChains(lookAt_ctl[-1], input)
+            # rig_transform.connectOffsetParentMatrix(lookAt_ctl[-1], input)
 
         # Delete the proxy guides_hrc:
         cmds.delete(self.guides_hrc)

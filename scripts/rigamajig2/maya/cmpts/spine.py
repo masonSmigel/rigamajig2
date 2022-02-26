@@ -13,6 +13,7 @@ import rigamajig2.maya.node as node
 import rigamajig2.shared.common as common
 import rigamajig2.maya.hierarchy as hierarchy
 import rigamajig2.maya.attr as rig_attr
+import rigamajig2.maya.joint as joint
 import rigamajig2.maya.meta as meta
 
 
@@ -104,7 +105,10 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         # the spline might shift slightly when the ik is created.
         # If built first this could affect the input of joints downstream
         # To comabt this  first we'll use the last joint to anchor the end of the spine to the chest top control
-        rig_transform.connectOffsetParentMatrix(self.chestTop[-1], self.input[-1], mo=True)
+        self.chestTop_trs = hierarchy.create(self.chestTop[-1], ['{}_trs'.format(self.input[0])], above=False)[0]
+        rig_transform.matchTransform(self.input[-1], self.chestTop_trs)
+
+        joint.connectChains(self.chestTop_trs, self.input[-1])
 
         # create the spline ik
         self.ikspline = spline.SplineBase(self.input[1:-1], name=self.name)
@@ -115,7 +119,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         # setup the hipSwivel
         self.hips_swing_trs = hierarchy.create(self.hip_swing[-1], ['{}_trs'.format(self.input[0])], above=False)[0]
         rig_transform.matchTransform(self.input[0], self.hips_swing_trs)
-        rig_transform.connectOffsetParentMatrix(self.hips_swing_trs, self.input[0])
+        joint.connectChains(self.hips_swing_trs, self.input[0])
 
         # create the pivot negate
         constrain.negate(self.hips_pivot[-1], self.hips[1], t=True)

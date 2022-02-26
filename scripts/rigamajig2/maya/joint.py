@@ -438,7 +438,7 @@ def connectChains(source, destination):
         raise RuntimeError('List mismatch. Source and destination must have equal lengths')
 
     for driver, driven in zip(source, destination):
-        # transform.connectOffsetParentMatrix(driver, driven)
+        attr.unlock(driven, attr.TRANSFORMS + ['v'])
         cmds.parentConstraint(driver, driven, mo=False)
 
         parent = 'bind' if cmds.objExists("bind") else None

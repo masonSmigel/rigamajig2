@@ -11,7 +11,7 @@ import rigamajig2.maya.cluster as rig_cluster
 import rigamajig2.maya.node as node
 import rigamajig2.maya.transform as rig_transform
 import rigamajig2.maya.attr as rig_attr
-import rigamajig2.maya.joint as joint
+import rigamajig2.maya.joint as rig_joint
 import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.meta as meta
 
@@ -262,10 +262,10 @@ class SplineBase(object):
             for attr in scaleAttrs:
                 cmds.connectAttr(".outputX".format(factor), '{}.s{}'.format(ik, attr))
 
-            # Connect the Ik joint to the bind joint
-            rig_transform.connectOffsetParentMatrix(ik, bind)
-            rig_attr.lock(bind, rig_attr.TRANSFORMS + ['v'])
             i += 1
+
+        # connect the ik to bind chain
+        rig_joint.connectChains(self.getIkJointList(), self.getJointList())
 
         # set the interpolations
         setScaleList = list(self._ikJointList)
@@ -314,12 +314,12 @@ def addTwistJoints(start, end, jnts=4, name="twist", bind_parent=None, rig_paren
     rig_attr.unlock(endJnt, rig_attr.KEYABLE(endJnt))
     cmds.parent(endJnt, startJnt)
 
-    insertJnts = joint.insertJoints(startJnt, endJnt, amount=jnts)
+    insertJnts = rig_joint.insertJoints(startJnt, endJnt, amount=jnts)
     jointList = [startJnt] + insertJnts + [endJnt]
 
     # ensure all transformation takes place on the main nodes
     rig_transform.unfreezeToTransform(jointList)
-    joint.toOrientation(jointList)
+    rig_joint.toOrientation(jointList)
 
     spline_ = SplineBase(jointList=jointList, name=name)
     if not cmds.objExists(spline_.getGroup()):

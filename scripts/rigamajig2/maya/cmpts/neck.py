@@ -13,6 +13,7 @@ import rigamajig2.maya.node as node
 import rigamajig2.shared.common as common
 import rigamajig2.maya.hierarchy as hierarchy
 import rigamajig2.maya.attr as rig_attr
+import rigamajig2.maya.joint as rig_joint
 import rigamajig2.maya.meta as meta
 
 
@@ -95,9 +96,11 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         cmds.parent(self.ikspline.getClusters()[2], self.headTanget[-1])
         cmds.parent(self.ikspline.getClusters()[3], self.headGimble[-1])
 
+        # connect the skull to the head joint
         self.skull_trs = hierarchy.create(self.skull[-1], ['{}_trs'.format(self.input[-1])], above=False)[0]
         rig_transform.matchTransform(self.input[-1], self.skull_trs)
-        rig_transform.connectOffsetParentMatrix(self.skull_trs, self.input[-1])
+        cmds.delete(cmds.ls(cmds.listConnections("{}.tx".format(self.input[-1])), type='parentConstraint')) # delete exising parent constraint
+        rig_joint.connectChains(self.skull_trs, self.input[-1])
 
         # connect the orient constraint to the twist controls
         cmds.orientConstraint(self.neck[-1], self.ikspline._startTwist, mo=True)

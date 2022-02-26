@@ -266,6 +266,7 @@ class SplineBase(object):
 
         # connect the ik to bind chain
         rig_joint.connectChains(self.getIkJointList(), self.getJointList())
+        cmds.hide(self.getIkJointList())
 
         # set the interpolations
         setScaleList = list(self._ikJointList)

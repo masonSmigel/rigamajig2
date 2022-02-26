@@ -376,9 +376,16 @@ class Builder(object):
                 cmpt._delete_advanced_proxy()
 
     def delete_cmpts(self):
+
+        main_cmpt = None
         for cmpt in self.cmpts:
-            if cmds.objExists(cmpt.container) and cmpt.get_cmpt_type() != 'main.Main':
-                cmpt.delete_setup()
+            if cmds.objExists(cmpt.container):
+                if cmpt.get_cmpt_type() == 'main.Main':
+                    main_cmpt = cmpt
+                else:
+                    cmpt.delete_setup()
+        if main_cmpt:
+            main_cmpt.delete_setup()
 
     # RUN SCRIPTS
     def load_required_plugins(self):

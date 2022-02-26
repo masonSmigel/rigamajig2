@@ -10,7 +10,6 @@ import rigamajig2.maya.attr as r_attr
 import rigamajig2.maya.meta
 import rigamajig2.maya.data.joint_data as joint_data
 import rigamajig2.maya.transform as transform
-from rigamajig2.maya.utils import ScriptEditorState
 
 import logging
 
@@ -246,10 +245,12 @@ class Base(object):
 
     def delete_setup(self):
         """ delete the rig setup"""
-        # TODO: this is a WIP
         logger.info("deleting component {}".format(self.name))
         cmds.select(self.container, r=True)
         mel.eval("doDelete;")
+
+        for input in self.input:
+            r_attr.unlock(input, r_attr.TRANSFORMS)
 
     def set_step(self, step=0):
         """

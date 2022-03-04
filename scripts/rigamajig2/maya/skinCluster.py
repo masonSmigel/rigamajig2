@@ -15,7 +15,7 @@ import maya.api.OpenMayaAnim as oma2
 
 import rigamajig2.shared.common
 import rigamajig2.maya.deformer
-import rigamajig2.maya.omUtils
+import rigamajig2.maya.utils
 import rigamajig2.maya.shape
 
 
@@ -37,13 +37,16 @@ def getSkinCluster(obj):
     :return: Skin cluster node
     """
     shape = rigamajig2.maya.deformer.getDeformShape(obj)
-    if shape is None:
-        return None
-    skin = mel.eval('findRelatedSkinCluster "' + shape + '"')
-    if not skin:
-        skins = cmds.ls(cmds.listHistory(shape), type='skinCluster')
-        if skin: skin = skins[0]
-    if not skin: return None
+    deformers = rigamajig2.maya.deformer.getDeformersForShape(shape)
+    skins = list(filter(lambda x: cmds.nodeType(x) == 'skinCluster', deformers))
+
+    assert len(skins) < 2, "Cannot use getSkinCluster on Stacked Skins"
+    skin = skins[0] if len(skins) else None
+    if skin:
+        # This is a tip from Charles Wardlaw,
+        # always ensure skin clusters weight distribution is set to neighbors.
+        # setting it here ensrures that any time we tough a skincluster it gets set properly
+        cmds.setAttr("{}.weightDistribution".format(skin), 1)
 
     return skin
 
@@ -55,7 +58,7 @@ def create():
     pass
 
 
-def getSkinClusterFn(skinCluster):
+def getMfnSkin(skinCluster):
     """
     Get a skin cluster function set from the skin cluster name
     :param skinCluster:
@@ -64,11 +67,137 @@ def getSkinClusterFn(skinCluster):
     if not isSkinCluster(skinCluster):
         raise Exception("{} is not a skinCluster".format(skinCluster))
 
-    selectionList = om2.MSelectionList()
-    selectionList.add(skinCluster)
-    skinClusterObj = selectionList.getDependNode(0)
-    skinClusterFn = oma2.MFnSkinCluster(skinClusterObj)
-    return skinClusterFn
+    skinClusterObj = rigamajig2.maya.utils.getMObject(skinCluster)
+    return oma2.MFnSkinCluster(skinClusterObj)
+
+
+def getMfnMesh(mesh):
+    """
+    :param mesh: name of the mesh to get the Mfn mesh object from
+    :return:
+    """
+    mesh = rigamajig2.maya.utils.getMObject(mesh)
+    return om2.MFnMesh(mesh)
+
+
+def getCompleteComponents(mesh):
+    if not isinstance(mesh, om2.MFnMesh):
+        mesh = getMfnMesh(mesh)
+    comp = om2.MFnSingleIndexedComponent()
+    ob = comp.create(om2.MFn.kMeshVertComponent)
+    comp.setCompleteData(mesh.numVertices)
+    return ob
+
+
+def tryMatrixSet(plug, value):
+    try:
+        cmds.setAttr(plug, value)
+    except RuntimeError:
+        pass
+
+
+def tryMatrixConnect(plug, target):
+    try:
+        cmds.connectAttr(plug, target)
+    except RuntimeError:
+        pass
+
+
+# def getWeights(mesh):
+#     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
+#     mesh = cmds.listRelatives(meshShape, p=True)[0]
+#
+#     mesh_skin = getSkinCluster(mesh)
+#     assert mesh_skin, "No Skin for mesh {} -- cannot save".format(mesh)
+#
+#     meshDag = rigamajig2.maya.utils.getDagPath(mesh)
+#     skinMfn = getMfnSkin(mesh_skin)
+#     meshMfn = getMfnMesh(meshShape)
+#     components = getCompleteComponents(meshMfn)
+#
+#     weights, influenceCount = skinMfn.getWeights(meshDag, components)
+#
+#     # preBindInputs = cmds.listConnections("{}.bindPreMatrix".format(mesh_skin), plugs=True, s=True, d=False)
+#     # bindInputs = preBindInputs[0] if preBindInputs else None
+#     # infuenceNameArray = [infPathArray[i].partialPathName() for i in range(len(infPathArray))]
+#     #
+#     # data = {"weights": list(weights),
+#     #         "influenceCount": influenceCount,
+#     #         "influenceObjects": infuenceNameArray,
+#     #         "bindInputs": bindInputs}
+#
+#     return list(weights), influenceCount
+
+
+def getWeights(mesh):
+    meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
+    mesh = cmds.listRelatives(meshShape, p=True)[0]
+
+    mesh_skin = getSkinCluster(mesh)
+    assert mesh_skin, "No Skin for mesh {} -- cannot save".format(mesh)
+
+    meshDag = rigamajig2.maya.utils.getDagPath(mesh)
+    skinMfn = getMfnSkin(mesh_skin)
+    meshMfn = getMfnMesh(meshShape)
+    components = getCompleteComponents(meshMfn)
+
+    weights, influenceCount = skinMfn.getWeights(meshDag, components)
+
+    influences = getInfluenceObjects(skinMfn)
+    numInfluences = len(list(influences))
+    numComponentsPerInfluence = int(len(weights) / numInfluences)
+
+    weightDict = {}
+    for ii in range(len(influences)):
+        influenceName = influences[ii]
+        influenceNoNs = influenceName.split(":")[-1]
+
+        # build a dictionary of vtx:weight. Skip 0.0 weights
+        # This is a super slick solution from Mgear!
+        infWeightDict = {
+            jj: weights[jj * numInfluences + ii]
+            for jj in range(numComponentsPerInfluence)
+            if weights[jj * numInfluences + ii] != 0.0
+            }
+        vertexCount = int(len(weights) / float(numInfluences))
+        weightDict[str(influenceNoNs)] = infWeightDict
+    return weightDict, vertexCount
+
+
+def setWeights(mesh, skincluster, weightDict, compressed=True):
+    meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
+
+    skinMfn = getMfnSkin(skincluster)
+    meshMfn = getMfnMesh(meshShape)
+    meshDag = rigamajig2.maya.utils.getDagPath(meshShape)
+    components = getCompleteComponents(meshMfn)
+
+    weights, influenceCount = skinMfn.getWeights(meshDag, components)
+    weightList = weights
+
+    influences = getInfluenceObjects(skinMfn)
+    numInfluences = len(list(influences))
+    numComponentsPerInfluence = int(len(weights)/numInfluences)
+
+    for importedIfluence, wtValues in weightDict.items():
+        for ii in range(len(influences)):
+            influenceName = influences[ii]
+            influenceNoNs = influenceName.split(":")[-1]
+            if influenceNoNs == importedIfluence:
+                if compressed:
+                    for jj in range(numComponentsPerInfluence):
+                        wt = wtValues.get(jj) or wtValues.get(str(jj)) or 0.0
+                        weightList[jj * numInfluences + ii] = wt
+    allIndices = om2.MIntArray(range(numInfluences))
+    skinMfn.setWeights(meshDag, components, allIndices, weightList, False)
+
+    # normalize the skinweights. This is to account for any floating point precision issues.
+    # even though they mostly would not be noticable its safer to manually normalize any drift.
+    cmds.skinPercent(skincluster, meshShape, normalize=True)
+
+    # Recache the bind matricies. This is from Charles Wardlaw.
+    # Ensures the skin behaves correctly durring playback
+    cmds.skinCluster(skincluster, e=True, recacheBindMatrices=True)
 
 
 def getInfluenceObjects(skinCluster):
@@ -77,9 +206,10 @@ def getInfluenceObjects(skinCluster):
     :param skinCluster: skinCluster to get influences from
     :return:
     """
-    skinClusterFn = getSkinClusterFn(skinCluster)
+    if not isinstance(skinCluster, oma2.MFnSkinCluster):
+        skinCluster = getMfnSkin(skinCluster)
 
-    infPathArray = skinClusterFn.influenceObjects()
+    infPathArray = skinCluster.influenceObjects()
     infuenceNameArray = [infPathArray[i].partialPathName() for i in range(len(infPathArray))]
 
     return infuenceNameArray
@@ -96,118 +226,10 @@ def getInfluenceIndex(skinCluster, influence):
         raise Exception("{} is not a skinCluster".format(skinCluster))
     if not cmds.objExists(influence):
         raise Exception("Influcence Object {} does not exist".format(influence))
-    skinClusterFn = getSkinClusterFn(skinCluster)
-    influencePath = rigamajig2.maya.omUtils.getDagPath2(influence)
+    skinClusterFn = getMfnSkin(skinCluster)
+    influencePath = rigamajig2.maya.utils.getDagPath(influence)
 
     return skinClusterFn.indexForInfluenceObject(influencePath)
-
-
-def getIfluenceAtIndex(skinCluster, influenceIndex):
-    """
-    Return the skin cluster influence at the index
-    :param skinCluster: Skincluster to get the influence from
-    :param influenceIndex: influence index to query
-    :return: influence at index
-    :rtype: str
-    """
-    if not isSkinCluster(skinCluster):
-        raise Exception("{} is not a skinCluster".format(skinCluster))
-
-    infConnections = cmds.listConnections(skinCluster + '.matrix[{}]'.format(influenceIndex), s=True, d=False)
-
-    if not infConnections: raise Exception("No influence at index {}".format(influenceIndex))
-    return infConnections[0]
-
-
-def getInfluencePhysicalIndex(skinCluster, influence):
-    """
-    Return a physical index of an index for a specified skin cluster
-    :param skinCluster: Skincluster to get the index from
-    :param influence: influcence of a skin cluster to get index of
-    :return: index of a given influence
-    """
-    if not isSkinCluster(skinCluster):
-        raise Exception("{} is not a skinCluster".format(skinCluster))
-    if not cmds.objExists(influence):
-        raise Exception("Influcence Object {} does not exist".format(influence))
-
-    skinClusterFn = getSkinClusterFn(skinCluster)
-
-    infPathArray = skinClusterFn.influenceObjects()
-    infuenceNameArray = [infPathArray[i].partialPathName() for i in range(len(infPathArray))]
-
-    if influence not in infuenceNameArray:
-        raise Exception("Unable to determine index for influence {}".format(influence))
-    influenceIndex = infuenceNameArray.index(influence)
-
-    return influenceIndex
-
-
-def getWeights(skinCluster, influences=None, geometry=None):
-    """
-    Return the weights of an influnce for a specified skin cluster.
-    Optionally pass influences, to only get specifed influences
-    :param skinCluster: Skin cluster to get the weights of
-    :param influences: Optional - Infuluence to query weights of. If None all are set from skincluster are used
-    :param geometry: Optional -Name of geometry to get weights from
-    :return:  list of component weights
-    """
-    weightList = dict()
-    if not isSkinCluster(skinCluster):
-        raise Exception("{} is not a skinCluster".format(skinCluster))
-
-    if geometry:
-        if not cmds.objExists(geometry): raise Exception("{} does not exist".format(geometry))
-    else:
-        geometry = rigamajig2.maya.deformer.getAffectedGeo(skinCluster)[0]
-
-    point_count = rigamajig2.maya.shape.getPointCount(geometry) - 1
-
-    if not influences:
-        influences = getInfluenceObjects(skinCluster)
-    else:
-        influences = rigamajig2.shared.common.toList(influences)
-
-    cmds.skinPercent(skinCluster, geometry, pruneWeights=0.005)
-    for inf in influences:
-        influenceIndex = getInfluenceIndex(skinCluster, inf)
-        attr = "{}.wl[0:{}].w[{}]".format(skinCluster, point_count, influenceIndex)
-        values = cmds.getAttr(attr)
-        values = [round(v, 5) for v in values]
-        weightList[inf] = values
-    return weightList
-
-
-def setWeights(skinCluster, weights, influences=None, geometry=None):
-    """
-    Set the skincluster weights.
-    Optionally pass influences, to only set specifed influences
-    :param skinCluster: skincluster to set Weights of
-    :param weights: dictionary of influences and weight values
-    :param influences: Optional- influences to set. If None all are set from the weight list
-    :param geometry: Optional -Name of geometry to set weights on
-    :return:
-    """
-    if not isSkinCluster(skinCluster):
-        raise Exception("{} is not a skinCluster".format(skinCluster))
-
-    if geometry:
-        if not cmds.objExists(geometry): raise Exception("{} does not exist".format(geometry))
-    else:
-        geometry = rigamajig2.maya.deformer.getAffectedGeo(skinCluster)[0]
-
-    point_count = rigamajig2.maya.shape.getPointCount(geometry) - 1
-
-    if not influences:
-        influences = weights.keys()
-    else:
-        influences = rigamajig2.shared.common.toList(influences)
-
-    for inf in influences:
-        influenceIndex = getInfluenceIndex(skinCluster, inf)
-        attr = "{}.wl[0:{}].w[{}]".format(skinCluster, point_count, influenceIndex)
-        weightList = weights[inf]
-        cmds.setAttr(attr, *weightList)
 
 
 def localize(skinclusters, transform):
@@ -230,9 +252,9 @@ def break_localization(skinClusters):
         pass
 
 
-def layer_skinclusters(source, target):
+def stack_skinclusters(source, target):
     """
-    create layered skinclusters
+    create stacked skinclusters
     :param source: mesh to copy skincluster from
     :param target: mesh to add new skin cluster too
     """

@@ -6,7 +6,7 @@ import maya.api.OpenMaya as om2
 import maya.OpenMayaAnim as oma
 import maya.OpenMaya as om
 import rigamajig2.shared.common as common
-import rigamajig2.maya.omUtils as omUtils
+import rigamajig2.maya.utils as utils
 import rigamajig2.maya.shape
 
 
@@ -147,7 +147,7 @@ def reorderSlide(geo, deformer, up=True):
     cmds.channelBox('mainChannelBox', e=True, update=True)
 
 
-def getDeformerStack(geo, ignoreTypes=None):
+def getDeformerStack(geo, ignoreTypes=['tweak']):
     """
     Return the whole deformer stack as a list
     :param geo: geometry object
@@ -156,11 +156,32 @@ def getDeformerStack(geo, ignoreTypes=None):
     """
     geo = common.getFirstIndex(geo)
 
-    if ignoreTypes is None:
-        ignoreTypes = ['tweak']
-
     inputs = cmds.ls(cmds.listHistory(geo, pruneDagObjects=True, interestLevel=1), type="geometryFilter")
     return [i for i in inputs if not cmds.nodeType(i) in ignoreTypes]
+
+
+def getDeformersForShape(geo, ignoreTypes=['tweak']):
+    """
+    Return the whole deformer stack as a list
+    :param geo: geometry object
+    :param ignoreTypes: types of deformers to exclude from the list
+    :return: list of deformers affecting the specified geo
+    """
+    geo = common.getFirstIndex(geo)
+    result = []
+
+    geometryFilters = cmds.ls(cmds.listHistory(geo), type="geometryFilter")
+    shape = getDeformShape(geo)
+
+    if shape is not None:
+        shapeSets = cmds.ls(cmds.listConnections(shape), type='objectSet')
+
+    for deformer in geometryFilters:
+        deformerSet = cmds.ls(cmds.listConnections(deformer), type="objectSet")[0]
+        if deformerSet in shapeSets:
+            if not cmds.nodeType(deformer) in ignoreTypes:
+                result.append(deformer)
+    return result
 
 
 def setDeformerOrder(geo, order, top=True):
@@ -191,7 +212,7 @@ def getAffectedGeo(deformer):
 
     affectedObjects = list()
 
-    deformerObj = omUtils.getMObject(deformer)
+    deformerObj = utils.getMObject(deformer)
     deformFn = oma.MFnGeometryFilter(deformerObj)
 
     outputObjs = om.MObjectArray()
@@ -351,7 +372,7 @@ def removeGeoFromDeformer(deformer, geo):
 #         cmds.error("Deformer {} does not exist".format(deformer))
 #         return
 #
-#     deformObj = omUtils.getMObject(deformer)
+#     deformObj = utils.getOldMObject(deformer)
 #
 #     try:
 #         deformerFn = oma.MFnWeightGeometryFilter(deformObj)
@@ -375,7 +396,7 @@ def removeGeoFromDeformer(deformer, geo):
 #
 #     deformerSet = getDeformerSet(deformer)
 #
-#     deformerSetObj = omUtils.getMObject(deformerSet)
+#     deformerSetObj = utils.getOldMObject(deformerSet)
 #     return om.MFnSet(deformerSetObj)
 
 # def getSetMembers(deformer, geo=None):

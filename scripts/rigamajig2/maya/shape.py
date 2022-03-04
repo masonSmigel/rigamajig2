@@ -4,7 +4,6 @@ Functions for shapes in maya
 import maya.cmds as cmds
 import maya.OpenMaya as om
 
-import rigamajig2.maya.omUtils
 import rigamajig2.shared.common as common
 
 

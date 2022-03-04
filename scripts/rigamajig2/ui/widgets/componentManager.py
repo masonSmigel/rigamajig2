@@ -31,6 +31,9 @@ class ComponentManager(QtWidgets.QWidget):
     def create_actions(self):
         self.select_container_action = QtWidgets.QAction("Select Container", self)
         self.select_container_action.setIcon(QtGui.QIcon(":play_S_100.png"))
+
+        self.del_cmpt_action = QtWidgets.QAction("Delete Cmpt Setup", self)
+        self.del_cmpt_action.setIcon(QtGui.QIcon(":trash.png"))
         self.select_container_action.triggered.connect(self.select_container)
 
     def create_widgets(self):
@@ -48,6 +51,7 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.component_tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.component_tree.addAction(self.select_container_action)
+        self.component_tree.addAction(self.del_cmpt_action)
 
         self.reload_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":refresh.png"), "")
         self.clear_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":hotkeyFieldClear.png"), "")

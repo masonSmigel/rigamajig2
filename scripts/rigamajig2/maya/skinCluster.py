@@ -51,13 +51,6 @@ def getSkinCluster(obj):
     return skin
 
 
-def create():
-    """
-    :return:
-    """
-    pass
-
-
 def getMfnSkin(skinCluster):
     """
     Get a skin cluster function set from the skin cluster name

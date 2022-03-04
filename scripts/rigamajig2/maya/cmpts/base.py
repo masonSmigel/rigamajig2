@@ -250,7 +250,7 @@ class Base(object):
         mel.eval("doDelete;")
 
         for input in self.input:
-            r_attr.unlock(input, r_attr.TRANSFORMS)
+            r_attr.unlock(input, r_attr.TRANSFORMS + ['v'])
 
     def set_step(self, step=0):
         """

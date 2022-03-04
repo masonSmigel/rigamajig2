@@ -103,32 +103,6 @@ def tryMatrixConnect(plug, target):
         pass
 
 
-# def getWeights(mesh):
-#     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
-#     mesh = cmds.listRelatives(meshShape, p=True)[0]
-#
-#     mesh_skin = getSkinCluster(mesh)
-#     assert mesh_skin, "No Skin for mesh {} -- cannot save".format(mesh)
-#
-#     meshDag = rigamajig2.maya.utils.getDagPath(mesh)
-#     skinMfn = getMfnSkin(mesh_skin)
-#     meshMfn = getMfnMesh(meshShape)
-#     components = getCompleteComponents(meshMfn)
-#
-#     weights, influenceCount = skinMfn.getWeights(meshDag, components)
-#
-#     # preBindInputs = cmds.listConnections("{}.bindPreMatrix".format(mesh_skin), plugs=True, s=True, d=False)
-#     # bindInputs = preBindInputs[0] if preBindInputs else None
-#     # infuenceNameArray = [infPathArray[i].partialPathName() for i in range(len(infPathArray))]
-#     #
-#     # data = {"weights": list(weights),
-#     #         "influenceCount": influenceCount,
-#     #         "influenceObjects": infuenceNameArray,
-#     #         "bindInputs": bindInputs}
-#
-#     return list(weights), influenceCount
-
-
 def getWeights(mesh):
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
     mesh = cmds.listRelatives(meshShape, p=True)[0]

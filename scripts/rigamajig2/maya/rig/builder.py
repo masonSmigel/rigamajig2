@@ -387,6 +387,8 @@ class Builder(object):
         if main_cmpt:
             main_cmpt.delete_setup()
 
+        self.cmpts = list()
+
     # RUN SCRIPTS
     def load_required_plugins(self):
         """

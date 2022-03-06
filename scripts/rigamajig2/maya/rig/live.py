@@ -7,8 +7,12 @@ import rigamajig2.shared.common as common
 import rigamajig2.maya.rig.ikfk as ikfk
 import rigamajig2.maya.node as node
 import rigamajig2.maya.transform as transform
+import rigamajig2.maya.attr as rig_attr
+import rigamajig2.maya.meta as meta
+import rigamajig2.maya.utils as utils
 
 MIRROR_GRP_NAME = 'liveMirror_hrc'
+PIN_HRC_NAME = 'rigamajig_pin_hrc'
 
 
 def createlivePoleVector(matchList, poleVectorNode=None):
@@ -215,3 +219,98 @@ def createLiveMirror(jointList, axis='x', mode='rotate'):
         # connect our mirror target with a parent constraint
         cmds.pointConstraint(mirrorTgt, mirrorJnt, n=mirrorJnt + common.POINTCONSTRAINT, mo=False)
         cmds.orientConstraint(mirrorTgt, mirrorJnt, n=mirrorJnt + common.ORIENTCONSTRAINT, mo=True)
+
+
+@utils.oneUndo
+@utils.preserveSelection
+def pin(nodes=None):
+    """
+    Takes the given nodes and 'pins' them. This means they will maintain their position and orientation
+    regardless of what the parent does.
+    :param nodes:
+    :return:
+    """
+    if not nodes:
+        nodes = cmds.ls(sl=True)
+    nodes = common.toList(nodes)
+
+    # create a pin transform
+    pin_hrc = PIN_HRC_NAME
+    if not cmds.objExists(pin_hrc):
+        pin_hrc = cmds.createNode("transform", name=pin_hrc)
+    rig_attr.lockAndHide(pin_hrc, rig_attr.TRANSFORMS + ['v'])
+
+    for node in nodes:
+        if cmds.objExists("{}.__isPinned__".format(node)):
+            continue
+
+        cmds.addAttr(node, longName="__isPinned__", at="bool")
+
+        pin_trs = cmds.spaceLocator(name=node + "_pin")[0]
+        transform.matchTransform(node, pin_trs)
+        cmds.parent(pin_trs, pin_hrc)
+        rig_attr.lockAndHide(pin_trs, rig_attr.TRANSFORMS + ['v'])
+        cmds.parentConstraint(pin_trs, node, mo=True)
+        rig_attr.lock(node, rig_attr.TRANSFORMS)
+
+        # store the color information before the pin.
+        data = dict()
+        data['prePin_overrideEnabled'] = cmds.getAttr("{}.overrideEnabled".format(node))
+        data['prePin_overrideRGBColors'] = cmds.getAttr("{}.overrideRGBColors".format(node))
+        if data['prePin_overrideRGBColors']:
+            data['prePin_overrideColorRGB'] = cmds.getAttr("{}.overrideColorRGB".format(node))[0]
+        else:
+            data['prePin_overrideColor'] = cmds.getAttr("{}.overrideColor".format(node))
+
+        meta_node = meta.MetaNode(pin_trs)
+        meta_node.setDataDict(data, hide=True, lock=True)
+
+        # set a new color
+        for n in [node, pin_trs]:
+            cmds.setAttr("{}.overrideEnabled".format(n), 1)
+            cmds.setAttr("{}.overrideRGBColors".format(n), 0)
+            cmds.setAttr("{}.overrideColor".format(n), 3)
+
+
+@utils.oneUndo
+def unpin(nodes=None):
+    """
+    unpin selected nodes
+    :param nodes:
+    :return:
+    """
+    if not nodes:
+        nodes = cmds.ls(sl=True)
+    nodes = common.toList(nodes)
+
+    for node in nodes:
+        if not cmds.objExists("{}.__isPinned__".format(node)):
+            continue
+
+        parent_const = cmds.ls(cmds.listConnections("{}.tx".format(node)), type='parentConstraint')[0] or None
+        if parent_const:
+            pin_trs = cmds.ls(cmds.listConnections("{}.target[0].targetParentMatrix".format(parent_const)),
+                              type='transform')[0] or None
+
+        # delete the parent constraint
+        rig_attr.unlock(node, rig_attr.TRANSFORMS)
+        cmds.delete(parent_const)
+
+        # retreive color information and set it back
+        meta_node = meta.MetaNode(pin_trs)
+        color_data = meta_node.getAllData()
+
+        for key in list(color_data.keys()):
+            attribute = key.split("_")[-1]
+            if isinstance(color_data[key], (list, tuple)):
+                cmds.setAttr("{0}.{1}".format(node, attribute), *color_data[key])
+            else:
+                cmds.setAttr("{0}.{1}".format(node, attribute), color_data[key])
+
+        # Remove the pinned tag so this node can be re-pined in the future.
+        cmds.deleteAttr("{}.__isPinned__".format(node))
+        cmds.delete(pin_trs)
+
+    # check if the pin hrc is empty. If it is we can delete it.
+    if len(cmds.listRelatives(PIN_HRC_NAME, c=True) or list()) == 0:
+        cmds.delete(PIN_HRC_NAME)

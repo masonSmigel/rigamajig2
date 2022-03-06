@@ -16,7 +16,7 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
 import rigamajig2.shared.common as common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager, overrideColorer
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager, overrideColorer, sliderGrp
 import rigamajig2.maya.rig.builder as builder
 import rigamajig2.maya.data.abstract_data as abstract_data
 
@@ -144,12 +144,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.import_load_skeleton_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
         self.skeletonEdit_wdgt = collapseableWidget.CollapsibleWidget('Edit Skeleton')
+        self.clean_skeleton_btn    = QtWidgets.QPushButton("Clean Skeleton")
         self.jnt_to_rot_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Rotation")
         self.jnt_to_ori_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Orientation")
         self.jntAxisX_rb = QtWidgets.QRadioButton('x')
-        self.jntAxisX_rb.setChecked(True)
         self.jntAxisY_rb = QtWidgets.QRadioButton('y')
         self.jntAxisZ_rb = QtWidgets.QRadioButton('z')
+        self.jntAxisX_rb.setChecked(True)
 
         self.mirrorJntMode_cbox = QtWidgets.QComboBox()
         self.mirrorJntMode_cbox.setFixedHeight(24)
@@ -157,6 +158,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.mirrorJntMode_cbox.addItem("translate")
         self.mirrorJnt_btn = QtWidgets.QPushButton(QtGui.QIcon(":kinMirrorJoint_S"), "Mirror")
         self.mirrorJnt_btn.setFixedHeight(24)
+
+        self.pin_jnt_btn    = QtWidgets.QPushButton("Pin Joints")
+        self.unpin_jnt_btn  = QtWidgets.QPushButton("Un-Pin Joints")
+
+        self.insert_jnts_amt_slider = sliderGrp.SliderGroup()
+        self.insert_jnts_amt_slider.setValue(1)
+        self.insert_jnts_btn = QtWidgets.QPushButton("Insert Joints")
 
         # Component Section
         self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Components', addCheckbox=True)
@@ -285,14 +293,25 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         mirrorJoint_layout.addWidget(self.mirrorJntMode_cbox)
         mirrorJoint_layout.addWidget(self.mirrorJnt_btn)
 
+        pinJoint_layout = QtWidgets.QHBoxLayout()
+        pinJoint_layout.addWidget(self.pin_jnt_btn)
+        pinJoint_layout.addWidget(self.unpin_jnt_btn)
+
+        insertJoint_layout = QtWidgets.QHBoxLayout()
+        insertJoint_layout.addWidget(self.insert_jnts_amt_slider)
+        insertJoint_layout.addWidget(self.insert_jnts_btn)
+
         self.skeleton_wdgt.addWidget(self.skel_path_selector)
         self.skeleton_wdgt.addWidget(self.joint_pos_path_selector)
         self.skeleton_wdgt.addLayout(skeleton_btn_layout)
         self.skeleton_wdgt.addWidget(self.import_load_skeleton_btn)
         self.skeleton_wdgt.addWidget(self.skeletonEdit_wdgt)
 
+        self.skeletonEdit_wdgt.addWidget(self.clean_skeleton_btn)
         self.skeletonEdit_wdgt.addLayout(jointOrientation_layout)
         self.skeletonEdit_wdgt.addLayout(mirrorJoint_layout)
+        self.skeletonEdit_wdgt.addLayout(pinJoint_layout)
+        self.skeletonEdit_wdgt.addLayout(insertJoint_layout)
 
         # Components
         cmpt_btn_layout = QtWidgets.QHBoxLayout()
@@ -433,6 +452,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.jnt_to_rot_btn.clicked.connect(self.jnt_to_rotation)
         self.jnt_to_ori_btn.clicked.connect(self.jnt_to_orientation)
         self.mirrorJnt_btn.clicked.connect(self.mirror_joint)
+        self.pin_jnt_btn.clicked.connect(self.pin_joints)
+        self.unpin_jnt_btn.clicked.connect(self.unpin_joints)
+        self.insert_jnts_btn.clicked.connect(self.insert_joints)
 
         self.load_guides_btn.clicked.connect(self.load_guides)
         self.save_guides_btn.clicked.connect(self.save_guides)
@@ -620,6 +642,21 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def save_joint_positions(self):
         self.rig_builder.save_joint_positions(self.joint_pos_path_selector.get_abs_path())
+
+    def pin_joints(self):
+        import rigamajig2.maya.rig.live as live
+        live.pin()
+
+    def unpin_joints(self):
+        import rigamajig2.maya.rig.live as live
+        live.unpin()
+
+    def insert_joints(self):
+        import rigamajig2.maya.joint as joint
+        jnt_amt = self.insert_jnts_amt_slider.getValue()
+        selection = cmds.ls(sl=True)
+        assert len(selection) == 2, "Must select two joints!"
+        joint.insertJoints(selection[0], selection[-1], amount=jnt_amt)
 
     def load_components(self):
         self.rig_builder.set_cmpts(list())

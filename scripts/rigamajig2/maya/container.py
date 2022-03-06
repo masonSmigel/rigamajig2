@@ -205,6 +205,12 @@ def addChildAnchor(node, container=None, assetNodeName=None):
     cmds.container(containerNode, e=True, publishAsChild=[node, assetNodeName])
 
 
+def safeDeleteContainer(container):
+    nodes = listNodes(container)
+    removeNodes(nodes, container, removeShapes=False)
+    cmds.delete(container)
+
+
 def sainityCheck():
     """Run several checks to make sure maya is setup to work with containers.
      There are a couple 'gotcha's' to look out for """

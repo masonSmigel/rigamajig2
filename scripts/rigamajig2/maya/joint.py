@@ -117,6 +117,7 @@ def duplicateChain(jointList, parent=None, names=None):
     return newJointList
 
 
+@utils.oneUndo
 def insertJoints(startJoint, endJoint, amount=1, name=None):
     """
     Insert more joints between a start and end joint

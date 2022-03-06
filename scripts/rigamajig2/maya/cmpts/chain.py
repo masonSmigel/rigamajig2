@@ -20,7 +20,7 @@ logger = logging.getLogger(__name__)
 
 class Chain(rigamajig2.maya.cmpts.base.Base):
 
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useScale=False, addFKSpace=False,
+    def __init__(self, name, input=[], size=1, useScale=False, addFKSpace=False,
                  useProxyAttrs=True, rigParent=str()):
         """
         Create a chain component
@@ -31,9 +31,6 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         :param size: default size of the controls:
         :type size: float
         :param: ikSpaces: dictionary of key and space for the ik control.
-        :type ikSpaces: dict
-        :param: pvSpaces: dictionary of key and space for the pv control.
-        :type pvSpaces: dict
         :param useProxyAttrs: use proxy attributes instead of an ikfk control
         :type useProxyAttrs: bool
         """

@@ -8,8 +8,6 @@ Charles Wardlaw: Deformation Layering in Maya’s Parallel GPU World
 (https://medium.com/@kattkieru/deformation-layering-in-mayas-parallel-gpu-world-15c2e3d66d82)
 """
 import maya.cmds as cmds
-import maya.mel as mel
-import maya.OpenMaya as om
 import maya.api.OpenMaya as om2
 import maya.api.OpenMayaAnim as oma2
 

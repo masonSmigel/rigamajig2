@@ -50,6 +50,7 @@ class Builder(object):
         self.path = None
         self.set_rig_file(rigFile)
         self.cmpts = list()
+        self.rig_file = None
 
         self._available_cmpts = list()
         self.__lookForComponents(CMPT_PATH)
@@ -306,7 +307,7 @@ class Builder(object):
         if not path:
             path = self._absPath(self.get_rig_data(self.rig_file, GUIDES))
 
-        if os.path.exists(path):
+        if path and os.path.exists(path):
             nd = node_data.NodeData()
             nd.read(path)
             nd.applyData(nodes=nd.getData().keys())
@@ -529,6 +530,10 @@ class Builder(object):
         :param key:
         :return:
         """
+
+        if not rig_file:
+            return None
+
         if not os.path.exists(rig_file):
             raise RuntimeError('rig file at {} does not exist'.format(rig_file))
 

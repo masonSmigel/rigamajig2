@@ -142,7 +142,7 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
 
     influences = getInfluenceObjects(skinMfn)
     numInfluences = len(list(influences))
-    numComponentsPerInfluence = int(len(weights)/numInfluences)
+    numComponentsPerInfluence = int(len(weights) / numInfluences)
 
     for importedIfluence, wtValues in weightDict.items():
         for ii in range(len(influences)):
@@ -163,6 +163,66 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
     # Recache the bind matricies. This is from Charles Wardlaw.
     # Ensures the skin behaves correctly durring playback
     cmds.skinCluster(skincluster, e=True, recacheBindMatrices=True)
+
+
+def getBlendWeights(mesh):
+    """
+    Get the DQ blended weights
+    :param mesh: mesh to get weights on
+    :return:
+    """
+    meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
+    mesh = cmds.listRelatives(meshShape, p=True)[0]
+
+    mesh_skin = getSkinCluster(mesh)
+    assert mesh_skin, "No Skin for mesh {} -- cannot save".format(mesh)
+
+    meshDag = rigamajig2.maya.utils.getDagPath(mesh)
+    skinMfn = getMfnSkin(mesh_skin)
+    meshMfn = getMfnMesh(meshShape)
+    components = getCompleteComponents(meshMfn)
+
+    weights = skinMfn.getBlendWeights(meshDag, components)
+    # round the weights down. This should be safe on Dual Quat blends
+    # because it is not normalized. And 6 should be more than accurate enough.
+    weightList = dict()
+    for i in range((len(weights))):
+        value = round(weights[i], 6)
+        if value > 0.0:
+            weightList[i] = value
+
+    return weightList
+
+
+def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
+    """
+    Set the Blended weights
+    :param mesh:
+    :param skincluster:
+    :param weightDict:
+    :param compressed:
+    :return:
+    """
+    meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
+
+    skinMfn = getMfnSkin(skincluster)
+    meshMfn = getMfnMesh(meshShape)
+    meshDag = rigamajig2.maya.utils.getDagPath(meshShape)
+    components = getCompleteComponents(meshMfn)
+
+    numVerts = skinMfn.getBlendWeights(meshDag, components)
+    blendedWeights = om2.MDoubleArray(range(len(numVerts)))
+
+    if compressed:
+        for i in range(len(blendedWeights)):
+            wt = weightDict.get(i) or weightDict.get(str(i)) or 0.0
+            print i, wt
+            blendedWeights[int(i)] = wt
+    else:
+        raise NotImplementedError("Not implemented")
+
+    # print len(blendedWeights), components.length()
+    skinMfn.setBlendWeights(meshDag, components, blendedWeights)
 
 
 def getInfluenceObjects(skinCluster):

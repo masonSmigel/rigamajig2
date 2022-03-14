@@ -47,6 +47,9 @@ class SkinData(maya_data.MayaData):
         data['vertexCount'] = vertexCount
         data['weights'] = weights
 
+        if data['skinningMethod'] == skinningMethodNames[-1]:
+            data['dqBlendWeights'] = skinCluster.getBlendWeights(node)
+
         self._data[node].update(data)
 
     def applyData(self, nodes, rebind=False):
@@ -65,7 +68,8 @@ class SkinData(maya_data.MayaData):
 
             if rebind and mesh_skin:
                 cmds.delete(mesh_skin)
-
+            if not rebind and not mesh_skin:
+                raise RuntimeError("No skin assosicated with the given node. Use the rebind argument to re-attatch skin.")
             # preform the rebind
             if rebind:
                 cmds.select(influenceObjects, mesh, r=True)
@@ -87,5 +91,8 @@ class SkinData(maya_data.MayaData):
             cmds.setAttr("{}.{}".format(mesh_skin, "skinningMethod"), skinningMethod)
             if skinningMethod > 0:
                 cmds.setAttr("{}.{}".format(mesh_skin, "dqsSupportNonRigid"), self._data[node]['dqsSupportNonRigid'])
+
+            if skinningMethod ==2:
+                skinCluster.setBlendWeights(mesh, mesh_skin, self._data[node]['dqBlendWeights'])
 
             logger.info("Loaded skinweights for '{}'".format(mesh))

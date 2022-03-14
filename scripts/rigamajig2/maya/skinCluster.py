@@ -216,7 +216,6 @@ def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
     if compressed:
         for i in range(len(blendedWeights)):
             wt = weightDict.get(i) or weightDict.get(str(i)) or 0.0
-            print i, wt
             blendedWeights[int(i)] = wt
     else:
         raise NotImplementedError("Not implemented")

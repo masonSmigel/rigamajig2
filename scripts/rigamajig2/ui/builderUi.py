@@ -389,6 +389,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.deformations_wdgt.addLayout(psd_btn_layout)
 
         # Publish
+        self.publish_wdgt.addWidget(self.publishScript_scriptRunner)
 
         # add the collapseable widgets
         build_layout = QtWidgets.QVBoxLayout()

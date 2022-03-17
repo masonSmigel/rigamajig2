@@ -50,7 +50,6 @@ class Builder(object):
         self.path = None
         self.set_rig_file(rigFile)
         self.cmpts = list()
-        self.rig_file = None
 
         self._available_cmpts = list()
         self.__lookForComponents(CMPT_PATH)
@@ -106,7 +105,8 @@ class Builder(object):
     def import_skeleton(self, path=None):
         if not path:
             path = self._absPath(self.get_rig_data(self.rig_file, SKELETON_FILE))
-
+            print self._absPath(self.get_rig_data(self.rig_file, SKELETON_FILE))
+        print path
         if os.path.exists(path):
             nodes = file.import_(path, ns=None)
             logger.info("skeleton imported")
@@ -407,12 +407,16 @@ class Builder(object):
         Run pre scripts. You can add scripts by path, but the main use is through the PRE SCRIPT path
         :param scripts: path to scripts to run
         """
+        scripts_list = list()
+        for script in scripts:
+            scripts_list.append(script)
+
         if self.path:
             scripts_path = self._absPath(PRE_SCRIPT_PATH)
             for script in runScript.find_scripts(scripts_path):
-                scripts.append(script)
+                scripts_list.append(script)
 
-        for script in scripts:
+        for script in scripts_list:
             runScript.run_script(script)
         logger.info("pre scripts -- complete")
 
@@ -421,12 +425,16 @@ class Builder(object):
         Run post scripts. You can add scripts by path, but the main use is through the POST SCRIPT path
         :param scripts: path to scripts to run
         """
+        scripts_list = list()
+        for script in scripts:
+            scripts_list.append(script)
+
         if self.path:
             scripts_path = self._absPath(POST_SCRIPT_PATH)
             for script in runScript.find_scripts(scripts_path):
-                scripts.append(script)
+                scripts_list.append(script)
 
-        for script in scripts:
+        for script in scripts_list:
             runScript.run_script(script)
         logger.info("post scripts -- complete")
 
@@ -436,12 +444,16 @@ class Builder(object):
         :param scripts:
         :return:
         """
+        scripts_list = list()
+        for script in scripts:
+            scripts_list.append(script)
+
         if self.path:
             scripts_path = self._absPath(PUB_SCRIPT_PATH)
             for script in runScript.find_scripts(scripts_path):
-                scripts.append(script)
+                scripts_list.append(script)
 
-        for script in scripts:
+        for script in scripts_list:
             runScript.run_script(script)
         logger.info("publish scripts -- complete")
 

@@ -132,7 +132,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
         if hrc_parent[0] != parent:
             cmds.parent(hrc, parent)
 
-    logger.info("Created pose reader on joint '{}'. Twist={}, Swing={}".format(joint, twist, swing))
+    logger.info("Created pose reader on joint '{}'".format(joint, twist, swing))
 
 
 def __createTwistPsdReader(joint, aimAxis='x', outputAttr=None):

@@ -13,7 +13,7 @@ scriptTypes = [
     "Scene Configuration (Internal)",
     "Time Changed"]
 
-func_format = """# scriptNode created with rigamajig from {function}
+func_format = """# scriptNode created with rigamajig from: {function}
 
 {imports}
 
@@ -125,4 +125,5 @@ def validateScriptString(script, defaultImports=''):
     if inspect.isfunction(script):
         func_src = inspect.getsource(script)
         func_call = script.__name__ + '()'
-        return func_format.format(function=str(script), imports=defaultImports, src=func_src, call=func_call)
+        func_path = ".".join([script.__module__, script.__name__])
+        return func_format.format(function=func_path, imports=defaultImports, src=func_src, call=func_call)

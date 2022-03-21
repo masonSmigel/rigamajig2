@@ -116,6 +116,8 @@ def createlivePoleVector(matchList, poleVectorNode=None):
 
     # connect our pvPos to the poleVectorNode
     cmds.connectAttr("{}.output3D".format(pvPos), "{}.t".format(poleVectorNode), f=True)
+
+    meta.tag(poleVectorNode, 'guide')
     return poleVectorNode
 
 

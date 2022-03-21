@@ -72,14 +72,7 @@ class Base(object):
                 self.createBuildGuides()
             self.set_step(1)
         else:
-            logger.warning('component {} already initalized.'.format(self.name))
-
-    def _show_advanced_proxy(self):
-        """
-        Show our advanced proxy setup
-        """
-        with rigamajig2.maya.container.ActiveContainer(self.container):
-            self.showAdvancedProxy()
+            logger.debug('component {} already initalized.'.format(self.name))
 
     def _build_cmpt(self):
         """
@@ -94,9 +87,6 @@ class Base(object):
         self._load_meta_to_component()
 
         if not self.get_step() >= 2:
-            # if a proxy setup exists delete it.
-            if self.proxy_setup_exists():
-                self._delete_advanced_proxy()
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -107,7 +97,7 @@ class Base(object):
                 self.setupAnimAttrs()
             self.set_step(2)
         else:
-            logger.warning('component {} already built.'.format(self.name))
+            logger.debug('component {} already built.'.format(self.name))
 
     def _connect_cmpt(self):
         """ connect components within the rig"""
@@ -120,7 +110,7 @@ class Base(object):
                 self.postConnect()
             self.set_step(3)
         else:
-            logger.warning('component {} already connected.'.format(self.name))
+            logger.debug('component {} already connected.'.format(self.name))
 
     def _finalize_cmpt(self):
         """
@@ -143,7 +133,7 @@ class Base(object):
                 self.postScript()
             self.set_step(4)
         else:
-            logger.warning('component {} already finalized.'.format(self.name))
+            logger.debug('component {} already finalized.'.format(self.name))
 
     def _optimize_cmpt(self):
         """"""
@@ -153,11 +143,7 @@ class Base(object):
             self.optimize()
             self.set_step(5)
         else:
-            logger.warning('component {} already optimized.'.format(self.name))
-
-    def _delete_advanced_proxy(self):
-        """ Delete the advanced proxy """
-        cmds.delete(self.proxySetupGrp)
+            logger.debug('component {} already optimized.'.format(self.name))
 
     # --------------------------------------------------------------------------------
     # functions
@@ -239,10 +225,6 @@ class Base(object):
         """Optimize a component"""
         pass
 
-    def showAdvancedProxy(self):
-        """ Show advanved proxy attributes """
-        pass
-
     def delete_setup(self):
         """ delete the rig setup"""
         logger.info("deleting component {}".format(self.name))
@@ -313,7 +295,9 @@ class Base(object):
         get the component container
         :return:
         """
-        return self.container
+        if cmds.objExists(self.container):
+            return self.container
+        return None
 
     def get_inputs(self):
         return self.input
@@ -337,3 +321,11 @@ class Base(object):
 
     def set_name(self, value):
         self.name = value
+
+    @classmethod
+    def testBuild(cls, cmpt):
+        cmpt._intialize_cmpt()
+        cmpt._build_cmpt()
+        cmpt._connect_cmpt()
+        cmpt._finalize_cmpt()
+        cmpt._optimize_cmpt()

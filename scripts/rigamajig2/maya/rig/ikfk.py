@@ -131,7 +131,7 @@ class IkFkBase(object):
             cmds.rename(self._group, value)
         self._group = value
 
-    def create(self):
+    def create(self, params=None):
         """
         This will create the ik/fkControls joints and connect them to the blendchain.
         IT WILL NOT RIG THEM in any way
@@ -139,10 +139,13 @@ class IkFkBase(object):
         if not cmds.objExists(self._group):
             cmds.createNode("transform", name=self._group)
 
-        ikfkAttr = "{}.ikfk".format(self._group)
+        if not params:
+            params = self._group
+
+        ikfkAttr = "{}.ikfk".format(params)
 
         if not cmds.objExists(ikfkAttr):
-            cmds.addAttr(self._group, ln='ikfk', at='double', min=0, max=1, keyable=True)
+            cmds.addAttr(params, ln='ikfk', at='double', min=0, max=1, keyable=True)
 
         fkParent = self._group
         ikParent = self._group
@@ -273,13 +276,13 @@ class IkFkLimb(IkFkBase):
 
         super(IkFkLimb, self).setJointList(value)
 
-    def create(self):
+    def create(self, params=None):
         """
         Create an IkFK chain with an ikHandle using the ikRPsolver
         :return:
         """
         if not self._ikJointList:
-            super(IkFkLimb, self).create()
+            super(IkFkLimb, self).create(params=params)
 
         guess_hdl = "{}_hdl".format(self._ikJointList[-1])
         if not cmds.objExists(guess_hdl):
@@ -291,11 +294,12 @@ class IkFkLimb(IkFkBase):
             self._handle = guess_hdl
 
     @staticmethod
-    def createStretchyIk(ikHandle, grp=None):
+    def createStretchyIk(ikHandle, grp=None, params=None):
         """
         Create a 2Bone stretchy ik from an  ikHandle
         :param ikHandle: Ikhandle to turn into a stretchy chain
         :param grp: Optional-group to hold attributes and calculate scale
+        :param params: Node to store parameters
         :return: target joints created
         """
         # get the joints influenced by the IK handle
@@ -304,21 +308,24 @@ class IkFkLimb(IkFkBase):
         if not grp or not cmds.objExists(grp):
             grp = cmds.createNode("transform", name='ikfk_stretch_hrc')
 
+        if not params:
+            grp=params
+
         # check if our joints are clean. If not return a warning but we can continue.
 
         if not joint.isClean(jnts[1]) or not joint.isClean(jnts[2]):
             cmds.warning("Some joints have dirty transformations. Stretch may not work as expected")
 
-        cmds.addAttr(grp, ln='stretch', at='double', dv=1, min=0, max=1, k=True)
-        cmds.addAttr(grp, ln='stretchTop', at='double', dv=1, k=True)
-        cmds.addAttr(grp, ln='stretchBot', at='double', dv=1, k=True)
-        cmds.addAttr(grp, ln='softStretch', at='double', dv=.001, min=.001, max=1, k=True)
-        cmds.addAttr(grp, ln='softStretchCompensate', at='double', dv=0, min=-1, max=0, k=False)
-        stretchAttr = '{}.stretch'.format(grp)
-        stretchTopAttr = '{}.stretchTop'.format(grp)
-        stretchBotAttr = '{}.stretchBot'.format(grp)
-        softStretchAttr = '{}.softStretch'.format(grp)
-        softStretchCompensateAttr = '{}.softStretchCompensate'.format(grp)
+        cmds.addAttr(params, ln='stretch', at='double', dv=1, min=0, max=1, k=True)
+        cmds.addAttr(params, ln='stretchTop', at='double', dv=1, k=True)
+        cmds.addAttr(params, ln='stretchBot', at='double', dv=1, k=True)
+        cmds.addAttr(params, ln='softStretch', at='double', dv=.001, min=.001, max=1, k=True)
+        cmds.addAttr(params, ln='softStretchCompensate', at='double', dv=0, min=-1, max=0, k=False)
+        stretchAttr = '{}.stretch'.format(params)
+        stretchTopAttr = '{}.stretchTop'.format(params)
+        stretchBotAttr = '{}.stretchBot'.format(params)
+        softStretchAttr = '{}.softStretch'.format(params)
+        softStretchCompensateAttr = '{}.softStretchCompensate'.format(params)
 
         # create target joints for the distance calulation
         startTgt = cmds.createNode('joint', n="{}_{}".format(jnts[0], common.TARGET))
@@ -343,8 +350,8 @@ class IkFkLimb(IkFkBase):
         # if a pole vector node is found add the pv setup!
         if pvNode:
             # add pole vector pinning attributes
-            cmds.addAttr(grp, ln='pvPin', at='double', dv=0, min=0, max=1, k=True)
-            pvPinAttr = '{}.pvPin'.format(grp)
+            cmds.addAttr(params, ln='pvPin', at='double', dv=0, min=0, max=1, k=True)
+            pvPinAttr = '{}.pvPin'.format(params)
 
             # get the distance from the joint3_fk and joint1_fk to pole vector
             pvdcmp = node.decomposeMatrix("{}.{}".format(pvNode, 'worldMatrix'), name=pvNode)

@@ -34,6 +34,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
+        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
         self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
         self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
 
@@ -76,12 +77,12 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         # create the spline ik
         self.ikspline = spline.SplineBase(self.input, name=self.name)
         self.ikspline.setGroup(self.name + '_ik')
-        self.ikspline.create(clusters=4)
+        self.ikspline.create(clusters=4, params=self.params_hrc)
         cmds.parent(self.ikspline.getGroup(), self.root_hrc)
 
         # connect the volume factor and tangents visability attributes
         rig_attr.addAttr(self.head[-1], 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
-        cmds.connectAttr("{}.volumeFactor".format(self.head[-1]), "{}.volumeFactor".format(self.ikspline.getGroup()))
+        cmds.connectAttr("{}.volumeFactor".format(self.head[-1]), "{}.volumeFactor".format(self.params_hrc))
 
         rig_attr.addAttr(self.neck[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.neck[-1]), "{}.v".format(self.neckTanget[0]))
@@ -107,7 +108,6 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.headGimble[-1], self.ikspline._endTwist, mo=True)
 
         rig_transform.connectOffsetParentMatrix(self.neck[-1], self.ikspline.getGroup(), mo=True)
-        rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
 
     def connect(self):
         """Create the connection"""
@@ -129,3 +129,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
 
         if self.headSpaces:
             spaces.addSpace(self.head[1], [self.headSpaces[k] for k in self.headSpaces.keys()], self.headSpaces.keys(), 'orient')
+
+    def finalize(self):
+        rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
+        rig_attr.lockAndHide(self.params_hrc, rig_attr.TRANSFORMS + ['v'])

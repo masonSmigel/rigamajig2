@@ -75,9 +75,20 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['ikSpaces'] = ikSpaces
         self.cmptSettings['pvSpaces'] = pvSpaces
 
+    def createBuildGuides(self):
+        """Show Advanced Proxy"""
+        import rigamajig2.maya.rig.live as live
+
+        self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
+        self.guide_pv = live.createlivePoleVector(self.input[1:4])
+        cmds.parent(self.guide_pv, self.guides_hrc)
+        rig_control.createDisplayLine(self.input[2], self.guide_pv, "{}_pvLine".format(self.name), self.guides_hrc, 'temp')
+        rig_control.createDisplayLine(self.input[1], self.input[3], "{}_ikLine".format(self.name), self.guides_hrc, "temp")
+
     def initalHierachy(self):
         """Build the initial hirarchy"""
         self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
+        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
         self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
         self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
 
@@ -128,7 +139,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                                                 color='blue', parent=self.limb_ik[-1], shape='sphere',
                                                 position=cmds.xform(self.input[3], q=True, ws=True, t=True))
 
-        pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:4], magnitude=0)
+        # pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:4], magnitude=0)
+        pv_pos = cmds.xform(self.guide_pv, q=True, ws=True, t=True)
         self.limb_pv = rig_control.create(self.limb_pvName, self.side,
                                           hierarchy=['trsBuffer', 'spaces_trs'],
                                           hideAttrs=['r', 's', 'v'], size=self.size, color='blue', shape='diamond',
@@ -198,7 +210,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         """Add the rig setup"""
         self.ikfk = ikfk.IkFkLimb(self.input[1:4])
         self.ikfk.setGroup(self.name + '_ikfk')
-        self.ikfk.create()
+        self.ikfk.create(params=self.params_hrc)
         self.ikJnts = self.ikfk.getIkJointList()
         self.fkJnts = self.ikfk.getFkJointList()
 
@@ -207,7 +219,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # create a pole vector contraint
         cmds.poleVectorConstraint(self.limb_pv[-1], self.ikfk.getHandle())
 
-        self._ikStartTgt, self._ikEndTgt = self.ikfk.createStretchyIk(self.ikfk.getHandle(), grp=self.ikfk.getGroup())
+        self._ikStartTgt, self._ikEndTgt = self.ikfk.createStretchyIk(self.ikfk.getHandle(),
+                                                                      grp=self.ikfk.getGroup(),
+                                                                      params=self.params_hrc)
 
         # connect the limbSwing to the other chains
         rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self.joint1_fk[0])
@@ -231,8 +245,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                                         name='{}_scale'.format(self.ikfk.getIkJointList()[-1]))
 
         # connect twist of ikHandle to ik arm
-        cmds.addAttr(self.ikfk.getGroup(), ln='twist', at='float', k=True)
-        cmds.connectAttr("{}.{}".format(self.ikfk.getGroup(), 'twist'), "{}.{}".format(self.ikfk.getHandle(), 'twist'))
+        cmds.addAttr(self.params_hrc, ln='twist', at='float', k=True)
+        cmds.connectAttr("{}.{}".format(self.params_hrc, 'twist'), "{}.{}".format(self.ikfk.getHandle(), 'twist'))
 
         # if not using proxy attributes then setup our ikfk controller
         if not self.useProxyAttrs:
@@ -289,7 +303,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 rig_transform.connectOffsetParentMatrix(self.bend5[-1], low_targets[2], mo=True)
 
             # create attributes for the volume factor
-            volumePlug = rigamajig2.maya.attr.addAttr(self.ikfk.getGroup(), "volumeFactor", 'float',value=1, minValue=0)
+            volumePlug = rigamajig2.maya.attr.addAttr(self.params_hrc, "volumeFactor", 'float',value=1, minValue=0)
             cmds.connectAttr(volumePlug, "{}.{}".format(upp_spline.getGroup(), "volumeFactor"))
             cmds.connectAttr(volumePlug, "{}.{}".format(low_spline.getGroup(), "volumeFactor"))
 
@@ -311,7 +325,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
         rigamajig2.maya.joint.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
-        ikfk.IkFkBase.connectVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
+        ikfk.IkFkBase.connectVisibility(self.params_hrc, 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
 
         # connect the base to the main bind chain
         rigamajig2.maya.joint.connectChains(self.limbBase[-1], self.input[0])
@@ -321,24 +335,24 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         if self.useProxyAttrs:
             for control in self.controlers:
                 rigamajig2.maya.attr.addSeparator(control, '----')
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'ikfk'), self.controlers)
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretch'), self.limb_ik[-1])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchTop'), self.limb_ik[-1])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'stretchBot'), self.limb_ik[-1])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'softStretch'), self.limb_ik[-1])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'pvPin'),[self.limb_ik[-1], self.limb_pv[-1]])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'twist'), self.limb_ik[-1])
+            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'ikfk'), self.controlers)
+            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'stretch'), self.limb_ik[-1])
+            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'stretchTop'), self.limb_ik[-1])
+            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'stretchBot'), self.limb_ik[-1])
+            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'softStretch'), self.limb_ik[-1])
+            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'pvPin'),[self.limb_ik[-1], self.limb_pv[-1]])
+            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'twist'), self.limb_ik[-1])
             if self.addTwistJoints and self.addBendies:
-                rigamajig2.maya.attr.addProxy('{}.{}'.format(self.ikfk.getGroup(), 'volumeFactor'), self.limb_ik[-1])
+                rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'volumeFactor'), self.limb_ik[-1])
         else:
-            rigamajig2.maya.attr.driveAttribute('ikfk', self.ikfk.getGroup(), self.ikfk_control[-1])
-            rigamajig2.maya.attr.driveAttribute('stretch', self.ikfk.getGroup(), self.ikfk_control[-1])
-            rigamajig2.maya.attr.driveAttribute('stretchTop', self.ikfk.getGroup(), self.ikfk_control[-1])
-            rigamajig2.maya.attr.driveAttribute('stretchBot', self.ikfk.getGroup(), self.ikfk_control[-1])
-            rigamajig2.maya.attr.driveAttribute('softStretch', self.ikfk.getGroup(), self.ikfk_control[-1])
-            rigamajig2.maya.attr.driveAttribute('pvPin', self.ikfk.getGroup(), self.ikfk_control[-1])
+            rigamajig2.maya.attr.driveAttribute('ikfk', self.params_hrc, self.ikfk_control[-1])
+            rigamajig2.maya.attr.driveAttribute('stretch', self.params_hrc, self.ikfk_control[-1])
+            rigamajig2.maya.attr.driveAttribute('stretchTop', self.params_hrc, self.ikfk_control[-1])
+            rigamajig2.maya.attr.driveAttribute('stretchBot', self.params_hrc, self.ikfk_control[-1])
+            rigamajig2.maya.attr.driveAttribute('softStretch', self.params_hrc, self.ikfk_control[-1])
+            rigamajig2.maya.attr.driveAttribute('pvPin', self.params_hrc, self.ikfk_control[-1])
             if self.addTwistJoints and self.addBendies:
-                rigamajig2.maya.attr.driveAttribute('volumeFactor', self.ikfk.getGroup(), self.ikfk_control[-1])
+                rigamajig2.maya.attr.driveAttribute('volumeFactor', self.params_hrc, self.ikfk_control[-1])
 
     def connect(self):
         """Create the connection"""
@@ -368,17 +382,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.lockAndHide(self.control_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
         rigamajig2.maya.attr.lockAndHide(self.spaces_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
         rigamajig2.maya.attr.lockAndHide(self.ikfk.getGroup(), rigamajig2.maya.attr.TRANSFORMS + ['v'])
-
-    def showAdvancedProxy(self):
-        """Show Advanced Proxy"""
-        import rigamajig2.maya.rig.live as live
-
-        self.proxySetupGrp = cmds.createNode("transform", n=self.proxySetupGrp)
-        tmpPv = live.createlivePoleVector(self.input[1:4])
-        cmds.parent(tmpPv, self.proxySetupGrp)
-        rig_control.createDisplayLine(self.input[2], tmpPv, "{}_pvLine".format(self.name), self.proxySetupGrp, 'temp')
-        rig_control.createDisplayLine(self.input[1], self.input[3], "{}_ikLine".format(self.name), self.proxySetupGrp,
-                                      "temp")
+        rigamajig2.maya.attr.lockAndHide(self.params_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
 
     def setAttrs(self):
         """ Set some attributes to values that make more sense for the inital setup."""

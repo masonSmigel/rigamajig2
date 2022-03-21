@@ -65,6 +65,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
     def initalHierachy(self):
         """Build the initial hirarchy"""
         self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
+        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
         self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
         self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
 

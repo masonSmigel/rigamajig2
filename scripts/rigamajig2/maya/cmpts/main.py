@@ -65,13 +65,16 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.lock(self.model_hrc, rigamajig2.maya.attr.TRANSFORMS)
     
     def delete_setup(self):
-        skel_children = cmds.listRelatives(self.bind_hrc, c=True)
-        if skel_children: cmds.parent(skel_children, world=True)
+        if cmds.objExists(self.bind_hrc):
+            skel_children = cmds.listRelatives(self.bind_hrc, c=True)
+            if skel_children: cmds.parent(skel_children, world=True)
 
-        rig_children = cmds.listRelatives(self.rig_hrc, c=True)
-        if rig_children: cmds.parent(rig_children, world=True)
+        if cmds.objExists(self.rig_hrc):
+            rig_children = cmds.listRelatives(self.rig_hrc, c=True)
+            if rig_children: cmds.parent(rig_children, world=True)
 
-        model_children = cmds.listRelatives(self.model_hrc, c=True)
-        if model_children: cmds.parent(model_children, world=True)
+        if cmds.objExists(self.model_hrc):
+            model_children = cmds.listRelatives(self.model_hrc, c=True)
+            if model_children: cmds.parent(model_children, world=True)
         
         super(Main, self).delete_setup()

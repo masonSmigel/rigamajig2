@@ -16,12 +16,12 @@ logger = logging.getLogger(__name__)
 class Arm(rigamajig2.maya.cmpts.limb.Limb):
     def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True, rigParent=str()):
         """
-        Create a main control
-        :param name: name of the components
+        Create an arm setup rig.
+        :param name: name of the component. Add a side token to set the component side.
         :type name: str
-        :param input: list of input joints. This must be a length of 4
+        :param input: list of input joints. This must be a length of 4 joints starting with the clavical and ending with the wrist.
         :type input: list
-        :param size: default size of the controls:
+        :param size: default size of the controls.
         :type size: float
         :param: ikSpaces: dictionary of key and space for the ik control.
         :type ikSpaces: dict
@@ -30,12 +30,12 @@ class Arm(rigamajig2.maya.cmpts.limb.Limb):
         :useProxyAttrs: use proxy attributes instead of an ikfk control
         :type useProxyAttrs: bool
         """
+        # noinspection PyTypeChecker
+        if len(input) != 4:
+            raise RuntimeError('Input list must have a length of 4')
+
         super(Arm, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces,
                                   useProxyAttrs=useProxyAttrs, useScale=useScale, rigParent=rigParent)
-
-        # noinspection PyTypeChecker
-        if len(self.input) != 4:
-            raise RuntimeError('Input list must have a length of 4')
 
     def setInitalData(self):
         self.cmptSettings['ikSpaces']['shoulder'] = self.cmptSettings['limbSwingName'] + '_' + self.side
@@ -48,6 +48,7 @@ class Arm(rigamajig2.maya.cmpts.limb.Limb):
     def rigSetup(self):
         """Add the rig setup"""
         super(Arm, self).rigSetup()
+        cmds.delete(self.guides_hrc)
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""

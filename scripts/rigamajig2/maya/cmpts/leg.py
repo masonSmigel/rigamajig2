@@ -50,7 +50,7 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
 
     def createBuildGuides(self):
         """ create build guides_hrc """
-        self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
+        super(Leg, self).createBuildGuides()
 
         self._heel_piv = rig_control.createGuide("{}_heel".format(self.name), parent=self.guides_hrc)
         self._inn_piv = rig_control.createGuide("{}_inn".format(self.name), parent=self.guides_hrc)

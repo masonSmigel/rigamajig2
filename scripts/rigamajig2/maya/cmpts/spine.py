@@ -38,6 +38,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
     def initalHierachy(self):
         """Build the initial hirarchy"""
         self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
+        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
         self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
         self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
 
@@ -113,7 +114,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         # create the spline ik
         self.ikspline = spline.SplineBase(self.input[1:-1], name=self.name)
         self.ikspline.setGroup(self.name + '_ik')
-        self.ikspline.create(clusters=4)
+        self.ikspline.create(clusters=4, params=self.params_hrc)
         cmds.parent(self.ikspline.getGroup(), self.root_hrc)
 
         # setup the hipSwivel
@@ -130,7 +131,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         rig_attr.addAttr(self.chest[-1], 'pivotHeight', attributeType='float', value=3.5, minValue=0, maxValue=10)
         # connect the some attributes
         rig_attr.addAttr(self.chest[-1], 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
-        cmds.connectAttr("{}.volumeFactor".format(self.chest[-1]), "{}.volumeFactor".format(self.ikspline.getGroup()))
+        cmds.connectAttr("{}.volumeFactor".format(self.chest[-1]), "{}.volumeFactor".format(self.params_hrc))
 
         # connect the tangets to the visablity
         rig_attr.addAttr(self.chest[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
@@ -161,7 +162,6 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.chestTop[-1], self.ikspline._endTwist, mo=True)
 
         rig_transform.connectOffsetParentMatrix(self.hipsGimble[-1], self.ikspline.getGroup(), mo=True)
-        rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
 
     def connect(self):
         """Create the connection"""
@@ -169,3 +169,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         if cmds.objExists(self.rigParent):
             cmds.parentConstraint(self.rigParent, self.hips[0], mo=True)
             cmds.parentConstraint(self.rigParent, self.hips_pivot[0], mo=True)
+
+    def finalize(self):
+        rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
+        rig_attr.lockAndHide(self.params_hrc, rig_attr.TRANSFORMS + ['v'])

@@ -129,7 +129,7 @@ class SplineBase(object):
         """
         self._name = name
 
-    def create(self, clusters=4):
+    def create(self, clusters=4, params=None):
         """
         This will create the ik spline and connect them to the jointList.
         :param clusters: number of clusters to make
@@ -147,10 +147,13 @@ class SplineBase(object):
         if not cmds.objExists(self._group):
             cmds.createNode("transform", name=self._group)
 
-        cmds.addAttr(self._group, ln='stretchy', at='double', dv=1, min=0, max=1, k=True)
-        cmds.addAttr(self._group, ln='volumeFactor', at='double', dv=1, min=0, k=True)
-        stretchyAttr = '{}.stretchy'.format(self._group)
-        volumeAttr = '{}.volumeFactor'.format(self._group)
+        if not params:
+            params = self._group
+
+        cmds.addAttr(params, ln='stretchy', at='double', dv=1, min=0, max=1, k=True)
+        cmds.addAttr(params, ln='volumeFactor', at='double', dv=1, min=0, k=True)
+        stretchyAttr = '{}.stretchy'.format(params)
+        volumeAttr = '{}.volumeFactor'.format(params)
 
         # create a duplicate joint chain, if we dont have an ikJointChain
         for i, joint in enumerate(self._jointList):

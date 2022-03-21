@@ -154,8 +154,12 @@ def addPublishNodes(nodes, container=None, bind=True):
             addNodes(node, container)
             containerNode = container
 
-        cmds.containerPublish(containerNode, publishNode=[node, 'transform'])
-        if bind: cmds.containerPublish(containerNode, bindNode=[node, assetNodeName])
+        containedNodes = cmds.containerPublish(containerNode, q=True, publishNode=True)
+        if not containedNodes:
+            containedNodes = list()
+        if node not in containedNodes:
+            cmds.containerPublish(containerNode, publishNode=[node, 'transform'])
+            if bind: cmds.containerPublish(containerNode, bindNode=[node, assetNodeName])
 
 
 def addParentAnchor(node, container=None, assetNodeName=None):

@@ -49,7 +49,7 @@ class Builder(object):
         """
         self.path = None
         self.set_rig_file(rigFile)
-        self.cmpts = list()
+        self.cmpt_list = list()
 
         self._available_cmpts = list()
         self.__lookForComponents(CMPT_PATH)
@@ -152,7 +152,7 @@ class Builder(object):
 
     def initalize(self):
         """Initalize rig (this is where the user can make changes)"""
-        for cmpt in self.cmpts:
+        for cmpt in self.cmpt_list:
             logger.info('Initalizing: {}'.format(cmpt.name))
             cmpt._intialize_cmpt()
         self.load_guide_data()
@@ -160,7 +160,7 @@ class Builder(object):
 
     def build(self):
         """build rig"""
-        for cmpt in self.cmpts:
+        for cmpt in self.cmpt_list:
             logger.info('Building: {}'.format(cmpt.name))
             cmpt._build_cmpt()
             # if the component is not a main parent the cmpt.root_hrc to the rig
@@ -185,21 +185,21 @@ class Builder(object):
 
     def connect(self):
         """connect rig"""
-        for cmpt in self.cmpts:
+        for cmpt in self.cmpt_list:
             logger.info('Connecting: {}'.format(cmpt.name))
             cmpt._connect_cmpt()
         logger.info("connect -- complete")
 
     def finalize(self):
         """finalize rig"""
-        for cmpt in self.cmpts:
+        for cmpt in self.cmpt_list:
             logger.info('Finalizing: {}'.format(cmpt.name))
             cmpt._finalize_cmpt()
         logger.info("finalize -- complete")
 
     def optimize(self):
         """optimize rig"""
-        for cmpt in self.cmpts:
+        for cmpt in self.cmpt_list:
             logger.info('Optimizing {}'.format(cmpt.name))
             cmpt._optimize_cmpt()
         logger.info("optimize -- complete")
@@ -215,7 +215,7 @@ class Builder(object):
 
         cmpt_data = OrderedDict()
         cd = abstract_data.AbstractData()
-        for cmpt in self.cmpts:
+        for cmpt in self.cmpt_list:
             cmpt_data[cmpt.name] = cmpt.get_cmpt_data()
 
         cd.setData(cmpt_data)
@@ -262,7 +262,7 @@ class Builder(object):
             cd = abstract_data.AbstractData()
             cd.read(path)
             cmpt_data = cd.getData()
-            for cmpt in self.cmpts:
+            for cmpt in self.cmpt_list:
                 cmpt.load_settings(cmpt_data[cmpt.name])
 
     def load_controlShapes(self, path=None, applyColor=True):
@@ -360,26 +360,9 @@ class Builder(object):
         self.load_poseReaders()
         logger.info("data loading -- complete")
 
-    def show_advanced_proxy(self):
-        """
-        Show the advanced proxy attributes for the components
-        :return:
-        """
-        for cmpt in self.cmpts:
-            if cmpt.get_step() >= 2:
-                logger.warning("component {} is already build. No use creating proxy feedback".format(cmpt))
-            else:
-                cmpt._show_advanced_proxy()
-
-    def delete_advanced_proxy(self):
-        for cmpt in self.cmpts:
-            if cmpt.proxy_setup_exists():
-                cmpt._delete_advanced_proxy()
-
-    def delete_cmpts(self):
-
+    def delete_cmpts(self, clear_list=True):
         main_cmpt = None
-        for cmpt in self.cmpts:
+        for cmpt in self.cmpt_list:
             if cmds.objExists(cmpt.container):
                 if cmpt.get_cmpt_type() == 'main.Main':
                     main_cmpt = cmpt
@@ -387,8 +370,52 @@ class Builder(object):
                     cmpt.delete_setup()
         if main_cmpt:
             main_cmpt.delete_setup()
+        if clear_list:
+            self.cmpt_list = list()
 
-        self.cmpts = list()
+    def edit_cmpts(self):
+        self.delete_cmpts(clear_list=False)
+        self.initalize()
+
+    def build_single_cmpt(self, name, type):
+        """
+        Build a single component based on the name and component type.
+        If a component with the given name and type exists within the self.cmpt_list build that component.
+
+        Warning: Building a single component without nesseary connection nodes in the scene may lead to
+                 unpredicable results. ONLY USE THIS FOR RND!
+        :param name:
+        :param type:
+        :return:
+        """
+        cmpt = self.find_cmpt(name=name, type=type)
+
+        if cmpt:
+            cmpt._intialize_cmpt()
+            cmpt._build_cmpt()
+            cmpt._connect_cmpt()
+            cmpt._finalize_cmpt()
+
+            if cmds.objExists('rig') and cmpt.get_cmpt_type() != 'main.Main':
+                if hasattr(cmpt, "root_hrc"):
+                    if not cmds.listRelatives(cmpt.root_hrc, p=True):
+                        cmds.parent(cmpt.root_hrc, 'rig')
+
+            logger.info("build: {} -- complete".format(cmpt.name))
+
+    def edit_single_cmpt(self, name, type):
+        """
+        Return a single component to the initialize stage to edit the component
+        :return:
+        """
+        cmpt = self.find_cmpt(name=name, type=type)
+
+        if cmpt:
+            if cmpt.getContainer():
+                cmpt.delete_setup()
+
+            cmpt._intialize_cmpt()
+            logger.info("edit : {}".format(cmpt.name))
 
     # RUN SCRIPTS
     def load_required_plugins(self):
@@ -515,14 +542,30 @@ class Builder(object):
     def get_rig_file(self):
         return self.rig_file
 
+    def get_cmpt_obj_from_container(self, container):
+        name = cmds.getAttr("{}.name".format(container))
+        cmpt_type = cmds.getAttr("{}.type".format(container))
+
+        return self.find_cmpt(name, cmpt_type)
+
+    def find_cmpt(self, name, type):
+        for cmpt in self.cmpt_list:
+            _name = cmpt.name
+            _type = cmpt.cmpt_type
+            if name == _name:
+                if type == _type:
+                    return cmpt
+        logger.warning("No component: {} with type: {} found within current build".format(name, cmpt_type))
+        return None
+
     # SET
     def set_cmpts(self, cmpts):
         """
-        Set the self.cmpts
+        Set the self.cmpt_list
         :param cmpts: list of components to set
         """
         cmpts = common.toList(cmpts)
-        self.cmpts = cmpts
+        self.cmpt_list = cmpts
 
     def append_cmpts(self, cmpts):
         """
@@ -532,7 +575,7 @@ class Builder(object):
         """
         cmpts = common.toList(cmpts)
         for cmpt in cmpts:
-            self.cmpts.append(cmpt)
+            self.cmpt_list.append(cmpt)
 
     @classmethod
     def get_rig_data(cls, rig_file, key):

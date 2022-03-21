@@ -178,10 +178,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.load_guides_btn = QtWidgets.QPushButton("Load Guides")
         self.save_guides_btn = QtWidgets.QPushButton("Save Guides")
 
-        self.build_rig_btn = QtWidgets.QPushButton("Build")
-        self.connect_rig_btn = QtWidgets.QPushButton("Connect")
-        self.finalize_rig_btn = QtWidgets.QPushButton("Finalize")
-        self.complete_build_btn = QtWidgets.QPushButton("Complete Build")
+        # self.build_rig_btn = QtWidgets.QPushButton("Build")
+        # self.connect_rig_btn = QtWidgets.QPushButton("Connect")
+        # self.finalize_rig_btn = QtWidgets.QPushButton("Finalize")
+        self.edit_build_btn = QtWidgets.QPushButton("Edit Build")
+        self.edit_build_btn.setFixedWidth(80)
+        self.edit_build_btn.setFixedHeight(LARGE_BTN_HEIGHT)
+        self.complete_build_btn = QtWidgets.QPushButton("Build Rig")
         self.complete_build_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
         # Post - script section
@@ -332,12 +335,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.cmpt_wdgt.addLayout(cmpt_btn_layout)
         self.cmpt_wdgt.addWidget(self.guide_path_selector)
         self.cmpt_wdgt.addLayout(guide_load_layout)
-        build_step_layout = QtWidgets.QHBoxLayout()
-        build_step_layout.addWidget(self.build_rig_btn)
-        build_step_layout.addWidget(self.connect_rig_btn)
-        build_step_layout.addWidget(self.finalize_rig_btn)
-        self.cmpt_wdgt.addLayout(build_step_layout)
-        self.cmpt_wdgt.addWidget(self.complete_build_btn)
+        build_layout = QtWidgets.QHBoxLayout()
+        # build_step_layout.addWidget(self.build_rig_btn)
+        # build_step_layout.addWidget(self.connect_rig_btn)
+        # build_step_layout.addWidget(self.finalize_rig_btn)
+        self.cmpt_wdgt.addLayout(build_layout)
+        build_layout.addWidget(self.edit_build_btn)
+        build_layout.addWidget(self.complete_build_btn)
 
         # Post Script
         self.postScript_wdgt.addWidget(self.postScript_scriptRunner)
@@ -462,9 +466,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.load_components_btn.clicked.connect(self.load_components)
         self.cmpt_manager.clear_cmpt_btn.clicked.connect(self.clear_components)
 
-        self.build_rig_btn.clicked.connect(self.build_rig)
-        self.connect_rig_btn.clicked.connect(self.connect_rig)
-        self.finalize_rig_btn.clicked.connect(self.finalize_rig)
+        # self.build_rig_btn.clicked.connect(self.build_rig)
+        # self.connect_rig_btn.clicked.connect(self.connect_rig)
+        # self.finalize_rig_btn.clicked.connect(self.finalize_rig)
+        self.edit_build_btn.clicked.connect(self.edit_build)
         self.complete_build_btn.clicked.connect(self.complete_build)
 
         self.load_ctl_btn.clicked.connect(self.load_controlShapes)
@@ -534,6 +539,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.psd_path_selector.set_relativeTo(self.rig_env)
 
         self.rig_builder = builder.Builder(self.rig_file)
+        self.cmpt_manager.set_rig_builder(self.rig_builder)
         self.update_ui_with_rig_data()
 
     def update_ui_with_rig_data(self):
@@ -685,6 +691,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.rig_builder.build()
         self.rig_builder.connect()
         self.rig_builder.finalize()
+        self.cmpt_manager.load_cmpts_from_scene()
+
+    def edit_build(self):
+        self.rig_builder.edit_cmpts()
         self.cmpt_manager.load_cmpts_from_scene()
 
     def load_guides(self):

@@ -77,4 +77,4 @@ class Main(rigamajig2.maya.cmpts.base.Base):
             model_children = cmds.listRelatives(self.model_hrc, c=True)
             if model_children: cmds.parent(model_children, world=True)
         
-        super(Main, self).delete_setup()
+        super(Main, self).deleteSetup()

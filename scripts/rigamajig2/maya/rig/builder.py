@@ -1,5 +1,5 @@
 """
-This module contains our rig builder
+This module contains our rig builder. It acts as a main wrapper to manage all functions of the rig build.
 """
 import sys
 import os
@@ -99,7 +99,6 @@ class Builder(object):
         if nodes:
             for node in cmds.ls(nodes, l=True, type='transform'):
                 if not len(node.split('|')) > 2:
-                    # self.top_skeleton_nodes.append(node)
                     meta.tag(node, 'model_root')
 
     def import_skeleton(self, path=None):
@@ -118,7 +117,6 @@ class Builder(object):
         # get top level nodes in the skeleton
         for node in cmds.ls(nodes, l=True, type='transform'):
             if not len(node.split('|')) > 2:
-                # self.top_skeleton_nodes.append(node)
                 meta.tag(node, 'skeleton_root')
 
     def load_joint_positions(self, path=None):
@@ -164,7 +162,7 @@ class Builder(object):
             logger.info('Building: {}'.format(cmpt.name))
             cmpt._build_cmpt()
             # if the component is not a main parent the cmpt.root_hrc to the rig
-            if cmds.objExists('rig') and cmpt.get_cmpt_type() != 'main.Main':
+            if cmds.objExists('rig') and cmpt.getComponenetType() != 'main.Main':
                 if hasattr(cmpt, "root_hrc"):
                     if not cmds.listRelatives(cmpt.root_hrc, p=True):
                         cmds.parent(cmpt.root_hrc, 'rig')
@@ -206,7 +204,7 @@ class Builder(object):
 
     def save_components(self, path=None):
         """
-        Save out components
+        Save out components to a file. This only saves compoonent settings such as name, inputs, spaces and names.
         :param path: path to components
         :return:
         """
@@ -216,7 +214,7 @@ class Builder(object):
         cmpt_data = OrderedDict()
         cd = abstract_data.AbstractData()
         for cmpt in self.cmpt_list:
-            cmpt_data[cmpt.name] = cmpt.get_cmpt_data()
+            cmpt_data[cmpt.name] = cmpt.getComponentData()
 
         cd.setData(cmpt_data)
         cd.write(path)
@@ -251,7 +249,7 @@ class Builder(object):
 
     def load_component_settings(self, path=None):
         """
-        load_settings component settings
+        loadSettings component settings
         :param path:
         :return:
         """
@@ -263,7 +261,7 @@ class Builder(object):
             cd.read(path)
             cmpt_data = cd.getData()
             for cmpt in self.cmpt_list:
-                cmpt.load_settings(cmpt_data[cmpt.name])
+                cmpt.loadSettings(cmpt_data[cmpt.name])
 
     def load_controlShapes(self, path=None, applyColor=True):
         """
@@ -364,10 +362,10 @@ class Builder(object):
         main_cmpt = None
         for cmpt in self.cmpt_list:
             if cmds.objExists(cmpt.container):
-                if cmpt.get_cmpt_type() == 'main.Main':
+                if cmpt.getComponenetType() == 'main.Main':
                     main_cmpt = cmpt
                 else:
-                    cmpt.delete_setup()
+                    cmpt.deleteSetup()
         if main_cmpt:
             main_cmpt.delete_setup()
         if clear_list:
@@ -420,7 +418,7 @@ class Builder(object):
     # RUN SCRIPTS
     def load_required_plugins(self):
         """
-        load_settings required plugins
+        loadSettings required plugins
         NOTE: there are plugins REQUIRED for rigamajig. for other plug-ins needed in production add them as a pre-script.
         """
         loaded_plugins = cmds.pluginInfo(query=True, listPlugins=True)
@@ -515,26 +513,6 @@ class Builder(object):
     def publish(self, outputfile=None):
         self.optimize()
 
-    # UTILITY FUNCTIONS
-    def set_rig_file(self, rigFile):
-        if not rigFile:
-            return
-
-        if not os.path.exists(rigFile):
-            # TODO: give the user the option to create a rig file somewhere
-            raise RuntimeError("'{0}' does not exist".format(rigFile))
-        self.rig_file = rigFile
-
-        rig_data = abstract_data.AbstractData()
-        rig_data.read(self.rig_file)
-        data = rig_data.getData()
-        if "rig_env" not in data:
-            rig_env_path = '../'
-        else:
-            rig_env_path = data["rig_env"]
-        self.path = os.path.abspath(os.path.join(self.rig_file, rig_env_path))
-        logger.info('\n\nRig Enviornment path: {0}'.format(self.path))
-
     # GET
     def get_path(self):
         return self.path
@@ -576,6 +554,25 @@ class Builder(object):
         cmpts = common.toList(cmpts)
         for cmpt in cmpts:
             self.cmpt_list.append(cmpt)
+
+    def set_rig_file(self, rigFile):
+        if not rigFile:
+            return
+
+        if not os.path.exists(rigFile):
+            # TODO: give the user the option to create a rig file somewhere
+            raise RuntimeError("'{0}' does not exist".format(rigFile))
+        self.rig_file = rigFile
+
+        rig_data = abstract_data.AbstractData()
+        rig_data.read(self.rig_file)
+        data = rig_data.getData()
+        if "rig_env" not in data:
+            rig_env_path = '../'
+        else:
+            rig_env_path = data["rig_env"]
+        self.path = os.path.abspath(os.path.join(self.rig_file, rig_env_path))
+        logger.info('\n\nRig Enviornment path: {0}'.format(self.path))
 
     @classmethod
     def get_rig_data(cls, rig_file, key):

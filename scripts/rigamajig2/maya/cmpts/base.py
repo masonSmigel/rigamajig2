@@ -56,7 +56,7 @@ class Base(object):
             self.createContainer
             self.preScript
         """
-        if not self.get_step() >= 1:
+        if not self.getStep() >= 1:
             # fullDict = dict(self.metaData, **self.cmptSettings)
             self.setInitalData()
             self.createContainer()
@@ -70,7 +70,7 @@ class Base(object):
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.preScript()  # run any pre-build scripts
                 self.createBuildGuides()
-            self.set_step(1)
+            self.setStep(1)
         else:
             logger.debug('component {} already initalized.'.format(self.name))
 
@@ -86,7 +86,7 @@ class Base(object):
         """
         self._load_meta_to_component()
 
-        if not self.get_step() >= 2:
+        if not self.getStep() >= 2:
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -95,7 +95,7 @@ class Base(object):
                 self.rigSetup()
                 self.postRigSetup()
                 self.setupAnimAttrs()
-            self.set_step(2)
+            self.setStep(2)
         else:
             logger.debug('component {} already built.'.format(self.name))
 
@@ -103,12 +103,12 @@ class Base(object):
         """ connect components within the rig"""
         self._load_meta_to_component()
 
-        if not self.get_step() >= 3:
+        if not self.getStep() >= 3:
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.initConnect()
                 self.connect()
                 self.postConnect()
-            self.set_step(3)
+            self.setStep(3)
         else:
             logger.debug('component {} already connected.'.format(self.name))
 
@@ -124,14 +124,14 @@ class Base(object):
         """
         self._load_meta_to_component()
 
-        if not self.get_step() >= 4:
+        if not self.getStep() >= 4:
             self.publishNodes()
             self.publishAttributes()
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.finalize()
                 self.setAttrs()
                 self.postScript()
-            self.set_step(4)
+            self.setStep(4)
         else:
             logger.debug('component {} already finalized.'.format(self.name))
 
@@ -139,9 +139,9 @@ class Base(object):
         """"""
         self._load_meta_to_component()
 
-        if not self.get_step() == 5:
+        if not self.getStep() == 5:
             self.optimize()
-            self.set_step(5)
+            self.setStep(5)
         else:
             logger.debug('component {} already optimized.'.format(self.name))
 
@@ -225,7 +225,7 @@ class Base(object):
         """Optimize a component"""
         pass
 
-    def delete_setup(self):
+    def deleteSetup(self):
         """ delete the rig setup"""
         logger.info("deleting component {}".format(self.name))
         cmds.select(self.container, r=True)
@@ -234,7 +234,7 @@ class Base(object):
         for input in self.input:
             r_attr.unlock(input, r_attr.TRANSFORMS + ['v'])
 
-    def set_step(self, step=0):
+    def setStep(self, step=0):
         """
         set the pipeline step.
 
@@ -255,7 +255,7 @@ class Base(object):
 
         cmds.setAttr("{}.{}".format(self.container, 'build_step'), step)
 
-    def get_step(self):
+    def getStep(self):
         """
         get the pipeline step
         :return:
@@ -264,15 +264,12 @@ class Base(object):
             return cmds.getAttr("{}.{}".format(self.container, 'build_step'))
         return 0
 
-    def proxy_setup_exists(self):
-        return True if self.proxySetupGrp and cmds.objExists(self.proxySetupGrp) else False
-
     def save(self):
         """Return the settings of component name"""
         self._load_meta_to_component()
         return self._userSettings
 
-    def load_settings(self, data):
+    def loadSettings(self, data):
         keys_to_remove = ['name', 'type', 'input']
         new_dict = {key: val for key, val in data.items() if key not in keys_to_remove}
         if self.metaNode:
@@ -280,7 +277,7 @@ class Base(object):
 
     def _load_meta_to_component(self):
         """
-        load_settings meta data from the settings node into a dictionary
+        loadSettings meta data from the settings node into a dictionary
         """
         new_cmpt_data = OrderedDict()
         for key in self.cmptSettings.keys():
@@ -299,10 +296,10 @@ class Base(object):
             return self.container
         return None
 
-    def get_inputs(self):
+    def getInputs(self):
         return self.input
 
-    def get_cmpt_data(self):
+    def getComponentData(self):
         # create an info dictionary with the important component settings.
         # This is used to save the component to a file
         info_dict = OrderedDict()
@@ -312,14 +309,14 @@ class Base(object):
         info_dict.update(self.cmptSettings)
         return info_dict
 
-    def get_cmpt_type(self):
+    def getComponenetType(self):
         return self.cmpt_type
 
     # SET
-    def set_inputs(self, value):
+    def setInputs(self, value):
         self.input = value
 
-    def set_name(self, value):
+    def setName(self, value):
         self.name = value
 
     @classmethod

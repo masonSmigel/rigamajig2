@@ -190,7 +190,7 @@ class ComponentManager(QtWidgets.QWidget):
         for item in items:
             component = self.get_component_obj(item)
             if component.getContainer():
-                component.delete_setup()
+                component.deleteSetup()
 
             item.setText(2, 'unbuilt')
 

@@ -32,8 +32,29 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['chestTop_name'] = 'chestTop'
         self.cmptSettings['hipTanget_name'] = 'hipTan'
         self.cmptSettings['chestTanget_name'] = 'chestTan'
-        self.cmptSettings['hipSwivel_percent'] = 0.333
-        self.cmptSettings['torso_percent'] = 0.15
+        # self.cmptSettings['hipSwivel_percent'] = 0.333
+        # self.cmptSettings['torso_percent'] = 0.15
+
+    def createBuildGuides(self):
+        """Create the build guides"""
+        self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
+
+        hipSwivel_pos = mathUtils.nodePosLerp(self.input[0], self.input[-1], 0.333)
+        self.hipsSwivel_guide = rig_control.createGuide(self.name + "_hipSwivel", side=self.side,
+                                                        parent=self.guides_hrc,
+                                                        position=hipSwivel_pos)
+        torso_pos = mathUtils.nodePosLerp(self.input[0], self.input[-1], 0.15)
+        self.torso_guide = rig_control.createGuide(self.name + "_torso", side=self.side, parent=self.guides_hrc,
+                                                   position=torso_pos)
+
+        spineEnd_pos = cmds.xform(self.input[-2], q=True, ws=True, t=True)
+        self.chest_guide = rig_control.createGuide(self.name + "_chest", side=self.side, parent=self.guides_hrc,
+                                                   position=spineEnd_pos)
+
+        chest_pos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
+        self.chestTop_guide = rig_control.createGuide(self.name + "_chestTop", side=self.side, parent=self.guides_hrc,
+                                                      position=chest_pos)
+        rig_attr.lockAndHide(self.chestTop_guide, rig_attr.TRANSLATE + rig_attr.SCALE + ['v'])
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
@@ -60,33 +81,31 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
                                              parent=self.hips[-1], shape='cube', shapeAim='x',
                                              position=hip_pos)
         # build the hips swivel control
-        hipSwivel_pos = mathUtils.nodePosLerp(self.input[0], self.input[-1], self.hipSwivel_percent)
-        self.hip_swing = rig_control.create(self.hipsSwing_name, self.side,
-                                            hierarchy=['trsBuffer'],
-                                            hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                            parent=self.hipsGimble[-1], shape='cube', shapeAim='x',
-                                            position=hipSwivel_pos)
+        self.hip_swing = rig_control.createAtObject(self.hipsSwing_name, self.side,
+                                                    hierarchy=['trsBuffer'],
+                                                    hideAttrs=['s', 'v'], size=self.size, color='yellow',
+                                                    parent=self.hipsGimble[-1], shape='cube', shapeAim='x',
+                                                    xformObj=self.hipsSwivel_guide)
         # build the torso control
-        torso_pos = mathUtils.nodePosLerp(self.input[0], self.input[-1], self.torso_percent)
-        self.torso = rig_control.create(self.torso_name, self.side,
-                                        hierarchy=['trsBuffer'],
-                                        hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                        parent=self.hipsGimble[-1], shape='cube', shapeAim='x',
-                                        position=torso_pos)
+        self.torso = rig_control.createAtObject(self.torso_name, self.side,
+                                                hierarchy=['trsBuffer'],
+                                                hideAttrs=['s', 'v'], size=self.size, color='yellow',
+                                                parent=self.hipsGimble[-1], shape='cube', shapeAim='x',
+                                                xformObj=self.torso_guide)
 
         # build the chest control
-        spineEnd_pos = cmds.xform(self.input[-2], q=True, ws=True, t=True)
-        self.chest = rig_control.create(self.chest_name, self.side,
-                                        hierarchy=['trsBuffer', 'neg'],
-                                        hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                        parent=self.torso[-1], shape='cube', shapeAim='x',
-                                        position=spineEnd_pos)
+        self.chest = rig_control.createAtObject(self.chest_name, self.side,
+                                                hierarchy=['trsBuffer', 'neg'],
+                                                hideAttrs=['s', 'v'], size=self.size, color='yellow',
+                                                parent=self.torso[-1], shape='cube', shapeAim='x',
+                                                xformObj=self.chest_guide)
+
         chest_pos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
-        self.chestTop = rig_control.create(self.chestTop_name, self.side,
-                                           hierarchy=['trsBuffer', 'len'],
-                                           hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                           parent=self.chest[-1], shape='cube', shapeAim='x',
-                                           position=chest_pos)
+        self.chestTop = rig_control.createAtObject(self.chestTop_name, self.side,
+                                                   hierarchy=['trsBuffer', 'len'],
+                                                   hideAttrs=['s', 'v'], size=self.size, color='yellow',
+                                                   parent=self.chest[-1], shape='cube', shapeAim='x',
+                                                   xformObj=self.chestTop_guide)
 
         self.hipTanget = rig_control.create(self.hipTanget_name, self.side,
                                             hierarchy=['trsBuffer'],
@@ -136,7 +155,8 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         # connect the tangets to the visablity
         rig_attr.addAttr(self.chest[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.chest[-1]), "{}.v".format(self.chestTanget[0]))
-        rig_attr.addAttr(self.hip_swing[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
+        rig_attr.addAttr(self.hip_swing[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True,
+                         keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.hip_swing[-1]), "{}.v".format(self.hipTanget[0]))
 
         # create the chest piviot offset
@@ -162,6 +182,9 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.chestTop[-1], self.ikspline._endTwist, mo=True)
 
         rig_transform.connectOffsetParentMatrix(self.hipsGimble[-1], self.ikspline.getGroup(), mo=True)
+
+        # delete the guides. We no longer need them.
+        cmds.delete(self.guides_hrc)
 
     def connect(self):
         """Create the connection"""

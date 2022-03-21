@@ -64,7 +64,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.lock(self.bind_hrc, rigamajig2.maya.attr.TRANSFORMS)
         rigamajig2.maya.attr.lock(self.model_hrc, rigamajig2.maya.attr.TRANSFORMS)
     
-    def delete_setup(self):
+    def deleteSetup(self):
         if cmds.objExists(self.bind_hrc):
             skel_children = cmds.listRelatives(self.bind_hrc, c=True)
             if skel_children: cmds.parent(skel_children, world=True)

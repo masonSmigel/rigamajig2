@@ -367,7 +367,7 @@ class Builder(object):
                 else:
                     cmpt.deleteSetup()
         if main_cmpt:
-            main_cmpt.delete_setup()
+            main_cmpt.deleteSetup()
         if clear_list:
             self.cmpt_list = list()
 
@@ -410,7 +410,7 @@ class Builder(object):
 
         if cmpt:
             if cmpt.getContainer():
-                cmpt.delete_setup()
+                cmpt.deleteSetup()
 
             cmpt._intialize_cmpt()
             logger.info("edit : {}".format(cmpt.name))

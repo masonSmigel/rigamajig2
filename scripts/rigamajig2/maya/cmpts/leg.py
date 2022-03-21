@@ -115,7 +115,10 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         rig_transform.connectOffsetParentMatrix(self.footikfk.getBlendJointList()[2], self.toes_fk[0], mo=True)
         # TODO: this is alittle hacky... maybe fix it later
         cmds.setAttr("{}.{}".format(self.footikfk.getIkJointList()[1], 'segmentScaleCompensate'), 0)
-        # Delete the proxy guides_hrc:
+
+        # delete the guides. We no longer need them.
+        # Do it in the subclass so the guide_hrc still exists in other subclasses.
+        # In the leg we use it to access the foot piviots!
         cmds.delete(self.guides_hrc)
 
     def postRigSetup(self):

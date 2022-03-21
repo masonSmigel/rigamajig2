@@ -54,7 +54,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         chest_pos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
         self.chestTop_guide = rig_control.createGuide(self.name + "_chestTop", side=self.side, parent=self.guides_hrc,
                                                       position=chest_pos)
-        rig_attr.lockAndHide(self.chestTop_guide, rig_attr.TRANSLATE + rig_attr.SCALE + ['v'])
+        rig_attr.lockAndHide(self.chestTop_guide, rig_attr.TRANSLATE + ['v'])
 
     def initalHierachy(self):
         """Build the initial hirarchy"""

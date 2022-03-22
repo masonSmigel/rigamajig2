@@ -8,12 +8,14 @@ import maya.mel as mel
 
 
 def onMayaDroppedPythonFile(*args):
+    # Get the location of the installer
     installer_path = __file__.replace('\\', '/')
 
+    # from the installer path build other important paths.
     module_root = os.path.dirname(installer_path)
-    python_path = os.path.join(os.path.dirname(installer_path), 'scripts')
-    plugin_path = os.path.join(os.path.dirname(installer_path), 'plug-ins')
-    lib_path = os.path.join(os.path.dirname(installer_path), 'scripts', 'lib')
+    python_path = os.path.join(module_root, 'scripts')
+    plugin_path = os.path.join(module_root, 'plug-ins')
+    lib_path = os.path.join(module_root, 'scripts', 'lib')
 
     # Check if the modules directory exists in the user preference directory (if it doesn't, create it)
     maya_moddir_path = '{}/modules'.format(pymel.util.getEnv('MAYA_APP_DIR'))

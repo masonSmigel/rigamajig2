@@ -1,5 +1,4 @@
 """ Drag and Drop installer for rigamajig2"""
-
 import os
 import sys
 
@@ -15,7 +14,6 @@ def onMayaDroppedPythonFile(*args):
     python_path = os.path.join(os.path.dirname(installer_path), 'scripts')
     plugin_path = os.path.join(os.path.dirname(installer_path), 'plug-ins')
     lib_path = os.path.join(os.path.dirname(installer_path), 'scripts', 'lib')
-    mel_path = os.path.join(os.path.dirname(installer_path), 'scripts', 'rigamajig2', 'mel')
 
     # Check if the modules directory exists in the user preference directory (if it doesn't, create it)
     maya_moddir_path = '{}/modules'.format(pymel.util.getEnv('MAYA_APP_DIR'))
@@ -34,10 +32,9 @@ def onMayaDroppedPythonFile(*args):
         if plugin_path not in pymel.util.getEnv("MAYA_PLUG_IN_PATH"):
             pymel.util.putEnv("MAYA_PLUG_IN_PATH", [pymel.util.getEnv("MAYA_PLUG_IN_PATH"), plugin_path])
 
-        # Any shelf file in this directory will be automatically loaded on Maya startup
         moduleFile.write(output)
 
-    # add the python path on initalize
+    # add the python path on first use
     if python_path not in sys.path:
         sys.path.append(python_path)
     if lib_path not in sys.path:

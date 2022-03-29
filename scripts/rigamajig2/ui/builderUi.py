@@ -116,6 +116,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.create_rig_env_btn = QtWidgets.QPushButton("Create rig env")
         self.create_rig_env_btn.setToolTip("Create a new rig enviornment from scratch")
 
+        self.asset_name_le = QtWidgets.QLineEdit()
+        self.asset_name_le.setPlaceholderText("asset_name")
+
         self.clone_rig_env_btn = QtWidgets.QPushButton("Clone rig env")
         self.create_rig_env_btn.setToolTip("Create a new rig enviornment from an existing enviornment")
 
@@ -237,10 +240,14 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         # Publish Section
         self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
         self.publishScript_scriptRunner = scriptRunner.ScriptRunner()
+        self.out_path_selector = pathSelector.PathSelector("out file:", cap="Select a location to save", ff=MAYA_FILTER, fm=1)
+        self.pub_btn = QtWidgets.QPushButton("Publish Rig")
+        self.pub_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
         self.run_selected_btn = QtWidgets.QPushButton("Run Selected")
         self.run_btn = QtWidgets.QPushButton("Run")
         self.run_btn.setFixedWidth(80)
+
         self.close_btn = QtWidgets.QPushButton("Close")
 
     def create_layouts(self):
@@ -248,8 +255,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         rig_env_btn_layout.addWidget(self.create_rig_env_btn)
         rig_env_btn_layout.addWidget(self.clone_rig_env_btn)
 
+        rig_char_name_layout = QtWidgets.QHBoxLayout()
+        rig_char_name_layout.addWidget(QtWidgets.QLabel("Rig Name:"))
+        rig_char_name_layout.addWidget(self.asset_name_le)
+
         rig_env_layout = QtWidgets.QVBoxLayout()
         rig_env_layout.addWidget(self.rig_path_selector)
+        rig_env_layout.addLayout(rig_char_name_layout)
         rig_env_layout.addLayout(rig_env_btn_layout)
 
         # prescript
@@ -394,6 +406,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Publish
         self.publish_wdgt.addWidget(self.publishScript_scriptRunner)
+        self.publish_wdgt.addWidget(self.out_path_selector)
+        self.publish_wdgt.addWidget(self.pub_btn)
 
         # add the collapseable widgets
         build_layout = QtWidgets.QVBoxLayout()
@@ -483,6 +497,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         self.run_selected_btn.clicked.connect(self.run_selected)
         self.run_btn.clicked.connect(self.run_all)
+        self.pub_btn.clicked.connect(self.pub_all)
         self.close_btn.clicked.connect(self.close)
 
     # Connections
@@ -537,6 +552,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.guide_path_selector.set_relativeTo(self.rig_env)
         self.ctl_path_selector.set_relativeTo(self.rig_env)
         self.psd_path_selector.set_relativeTo(self.rig_env)
+        self.out_path_selector.set_relativeTo(self.rig_env)
 
         self.rig_builder = builder.Builder(self.rig_file)
         self.cmpt_manager.set_rig_builder(self.rig_builder)
@@ -546,6 +562,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         tmp_builder = builder.Builder()
         if not self.rig_file:
             return
+
+        # set the character name
+        self.asset_name_le.setText(tmp_builder.get_rig_data(self.rig_file, builder.RIG_NAME))
 
         # clear script runners
         self.preScript_scriptRunner.clear_scripts()
@@ -590,6 +609,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         psd_file = tmp_builder.get_rig_data(self.rig_file, builder.PSD)
         if ctl_file: self.psd_path_selector.set_path(psd_file)
+
+        out_file = tmp_builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG)
+        if out_file: self.out_path_selector.set_path(out_file)
 
     # UI FUNCTIONS
     def set_ctlShape_items(self):
@@ -760,6 +782,18 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def run_all(self):
         self.rig_builder.run()
+
+    def pub_all(self):
+        confirm_pub_msg = QtWidgets.QMessageBox()
+        confirm_pub_msg.setText("Publish the current rig")
+        confirm_pub_msg.setInformativeText("saving will overwrite existing publish")
+        confirm_pub_msg.setStandardButtons(QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+        confirm_pub_msg.setDefaultButton(QtWidgets.QMessageBox.Save)
+        res = confirm_pub_msg.exec_()
+
+        if res == QtWidgets.QMessageBox.Save:
+            self.rig_builder.run()
+            self.rig_builder.publish(self.out_path_selector.get_abs_path())
 
     # TOOLS MENU
     def run_performace_test(self):

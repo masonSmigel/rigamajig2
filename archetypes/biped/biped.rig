@@ -1,22 +1,19 @@
 {
     "type": "AbstractData", 
     "user": "masonsmigel", 
-    "time": "2021-11-22 23:12:13", 
+    "time": "2022-03-23 18:42:26", 
     "data": {
-        "model_file": null, 
+        "rig_name": null,
+        "model_file": "", 
         "skeleton_file": "skeleton.ma", 
         "skeleton_pos": "skeleton_pos.json", 
         "pre_scripts": [], 
         "post_scripts": [], 
         "pub_scripts": [], 
-        "l_color": "blue", 
-        "r_color": "red", 
-        "c_color": "yellow", 
-        "use_proxy_attrs": true, 
-        "control_shapes" : "controlShapes.json", 
-        "guides": "guides.json",
-        "components": "components.json",
-        "psd": null,
-        "output_file": "../out/girl_rig.ma"
+        "control_shapes": "controlShapes.json", 
+        "guides": "guides.json", 
+        "components": "components.json", 
+        "psd": null, 
+        "output_file": "../out/biped_rig.ma"
     }
 }

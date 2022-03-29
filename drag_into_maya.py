@@ -4,7 +4,6 @@ import sys
 
 import pymel.util
 import maya.cmds as cmds
-import maya.mel as mel
 
 
 def onMayaDroppedPythonFile(*args):

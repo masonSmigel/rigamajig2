@@ -216,12 +216,18 @@ def safeDeleteContainer(container):
 
 
 def sainityCheck():
-    """Run several checks to make sure maya is setup to work with containers.
-     There are a couple 'gotcha's' to look out for """
+    """
+    Run several checks to make sure maya is setup to work with containers.
+    There are a couple 'gotcha's' to look out for
+    """
 
-    # ensure 'use assets' is OFF in the node editor
+    # set 'use assets' OFF in the node editor
     cmds.nodeEditor('nodeEditorPanel1NodeEditorEd', e=True, useAssets=False)
+
+    # set 'show at top' OFF in the channel box editor
     cmds.channelBox('mainChannelBox', e=True, containerAtTop=False)
+
+    # set asset display is to 'under parent'
     outliners = cmds.getPanel(typ='outlinerPanel')
     for outlinerPanel in outliners:
         cmds.outlinerEditor(outlinerPanel, e=True, showContainerContents=0)

@@ -6,7 +6,7 @@ import maya.mel as mel
 from collections import OrderedDict
 
 import rigamajig2.maya.container
-import rigamajig2.maya.attr as r_attr
+import rigamajig2.maya.attr
 import rigamajig2.maya.meta
 import rigamajig2.maya.data.joint_data as joint_data
 import rigamajig2.maya.transform as transform
@@ -22,7 +22,7 @@ class Base(object):
         """
         :param name: name of the components
         :type name: str
-        :param input: list of input joints. This must be a length of 4
+        :param input: list of input joints.
         :type input: list
         :param size: default size of the controls:
         :param rigParent: node to parent to connect the component to in the heirarchy
@@ -148,9 +148,6 @@ class Base(object):
     # --------------------------------------------------------------------------------
     # functions
     # --------------------------------------------------------------------------------
-    def preScript(self):
-        pass
-
     def createBuildGuides(self):
         """Add additional guides"""
         pass
@@ -168,61 +165,64 @@ class Base(object):
             self.container = rigamajig2.maya.container.create(self.container)
             rigamajig2.maya.meta.tag(self.container, 'component')
 
-    def initalHierachy(self):
-        """Setup the inital Hirarchy"""
-        pass
-
-    def preRigSetup(self):
-        """Pre rig setup"""
-        pass
-
-    def rigSetup(self):
-        """Add the rig setup"""
-        pass
-
-    def postRigSetup(self):
-        """Add the rig setup"""
+    def preScript(self):
         pass
 
     def setupAnimAttrs(self):
-        """Setup animation attributes"""
+        """Setup animation attributes. implement in subclass"""
+        pass
+
+    def initalHierachy(self):
+        """Setup the inital Hirarchy. implement in subclass"""
+        pass
+
+    def preRigSetup(self):
+        """Pre rig setup. implement in subclass"""
+        pass
+
+    def rigSetup(self):
+        """Add the rig setup. implement in subclass"""
+        pass
+
+    def postRigSetup(self):
+        """Add the post setup. implement in subclass"""
         pass
 
     def initConnect(self):
-        """initalize the connection"""
+        """initalize the connection. implement in subclass"""
         pass
 
     def connect(self):
-        """create the connection"""
+        """create the connection. implement in subclass"""
         pass
 
     def postConnect(self):
-        """any final cleanup after the connection"""
+        """any final cleanup after the connection. implement in subclass"""
         pass
 
     def publishNodes(self):
-        """Publush nodes"""
+        """Publush nodes. implement in subclass"""
         rigamajig2.maya.container.addParentAnchor(self.root_hrc, container=self.container)
         rigamajig2.maya.container.addChildAnchor(self.root_hrc, container=self.container)
         rigamajig2.maya.container.addPublishNodes(self.controlers)
 
     def publishAttributes(self):
-        """publish attributes"""
+        """publish attributes. implement in subclass"""
         pass
 
     def finalize(self):
-        """Finalize a component"""
+        """Finalize a component. implement in subclass"""
         pass
 
     def setAttrs(self):
-        """Set attributes"""
+        """Set attributes. implement in subclass"""
         pass
 
     def postScript(self):
         pass
 
     def optimize(self):
-        """Optimize a component"""
+        """Optimize a component. implement in subclass"""
         pass
 
     def deleteSetup(self):
@@ -232,7 +232,7 @@ class Base(object):
         mel.eval("doDelete;")
 
         for input in self.input:
-            r_attr.unlock(input, r_attr.TRANSFORMS + ['v'])
+            rigamajig2.maya.attr.unlock(input, rigamajig2.maya.attr.TRANSFORMS + ['v'])
 
     def setStep(self, step=0):
         """
@@ -249,9 +249,9 @@ class Base(object):
         :return:
         """
         if not cmds.objExists("{}.{}".format(self.container, 'build_step')):
-            r_attr.addEnum(self.container, 'build_step', value=0,
-                           enum=['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize'],
-                           keyable=False, channelBox=False)
+            rigamajig2.maya.attr.addEnum(self.container, 'build_step', value=0,
+                                         enum=['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize'],
+                                         keyable=False, channelBox=False)
 
         cmds.setAttr("{}.{}".format(self.container, 'build_step'), step)
 

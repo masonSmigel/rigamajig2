@@ -9,6 +9,7 @@ from collections import OrderedDict
 
 import maya.cmds as cmds
 import rigamajig2.shared.common as common
+import rigamajig2.shared.path as rig_path
 import rigamajig2.shared.runScript as runScript
 import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.file as file
@@ -31,6 +32,7 @@ POST_SCRIPT_PATH = 'post_script'
 PUB_SCRIPT_PATH = 'pub_script'
 
 # RIG FILE KEYS
+RIG_NAME = 'rig_name'
 MODEL_FILE = "model_file"
 SKELETON_FILE = "skeleton_file"
 SKELETON_POS = "skeleton_pos"
@@ -38,7 +40,7 @@ CONTROL_SHAPES = "control_shapes"
 GUIDES = "guides"
 COMPONENTS = "components"
 PSD = 'psd'
-OUTPUT_RIG = 'psd'
+OUTPUT_RIG = 'output_file'
 
 
 class Builder(object):
@@ -83,7 +85,7 @@ class Builder(object):
 
     def _absPath(self, path):
         if path:
-            return os.path.join(self.path, path)
+            return os.path.realpath(os.path.join(self.path, path))
 
     # RIG BUILD STEPS
     def import_model(self, path=None):
@@ -104,8 +106,6 @@ class Builder(object):
     def import_skeleton(self, path=None):
         if not path:
             path = self._absPath(self.get_rig_data(self.rig_file, SKELETON_FILE))
-            print self._absPath(self.get_rig_data(self.rig_file, SKELETON_FILE))
-        print path
         if os.path.exists(path):
             nodes = file.import_(path, ns=None)
             logger.info("skeleton imported")
@@ -483,7 +483,7 @@ class Builder(object):
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
-    def run(self):
+    def run(self, publish=False):
         if not self.path:
             logger.error('you must provide a build enviornment path. Use Bulder.set_rig_file()')
             return
@@ -504,14 +504,45 @@ class Builder(object):
         self.load_controlShapes()
         self.load_deform_data()
         self.post_script()
+        if publish:
+            self.publish()
         end_time = time.time()
         final_time = end_time - start_time
 
         print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(final_time, '-' * 70))
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
-    def publish(self, outputfile=None):
-        self.optimize()
+    def publish(self, outputfile=None, versioning=True):
+        # self.optimize()
+
+        if not outputfile:
+            outputfile = self._absPath(self.get_rig_data(self.rig_file, OUTPUT_RIG))
+
+        if rig_path.is_file(outputfile):
+            file_name = outputfile.split(os.sep)[-1]
+            dir_name = '/'.join(outputfile.split(os.sep)[:-1])
+        else:
+            dir_name = outputfile
+            if self.get_rig_data(self.rig_file, RIG_NAME):
+                file_name = "{}_{}".format(self.get_rig_data(self.rig_file, RIG_NAME), 'rig')
+            else:
+                raise RuntimeError("Must select an output path or character name to publush a rig")
+
+        # create directories if they do not exist
+        rig_path.make_dir(dir_name)
+        publish_path = os.path.join(dir_name, file_name)
+        file.saveAs(publish_path, log=False)
+        logger.info("New rig published: {}".format(publish_path))
+
+        if versioning:
+            version_dir = os.path.join(dir_name, 'versions')
+            filebase = ".".join(file_name.split('.')[:-1])
+            fileext = file_name.split('.')[-1]
+            version_file = "{}_{}.{}".format(filebase, 'v001', fileext)
+            version_path = rig_path.getUniqueFile(version_file, version_dir)
+            rig_path.make_dir(version_dir)
+            file.saveAs(version_path, log=False)
+            logger.info("New rig version archived: {}".format(version_path))
 
     # GET
     def get_path(self):

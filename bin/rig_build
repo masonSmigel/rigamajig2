@@ -6,7 +6,6 @@ maya.standalone.initialize()
 import maya.cmds as cmds
 import os
 
-cmds.polySphere()
-print(cmds.ls())
+print("rig build complete and saved to : {}".format("/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/out/biped.rig"))
 
 os._exit(0)

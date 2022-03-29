@@ -102,6 +102,7 @@ NAMETEMPLATETOKENS = ["BASE",
                       "INDEX",
                       "EXTENSION",
                       ]
+FILE_VERSION_DELIMINATOR = '_v'
 
 L_TOKENS = ['left_', '_left', 'Left_', '_Left', 'lf_', '_lf', 'Lt_', '_Lt', 'lft_', '_lft', 'Lft_', '_Lft', 'Lf_',
             '_Lf', '_l', 'L_', '_L', '_L_', '_l_']

@@ -50,26 +50,27 @@ def open_(path=None, f=False):
     cmds.file(path, o=True, f=f)
 
 
-def save():
+def save(log=True):
     """
     save the current scene
     :return:
     """
     file = cmds.file(s=True)
-    print('File saved to "{}"'.format(file))
+    if log: print('File saved to "{}"'.format(file))
     return file
 
 
-def saveAs(path=None):
+def saveAs(path=None, log=True):
     """
     Save the current scene as
     :param path: path to save the file
+    :param log: log the output
     :return:
     """
     if not path:
         path = _pathDialog(cap='Save As', okc='Save As', fm=0)
     cmds.file(rename=path)
-    return save()
+    return save(log=log)
 
 
 def incrimentSave(padding=3, indexPosition=-1):

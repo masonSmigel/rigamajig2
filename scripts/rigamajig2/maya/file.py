@@ -77,6 +77,7 @@ def saveAs(path=None, log=True):
     """
     if not path:
         path = _pathDialog(cap='Save As', okc='Save As', fm=0)
+
     if path:
         cmds.file(rename=path)
         return save(log=log)
@@ -90,6 +91,7 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
     :param path: path to the file to save
     :param padding: Amount of padding to add to the index
     :param indexPosition: Optional - Index position, default will be -1
+    :param log: log the output
     :return:
     """
     if not path:

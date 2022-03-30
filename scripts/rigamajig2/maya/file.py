@@ -56,7 +56,14 @@ def save(log=True):
     save the current scene
     :return:
     """
-    file = cmds.file(s=True)
+    sceneName = cmds.file(q=True, sn=True)
+    extension = sceneName.split('.')[-1]
+
+    if extension == 'ma': fileType = 'mayaAscii'
+    elif extension == 'mb': fileType = 'mayaBinary'
+    else: raise RuntimeError("Must save using a maya file type: mayaAscii or mayaBinary")
+
+    file = cmds.file(s=True, typ=fileType)
     if log: print('File saved to "{}"'.format(file))
     return file
 
@@ -70,8 +77,9 @@ def saveAs(path=None, log=True):
     """
     if not path:
         path = _pathDialog(cap='Save As', okc='Save As', fm=0)
-    cmds.file(rename=path)
-    return save(log=log)
+    if path:
+        cmds.file(rename=path)
+        return save(log=log)
 
 
 def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
@@ -133,7 +141,8 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
         path = os.path.join(dir, new_file_name)
         if not isUniqueFile(path):
             newIndex += 1
-        else: break
+        else:
+            break
     return saveAs(path, log=log)
 
 
@@ -148,7 +157,7 @@ def import_(path=None, ns=False, f=False):
     if not path:
         path = _pathDialog(cap='Import', okc='Import', fm=0, ff=IMPORT_FILE_FILTER)
 
-    kwargs = {"i": True, "f": f, "rnn":True}
+    kwargs = {"i": True, "f": f, "rnn": True}
     if ns:
         namespace = os.path.basename(path).split('.')[0]
         kwargs["ns"] = namespace

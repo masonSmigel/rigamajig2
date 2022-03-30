@@ -244,6 +244,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.pub_btn = QtWidgets.QPushButton("Publish Rig")
         self.pub_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
+        self.out_file_type_cb = QtWidgets.QComboBox()
+        self.out_file_type_cb.addItem('ma')
+        self.out_file_type_cb.addItem('mb')
+
         self.run_selected_btn = QtWidgets.QPushButton("Run Selected")
         self.run_btn = QtWidgets.QPushButton("Run")
         self.run_btn.setFixedWidth(80)
@@ -406,7 +410,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Publish
         self.publish_wdgt.addWidget(self.publishScript_scriptRunner)
-        self.publish_wdgt.addWidget(self.out_path_selector)
+        publish_file_layout = QtWidgets.QHBoxLayout()
+        publish_file_layout.addWidget(self.out_path_selector)
+        publish_file_layout.addWidget(self.out_file_type_cb)
+        self.publish_wdgt.addLayout(publish_file_layout)
         self.publish_wdgt.addWidget(self.pub_btn)
 
         # add the collapseable widgets
@@ -497,7 +504,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         self.run_selected_btn.clicked.connect(self.run_selected)
         self.run_btn.clicked.connect(self.run_all)
-        self.pub_btn.clicked.connect(self.pub_all)
+        self.pub_btn.clicked.connect(self.publish)
         self.close_btn.clicked.connect(self.close)
 
     # Connections
@@ -612,6 +619,12 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         out_file = tmp_builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG)
         if out_file: self.out_path_selector.set_path(out_file)
+
+        # set the default output file type
+        file_type_text = tmp_builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG_FILE_TYPE)
+        index = self.out_file_type_cb.findText(file_type_text, QtCore.Qt.MatchFixedString)
+        if index >= 0:
+            self.out_file_type_cb.setCurrentIndex(index)
 
     # UI FUNCTIONS
     def set_ctlShape_items(self):
@@ -783,17 +796,17 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def run_all(self):
         self.rig_builder.run()
 
-    def pub_all(self):
+    def publish(self):
         confirm_pub_msg = QtWidgets.QMessageBox()
-        confirm_pub_msg.setText("Publish the current rig")
-        confirm_pub_msg.setInformativeText("saving will overwrite existing publish")
+        confirm_pub_msg.setText("Publish the rig")
+        confirm_pub_msg.setInformativeText("Proceeding will rebuild a fresh rig from saved data overwriting any existing any published rigs.")
         confirm_pub_msg.setStandardButtons(QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
         confirm_pub_msg.setDefaultButton(QtWidgets.QMessageBox.Save)
         res = confirm_pub_msg.exec_()
 
         if res == QtWidgets.QMessageBox.Save:
-            self.rig_builder.run()
-            self.rig_builder.publish(self.out_path_selector.get_abs_path())
+            self.run_all()
+            self.rig_builder.publish(self.out_path_selector.get_abs_path(), self.asset_name_le.text(), self.out_file_type_cb.currentText())
 
     # TOOLS MENU
     def run_performace_test(self):

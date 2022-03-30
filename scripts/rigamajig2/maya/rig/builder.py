@@ -41,7 +41,7 @@ GUIDES = "guides"
 COMPONENTS = "components"
 PSD = 'psd'
 OUTPUT_RIG = 'output_file'
-
+OUTPUT_RIG_FILE_TYPE = 'output_file_type'
 
 class Builder(object):
     def __init__(self, rigFile=None):
@@ -512,37 +512,51 @@ class Builder(object):
         print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(final_time, '-' * 70))
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
-    def publish(self, outputfile=None, versioning=True):
-        # self.optimize()
+    def publish(self, outputfile=None, assetName=None, fileType=None, versioning=True):
 
         if not outputfile:
             outputfile = self._absPath(self.get_rig_data(self.rig_file, OUTPUT_RIG))
+        if not assetName:
+            assetName = self._absPath(self.get_rig_data(self.rig_file, RIG_NAME))
+        if not fileType:
+            fileType = self._absPath(self.get_rig_data(self.rig_file, OUTPUT_RIG_FILE_TYPE))
 
+        # check if the provided path is a file path.
+        # if so use the file naming and extension from the provided path
         if rig_path.is_file(outputfile):
             file_name = outputfile.split(os.sep)[-1]
             dir_name = '/'.join(outputfile.split(os.sep)[:-1])
+
+        # if only a directory is provided than generate a filename using the rig name and file extension
         else:
             dir_name = outputfile
-            if self.get_rig_data(self.rig_file, RIG_NAME):
-                file_name = "{}_{}".format(self.get_rig_data(self.rig_file, RIG_NAME), 'rig')
+            if assetName:
+                rig_name = self.get_rig_data(self.rig_file, RIG_NAME)
+                file_name = "{}_{}.{}".format(rig_name, 'rig', fileType)
             else:
-                raise RuntimeError("Must select an output path or character name to publush a rig")
+                raise RuntimeError("Must select an output path or character name to publish a rig")
 
-        # create directories if they do not exist
+        # create output directory and save
         rig_path.make_dir(dir_name)
         publish_path = os.path.join(dir_name, file_name)
         file.saveAs(publish_path, log=False)
-        logger.info("New rig published: {}".format(publish_path))
+        logger.info("out rig published: {}".format(publish_path))
 
+        # if we want to save a version as well
         if versioning:
+            # get the version directory, file
             version_dir = os.path.join(dir_name, 'versions')
             filebase = ".".join(file_name.split('.')[:-1])
             fileext = file_name.split('.')[-1]
-            version_file = "{}_{}.{}".format(filebase, 'v001', fileext)
-            version_path = rig_path.getUniqueFile(version_file, version_dir)
+
+            # format the new file name and file path
+            version_file = "{}_{}.{}".format(filebase, 'v000', fileext)
+            version_path = os.path.join(version_dir, version_file)
+
+            # make the output directory and save the file
             rig_path.make_dir(version_dir)
-            file.saveAs(version_path, log=False)
-            logger.info("New rig version archived: {}".format(version_path))
+            version_path = file.incrimentSave(version_path, log=False)
+            logger.info("out rig archived: {}".format(version_path))
 
     # GET
     def get_path(self):

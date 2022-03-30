@@ -14,6 +14,7 @@
         "guides": "guides.json", 
         "components": "components.json", 
         "psd": null, 
-        "output_file": "../out/biped_rig.ma"
+        "output_file": "../out/", 
+        "output_file_type": "mb"
     }
 }

@@ -11,6 +11,7 @@ import re
 MAYA_FILE_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;All Files (*.*);;"
 IMPORT_FILE_FILTER = "All Files (*.*);;Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;Obj (*.obj);; FBX (*.fbx);;"
 DELIMINATOR = '_'
+VERSION_TOKEN = 'v'
 
 
 def _pathDialog(cap='Select a file',
@@ -73,16 +74,18 @@ def saveAs(path=None, log=True):
     return save(log=log)
 
 
-def incrimentSave(padding=3, indexPosition=-1):
+def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
     """
     Incrimental save with a better naming convention.
     Naming convention is made as follows:
         baseName_v001.warble.ext
+    :param path: path to the file to save
     :param padding: Amount of padding to add to the index
     :param indexPosition: Optional - Index position, default will be -1
     :return:
     """
-    path = cmds.file(q=True, loc=True)
+    if not path:
+        path = cmds.file(q=True, loc=True)
     # if we dont have a scene open give the user the option to save the scene
     if path == 'unknown':
         return saveAs()
@@ -96,27 +99,42 @@ def incrimentSave(padding=3, indexPosition=-1):
     extension = file.split('.')[-1]
     warble = '.'.join(file.split('.')[1:-1])
 
-    # Get the file index, if we dont find one return -1
-    i = re.findall("\d+$", base_name)
-    file_index = int(i[indexPosition]) if i else -1
-    if file_index > 0:
-        # incriment the index
-        incrimented_index = str(file_index + 1).zfill(padding)
-        if str(file_index).zfill(padding) in base_name:
-            new_base = base_name.replace(str(file_index).zfill(padding), incrimented_index)
+    fileSplit = base_name.split(DELIMINATOR)
+    indexStr = [s for s in fileSplit if s.startswith(VERSION_TOKEN)]
+
+    if indexStr:
+        indexPosition = fileSplit.index(str(indexStr[-1]))
+        oldIndexStr = indexStr[-1] if indexStr else -1
+        oldIndexInt = int(oldIndexStr.replace(VERSION_TOKEN, ''))
+        newIndex = oldIndexInt + 1
+    else:
+        newIndex = 1
+        # if the index is '-1' add the new index to the end of the string instead of inserting it.
+        if indexPosition == -1:
+            fileSplit.append(str(newIndex).zfill(padding))
+        # if the fileSplit is greater than the index, add the index to the end instead of inserting it.
+        elif len(fileSplit) >= abs(indexPosition):
+            fileSplit.insert(indexPosition + 1, str(newIndex).zfill(padding))
         else:
-            new_base = base_name.replace(str(file_index), incrimented_index)
-    else:
-        new_base = base_name + "_v" + str(1).zfill(padding)
+            fileSplit.append(str(newIndex).zfill(padding))
+            indexPosition = -1
 
-    # reconstruct the filename with the warble if we had one to begin with.
-    if warble:
-        new_file_name = '.'.join([new_base, warble, extension])
-    else:
-        new_file_name = '.'.join([new_base, extension])
+    # validate the new name
+    for i in range(2000):
+        newIndexStr = "v{}".format(str(newIndex).zfill(padding))
+        fileSplit[indexPosition] = newIndexStr
+        new_base = DELIMINATOR.join(fileSplit)
 
-    # save the scene with the new base name
-    return saveAs(os.path.join(dir, new_file_name))
+        if warble:
+            new_file_name = '.'.join([new_base, warble, extension])
+        else:
+            new_file_name = '.'.join([new_base, extension])
+
+        path = os.path.join(dir, new_file_name)
+        if not isUniqueFile(path):
+            newIndex += 1
+        else: break
+    return saveAs(path, log=log)
 
 
 def import_(path=None, ns=False, f=False):
@@ -149,6 +167,18 @@ def reference(path=None):
         path = _pathDialog(cap='Reference', okc='Reference', fm=0, ff=MAYA_FILE_FILTER)
     namespace = os.path.basename(path).split('.')[0]
     return cmds.file(path, r=True, ns=namespace)
+
+
+def isUniqueFile(path):
+    """
+    Check if file is unique
+    :param path: file to test
+    :type path: str
+    :return: if the name is unique
+    :rtype: bool
+    """
+
+    return False if os.path.exists(path) else True
 
 
 def getEnvironment():

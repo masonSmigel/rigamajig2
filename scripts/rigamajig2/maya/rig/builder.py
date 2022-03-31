@@ -27,9 +27,9 @@ _EXCLUDED_FOLDERS = []
 _EXCLUDED_FILES = ['__init__.py', 'base.py']
 
 # BUILD ENVIORNMENT GLOBLALS
-PRE_SCRIPT_PATH = 'pre_script'
-POST_SCRIPT_PATH = 'post_script'
-PUB_SCRIPT_PATH = 'pub_script'
+PRE_SCRIPT = 'pre_script'
+POST_SCRIPT = 'post_script'
+PUB_SCRIPT = 'pub_script'
 
 # RIG FILE KEYS
 RIG_NAME = 'rig_name'
@@ -42,6 +42,7 @@ COMPONENTS = "components"
 PSD = 'psd'
 OUTPUT_RIG = 'output_file'
 OUTPUT_RIG_FILE_TYPE = 'output_file_type'
+
 
 class Builder(object):
     def __init__(self, rigFile=None):
@@ -85,6 +86,7 @@ class Builder(object):
 
     def _absPath(self, path):
         if path:
+            path = common.getFirstIndex(path)
             return os.path.realpath(os.path.join(self.path, path))
 
     # RIG BUILD STEPS
@@ -427,21 +429,35 @@ class Builder(object):
             if plugin not in loaded_plugins:
                 cmds.loadPlugin(plugin)
 
+    def validate_script_list(self, scripts_list=None):
+        res_list = list()
+
+        scripts_list = common.toList(scripts_list)
+
+        for item in scripts_list:
+            if not item:
+                continue
+
+            if rig_path.is_file(item):
+                res_list.append(item)
+
+            if rig_path.is_dir(item):
+                for script in runScript.find_scripts(item):
+                    res_list.append(script)
+
+        return res_list
+
     def pre_script(self, scripts=[]):
         """
         Run pre scripts. You can add scripts by path, but the main use is through the PRE SCRIPT path
         :param scripts: path to scripts to run
         """
-        scripts_list = list()
-        for script in scripts:
-            scripts_list.append(script)
+        if self.get_rig_data(self.rig_file, PRE_SCRIPT):
+            scripts.append(self._absPath(self.get_rig_data(self.rig_file, PRE_SCRIPT)))
 
-        if self.path:
-            scripts_path = self._absPath(PRE_SCRIPT_PATH)
-            for script in runScript.find_scripts(scripts_path):
-                scripts_list.append(script)
+        file_scripts = self.validate_script_list(scripts)
 
-        for script in scripts_list:
+        for script in file_scripts:
             runScript.run_script(script)
         logger.info("pre scripts -- complete")
 
@@ -450,16 +466,12 @@ class Builder(object):
         Run post scripts. You can add scripts by path, but the main use is through the POST SCRIPT path
         :param scripts: path to scripts to run
         """
-        scripts_list = list()
-        for script in scripts:
-            scripts_list.append(script)
+        if self.get_rig_data(self.rig_file, POST_SCRIPT):
+            scripts.append(self._absPath(self.get_rig_data(self.rig_file, POST_SCRIPT)))
 
-        if self.path:
-            scripts_path = self._absPath(POST_SCRIPT_PATH)
-            for script in runScript.find_scripts(scripts_path):
-                scripts_list.append(script)
+        file_scripts = self.validate_script_list(scripts)
 
-        for script in scripts_list:
+        for script in file_scripts:
             runScript.run_script(script)
         logger.info("post scripts -- complete")
 
@@ -469,16 +481,12 @@ class Builder(object):
         :param scripts:
         :return:
         """
-        scripts_list = list()
-        for script in scripts:
-            scripts_list.append(script)
+        if self.get_rig_data(self.rig_file, PUB_SCRIPT):
+            scripts.append(self._absPath(self.get_rig_data(self.rig_file, PUB_SCRIPT)))
 
-        if self.path:
-            scripts_path = self._absPath(PUB_SCRIPT_PATH)
-            for script in runScript.find_scripts(scripts_path):
-                scripts_list.append(script)
+        file_scripts = self.validate_script_list(scripts)
 
-        for script in scripts_list:
+        for script in file_scripts:
             runScript.run_script(script)
         logger.info("publish scripts -- complete")
 
@@ -640,6 +648,8 @@ class Builder(object):
             return data.getData()[key]
         return None
 
+    def get_rig_env(self):
+        return self.path
 
 def build_directory():
     pass

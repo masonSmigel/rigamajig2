@@ -37,6 +37,10 @@ class SliderGroup(QtWidgets.QWidget):
     def setMaximum(self, val):
         self.slider.setMaximum(val)
 
+    def setRange(self, min, max):
+        self.setMinimun(min)
+        self.setMaximum(max)
+
     def setIncriment(self, val):
         self.slider.setTickInterval(val)
 

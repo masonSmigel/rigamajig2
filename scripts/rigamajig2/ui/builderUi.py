@@ -71,10 +71,16 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def create_actions(self):
         # FILE
         self.load_rig_file_action = QtWidgets.QAction("Load Rig File", self)
+        self.load_rig_file_action.setIcon(QtGui.QIcon(":folder-open.png"))
         self.load_rig_file_action.triggered.connect(self.load_rig_file)
 
         self.save_rig_file_action = QtWidgets.QAction("Save Rig File", self)
+        self.save_rig_file_action.setIcon(QtGui.QIcon(":save.png"))
         self.save_rig_file_action.triggered.connect(self.save_rig_file)
+
+        self.reload_rig_file_action = QtWidgets.QAction("Reload Rig File", self)
+        self.reload_rig_file_action.setIcon(QtGui.QIcon(":refresh.png"))
+        self.reload_rig_file_action.triggered.connect(self.reload_rig_file)
 
         # UTILS
         # ...
@@ -100,6 +106,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         file_menu = self.main_menu.addMenu("File")
         file_menu.addAction(self.load_rig_file_action)
         file_menu.addAction(self.save_rig_file_action)
+        file_menu.addSeparator()
+        file_menu.addAction(self.reload_rig_file_action)
 
         utils_menu = self.main_menu.addMenu("Utils")
         tools_menu = self.main_menu.addMenu("Tools")
@@ -113,14 +121,14 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def create_widgets(self):
         self.rig_path_selector = pathSelector.PathSelector(cap='Select a Rig File', ff="Rig Files (*.rig)", fm=1)
 
-        self.create_rig_env_btn = QtWidgets.QPushButton("Create rig env")
-        self.create_rig_env_btn.setToolTip("Create a new rig enviornment from scratch")
+        self.create_from_archetype_btn = QtWidgets.QPushButton("Create from Archetype")
+        self.create_from_archetype_btn.setToolTip("Create a new rig enviornment from scratch")
 
         self.asset_name_le = QtWidgets.QLineEdit()
         self.asset_name_le.setPlaceholderText("asset_name")
 
-        self.clone_rig_env_btn = QtWidgets.QPushButton("Clone rig env")
-        self.create_rig_env_btn.setToolTip("Create a new rig enviornment from an existing enviornment")
+        self.clone_rig_env_btn = QtWidgets.QPushButton("Clone Existing Rig")
+        self.create_from_archetype_btn.setToolTip("Create a new rig enviornment from an existing enviornment")
 
         # Pre- script section
         self.preScript_wdgt = collapseableWidget.CollapsibleWidget('Pre-Script', addCheckbox=True)
@@ -163,10 +171,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.mirrorJnt_btn.setFixedHeight(24)
 
         self.pin_jnt_btn    = QtWidgets.QPushButton("Pin Joints")
+        self.pin_jnt_btn.setIcon(QtGui.QIcon(":pinned"))
         self.unpin_jnt_btn  = QtWidgets.QPushButton("Un-Pin Joints")
+        self.unpin_jnt_btn.setIcon(QtGui.QIcon(":unpinned"))
 
         self.insert_jnts_amt_slider = sliderGrp.SliderGroup()
         self.insert_jnts_amt_slider.setValue(1)
+        self.insert_jnts_amt_slider.setRange(1, 10)
         self.insert_jnts_btn = QtWidgets.QPushButton("Insert Joints")
 
         # Component Section
@@ -256,7 +267,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def create_layouts(self):
         rig_env_btn_layout = QtWidgets.QHBoxLayout()
-        rig_env_btn_layout.addWidget(self.create_rig_env_btn)
+        rig_env_btn_layout.addWidget(self.create_from_archetype_btn)
         rig_env_btn_layout.addWidget(self.clone_rig_env_btn)
 
         rig_char_name_layout = QtWidgets.QHBoxLayout()
@@ -466,8 +477,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def create_connections(self):
         self.rig_path_selector.select_path_btn.clicked.connect(self.path_selector_load_rig_file)
-        self.create_rig_env_btn.clicked.connect(self.create_rig_env)
+        self.create_from_archetype_btn.clicked.connect(self.create_rig_env)
         self.clone_rig_env_btn.clicked.connect(self.clone_rig_env)
+
+        self.preScript_scriptRunner.reload_scripts_btn.clicked.connect(self.reload_prescripts)
 
         self.import_model_btn.clicked.connect(self.import_model)
 
@@ -539,6 +552,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         data.setData(new_data)
         data.write(self.rig_file)
 
+    def reload_rig_file(self):
+        self.set_rig_file(self.rig_file)
+
     def show_documentation(self):
         pass
 
@@ -573,28 +589,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         # set the character name
         self.asset_name_le.setText(tmp_builder.get_rig_data(self.rig_file, builder.RIG_NAME))
 
-        # clear script runners
-        self.preScript_scriptRunner.clear_scripts()
-        self.postScript_scriptRunner.clear_scripts()
-        self.publishScript_scriptRunner.clear_scripts()
-
-        # loadSettings prescripts from file or rig_env
-        pre_script_path = os.path.join(self.rig_env, builder.PRE_SCRIPT_PATH)
-        if QtCore.QFileInfo(pre_script_path).exists():
-            self.preScript_scriptRunner.set_start_dir(pre_script_path)
-            self.preScript_scriptRunner.add_scripts_from_dir(pre_script_path)
-
-        # loadSettings post scripts from file or rig_env
-        post_script_path = os.path.join(self.rig_env, builder.POST_SCRIPT_PATH)
-        if QtCore.QFileInfo(post_script_path).exists():
-            self.postScript_scriptRunner.set_start_dir(post_script_path)
-            self.postScript_scriptRunner.add_scripts_from_dir(post_script_path)
-
-        # loadSettings pub scripts from file or rig_env
-        pub_script_path = os.path.join(self.rig_env, builder.PUB_SCRIPT_PATH)
-        if QtCore.QFileInfo(pub_script_path).exists():
-            self.publishScript_scriptRunner.set_start_dir(pub_script_path)
-            self.publishScript_scriptRunner.add_scripts_from_dir(pub_script_path)
+        # loadSettings prescripts, postscripts and pubscripts from file or rig_env
+        self.reload_prescripts()
+        self.reload_postscripts()
+        self.reload_pubscripts()
 
         mod_file = tmp_builder.get_rig_data(self.rig_file, builder.MODEL_FILE)
         if mod_file: self.model_path_selector.set_path(mod_file)
@@ -625,6 +623,27 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         index = self.out_file_type_cb.findText(file_type_text, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.out_file_type_cb.setCurrentIndex(index)
+
+    def reload_prescripts(self):
+        self.preScript_scriptRunner.clear_scripts()
+        self.preScript_scriptRunner.set_start_dir(self.rig_builder.get_rig_env())
+        for path in self.rig_builder.get_rig_data(self.rig_file, builder.PRE_SCRIPT):
+            # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
+                self.preScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
+
+    def reload_postscripts(self):
+        self.postScript_scriptRunner.clear_scripts()
+        self.postScript_scriptRunner.set_start_dir(self.rig_builder.get_rig_env())
+        for path in self.rig_builder.get_rig_data(self.rig_file, builder.POST_SCRIPT):
+            # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
+                self.postScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
+
+    def reload_pubscripts(self):
+        self.publishScript_scriptRunner.clear_scripts()
+        self.publishScript_scriptRunner.set_start_dir(self.rig_builder.get_rig_env())
+        for path in self.rig_builder.get_rig_data(self.rig_file, builder.PUB_SCRIPT):
+            # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
+                self.publishScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
 
     # UI FUNCTIONS
     def set_ctlShape_items(self):

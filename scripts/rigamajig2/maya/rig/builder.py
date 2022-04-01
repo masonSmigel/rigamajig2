@@ -627,8 +627,8 @@ class Builder(object):
         self.path = os.path.abspath(os.path.join(self.rig_file, rig_env_path))
         logger.info('\n\nRig Enviornment path: {0}'.format(self.path))
 
-    @classmethod
-    def get_rig_data(cls, rig_file, key):
+    @staticmethod
+    def get_rig_data(rig_file, key):
         """
         read the data from the self.rig_file
         :param rig_file:

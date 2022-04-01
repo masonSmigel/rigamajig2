@@ -85,7 +85,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         # UTILS
         # ...
 
-        #TOOLS
+        # TOOLS
         self.run_performance_test_action = QtWidgets.QAction("Run Performance Test", self)
         self.run_performance_test_action.triggered.connect(self.run_performace_test)
 
@@ -110,6 +110,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         file_menu.addAction(self.reload_rig_file_action)
 
         utils_menu = self.main_menu.addMenu("Utils")
+
         tools_menu = self.main_menu.addMenu("Tools")
         tools_menu.addAction(self.run_performance_test_action)
         tools_menu.addAction(self.reload_rigamajig_modules_action)
@@ -155,7 +156,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.import_load_skeleton_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
         self.skeletonEdit_wdgt = collapseableWidget.CollapsibleWidget('Edit Skeleton')
-        self.clean_skeleton_btn    = QtWidgets.QPushButton("Clean Skeleton")
+        self.clean_skeleton_btn = QtWidgets.QPushButton("Clean Skeleton")
         self.jnt_to_rot_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Rotation")
         self.jnt_to_ori_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Orientation")
         self.jntAxisX_rb = QtWidgets.QRadioButton('x')
@@ -170,9 +171,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.mirrorJnt_btn = QtWidgets.QPushButton(QtGui.QIcon(":kinMirrorJoint_S"), "Mirror")
         self.mirrorJnt_btn.setFixedHeight(24)
 
-        self.pin_jnt_btn    = QtWidgets.QPushButton("Pin Joints")
+        self.pin_jnt_btn = QtWidgets.QPushButton("Pin Joints")
         self.pin_jnt_btn.setIcon(QtGui.QIcon(":pinned"))
-        self.unpin_jnt_btn  = QtWidgets.QPushButton("Un-Pin Joints")
+        self.unpin_jnt_btn = QtWidgets.QPushButton("Un-Pin Joints")
         self.unpin_jnt_btn.setIcon(QtGui.QIcon(":unpinned"))
 
         self.insert_jnts_amt_slider = sliderGrp.SliderGroup()
@@ -182,7 +183,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Component Section
         self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Components', addCheckbox=True)
-        self.cmpt_path_selector = pathSelector.PathSelector("cmpts:", cap="Select a Component File", ff=JSON_FILTER, fm=1)
+        self.cmpt_path_selector = pathSelector.PathSelector("cmpts:", cap="Select a Component File", ff=JSON_FILTER,
+                                                            fm=1)
         self.load_components_btn = QtWidgets.QPushButton("Load Cmpts")
         self.append_components_btn = QtWidgets.QPushButton("Append Cmpts")
         self.save_components_btn = QtWidgets.QPushButton("Save Cmpts")
@@ -238,7 +240,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Deformation Section
         self.deformations_wdgt = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
-        self.psd_path_selector = pathSelector.PathSelector("psd:", cap="Select a Pose Reader File", ff=JSON_FILTER, fm=1)
+        self.psd_path_selector = pathSelector.PathSelector("psd:", cap="Select a Pose Reader File", ff=JSON_FILTER,
+                                                           fm=1)
 
         self.load_psd_btn = QtWidgets.QPushButton("Load Pose Readers")
         self.save_psd_btn = QtWidgets.QPushButton("Save Pose Readers")
@@ -251,7 +254,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         # Publish Section
         self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
         self.publishScript_scriptRunner = scriptRunner.ScriptRunner()
-        self.out_path_selector = pathSelector.PathSelector("out file:", cap="Select a location to save", ff=MAYA_FILTER, fm=1)
+        self.out_path_selector = pathSelector.PathSelector("out file:", cap="Select a location to save", ff=MAYA_FILTER,
+                                                           fm=1)
         self.pub_btn = QtWidgets.QPushButton("Publish Rig")
         self.pub_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
@@ -520,7 +524,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.pub_btn.clicked.connect(self.publish)
         self.close_btn.clicked.connect(self.close)
 
+    # --------------------------------------------------------------------------------
     # Connections
+    # --------------------------------------------------------------------------------
+
     def load_rig_file(self):
         new_path = cmds.fileDialog2(ds=2, cap="Select a rig file", ff="Rig Files (*.rig)", fm=1, okc='Select',
                                     dir=self.rig_env)
@@ -539,7 +546,6 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         """
         data = abstract_data.AbstractData()
         data.read(self.rig_file)
-        new_data = OrderedDict()
         new_data = data.getData()
 
         # TODO: Keep this updated as we add stuff to the builder
@@ -582,68 +588,67 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.update_ui_with_rig_data()
 
     def update_ui_with_rig_data(self):
-        tmp_builder = builder.Builder()
         if not self.rig_file:
             return
 
         # set the character name
-        self.asset_name_le.setText(tmp_builder.get_rig_data(self.rig_file, builder.RIG_NAME))
+        self.asset_name_le.setText(self.rig_builder.get_rig_data(self.rig_file, builder.RIG_NAME))
 
         # loadSettings prescripts, postscripts and pubscripts from file or rig_env
         self.reload_prescripts()
         self.reload_postscripts()
         self.reload_pubscripts()
 
-        mod_file = tmp_builder.get_rig_data(self.rig_file, builder.MODEL_FILE)
+        mod_file = builder.Builder.get_rig_data(self.rig_file, builder.MODEL_FILE)
         if mod_file: self.model_path_selector.set_path(mod_file)
 
-        skel_file = tmp_builder.get_rig_data(self.rig_file, builder.SKELETON_FILE)
+        skel_file = builder.Builder.get_rig_data(self.rig_file, builder.SKELETON_FILE)
         if skel_file: self.skel_path_selector.set_path(skel_file)
 
-        skel_pos_file = tmp_builder.get_rig_data(self.rig_file, builder.SKELETON_POS)
+        skel_pos_file = builder.Builder.get_rig_data(self.rig_file, builder.SKELETON_POS)
         if skel_pos_file: self.joint_pos_path_selector.set_path(skel_pos_file)
 
-        cmpt_file = tmp_builder.get_rig_data(self.rig_file, builder.COMPONENTS)
+        cmpt_file = builder.Builder.get_rig_data(self.rig_file, builder.COMPONENTS)
         if cmpt_file: self.cmpt_path_selector.set_path(cmpt_file)
 
-        guide_file = tmp_builder.get_rig_data(self.rig_file, builder.GUIDES)
+        guide_file = builder.Builder.get_rig_data(self.rig_file, builder.GUIDES)
         if guide_file: self.guide_path_selector.set_path(guide_file)
 
-        ctl_file = tmp_builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES)
+        ctl_file = builder.Builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES)
         if ctl_file: self.ctl_path_selector.set_path(ctl_file)
 
-        psd_file = tmp_builder.get_rig_data(self.rig_file, builder.PSD)
+        psd_file = builder.Builder.get_rig_data(self.rig_file, builder.PSD)
         if ctl_file: self.psd_path_selector.set_path(psd_file)
 
-        out_file = tmp_builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG)
+        out_file = builder.Builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG)
         if out_file: self.out_path_selector.set_path(out_file)
 
         # set the default output file type
-        file_type_text = tmp_builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG_FILE_TYPE)
+        file_type_text = builder.Builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG_FILE_TYPE)
         index = self.out_file_type_cb.findText(file_type_text, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.out_file_type_cb.setCurrentIndex(index)
 
     def reload_prescripts(self):
         self.preScript_scriptRunner.clear_scripts()
-        self.preScript_scriptRunner.set_start_dir(self.rig_builder.get_rig_env())
+        self.preScript_scriptRunner.set_relative_dir(self.rig_builder.get_rig_env())
         for path in self.rig_builder.get_rig_data(self.rig_file, builder.PRE_SCRIPT):
             # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
-                self.preScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
+            self.preScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
 
     def reload_postscripts(self):
         self.postScript_scriptRunner.clear_scripts()
-        self.postScript_scriptRunner.set_start_dir(self.rig_builder.get_rig_env())
+        self.postScript_scriptRunner.set_relative_dir(self.rig_builder.get_rig_env())
         for path in self.rig_builder.get_rig_data(self.rig_file, builder.POST_SCRIPT):
             # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
-                self.postScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
+            self.postScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
 
     def reload_pubscripts(self):
         self.publishScript_scriptRunner.clear_scripts()
-        self.publishScript_scriptRunner.set_start_dir(self.rig_builder.get_rig_env())
+        self.publishScript_scriptRunner.set_relative_dir(self.rig_builder.get_rig_env())
         for path in self.rig_builder.get_rig_data(self.rig_file, builder.PUB_SCRIPT):
             # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
-                self.publishScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
+            self.publishScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
 
     # UI FUNCTIONS
     def set_ctlShape_items(self):
@@ -782,7 +787,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
                 rigamajig2.maya.curve.copyShape(selection[0], dest)
 
     def load_posereaders(self):
-        self.rig_builder.load_poseReaders(self.psd_path_selector.get_abs_path(), replace=self.load_psd_mode_cbox.currentIndex())
+        self.rig_builder.load_poseReaders(self.psd_path_selector.get_abs_path(),
+                                          replace=self.load_psd_mode_cbox.currentIndex())
 
     def save_posereaders(self):
         self.rig_builder.save_poseReaders(self.psd_path_selector.get_abs_path())
@@ -818,14 +824,17 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def publish(self):
         confirm_pub_msg = QtWidgets.QMessageBox()
         confirm_pub_msg.setText("Publish the rig")
-        confirm_pub_msg.setInformativeText("Proceeding will rebuild a fresh rig from saved data overwriting any existing any published rigs.")
-        confirm_pub_msg.setStandardButtons(QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+        confirm_pub_msg.setInformativeText(
+            "Proceeding will rebuild a fresh rig from saved data overwriting any existing any published rigs.")
+        confirm_pub_msg.setStandardButtons(
+            QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
         confirm_pub_msg.setDefaultButton(QtWidgets.QMessageBox.Save)
         res = confirm_pub_msg.exec_()
 
         if res == QtWidgets.QMessageBox.Save:
             self.run_all()
-            self.rig_builder.publish(self.out_path_selector.get_abs_path(), self.asset_name_le.text(), self.out_file_type_cb.currentText())
+            self.rig_builder.publish(self.out_path_selector.get_abs_path(), self.asset_name_le.text(),
+                                     self.out_file_type_cb.currentText())
 
     # TOOLS MENU
     def run_performace_test(self):

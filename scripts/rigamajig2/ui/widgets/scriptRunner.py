@@ -12,11 +12,11 @@ import maya.OpenMayaUI as omui
 import rigamajig2.shared.runScript as runScript
 import rigamajig2.shared.path as rig_path
 
+SCRIPT_FILE_FILTER = "Python (*.py) ;; Mel (*.mel)"
+
 
 def maya_main_window():
-    """
-    Return the Maya main window widget as a Python object
-    """
+    """ Return the Maya main window widget as a Python object """
     main_window_ptr = omui.MQtUtil.mainWindow()
     if sys.version_info.major >= 3:
         return wrapInstance(int(main_window_ptr), QtWidgets.QWidget)
@@ -26,6 +26,15 @@ def maya_main_window():
 
 class ScriptRunner(QtWidgets.QWidget):
     def __init__(self, root_dir=None, *args, **kwargs):
+        """
+        Script runner widget class.
+        The script runner conists of a list of scripts that can be modified, a scripts loaded in run in order.
+        Paths relative to the root directory specified.
+        :param root_dir: root directory of the script runner. All paths are relative to the script runner
+        :param args:
+        :param kwargs:
+        """
+
         super(ScriptRunner, self).__init__(*args, **kwargs)
 
         self.root_dir = root_dir
@@ -91,7 +100,7 @@ class ScriptRunner(QtWidgets.QWidget):
         self.execute_scripts_btn.clicked.connect(self.execute_all_scripts)
 
     def _add_item(self, name, data=None, icon=None):
-
+        """ add an item to the script list"""
         item = QtWidgets.QListWidgetItem(name)
         if data:
             item.setData(QtCore.Qt.UserRole, data)
@@ -113,17 +122,21 @@ class ScriptRunner(QtWidgets.QWidget):
             if not item:
                 continue
 
+            # if the item is a script then add it 
             if rig_path.is_file(item):
-                self._add_script(item)
+                self._add_script_to_widget(item)
 
+            # if the item is a directory then add all scripts in the directory
             if rig_path.is_dir(item):
                 for script in runScript.find_scripts(item):
-                    self._add_script(script)
+                    self._add_script_to_widget(script)
+
             # Append the item to the current script list.
             # This keeps a list of all the current directories and scripts added to the UI
             self.current_scripts_list.append(item)
 
-    def _add_script(self, script):
+    def _add_script_to_widget(self, script):
+        """private method to add scripts to the list """
         file_info = QtCore.QFileInfo(script)
         if file_info.exists():
             if self.root_dir:
@@ -133,24 +146,17 @@ class ScriptRunner(QtWidgets.QWidget):
             self._add_item(file_name, data=file_info.filePath(), icon=QtGui.QIcon(":fileNew.png"))
 
     def add_script_browser(self):
-        file_path, selected_filter = QtWidgets.QFileDialog.getOpenFileName(self, "Select File", "",
-                                                                           "Python (*.py) ;; Mel (*.mel)")
+        """add script through a browswer"""
+        file_path, selected_filter = QtWidgets.QFileDialog.getOpenFileName(self, "Select File", "", SCRIPT_FILE_FILTER)
         self.add_scripts(file_path)
 
     def create_new_script(self):
-        file_path, selected_filter = QtWidgets.QFileDialog.getSaveFileName(self, "Select File", "",
-                                                                           "Python (*.py) ;; Mel (*.mel)")
+        """create a new script"""
+        file_path, selected_filter = QtWidgets.QFileDialog.getSaveFileName(self, "Select File", "", SCRIPT_FILE_FILTER)
         f = open(file_path, "w")
         f.write("")
         f.close()
         self.add_scripts(file_path)
-
-    def add_scripts_from_dir(self, directory):
-        file_info = QtCore.QFileInfo(directory)
-        if not file_info.exists():
-            return
-        for script in runScript.find_scripts(directory):
-            self.add_scripts(script)
 
     def save_scripts(self):
         print "TODO: save scripts to rig file: {}".format(self.get_current_script_list())
@@ -161,31 +167,39 @@ class ScriptRunner(QtWidgets.QWidget):
         self.current_scripts_list = list()
 
     def execute_all_scripts(self):
+        """run all script list items"""
         for item in self.get_all_items():
             self.run_script(item)
 
     def run_selected_scripts(self):
+        """run the selected script list items"""
         for item in self.get_sel_items():
             self.run_script(item)
 
     def delete_selected_scripts(self):
+        """delete the selected script list items"""
         for item in self.get_sel_items():
             self.delete_item(item)
 
     def run_script(self, item):
+        """run a script list item"""
         script_path = item.data(QtCore.Qt.UserRole)
         runScript.run_script(script_path)
 
     def delete_item(self, item):
+        """delete a script list item"""
         self.script_list.takeItem(self.script_list.row(item))
 
     def get_all_items(self):
+        """get all items in the script list"""
         return [self.script_list.item(i) for i in range(self.script_list.count())]
 
     def get_sel_items(self):
+        """get selected items in the script list"""
         return [i for i in self.script_list.selectedItems()]
 
     def get_current_script_list(self):
+        """ get a list of current items in the script list """
         return self.current_scripts_list
 
     def show_in_folder(self):
@@ -229,7 +243,12 @@ class ScriptRunner(QtWidgets.QWidget):
             return True
         return False
 
-    def set_start_dir(self, value):
+    def set_relative_dir(self, value):
+        """
+        Make all scripts in the UI relative to this path
+        :param value: path to make scripts relative to
+        :return:
+        """
         self.root_dir = value
 
 

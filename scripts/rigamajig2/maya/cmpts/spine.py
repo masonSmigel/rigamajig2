@@ -23,9 +23,6 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         super(Spine, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings['hips_name'] = 'hips'
-        self.cmptSettings['hipsGimble_name'] = 'hipsGimble'
-        self.cmptSettings['hipsPivot_name'] = 'hips_pivot'
         self.cmptSettings['hipsSwing_name'] = 'hip_swing'
         self.cmptSettings['torso_name'] = 'torso'
         self.cmptSettings['chest_name'] = 'chest'
@@ -63,34 +60,18 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
         self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
 
-        # setup the hip controls
-        hip_pos = cmds.xform(self.input[0], q=True, ws=True, t=True)
-        self.hips_pivot = rig_control.create(self.hipsPivot_name, self.side,
-                                             hierarchy=['trsBuffer'],
-                                             hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                             parent=self.control_hrc, shape='sphere', shapeAim='x',
-                                             position=hip_pos)
-        self.hips = rig_control.create(self.hips_name, self.side,
-                                       hierarchy=['trsBuffer', 'neg'],
-                                       hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                       parent=self.control_hrc, shape='cube', shapeAim='x',
-                                       position=hip_pos)
-        self.hipsGimble = rig_control.create(self.hipsGimble_name, self.side,
-                                             hierarchy=['trsBuffer'],
-                                             hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                             parent=self.hips[-1], shape='cube', shapeAim='x',
-                                             position=hip_pos)
         # build the hips swivel control
+        hip_pos = cmds.xform(self.input[0], q=True, ws=True, t=True)
         self.hip_swing = rig_control.createAtObject(self.hipsSwing_name, self.side,
                                                     hierarchy=['trsBuffer'],
                                                     hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                                    parent=self.hipsGimble[-1], shape='cube', shapeAim='x',
+                                                    parent=self.control_hrc, shape='cube', shapeAim='x',
                                                     xformObj=self.hipsSwivel_guide)
         # build the torso control
         self.torso = rig_control.createAtObject(self.torso_name, self.side,
                                                 hierarchy=['trsBuffer'],
                                                 hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                                parent=self.hipsGimble[-1], shape='cube', shapeAim='x',
+                                                parent=self.control_hrc, shape='cube', shapeAim='x',
                                                 xformObj=self.torso_guide)
 
         # build the chest control
@@ -141,9 +122,6 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         rig_transform.matchTransform(self.input[0], self.hips_swing_trs)
         joint.connectChains(self.hips_swing_trs, self.input[0])
 
-        # create the pivot negate
-        constrain.negate(self.hips_pivot[-1], self.hips[1], t=True)
-
         # create  attributes
         rig_attr.addSeparator(self.chest[-1], '----')
         rig_attr.addSeparator(self.hip_swing[-1], '----')
@@ -181,8 +159,6 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.hip_swing[-1], self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.chestTop[-1], self.ikspline._endTwist, mo=True)
 
-        rig_transform.connectOffsetParentMatrix(self.hipsGimble[-1], self.ikspline.getGroup(), mo=True)
-
         # delete the guides. We no longer need them.
         cmds.delete(self.guides_hrc)
 
@@ -190,9 +166,11 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         """Create the connection"""
 
         if cmds.objExists(self.rigParent):
-            cmds.parentConstraint(self.rigParent, self.hips[0], mo=True)
-            cmds.parentConstraint(self.rigParent, self.hips_pivot[0], mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.hip_swing[0], mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.torso[0], mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.ikspline.getGroup(), mo=True)
 
-    def finalize(self):
+
+def finalize(self):
         rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
         rig_attr.lockAndHide(self.params_hrc, rig_attr.TRANSFORMS + ['v'])

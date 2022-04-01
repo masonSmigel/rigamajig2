@@ -10,6 +10,18 @@
             "rigParent": "", 
             "size": 15
         }, 
+        "body" : {
+            "name": "body", 
+            "type": "cog.Cog", 
+            "input": [
+                    "hips_bind"
+            ], 
+            "rigParent": "", 
+            "size": 4, 
+            "cog_name": "hips", 
+            "cogGimble_name": "hipsGimble", 
+            "cogPivot_name": "hips_pivot"
+        },
         "spine": {
             "name": "spine", 
             "type": "spine.Spine", 
@@ -23,11 +35,8 @@
                 "spine_5_bind", 
                 "chest_bind"
             ], 
-            "rigParent": "", 
+            "rigParent": "hipsGimble", 
             "size": 4, 
-            "hips_name": "hips", 
-            "hipsGimble_name": "hipsGimble", 
-            "hipsPivot_name": "hips_pivot", 
             "hipsSwing_name": "hip_swing", 
             "torso_name": "torso", 
             "chest_name": "chest", 

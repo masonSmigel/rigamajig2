@@ -8,6 +8,10 @@ import rigamajig2.maya.container
 import rigamajig2.maya.node
 import rigamajig2.maya.attr
 
+RIG_HRC_NAME = 'rig'
+BIND_HRC_NAME = 'bind'
+MOD_HRC_NAME = 'model'
+
 
 class Main(rigamajig2.maya.cmpts.base.Base):
     def __init__(self, name, input=[], size=1):
@@ -21,9 +25,9 @@ class Main(rigamajig2.maya.cmpts.base.Base):
     def initalHierachy(self):
         """Build the initial hirarchy"""
         self.root_hrc = cmds.createNode('transform', n=self.name)
-        self.rig_hrc = cmds.createNode('transform', n='rig', parent=self.root_hrc)
-        self.bind_hrc = cmds.createNode('transform', n='bind', parent=self.root_hrc)
-        self.model_hrc = cmds.createNode('transform', n='model', parent=self.root_hrc)
+        self.rig_hrc = cmds.createNode('transform', n=RIG_HRC_NAME, parent=self.root_hrc)
+        self.bind_hrc = cmds.createNode('transform', n=BIND_HRC_NAME, parent=self.root_hrc)
+        self.model_hrc = cmds.createNode('transform', n=MOD_HRC_NAME, parent=self.root_hrc)
 
         # Build our controls
         self.trs_global = rig_control.create('trs_global', hierarchy=[], size=self.size * 1.2,
@@ -63,18 +67,18 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.lock(self.rig_hrc, rigamajig2.maya.attr.TRANSFORMS)
         rigamajig2.maya.attr.lock(self.bind_hrc, rigamajig2.maya.attr.TRANSFORMS)
         rigamajig2.maya.attr.lock(self.model_hrc, rigamajig2.maya.attr.TRANSFORMS)
-    
+
     def deleteSetup(self):
-        if cmds.objExists(self.bind_hrc):
-            skel_children = cmds.listRelatives(self.bind_hrc, c=True)
+        if cmds.objExists(BIND_HRC_NAME):
+            skel_children = cmds.listRelatives(BIND_HRC_NAME, c=True)
             if skel_children: cmds.parent(skel_children, world=True)
 
-        if cmds.objExists(self.rig_hrc):
-            rig_children = cmds.listRelatives(self.rig_hrc, c=True)
+        if cmds.objExists(RIG_HRC_NAME):
+            rig_children = cmds.listRelatives(RIG_HRC_NAME, c=True)
             if rig_children: cmds.parent(rig_children, world=True)
 
-        if cmds.objExists(self.model_hrc):
-            model_children = cmds.listRelatives(self.model_hrc, c=True)
+        if cmds.objExists(MOD_HRC_NAME):
+            model_children = cmds.listRelatives(MOD_HRC_NAME, c=True)
             if model_children: cmds.parent(model_children, world=True)
-        
+
         super(Main, self).deleteSetup()

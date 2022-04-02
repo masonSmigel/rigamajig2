@@ -190,6 +190,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.save_components_btn = QtWidgets.QPushButton("Save Cmpts")
         self.cmpt_manager = componentManager.ComponentManager()
 
+        self.initalize_build_btn = QtWidgets.QPushButton("Initalize Build")
+        self.initalize_build_btn.setFixedHeight(LARGE_BTN_HEIGHT)
         self.guide_path_selector = pathSelector.PathSelector("guides:", cap="Select a guide file", ff=JSON_FILTER, fm=1)
         self.load_guides_btn = QtWidgets.QPushButton("Load Guides")
         self.save_guides_btn = QtWidgets.QPushButton("Save Guides")
@@ -363,6 +365,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.cmpt_wdgt.addWidget(self.cmpt_path_selector)
         self.cmpt_wdgt.addLayout(cmpt_load_layout)
         self.cmpt_wdgt.addWidget(self.cmpt_manager)
+        self.cmpt_wdgt.addWidget(self.initalize_build_btn)
         self.cmpt_wdgt.addLayout(cmpt_btn_layout)
         self.cmpt_wdgt.addWidget(self.guide_path_selector)
         self.cmpt_wdgt.addLayout(guide_load_layout)
@@ -503,6 +506,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.save_guides_btn.clicked.connect(self.save_guides)
         self.load_components_btn.clicked.connect(self.load_components)
         self.cmpt_manager.clear_cmpt_btn.clicked.connect(self.clear_components)
+        self.initalize_build_btn.clicked.connect(self.initalize_rig)
 
         # self.build_rig_btn.clicked.connect(self.build_rig)
         # self.connect_rig_btn.clicked.connect(self.connect_rig)
@@ -549,11 +553,19 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         new_data = data.getData()
 
         # TODO: Keep this updated as we add stuff to the builder
+        new_data['rig_name'] = self.asset_name_le.text()
+        new_data['pre_script'] = self.preScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data['post_script'] = self.postScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data['pub_script'] = self.publishScript_scriptRunner.get_current_script_list(relative_paths=True)
         new_data['model_file'] = self.model_path_selector.get_path()
         new_data['skeleton_file'] = self.skel_path_selector.get_path()
         new_data['skeleton_pos'] = self.joint_pos_path_selector.get_path()
         new_data['guides'] = self.guide_path_selector.get_path()
+        new_data['components'] = self.cmpt_path_selector.get_path()
         new_data['control_shapes'] = self.ctl_path_selector.get_path()
+        new_data['psd'] = self.psd_path_selector.get_path()
+        new_data['output_file'] = self.out_path_selector.get_path()
+        new_data['output_file_type'] = self.out_file_type_cb.currentText()
 
         data.setData(new_data)
         data.write(self.rig_file)
@@ -599,29 +611,18 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.reload_postscripts()
         self.reload_pubscripts()
 
-        mod_file = builder.Builder.get_rig_data(self.rig_file, builder.MODEL_FILE)
-        if mod_file: self.model_path_selector.set_path(mod_file)
+        # set rig paths
+        self.model_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.MODEL_FILE))
+        self.skel_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.SKELETON_FILE))
+        self.joint_pos_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.SKELETON_POS))
+        self.cmpt_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.COMPONENTS))
+        self.guide_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.GUIDES))
+        self.ctl_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES))
+        self.psd_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.PSD))
+        self.out_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG))
 
-        skel_file = builder.Builder.get_rig_data(self.rig_file, builder.SKELETON_FILE)
-        if skel_file: self.skel_path_selector.set_path(skel_file)
-
-        skel_pos_file = builder.Builder.get_rig_data(self.rig_file, builder.SKELETON_POS)
-        if skel_pos_file: self.joint_pos_path_selector.set_path(skel_pos_file)
-
-        cmpt_file = builder.Builder.get_rig_data(self.rig_file, builder.COMPONENTS)
-        if cmpt_file: self.cmpt_path_selector.set_path(cmpt_file)
-
-        guide_file = builder.Builder.get_rig_data(self.rig_file, builder.GUIDES)
-        if guide_file: self.guide_path_selector.set_path(guide_file)
-
-        ctl_file = builder.Builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES)
-        if ctl_file: self.ctl_path_selector.set_path(ctl_file)
-
-        psd_file = builder.Builder.get_rig_data(self.rig_file, builder.PSD)
-        if ctl_file: self.psd_path_selector.set_path(psd_file)
-
-        out_file = builder.Builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG)
-        if out_file: self.out_path_selector.set_path(out_file)
+        # clear the component manager
+        self.cmpt_manager.clear_cmpt_tree()
 
         # set the default output file type
         file_type_text = builder.Builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG_FILE_TYPE)
@@ -727,8 +728,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def load_components(self):
         self.rig_builder.set_cmpts(list())
         self.rig_builder.load_components(self.cmpt_path_selector.get_abs_path())
-        self.rig_builder.initalize()
         self.rig_builder.load_component_settings(self.cmpt_path_selector.get_abs_path())
+        self.cmpt_manager.load_list_from_builder()
+
+    def initalize_rig(self):
+        self.rig_builder.initalize()
         self.cmpt_manager.load_cmpts_from_scene()
 
     def clear_components(self):
@@ -747,6 +751,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.cmpt_manager.load_cmpts_from_scene()
 
     def complete_build(self):
+        self.rig_builder.initalize()
         self.rig_builder.build()
         self.rig_builder.connect()
         self.rig_builder.finalize()
@@ -820,6 +825,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     def run_all(self):
         self.rig_builder.run()
+        self.cmpt_manager.load_cmpts_from_scene()
 
     def publish(self):
         confirm_pub_msg = QtWidgets.QMessageBox()

@@ -198,8 +198,13 @@ class ScriptRunner(QtWidgets.QWidget):
         """get selected items in the script list"""
         return [i for i in self.script_list.selectedItems()]
 
-    def get_current_script_list(self):
+    def get_current_script_list(self, relative_paths=False):
         """ get a list of current items in the script list """
+        script_list = list()
+        if relative_paths:
+            for script in self.current_scripts_list:
+                script_list.append(relpath(script, self.root_dir))
+            return script_list
         return self.current_scripts_list
 
     def show_in_folder(self):

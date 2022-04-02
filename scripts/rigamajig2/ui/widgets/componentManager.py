@@ -93,7 +93,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.clear_cmpt_btn.clicked.connect(self.clear_cmpt_tree)
         self.add_cmpt_btn.clicked.connect(self.create_context_menu)
 
-    def add_component(self, name, cmpt, build_step='unbuilt', container=None):
+    def add_component(self, name, cmpt_type, build_step='unbuilt', container=None):
         rowcount = self.component_tree.topLevelItemCount()
         item = QtWidgets.QTreeWidgetItem(rowcount)
         item.setSizeHint(0, QtCore.QSize(item.sizeHint(0).width(), 24))  # set height
@@ -102,14 +102,14 @@ class ComponentManager(QtWidgets.QWidget):
         item.setText(0, name)
         item.setFont(0, QtGui.QFont())
 
-        item.setText(1, cmpt)
+        item.setText(1, cmpt_type)
         item.setText(2, build_step)
 
         item.setTextColor(1, QtGui.QColor(156, 156, 156))
         item.setTextColor(2, QtGui.QColor(156, 156, 156))
 
         # set the icon
-        cmpt_icon = self.__get_cmpt_icon(cmpt)
+        cmpt_icon = self.__get_cmpt_icon(cmpt_type)
         item.setIcon(0, cmpt_icon)
 
         # set the data
@@ -126,12 +126,12 @@ class ComponentManager(QtWidgets.QWidget):
 
         for component in components:
             name = cmds.getAttr("{}.name".format(component))
-            cmpt = cmds.getAttr("{}.type".format(component))
+            cmpt_type = cmds.getAttr("{}.type".format(component))
             build_step_str = cmds.attributeQuery("build_step", n=component, le=True)[0].split(":")
             build_step = build_step_str[cmds.getAttr("{}.build_step".format(component))]
             isSubComponent = meta.hasTag(component, "subComponent")
             if not isSubComponent:
-                self.add_component(name=name, cmpt=cmpt, build_step=build_step, container=component)
+                self.add_component(name=name, cmpt_type=cmpt_type, build_step=build_step, container=component)
 
     def get_data_from_item(self, item):
         """
@@ -214,6 +214,19 @@ class ComponentManager(QtWidgets.QWidget):
 
     def set_rig_builder(self, builder):
         self.builder = builder
+
+    def load_list_from_builder(self):
+        self.clear_cmpt_tree()
+
+        if not self.builder:
+            raise RuntimeError("No valid rig builder found")
+        for cmpt in self.builder.get_cmpt_list():
+            name = cmpt.name
+            cmpt_type = cmpt.cmpt_type
+            build_step_str =['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize']
+            build_step = build_step_str[cmpt.getStep()]
+
+            self.add_component(name=name, cmpt_type=cmpt_type,build_step=build_step)
 
     def update_cmpt_from_scene(self, item):
         item_dict = self.get_data_from_item(item)

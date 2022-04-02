@@ -283,7 +283,7 @@ class Builder(object):
         if os.path.exists(path):
             controls = [ctl for ctl in cd.getData().keys() if cmds.objExists(ctl)]
             logger.info("loading shapes for {} controls".format(len(controls)))
-            cd.applyData(controls, applyColor=applyColor)
+            cd.applyData(controls, create=True ,applyColor=applyColor)
             logger.info("control shapes -- complete")
 
     def save_controlShapes(self, path=None):
@@ -396,7 +396,7 @@ class Builder(object):
             cmpt._connect_cmpt()
             cmpt._finalize_cmpt()
 
-            if cmds.objExists('rig') and cmpt.get_cmpt_type() != 'main.Main':
+            if cmds.objExists('rig') and cmpt.getComponenetType() != 'main.Main':
                 if hasattr(cmpt, "root_hrc"):
                     if not cmds.listRelatives(cmpt.root_hrc, p=True):
                         cmds.parent(cmpt.root_hrc, 'rig')
@@ -452,10 +452,13 @@ class Builder(object):
         Run pre scripts. You can add scripts by path, but the main use is through the PRE SCRIPT path
         :param scripts: path to scripts to run
         """
-        if self.get_rig_data(self.rig_file, PRE_SCRIPT):
-            scripts.append(self._absPath(self.get_rig_data(self.rig_file, PRE_SCRIPT)))
+        run_list = list()
+        run_list += scripts
 
-        file_scripts = self.validate_script_list(scripts)
+        if self.get_rig_data(self.rig_file, PRE_SCRIPT):
+            run_list.append(self._absPath(self.get_rig_data(self.rig_file, PRE_SCRIPT)))
+
+        file_scripts = self.validate_script_list(run_list)
 
         for script in file_scripts:
             runScript.run_script(script)
@@ -466,10 +469,13 @@ class Builder(object):
         Run post scripts. You can add scripts by path, but the main use is through the POST SCRIPT path
         :param scripts: path to scripts to run
         """
-        if self.get_rig_data(self.rig_file, POST_SCRIPT):
-            scripts.append(self._absPath(self.get_rig_data(self.rig_file, POST_SCRIPT)))
+        run_list = list()
+        run_list += scripts
 
-        file_scripts = self.validate_script_list(scripts)
+        if self.get_rig_data(self.rig_file, POST_SCRIPT):
+            run_list.append(self._absPath(self.get_rig_data(self.rig_file, POST_SCRIPT)))
+
+        file_scripts = self.validate_script_list(run_list)
 
         for script in file_scripts:
             runScript.run_script(script)
@@ -481,10 +487,13 @@ class Builder(object):
         :param scripts:
         :return:
         """
-        if self.get_rig_data(self.rig_file, PUB_SCRIPT):
-            scripts.append(self._absPath(self.get_rig_data(self.rig_file, PUB_SCRIPT)))
+        run_list = list()
+        run_list += scripts
 
-        file_scripts = self.validate_script_list(scripts)
+        if self.get_rig_data(self.rig_file, PUB_SCRIPT):
+            run_list.append(self._absPath(self.get_rig_data(self.rig_file, PUB_SCRIPT)))
+
+        file_scripts = self.validate_script_list(run_list)
 
         for script in file_scripts:
             runScript.run_script(script)
@@ -572,6 +581,9 @@ class Builder(object):
 
     def get_rig_file(self):
         return self.rig_file
+
+    def get_cmpt_list(self):
+        return self.cmpt_list
 
     def get_cmpt_obj_from_container(self, container):
         name = cmds.getAttr("{}.name".format(container))

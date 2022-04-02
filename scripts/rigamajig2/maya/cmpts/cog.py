@@ -37,30 +37,27 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
             pos = cmds.xform(self.input[0], q=True, ws=True, t=True)
         else:
             pos = (0,0,0)
-        self.hips_pivot = rig_control.create(self.cogPivot_name,
-                                             hierarchy=['trsBuffer'],
+        self.cog = rig_control.create(self.cog_name,
+                                      hierarchy=['trsBuffer'],
+                                      hideAttrs=['s', 'v'], size=self.size, color='yellow',
+                                      parent=self.control_hrc, shape='cube', shapeAim='x',
+                                      position=pos)
+        self.cog_pivot = rig_control.create(self.cogPivot_name,
+                                            hierarchy=['trsBuffer'],
+                                            hideAttrs=['s', 'v'], size=self.size, color='yellow',
+                                            parent=self.cog[-1], shape='sphere', shapeAim='x',
+                                            position=pos)
+        self.cog_gimble = rig_control.create(self.cogGimble_name,
+                                             hierarchy=['trsBuffer', 'neg'],
                                              hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                             parent=self.control_hrc, shape='sphere', shapeAim='x',
-                                             position=pos)
-        self.hips = rig_control.create(self.cog_name,
-                                       hierarchy=['trsBuffer', 'neg'],
-                                       hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                       parent=self.control_hrc, shape='cube', shapeAim='x',
-                                       position=pos)
-        self.hipsGimble = rig_control.create(self.cogGimble_name,
-                                             hierarchy=['trsBuffer'],
-                                             hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                             parent=self.hips[-1], shape='cube', shapeAim='x',
+                                             parent=self.cog[-1], shape='cube', shapeAim='x',
                                              position=pos)
 
     def rigSetup(self):
-        super(Cog, self).rigSetup()
         # create the pivot negate
-        constrain.negate(self.hips_pivot[-1], self.hips[1], t=True)
+        constrain.negate(self.cog_pivot[-1], self.cog_gimble[1], t=True)
 
     def connect(self):
-        super(Cog, self).rigSetup()
 
         if cmds.objExists(self.rigParent):
-            cmds.parentConstraint(self.rigParent, self.hips[0], mo=True)
-            cmds.parentConstraint(self.rigParent, self.hips_pivot[0], mo=True)
+            cmds.parentConstraint(self.rigParent, self.cog[0], mo=True)

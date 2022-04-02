@@ -10,8 +10,8 @@
             "rigParent": "", 
             "size": 15
         }, 
-        "body" : {
-            "name": "body", 
+        "cog" : {
+            "name": "cog", 
             "type": "cog.Cog", 
             "input": [
                     "hips_bind"

@@ -33,14 +33,22 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
 
     def createBuildGuides(self):
         """Create the build guides"""
+        HEAD_PERCENT = 0.7
 
         self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
+
         neck_pos = cmds.xform(self.input[0], q=True, ws=True, t=True)
         self.neck_guide = rig_control.createGuide(self.name + "_neck", side=self.side, parent=self.guides_hrc, position=neck_pos)
         rig_attr.lockAndHide(self.neck_guide, rig_attr.TRANSLATE + ['v'])
 
-        head_pos = mathUtils.nodePosLerp(self.input[0], self.input[-1], 0.7)
-        self.head_guide = rig_control.createGuide(self.name + "_head", side=self.side, parent=self.guides_hrc, position=head_pos)
+        self.head_guide = rig_control.createGuide(self.name + "_head", side=self.side, parent=self.guides_hrc)
+
+        const = cmds.pointConstraint([self.input[0], self.input[-1], self.head_guide], mo=False)[0]
+        rig_attr.addAttr(self.head_guide, "position", "float", value=HEAD_PERCENT, minValue=0, maxValue=1, keyable=True)
+        cmds.connectAttr("{}.{}".format(self.head_guide, "position"), "{}.{}".format(const, "target[1].targetWeight"), f=True)
+        node.reverse("{}.{}".format(self.head_guide, "position"), output="{}.{}".format(const, "target[0].targetWeight"),
+                     name="{}_reverse".format(self.head_guide))
+        rig_attr.lock(self.head_guide, rig_attr.TRANSLATE + ['v'])
 
         skull_pos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
         self.skull_guide = rig_control.createGuide(self.name + "_skull", side=self.side, parent=self.guides_hrc, position=skull_pos)

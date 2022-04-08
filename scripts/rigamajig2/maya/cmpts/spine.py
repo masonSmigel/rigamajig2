@@ -34,15 +34,27 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
     def createBuildGuides(self):
         """Create the build guides"""
+        HIPS_PERCENT = 0.33
+        TORSO_PERCENT = 0.15
+
         self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
-        hipSwivel_pos = mathUtils.nodePosLerp(self.input[0], self.input[-1], 0.333)
         self.hipsSwivel_guide = rig_control.createGuide(self.name + "_hipSwivel", side=self.side,
-                                                        parent=self.guides_hrc,
-                                                        position=hipSwivel_pos)
-        torso_pos = mathUtils.nodePosLerp(self.input[0], self.input[-1], 0.15)
-        self.torso_guide = rig_control.createGuide(self.name + "_torso", side=self.side, parent=self.guides_hrc,
-                                                   position=torso_pos)
+                                                        parent=self.guides_hrc)
+        # setup the slider for the guide
+        const = cmds.pointConstraint([self.input[1], self.input[-2], self.hipsSwivel_guide], mo=False)[0]
+        rig_attr.addAttr(self.hipsSwivel_guide, "position", "float", value=HIPS_PERCENT, minValue=0, maxValue=1, keyable=True)
+        cmds.connectAttr("{}.{}".format(self.hipsSwivel_guide, "position"), "{}.{}".format(const, "target[1].targetWeight"), f=True)
+        node.reverse("{}.{}".format(self.hipsSwivel_guide, "position"), output="{}.{}".format(const, "target[0].targetWeight"),
+                     name="{}_reverse".format(self.hipsSwivel_guide))
+
+        self.torso_guide = rig_control.createGuide(self.name + "_torso", side=self.side, parent=self.guides_hrc)
+        # setup the slider for the guide
+        const = cmds.pointConstraint([self.input[1], self.input[-2], self.torso_guide], mo=False)[0]
+        rig_attr.addAttr(self.torso_guide, "position", "float", value=TORSO_PERCENT, minValue=0, maxValue=1, keyable=True)
+        cmds.connectAttr("{}.{}".format(self.torso_guide, "position"), "{}.{}".format(const, "target[1].targetWeight"), f=True)
+        node.reverse("{}.{}".format(self.torso_guide, "position"), output="{}.{}".format(const, "target[0].targetWeight"),
+                     name="{}_reverse".format(self.torso_guide))
 
         spineEnd_pos = cmds.xform(self.input[-2], q=True, ws=True, t=True)
         self.chest_guide = rig_control.createGuide(self.name + "_chest", side=self.side, parent=self.guides_hrc,
@@ -51,6 +63,9 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         chest_pos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
         self.chestTop_guide = rig_control.createGuide(self.name + "_chestTop", side=self.side, parent=self.guides_hrc,
                                                       position=chest_pos)
+        for guide in [self.hipsSwivel_guide, self.torso_guide, self.chest_guide]:
+            rig_attr.lock(guide, rig_attr.TRANSLATE)
+
         rig_attr.lockAndHide(self.chestTop_guide, rig_attr.TRANSLATE + ['v'])
 
     def initalHierachy(self):

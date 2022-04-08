@@ -92,8 +92,8 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         self.footikfk = ikfk.IkFkFoot(jointList=self.input[3:],
                                       heelPivot=self._heel_piv, innPivot=self._inn_piv, outPivot=self._out_piv)
         self.footikfk.setGroup(self.ikfk.getGroup())
-        self.footikfk.create()
-        ikfk.IkFkFoot.createFootRoll(self.footikfk.getPivotList(), self.footikfk.getGroup())
+        self.footikfk.create(params=self.params_hrc)
+        ikfk.IkFkFoot.createFootRoll(self.footikfk.getPivotList(), self.footikfk.getGroup(), params=self.params_hrc)
 
         # connect the Foot IKFK to the ankle IK
         cmds.parent(self._ikEndTgt, self.footikfk.getPivotList()[6])
@@ -126,7 +126,11 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         blendedJointlist = self.ikfk.getBlendJointList() + [self.toes_fk[-1]]
         rigamajig2.maya.joint.connectChains(blendedJointlist, self.input[1:-1])
         rigamajig2.maya.attr.lock(self.input[-1], rigamajig2.maya.attr.TRANSFORMS + ['v'])
-        ikfk.IkFkBase.connectVisibility(self.ikfk.getGroup(), 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
+        ikfk.IkFkBase.connectVisibility(self.params_hrc, 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
+
+        if self.addTwistJoints:
+            for jnt in [self.input[1], self.input[2]]:
+                cmds.setAttr("{}.{}".format(jnt, "drawStyle"), 2)
 
         # connect the base to the main bind chain
         rigamajig2.maya.joint.connectChains(self.limbBase[-1], self.input[0])
@@ -136,10 +140,10 @@ class Leg(rigamajig2.maya.cmpts.limb.Limb):
         super(Leg, self).setupAnimAttrs()
         # connect the fook ik attributes to the foot control
         rigamajig2.maya.attr.addSeparator(self.limb_ik[-1], '----')
-        rigamajig2.maya.attr.driveAttribute('roll', self.ikfk.getGroup(), self.limb_ik[-1])
-        rigamajig2.maya.attr.driveAttribute('bank', self.ikfk.getGroup(), self.limb_ik[-1])
-        rigamajig2.maya.attr.driveAttribute('ballAngle', self.ikfk.getGroup(), self.limb_ik[-1])
-        rigamajig2.maya.attr.driveAttribute('toeStraightAngle', self.ikfk.getGroup(), self.limb_ik[-1])
+        rigamajig2.maya.attr.driveAttribute('roll', self.params_hrc, self.limb_ik[-1])
+        rigamajig2.maya.attr.driveAttribute('bank', self.params_hrc, self.limb_ik[-1])
+        rigamajig2.maya.attr.driveAttribute('ballAngle', self.params_hrc, self.limb_ik[-1])
+        rigamajig2.maya.attr.driveAttribute('toeStraightAngle', self.params_hrc, self.limb_ik[-1])
 
     def connect(self):
         """Create the connection"""

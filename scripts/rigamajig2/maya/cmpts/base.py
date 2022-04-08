@@ -63,8 +63,10 @@ class Base(object):
 
             # Store to component node
             self.metaNode = rigamajig2.maya.meta.MetaNode(self.container)
-            self.metaNode.setDataDict(data=self.cmptData, hide=True, lock=True)
+            self.metaNode.setDataDict(data=self.cmptData, hide=True)
             self.metaNode.setDataDict(data=self.cmptSettings, hide=True)
+
+            rigamajig2.maya.attr.lock(self.container, ["name", "type"])
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -264,11 +266,6 @@ class Base(object):
             return cmds.getAttr("{}.{}".format(self.container, 'build_step'))
         return 0
 
-    def save(self):
-        """Return the settings of component name"""
-        self._load_meta_to_component()
-        return self._userSettings
-
     def loadSettings(self, data):
         keys_to_remove = ['name', 'type', 'input']
         new_dict = {key: val for key, val in data.items() if key not in keys_to_remove}
@@ -303,10 +300,10 @@ class Base(object):
         # create an info dictionary with the important component settings.
         # This is used to save the component to a file
         info_dict = OrderedDict()
-        info_dict['name'] = self.name
-        info_dict['type'] = self.cmpt_type
-        info_dict['input'] = self.input
-        info_dict.update(self.cmptSettings)
+        data = self.metaNode.getAllData()
+
+        for key in self.cmptSettings.keys() + ['name','type', 'input']:
+            info_dict[key] = data[key]
         return info_dict
 
     def getComponenetType(self):

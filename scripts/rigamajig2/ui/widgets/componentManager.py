@@ -40,13 +40,13 @@ class ComponentManager(QtWidgets.QWidget):
         self.edit_cmpt_action = QtWidgets.QAction("Edit Cmpt", self)
         self.edit_cmpt_action.setIcon(QtGui.QIcon(":editRenderPass.png"))
 
-        self.del_cmpt_action = QtWidgets.QAction("Delete Cmpt Setup", self)
+        self.del_cmpt_action = QtWidgets.QAction("Delete Cmpt", self)
         self.del_cmpt_action.setIcon(QtGui.QIcon(":trash.png"))
 
         self.select_container_action.triggered.connect(self.select_container)
         self.build_cmpt_action.triggered.connect(self.build_cmpt)
         self.edit_cmpt_action.triggered.connect(self.edit_cmpt)
-        self.del_cmpt_action.triggered.connect(self.delete_cmpt_setup)
+        self.del_cmpt_action.triggered.connect(self.delete_cmpt)
 
     def create_widgets(self):
         self.component_tree = QtWidgets.QTreeWidget()
@@ -67,6 +67,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.component_tree.addAction(self.edit_cmpt_action)
         self.component_tree.addAction(self.del_cmpt_action)
 
+        self.save_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":save.png"), "Save Cmpts")
         self.reload_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":refresh.png"), "")
         self.clear_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":hotkeyFieldClear.png"), "")
         self.cmpt_settings_btn = QtWidgets.QPushButton(QtGui.QIcon(":QR_settings.png"), "")
@@ -75,6 +76,7 @@ class ComponentManager(QtWidgets.QWidget):
     def create_layouts(self):
         btn_layout = QtWidgets.QHBoxLayout()
         btn_layout.setContentsMargins(0, 0, 0, 0)
+        btn_layout.addWidget(self.save_cmpt_btn)
         btn_layout.addStretch()
         btn_layout.addWidget(self.reload_cmpt_btn)
         btn_layout.addWidget(self.clear_cmpt_btn)
@@ -185,14 +187,20 @@ class ComponentManager(QtWidgets.QWidget):
             self.builder.build_single_cmpt(item_dict['name'], item_dict['type'])
             self.update_cmpt_from_scene(item)
 
-    def delete_cmpt_setup(self):
+    def delete_cmpt(self):
         items = self.get_selected_item()
         for item in items:
             component = self.get_component_obj(item)
             if component.getContainer():
                 component.deleteSetup()
+            self.component_tree.takeTopLevelItem(self.component_tree.indexOfTopLevelItem(item))
 
-            item.setText(2, 'unbuilt')
+            self.builder.cmpt_list.remove(component)
+
+            for c in self.builder.cmpt_list:
+                print c.name
+
+            # item.setText(2, 'unbuilt')
 
     def clear_cmpt_tree(self):
         """ clear the component tree"""

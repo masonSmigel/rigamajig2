@@ -54,4 +54,6 @@ class SliderGroup(QtWidgets.QWidget):
         self.lineEdit.setText(str(self.slider.value()))
 
     def updateSlider(self):
+        if int(self.lineEdit.text()) > self.slider.maximum():
+            self.setMaximum(int(self.lineEdit.text()))
         self.slider.setValue(float(self.lineEdit.text()))

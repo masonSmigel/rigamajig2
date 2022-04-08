@@ -23,6 +23,16 @@ BOTTOM = 'bt'
 
 LOCATIONS = {'front': FRONT, 'back': BACK, 'middle': MIDDLE, 'top': TOP, 'bottom': BOTTOM}
 
+# Project path Constants
+current_path = __file__.replace('\\', '/')
+
+ICONS_PATH = '/'.join(current_path.split('/')[0:-4]) + '/icons'
+SCRIPTS_PATH = '/'.join(current_path.split('/')[0:-4]) + '/scripts'
+ARCHETYPES_PATH = '/'.join(current_path.split('/')[0:-4]) + '/archetypes'
+BIN_PATH = '/'.join(current_path.split('/')[0:-4]) + '/bin'
+PLUGIN_PATH = '/'.join(current_path.split('/')[0:-4]) + '/plug-ins'
+MISC_PATH = '/'.join(current_path.split('/')[0:-4]) + '/misc'
+
 # Class Constants
 IK = 'ik'
 FK = 'fk'
@@ -69,7 +79,7 @@ EULERTOQUAT = 'eulerToQuat'
 UNITCONVERSION = 'uc'
 
 # Type Constants
-COMPONENT = 'cmpnt'
+COMPONENT = 'cmpt'
 OFFSET = 'trsOffset'
 TRANSFORM = 'trs'
 TARGET = 'tgt'

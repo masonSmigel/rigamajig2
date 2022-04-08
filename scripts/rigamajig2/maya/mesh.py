@@ -164,12 +164,15 @@ def cleanShapes(nodes):
             print("Deleted Intermeidate Shapes: {}".format(intermidiate_shapes))
 
 
-def cleanModel(nodes):
+def cleanModel(nodes=None):
     """
     Clean up model
     :param nodes: meshes to clean
     """
+    if not nodes:
+        nodes = cmds.ls(sl=True)
     nodes = common.toList(nodes)
+
     for node in nodes:
         cmds.delete(node, ch=True)
         cmds.makeIdentity(node, apply=True, t=True, r=True, s=True, n=0, pn=1)

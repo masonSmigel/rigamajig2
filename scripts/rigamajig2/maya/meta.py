@@ -189,12 +189,13 @@ class MetaNode(object):
         if not cmds.objExists("{}.{}".format(self.node, attr)):
             raise RuntimeError("Attribute {} does not exist on the node {}".format(attr, self.node))
 
-        value = cmds.getAttr("{}.{}".format(self.node, attr), silent=True)
         attrType = cmds.getAttr("{}.{}".format(self.node, attr), type=True)
 
         # TODO : what are we gonnna do with message attributes?!??
         if attrType == 'message':
             return None
+
+        value = cmds.getAttr("{}.{}".format(self.node, attr), silent=True)
         if attrType == 'string':
             try:
                 value = self.__deserializeComplex(value)  # if the data is a string try to deserialize it.

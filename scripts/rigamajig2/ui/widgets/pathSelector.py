@@ -41,7 +41,7 @@ class PathSelector(QtWidgets.QWidget):
         if self.label is not None:
             self.main_layout.addWidget(self.path_label)
             self.set_label_text(self.label)
-            self.path_label.setFixedWidth(50)
+            self.path_label.setFixedWidth(60)
 
         self.main_layout.addWidget(self.path_le)
         self.main_layout.addWidget(self.select_path_btn)

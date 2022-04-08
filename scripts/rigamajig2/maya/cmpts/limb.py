@@ -14,7 +14,7 @@ import rigamajig2.maya.meta as meta
 import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.constrain as constrain
 import rigamajig2.maya.node
-import rigamajig2.maya.attr
+import rigamajig2.maya.attr as rig_attr
 import rigamajig2.maya.joint
 import rigamajig2.maya.rig.spline as spline
 
@@ -231,7 +231,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # connect fk controls to fk joints
         for ctl, jnt in zip([self.joint1_fk[-1], self.joint2_fk[-1], self.joint3Gimble_fk[-1]], self.fkJnts):
             rig_transform.connectOffsetParentMatrix(ctl, jnt)
-            rigamajig2.maya.attr.lock(jnt, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+            rig_attr.lock(jnt, rig_attr.TRANSFORMS + ['v'])
 
         # connect the IkHandle to the end Target
         cmds.pointConstraint(self.limbGimble_ik[-1], self._ikEndTgt, mo=True)
@@ -303,7 +303,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 rig_transform.connectOffsetParentMatrix(self.bend5[-1], low_targets[2], mo=True)
 
             # create attributes for the volume factor
-            volumePlug = rigamajig2.maya.attr.addAttr(self.params_hrc, "volumeFactor", 'float',value=1, minValue=0)
+            volumePlug = rig_attr.addAttr(self.params_hrc, "volumeFactor", 'float',value=1, minValue=0)
             cmds.connectAttr(volumePlug, "{}.{}".format(upp_spline.getGroup(), "volumeFactor"))
             cmds.connectAttr(volumePlug, "{}.{}".format(low_spline.getGroup(), "volumeFactor"))
 
@@ -320,12 +320,24 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 value = mathUtils.lerp(1, 0, percent)
                 cmds.setAttr("{}.scale_{}".format(low_spline._group, low_spline._ikJointList.index(setScaleList[i])), value)
 
+            # if the module is using the twisty bendy controls then we need to create a visibly control
+            rig_attr.addAttr(self.params_hrc, "bendies", "bool", value=1, keyable=True, channelBox=True)
+            for bendie_ctl in self.bendControls:
+                shapes = cmds.listRelatives(bendie_ctl, s=True)
+                for shape in shapes:
+                    cmds.connectAttr("{}.{}".format(self.params_hrc, 'bendies'), "{}.{}".format(shape, 'v'))
+
         self.ikfkMatchSetup()
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
         rigamajig2.maya.joint.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
         ikfk.IkFkBase.connectVisibility(self.params_hrc, 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
+
+        # hide the upper  and middle joints if were using twisty bendy controls
+        if self.addTwistJoints:
+            for jnt in [self.input[1], self.input[2]]:
+                cmds.setAttr("{}.{}".format(jnt, "drawStyle"), 2)
 
         # connect the base to the main bind chain
         rigamajig2.maya.joint.connectChains(self.limbBase[-1], self.input[0])
@@ -334,25 +346,27 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         if self.useProxyAttrs:
             for control in self.controlers:
-                rigamajig2.maya.attr.addSeparator(control, '----')
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'ikfk'), self.controlers)
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'stretch'), self.limb_ik[-1])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'stretchTop'), self.limb_ik[-1])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'stretchBot'), self.limb_ik[-1])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'softStretch'), self.limb_ik[-1])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'pvPin'),[self.limb_ik[-1], self.limb_pv[-1]])
-            rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'twist'), self.limb_ik[-1])
+                rig_attr.addSeparator(control, '----')
+            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'ikfk'), self.controlers)
+            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'stretch'), self.limb_ik[-1])
+            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'stretchTop'), self.limb_ik[-1])
+            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'stretchBot'), self.limb_ik[-1])
+            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'softStretch'), self.limb_ik[-1])
+            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'pvPin'),[self.limb_ik[-1], self.limb_pv[-1]])
+            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'twist'), self.limb_ik[-1])
             if self.addTwistJoints and self.addBendies:
-                rigamajig2.maya.attr.addProxy('{}.{}'.format(self.params_hrc, 'volumeFactor'), self.limb_ik[-1])
+                rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'volumeFactor'), self.limb_ik[-1])
+                rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'bendies'), self.limb_ik[-1])
         else:
-            rigamajig2.maya.attr.driveAttribute('ikfk', self.params_hrc, self.ikfk_control[-1])
-            rigamajig2.maya.attr.driveAttribute('stretch', self.params_hrc, self.ikfk_control[-1])
-            rigamajig2.maya.attr.driveAttribute('stretchTop', self.params_hrc, self.ikfk_control[-1])
-            rigamajig2.maya.attr.driveAttribute('stretchBot', self.params_hrc, self.ikfk_control[-1])
-            rigamajig2.maya.attr.driveAttribute('softStretch', self.params_hrc, self.ikfk_control[-1])
-            rigamajig2.maya.attr.driveAttribute('pvPin', self.params_hrc, self.ikfk_control[-1])
+            rig_attr.driveAttribute('ikfk', self.params_hrc, self.ikfk_control[-1])
+            rig_attr.driveAttribute('stretch', self.params_hrc, self.ikfk_control[-1])
+            rig_attr.driveAttribute('stretchTop', self.params_hrc, self.ikfk_control[-1])
+            rig_attr.driveAttribute('stretchBot', self.params_hrc, self.ikfk_control[-1])
+            rig_attr.driveAttribute('softStretch', self.params_hrc, self.ikfk_control[-1])
+            rig_attr.driveAttribute('pvPin', self.params_hrc, self.ikfk_control[-1])
             if self.addTwistJoints and self.addBendies:
-                rigamajig2.maya.attr.driveAttribute('volumeFactor', self.params_hrc, self.ikfk_control[-1])
+                rig_attr.driveAttribute('volumeFactor', self.params_hrc, self.ikfk_control[-1])
+                rig_attr.driveAttribute('bendies', self.params_hrc, self.ikfk_control[-1])
 
     def connect(self):
         """Create the connection"""
@@ -378,11 +392,11 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
     def finalize(self):
         """ Lock some attributes we dont want to see"""
-        rigamajig2.maya.attr.lockAndHide(self.root_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
-        rigamajig2.maya.attr.lockAndHide(self.control_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
-        rigamajig2.maya.attr.lockAndHide(self.spaces_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
-        rigamajig2.maya.attr.lockAndHide(self.ikfk.getGroup(), rigamajig2.maya.attr.TRANSFORMS + ['v'])
-        rigamajig2.maya.attr.lockAndHide(self.params_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+        rig_attr.lockAndHide(self.root_hrc, rig_attr.TRANSFORMS + ['v'])
+        rig_attr.lockAndHide(self.control_hrc, rig_attr.TRANSFORMS + ['v'])
+        rig_attr.lockAndHide(self.spaces_hrc, rig_attr.TRANSFORMS + ['v'])
+        rig_attr.lockAndHide(self.ikfk.getGroup(), rig_attr.TRANSFORMS + ['v'])
+        rig_attr.lockAndHide(self.params_hrc, rig_attr.TRANSFORMS + ['v'])
 
     def setAttrs(self):
         """ Set some attributes to values that make more sense for the inital setup."""
@@ -398,7 +412,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         """Setup the ikFKMatching"""
         wristIkOffset = cmds.createNode('transform', name="{}_ikMatch".format(self.input[3]), p=self.fkJnts[-1])
         rig_transform.matchTransform(self.limb_ik[-1], wristIkOffset)
-        rigamajig2.maya.attr.lock(wristIkOffset, ['t', 'r', 's', 'v'])
+        rig_attr.lock(wristIkOffset, ['t', 'r', 's', 'v'])
 
         # add required data to the ikFkSwitchGroup
         # TODO: try to check this out. maybe use the ikfk group instead of the attribute

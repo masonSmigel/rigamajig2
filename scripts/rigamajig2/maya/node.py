@@ -32,23 +32,23 @@ def _setCompoundConnection(plug, value):
         cmds.setAttr(plug, *value)
 
 
-def _connectOutput(source, destination):
+def _connectOutput(source, destination, f=True):
     if not cmds.objExists(destination) and attr.isAttr(destination):
         cmds.error('Destination: {} does not exist or is not a valid attribute'.format(destination))
         return
 
     if attr.isCompound(destination):
         if attr.isCompound(source):
-            cmds.connectAttr(source, destination)
+            cmds.connectAttr(source, destination, f=f)
         else:
             childAttrs = attr.getCompoundChildren(source)
-            cmds.connectAttr(childAttrs[0], destination)
+            cmds.connectAttr(childAttrs[0], destination, f=f)
     else:
         if attr.isCompound(source):
             childAttrs = attr.getCompoundChildren(source)
-            cmds.connectAttr(childAttrs[0], destination)
+            cmds.connectAttr(childAttrs[0], destination, f=f)
         else:
-            cmds.connectAttr(source, destination)
+            cmds.connectAttr(source, destination, f=f)
 
 
 def addDoubleLinear(input1=None, input2=None, output=None, name=None):

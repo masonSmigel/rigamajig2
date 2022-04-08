@@ -52,7 +52,7 @@ class SkinData(maya_data.MayaData):
 
         self._data[node].update(data)
 
-    def applyData(self, nodes, rebind=False):
+    def applyData(self, nodes, rebind=True):
         nodes = common.toList(nodes)
 
         for node in nodes:

@@ -188,19 +188,25 @@ class IkFkBase(object):
             if not blendJntExists:
                 # create a blend matrix node
                 blendMatrix = cmds.createNode("blendMatrix", n='{}_blendMatrix'.format(blendJnt))
-                cmds.connectAttr("{}.{}".format(ikJnt, 'worldMatrix'), "{}.{}".format(blendMatrix, "inputMatrix"), f=True)
-                cmds.connectAttr("{}.{}".format(fkJnt, 'worldMatrix'), "{}.{}".format(blendMatrix, "target[0].targetMatrix"), f=True)
+                cmds.connectAttr("{}.{}".format(ikJnt, 'worldMatrix'), "{}.{}".format(blendMatrix, "inputMatrix"),
+                                 f=True)
+                cmds.connectAttr("{}.{}".format(fkJnt, 'worldMatrix'),
+                                 "{}.{}".format(blendMatrix, "target[0].targetMatrix"), f=True)
                 cmds.connectAttr(ikfkAttr, "{}.{}".format(blendMatrix, "target[0].weight"), f=True)
 
                 # if the node has a parent create a mult matrix to account for the offset
                 parent = cmds.listRelatives(blendJnt, parent=True, path=True)[0] or None
                 if parent:
                     mm = cmds.createNode("multMatrix", name="{}_mm".format(blendJnt))
-                    cmds.connectAttr("{}.{}".format(blendMatrix, 'outputMatrix'), "{}.{}".format(mm, 'matrixIn[0]'), f=True)
-                    cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[1]'), f=True)
-                    cmds.connectAttr("{}.{}".format(mm, 'matrixSum'), "{}.{}".format(blendJnt, 'offsetParentMatrix'), f=True)
+                    cmds.connectAttr("{}.{}".format(blendMatrix, 'outputMatrix'), "{}.{}".format(mm, 'matrixIn[0]'),
+                                     f=True)
+                    cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[1]'),
+                                     f=True)
+                    cmds.connectAttr("{}.{}".format(mm, 'matrixSum'), "{}.{}".format(blendJnt, 'offsetParentMatrix'),
+                                     f=True)
                 else:
-                    cmds.connectAttr("{}.{}".format(blendMatrix, "outputMatrix"), "{}.{}".format(blendJnt, "offsetParentMatrix"))
+                    cmds.connectAttr("{}.{}".format(blendMatrix, "outputMatrix"),
+                                     "{}.{}".format(blendJnt, "offsetParentMatrix"))
 
                 # reset the transformations
                 transform.resetTransformations(blendJnt)
@@ -309,7 +315,7 @@ class IkFkLimb(IkFkBase):
             grp = cmds.createNode("transform", name='ikfk_stretch_hrc')
 
         if not params:
-            grp=params
+            params = grp
 
         # check if our joints are clean. If not return a warning but we can continue.
 
@@ -576,12 +582,12 @@ class IkFkFoot(IkFkBase):
 
         super(IkFkFoot, self).setJointList(value)
 
-    def create(self):
+    def create(self, params=None):
         """
         construct the ikfk system
         """
         if not self._ikJointList:
-            super(IkFkFoot, self).create()
+            super(IkFkFoot, self).create(params=params)
 
         ankleConnections = cmds.listConnections("{}.tx".format(self._ikJointList[0]), source=False, destination=True)
         if ankleConnections:
@@ -613,11 +619,12 @@ class IkFkFoot(IkFkBase):
                 cmds.setAttr("{}.v".format(handle), 0)
 
     @staticmethod
-    def createFootRoll(pivotList, grp=None):
+    def createFootRoll(pivotList, grp=None, params=None):
         """
         Create our advanced footroll setup
         :param pivotList: list of foot pivots
         :param grp: Optional-group to hold attributes and calculate scale
+        :param params:
         :return:
         """
         if len(pivotList) != 8:
@@ -626,14 +633,17 @@ class IkFkFoot(IkFkBase):
         if not grp or not cmds.objExists(grp):
             grp = cmds.createNode("transform", name='ikfk_foot_hrc')
 
-        cmds.addAttr(grp, ln='roll', at='double', dv=0, min=-90, max=180, k=True)
-        cmds.addAttr(grp, ln='bank', at='double', dv=0, k=True)
-        cmds.addAttr(grp, ln='ballAngle', at='double', dv=45, min=0, k=True)
-        cmds.addAttr(grp, ln='toeStraightAngle', at='double', dv=70, min=0, k=True)
-        rollAttr = '{}.roll'.format(grp)
-        ballAngleAttr = '{}.ballAngle'.format(grp)
-        toeStraightAngleAttr = '{}.toeStraightAngle'.format(grp)
-        bankAttr = '{}.bank'.format(grp)
+        if not params:
+            params = grp
+
+        cmds.addAttr(params, ln='roll', at='double', dv=0, min=-90, max=180, k=True)
+        cmds.addAttr(params, ln='bank', at='double', dv=0, k=True)
+        cmds.addAttr(params, ln='ballAngle', at='double', dv=45, min=0, k=True)
+        cmds.addAttr(params, ln='toeStraightAngle', at='double', dv=70, min=0, k=True)
+        rollAttr = '{}.roll'.format(params)
+        ballAngleAttr = '{}.ballAngle'.format(params)
+        toeStraightAngleAttr = '{}.toeStraightAngle'.format(params)
+        bankAttr = '{}.bank'.format(params)
 
         # Setup the bank
         bankCond = node.condition(bankAttr, 0, ifTrue=[bankAttr, 0, 0], ifFalse=[0, bankAttr, 0], operation='>',

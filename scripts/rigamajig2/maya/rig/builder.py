@@ -5,6 +5,7 @@ import sys
 import os
 import time
 import inspect
+import shutil
 from collections import OrderedDict
 
 import maya.cmds as cmds
@@ -89,7 +90,9 @@ class Builder(object):
             path = common.getFirstIndex(path)
             return os.path.realpath(os.path.join(self.path, path))
 
+    # --------------------------------------------------------------------------------
     # RIG BUILD STEPS
+    # --------------------------------------------------------------------------------
     def import_model(self, path=None):
         if not path:
             path = self._absPath(self.get_rig_data(self.rig_file, MODEL_FILE))
@@ -251,7 +254,7 @@ class Builder(object):
 
     def load_component_settings(self, path=None):
         """
-        loadSettings component settings
+        loadSettings component settings from the rig builder
         :param path:
         :return:
         """
@@ -264,6 +267,10 @@ class Builder(object):
             cmpt_data = cd.getData()
             for cmpt in self.cmpt_list:
                 cmpt.loadSettings(cmpt_data[cmpt.name])
+
+    def load_meta_settings(self):
+        for cmpt in self.cmpt_list:
+            cmpt._load_meta_to_component()
 
     def load_controlShapes(self, path=None, applyColor=True):
         """
@@ -283,7 +290,7 @@ class Builder(object):
         if os.path.exists(path):
             controls = [ctl for ctl in cd.getData().keys() if cmds.objExists(ctl)]
             logger.info("loading shapes for {} controls".format(len(controls)))
-            cd.applyData(controls, create=True ,applyColor=applyColor)
+            cd.applyData(controls, create=True, applyColor=applyColor)
             logger.info("control shapes -- complete")
 
     def save_controlShapes(self, path=None):
@@ -325,7 +332,7 @@ class Builder(object):
 
         if path:
             nd = node_data.NodeData()
-            nd.gatherDataIterate(meta.getTagged("guide"))
+            nd.gatherDataIterate(meta.getTagged("guide"), user_attrs=True)
             nd.write(path)
             logger.info("guides saved to: {}".format(path))
 
@@ -417,7 +424,9 @@ class Builder(object):
             cmpt._intialize_cmpt()
             logger.info("edit : {}".format(cmpt.name))
 
-    # RUN SCRIPTS
+    # --------------------------------------------------------------------------------
+    # RUN SCRIPTS UTILITIES
+    # --------------------------------------------------------------------------------
     def load_required_plugins(self):
         """
         loadSettings required plugins
@@ -500,7 +509,7 @@ class Builder(object):
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
-    def run(self, publish=False):
+    def run(self, publish=False, outputfile=None, assetName=None, fileType=None, versioning=True):
         if not self.path:
             logger.error('you must provide a build enviornment path. Use Bulder.set_rig_file()')
             return
@@ -522,7 +531,8 @@ class Builder(object):
         self.load_deform_data()
         self.post_script()
         if publish:
-            self.publish()
+            self.pub_script()
+            self.publish(outputfile=outputfile, assetName=assetName, fileType=fileType, versioning=versioning)
         end_time = time.time()
         final_time = end_time - start_time
 
@@ -575,7 +585,9 @@ class Builder(object):
             version_path = file.incrimentSave(version_path, log=False)
             logger.info("out rig archived: {}".format(version_path))
 
+    # --------------------------------------------------------------------------------
     # GET
+    # --------------------------------------------------------------------------------
     def get_path(self):
         return self.path
 
@@ -601,7 +613,9 @@ class Builder(object):
         logger.warning("No component: {} with type: {} found within current build".format(name, cmpt_type))
         return None
 
+    # --------------------------------------------------------------------------------
     # SET
+    # --------------------------------------------------------------------------------
     def set_cmpts(self, cmpts):
         """
         Set the self.cmpt_list
@@ -647,7 +661,6 @@ class Builder(object):
         :param key:
         :return:
         """
-
         if not rig_file:
             return None
 
@@ -663,5 +676,82 @@ class Builder(object):
     def get_rig_env(self):
         return self.path
 
-def build_directory():
-    pass
+
+def get_available_archetypes():
+    """
+    get a list of avaible archetypes. Archetypes are defined as a folder containng a .rig file.
+    :return: list of archetypes
+    """
+    archetype_list = list()
+
+    path_contents = os.listdir(common.ARCHETYPES_PATH)
+    for archetype in path_contents:
+        archetype_path = os.path.join(common.ARCHETYPES_PATH, archetype)
+        if archetype.startswith("."):
+            continue
+        if find_rig_file(archetype_path):
+            archetype_list.append(archetype)
+    return archetype_list
+
+
+def find_rig_file(path):
+    """ find a rig file within the path"""
+    if rig_path.is_file(path):
+        return False
+
+    path_contents = os.listdir(path)
+    for f in path_contents:
+        if f.startswith("."):
+            continue
+        if not rig_path.is_dir(path):
+            continue
+        file_name, file_ext = os.path.splitext(os.path.join(path, f))
+        if not file_ext == '.rig':
+            continue
+        return os.path.join(path, f)
+    return False
+
+
+def new_rigenv_from_archetype(new_env, archetype, rig_name=None):
+    """
+    Create a new rig envirnment from and archetype
+    :param new_env: target driectory for the new rig enviornment
+    :param rig_name: name of the new rig enviornment
+    :param archetype: archetype to copy
+    :return:
+    """
+    if archetype not in get_available_archetypes():
+        raise RuntimeError("{} is not a valid archetype".format(archetype))
+
+    archetype_path = os.path.join(common.ARCHETYPES_PATH, archetype)
+    return create_rig_env(src_env=archetype_path, tgt_env=new_env, rig_name=rig_name)
+
+
+def create_rig_env(src_env, tgt_env, rig_name):
+    """
+    create a new rig enviornment
+    :param src_env: source rig enviornment
+    :param tgt_env: target rig direction
+    :param rig_name: new name of the rig enviornment and .rig file
+    :return:
+    """
+
+    tgt_env_path = os.path.join(tgt_env, rig_name)
+    shutil.copytree(src_env, tgt_env_path)
+
+    src_rig_file = find_rig_file(tgt_env_path)
+    rig_file = os.path.join(tgt_env_path, "{}.rig".format(rig_name))
+
+    # rename the .rig file and the rig_name within the .rig file
+    os.rename(src_rig_file, rig_file)
+
+    data = abstract_data.AbstractData()
+    data.read(rig_file)
+
+    new_data = data.getData()
+    new_data['rig_name'] = rig_name
+    data.setData(new_data)
+    data.write(rig_file)
+
+    logger.info("New rig environment created: {}".format(tgt_env_path))
+    return os.path.join(tgt_env_path, rig_file)

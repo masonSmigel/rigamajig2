@@ -114,10 +114,10 @@ NAMETEMPLATETOKENS = ["BASE",
                       ]
 FILE_VERSION_DELIMINATOR = '_v'
 
-L_TOKENS = ['left_', '_left', 'Left_', '_Left', 'lf_', '_lf', 'Lt_', '_Lt', 'lft_', '_lft', 'Lft_', '_Lft', 'Lf_',
-            '_Lf', '_l', 'L_', '_L', '_L_', '_l_']
-R_TOKENS = ['right_', '_right', 'Right_', '_Right', 'rt_', '_rt', 'Rt_', '_Rt', 'rgt_', '_rgt', 'Rgt_', '_Rgt', 'Rg_',
-            '_Rg', '_r', 'R_', '_R', '_R_', '_r_']
+L_TOKENS = ['left_', '_left', 'Left_', '_Left','_l_', 'lf_', '_lf', 'Lt_', '_Lt', 'lft_', '_lft', 'Lft_', '_Lft', 'Lf_',
+            '_Lf', '_l', 'L_', '_L', '_L_',]
+R_TOKENS = ['right_', '_right', 'Right_', '_Right', '_r_', 'rt_', '_rt', 'Rt_', '_Rt', 'rgt_', '_rgt', 'Rgt_', '_Rgt', 'Rt_',
+            '_Rt', '_r', 'R_', '_R', '_R_']
 
 
 def toList(values):

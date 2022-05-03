@@ -71,7 +71,6 @@ def createAxisMarker(nodes=None):
         nodes = cmds.ls(sl=True)
 
     asset = os.path.abspath(os.path.join(os.path.dirname(__file__), "../../../misc/axis_marker.ma"))
-    print asset
 
     if not cmds.objExists("axisMarker_hrc"):
         cmds.createNode("transform", name="axisMarker_hrc")

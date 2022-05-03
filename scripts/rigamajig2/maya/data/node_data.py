@@ -4,7 +4,6 @@ This is the json module for maya transform data
 from collections import OrderedDict
 import rigamajig2.maya.data.maya_data as maya_data
 import maya.cmds as cmds
-import rigamajig2.maya.attr
 import sys
 
 if sys.version_info.major >= 3:
@@ -18,13 +17,11 @@ class NodeData(maya_data.MayaData):
         """
         super(NodeData, self).__init__()
 
-    def gatherData(self, node, user_attrs=True):
+    def gatherData(self, node):
         """
         This method will gather data from the maya node passed as an argument.
         It stores the data on the self._data attribute
         :param node: Node to gather data from
-        :param user_attrs: Gather user attributes as well
-        :type node: str
         """
         super(NodeData, self).gatherData(node)
 
@@ -44,22 +41,16 @@ class NodeData(maya_data.MayaData):
                 data['overrideColorRGB'] = cmds.getAttr("{}.overrideColorRGB".format(node))[0]
             else:
                 data['overrideColor'] = cmds.getAttr("{}.overrideColor".format(node))
-        if user_attrs:
-            attrs = cmds.listAttr(node, ud=True)
-            for attr in attrs:
-                if attr.startswith("__"):
-                    continue
-                data[attr] = rigamajig2.maya.attr .getPlugValue("{}.{}".format(node, attr))
 
         self._data[node].update(data)
 
-    def gatherDataIterate(self, items, user_attrs):
+    def gatherDataIterate(self, items):
         """
         This method will iterate through the list of items and use the gatherData method to store the
         data on the self._data attribute
         """
         for item in items:
-            self.gatherData(item, user_attrs=user_attrs)
+            self.gatherData(item)
 
     def applyData(self, nodes, attributes=None, worldSpace=False):
         """

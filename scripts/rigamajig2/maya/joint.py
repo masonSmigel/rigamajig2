@@ -458,3 +458,17 @@ def connectChains(source, destination):
         cmds.connectAttr(dcmp + '.outputShear', driven + ".shear", f=True)
 
         attr.lock(driven, attr.TRANSFORMS + ['v'])
+
+
+def hideJoints(joints):
+    """
+    Hide joints from the outliner
+    :param joints:
+    :return:
+    """
+
+    joints = common.toList(joints)
+
+    for joint in joints:
+        if isJoint(joint):
+            cmds.setAttr("{}.drawStyle".format(joint), 2)

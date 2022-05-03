@@ -4,6 +4,7 @@ This module contains functions to navigate mesh topology
 
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
+import operator
 import rigamajig2.maya.mesh
 
 
@@ -33,13 +34,14 @@ def getClosestFacePoint(mesh, point):
     return mfnMesh.getClosestPoint(pos, om2.MSpace.kWorld)
 
 
-def getClosestVertex(mesh, point):
+def getClosestVertex(mesh, point, returnDistance=False):
     """
     Return closest vertex on mesh to the point.
     :param mesh: mesh to get the closest vertex of
     :param point: world space coordinate
-    :return: tuple of vertex id and distance to point
-    :rtype: tuple
+    :param returnDistance: if true returns a tuple of vertex id and distance to vertex
+    :return: name of the closest vertex
+    :rtype: str
     """
     pos = om2.MPoint(point[0], point[1], point[2])
     mfn_mesh = rigamajig2.maya.mesh.getMeshFn(mesh)
@@ -48,7 +50,10 @@ def getClosestVertex(mesh, point):
     faceVtx = mfn_mesh.getPolygonVertices(index)
     vtxDist = [(vtx, mfn_mesh.getPoint(vtx, om2.MSpace.kWorld).distanceTo(pos)) for vtx in faceVtx]
 
-    return min(vtxDist, key=operator.itemgetter(1))
+    vertexId, dist = min(vtxDist, key=operator.itemgetter(1))
+    if returnDistance:
+        return mesh + '.vtx[{}]'.format(vertexId), dist
+    return mesh + '.vtx[{}]'.format(vertexId)
 
 
 def getClosestUV(mesh, point):

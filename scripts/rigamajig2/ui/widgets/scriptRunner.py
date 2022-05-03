@@ -158,6 +158,9 @@ class ScriptRunner(QtWidgets.QWidget):
         f.close()
         self.add_scripts(file_path)
 
+    def save_scripts(self):
+        print ("TODO: save scripts to rig file: {}".format(self.get_current_script_list()))
+
     def clear_scripts(self):
         """Clear all scripts from the UI"""
         self.script_list.clear()

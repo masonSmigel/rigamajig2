@@ -14,6 +14,7 @@ import rigamajig2.maya.joint as joint
 import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.debug as debug
 import rigamajig2.maya.meta as meta
+import rigamajig2.maya.rig.control as rig_control
 
 if sys.version_info.major >= 3:
     basestring = str
@@ -235,14 +236,10 @@ class IkFkBase(object):
             rev = meta.getMessageConnection('{}.ikVisNode'.format(attrHolder))
 
         for ikNode in ikList:
-            shapes = cmds.listRelatives(ikNode, s=True)
-            for shape in shapes:
-                cmds.connectAttr("{}.{}".format(rev, 'outputX'), "{}.{}".format(shape, 'v'))
+            rig_control.connectControlVisiblity(driverNode=rev, driverAttr='outputX', controls=ikNode)
 
         for fkNode in fkList:
-            shapes = cmds.listRelatives(fkNode, s=True) or []
-            for shape in shapes:
-                cmds.connectAttr("{}.{}".format(attrHolder, attr), "{}.{}".format(shape, 'v'))
+            rig_control.connectControlVisiblity(driverNode=attrHolder, driverAttr=attr, controls=fkNode)
 
 
 class IkFkLimb(IkFkBase):

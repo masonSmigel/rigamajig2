@@ -271,6 +271,21 @@ def createDisplayLine(point1, point2, name=None, parent=None, displayType='ref')
     cmds.connectAttr(dcmp2 + '.outputTranslate', displayLineShape[0] + '.controlPoints[1]', f=True)
 
 
+def connectControlVisiblity(driverNode, driverAttr, controls):
+    """
+    connect to the control visiblity
+    :param driverNode: name of the node to drive the control visibility
+    :param driverAttr: name of the attribute on the node to drive the control visibility
+    :param controls: list of the controls to drive their visibility of
+    """
+    controls = rigamajig2.shared.common.toList(controls)
+
+    for control in controls:
+        shapes = cmds.listRelatives(control, s=True) or []
+        for shape in shapes:
+            cmds.connectAttr("{}.{}".format(driverNode, driverAttr), "{}.{}".format(shape, 'v'))
+
+
 @rigamajig2.maya.utils.oneUndo
 def setControlShape(control, shape, clearExisting=True):
     """
@@ -341,7 +356,22 @@ def scaleShapes(shape, scale=(1, 1, 1)):
                    relative=True, objectSpace=True)
 
 
-def createGuide(name, side=None, parent=None, position=[0,0,0], rotation=[0,0,0], size=1, hideAttrs=['sx', 'sy', 'sz','v'], color='turquoise'):
+def setLineWidth(controls, lineWidth=1):
+    """
+    set the control line width
+    :param controls: controls to set the line width of
+    :param lineWidth: line weight to set on the controls
+    :return:
+    """
+    controls = rigamajig2.shared.common.toList(controls)
+    for control in controls:
+        shapes = cmds.listRelatives(control, s=True) or []
+        for shape in shapes:
+            cmds.setAttr("{}.{}".format(shape, "lineWidth"), lineWidth)
+
+
+def createGuide(name, side=None, parent=None, position=[0, 0, 0], rotation=[0, 0, 0], size=1,
+                hideAttrs=['sx', 'sy', 'sz', 'v'], color='turquoise'):
     """
     Create a guide controler
     :param name: Name of the guide
@@ -384,5 +414,3 @@ def createGuide(name, side=None, parent=None, position=[0,0,0], rotation=[0,0,0]
     rigamajig2.maya.meta.tag(guide, 'guide')
 
     return guide
-
-

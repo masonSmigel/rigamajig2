@@ -40,6 +40,7 @@ SKELETON_POS = "skeleton_pos"
 CONTROL_SHAPES = "control_shapes"
 GUIDES = "guides"
 COMPONENTS = "components"
+SKINS = 'skins'
 PSD = 'psd'
 OUTPUT_RIG = 'output_file'
 OUTPUT_RIG_FILE_TYPE = 'output_file_type'
@@ -326,13 +327,13 @@ class Builder(object):
         :param path:
         :return:
         """
-        import rigamajig2.maya.data.node_data as node_data
+        import rigamajig2.maya.data.guide_data as guide_data
         if not path:
             path = self._absPath(self.get_rig_data(self.rig_file, GUIDES)) or ''
 
         if path:
-            nd = node_data.NodeData()
-            nd.gatherDataIterate(meta.getTagged("guide"), user_attrs=True)
+            nd = guide_data.GuideData()
+            nd.gatherDataIterate(meta.getTagged("guide"))
             nd.write(path)
             logger.info("guides saved to: {}".format(path))
 
@@ -365,7 +366,55 @@ class Builder(object):
         :return:
         """
         self.load_poseReaders()
+        self.load_skin_weights()
         logger.info("data loading -- complete")
+
+    def load_skin_weights(self, path=None):
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, SKINS)) or ''
+
+        if os.path.exists(path):
+            root, ext = os.path.splitext(path)
+            if ext:
+                self.load_single_skin(path)
+            else:
+                files = os.listdir(path)
+                for f in files:
+                    file_path = os.path.join(path, f)
+                    _, fileext = os.path.splitext(file_path)
+                    if fileext == '.json':
+                        self.load_single_skin(file_path)
+
+        logger.info("skin weights loaded")
+
+    def load_single_skin(self, path):
+        import rigamajig2.maya.data.skin_data as skin_data
+        if not path:
+            return
+        sd = skin_data.SkinData()
+        sd.read(path)
+        sd.applyData(nodes=sd.getData().keys())
+
+    def save_skin_weights(self, path=None):
+        import rigamajig2.maya.data.skin_data as skin_data
+        import rigamajig2.maya.skinCluster as skinCluster
+        if not path:
+            path = self._absPath(self.get_rig_data(self.rig_file, SKINS)) or ''
+
+        if rig_path.is_file(path):
+            sd = skin_data.SkinData()
+            sd.gatherDataIterate(cmds.ls(sl=True))
+            sd.write(path)
+            logging.info("skin weights for: {} saved to:{}".format(cmds.ls(sl=True), path))
+
+        else:
+            for geo in cmds.ls(sl=True):
+                if not skinCluster.getSkinCluster:
+                    continue
+                sd = skin_data.SkinData()
+                sd.gatherData(geo)
+                sd.write("{}/{}.json".format(path, geo))
+                logging.info("skin weights for: {} saved to:{}".format(geo, path))
 
     def delete_cmpts(self, clear_list=True):
         main_cmpt = None
@@ -636,6 +685,7 @@ class Builder(object):
 
     def set_rig_file(self, rigFile):
         if not rigFile:
+            self.rig_file = None
             return
 
         if not os.path.exists(rigFile):

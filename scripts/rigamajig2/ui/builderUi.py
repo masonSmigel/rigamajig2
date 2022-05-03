@@ -87,14 +87,15 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.reload_rig_file_action.triggered.connect(self.reload_rig_file)
 
         # UTILS
-        # ...
+        self.reload_rigamajig_modules_action = QtWidgets.QAction("Reload Rigamajig2 Modules", self)
+        self.reload_rigamajig_modules_action.triggered.connect(self.reload_rigamajig_modules)
 
         # TOOLS
         self.run_performance_test_action = QtWidgets.QAction("Run Performance Test", self)
         self.run_performance_test_action.triggered.connect(self.run_performace_test)
 
-        self.reload_rigamajig_modules_action = QtWidgets.QAction("Reload Rigamajig2 Modules", self)
-        self.reload_rigamajig_modules_action.triggered.connect(self.reload_rigamajig_modules)
+        self.generate_random_anim_action = QtWidgets.QAction("Generate Random Animation", self)
+        self.generate_random_anim_action.triggered.connect(self.generate_random_anmation)
 
         # HELP
         self.show_documentation_action = QtWidgets.QAction("Documentation", self)
@@ -115,10 +116,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         file_menu.addAction(self.reload_rig_file_action)
 
         utils_menu = self.main_menu.addMenu("Utils")
+        utils_menu.addAction(self.reload_rigamajig_modules_action)
 
-        tools_menu = self.main_menu.addMenu("Tools")
-        tools_menu.addAction(self.run_performance_test_action)
-        tools_menu.addAction(self.reload_rigamajig_modules_action)
+        qc_menu = self.main_menu.addMenu("QC")
+        qc_menu.addAction(self.run_performance_test_action)
+        qc_menu.addAction(self.generate_random_anim_action)
 
         help_menu = self.main_menu.addMenu("Help")
         help_menu.addAction(self.show_documentation_action)
@@ -151,7 +153,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.joint_pos_path_selector = pathSelector.PathSelector("joint pos: ", cap="Select a Skeleton position file",
                                                                  ff=JSON_FILTER, fm=1)
         self.import_skeleton_btn = QtWidgets.QPushButton("Import skeleton")
-        self.save_skeleton_btn = QtWidgets.QPushButton("Save skeleton")
+        self.open_skeleton_btn = QtWidgets.QPushButton("Open skel")
         self.load_jnt_pos_btn = QtWidgets.QPushButton("Load joint pos")
         self.save_jnt_pos_btn = QtWidgets.QPushButton("Save joint pos")
         self.import_load_skeleton_btn = QtWidgets.QPushButton("Import and Load Joint Positions")
@@ -183,6 +185,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.insert_jnts_amt_slider.setRange(1, 10)
         self.insert_jnts_btn = QtWidgets.QPushButton("Insert Joints")
 
+        self.prep_jnts_btn = QtWidgets.QPushButton("Prep Skeleton")
+
         # Component Section
         self.cmpt_wdgt = collapseableWidget.CollapsibleWidget('Components', addCheckbox=True)
         self.cmpt_path_selector = pathSelector.PathSelector("cmpts:", cap="Select a Component File", ff=JSON_FILTER,
@@ -190,6 +194,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.load_components_btn = QtWidgets.QPushButton("Load Cmpts")
         self.append_components_btn = QtWidgets.QPushButton("Append Cmpts")
         self.save_components_btn = QtWidgets.QPushButton("Save Cmpts")
+        self.save_components_btn.setIcon(QtGui.QIcon(":save.png"))
         self.cmpt_manager = componentManager.ComponentManager()
 
         self.initalize_build_btn = QtWidgets.QPushButton("Initalize Build")
@@ -248,6 +253,13 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         # Deformation Section
         self.deformations_wdgt = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
+
+        self.skin_path_selector = pathSelector.PathSelector("skin:", cap="Select the skin weight folder", ff=JSON_FILTER,
+                                                           fm=2)
+        self.load_all_skin_btn = QtWidgets.QPushButton("Load All Skins")
+        self.load_single_skin_btn = QtWidgets.QPushButton("Load Skin")
+        self.save_skin_btn = QtWidgets.QPushButton("Save Skin")
+
         self.psd_path_selector = pathSelector.PathSelector("psd:", cap="Select a Pose Reader File", ff=JSON_FILTER,
                                                            fm=1)
 
@@ -263,7 +275,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
         self.publishScript_scriptRunner = scriptRunner.ScriptRunner()
         self.out_path_selector = pathSelector.PathSelector("out file:", cap="Select a location to save", ff=MAYA_FILTER,
-                                                           fm=1)
+                                                           fm=2)
         self.pub_btn = QtWidgets.QPushButton("Publish Rig")
         self.pub_btn.setFixedHeight(LARGE_BTN_HEIGHT)
 
@@ -304,7 +316,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         # Skeleton
         save_load_skeleton_layout = QtWidgets.QHBoxLayout()
         save_load_skeleton_layout.addWidget(self.import_skeleton_btn)
-        save_load_skeleton_layout.addWidget(self.save_skeleton_btn)
+        save_load_skeleton_layout.addWidget(self.open_skeleton_btn)
 
         save_load_jnt_layout = QtWidgets.QHBoxLayout()
         save_load_jnt_layout.addWidget(self.load_jnt_pos_btn)
@@ -351,6 +363,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.skeletonEdit_wdgt.addLayout(mirrorJoint_layout)
         self.skeletonEdit_wdgt.addLayout(pinJoint_layout)
         self.skeletonEdit_wdgt.addLayout(insertJoint_layout)
+        self.skeletonEdit_wdgt.addWidget(self.prep_jnts_btn)
 
         # Components
         cmpt_btn_layout = QtWidgets.QHBoxLayout()
@@ -424,6 +437,17 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.controlEdit_wgt.addWidget(self.replace_ctl_btn)
 
         # Deformations
+        skin_btn_layout = QtWidgets.QHBoxLayout()
+        skin_btn_layout.setContentsMargins(0, 0, 0, 0)
+        skin_btn_layout.setSpacing(4)
+        skin_btn_layout.addWidget(self.load_all_skin_btn)
+        skin_btn_layout.addWidget(self.load_single_skin_btn)
+        skin_btn_layout.addWidget(self.save_skin_btn)
+
+        self.deformations_wdgt.addWidget(self.skin_path_selector)
+        self.deformations_wdgt.addLayout(skin_btn_layout)
+
+
         psd_btn_layout = QtWidgets.QHBoxLayout()
         psd_btn_layout.setContentsMargins(0, 0, 0, 0)
         psd_btn_layout.setSpacing(4)
@@ -433,6 +457,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         self.deformations_wdgt.addWidget(self.psd_path_selector)
         self.deformations_wdgt.addLayout(psd_btn_layout)
+
 
         # Publish
         self.publish_wdgt.addWidget(self.publishScript_scriptRunner)
@@ -503,17 +528,19 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.import_skeleton_btn.clicked.connect(self.import_skeleton)
         self.load_jnt_pos_btn.clicked.connect(self.load_joint_positions)
         self.save_jnt_pos_btn.clicked.connect(self.save_joint_positions)
+        self.open_skeleton_btn.clicked.connect(self.open_skeleton)
         self.jnt_to_rot_btn.clicked.connect(self.jnt_to_rotation)
         self.jnt_to_ori_btn.clicked.connect(self.jnt_to_orientation)
         self.mirrorJnt_btn.clicked.connect(self.mirror_joint)
         self.pin_jnt_btn.clicked.connect(self.pin_joints)
         self.unpin_jnt_btn.clicked.connect(self.unpin_joints)
         self.insert_jnts_btn.clicked.connect(self.insert_joints)
+        self.prep_jnts_btn.clicked.connect(self.prep_skeleton)
 
         self.load_guides_btn.clicked.connect(self.load_guides)
         self.save_guides_btn.clicked.connect(self.save_guides)
         self.load_components_btn.clicked.connect(self.load_components)
-        self.cmpt_manager.save_cmpt_btn.clicked.connect(self.save_components)
+        self.save_components_btn.clicked.connect(self.save_components)
         self.cmpt_manager.clear_cmpt_btn.clicked.connect(self.clear_components)
         self.initalize_build_btn.clicked.connect(self.initalize_rig)
         self.edit_build_btn.clicked.connect(self.edit_build)
@@ -525,6 +552,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.setCtlShape_btn.clicked.connect(self.set_controlShape)
         self.replace_ctl_btn.clicked.connect(self.replace_controlShape)
 
+        self.load_all_skin_btn.clicked.connect(self.load_all_skins)
+        self.load_single_skin_btn.clicked.connect(self.load_single_skin)
+        self.save_skin_btn.clicked.connect(self.save_skin)
         self.load_psd_btn.clicked.connect(self.load_posereaders)
         self.save_psd_btn.clicked.connect(self.save_posereaders)
 
@@ -558,19 +588,20 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         new_data = data.getData()
 
         # Save the main feilds
-        new_data['rig_name'] = self.asset_name_le.text()
-        new_data['pre_script'] = self.preScript_scriptRunner.get_current_script_list(relative_paths=True)
-        new_data['post_script'] = self.postScript_scriptRunner.get_current_script_list(relative_paths=True)
-        new_data['pub_script'] = self.publishScript_scriptRunner.get_current_script_list(relative_paths=True)
-        new_data['model_file'] = self.model_path_selector.get_path()
-        new_data['skeleton_file'] = self.skel_path_selector.get_path()
-        new_data['skeleton_pos'] = self.joint_pos_path_selector.get_path()
-        new_data['guides'] = self.guide_path_selector.get_path()
-        new_data['components'] = self.cmpt_path_selector.get_path()
-        new_data['control_shapes'] = self.ctl_path_selector.get_path()
-        new_data['psd'] = self.psd_path_selector.get_path()
-        new_data['output_file'] = self.out_path_selector.get_path()
-        new_data['output_file_type'] = self.out_file_type_cb.currentText()
+        new_data[builder.RIG_NAME] = self.asset_name_le.text()
+        new_data[builder.PRE_SCRIPT] = self.preScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data[builder.POST_SCRIPT] = self.postScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data[builder.PUB_SCRIPT] = self.publishScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data[builder.MODEL_FILE] = self.model_path_selector.get_path()
+        new_data[builder.SKELETON_FILE] = self.skel_path_selector.get_path()
+        new_data[builder.SKELETON_POS] = self.joint_pos_path_selector.get_path()
+        new_data[builder.GUIDES] = self.guide_path_selector.get_path()
+        new_data[builder.COMPONENTS] = self.cmpt_path_selector.get_path()
+        new_data[builder.CONTROL_SHAPES] = self.ctl_path_selector.get_path()
+        new_data[builder.SKINS] = self.skin_path_selector.get_path()
+        new_data[builder.PSD] = self.psd_path_selector.get_path()
+        new_data[builder.OUTPUT_RIG] = self.out_path_selector.get_path()
+        new_data[builder.OUTPUT_RIG_FILE_TYPE] = self.out_file_type_cb.currentText()
 
         data.setData(new_data)
         data.write(self.rig_file)
@@ -598,6 +629,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.cmpt_path_selector.set_relativeTo(self.rig_env)
         self.guide_path_selector.set_relativeTo(self.rig_env)
         self.ctl_path_selector.set_relativeTo(self.rig_env)
+        self.skin_path_selector.set_relativeTo(self.rig_env)
         self.psd_path_selector.set_relativeTo(self.rig_env)
         self.out_path_selector.set_relativeTo(self.rig_env)
 
@@ -624,6 +656,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.cmpt_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.COMPONENTS))
         self.guide_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.GUIDES))
         self.ctl_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES))
+        self.skin_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.SKINS))
         self.psd_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.PSD))
         self.out_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG))
 
@@ -712,6 +745,9 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def import_skeleton(self):
         self.rig_builder.import_skeleton(self.skel_path_selector.get_abs_path())
 
+    def open_skeleton(self):
+        cmds.file(self.skel_path_selector.get_abs_path(), o=True, f=True)
+
     def load_joint_positions(self):
         self.rig_builder.load_joint_positions(self.joint_pos_path_selector.get_abs_path())
 
@@ -732,6 +768,11 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         selection = cmds.ls(sl=True)
         assert len(selection) == 2, "Must select two joints!"
         joint.insertJoints(selection[0], selection[-1], amount=jnt_amt)
+
+    def prep_skeleton(self):
+        import rigamajig2.maya.joint as joint
+        joint.addJointOrientToChannelBox(cmds.ls(sl=True))
+        joint.toOrientation(cmds.ls(sl=True))
 
     def load_components(self):
         self.rig_builder.set_cmpts(list())
@@ -807,6 +848,18 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
                         cmds.delete(shape)
                 rigamajig2.maya.curve.copyShape(selection[0], dest)
 
+    def load_all_skins(self):
+        self.rig_builder.load_skin_weights(self.skin_path_selector.get_abs_path())
+
+    def load_single_skin(self):
+        path = cmds.fileDialog2(ds=2, cap="Select a skin file", ff=JSON_FILTER, okc="Select",
+                                dir=self.skin_path_selector.get_abs_path())
+        if path:
+            self.rig_builder.load_single_skin(path[0])
+
+    def save_skin(self):
+        self.rig_builder.save_skin_weights(path=self.skin_path_selector.get_abs_path())
+
     def load_posereaders(self):
         self.rig_builder.load_poseReaders(self.psd_path_selector.get_abs_path(),
                                           replace=self.load_psd_mode_cbox.currentIndex())
@@ -830,7 +883,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         if self.ctlShape_wdgt.isChecked():
             self.load_controlShapes()
         if self.deformations_wdgt.isChecked():
-            pass
+            self.load_all_skins()
+            self.load_posereaders()
         if self.postScript_wdgt.isChecked():
             self.postScript_scriptRunner.execute_all_scripts()
         if self.publish_wdgt.isChecked():
@@ -864,6 +918,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def run_performace_test(self):
         import maya.app.evaluationToolkit.evaluationToolkit as et
         et.runEMPerformanceTest()
+
+    def generate_random_anmation(self):
+        import rigamajig2.maya.qc as qc
+        qc.generateRandomAnim()
 
     def reload_rigamajig_modules(self):
         import rigamajig2
@@ -984,7 +1042,6 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
             rig_file = builder.create_rig_env(src_env=src_env, tgt_env=dest_rig_env, rig_name=rig_name)
         self.new_env_created.emit(rig_file)
 
-        print "rig file ", rig_file
         self.close()
 
 

@@ -25,8 +25,9 @@ class Base(object):
         :param input: list of input joints.
         :type input: list
         :param size: default size of the controls:
-        :param rigParent: node to parent to connect the component to in the heirarchy
         :type size: float
+        :param rigParent: node to parent to connect the component to in the heirarchy
+        :type rigParent: str
         """
         self.name = name
         self.cmpt_type = ".".join([self.__module__.split('cmpts.')[-1], self.__class__.__name__])
@@ -39,12 +40,12 @@ class Base(object):
         self.controlers = list()
 
         # node metaData
-        self.cmptData = OrderedDict()
-        self.cmptData['name'] = self.name
-        self.cmptData['type'] = self.cmpt_type
-        self.cmptData['input'] = self.input
+        self.cmptSettings = OrderedDict(name=name, type=self.cmpt_type, input=self.input, size=size, rigParent=rigParent)
+        # self.cmptSettings['name'] = self.name
+        # self.cmptSettings['type'] = self.cmpt_type
+        # self.cmptSettings['input'] = self.input
         # node cmpt settings
-        self.cmptSettings = OrderedDict(size=size, rigParent=rigParent)
+        # self.cmptSettings = OrderedDict(size=size, rigParent=rigParent)
 
         self.proxySetupGrp = self.name + "_proxy"
 
@@ -63,7 +64,7 @@ class Base(object):
 
             # Store to component node
             self.metaNode = rigamajig2.maya.meta.MetaNode(self.container)
-            self.metaNode.setDataDict(data=self.cmptData, hide=True)
+            # self.metaNode.setDataDict(data=self.cmptData, hide=True)
             self.metaNode.setDataDict(data=self.cmptSettings, hide=True)
 
             rigamajig2.maya.attr.lock(self.container, ["name", "type"])
@@ -278,8 +279,11 @@ class Base(object):
         """
         new_cmpt_data = OrderedDict()
         for key in self.cmptSettings.keys():
-            setattr(self, key, self.metaNode.getData(key))
-            new_cmpt_data[key] = self.metaNode.getData(key)
+            if self.metaNode: data = self.metaNode.getAllData()
+            else:data = self.cmptSettings
+
+            setattr(self, key, data[key])
+            new_cmpt_data[key] = data[key]
 
         self.cmptSettings.update(new_cmpt_data)
 
@@ -300,9 +304,9 @@ class Base(object):
         # create an info dictionary with the important component settings.
         # This is used to save the component to a file
         info_dict = OrderedDict()
-        data = self.metaNode.getAllData()
+        data = self.cmptSettings
 
-        for key in self.cmptSettings.keys() + ['name','type', 'input']:
+        for key in self.cmptSettings.keys() + ['name', 'type', 'input']:
             info_dict[key] = data[key]
         return info_dict
 

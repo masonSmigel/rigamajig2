@@ -186,6 +186,6 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.ikspline.getGroup(), mo=True)
 
 
-def finalize(self):
-        rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
-        rig_attr.lockAndHide(self.params_hrc, rig_attr.TRANSFORMS + ['v'])
+    def finalize(self):
+            rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
+            rig_attr.lockAndHide(self.params_hrc, rig_attr.TRANSFORMS + ['v'])

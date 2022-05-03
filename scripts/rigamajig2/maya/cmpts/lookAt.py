@@ -13,6 +13,20 @@ import rigamajig2.maya.rig.spaces as spaces
 
 class LookAt(rigamajig2.maya.cmpts.base.Base):
     def __init__(self, name, input=[], size=1, rigParent=str(), lookAtSpaces=dict()):
+        """
+        Look at or aim component
+        :param name: name of the components
+        :type name: str
+        :param input: list of input joints.
+        :type input: list
+        :param size: default size of the controls:
+        :type size: float
+        :param rigParent: node to parent to connect the component to in the heirarchy
+        :type rigParent: str
+        :param lookAtSpaces: list of space connections for the aim control. formated as {"attrName": object}
+        :type lookAtSpaces: dict
+        """
+
         super(LookAt, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
@@ -20,9 +34,10 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['lookAtSpaces'] = lookAtSpaces
 
         for input in self.input:
+            if not cmds.objExists(input):
+                continue
             self.cmptSettings['{}Name'.format(input)] = '_'.join(input.split("_")[:-1])
-            self.cmptSettings['{}_aimVector'.format(input)] = rig_transform.getVectorFromAxis(
-                rig_transform.getAimAxis(input))
+            self.cmptSettings['{}_aimVector'.format(input)] = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(input))
             self.cmptSettings['{}_upVector'.format(input)] = (0, 1, 0)
 
     def createBuildGuides(self):
@@ -32,7 +47,7 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         self._lookAtTgt = rig_control.createGuide("{}_lookAtTgt".format(self.name), parent=self.guides_hrc)
         rig_transform.matchTranslate(self.input, self._lookAtTgt)
         for input in self.input:
-            input_upVec = rig_control.createGuide("{}_lookAtTgt".format(input), parent=self.guides_hrc)
+            input_upVec = rig_control.createGuide("{}_upVecTgt".format(input), parent=self.guides_hrc)
             setattr(self, "_{}_upVecTgt".format(input), input_upVec)
 
     def initalHierachy(self):
@@ -43,7 +58,7 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
         self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
 
-        self.aimTarget = rig_control.createAtObject(self.aimTargetName, self.side,
+        self.aimTarget = rig_control.createAtObject(self.aimTargetName,
                                                     hierarchy=['trsBuffer', 'spaces_trs'],
                                                     hideAttrs=['v', 's'], size=self.size, color='banana',
                                                     parent=self.control_hrc, shape='square', shapeAim='z',

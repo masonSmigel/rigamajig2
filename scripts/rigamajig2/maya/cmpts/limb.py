@@ -48,7 +48,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         super(Limb, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
-        self.cmptData['component_side'] = self.side
+        self.cmptSettings['component_side'] = self.side
         # initalize cmpt settings.
         self.cmptSettings['useProxyAttrs'] = useProxyAttrs
         self.cmptSettings['useScale'] = useScale
@@ -224,7 +224,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                                                                       params=self.params_hrc)
 
         # connect the limbSwing to the other chains
-        rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self.joint1_fk[0])
+        rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self.joint1_fk[0], s=False, sh=False)
         rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self.ikfk.getIkJointList()[0], s=False)
         rig_transform.connectOffsetParentMatrix(self.limbSwing[-1], self._ikStartTgt)
 
@@ -373,7 +373,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.limbBase[0], mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.limbBase[0], s=False, sh=False, mo=True)
 
         # setup the spaces
         spaces.create(self.limbSwing[1], self.limbSwing[-1], parent=self.spaces_hrc)

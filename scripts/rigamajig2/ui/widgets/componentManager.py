@@ -67,7 +67,6 @@ class ComponentManager(QtWidgets.QWidget):
         self.component_tree.addAction(self.edit_cmpt_action)
         self.component_tree.addAction(self.del_cmpt_action)
 
-        self.save_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":save.png"), "Save Cmpts")
         self.reload_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":refresh.png"), "")
         self.clear_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":hotkeyFieldClear.png"), "")
         self.cmpt_settings_btn = QtWidgets.QPushButton(QtGui.QIcon(":QR_settings.png"), "")
@@ -76,7 +75,6 @@ class ComponentManager(QtWidgets.QWidget):
     def create_layouts(self):
         btn_layout = QtWidgets.QHBoxLayout()
         btn_layout.setContentsMargins(0, 0, 0, 0)
-        btn_layout.addWidget(self.save_cmpt_btn)
         btn_layout.addStretch()
         btn_layout.addWidget(self.reload_cmpt_btn)
         btn_layout.addWidget(self.clear_cmpt_btn)
@@ -197,11 +195,6 @@ class ComponentManager(QtWidgets.QWidget):
 
             self.builder.cmpt_list.remove(component)
 
-            for c in self.builder.cmpt_list:
-                print c.name
-
-            # item.setText(2, 'unbuilt')
-
     def clear_cmpt_tree(self):
         """ clear the component tree"""
         self.component_tree.clear()
@@ -231,10 +224,10 @@ class ComponentManager(QtWidgets.QWidget):
         for cmpt in self.builder.get_cmpt_list():
             name = cmpt.name
             cmpt_type = cmpt.cmpt_type
-            build_step_str =['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize']
+            build_step_str = ['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize']
             build_step = build_step_str[cmpt.getStep()]
 
-            self.add_component(name=name, cmpt_type=cmpt_type,build_step=build_step)
+            self.add_component(name=name, cmpt_type=cmpt_type, build_step=build_step)
 
     def update_cmpt_from_scene(self, item):
         item_dict = self.get_data_from_item(item)
@@ -248,3 +241,7 @@ class ComponentManager(QtWidgets.QWidget):
         item.setText(0, name)
         item.setText(1, cmpt)
         item.setText(2, build_step)
+
+
+class CreateCmptDialog(QtWidgets.QDialog):
+    WINDOW_TITLE = "Create New Component"

@@ -291,12 +291,14 @@ def getAimAxis(transform, allowNegative=True):
     if not child:
         raise RuntimeError('{} does not have a child to aim at'.format(transform))
 
-    childLocalMatrix = localOffset(child[0])
-    tx, ty, tz = matrix.getTranslation(childLocalMatrix)
+    return getClosestAxis(transform, child[0], allowNegative=allowNegative)
 
-    # Check which value is the largest.
-    # Then get the proper direction
-    # X
+
+def getClosestAxis(transform, target, allowNegative=True):
+
+    offset = offsetMatrix(transform, target)
+    tx, ty, tz = matrix.getTranslation(offset)
+
     if (abs(tx) > abs(ty)) and (abs(tx) > abs(tz)):
         if (tx > ty) and (tx > tz): axis = 'x'  # x
         if (tx < ty) and (tx < tz): axis = '-x'  # -x

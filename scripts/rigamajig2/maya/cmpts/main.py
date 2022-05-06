@@ -62,6 +62,14 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         cmds.setAttr(self.model_hrc + '.overrideEnabled', 1)
         cmds.connectAttr(ovrmod, self.model_hrc + '.overrideDisplayType')
 
+        # create some attributes for the geo and rig visablity
+        modVisAttr = rigamajig2.maya.attr.addAttr(self.root_hrc, longName="model", attributeType='bool',
+                                                  value=True, keyable=True, channelBox=True)
+        rigVisAttr = rigamajig2.maya.attr.addAttr(self.root_hrc, longName="rig", attributeType='bool',
+                                                  value=True, keyable=True, channelBox=True)
+        cmds.connectAttr(modVisAttr, "{}.v".format(self.model_hrc))
+        cmds.connectAttr(rigVisAttr, "{}.v".format(self.rig_hrc))
+
     def finalize(self):
         rigamajig2.maya.attr.lockAndHide(self.root_hrc, rigamajig2.maya.attr.TRANSFORMS + ['v'])
         rigamajig2.maya.attr.lock(self.rig_hrc, rigamajig2.maya.attr.TRANSFORMS)

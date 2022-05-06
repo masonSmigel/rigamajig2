@@ -6,13 +6,13 @@ import rigamajig2.maya.meta as meta
 import rigamajig2.shared.common as common
 import rigamajig2.maya.transform as rig_transform
 
-SKIPS    = {"bool", "enum"}
+SKIPS = {"bool", "enum"}
 
 
 def has_scale_token(node, attr):
     # attr = common.getFirstIndex(attr)
     scale_tokens = ["Mult", "Thickness", "Scale", "Factor"]
-    result = filter(lambda x: x in cmds.attributeName("{}.{}".format(node, attr), l=True ), scale_tokens)
+    result = filter(lambda x: x in cmds.attributeName("{}.{}".format(node, attr), l=True), scale_tokens)
     return bool(len(result))
 
 
@@ -59,3 +59,12 @@ def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
                 cmds.setKeyframe(node, attribute=attr, v=value, t=frame)
 
     print("Generated Test animation for {} nodes with time range of {}-{}.".format(len(nodes), start, end))
+
+
+def runPerformanceTest():
+    import maya.app.evaluationToolkit.evaluationToolkit as et
+    # query the playback speed, so we can set it back to default after the performace test.
+    playbackSpeed = cmds.playbackOptions(q=True, ps=True)
+    cmds.playbackOptions(ps=0.0)
+    et.runEMPerformanceTest()
+    cmds.playbackOptions(ps=playbackSpeed)

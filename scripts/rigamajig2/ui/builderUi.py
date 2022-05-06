@@ -27,6 +27,7 @@ MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
 JSON_FILTER = "Json Files (*.json)"
 
 LARGE_BTN_HEIGHT = 35
+EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 
 
 class RigamajigBuilderUi(QtWidgets.QDialog):
@@ -203,12 +204,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.load_guides_btn = QtWidgets.QPushButton("Load Guides")
         self.save_guides_btn = QtWidgets.QPushButton("Save Guides")
 
-        # self.build_rig_btn = QtWidgets.QPushButton("Build")
-        # self.connect_rig_btn = QtWidgets.QPushButton("Connect")
-        # self.finalize_rig_btn = QtWidgets.QPushButton("Finalize")
         self.edit_build_btn = QtWidgets.QPushButton("Edit Build")
         self.edit_build_btn.setFixedWidth(80)
-        # self.edit_build_btn.setFixedHeight(LARGE_BTN_HEIGHT)
         self.load_ctls_on_build = QtWidgets.QCheckBox("Load Ctls")
         self.load_ctls_on_build.setChecked(True)
         self.load_ctls_on_build.setFixedWidth(80)
@@ -391,9 +388,6 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         build_option_layout.addWidget(self.edit_build_btn)
         build_option_layout.addWidget(self.load_ctls_on_build)
 
-        # build_step_layout.addWidget(self.build_rig_btn)
-        # build_step_layout.addWidget(self.connect_rig_btn)
-        # build_step_layout.addWidget(self.finalize_rig_btn)
         self.cmpt_wdgt.addLayout(build_layout)
         build_layout.addLayout(build_option_layout)
         build_layout.addWidget(self.complete_build_btn)
@@ -916,8 +910,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
     # TOOLS MENU
     def run_performace_test(self):
-        import maya.app.evaluationToolkit.evaluationToolkit as et
-        et.runEMPerformanceTest()
+        import rigamajig2.maya.qc as qc
+        qc.runPerformanceTest()
 
     def generate_random_anmation(self):
         import rigamajig2.maya.qc as qc

@@ -282,8 +282,10 @@ class Base(object):
             if self.metaNode: data = self.metaNode.getAllData()
             else:data = self.cmptSettings
 
-            setattr(self, key, data[key])
-            new_cmpt_data[key] = data[key]
+            if key in data.keys():
+                print key, data[key]
+                setattr(self, key, data[key])
+                new_cmpt_data[key] = data[key]
 
         self.cmptSettings.update(new_cmpt_data)
 

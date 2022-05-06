@@ -33,7 +33,7 @@ class CollapsibleHeader(QtWidgets.QWidget):
         self.text_label.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
 
         self.main_layout = QtWidgets.QHBoxLayout(self)
-        self.main_layout.setContentsMargins(3, 3, 3, 3)
+        self.main_layout.setContentsMargins(4, 4, 4, 4)
         self.main_layout.addWidget(self.icon_label)
         if addCheckbox:
             self.main_layout.addWidget(self.checkbox)

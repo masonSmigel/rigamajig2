@@ -1,6 +1,7 @@
 """ Component Manager"""
 import sys
 import os
+from functools import partial
 
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -23,6 +24,8 @@ class ComponentManager(QtWidgets.QWidget):
         super(ComponentManager, self).__init__(*args, **kwargs)
 
         self.builder = builder
+
+        self.scriptjob_number = -1
 
         self.create_actions()
         self.create_widgets()
@@ -69,7 +72,6 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.reload_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":refresh.png"), "")
         self.clear_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":hotkeyFieldClear.png"), "")
-        self.cmpt_settings_btn = QtWidgets.QPushButton(QtGui.QIcon(":QR_settings.png"), "")
         self.add_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":freeformOff.png"), "Add Component")
 
     def create_layouts(self):
@@ -78,7 +80,6 @@ class ComponentManager(QtWidgets.QWidget):
         btn_layout.addStretch()
         btn_layout.addWidget(self.reload_cmpt_btn)
         btn_layout.addWidget(self.clear_cmpt_btn)
-        btn_layout.addWidget(self.cmpt_settings_btn)
         btn_layout.addWidget(self.add_cmpt_btn)
 
         self.main_layout = QtWidgets.QVBoxLayout(self)
@@ -91,7 +92,14 @@ class ComponentManager(QtWidgets.QWidget):
     def create_connections(self):
         self.reload_cmpt_btn.clicked.connect(self.load_cmpts_from_scene)
         self.clear_cmpt_btn.clicked.connect(self.clear_cmpt_tree)
-        self.add_cmpt_btn.clicked.connect(self.create_context_menu)
+        # self.add_cmpt_btn.clicked.connect(self.create_context_menu)
+
+    def set_scriptjob_enabled(self, enabled):
+        if enabled and self.scriptjob_number < 0:
+            self.scriptjob_number = cmds.scriptJob(event=["NewSceneOpened", partial(self.load_cmpts_from_scene)], protected=True)
+        elif not enabled and self.scriptjob_number < 0:
+            cmds.scriptJob(kill=self.scriptjob_number, f=True)
+            self.scriptjob_number = -1
 
     def add_component(self, name, cmpt_type, build_step='unbuilt', container=None):
         rowcount = self.component_tree.topLevelItemCount()
@@ -197,17 +205,18 @@ class ComponentManager(QtWidgets.QWidget):
 
     def clear_cmpt_tree(self):
         """ clear the component tree"""
-        self.component_tree.clear()
+        if self.component_tree.topLevelItemCount() > 0:
+            self.component_tree.clear()
 
-    def create_context_menu(self):
-        self.add_components_menu = QtWidgets.QMenu()
-        tmp_builder = builder.Builder()
-        for component in sorted(tmp_builder.getComponents()):
-            action = QtWidgets.QAction(component, self)
-            action.setIcon(QtGui.QIcon(self.__get_cmpt_icon(component)))
-            self.add_components_menu.addAction(action)
-
-        self.add_components_menu.exec_(QtGui.QCursor.pos())
+    # def create_context_menu(self):
+    #     self.add_components_menu = QtWidgets.QMenu()
+    #     tmp_builder = builder.Builder()
+    #     for component in sorted(tmp_builder.getComponents()):
+    #         action = QtWidgets.QAction(component, self)
+    #         action.setIcon(QtGui.QIcon(self.__get_cmpt_icon(component)))
+    #         self.add_components_menu.addAction(action)
+    #
+    #     self.add_components_menu.exec_(QtGui.QCursor.pos())
 
     def __get_cmpt_icon(self, cmpt):
         """ get the component icon from the module.Class of the component"""
@@ -241,6 +250,14 @@ class ComponentManager(QtWidgets.QWidget):
         item.setText(0, name)
         item.setText(1, cmpt)
         item.setText(2, build_step)
+
+    def showEvent(self, e):
+        super(ComponentManager, self).showEvent(e)
+        self.set_scriptjob_enabled(True)
+
+    def closeEvent(self, e):
+        super(ComponentManager, self).showEvent(e)
+        self.set_scriptjob_enabled(False)
 
 
 class CreateCmptDialog(QtWidgets.QDialog):

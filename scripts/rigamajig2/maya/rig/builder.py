@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 
 CMPT_PATH = os.path.abspath(os.path.join(__file__, '../../cmpts'))
 
-_EXCLUDED_FOLDERS = []
+_EXCLUDED_FOLDERS = ['face']
 _EXCLUDED_FILES = ['__init__.py', 'base.py']
 
 # BUILD ENVIORNMENT GLOBLALS

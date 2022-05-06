@@ -132,17 +132,13 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
        """
         super(SplineFK, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
-        self.cmptData['component_side'] = self.side
+        self.cmptSettings['component_side'] = self.side
 
         # initalize cmpt settings
         self.cmptSettings['numControls'] = numControls
 
-        if not self.side:
-            self.cmptSettings['fkControlName'] = "{}_fk_0".format(self.name)
-            self.cmptSettings['ikControlName'] = "{}_ik_0".format(self.name)
-        else:
-            self.cmptSettings['fkControlName'] = "{}_{}_fk_0".format(self.name, self.side)
-            self.cmptSettings['ikControlName'] = "{}_{}_ik_0".format(self.name, self.side)
+        self.cmptSettings['fkControlName'] = "{}_fk_0".format(self.name)
+        self.cmptSettings['ikControlName'] = "{}_ik_0".format(self.name)
 
         self.cmptSettings['addFKSpace'] = addFKSpace
 
@@ -158,7 +154,7 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
         pos = cmds.xform(self.inputList[0], q=True, ws=True, t=True)
-        self.up_vec_guide = rig_control.createGuide(self.name + "_upVector", side=self.side, parent=self.guides_hrc,
+        self.up_vec_guide = rig_control.createGuide(self.name + "_upVector", parent=self.guides_hrc,
                                                     position=pos)
 
     def initalHierachy(self):
@@ -224,6 +220,16 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
 
             # delete temp objects
             cmds.delete(tmp_obj)
+
+        # connect the orientation of the controls to the rig
+        cmds.orientConstraint(self.fk_control_obj_list[0][-1], self.ikspline._startTwist, mo=True)
+        cmds.orientConstraint(self.fk_control_obj_list[-1][-1], self.ikspline._endTwist, mo=True)
+
+        # setup the ik visablity attribute
+        rig_attr.addAttr(self.fk_control_obj_list[0][-1], "ikVis", "bool", value=0, keyable=False, channelBox=True)
+
+        for control in self.ikControls:
+            rig_control.connectControlVisiblity(self.fkControls[0], "ikVis", control)
 
         # delete the guides
         cmds.delete(self.guides_hrc)

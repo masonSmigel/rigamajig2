@@ -130,6 +130,7 @@ class MocapImportDialog(QtWidgets.QDialog):
         self.namespace_cb = QtWidgets.QComboBox()
         self.apply_to_layer_chbx = QtWidgets.QCheckBox("Apply to Layer")
         self.apply_to_layer_chbx.setChecked(False)
+        self.prep_rig_btn = QtWidgets.QPushButton("Prep Rig")
         self.connect_data_btn = QtWidgets.QPushButton("Connect to Rig")
 
     def create_layouts(self):
@@ -160,13 +161,19 @@ class MocapImportDialog(QtWidgets.QDialog):
         main_layout.addStretch()
 
         main_layout.addWidget(QtWidgets.QLabel("4. Apply the mocap data to the rig: "))
-        main_layout.addWidget(self.apply_to_layer_chbx)
+
+        options_layout = QtWidgets.QHBoxLayout()
+        options_layout.addWidget(self.apply_to_layer_chbx)
+        options_layout.addWidget(self.prep_rig_btn)
+
+        main_layout.addLayout(options_layout)
         main_layout.addWidget(self.connect_data_btn)
 
     def create_connections(self):
         self.import_fbx_btn.clicked.connect(self.import_fbx)
         self.cleanup_namespaces_btn.clicked.connect(self.cleanup_namespaces)
         self.connect_data_btn.clicked.connect(self.connect_mocap_data)
+        self.prep_rig_btn.clicked.connect(self.prep_rig)
 
     def update_namespaces(self):
         self.namespace_cb.clear()
@@ -214,6 +221,16 @@ class MocapImportDialog(QtWidgets.QDialog):
 
         prepSkeleton(namespace, data)
         connectMocapData(namespace, data, applyToLayer=applyToLayer)
+
+    def prep_rig(self):
+        path = self.mocap_template_pathSelector.get_path()
+        namespace = self.namespace_cb.currentText()
+        
+        d = abstract_data.AbstractData()
+        d.read(path)
+        data = d.getData()
+
+        prepSkeleton(namespace, data)
 
     def cleanup_namespaces(self):
         """

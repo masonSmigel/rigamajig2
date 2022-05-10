@@ -1,6 +1,8 @@
 """ Component Manager"""
 import sys
 import os
+import ast
+import re
 from functools import partial
 
 from PySide2 import QtCore
@@ -17,6 +19,26 @@ import rigamajig2.maya.rig.builder as builder
 ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 
 
+def _get_cmpt_icon(cmpt):
+    """ get the component icon from the module.Class of the component"""
+    return QtGui.QIcon(os.path.join(ICON_PATH, "{}.png".format(cmpt.split('.')[0])))
+
+
+def get_cmpt_object(component=None):
+
+    tmp_builder = builder.Builder()
+    cmpt_list = tmp_builder.getComponents()
+
+    module_file = ".".join(component.rsplit('.', 1)[:-1])
+    modulesPath = 'rigamajig2.maya.cmpts.{}'
+    module_name = modulesPath.format(module_file)
+    module_object = __import__(module_name, globals(), locals(), ["*"], 0)
+
+    class_ = getattr(module_object, component.rsplit('.', 1)[-1])
+
+    return class_
+
+
 class ComponentManager(QtWidgets.QWidget):
     component_icons = dict()
 
@@ -30,7 +52,6 @@ class ComponentManager(QtWidgets.QWidget):
         self.create_actions()
         self.create_widgets()
         self.create_layouts()
-        self.create_connections()
         self.setFixedHeight(280)
 
     def create_actions(self):
@@ -40,15 +61,15 @@ class ComponentManager(QtWidgets.QWidget):
         self.build_cmpt_action = QtWidgets.QAction("Build Cmpt", self)
         self.build_cmpt_action.setIcon(QtGui.QIcon(":play_S_100.png"))
 
-        self.edit_cmpt_action = QtWidgets.QAction("Edit Cmpt", self)
-        self.edit_cmpt_action.setIcon(QtGui.QIcon(":editRenderPass.png"))
+        self.reload_cmpt_action = QtWidgets.QAction("Reload Cmpts", self)
+        self.reload_cmpt_action.setIcon(QtGui.QIcon(":refresh.png"))
 
         self.del_cmpt_action = QtWidgets.QAction("Delete Cmpt", self)
         self.del_cmpt_action.setIcon(QtGui.QIcon(":trash.png"))
 
         self.select_container_action.triggered.connect(self.select_container)
         self.build_cmpt_action.triggered.connect(self.build_cmpt)
-        self.edit_cmpt_action.triggered.connect(self.edit_cmpt)
+        self.reload_cmpt_action.triggered.connect(self.load_cmpts_from_scene)
         self.del_cmpt_action.triggered.connect(self.delete_cmpt)
 
     def create_widgets(self):
@@ -67,37 +88,21 @@ class ComponentManager(QtWidgets.QWidget):
         self.component_tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.component_tree.addAction(self.select_container_action)
         self.component_tree.addAction(self.build_cmpt_action)
-        self.component_tree.addAction(self.edit_cmpt_action)
+        self.component_tree.addAction(self.reload_cmpt_action)
         self.component_tree.addAction(self.del_cmpt_action)
 
-        self.reload_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":refresh.png"), "")
-        self.clear_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":hotkeyFieldClear.png"), "")
-        self.add_cmpt_btn = QtWidgets.QPushButton(QtGui.QIcon(":freeformOff.png"), "Add Component")
-
     def create_layouts(self):
-        btn_layout = QtWidgets.QHBoxLayout()
-        btn_layout.setContentsMargins(0, 0, 0, 0)
-        btn_layout.addStretch()
-        btn_layout.addWidget(self.reload_cmpt_btn)
-        btn_layout.addWidget(self.clear_cmpt_btn)
-        btn_layout.addWidget(self.add_cmpt_btn)
-
         self.main_layout = QtWidgets.QVBoxLayout(self)
         self.main_layout.minimumSize()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(4)
         self.main_layout.addWidget(self.component_tree)
-        self.main_layout.addLayout(btn_layout)
-
-    def create_connections(self):
-        self.reload_cmpt_btn.clicked.connect(self.load_cmpts_from_scene)
-        self.clear_cmpt_btn.clicked.connect(self.clear_cmpt_tree)
-        # self.add_cmpt_btn.clicked.connect(self.create_context_menu)
 
     def set_scriptjob_enabled(self, enabled):
         if enabled and self.scriptjob_number < 0:
-            self.scriptjob_number = cmds.scriptJob(event=["NewSceneOpened", partial(self.load_cmpts_from_scene)], protected=True)
-        elif not enabled and self.scriptjob_number < 0:
+            self.scriptjob_number = cmds.scriptJob(event=["NewSceneOpened", partial(self.load_cmpts_from_scene)],
+                                                   protected=True)
+        elif not enabled and self.scriptjob_number > 0:
             cmds.scriptJob(kill=self.scriptjob_number, f=True)
             self.scriptjob_number = -1
 
@@ -117,7 +122,7 @@ class ComponentManager(QtWidgets.QWidget):
         item.setTextColor(2, QtGui.QColor(156, 156, 156))
 
         # set the icon
-        cmpt_icon = self.__get_cmpt_icon(cmpt_type)
+        cmpt_icon = _get_cmpt_icon(cmpt_type)
         item.setIcon(0, cmpt_icon)
 
         # set the data
@@ -126,6 +131,15 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.component_tree.addTopLevelItem(item)
         return item
+
+    def create_component(self,name, cmpt_type, input, rigParent):
+        print name, cmpt_type, input, rigParent
+
+        cmpt_obj = get_cmpt_object(cmpt_type)
+        cmpt = cmpt_obj(name=name, input=ast.literal_eval(str(input)), rigParent=rigParent)
+
+        self.add_component(name=name, cmpt_type=cmpt_type, build_step='unbuilt', container=None)
+        self.builder.append_cmpts([cmpt])
 
     def load_cmpts_from_scene(self):
         """ load exisiting components from the scene"""
@@ -205,22 +219,11 @@ class ComponentManager(QtWidgets.QWidget):
 
     def clear_cmpt_tree(self):
         """ clear the component tree"""
-        if self.component_tree.topLevelItemCount() > 0:
-            self.component_tree.clear()
-
-    # def create_context_menu(self):
-    #     self.add_components_menu = QtWidgets.QMenu()
-    #     tmp_builder = builder.Builder()
-    #     for component in sorted(tmp_builder.getComponents()):
-    #         action = QtWidgets.QAction(component, self)
-    #         action.setIcon(QtGui.QIcon(self.__get_cmpt_icon(component)))
-    #         self.add_components_menu.addAction(action)
-    #
-    #     self.add_components_menu.exec_(QtGui.QCursor.pos())
-
-    def __get_cmpt_icon(self, cmpt):
-        """ get the component icon from the module.Class of the component"""
-        return QtGui.QIcon(os.path.join(ICON_PATH, "{}.png".format(cmpt.split('.')[0])))
+        try:
+            if self.component_tree.topLevelItemCount() > 0:
+                self.component_tree.clear()
+        except RuntimeError:
+            pass
 
     def set_rig_builder(self, builder):
         self.builder = builder
@@ -252,13 +255,163 @@ class ComponentManager(QtWidgets.QWidget):
         item.setText(2, build_step)
 
     def showEvent(self, e):
+        print "create a script node"
         super(ComponentManager, self).showEvent(e)
         self.set_scriptjob_enabled(True)
 
-    def closeEvent(self, e):
-        super(ComponentManager, self).showEvent(e)
-        self.set_scriptjob_enabled(False)
+    def show_add_component_dialog(self):
+
+        dialog = CreateCmptDialog()
+        dialog.new_cmpt_created.connect(self.create_component)
+        dialog.show()
 
 
 class CreateCmptDialog(QtWidgets.QDialog):
     WINDOW_TITLE = "Create New Component"
+
+    new_cmpt_created = QtCore.Signal(str, str, str, str)
+
+    def __init__(self, cmpt_manager=None):
+        if sys.version_info.major < 3:
+            maya_main_window = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+        else:
+            maya_main_window = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+
+        super(CreateCmptDialog, self).__init__(maya_main_window)
+        self.cmpt_manager = cmpt_manager
+
+        self.setWindowTitle(self.WINDOW_TITLE)
+        if cmds.about(ntOS=True):
+            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+        elif cmds.about(macOS=True):
+            self.setProperty("saveWindowPref", True)
+            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+        self.setMinimumSize(400, 180)
+        self.resize(400, 240)
+
+        self.create_widgets()
+        self.create_layouts()
+        self.create_connections()
+
+        self.update_comboBox()
+
+    def create_widgets(self):
+        self.name_le = QtWidgets.QLineEdit()
+        self.component_type_cb = QtWidgets.QComboBox()
+        self.component_type_cb.setMinimumHeight(30)
+        self.component_type_cb.setMaxVisibleItems(15)
+        self.component_type_cb.setMaxVisibleItems(30)
+
+        self.input_le = QtWidgets.QLineEdit()
+        self.input_le.setPlaceholderText("[]")
+        self.load_sel_as_input_btn = QtWidgets.QPushButton("<")
+        self.load_sel_as_input_btn.setMaximumWidth(30)
+
+        self.rigParent_le = QtWidgets.QLineEdit()
+        self.rigParent_le.setPlaceholderText("None")
+        self.load_sel_as_rigParent_btn = QtWidgets.QPushButton("<")
+        self.load_sel_as_rigParent_btn.setMaximumWidth(30)
+
+        self.discription_te = QtWidgets.QTextEdit()
+        self.discription_te.setReadOnly(True)
+
+        self.apply_close_btn = QtWidgets.QPushButton("Create and Close")
+        self.apply_btn = QtWidgets.QPushButton("Create")
+        self.close_btn = QtWidgets.QPushButton("Cancel")
+
+    def create_layouts(self):
+        main_layout = QtWidgets.QVBoxLayout(self)
+        main_layout.setContentsMargins(6, 6, 6, 6)
+        main_layout.setSpacing(4)
+
+        name_layout = QtWidgets.QHBoxLayout()
+        name_layout.addWidget(QtWidgets.QLabel("name:"))
+        name_layout.addWidget(self.name_le)
+        name_layout.addSpacing(30)
+        name_layout.addWidget(QtWidgets.QLabel("type:"))
+        name_layout.addWidget(self.component_type_cb)
+
+        input_layout = QtWidgets.QHBoxLayout()
+        input_layout.addWidget(self.input_le)
+        input_layout.addWidget(self.load_sel_as_input_btn)
+
+        rigParent_layout = QtWidgets.QHBoxLayout()
+        rigParent_layout.addWidget(self.rigParent_le)
+        rigParent_layout.addWidget(self.load_sel_as_rigParent_btn)
+
+        widget_layout = QtWidgets.QFormLayout()
+        widget_layout.addRow(QtWidgets.QLabel("input:"), input_layout)
+        widget_layout.addRow(QtWidgets.QLabel("rigParent:"), rigParent_layout)
+
+        apply_btn_layout = QtWidgets.QHBoxLayout()
+        apply_btn_layout.addWidget(self.apply_close_btn)
+        apply_btn_layout.addWidget(self.apply_btn)
+        apply_btn_layout.addWidget(self.close_btn)
+
+        main_layout.addLayout(name_layout)
+        main_layout.addLayout(widget_layout)
+        main_layout.addSpacing(5)
+        main_layout.addWidget(self.discription_te)
+        main_layout.addLayout(apply_btn_layout)
+
+    def create_connections(self):
+        self.load_sel_as_input_btn.clicked.connect(self.add_selection_as_input)
+        self.load_sel_as_rigParent_btn.clicked.connect(self.add_selection_as_rigParent)
+        self.component_type_cb.currentIndexChanged.connect(self.update_discription)
+        self.close_btn.clicked.connect(self.close)
+        self.apply_btn.clicked.connect(self.apply)
+        self.apply_close_btn.clicked.connect(self.apply_and_close)
+
+    def update_comboBox(self):
+        self.component_type_cb.clear()
+        tmp_builder = builder.Builder()
+        for i, component in enumerate(sorted(tmp_builder.getComponents())):
+            self.component_type_cb.addItem(component)
+            self.component_type_cb.setItemIcon(i, QtGui.QIcon(_get_cmpt_icon(component)))
+
+    def update_discription(self):
+        self.discription_te.clear()
+
+        cmpt_type = self.component_type_cb.currentText()
+
+        cmpt_object  = get_cmpt_object(cmpt_type)
+
+        docstring = cmpt_object.__init__.__doc__
+        if docstring:
+            docstring = re.sub(" {4}", "", docstring.strip())
+
+        self.discription_te.setText(docstring)
+
+    def add_selection_as_input(self):
+        self.input_le.clear()
+        sel = cmds.ls(sl=True)
+        sel_list = list()
+        for s in sel:
+            sel_list.append(str(s))
+
+        self.input_le.setText(str(sel_list))
+
+    def add_selection_as_rigParent(self):
+        self.rigParent_le.clear()
+        sel = cmds.ls(sl=True)
+
+        if len(sel) > 0:
+            self.rigParent_le.setText(str(sel[0]))
+
+    def apply(self):
+        cmpt_type = self.component_type_cb.currentText()
+
+        name = self.name_le.text() or None
+        input = self.input_le.text() or []
+        rigParent = self.rigParent_le.text() or None
+
+        # emit the data to the create_component mehtod of the component manager.
+        # if the type is main then we can ignore the input.
+        if name and cmpt_type == 'main.Main':
+            self.new_cmpt_created.emit(name, cmpt_type, "[]", rigParent)
+        elif name and input:
+            self.new_cmpt_created.emit(name, cmpt_type, input, rigParent)
+
+    def apply_and_close(self):
+        self.apply()
+        self.close()

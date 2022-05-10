@@ -17,7 +17,7 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
 
     def __init__(self, name, input=[], size=1, useProxyAttrs=True, rigParent=str()):
         """
-        Squash componen
+        Squash component.
         This is a simple squash component made of a single joint.
 
         Important note: the guides will control the placement of this components input!

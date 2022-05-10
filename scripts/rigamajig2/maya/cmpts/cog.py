@@ -20,10 +20,23 @@ logger = logging.getLogger(__name__)
 
 class Cog(rigamajig2.maya.cmpts.base.Base):
 
-    def __init__(self, name, input=[], size=1):
+    def __init__(self, name, input=[], size=1, bindToInput=False):
+        """
+        Center of gravity (COG) component.
+
+        :param name: name of the components
+        :param input: list of one joint. typically the hips.
+        :type input: list
+        :param size: default size of the controls:
+        :type size: float
+        :param rigParent:  Connect the component to a rigParent.
+        :param bindToInput: connect the output position of the COG cmpt to the input.
+                            This should be False in most rigs as the hips will be controlled by the spine.
+        :type bindToInput: bool
+        """
         super(Cog, self).__init__(name, input=input, size=size)
 
-        self.cmptSettings['bind_to_input'] = False
+        self.cmptSettings['bind_to_input'] = bindToInput
         self.cmptSettings['cog_control_shape'] = 'cube'
         self.cmptSettings['cog_name'] = 'hips'
         self.cmptSettings['cogGimble_name'] = 'hipsGimble'

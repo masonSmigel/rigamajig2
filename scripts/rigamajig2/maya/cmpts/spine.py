@@ -20,6 +20,21 @@ import rigamajig2.maya.meta as meta
 class Spine(rigamajig2.maya.cmpts.base.Base):
 
     def __init__(self, name, input=[], size=1, rigParent=str()):
+        """
+        Spine component.
+        The spine containts the hipSwivel, torso and chest controls.
+        Based on an IKSpline to create a smooth movement.
+
+        :param name: name of the component
+        :type name: str
+        :param input: list of input joints. Starting with the base of the neck and ending with the head.
+        :type input: list
+        :param size: default size of the controls.
+        :type size: float
+        :param rigParent: connect the component to a rigParent.
+        :type rigParent: str
+        """
+
         super(Spine, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 

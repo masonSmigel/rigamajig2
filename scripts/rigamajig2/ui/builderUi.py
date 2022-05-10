@@ -61,7 +61,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         elif cmds.about(macOS=True):
             self.setProperty("saveWindowPref", True)
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        self.setMinimumSize(375, 825)
+        self.setMinimumSize(380, 825)
 
         self.create_actions()
         self.create_menus()
@@ -196,6 +196,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.append_components_btn = QtWidgets.QPushButton("Append Cmpts")
         self.save_components_btn = QtWidgets.QPushButton("Save Cmpts")
         self.save_components_btn.setIcon(QtGui.QIcon(":save.png"))
+        self.add_components_btn = QtWidgets.QPushButton("Add Components")
+        self.add_components_btn.setIcon(QtGui.QIcon(":freeformOff.png"))
         self.cmpt_manager = componentManager.ComponentManager()
 
         self.initalize_build_btn = QtWidgets.QPushButton("Initalize Build")
@@ -372,8 +374,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         cmpt_load_layout = QtWidgets.QHBoxLayout()
         cmpt_load_layout.addWidget(self.load_components_btn)
-        cmpt_load_layout.addWidget(self.append_components_btn)
         cmpt_load_layout.addWidget(self.save_components_btn)
+        cmpt_load_layout.addWidget(self.add_components_btn)
 
         self.cmpt_wdgt.addWidget(self.cmpt_path_selector)
         self.cmpt_wdgt.addLayout(cmpt_load_layout)
@@ -535,7 +537,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.save_guides_btn.clicked.connect(self.save_guides)
         self.load_components_btn.clicked.connect(self.load_components)
         self.save_components_btn.clicked.connect(self.save_components)
-        self.cmpt_manager.clear_cmpt_btn.clicked.connect(self.clear_components)
+
+        self.add_components_btn.clicked.connect(self.cmpt_manager.show_add_component_dialog)
         self.initalize_build_btn.clicked.connect(self.initalize_rig)
         self.edit_build_btn.clicked.connect(self.edit_build)
         self.complete_build_btn.clicked.connect(self.complete_build)
@@ -907,6 +910,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
             fileType = self.out_file_type_cb.currentText()
 
             self.rig_builder.run(publish=True, outputfile=outputfile, assetName=assetName, fileType=fileType)
+
+    def closeEvent(self, e):
+        super(RigamajigBuilderUi, self).closeEvent(e)
+        self.cmpt_manager.set_scriptjob_enabled(False)
 
     # TOOLS MENU
     def run_performace_test(self):

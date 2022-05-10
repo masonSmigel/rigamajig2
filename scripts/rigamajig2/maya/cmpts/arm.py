@@ -14,20 +14,24 @@ logger = logging.getLogger(__name__)
 
 
 class Arm(rigamajig2.maya.cmpts.limb.Limb):
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True, rigParent=str()):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(),
+                 useProxyAttrs=True, useScale=True, rigParent=str()):
         """
-        Create an arm setup rig.
-        :param name: name of the component. Add a side token to set the component side.
+        Arm Component (subclass of limb rig)
+
+        :param name: component name. To add a side use a side token
         :type name: str
-        :param input: list of input joints. This must be a length of 4 joints starting with the clavical and ending with the wrist.
+        :param input: list of 4 joints starting with the clavical and ending with the wrist.
         :type input: list
         :param size: default size of the controls.
         :type size: float
-        :param: ikSpaces: dictionary of key and space for the ik control.
+        :param rigParent: connect the component to a rigParent.
+        :type rigParent: str
+        :param: ikSpaces: dictionary of key and space for the ik control. formated as {"attrName": object}
         :type ikSpaces: dict
-        :param: pvSpaces: dictionary of key and space for the pv control.
+        :param: pvSpaces: dictionary of key and space for the pv control. formated as {"attrName": object}
         :type pvSpaces: dict
-        :useProxyAttrs: use proxy attributes instead of an ikfk control
+        :param useProxyAttrs: use proxy attributes instead of an ikfk control
         :type useProxyAttrs: bool
         """
         # noinspection PyTypeChecker

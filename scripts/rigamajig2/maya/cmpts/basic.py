@@ -19,6 +19,16 @@ logger = logging.getLogger(__name__)
 class Basic(rigamajig2.maya.cmpts.base.Base):
 
     def __init__(self, name, input=[], size=1, rigParent=str(), controlShape='cube', worldOrient=False):
+        """
+        Single control component.
+
+        :param name: Component name. To add a side use a side token
+        :param input: Single input joint
+        :param size:  Default size of the controls.
+        :param rigParent:  Connect the component to a rigParent.
+        :param controlShape: Control shape to apply. Default: "cube"
+        :param worldOrient: Orient the control to the world. Default: False
+        """
         super(Basic, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 

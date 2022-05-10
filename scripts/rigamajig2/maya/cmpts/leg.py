@@ -22,17 +22,23 @@ logger = logging.getLogger(__name__)
 class Leg(rigamajig2.maya.cmpts.limb.Limb):
     def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True, rigParent=str()):
         """
-        Create a main control
-        :param name: name of the components
+        Leg Component. (subclass of limb rig)
+        The leg component includes a foot.
+
+        :param name: component name. To add a side use a side token
         :type name: str
-        :param input: list of input joints. This must be a length of 4
+        :param input: list of 6 joints starting with the pelvis and ending with the toes.
         :type input: list
-        :param size: default size of the controls:
+        :param size: default size of the controls.
         :type size: float
-        :param: ikSpaces: dictionary of key and space for the ik control.
+        :param rigParent: connect the component to a rigParent.
+        :type rigParent: str
+        :param: ikSpaces: dictionary of key and space for the ik control. formated as {"attrName": object}
         :type ikSpaces: dict
-        :param: pvSpaces: dictionary of key and space for the pv control.
+        :param: pvSpaces: dictionary of key and space for the pv control. formated as {"attrName": object}
         :type pvSpaces: dict
+        :param useProxyAttrs: use proxy attributes instead of an ikfk control
+        :type useProxyAttrs: bool
         """
         super(Leg, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces,
                                   useProxyAttrs=useProxyAttrs,useScale=useScale, rigParent=rigParent)

@@ -117,19 +117,20 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
 
     def __init__(self, name, input=[], size=1, rigParent=str(), numControls=4, addFKSpace=False):
         """
-       Spline fk chain  component.
-       This component is made of a longer chain of joints connected through a spline ik handle
-       used fk controls to control the clusters of the spline.
+        Spline fk chain  component.
+        This component is made of a longer chain of joints connected through a spline ik handle
+        uses fk controls to control the clusters of the spline.
 
-       :param name: name of the components
-       :param input: list of two joints. A start and an end joint
-       :type input: list
-       :param size: default size of the controls:
-       :type size: float
-       :param: numControls: number of controls to add along the spline
-       :param addFKSpace: add a world/local space switch to the fk chain
-       :type addFKSpace: bool
-       """
+        :param name: name of the components
+        :param input: list of two joints. A start and an end joint
+        :type input: list
+        :param size: default size of the controls:
+        :type size: float
+        :param: numControls: number of controls to add along the spline
+        :type numControls: int
+        :param addFKSpace: add a world/local space switch to the fk chain
+        :type addFKSpace: bool
+        """
         super(SplineFK, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
         self.cmptSettings['component_side'] = self.side

@@ -21,19 +21,20 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
 
     def __init__(self, name, input=[], size=1, useProxyAttrs=True, useScale=False, addFKSpace=False, rigParent=str()):
         """
-        Create a chain component
+        Hand component.
+        The Hand is a system of chain components.
+
         :param name: name of the components
         :type name: str
-        :param input: list of base joints for each finger. Add the joints from pinky to thumb.
+        :param input: list of base joints for each finger. Add the joints in order from from pinky to thumb.
         :type input: list
         :param size: default size of the controls:
-        :type size: float
-        :param: ikSpaces: dictionary of key and space for the ik control.
-        :type ikSpaces: dict
-        :param: pvSpaces: dictionary of key and space for the pv control.
-        :type pvSpaces: dict
         :param useProxyAttrs: use proxy attributes instead of an ikfk control
         :type useProxyAttrs: bool
+        :param useScale: enable the animator to scale the controls
+        :type useScale: bool
+        :param addFKSpace: add an FK space switch:
+        :type addFKSpace: bool
         """
         super(Hand, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)

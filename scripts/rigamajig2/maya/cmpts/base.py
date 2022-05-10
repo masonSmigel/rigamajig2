@@ -283,7 +283,6 @@ class Base(object):
             else:data = self.cmptSettings
 
             if key in data.keys():
-                print key, data[key]
                 setattr(self, key, data[key])
                 new_cmpt_data[key] = data[key]
 

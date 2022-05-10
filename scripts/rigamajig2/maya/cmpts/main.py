@@ -14,7 +14,7 @@ MOD_HRC_NAME = 'model'
 
 
 class Main(rigamajig2.maya.cmpts.base.Base):
-    def __init__(self, name, input=[], size=1):
+    def __init__(self, name, input=[], size=1, rigParent=None):
         """
         Create a main control
         :param name:

@@ -14,10 +14,13 @@ import rigamajig2.maya.rig.spaces as spaces
 class LookAt(rigamajig2.maya.cmpts.base.Base):
     def __init__(self, name, input=[], size=1, rigParent=str(), lookAtSpaces=dict()):
         """
-        Look at or aim component
+        Look at or aim component.
+        All joints within the same component will aim at the same target.
+
+
         :param name: name of the components
         :type name: str
-        :param input: list of input joints.
+        :param input: list of input joints to aim at a target. the aim axis is determined by the direction of the child
         :type input: list
         :param size: default size of the controls:
         :type size: float

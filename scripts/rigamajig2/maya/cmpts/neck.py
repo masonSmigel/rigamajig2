@@ -19,6 +19,23 @@ import rigamajig2.maya.meta as meta
 
 class Neck(rigamajig2.maya.cmpts.base.Base):
     def __init__(self, name, input=[], size=1, headSpaces=dict(), neckSpaces=dict(), rigParent=str()):
+        """
+        Neck component.
+        The neck has a head and neck control to create natural movement in the head
+
+        :param name: name of the component
+        :type name: str
+        :param input: list of input joints. Starting with the base of the neck and ending with the head.
+        :type input: list
+        :param size: default size of the controls.
+        :type size: float
+        :param headSpaces: dictionary of key and space for the head control. formated as {"attrName": object}
+        :type headSpaces: dict
+        :param neckSpaces: dictionary of key and space for the neck control. formated as {"attrName": object}
+        :param rigParent: connect the component to a rigParent.
+        :type rigParent: str
+        """
+
         super(Neck, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 

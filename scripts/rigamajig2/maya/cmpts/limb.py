@@ -29,7 +29,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                  useProxyAttrs=True, useScale=True, addTwistJoints=True, addBendies=True,
                  rigParent=str()):
         """
-        Create a main control
+        Create a limb component. (This component is most often used as a subclass)
+
         :param name: name of the components
         :type name: str
         :param input: list of input joints. This must be a length of 4
@@ -40,7 +41,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         :type ikSpaces: dict
         :param: pvSpaces: dictionary of key and space for the pv control.
         :type pvSpaces: dict
-        :useProxyAttrs: use proxy attributes instead of an ikfk control
+        :param useProxyAttrs: use proxy attributes instead of an ikfk control
         :type useProxyAttrs: bool
         :param useScale: use scale on the controls
         :type useScale: bool

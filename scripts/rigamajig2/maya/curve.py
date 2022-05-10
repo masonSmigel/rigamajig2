@@ -265,7 +265,6 @@ def mirror(curves, axis='x', mode='replace'):
             # if the curve had incoming connections re-create them. 
             if connections:
                 for connection in connections:
-                    print connection
                     for shape in cmds.listRelatives(destinationCurve, c=True, shapes=True, type="nurbsCurve", ni=1):
                         cmds.connectAttr(connection, "{}.v".format(shape), f=True)
 

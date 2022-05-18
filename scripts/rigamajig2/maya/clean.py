@@ -89,7 +89,7 @@ def cleanRougePanels(panels=list()):
                     logger.info("removed callback '{}' from pannel '{}'".format(part, panelName))
                     break
             else:
-                newParts.apMLdeleteUnused.melpend(part)
+                newParts.append(part)
         if changed:
             cmds.modelEditor(panelName, edit=True, editorChanged=';'.join(newParts))
         processedPanelNames.append(panelName)

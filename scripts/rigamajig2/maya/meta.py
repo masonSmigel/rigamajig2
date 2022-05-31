@@ -32,11 +32,11 @@ def tag(nodes, tag, type=None):
     nodes = common.toList(nodes)
     for node in nodes:
         if cmds.objExists(node):
-            if not cmds.objExists("{}.__{}__".format(node, tag)):
-                cmds.addAttr(node, ln='__{}__'.format(tag), at='message')
             if type:
                 if not cmds.objExists("{}.__{}_{}__".format(node, type, tag)):
                     cmds.addAttr(node, ln='__{}_{}__'.format(type, tag), at='message')
+            elif not cmds.objExists("{}.__{}__".format(node, tag)):
+                cmds.addAttr(node, ln='__{}__'.format(tag), at='message')
 
 
 def untag(nodes, tag):
@@ -57,15 +57,18 @@ def untag(nodes, tag):
                     cmds.deleteAttr("{}.{}".format(node, attr))
 
 
-def getTagged(tag, namespace=None):
+def getTagged(tag, type=None, namespace=None):
     """
     Get a list of all the objects with a tag in a scene.
     :param tag: tag to get
     :type tag: str
+    :param type: specify a tag type to get
     :param namespace: Get controls found within a specific namespace
     :type namespace: str
     :return:
     """
+    if type:
+        tag = "{}_{}".format(type, tag)
     if not namespace:
         return [s.split(".")[0] for s in cmds.ls("*.__{}__".format(tag))]
     else:

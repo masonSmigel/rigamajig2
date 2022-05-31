@@ -57,9 +57,7 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         """
         :return:
         """
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
-        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
+        super(LookAt, self).initalHierachy()
 
         self.aimTarget = rig_control.createAtObject(self.aimTargetName,
                                                     hierarchy=['trsBuffer', 'spaces_trs'],

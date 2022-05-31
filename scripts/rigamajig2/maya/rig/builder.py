@@ -365,7 +365,6 @@ class Builder(object):
         Load other data, this is stuff like skinweights, blendshapes, clusters etc.
         :return:
         """
-        self.load_poseReaders()
         self.load_skin_weights()
         logger.info("data loading -- complete")
 
@@ -576,9 +575,10 @@ class Builder(object):
         self.build()
         self.connect()
         self.finalize()
+        self.load_poseReaders()
+        self.post_script()
         self.load_controlShapes()
         self.load_deform_data()
-        self.post_script()
         if publish:
             self.pub_script()
             self.publish(outputfile=outputfile, assetName=assetName, fileType=fileType, versioning=versioning)

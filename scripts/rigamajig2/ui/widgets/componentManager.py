@@ -255,7 +255,6 @@ class ComponentManager(QtWidgets.QWidget):
         item.setText(2, build_step)
 
     def showEvent(self, e):
-        print "create a script node"
         super(ComponentManager, self).showEvent(e)
         self.set_scriptjob_enabled(True)
 

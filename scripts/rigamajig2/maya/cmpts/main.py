@@ -56,17 +56,17 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         cmds.setAttr("{}.{}".format(self.model_hrc, 'inheritsTransform'), 0)
 
         # Add the attribute for model override.
-        ovrmod = rigamajig2.maya.attr.addEnum(self.trs_shot, longName='modDisplay',
-                                              enum=['normal', 'template', 'reference'],
-                                              value=2, keyable=False, channelBox=True)
+        ovrmod = rigamajig2.maya.attr.createEnum(self.trs_shot, longName='modDisplay',
+                                                 enum=['normal', 'template', 'reference'],
+                                                 value=2, keyable=False, channelBox=True)
         cmds.setAttr(self.model_hrc + '.overrideEnabled', 1)
         cmds.connectAttr(ovrmod, self.model_hrc + '.overrideDisplayType')
 
         # create some attributes for the geo and rig visablity
-        modVisAttr = rigamajig2.maya.attr.addAttr(self.root_hrc, longName="model", attributeType='bool',
-                                                  value=True, keyable=True, channelBox=True)
-        rigVisAttr = rigamajig2.maya.attr.addAttr(self.root_hrc, longName="rig", attributeType='bool',
-                                                  value=True, keyable=True, channelBox=True)
+        modVisAttr = rigamajig2.maya.attr.createAttr(self.root_hrc, longName="model", attributeType='bool',
+                                                     value=True, keyable=True, channelBox=True)
+        rigVisAttr = rigamajig2.maya.attr.createAttr(self.root_hrc, longName="rig", attributeType='bool',
+                                                     value=True, keyable=True, channelBox=True)
         cmds.connectAttr(modVisAttr, "{}.v".format(self.model_hrc))
         cmds.connectAttr(rigVisAttr, "{}.v".format(self.rig_hrc))
 

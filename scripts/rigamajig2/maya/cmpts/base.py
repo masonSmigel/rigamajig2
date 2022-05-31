@@ -41,13 +41,6 @@ class Base(object):
 
         # node metaData
         self.cmptSettings = OrderedDict(name=name, type=self.cmpt_type, input=self.input, size=size, rigParent=rigParent)
-        # self.cmptSettings['name'] = self.name
-        # self.cmptSettings['type'] = self.cmpt_type
-        # self.cmptSettings['input'] = self.input
-        # node cmpt settings
-        # self.cmptSettings = OrderedDict(size=size, rigParent=rigParent)
-
-        self.proxySetupGrp = self.name + "_proxy"
 
     def _intialize_cmpt(self):
         """
@@ -177,7 +170,10 @@ class Base(object):
 
     def initalHierachy(self):
         """Setup the inital Hirarchy. implement in subclass"""
-        pass
+        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
+        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
+        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
+        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
 
     def preRigSetup(self):
         """Pre rig setup. implement in subclass"""
@@ -252,7 +248,7 @@ class Base(object):
         :return:
         """
         if not cmds.objExists("{}.{}".format(self.container, 'build_step')):
-            rigamajig2.maya.attr.addEnum(self.container, 'build_step', value=0,
+            rigamajig2.maya.attr.createEnum(self.container, 'build_step', value=0,
                                          enum=['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize'],
                                          keyable=False, channelBox=False)
 

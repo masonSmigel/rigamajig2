@@ -31,8 +31,8 @@ def isAttr(plug):
     return False
 
 
-def addAttr(node, longName, attributeType, value=None, niceName=None, shortName=None, minValue=None, maxValue=None,
-            keyable=True, readable=True, writable=True, storable=True, channelBox=False):
+def createAttr(node, longName, attributeType, value=None, niceName=None, shortName=None, minValue=None, maxValue=None,
+               keyable=True, readable=True, writable=True, storable=True, channelBox=False):
     """
     Add a new attribute to the provided node.
 
@@ -102,8 +102,8 @@ def addAttr(node, longName, attributeType, value=None, niceName=None, shortName=
     return plug
 
 
-def addEnum(node, longName, enum, value=None, niceName=None, shortName=None,
-            keyable=True, readable=True, writable=True, storable=True, channelBox=False):
+def createEnum(node, longName, enum, value=None, niceName=None, shortName=None,
+               keyable=True, readable=True, writable=True, storable=True, channelBox=False):
     """
     Add an Enum attribute
 
@@ -168,14 +168,14 @@ def addSeparator(node, label, repeat=4):
     existing = [str(i) for i in cmds.listAttr(node, ud=True) or [] if i.startswith('sep')]
     sep = "sep" + str(len(existing))
 
-    addEnum(node, longName=sep, niceName=("-" * repeat), enum=[label])
+    createEnum(node, longName=sep, niceName=("-" * repeat), enum=[label])
     plug = node + "." + sep
     cmds.setAttr(plug, k=True, cb=True)
 
     return plug
 
 
-def addProxy(sources, targets):
+def createProxy(sources, targets):
     """
     Add a proxy attribute to the list of target nodes.
     :param sources: source attributes to add to the proxy attributes
@@ -200,8 +200,8 @@ def addProxy(sources, targets):
                 cmds.error("Attribute {} already exists. Cannot make a proxy".format(target + '.' + attrName))
 
 
-def addColorAttr(node, longName, value=False, niceName=None, shortName=None,
-                 keyable=True, readable=True, storable=True, writable=True, channelBox=False, channelBoxType='rgb'):
+def createColorAttr(node, longName, value=False, niceName=None, shortName=None,
+                    keyable=True, readable=True, storable=True, writable=True, channelBox=False, channelBoxType='rgb'):
     """
     Add a new attribute to the provided node.
 
@@ -250,9 +250,9 @@ def addColorAttr(node, longName, value=False, niceName=None, shortName=None,
     # if channel box is on. Make a couple float attributes to control the color.
     if channelBox:
         if channelBoxType == 'rgb':
-            rChannel = addAttr(node, longName + 'R', attributeType='float', minValue=0, maxValue=1)
-            gChannel = addAttr(node, longName + 'G', attributeType='float', minValue=0, maxValue=1)
-            bChannel = addAttr(node, longName + 'B', attributeType='float', minValue=0, maxValue=1)
+            rChannel = createAttr(node, longName + 'R', attributeType='float', minValue=0, maxValue=1)
+            gChannel = createAttr(node, longName + 'G', attributeType='float', minValue=0, maxValue=1)
+            bChannel = createAttr(node, longName + 'B', attributeType='float', minValue=0, maxValue=1)
 
             cmds.connectAttr(rChannel, node + "." + longName + '_r', f=True)
             cmds.connectAttr(gChannel, node + "." + longName + '_g', f=True)
@@ -264,9 +264,9 @@ def addColorAttr(node, longName, value=False, niceName=None, shortName=None,
                 cmds.setAttr(bChannel, value[2])
 
         elif channelBoxType == 'hsv':
-            hueChannel = addAttr(node, longName + 'Hue', attributeType='float', minValue=0, maxValue=1)
-            satChannel = addAttr(node, longName + 'Sat', attributeType='float', minValue=0, maxValue=1)
-            valChannel = addAttr(node, longName + 'Val', attributeType='float', minValue=0, maxValue=1)
+            hueChannel = createAttr(node, longName + 'Hue', attributeType='float', minValue=0, maxValue=1)
+            satChannel = createAttr(node, longName + 'Sat', attributeType='float', minValue=0, maxValue=1)
+            valChannel = createAttr(node, longName + 'Val', attributeType='float', minValue=0, maxValue=1)
             hsvNode = cmds.createNode('hsvToRgb', n=node + "_" + longName + '_hsv')
             hueMult = cmds.createNode('multDoubleLinear', n=node + "_" + longName + '_hue_mdl')
 
@@ -316,7 +316,7 @@ def copyAttribute(attr, source, target):
         # add Enum
         if cmds.attributeQuery(attr, n=source, le=True):
             kwargs['enum'] = cmds.attributeQuery(attr, n=source, le=True)
-            addEnum(target, longName=attr, **kwargs)
+            createEnum(target, longName=attr, **kwargs)
 
         # add attr
         else:
@@ -325,7 +325,7 @@ def copyAttribute(attr, source, target):
                 kwargs['minValue'] = cmds.attributeQuery(attr, n=source, min=True)[0]
             if cmds.attributeQuery(attr, n=source, mxe=True):  # check if the attribute has a maximum
                 kwargs['maxValue'] = cmds.attributeQuery(attr, n=source, max=True)[0]
-            addAttr(target, longName=attr, **kwargs)
+            createAttr(target, longName=attr, **kwargs)
 
         cmds.setAttr("{}.{}".format(target, attr), value)  # set the value of the attribtue
 
@@ -350,7 +350,7 @@ def moveAttribute(attr, source, target):
     for plug in destination_connections: cmds.connectAttr("{}.{}".format(target, attr), plug, f=True)
 
 
-def driveAttribute(attr, source, target):
+def driveAttribute(attr, source, target, forceVisable=False):
     """
     Create an identical attribute on a target node and drive the source
     :param attr: attribute to move
@@ -359,10 +359,14 @@ def driveAttribute(attr, source, target):
     :type source: str
     :param target: node to move the attribute to
     :type target: str
+    :param forceVisable: force the target attribute to be visable in the channel box
     """
     copyAttribute(attr=attr, source=source, target=target)
 
     cmds.connectAttr("{}.{}".format(target, attr), "{}.{}".format(source, attr), f=True)
+
+    if forceVisable:
+        cmds.setAttr("{}.{}".format(target, attr), k=True)
 
 
 def unlock(nodes, attrs):

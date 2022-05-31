@@ -69,10 +69,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
-        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
+        super(Chain, self).initalHierachy()
 
         self.fk_control_obj_list = list()
         if self.useScale:
@@ -160,10 +157,7 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
-        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
+        super(SplineFK, self).initalHierachy()
 
         self.fk_control_obj_list = list()
         self.ik_control_obj_list = list()
@@ -227,7 +221,7 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.fk_control_obj_list[-1][-1], self.ikspline._endTwist, mo=True)
 
         # setup the ik visablity attribute
-        rig_attr.addAttr(self.fk_control_obj_list[0][-1], "ikVis", "bool", value=0, keyable=False, channelBox=True)
+        rig_attr.createAttr(self.fk_control_obj_list[0][-1], "ikVis", "bool", value=0, keyable=False, channelBox=True)
 
         for control in self.ikControls:
             rig_control.connectControlVisiblity(self.fkControls[0], "ikVis", control)

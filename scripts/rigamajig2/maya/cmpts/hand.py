@@ -48,9 +48,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
-        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
+        super(Hand, self).initalHierachy()
 
         # disable auto-container placement
         cmds.container(self.container, e=True, c=False)

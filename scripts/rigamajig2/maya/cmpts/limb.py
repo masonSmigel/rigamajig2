@@ -88,10 +88,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
-        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
+        super(Limb, self).initalHierachy()
 
         if self.useScale:
             hideAttrs = []
@@ -304,7 +301,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 rig_transform.connectOffsetParentMatrix(self.bend5[-1], low_targets[2], mo=True)
 
             # create attributes for the volume factor
-            volumePlug = rig_attr.addAttr(self.params_hrc, "volumeFactor", 'float',value=1, minValue=0)
+            volumePlug = rig_attr.createAttr(self.params_hrc, "volumeFactor", 'float',value=1, minValue=0)
             cmds.connectAttr(volumePlug, "{}.{}".format(upp_spline.getGroup(), "volumeFactor"))
             cmds.connectAttr(volumePlug, "{}.{}".format(low_spline.getGroup(), "volumeFactor"))
 
@@ -322,7 +319,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 cmds.setAttr("{}.scale_{}".format(low_spline._group, low_spline._ikJointList.index(setScaleList[i])), value)
 
             # if the module is using the twisty bendy controls then we need to create a visibly control
-            rig_attr.addAttr(self.params_hrc, "bendies", "bool", value=1, keyable=True, channelBox=True)
+            rig_attr.createAttr(self.params_hrc, "bendies", "bool", value=1, keyable=True, channelBox=True)
             for bendie_ctl in self.bendControls:
                 shapes = cmds.listRelatives(bendie_ctl, s=True)
                 for shape in shapes:
@@ -348,16 +345,16 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         if self.useProxyAttrs:
             for control in self.controlers:
                 rig_attr.addSeparator(control, '----')
-            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'ikfk'), self.controlers)
-            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'stretch'), self.limb_ik[-1])
-            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'stretchTop'), self.limb_ik[-1])
-            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'stretchBot'), self.limb_ik[-1])
-            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'softStretch'), self.limb_ik[-1])
-            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'pvPin'),[self.limb_ik[-1], self.limb_pv[-1]])
-            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'twist'), self.limb_ik[-1])
+            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'ikfk'), self.controlers)
+            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'stretch'), self.limb_ik[-1])
+            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'stretchTop'), self.limb_ik[-1])
+            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'stretchBot'), self.limb_ik[-1])
+            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'softStretch'), self.limb_ik[-1])
+            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'pvPin'),[self.limb_ik[-1], self.limb_pv[-1]])
+            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'twist'), self.limb_ik[-1])
             if self.addTwistJoints and self.addBendies:
-                rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'volumeFactor'), self.limb_ik[-1])
-                rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'bendies'), self.limb_ik[-1])
+                rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'volumeFactor'), self.limb_ik[-1])
+                rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'bendies'), self.limb_ik[-1])
         else:
             rig_attr.driveAttribute('ikfk', self.params_hrc, self.ikfk_control[-1])
             rig_attr.driveAttribute('stretch', self.params_hrc, self.ikfk_control[-1])

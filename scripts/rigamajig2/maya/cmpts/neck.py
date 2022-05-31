@@ -61,7 +61,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         self.head_guide = rig_control.createGuide(self.name + "_head", side=self.side, parent=self.guides_hrc)
 
         const = cmds.pointConstraint([self.input[0], self.input[-1], self.head_guide], mo=False)[0]
-        rig_attr.addAttr(self.head_guide, "position", "float", value=HEAD_PERCENT, minValue=0, maxValue=1, keyable=True)
+        rig_attr.createAttr(self.head_guide, "position", "float", value=HEAD_PERCENT, minValue=0, maxValue=1, keyable=True)
         cmds.connectAttr("{}.{}".format(self.head_guide, "position"), "{}.{}".format(const, "target[1].targetWeight"), f=True)
         node.reverse("{}.{}".format(self.head_guide, "position"), output="{}.{}".format(const, "target[0].targetWeight"),
                      name="{}_reverse".format(self.head_guide))
@@ -72,10 +72,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         rig_attr.lockAndHide(self.skull_guide, rig_attr.TRANSLATE + ['v'])
 
     def initalHierachy(self):
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
-        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
+        super(Neck, self).initalHierachy()
 
         self.neck = rig_control.createAtObject(self.neck_name, self.side,
                                                hierarchy=['trsBuffer', 'spaces_trs'],
@@ -117,14 +114,14 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         cmds.parent(self.ikspline.getGroup(), self.root_hrc)
 
         # connect the volume factor and tangents visability attributes
-        rig_attr.addAttr(self.head[-1], 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
+        rig_attr.createAttr(self.head[-1], 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
         cmds.connectAttr("{}.volumeFactor".format(self.head[-1]), "{}.volumeFactor".format(self.params_hrc))
 
-        rig_attr.addAttr(self.neck[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
+        rig_attr.createAttr(self.neck[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.neck[-1]), "{}.v".format(self.neckTanget[0]))
         rig_transform.matchTransform(self.ikspline.getClusters()[1], self.neckTanget[0])
 
-        rig_attr.addAttr(self.head[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
+        rig_attr.createAttr(self.head[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.head[-1]), "{}.v".format(self.headTanget[0]))
         rig_transform.matchTransform(self.ikspline.getClusters()[2], self.headTanget[0])
 

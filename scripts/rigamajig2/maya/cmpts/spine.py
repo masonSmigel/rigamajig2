@@ -58,17 +58,23 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
                                                         parent=self.guides_hrc)
         # setup the slider for the guide
         const = cmds.pointConstraint([self.input[1], self.input[-2], self.hipsSwivel_guide], mo=False)[0]
-        rig_attr.addAttr(self.hipsSwivel_guide, "position", "float", value=HIPS_PERCENT, minValue=0, maxValue=1, keyable=True)
-        cmds.connectAttr("{}.{}".format(self.hipsSwivel_guide, "position"), "{}.{}".format(const, "target[1].targetWeight"), f=True)
-        node.reverse("{}.{}".format(self.hipsSwivel_guide, "position"), output="{}.{}".format(const, "target[0].targetWeight"),
+        rig_attr.createAttr(self.hipsSwivel_guide, "position", "float", value=HIPS_PERCENT, minValue=0, maxValue=1,
+                            keyable=True)
+        cmds.connectAttr("{}.{}".format(self.hipsSwivel_guide, "position"),
+                         "{}.{}".format(const, "target[1].targetWeight"), f=True)
+        node.reverse("{}.{}".format(self.hipsSwivel_guide, "position"),
+                     output="{}.{}".format(const, "target[0].targetWeight"),
                      name="{}_reverse".format(self.hipsSwivel_guide))
 
         self.torso_guide = rig_control.createGuide(self.name + "_torso", side=self.side, parent=self.guides_hrc)
         # setup the slider for the guide
         const = cmds.pointConstraint([self.input[1], self.input[-2], self.torso_guide], mo=False)[0]
-        rig_attr.addAttr(self.torso_guide, "position", "float", value=TORSO_PERCENT, minValue=0, maxValue=1, keyable=True)
-        cmds.connectAttr("{}.{}".format(self.torso_guide, "position"), "{}.{}".format(const, "target[1].targetWeight"), f=True)
-        node.reverse("{}.{}".format(self.torso_guide, "position"), output="{}.{}".format(const, "target[0].targetWeight"),
+        rig_attr.createAttr(self.torso_guide, "position", "float", value=TORSO_PERCENT, minValue=0, maxValue=1,
+                            keyable=True)
+        cmds.connectAttr("{}.{}".format(self.torso_guide, "position"), "{}.{}".format(const, "target[1].targetWeight"),
+                         f=True)
+        node.reverse("{}.{}".format(self.torso_guide, "position"),
+                     output="{}.{}".format(const, "target[0].targetWeight"),
                      name="{}_reverse".format(self.torso_guide))
 
         spineEnd_pos = cmds.xform(self.input[-2], q=True, ws=True, t=True)
@@ -85,10 +91,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
-        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
+        super(Spine, self).initalHierachy()
 
         # build the hips swivel control
         hip_pos = cmds.xform(self.input[0], q=True, ws=True, t=True)
@@ -155,16 +158,16 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         # create  attributes
         rig_attr.addSeparator(self.chest[-1], '----')
         rig_attr.addSeparator(self.hip_swing[-1], '----')
-        rig_attr.addAttr(self.chest[-1], 'pivotHeight', attributeType='float', value=3.5, minValue=0, maxValue=10)
+        rig_attr.createAttr(self.chest[-1], 'pivotHeight', attributeType='float', value=3.5, minValue=0, maxValue=10)
         # connect the some attributes
-        rig_attr.addAttr(self.chest[-1], 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
+        rig_attr.createAttr(self.chest[-1], 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
         cmds.connectAttr("{}.volumeFactor".format(self.chest[-1]), "{}.volumeFactor".format(self.params_hrc))
 
         # connect the tangets to the visablity
-        rig_attr.addAttr(self.chest[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
+        rig_attr.createAttr(self.chest[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True, keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.chest[-1]), "{}.v".format(self.chestTanget[0]))
-        rig_attr.addAttr(self.hip_swing[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True,
-                         keyable=False)
+        rig_attr.createAttr(self.hip_swing[-1], 'tangentVis', attributeType='bool', value=1, channelBox=True,
+                            keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.hip_swing[-1]), "{}.v".format(self.hipTanget[0]))
 
         # create the chest piviot offset
@@ -200,7 +203,6 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.torso[0], mo=True)
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.ikspline.getGroup(), mo=True)
 
-
     def finalize(self):
-            rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
-            rig_attr.lockAndHide(self.params_hrc, rig_attr.TRANSFORMS + ['v'])
+        rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
+        rig_attr.lockAndHide(self.params_hrc, rig_attr.TRANSFORMS + ['v'])

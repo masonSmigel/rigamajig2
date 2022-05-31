@@ -38,10 +38,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['worldOrient'] = worldOrient
 
     def initalHierachy(self):
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
-        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
+        super(Basic, self).initalHierachy()
 
         self.control = rig_control.create(self.controlName, self.side, hierarchy=['trsBuffer', 'sdk'], color='blue',
                                           parent=self.control_hrc, shape=self.controlShape)

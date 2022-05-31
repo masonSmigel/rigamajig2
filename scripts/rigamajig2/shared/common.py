@@ -118,6 +118,8 @@ L_TOKENS = ['left_', '_left', 'Left_', '_Left','_l_', 'lf_', '_lf', 'Lt_', '_Lt'
             '_Lf', '_l', 'L_', '_L', '_L_',]
 R_TOKENS = ['right_', '_right', 'Right_', '_Right', '_r_', 'rt_', '_rt', 'Rt_', '_Rt', 'rgt_', '_rgt', 'Rgt_', '_Rgt', 'Rt_',
             '_Rt', '_r', 'R_', '_R', '_R_']
+C_TOKENS = ['center_', '_center', 'Center_', '_Center', '_c_', 'cr_', '_cr', 'Cr_', '_Cr', 'ctr_', '_ctr', 'Ctr_', '_Ctr', 'Ct_',
+            '_Ct', '_c', 'C_', '_C', '_C_']
 
 
 def toList(values):
@@ -235,4 +237,6 @@ def getSide(name):
             return LEFT
         elif R_TOKENS[i] in name:
             return RIGHT
+        elif C_TOKENS[i] in name:
+            return CENTER
     return None

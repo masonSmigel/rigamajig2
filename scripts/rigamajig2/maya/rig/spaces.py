@@ -42,7 +42,7 @@ def create(node, attrHolder=None, parent=None, spaceAttrName='space', defaultNam
                              name="{}_{}".format(node, 'spaces'))
 
     # Add the local space. This node that will inherit transform from the spaceGroup (parentNode.worldMatrix)
-    rig_attr.addEnum(attrHolder, longName='space', niceName=spaceAttrName, enum=[defaultName], keyable=True)
+    rig_attr.createEnum(attrHolder, longName='space', niceName=spaceAttrName, enum=[defaultName], keyable=True)
     localSpace = cmds.createNode('transform', name="{}_{}".format(node, defaultName), parent=grp)
     rig_transform.matchTransform(node, localSpace)
     rig_attr.lockAndHide(localSpace, ['t', 'r', 's', 'v'])

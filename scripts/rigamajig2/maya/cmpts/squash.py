@@ -36,7 +36,7 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         super(SimpleSquash, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
-        self.cmptData['component_side'] = self.side
+        self.cmptSettings['component_side'] = self.side
         # initalize cmpt settings.
         self.cmptSettings['useProxyAttrs'] = useProxyAttrs
         self.cmptSettings['startControlName'] = "{}Start".format(self.name)
@@ -59,10 +59,7 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
-        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
+        super(SimpleSquash, self).initalHierachy()
 
         self.squash_start = rig_control.createAtObject(self.startControlName, self.side,
                                                        hierarchy=['trsBuffer'],
@@ -89,7 +86,7 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         rig_transform.matchTransform(self.end_guide, end_jnt)
 
         # add parameters
-        volumeFactorAttr = rig_attr.addAttr(self.params_hrc, "volumeFactor", "float", value=1, minValue=0, maxValue=10)
+        volumeFactorAttr = rig_attr.createAttr(self.params_hrc, "volumeFactor", "float", value=1, minValue=0, maxValue=10)
 
         # orient the joints
         for jnt in [start_jnt, end_jnt, squash_jnt]:
@@ -155,7 +152,7 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         if self.useProxyAttrs:
             for control in self.controlers:
                 rig_attr.addSeparator(control, '----')
-            rig_attr.addProxy('{}.{}'.format(self.params_hrc, 'volumeFactor'), self.controlers)
+            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'volumeFactor'), self.controlers)
         else:
             rig_attr.addSeparator(self.squash_end[-1], '----')
             rig_attr.driveAttribute('volumeFactor', self.params_hrc, self.squash_end[-1])

@@ -370,12 +370,13 @@ def setLineWidth(controls, lineWidth=1):
             cmds.setAttr("{}.{}".format(shape, "lineWidth"), lineWidth)
 
 
-def createGuide(name, side=None, parent=None, position=[0, 0, 0], rotation=[0, 0, 0], size=1,
+def createGuide(name, side=None, type=None, parent=None, position=[0, 0, 0], rotation=[0, 0, 0], size=1,
                 hideAttrs=['sx', 'sy', 'sz', 'v'], color='turquoise'):
     """
     Create a guide controler
     :param name: Name of the guide
     :param side: Optional - name of the side
+    :param type: control type to tag as.
     :param parent: Optional - Parent the guide in the control hierarchy
     :param position: Optional - Point in world space to position the control
     :param rotation: Optional - Rotation in world space to rotate the control
@@ -411,6 +412,6 @@ def createGuide(name, side=None, parent=None, position=[0, 0, 0], rotation=[0, 0
     if size > 0:
         cmds.setAttr("{}.localScale".format(loc), size, size, size, type="double3")
 
-    rigamajig2.maya.meta.tag(guide, 'guide')
+    rigamajig2.maya.meta.tag(guide, 'guide', type=type)
 
     return guide

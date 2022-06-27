@@ -30,12 +30,19 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         self.model_hrc = cmds.createNode('transform', n=MOD_HRC_NAME, parent=self.root_hrc)
 
         # Build our controls
-        self.trs_global = rig_control.create('trs_global', hierarchy=[], size=self.size * 1.2,
-                                             color='yellow', parent=self.root_hrc)[0]
-        self.trs_shot = rig_control.create('trs_shot', hierarchy=[], size=self.size * 1.1,
-                                           color='lightgreenyellow', parent=self.trs_global)[0]
-        self.trs_motion = rig_control.create('trs_motion', hierarchy=[], size=self.size,
-                                             color='yellowgreen', parent=self.trs_shot)[0]
+        self.trs_global = rig_control.create('trs_global',
+                                             hierarchy=[],
+                                             size=self.size * 1.2,
+                                             color='yellow',
+                                             parent=self.root_hrc)[0]
+        self.trs_shot = rig_control.create('trs_shot', hierarchy=[],
+                                           size=self.size * 1.1,
+                                           color='lightgreenyellow',
+                                           parent=self.trs_global)[0]
+        self.trs_motion = rig_control.create('trs_motion', hierarchy=[],
+                                             size=self.size,
+                                             color='yellowgreen',
+                                             parent=self.trs_shot)[0]
         # add the trs to the top of our outliner
         cmds.reorder(self.trs_global, f=True)
 
@@ -45,9 +52,9 @@ class Main(rigamajig2.maya.cmpts.base.Base):
     def rigSetup(self):
         """Add the self.rig setup"""
         # Setup the main scaling
-        rigamajig2.maya.node.multMatrix([(self.trs_motion + '.matrix'),
-                                         self.trs_shot + '.matrix',
-                                         self.trs_global + '.matrix'],
+        rigamajig2.maya.node.multMatrix([self.trs_motion + '.matrix',
+                                        self.trs_shot + '.matrix',
+                                        self.trs_global + '.matrix'],
                                         outputs=[self.rig_hrc, self.bind_hrc],
                                         t=True, r=True, s=True,
                                         name='main')
@@ -56,17 +63,31 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         cmds.setAttr("{}.{}".format(self.model_hrc, 'inheritsTransform'), 0)
 
         # Add the attribute for model override.
-        ovrmod = rigamajig2.maya.attr.createEnum(self.trs_shot, longName='modDisplay',
+        ovrmod = rigamajig2.maya.attr.createEnum(self.trs_shot,
+                                                 longName='modDisplay',
                                                  enum=['normal', 'template', 'reference'],
-                                                 value=2, keyable=False, channelBox=True)
+                                                 value=2,
+                                                 keyable=False,
+                                                 channelBox=True)
+
         cmds.setAttr(self.model_hrc + '.overrideEnabled', 1)
         cmds.connectAttr(ovrmod, self.model_hrc + '.overrideDisplayType')
 
         # create some attributes for the geo and rig visablity
-        modVisAttr = rigamajig2.maya.attr.createAttr(self.root_hrc, longName="model", attributeType='bool',
-                                                     value=True, keyable=True, channelBox=True)
-        rigVisAttr = rigamajig2.maya.attr.createAttr(self.root_hrc, longName="rig", attributeType='bool',
-                                                     value=True, keyable=True, channelBox=True)
+        modVisAttr = rigamajig2.maya.attr.createAttr(self.root_hrc,
+                                                     longName="model",
+                                                     attributeType='bool',
+                                                     value=True,
+                                                     keyable=True,
+                                                     channelBox=True)
+
+        rigVisAttr = rigamajig2.maya.attr.createAttr(self.root_hrc,
+                                                     longName="rig",
+                                                     attributeType='bool',
+                                                     value=True,
+                                                     keyable=True,
+                                                     channelBox=True)
+
         cmds.connectAttr(modVisAttr, "{}.v".format(self.model_hrc))
         cmds.connectAttr(rigVisAttr, "{}.v".format(self.rig_hrc))
 

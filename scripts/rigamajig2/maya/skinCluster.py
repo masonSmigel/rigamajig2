@@ -81,6 +81,7 @@ def getCompleteComponents(mesh):
 
 
 def tryMatrixSet(plug, value):
+    """try to set a matrix plug to given value. used to avoid errors seting an invalid value"""
     try:
         cmds.setAttr(plug, value)
     except RuntimeError:
@@ -88,6 +89,7 @@ def tryMatrixSet(plug, value):
 
 
 def tryMatrixConnect(plug, target):
+    """try to connect a given target to a matrix plug . used to avoid errors seting an invalid value"""
     try:
         cmds.connectAttr(plug, target)
     except RuntimeError:
@@ -95,6 +97,11 @@ def tryMatrixConnect(plug, target):
 
 
 def getWeights(mesh):
+    """
+    Return a list of all skincluster weights on a mesh
+    :param mesh: mesh to get the weights on
+    :return:
+    """
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
     mesh = cmds.listRelatives(meshShape, p=True)[0]
 
@@ -130,6 +137,15 @@ def getWeights(mesh):
 
 
 def setWeights(mesh, skincluster, weightDict, compressed=True):
+    """
+    Set the skin cluster weights of a given mesh
+
+    :param mesh: mesh to set the weights on
+    :param skincluster: skin cluster node to hold the weights
+    :param weightDict: skin cluster dict holding weight values for each influence
+    :param compressed: if the weights are compressed or not
+    :return:
+    """
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
 
     skinMfn = getMfnSkin(skincluster)

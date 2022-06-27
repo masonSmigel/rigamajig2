@@ -114,12 +114,20 @@ NAMETEMPLATETOKENS = ["BASE",
                       ]
 FILE_VERSION_DELIMINATOR = '_v'
 
-L_TOKENS = ['left_', '_left', 'Left_', '_Left','_l_', 'lf_', '_lf', 'Lt_', '_Lt', 'lft_', '_lft', 'Lft_', '_Lft', 'Lf_',
-            '_Lf', '_l', 'L_', '_L', '_L_',]
-R_TOKENS = ['right_', '_right', 'Right_', '_Right', '_r_', 'rt_', '_rt', 'Rt_', '_Rt', 'rgt_', '_rgt', 'Rgt_', '_Rgt', 'Rt_',
-            '_Rt', '_r', 'R_', '_R', '_R_']
-C_TOKENS = ['center_', '_center', 'Center_', '_Center', '_c_', 'cr_', '_cr', 'Cr_', '_Cr', 'ctr_', '_ctr', 'Ctr_', '_Ctr', 'Ct_',
-            '_Ct', '_c', 'C_', '_C', '_C_']
+L_TOKENS = ['left_', '_left', 'Left_', '_Left',
+            '_l_', 'lf_', '_lf', 'Lt_', '_Lt',
+            'lft_', '_lft', 'Lft_', '_Lft',
+            'Lf_', '_Lf', '_l', 'L_', '_L', '_L_',]
+
+R_TOKENS = ['right_', '_right', 'Right_', '_Right',
+            '_r_',  'rt_', '_rt', 'Rt_', '_Rt',
+            'rgt_', '_rgt', 'Rgt_', '_Rgt',
+            'Rt_',  '_Rt', '_r', 'R_', '_R', '_R_']
+
+C_TOKENS = ['center_', '_center', 'Center_', '_Center',
+            '_c_', 'cr_', '_cr', 'Cr_', '_Cr',
+            'ctr_', '_ctr', 'Ctr_', '_Ctr',
+            'Ct_','_Ct', '_c', 'C_', '_C', '_C_']
 
 
 def toList(values):
@@ -228,7 +236,8 @@ def getSide(name):
     Get the side of the node
     :param name: name to check the side of
     :type name: str
-    :return: the side of the node. A single letter to denote the side (this can be set in the rigamjig2.shared.common module)
+    :return: the side of the node. A single letter to denote the side
+             (this can be set in the rigamjig2.shared.common module)
              Default values are left - 'l' and  right -'r'
      :rtype: str
     """

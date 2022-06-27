@@ -11,9 +11,9 @@ def clean_path(path):
     :returns: cleanup up path
     :rtype: str
     """
-    r_path = path.replace('\\', '/')
-    r_path = r_path.replace('//', '/')
-    return r_path
+    rPath = path.replace('\\', '/')
+    rPath = rPath.replace('//', '/')
+    return rPath
 
 
 def is_file(path):
@@ -70,4 +70,3 @@ def make_dir(path):
     if not os.path.isdir(path):
         os.makedirs(path)
     return path
-

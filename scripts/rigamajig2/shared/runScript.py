@@ -8,18 +8,18 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-def run_script(file_path, init_globals=None):
+def run_script(file_path, initGlobals=None):
     """
     Execute code located at the file_path
     :param file_path: File Path
-    :param init_globals: Optional- dictionary with module globals
+    :param initGlobals: Optional- dictionary with module globals
     :return:
     """
-    if init_globals is None:
-        init_globals = dict()
+    if initGlobals is None:
+        initGlobals = dict()
     file_path = os.path.realpath(file_path)
     logger.info("Running: {}".format(os.path.basename(file_path)))
-    runpy.run_path(file_path, init_globals, "__main__")
+    runpy.run_path(file_path, initGlobals, "__main__")
 
 
 def find_scripts(path):

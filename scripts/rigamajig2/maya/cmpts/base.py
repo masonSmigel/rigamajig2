@@ -65,6 +65,7 @@ class Base(object):
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.preScript()  # run any pre-build scripts
+                self.createJoints()
                 self.createBuildGuides()
             self.setStep(1)
         else:
@@ -144,6 +145,10 @@ class Base(object):
     # --------------------------------------------------------------------------------
     # functions
     # --------------------------------------------------------------------------------
+    def createJoints(self):
+        """build joints required for the component"""
+        pass
+
     def createBuildGuides(self):
         """Add additional guides"""
         pass
@@ -151,7 +156,7 @@ class Base(object):
     def setInitalData(self):
         """
         Set inital component data.
-        This needs to be done in a compont so we control attrribute settings in subclasses.
+        This allows you to set component data within subclasses.
         """
         pass
 
@@ -162,6 +167,7 @@ class Base(object):
             rigamajig2.maya.meta.tag(self.container, 'component')
 
     def preScript(self):
+        """run a prescript"""
         pass
 
     def setupAnimAttrs(self):
@@ -218,6 +224,7 @@ class Base(object):
         pass
 
     def postScript(self):
+        """run a post script"""
         pass
 
     def optimize(self):

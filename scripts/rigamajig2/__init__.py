@@ -1,6 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 """
+    Rigamjig2 modular rigging system
+
     project: rigamajig2
     file: __init__.py
     author: masonsmigel

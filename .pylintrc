@@ -100,46 +100,24 @@ min-similarity-lines=15
 variable-naming-style=camelCase
 argument-naming-style=camelCase
 attr-naming-style=camelCase
+const-naming-style=UPPER_CASE
 
+
+# Naming style matching correct class, and class constant names
 class-attribute-naming-style=camelCase
 class-const-naming-style=UPPER_CASE
 class-naming-style=PascalCase
-const-naming-style=UPPER_CASE
 
-# Minimum line length for functions/classes that require docstrings
-docstring-min-length=-1
+# Naming style matching correct method, function and module  names.
+method-naming-style=camelCase
+function-naming-style=camelCase
+module-naming-style=camelCase
 
 # Good variable names which should always be accepted, separated by a comma.
 good-names= i, j, k, ex, Run, _, A, B, C
 
-# Naming style matching correct method names.
-method-naming-style=camelCase
-
-# Naming style matching correct function names.
-function-naming-style=camelCase
-
-# Naming style matching correct module names.
-module-naming-style=camelCase
-
-
-[IMPORTS]
-
-# List of modules that can be imported at any level, not just the top level
-# one.
-allow-any-import-level=
-
-# Allow wildcard imports from modules that define __all__.
-allow-wildcard-with-all=no
-
-# Output a graph (.gv or any supported image format) of all (i.e. internal and
-# external) dependencies to the given file (report RP0402 must not be
-# disabled).
-import-graph=
 
 [CLASSES]
-
-# Warn about protected attribute access inside special methods
-check-protected-access-in-special-methods=no
 
 # List of method names used to declare (i.e. assign) instance attributes.
 defining-attr-methods=__init__,

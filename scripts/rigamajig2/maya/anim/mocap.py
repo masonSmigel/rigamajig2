@@ -123,6 +123,7 @@ class MocapImportDialog(QtWidgets.QDialog):
         self.update_namespaces()
 
     def create_widgets(self):
+        """create widgets"""
         self.import_fbx_btn = QtWidgets.QPushButton("Import FBX")
         self.cleanup_namespaces_btn = QtWidgets.QPushButton("Cleanup Namespaces")
         self.mocap_template_pathSelector = pathSelector.PathSelector(cap='Select a Mocap Template',
@@ -134,6 +135,7 @@ class MocapImportDialog(QtWidgets.QDialog):
         self.connect_data_btn = QtWidgets.QPushButton("Connect to Rig")
 
     def create_layouts(self):
+        """create layouts"""
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.setContentsMargins(6, 6, 6, 6)
         main_layout.setSpacing(4)

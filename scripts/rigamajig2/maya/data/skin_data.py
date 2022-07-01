@@ -40,7 +40,8 @@ class SkinData(maya_data.MayaData):
         data['dqsSupportNonRigid'] = cmds.getAttr("{}.dqsSupportNonRigid".format(skinCls))
         data['objects'] = cmds.skinCluster(skinCls, q=True, g=True)
 
-        preBindInputs = common.toList(cmds.listConnections("{}.bindPreMatrix".format(skinCls), plugs=True, s=True, d=False))
+        skinClsPreBindAttr = "{}.bindPreMatrix".format(skinCls)
+        preBindInputs = common.toList(cmds.listConnections(skinClsPreBindAttr, plugs=True, s=True, d=False))
         data['preBindInputs'] = preBindInputs if preBindInputs else None
 
         weights, vertexCount = skinCluster.getWeights(node)
@@ -69,7 +70,7 @@ class SkinData(maya_data.MayaData):
             if rebind and mesh_skin:
                 cmds.delete(mesh_skin)
             if not rebind and not mesh_skin:
-                raise RuntimeError("No skin assosicated with the given node. Use the rebind argument to re-attatch skin.")
+                raise RuntimeError("No skin assosicated with the given node. Use the rebind argument to re-bind.")
             # preform the rebind
             if rebind:
                 cmds.select(influenceObjects, mesh, r=True)

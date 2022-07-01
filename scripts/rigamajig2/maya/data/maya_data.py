@@ -7,6 +7,7 @@ import maya.cmds as cmds
 
 
 class MayaData(abstract_data.AbstractData):
+    """ Class to stre maya data"""
     def gatherData(self, node):
         """
         This method will gather data from the maya node passed as an argument.

@@ -370,13 +370,14 @@ def setLineWidth(controls, lineWidth=1):
             cmds.setAttr("{}.{}".format(shape, "lineWidth"), lineWidth)
 
 
-def createGuide(name, side=None, type=None, parent=None, position=[0, 0, 0], rotation=[0, 0, 0], size=1,
+def createGuide(name, side=None, shape="loc", type=None, parent=None, position=[0, 0, 0], rotation=[0, 0, 0], size=1,
                 hideAttrs=['sx', 'sy', 'sz', 'v'], color='turquoise'):
     """
     Create a guide controler
     :param name: Name of the guide
     :param side: Optional - name of the side
     :param type: control type to tag as.
+    :param shape: shape of the guide
     :param parent: Optional - Parent the guide in the control hierarchy
     :param position: Optional - Point in world space to position the control
     :param rotation: Optional - Rotation in world space to rotate the control
@@ -385,13 +386,17 @@ def createGuide(name, side=None, type=None, parent=None, position=[0, 0, 0], rot
     :param color: Optional - Color of the guide
     :return: Control created
     """
-    if side:
-        name = rigamajig2.maya.naming.getUniqueName("{}_{}".format(name, side))
-    else:
-        name = rigamajig2.maya.naming.getUniqueName(name)
-
+    name = rigamajig2.maya.naming.getUniqueName(name, side=side)
     guide = cmds.createNode('joint', name=name)
-    loc = cmds.createNode('locator', p=guide, n="{}Shape".format(name))
+
+    # set the control shape
+    if shape == "loc":
+        loc = cmds.createNode('locator', p=guide, n="{}Shape".format(name))
+        cmds.setAttr("{}.localScale".format(loc), size, size, size, type="double3")
+    else:
+        setControlShape(guide, shape)
+        scaleShapes(guide, (size, size, size))
+
     cmds.setAttr("{}.drawStyle".format(guide), 2)
     hideAttrs.append('radius')
 
@@ -407,10 +412,6 @@ def createGuide(name, side=None, type=None, parent=None, position=[0, 0, 0], rot
         cmds.xform(guide, ws=True, rotation=rotation)
     if color:
         rigamajig2.maya.color.setOverrideColor(guide, color)
-
-    # scale the shape
-    if size > 0:
-        cmds.setAttr("{}.localScale".format(loc), size, size, size, type="double3")
 
     rigamajig2.maya.meta.tag(guide, 'guide', type=type)
 

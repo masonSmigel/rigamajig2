@@ -16,7 +16,7 @@ class Logger(object):
     LOGGER_NAME = 'Rigamajig2'
 
     LEVEL_DEFAULT = logging.DEBUG
-    PROPAGATE_DEFAULT = True
+    PROPAGATE_DEFAULT = False
 
     _logger_obj = None
 
@@ -30,7 +30,8 @@ class Logger(object):
                 cls._logger_obj.setLevel(cls.LEVEL_DEFAULT)
                 cls._logger_obj.propagate = cls.PROPAGATE_DEFAULT
 
-                fmt = logging.Formatter("%(name)s %(levelname)s [%(module)s: %(lineno)d] %(message)s")
+                # "%(name)s %(levelname)s [%(module)s: %(lineno)d] %(message)s"
+                fmt = logging.Formatter("%(name)s %(module)s:  %(message)s")
 
                 stream_handler = logging.StreamHandler(sys.stderr)
                 stream_handler.setFormatter(fmt)

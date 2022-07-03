@@ -18,7 +18,6 @@ if sys.version_info.major >= 3:
     basestring = str
     unicode = basestring
 
-
 def tag(nodes, tag, type=None):
     """
     Tag the specified nodes with the proper type
@@ -87,6 +86,9 @@ def hasTag(node, tag):
     if cmds.objExists("{}.__{}__".format(node, tag)):
         return True
     return False
+
+
+# TODO: refactor all this!
 
 
 def addMessageConnection(sourceNode, dataNode, sourceAttr, dataAttr=None):

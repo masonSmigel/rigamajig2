@@ -318,7 +318,7 @@ def mirror(joints, axis='x', mode='rotate', zeroRotation=True):
         toOrientation(mirroredJointList)
 
 
-@utils.preserveSelection
+# @utils.preserveSelection
 def orientJoints(joints, aimAxis='x', upAxis='y', worldUpVector=(0, 1, 0), autoUpVector=False):
     """
     Orient joints using an aim constraint. If using autoUpVector select the only joints you want to orient together.
@@ -344,15 +344,13 @@ def orientJoints(joints, aimAxis='x', upAxis='y', worldUpVector=(0, 1, 0), autoU
         if parent not in joints:
             parent = None
 
-        children = cmds.listRelatives(joint, c=True) if cmds.listRelatives(joint, c=True) else list()
+        allChildren = cmds.listRelatives(joint, c=True) if cmds.listRelatives(joint, c=True) else list()
+        children = [child for child in allChildren if cmds.nodeType(child) == "joint"]
         if len(children) > 0:
             # get the aim target
             aimTarget = None
             for child in children:
-                if cmds.nodeType(child) == 'joint':
-                    aimTarget = child
-                    break
-            for child in children:
+                aimTarget = child
                 cmds.parent(child, world=True)
 
             if aimTarget:
@@ -397,7 +395,8 @@ def orientJoints(joints, aimAxis='x', upAxis='y', worldUpVector=(0, 1, 0), autoU
 
             # reparent children to current joint
             for child in children:
-                cmds.parent(child, joint)
+                if cmds.nodeType(child) == 'joint':
+                    cmds.parent(child, joint)
 
         # if the joint has no children, set the orientation to match the parent joint.
         # Apply all rotations then zero them out.

@@ -22,8 +22,6 @@ __version__ = version
 
 __all__ = ['version', 'version_info', '__version__']
 
-logger = logging.getLogger(__name__)
-
 
 def reloadModule(name='rigamajig2', log=True):
     """
@@ -36,5 +34,5 @@ def reloadModule(name='rigamajig2', log=True):
     for mod in keys_list:
         if mod.startswith(name):
             if log:
-                logger.info("Reloaded module: {}".format(mod))
+                print("Reloaded module: {}".format(mod))
             del sys.modules[mod]

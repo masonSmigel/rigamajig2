@@ -15,6 +15,7 @@ import rigamajig2.maya.meta
 import rigamajig2.maya.shape
 import rigamajig2.maya.attr
 import rigamajig2.maya.utils
+import rigamajig2.maya.joint
 
 CONTROLSHAPES = rigamajig2.shared.path.clean_path(os.path.join(os.path.dirname(__file__), "controlShapes.data"))
 
@@ -370,7 +371,8 @@ def setLineWidth(controls, lineWidth=1):
             cmds.setAttr("{}.{}".format(shape, "lineWidth"), lineWidth)
 
 
-def createGuide(name, side=None, shape="loc", type=None, parent=None, position=[0, 0, 0], rotation=[0, 0, 0], size=1,
+def createGuide(name, side=None, shape="loc", type=None, parent=None, joint=False,
+                position=[0, 0, 0], rotation=[0, 0, 0], size=1,
                 hideAttrs=['sx', 'sy', 'sz', 'v'], color='turquoise'):
     """
     Create a guide controler
@@ -379,6 +381,7 @@ def createGuide(name, side=None, shape="loc", type=None, parent=None, position=[
     :param type: control type to tag as.
     :param shape: shape of the guide
     :param parent: Optional - Parent the guide in the control hierarchy
+    :param bool joint: choose to show or hide the joint
     :param position: Optional - Point in world space to position the control
     :param rotation: Optional - Rotation in world space to rotate the control
     :param size: Optional - Size of the guide
@@ -386,19 +389,25 @@ def createGuide(name, side=None, shape="loc", type=None, parent=None, position=[
     :param color: Optional - Color of the guide
     :return: Control created
     """
+    if hideAttrs is None:
+        hideAttrs = list()
+
     name = rigamajig2.maya.naming.getUniqueName(name, side=side)
-    guide = cmds.createNode('joint', name=name)
+    guide = cmds.createNode('joint', name=name + "_guide")
 
     # set the control shape
     if shape == "loc":
         loc = cmds.createNode('locator', p=guide, n="{}Shape".format(name))
         cmds.setAttr("{}.localScale".format(loc), size, size, size, type="double3")
-    else:
+    elif shape is not "joint":
         setControlShape(guide, shape)
         scaleShapes(guide, (size, size, size))
 
-    cmds.setAttr("{}.drawStyle".format(guide), 2)
-    hideAttrs.append('radius')
+    if not joint:
+        cmds.setAttr("{}.drawStyle".format(guide), 2)
+        hideAttrs.append('radius')
+    else:
+        rigamajig2.maya.joint.addJointOrientToChannelBox(guide)
 
     for attr in hideAttrs:
         if cmds.objExists("{}.{}".format(guide, attr)):

@@ -65,14 +65,18 @@ def isUniqueName(name):
     return False if len(cmds.ls(name)) > 1 else True
 
 
-def getUniqueName(name, indexPosition=-1):
+def getUniqueName(name, side=None, indexPosition=-1):
     """
     Add an index to the given name. The last interger found in the string will be used as the index.
     :param name: name to check
+    :param side: side to add to the name
     :param indexPosition: where to add the index if one is not found. default is -2 (after the suffix)
     :return: returns a new unique name
     """
     name = common.getFirstIndex(name)
+
+    if side:
+        name = "{}_{}".format(name, side)
 
     # name is already unique
     if not cmds.objExists(name):

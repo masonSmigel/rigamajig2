@@ -14,7 +14,7 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
 import rigamajig2.maya.meta as meta
-import rigamajig2.maya.rig.builder as builder
+import rigamajig2.maya.rig_builder.builder as builder
 
 ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 

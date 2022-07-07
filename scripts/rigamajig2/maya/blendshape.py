@@ -1,7 +1,17 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-Functions for blenshapes. Try to take some from Gl tools
+    project: rigamajig2
+    file: blendshape.py
+    author: masonsmigel
+    date: 01/2021
+    discription: blendshape functions and helpers.
 """
+
+# MAYA
 import maya.cmds as cmds
+
+# RIGAMAJIG
 import rigamajig2.shared.common as common
 import rigamajig2.maya.shape
 

@@ -1,24 +1,28 @@
 """
 This file contains the UI for the main rig builder
 """
+# PYTHON
 import sys
 import time
 import logging
 import os
 from collections import OrderedDict
 
+# MAYA
+import maya.cmds as cmds
+import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
-import maya.cmds as cmds
-import maya.OpenMayaUI as omui
-
+# RIGAMAJIG
 import rigamajig2.shared.common as common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager, overrideColorer, sliderGrp
-import rigamajig2.maya.rig.builder as builder
+import rigamajig2.maya.rig_builder.builder as cmptBuilder
 import rigamajig2.maya.data.abstract_data as abstract_data
+
+import rigamajig2.maya.rig_builder.deform as deform
 
 logger = logging.getLogger(__name__)
 logger.setLevel(5)
@@ -470,8 +474,8 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         build_layout.addWidget(self.skeleton_wdgt)
         build_layout.addWidget(self.cmpt_wdgt)
         build_layout.addWidget(self.ctlShape_wdgt)
-        build_layout.addWidget(self.deformations_wdgt)
         build_layout.addWidget(self.postScript_wdgt)
+        build_layout.addWidget(self.deformations_wdgt)
         build_layout.addWidget(self.publish_wdgt)
         build_layout.addStretch()
 
@@ -585,20 +589,20 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         new_data = data.getData()
 
         # Save the main feilds
-        new_data[builder.RIG_NAME] = self.asset_name_le.text()
-        new_data[builder.PRE_SCRIPT] = self.preScript_scriptRunner.get_current_script_list(relative_paths=True)
-        new_data[builder.POST_SCRIPT] = self.postScript_scriptRunner.get_current_script_list(relative_paths=True)
-        new_data[builder.PUB_SCRIPT] = self.publishScript_scriptRunner.get_current_script_list(relative_paths=True)
-        new_data[builder.MODEL_FILE] = self.model_path_selector.get_path()
-        new_data[builder.SKELETON_FILE] = self.skel_path_selector.get_path()
-        new_data[builder.SKELETON_POS] = self.joint_pos_path_selector.get_path()
-        new_data[builder.GUIDES] = self.guide_path_selector.get_path()
-        new_data[builder.COMPONENTS] = self.cmpt_path_selector.get_path()
-        new_data[builder.CONTROL_SHAPES] = self.ctl_path_selector.get_path()
-        new_data[builder.SKINS] = self.skin_path_selector.get_path()
-        new_data[builder.PSD] = self.psd_path_selector.get_path()
-        new_data[builder.OUTPUT_RIG] = self.out_path_selector.get_path()
-        new_data[builder.OUTPUT_RIG_FILE_TYPE] = self.out_file_type_cb.currentText()
+        new_data[cmptBuilder.RIG_NAME] = self.asset_name_le.text()
+        new_data[cmptBuilder.PRE_SCRIPT] = self.preScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data[cmptBuilder.POST_SCRIPT] = self.postScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data[cmptBuilder.PUB_SCRIPT] = self.publishScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data[cmptBuilder.MODEL_FILE] = self.model_path_selector.get_path()
+        new_data[cmptBuilder.SKELETON_FILE] = self.skel_path_selector.get_path()
+        new_data[cmptBuilder.SKELETON_POS] = self.joint_pos_path_selector.get_path()
+        new_data[cmptBuilder.GUIDES] = self.guide_path_selector.get_path()
+        new_data[cmptBuilder.COMPONENTS] = self.cmpt_path_selector.get_path()
+        new_data[cmptBuilder.CONTROL_SHAPES] = self.ctl_path_selector.get_path()
+        new_data[cmptBuilder.SKINS] = self.skin_path_selector.get_path()
+        new_data[cmptBuilder.PSD] = self.psd_path_selector.get_path()
+        new_data[cmptBuilder.OUTPUT_RIG] = self.out_path_selector.get_path()
+        new_data[cmptBuilder.OUTPUT_RIG_FILE_TYPE] = self.out_file_type_cb.currentText()
 
         data.setData(new_data)
         data.write(self.rig_file)
@@ -630,7 +634,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.psd_path_selector.set_relativeTo(self.rig_env)
         self.out_path_selector.set_relativeTo(self.rig_env)
 
-        self.rig_builder = builder.Builder(self.rig_file)
+        self.rig_builder = cmptBuilder.Builder(self.rig_file)
         self.cmpt_manager.set_rig_builder(self.rig_builder)
         self.update_ui_with_rig_data()
 
@@ -639,7 +643,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
             return
 
         # set the character name
-        self.asset_name_le.setText(self.rig_builder.get_rig_data(self.rig_file, builder.RIG_NAME))
+        self.asset_name_le.setText(self.rig_builder.get_rig_data(self.rig_file, cmptBuilder.RIG_NAME))
 
         # loadSettings prescripts, postscripts and pubscripts from file or rig_env
         self.reload_prescripts()
@@ -647,21 +651,21 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         self.reload_pubscripts()
 
         # set rig paths
-        self.model_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.MODEL_FILE))
-        self.skel_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.SKELETON_FILE))
-        self.joint_pos_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.SKELETON_POS))
-        self.cmpt_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.COMPONENTS))
-        self.guide_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.GUIDES))
-        self.ctl_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.CONTROL_SHAPES))
-        self.skin_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.SKINS))
-        self.psd_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.PSD))
-        self.out_path_selector.set_path(builder.Builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG))
+        self.model_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.MODEL_FILE))
+        self.skel_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.SKELETON_FILE))
+        self.joint_pos_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.SKELETON_POS))
+        self.cmpt_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.COMPONENTS))
+        self.guide_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.GUIDES))
+        self.ctl_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.CONTROL_SHAPES))
+        self.skin_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.SKINS))
+        self.psd_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.PSD))
+        self.out_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.OUTPUT_RIG))
 
         # clear the component manager
         self.cmpt_manager.clear_cmpt_tree()
 
         # set the default output file type
-        file_type_text = builder.Builder.get_rig_data(self.rig_file, builder.OUTPUT_RIG_FILE_TYPE)
+        file_type_text = cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.OUTPUT_RIG_FILE_TYPE)
         index = self.out_file_type_cb.findText(file_type_text, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.out_file_type_cb.setCurrentIndex(index)
@@ -669,21 +673,21 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     def reload_prescripts(self):
         self.preScript_scriptRunner.clear_scripts()
         self.preScript_scriptRunner.set_relative_dir(self.rig_builder.get_rig_env())
-        for path in self.rig_builder.get_rig_data(self.rig_file, builder.PRE_SCRIPT):
+        for path in self.rig_builder.get_rig_data(self.rig_file, cmptBuilder.PRE_SCRIPT):
             # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
             self.preScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
 
     def reload_postscripts(self):
         self.postScript_scriptRunner.clear_scripts()
         self.postScript_scriptRunner.set_relative_dir(self.rig_builder.get_rig_env())
-        for path in self.rig_builder.get_rig_data(self.rig_file, builder.POST_SCRIPT):
+        for path in self.rig_builder.get_rig_data(self.rig_file, cmptBuilder.POST_SCRIPT):
             # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
             self.postScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
 
     def reload_pubscripts(self):
         self.publishScript_scriptRunner.clear_scripts()
         self.publishScript_scriptRunner.set_relative_dir(self.rig_builder.get_rig_env())
-        for path in self.rig_builder.get_rig_data(self.rig_file, builder.PUB_SCRIPT):
+        for path in self.rig_builder.get_rig_data(self.rig_file, cmptBuilder.PUB_SCRIPT):
             # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
             self.publishScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
 
@@ -736,7 +740,6 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         cmds.file(self.model_path_selector.get_abs_path(), o=True, f=True)
 
     def import_and_load_skeleton(self):
-        self.import_skeleton()
         self.load_joint_positions()
 
     def import_skeleton(self):
@@ -746,10 +749,10 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         cmds.file(self.skel_path_selector.get_abs_path(), o=True, f=True)
 
     def load_joint_positions(self):
-        self.rig_builder.load_joint_positions(self.joint_pos_path_selector.get_abs_path())
+        self.rig_builder.load_joints(self.joint_pos_path_selector.get_abs_path())
 
     def save_joint_positions(self):
-        self.rig_builder.save_joint_positions(self.joint_pos_path_selector.get_abs_path())
+        self.rig_builder.save_joints(self.joint_pos_path_selector.get_abs_path())
 
     def pin_joints(self):
         import rigamajig2.maya.rig.live as live
@@ -852,7 +855,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         path = cmds.fileDialog2(ds=2, cap="Select a skin file", ff=JSON_FILTER, okc="Select",
                                 dir=self.skin_path_selector.get_abs_path())
         if path:
-            self.rig_builder.load_single_skin(path[0])
+            deform.load_single_skin(path[0])
 
     def save_skin(self):
         self.rig_builder.save_skin_weights(path=self.skin_path_selector.get_abs_path())
@@ -970,7 +973,7 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         self.archetype_cb_widget = QtWidgets.QWidget()
         self.archetype_cb_widget.setFixedHeight(25)
         self.archetype_cb = QtWidgets.QComboBox()
-        for archetype in builder.get_available_archetypes():
+        for archetype in cmptBuilder.get_available_archetypes():
             self.archetype_cb.addItem(archetype)
 
         self.src_path = pathSelector.PathSelector("Source:", fm=2)
@@ -1037,10 +1040,10 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         rig_name = self.rig_name_le.text()
         if self.from_archetype_rb.isChecked():
             archetype = self.archetype_cb.currentText()
-            rig_file = builder.new_rigenv_from_archetype(new_env=dest_rig_env, archetype=archetype, rig_name=rig_name)
+            rig_file = cmptBuilder.new_rigenv_from_archetype(new_env=dest_rig_env, archetype=archetype, rig_name=rig_name)
         else:
             src_env = self.src_path.get_path()
-            rig_file = builder.create_rig_env(src_env=src_env, tgt_env=dest_rig_env, rig_name=rig_name)
+            rig_file = cmptBuilder.create_rig_env(src_env=src_env, tgt_env=dest_rig_env, rig_name=rig_name)
         self.new_env_created.emit(rig_file)
 
         self.close()

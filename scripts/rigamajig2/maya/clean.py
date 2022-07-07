@@ -1,9 +1,19 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-Clean scene functions
+    project: rigamajig2
+    file: clean.py
+    author: masonsmigel
+    date: 01/2021
+    discription: functions to clean up scenes
 """
+# PYTHON
+import logging
+
+# MAYA
 import maya.cmds as cmds
 import maya.mel as mel
-import logging
+
 
 logger = logging.getLogger(__name__)
 

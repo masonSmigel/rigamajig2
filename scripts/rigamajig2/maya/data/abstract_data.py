@@ -89,6 +89,13 @@ class AbstractData(object):
         """
         return self._data
 
+    def getKeys(self):
+        """
+        This will return a list of all the keys
+        :return:
+        """
+        return list(self._data.keys())
+
     def setData(self, value):
         """
         This should only be used for setting the self._data attribute to a dictionary.

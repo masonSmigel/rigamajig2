@@ -1,14 +1,27 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-This module contains our rig builder. It acts as a main wrapper to manage all functions of the rig build.
+    project: rigamajig2
+    file: model.py
+    author: masonsmigel
+    date: 07/2022
+    discription: This module contains our rig builder.
+                 It acts as a wrapper to manage all functions of the rig_builder.
 """
+
+# PYTHON
 import sys
 import os
 import time
 import inspect
 import shutil
+import logging
 from collections import OrderedDict
 
+# MAYA
 import maya.cmds as cmds
+
+# RIGAMAJIG
 import rigamajig2.shared.common as common
 import rigamajig2.shared.path as rig_path
 import rigamajig2.shared.runScript as runScript
@@ -16,9 +29,11 @@ import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
 
-import rigamajig2.maya.cmpts.main as main
-
-import logging
+# BUILDER
+import rigamajig2.maya.rig_builder.model as model
+import rigamajig2.maya.rig_builder.guides as guides
+import rigamajig2.maya.rig_builder.controlShapes as controlShapes
+import rigamajig2.maya.rig_builder.deform as deform
 
 logger = logging.getLogger(__name__)
 
@@ -95,64 +110,19 @@ class Builder(object):
     # RIG BUILD STEPS
     # --------------------------------------------------------------------------------
     def import_model(self, path=None):
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, MODEL_FILE))
+        path = path or self._absPath(self.get_rig_data(self.rig_file, MODEL_FILE))
+        model.import_model(path)
+        logger.info("Model loaded")
 
-        nodes = list()
-        if path and os.path.exists(path):
-            nodes = file.import_(path, ns=None)
-            logger.info("model imported")
+    def load_joints(self, path=None):
+        path = path or self._absPath(self.get_rig_data(self.rig_file, SKELETON_POS))
+        guides.load_joints(path)
+        logger.info("Joints loaded")
 
-        # get top level nodes in the skeleton
-        if nodes:
-            for node in cmds.ls(nodes, l=True, type='transform'):
-                if not len(node.split('|')) > 2:
-                    meta.tag(node, 'model_root')
-
-    def import_skeleton(self, path=None):
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, SKELETON_FILE))
-        if os.path.exists(path):
-            nodes = file.import_(path, ns=None)
-            logger.info("skeleton imported")
-
-        # tag all bind joints
-        for jnt in cmds.ls("*_bind", type='joint'):
-            meta.tag(jnt, "bind")
-
-        # get top level nodes in the skeleton
-        for node in cmds.ls(nodes, l=True, type='transform'):
-            if not len(node.split('|')) > 2:
-                meta.tag(node, 'skeleton_root')
-
-    def load_joint_positions(self, path=None):
-        import rigamajig2.maya.data.joint_data as joint_data
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, SKELETON_POS))
-
-        if os.path.exists(path):
-            data_obj = joint_data.JointData()
-            data_obj.read(path)
-            data_obj.applyData(data_obj.getData().keys())
-            logger.info("Joint positions loaded")
-
-    def save_joint_positions(self, path=None):
-        import rigamajig2.maya.data.joint_data as joint_data
-
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, SKELETON_POS))
-
-        # find all skeleton roots and get the positions of their children
-        skeleton_roots = common.toList(meta.getTagged('skeleton_root'))
-        if len(skeleton_roots) > 0:
-            data_obj = joint_data.JointData()
-            for root in skeleton_roots:
-                logger.debug("Gathering data of joints under skeleton root_hrc: {}".format(root))
-                data_obj.gatherDataIterate(cmds.listRelatives(root, allDescendents=True, type='joint'))
-            data_obj.write(path)
-            logger.info("Joint positions saved to: {}".format(path))
-        else:
-            raise RuntimeError("the root_hrc joint {} does not exists".format(skeleton_roots))
+    def save_joints(self, path=None):
+        path = path or self._absPath(self.get_rig_data(self.rig_file, SKELETON_POS))
+        guides.save_joints(path)
+        logger.info("Joint positions saved to: {}".format(path))
 
     def initalize(self):
         """Initalize rig (this is where the user can make changes)"""
@@ -280,45 +250,22 @@ class Builder(object):
         :param applyColor: Apply the control colors.
         :return:
         """
-        import rigamajig2.maya.data.curve_data as curve_data
-
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))
-
-        cd = curve_data.CurveData()
-        cd.read(path)
-
-        if os.path.exists(path):
-            controls = [ctl for ctl in cd.getData().keys() if cmds.objExists(ctl)]
-            logger.info("loading shapes for {} controls".format(len(controls)))
-            cd.applyData(controls, create=True, applyColor=applyColor)
-            logger.info("control shapes -- complete")
+        path = path or self._absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))
+        controlShapes.load_controlShapes(path, applyColor=applyColor)
+        logger.info("control shapes -- complete")
 
     def save_controlShapes(self, path=None):
-        import rigamajig2.maya.data.curve_data as curve_data
-
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))
-
-        if path:
-            cd = curve_data.CurveData()
-            cd.gatherDataIterate(meta.getTagged("control"))
-            cd.write(path)
-            logger.info("control shapes saved to: {}".format(path))
+        path = path or self._absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))
+        controlShapes.save_controlShapes(path)
+        logger.info("control shapes saved to: {}".format(path))
 
     def load_guide_data(self, path=None):
         """
         Load guide data
         :return:
         """
-        import rigamajig2.maya.data.node_data as node_data
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, GUIDES))
-
-        if path and os.path.exists(path):
-            nd = node_data.NodeData()
-            nd.read(path)
-            nd.applyData(nodes=nd.getData().keys())
+        path = path or self._absPath(self.get_rig_data(self.rig_file, GUIDES))
+        if guides.load_guide_data(path):
             logger.info("guides loaded")
 
     def save_guide_data(self, path=None):
@@ -327,38 +274,22 @@ class Builder(object):
         :param path:
         :return:
         """
-        import rigamajig2.maya.data.guide_data as guide_data
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, GUIDES)) or ''
-
-        if path:
-            nd = guide_data.GuideData()
-            nd.gatherDataIterate(meta.getTagged("guide"))
-            nd.write(path)
-            logger.info("guides saved to: {}".format(path))
-
-    def save_poseReaders(self, path=None):
-        """Save out pose readers"""
-        import rigamajig2.maya.data.psd_data as psd_data
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, PSD))
-
-        if path:
-            pd = psd_data.PSDData()
-            pd.gatherDataIterate(meta.getTagged("poseReader"))
-            pd.write(path)
+        path = path or self._absPath(self.get_rig_data(self.rig_file, GUIDES))
+        guides.save_guide_data(path)
+        logger.info("guides saved to: {}".format(path))
 
     def load_poseReaders(self, path=None, replace=True):
         """ Load pose readers"""
-        import rigamajig2.maya.data.psd_data as psd_data
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, PSD)) or ''
 
-        if os.path.exists(path):
-            pd = psd_data.PSDData()
-            pd.read(path)
-            pd.applyData(nodes=pd.getData().keys(), replace=replace)
+        path = path or self._absPath(self.get_rig_data(self.rig_file, PSD)) or ''
+        if deform.load_poseReaders(path, replace=replace):
             logger.info("pose readers loaded")
+
+    def save_poseReaders(self, path=None):
+        """Save out pose readers"""
+        path = path or self._absPath(self.get_rig_data(self.rig_file, PSD))
+        deform.save_poseReaders(path)
+        logger.info("pose readers saved to: {}".format(path))
 
     def load_deform_data(self):
         """
@@ -369,51 +300,13 @@ class Builder(object):
         logger.info("data loading -- complete")
 
     def load_skin_weights(self, path=None):
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, SKINS)) or ''
-
-        if os.path.exists(path):
-            root, ext = os.path.splitext(path)
-            if ext:
-                self.load_single_skin(path)
-            else:
-                files = os.listdir(path)
-                for f in files:
-                    file_path = os.path.join(path, f)
-                    _, fileext = os.path.splitext(file_path)
-                    if fileext == '.json':
-                        self.load_single_skin(file_path)
-
-        logger.info("skin weights loaded")
-
-    def load_single_skin(self, path):
-        import rigamajig2.maya.data.skin_data as skin_data
-        if not path:
-            return
-        sd = skin_data.SkinData()
-        sd.read(path)
-        sd.applyData(nodes=sd.getData().keys())
+        path = path or self._absPath(self.get_rig_data(self.rig_file, SKINS)) or ''
+        if deform.load_skin_weights(path):
+            logger.info("skin weights loaded")
 
     def save_skin_weights(self, path=None):
-        import rigamajig2.maya.data.skin_data as skin_data
-        import rigamajig2.maya.skinCluster as skinCluster
-        if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, SKINS)) or ''
-
-        if rig_path.isFile(path):
-            sd = skin_data.SkinData()
-            sd.gatherDataIterate(cmds.ls(sl=True))
-            sd.write(path)
-            logging.info("skin weights for: {} saved to:{}".format(cmds.ls(sl=True), path))
-
-        else:
-            for geo in cmds.ls(sl=True):
-                if not skinCluster.getSkinCluster:
-                    continue
-                sd = skin_data.SkinData()
-                sd.gatherData(geo)
-                sd.write("{}/{}.json".format(path, geo))
-                logging.info("skin weights for: {} saved to:{}".format(geo, path))
+        path = path or self._absPath(self.get_rig_data(self.rig_file, SKINS)) or ''
+        deform.save_skin_weights(path)
 
     def delete_cmpts(self, clear_list=True):
         main_cmpt = None
@@ -478,7 +371,8 @@ class Builder(object):
     def load_required_plugins(self):
         """
         loadSettings required plugins
-        NOTE: there are plugins REQUIRED for rigamajig. for other plug-ins needed in production add them as a pre-script.
+        NOTE: There are plugins REQUIRED for rigamajig such as matrix and quat nodes.
+              loading other plug-ins needed in production should be added into a pre-script file
         """
         loaded_plugins = cmds.pluginInfo(query=True, listPlugins=True)
 
@@ -567,8 +461,7 @@ class Builder(object):
         self.load_required_plugins()
         self.pre_script()
         self.import_model()
-        self.import_skeleton()
-        self.load_joint_positions()
+        self.load_joints()
         self.load_components()
         self.initalize()
         self.load_component_settings()

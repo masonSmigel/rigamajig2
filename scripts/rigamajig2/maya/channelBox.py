@@ -1,4 +1,13 @@
-""" Channel box Utilities"""
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    project: rigamajig2
+    file: channelBox.py
+    author: masonsmigel
+    date: 01/2021
+    discription: channel Box utilities
+"""
+
 import maya.cmds as cmds
 
 

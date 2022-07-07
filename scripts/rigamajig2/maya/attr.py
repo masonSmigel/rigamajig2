@@ -1,12 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-Attribute functions
-
-Thanks to Austin Baker (http://austinjbaker.com/) for his blog about the _getPlug, getPlugValue and , setPlugValue
-
+    project: rigamajig2
+    file: attr.py
+    author: masonsmigel
+    date: 01/2021
+    discription: attribute functions and helpers.
 """
+
+# MAYA
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 
+# RIGAMAJIG
 import rigamajig2.shared.common as common
 
 TRANSLATE = ['tx', 'ty', 'tz']

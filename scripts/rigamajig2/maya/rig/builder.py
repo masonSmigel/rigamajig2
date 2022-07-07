@@ -400,7 +400,7 @@ class Builder(object):
         if not path:
             path = self._absPath(self.get_rig_data(self.rig_file, SKINS)) or ''
 
-        if rig_path.is_file(path):
+        if rig_path.isFile(path):
             sd = skin_data.SkinData()
             sd.gatherDataIterate(cmds.ls(sl=True))
             sd.write(path)
@@ -495,10 +495,10 @@ class Builder(object):
             if not item:
                 continue
 
-            if rig_path.is_file(item):
+            if rig_path.isFile(item):
                 res_list.append(item)
 
-            if rig_path.is_dir(item):
+            if rig_path.isDir(item):
                 for script in runScript.find_scripts(item):
                     res_list.append(script)
 
@@ -599,7 +599,7 @@ class Builder(object):
 
         # check if the provided path is a file path.
         # if so use the file naming and extension from the provided path
-        if rig_path.is_file(outputfile):
+        if rig_path.isFile(outputfile):
             file_name = outputfile.split(os.sep)[-1]
             dir_name = '/'.join(outputfile.split(os.sep)[:-1])
 
@@ -746,14 +746,14 @@ def get_available_archetypes():
 
 def find_rig_file(path):
     """ find a rig file within the path"""
-    if rig_path.is_file(path):
+    if rig_path.isFile(path):
         return False
 
     path_contents = os.listdir(path)
     for f in path_contents:
         if f.startswith("."):
             continue
-        if not rig_path.is_dir(path):
+        if not rig_path.isDir(path):
             continue
         file_name, file_ext = os.path.splitext(os.path.join(path, f))
         if not file_ext == '.rig':

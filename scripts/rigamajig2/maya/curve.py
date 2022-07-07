@@ -3,6 +3,7 @@ from collections import OrderedDict
 
 import maya.cmds as cmds
 
+import rigamajig2.maya.decorators
 import rigamajig2.shared.common as common
 import rigamajig2.maya.shape as shape
 import rigamajig2.maya.mathUtils as mathUtils
@@ -167,8 +168,8 @@ def wipeCurveShape(curve):
             cmds.delete(shape)
 
 
-@utils.oneUndo
-@utils.preserveSelection
+@rigamajig2.maya.decorators.oneUndo
+@rigamajig2.maya.decorators.preserveSelection
 def copyShape(source, destinations):
     """
     copy the shapes on the shapes nodes of the source to the desination nodes
@@ -217,8 +218,8 @@ def copyShape(source, destinations):
             cmds.delete(curveTrs)
 
 
-@utils.oneUndo
-@utils.preserveSelection
+@rigamajig2.maya.decorators.oneUndo
+@rigamajig2.maya.decorators.preserveSelection
 def mirror(curves, axis='x', mode='replace'):
     """
     :param curves: curve to mirror

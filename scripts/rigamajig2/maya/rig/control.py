@@ -3,6 +3,8 @@ Controller functions
 """
 import os
 import maya.cmds as cmds
+
+import rigamajig2.maya.decorators
 import rigamajig2.shared.common
 import rigamajig2.shared.path
 import rigamajig2.maya.naming
@@ -17,7 +19,7 @@ import rigamajig2.maya.attr
 import rigamajig2.maya.utils
 import rigamajig2.maya.joint
 
-CONTROLSHAPES = rigamajig2.shared.path.clean_path(os.path.join(os.path.dirname(__file__), "controlShapes.data"))
+CONTROLSHAPES = os.path.join(os.path.dirname(__file__), "controlShapes.data").replace("\\", "/")
 
 CONTROLTAG = 'control'
 
@@ -287,7 +289,7 @@ def connectControlVisiblity(driverNode, driverAttr, controls):
             cmds.connectAttr("{}.{}".format(driverNode, driverAttr), "{}.{}".format(shape, 'v'))
 
 
-@rigamajig2.maya.utils.oneUndo
+@rigamajig2.maya.decorators.oneUndo
 def setControlShape(control, shape, clearExisting=True):
     """
     Set the control shape

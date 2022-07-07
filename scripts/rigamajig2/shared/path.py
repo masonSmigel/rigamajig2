@@ -4,7 +4,7 @@ This module contains path utilities
 import os
 
 
-def clean_path(path):
+def cleanPath(path):
     """
     Cleanup a given path to work how it should.
     :param path: path to clean
@@ -16,7 +16,7 @@ def clean_path(path):
     return rPath
 
 
-def is_file(path):
+def isFile(path):
     """Check if the path is a file"""
     root, ext = os.path.splitext(path)
     if ext:
@@ -25,7 +25,7 @@ def is_file(path):
         return False
 
 
-def is_dir(path):
+def isDir(path):
     """Check if the path is a directory"""
     root, ext = os.path.splitext(path)
     if ext:
@@ -64,7 +64,7 @@ def make_dir(path):
     :return: path. if creation failed return None
     :rtype: str
     """
-    if is_file(path):
+    if isFile(path):
         path = os.path.dirname(path)
 
     if not os.path.isdir(path):

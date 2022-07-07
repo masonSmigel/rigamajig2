@@ -3,6 +3,8 @@ functions for Joints
 """
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
+
+import rigamajig2.maya.decorators
 import rigamajig2.shared.common as common
 import rigamajig2.maya.utils as utils
 import rigamajig2.maya.mathUtils as mathUtils
@@ -117,7 +119,7 @@ def duplicateChain(jointList, parent=None, names=None):
     return newJointList
 
 
-@utils.oneUndo
+@rigamajig2.maya.decorators.oneUndo
 def insertJoints(startJoint, endJoint, amount=1, name=None):
     """
     Insert more joints between a start and end joint
@@ -173,7 +175,7 @@ def getInbetweenJoints(start, end):
     return [start] + btwnJoints + [end]
 
 
-@utils.preserveSelection
+@rigamajig2.maya.decorators.preserveSelection
 def toOrientation(joints):
     """
     Remove all values from our rotation channels and add them to the Joint orient
@@ -207,7 +209,7 @@ def toOrientation(joints):
             cmds.setAttr("{0}.rotateAxis".format(jnt), 0, 0, 0)
 
 
-@utils.preserveSelection
+@rigamajig2.maya.decorators.preserveSelection
 def toRotation(joints):
     """
     Remove all values from our joint orient channels and add them to the rotation
@@ -227,8 +229,8 @@ def toRotation(joints):
         cmds.xform(jnt, ws=True, rotation=orientation)
 
 
-@utils.oneUndo
-@utils.preserveSelection
+@rigamajig2.maya.decorators.oneUndo
+@rigamajig2.maya.decorators.preserveSelection
 def mirror(joints, axis='x', mode='rotate', zeroRotation=True):
     """
     Mirrors of one joint to its mirror across a given axis.

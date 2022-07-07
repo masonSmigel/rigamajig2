@@ -9,6 +9,7 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
+import rigamajig2.maya.decorators
 import rigamajig2.maya.transform
 import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.utils as utils
@@ -35,7 +36,7 @@ def prepSkeleton(namespace=None, mocapData=dict()):
         cmds.setAttr(control, mocapData['prepAttrs'][attr])
 
 
-@utils.oneUndo
+@rigamajig2.maya.decorators.oneUndo
 def connectMocapData(namespace=None, mocapData=dict(), applyToLayer=False):
     """
     connect the mocap data to the rig
@@ -77,10 +78,18 @@ def connectMocapData(namespace=None, mocapData=dict(), applyToLayer=False):
     # bake the control to the keys.
     min_time = cmds.playbackOptions(q=True, min=True)
     max_time = cmds.playbackOptions(q=True, max=True)
-    cmds.bakeResults(controls, simulation=True, time=(min_time, max_time), hi='none',
-                     sampleBy=1, oversamplingRate=1, disableImplicitControl=True, preserveOutsideKeys=True,
-                     sparseAnimCurveBake=False, removeBakedAttributeFromLayer=False,
-                     removeBakedAnimFromLayer=True, bakeOnOverrideLayer=applyToLayer,
+    cmds.bakeResults(controls,
+                     simulation=True,
+                     time=(min_time, max_time),
+                     hi='none',
+                     sampleBy=1,
+                     oversamplingRate=1,
+                     disableImplicitControl=True,
+                     preserveOutsideKeys=True,
+                     sparseAnimCurveBake=False,
+                     removeBakedAttributeFromLayer=False,
+                     removeBakedAnimFromLayer=True,
+                     bakeOnOverrideLayer=applyToLayer,
                      shape=False)
 
 

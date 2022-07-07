@@ -3,6 +3,8 @@ This module contains functions for maintaining interactablility
 """
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
+
+import rigamajig2.maya.decorators
 import rigamajig2.shared.common as common
 import rigamajig2.maya.rig.ikfk as ikfk
 import rigamajig2.maya.node as node
@@ -223,8 +225,8 @@ def createLiveMirror(jointList, axis='x', mode='rotate'):
         cmds.orientConstraint(mirrorTgt, mirrorJnt, n=mirrorJnt + common.ORIENTCONSTRAINT, mo=True)
 
 
-@utils.oneUndo
-@utils.preserveSelection
+@rigamajig2.maya.decorators.oneUndo
+@rigamajig2.maya.decorators.preserveSelection
 def pin(nodes=None):
     """
     Takes the given nodes and 'pins' them. This means they will maintain their position and orientation
@@ -274,7 +276,7 @@ def pin(nodes=None):
             cmds.setAttr("{}.overrideColor".format(n), 3)
 
 
-@utils.oneUndo
+@rigamajig2.maya.decorators.oneUndo
 def unpin(nodes=None):
     """
     unpin selected nodes

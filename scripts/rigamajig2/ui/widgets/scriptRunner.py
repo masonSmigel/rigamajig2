@@ -123,11 +123,11 @@ class ScriptRunner(QtWidgets.QWidget):
                 continue
 
             # if the item is a script then add it 
-            if rig_path.is_file(item):
+            if rig_path.isFile(item):
                 self._add_script_to_widget(item)
 
             # if the item is a directory then add all scripts in the directory
-            if rig_path.is_dir(item):
+            if rig_path.isDir(item):
                 for script in runScript.find_scripts(item):
                     self._add_script_to_widget(script)
 

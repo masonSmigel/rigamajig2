@@ -17,6 +17,7 @@ from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
 # RIGAMAJIG
+import rigamajig2.maya.rig_builder.builderUtils
 import rigamajig2.shared.common as common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, overrideColorer, sliderGrp
 from rigamajig2.ui.builder_ui import componentManager
@@ -211,8 +212,6 @@ class BuilderUi(QtWidgets.QDialog):
         self.load_guides_btn = QtWidgets.QPushButton("Load Guides")
         self.save_guides_btn = QtWidgets.QPushButton("Save Guides")
 
-        self.edit_build_btn = QtWidgets.QPushButton("Edit Build")
-        self.edit_build_btn.setFixedWidth(80)
         self.load_ctls_on_build = QtWidgets.QCheckBox("Load Ctls")
         self.load_ctls_on_build.setChecked(True)
         self.load_ctls_on_build.setFixedWidth(80)
@@ -391,12 +390,8 @@ class BuilderUi(QtWidgets.QDialog):
         self.cmpt_wdgt.addLayout(guide_load_layout)
         build_layout = QtWidgets.QHBoxLayout()
 
-        build_option_layout = QtWidgets.QVBoxLayout()
-        build_option_layout.addWidget(self.edit_build_btn)
-        build_option_layout.addWidget(self.load_ctls_on_build)
-
         self.cmpt_wdgt.addLayout(build_layout)
-        build_layout.addLayout(build_option_layout)
+        build_layout.addWidget(self.load_ctls_on_build)
         build_layout.addWidget(self.complete_build_btn)
 
         # Post Script
@@ -544,7 +539,6 @@ class BuilderUi(QtWidgets.QDialog):
 
         self.add_components_btn.clicked.connect(self.cmpt_manager.show_add_component_dialog)
         self.initalize_build_btn.clicked.connect(self.initalize_rig)
-        self.edit_build_btn.clicked.connect(self.edit_build)
         self.complete_build_btn.clicked.connect(self.complete_build)
 
         self.load_ctl_btn.clicked.connect(self.load_controlShapes)
@@ -814,10 +808,6 @@ class BuilderUi(QtWidgets.QDialog):
             self.load_controlShapes()
         self.cmpt_manager.load_cmpts_from_scene()
 
-    def edit_build(self):
-        self.rig_builder.edit_cmpts()
-        self.cmpt_manager.load_cmpts_from_scene()
-
     def load_guides(self):
         self.rig_builder.load_guide_data(self.guide_path_selector.get_abs_path())
 
@@ -973,7 +963,7 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         self.archetype_cb_widget = QtWidgets.QWidget()
         self.archetype_cb_widget.setFixedHeight(25)
         self.archetype_cb = QtWidgets.QComboBox()
-        for archetype in cmptBuilder.get_available_archetypes():
+        for archetype in rigamajig2.maya.rig_builder.builderUtils.get_available_archetypes():
             self.archetype_cb.addItem(archetype)
 
         self.src_path = pathSelector.PathSelector("Source:", fm=2)
@@ -1040,10 +1030,10 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         rig_name = self.rig_name_le.text()
         if self.from_archetype_rb.isChecked():
             archetype = self.archetype_cb.currentText()
-            rig_file = cmptBuilder.new_rigenv_from_archetype(new_env=dest_rig_env, archetype=archetype, rig_name=rig_name)
+            rig_file = rigamajig2.maya.rig_builder.builderUtils.new_rigenv_from_archetype(new_env=dest_rig_env, archetype=archetype, rig_name=rig_name)
         else:
             src_env = self.src_path.get_path()
-            rig_file = cmptBuilder.create_rig_env(src_env=src_env, tgt_env=dest_rig_env, rig_name=rig_name)
+            rig_file = rigamajig2.maya.rig_builder.builderUtils.create_rig_env(src_env=src_env, tgt_env=dest_rig_env, rig_name=rig_name)
         self.new_env_created.emit(rig_file)
 
         self.close()

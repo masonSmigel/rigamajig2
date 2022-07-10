@@ -10,11 +10,9 @@
 """
 
 # PYTHON
-import sys
 import os
 import time
 import inspect
-import shutil
 import logging
 from collections import OrderedDict
 
@@ -24,7 +22,6 @@ import maya.cmds as cmds
 # RIGAMAJIG
 import rigamajig2.shared.common as common
 import rigamajig2.shared.path as rig_path
-import rigamajig2.shared.runScript as runScript
 import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
@@ -34,7 +31,7 @@ import rigamajig2.maya.rig_builder.model as model
 import rigamajig2.maya.rig_builder.guides as guides
 import rigamajig2.maya.rig_builder.controlShapes as controlShapes
 import rigamajig2.maya.rig_builder.deform as deform
-import rigamajig2.maya.rig_builder.builderScriptRunner as builderScriptRunner
+import rigamajig2.maya.rig_builder.builderUtils as builderUtils
 
 logger = logging.getLogger(__name__)
 
@@ -72,8 +69,8 @@ class Builder(object):
         self.set_rig_file(rigFile)
         self.cmpt_list = list()
 
-        self._available_cmpts = list()
-        self.__lookForComponents(CMPT_PATH)
+        self._available_cmpts = builderUtils._lookForComponents(CMPT_PATH, _EXCLUDED_FOLDERS, _EXCLUDED_FILES)
+        # self.__lookForComponents(CMPT_PATH)
 
         # varibles we need
         self.top_skeleton_nodes = list()
@@ -81,26 +78,6 @@ class Builder(object):
 
     def getComponents(self):
         return self._available_cmpts
-
-    def __lookForComponents(self, path):
-        res = os.listdir(path)
-        toReturn = list()
-        for r in res:
-            full_path = os.path.join(path, r)
-            if r not in _EXCLUDED_FOLDERS and os.path.isdir(path + '/' + r) == True:
-                self.__lookForComponents(full_path)
-            if r.find('.py') != -1 and r.find('.pyc') == -1 and r not in _EXCLUDED_FILES:
-                if r.find('reload') == -1:
-
-                    # find classes in the file path
-                    module_file = r.split('.')[0]
-                    modulesPath = 'rigamajig2.maya.cmpts.{}'
-                    module_name = modulesPath.format(module_file)
-                    module_object = __import__(module_name, globals(), locals(), ["*"], 0)
-                    for cls in inspect.getmembers(module_object, inspect.isclass):
-                        toReturn.append("{}.{}".format(module_file, cls[0]))
-
-        self._available_cmpts += toReturn
 
     def _absPath(self, path):
         if path:
@@ -240,10 +217,6 @@ class Builder(object):
             for cmpt in self.cmpt_list:
                 cmpt.loadSettings(cmpt_data[cmpt.name])
 
-    def load_meta_settings(self):
-        for cmpt in self.cmpt_list:
-            cmpt._load_meta_to_component()
-
     def load_controlShapes(self, path=None, applyColor=True):
         """
         Load the control shapes
@@ -322,10 +295,6 @@ class Builder(object):
         if clear_list:
             self.cmpt_list = list()
 
-    def edit_cmpts(self):
-        self.delete_cmpts(clear_list=False)
-        self.initalize()
-
     def build_single_cmpt(self, name, type):
         """
         Build a single component based on the name and component type.
@@ -352,36 +321,22 @@ class Builder(object):
 
             logger.info("build: {} -- complete".format(cmpt.name))
 
-    def edit_single_cmpt(self, name, type):
-        """
-        Return a single component to the initialize stage to edit the component
-        :return:
-        """
-        cmpt = self.find_cmpt(name=name, type=type)
-
-        if cmpt:
-            if cmpt.getContainer():
-                cmpt.deleteSetup()
-
-            cmpt._intialize_cmpt()
-            logger.info("edit : {}".format(cmpt.name))
-
     # --------------------------------------------------------------------------------
     # RUN SCRIPTS UTILITIES
     # --------------------------------------------------------------------------------
     def pre_script(self):
         """ Run pre scripts. use  through the PRE SCRIPT path"""
-        builderScriptRunner.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, PRE_SCRIPT)))
+        builderUtils.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, PRE_SCRIPT)))
         logger.info("pre scripts -- complete")
 
     def post_script(self):
         """ Run pre scripts. use  through the POST SCRIPT path"""
-        builderScriptRunner.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, POST_SCRIPT)))
+        builderUtils.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, POST_SCRIPT)))
         logger.info("pre scripts -- complete")
 
     def pub_script(self):
         """ Run pre scripts. use  through the PUB SCRIPT path"""
-        builderScriptRunner.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, PUB_SCRIPT)))
+        builderUtils.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, PUB_SCRIPT)))
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
@@ -392,7 +347,7 @@ class Builder(object):
 
         start_time = time.time()
         print('\nBegin Rig Build\n{0}\nbuild env: {1}\n'.format('-' * 70, self.path))
-        builderScriptRunner.load_required_plugins()
+        builderUtils.load_required_plugins()
         self.pre_script()
         self.import_model()
         self.load_joints()
@@ -417,12 +372,9 @@ class Builder(object):
     # UTILITY FUNCTION TO PUBLISH THE RIG
     def publish(self, outputfile=None, assetName=None, fileType=None, versioning=True):
 
-        if not outputfile:
-            outputfile = self._absPath(self.get_rig_data(self.rig_file, OUTPUT_RIG))
-        if not assetName:
-            assetName = self._absPath(self.get_rig_data(self.rig_file, RIG_NAME))
-        if not fileType:
-            fileType = self._absPath(self.get_rig_data(self.rig_file, OUTPUT_RIG_FILE_TYPE))
+        outputfile = outputfile or self._absPath(self.get_rig_data(self.rig_file, OUTPUT_RIG))
+        assetName = assetName or self._absPath(self.get_rig_data(self.rig_file, RIG_NAME))
+        fileType = fileType or self._absPath(self.get_rig_data(self.rig_file, OUTPUT_RIG_FILE_TYPE))
 
         # check if the provided path is a file path.
         # if so use the file naming and extension from the provided path
@@ -464,7 +416,7 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     # GET
     # --------------------------------------------------------------------------------
-    def get_path(self):
+    def get_rig_env(self):
         return self.path
 
     def get_rig_file(self):
@@ -549,86 +501,3 @@ class Builder(object):
         if key in data.getData():
             return data.getData()[key]
         return None
-
-    def get_rig_env(self):
-        return self.path
-
-
-def get_available_archetypes():
-    """
-    get a list of avaible archetypes. Archetypes are defined as a folder containng a .rig file.
-    :return: list of archetypes
-    """
-    archetype_list = list()
-
-    path_contents = os.listdir(common.ARCHETYPES_PATH)
-    for archetype in path_contents:
-        archetype_path = os.path.join(common.ARCHETYPES_PATH, archetype)
-        if archetype.startswith("."):
-            continue
-        if find_rig_file(archetype_path):
-            archetype_list.append(archetype)
-    return archetype_list
-
-
-def find_rig_file(path):
-    """ find a rig file within the path"""
-    if rig_path.isFile(path):
-        return False
-
-    path_contents = os.listdir(path)
-    for f in path_contents:
-        if f.startswith("."):
-            continue
-        if not rig_path.isDir(path):
-            continue
-        file_name, file_ext = os.path.splitext(os.path.join(path, f))
-        if not file_ext == '.rig':
-            continue
-        return os.path.join(path, f)
-    return False
-
-
-def new_rigenv_from_archetype(new_env, archetype, rig_name=None):
-    """
-    Create a new rig envirnment from and archetype
-    :param new_env: target driectory for the new rig enviornment
-    :param rig_name: name of the new rig enviornment
-    :param archetype: archetype to copy
-    :return:
-    """
-    if archetype not in get_available_archetypes():
-        raise RuntimeError("{} is not a valid archetype".format(archetype))
-
-    archetype_path = os.path.join(common.ARCHETYPES_PATH, archetype)
-    return create_rig_env(src_env=archetype_path, tgt_env=new_env, rig_name=rig_name)
-
-
-def create_rig_env(src_env, tgt_env, rig_name):
-    """
-    create a new rig enviornment
-    :param src_env: source rig enviornment
-    :param tgt_env: target rig direction
-    :param rig_name: new name of the rig enviornment and .rig file
-    :return:
-    """
-
-    tgt_env_path = os.path.join(tgt_env, rig_name)
-    shutil.copytree(src_env, tgt_env_path)
-
-    src_rig_file = find_rig_file(tgt_env_path)
-    rig_file = os.path.join(tgt_env_path, "{}.rig".format(rig_name))
-
-    # rename the .rig file and the rig_name within the .rig file
-    os.rename(src_rig_file, rig_file)
-
-    data = abstract_data.AbstractData()
-    data.read(rig_file)
-
-    new_data = data.getData()
-    new_data['rig_name'] = rig_name
-    data.setData(new_data)
-    data.write(rig_file)
-
-    logger.info("New rig environment created: {}".format(tgt_env_path))
-    return os.path.join(tgt_env_path, rig_file)

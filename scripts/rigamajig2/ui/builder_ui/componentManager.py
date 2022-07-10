@@ -61,7 +61,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.build_cmpt_action = QtWidgets.QAction("Build Cmpt", self)
         self.build_cmpt_action.setIcon(QtGui.QIcon(":play_S_100.png"))
 
-        self.reload_cmpt_action = QtWidgets.QAction("Reload Cmpts", self)
+        self.reload_cmpt_action = QtWidgets.QAction("Reload Cmpts from Scene", self)
         self.reload_cmpt_action.setIcon(QtGui.QIcon(":refresh.png"))
 
         self.del_cmpt_action = QtWidgets.QAction("Delete Cmpt", self)

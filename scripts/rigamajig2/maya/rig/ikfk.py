@@ -315,7 +315,6 @@ class IkFkLimb(IkFkBase):
             params = grp
 
         # check if our joints are clean. If not return a warning but we can continue.
-
         if not joint.isClean(jnts[1]) or not joint.isClean(jnts[2]):
             cmds.warning("Some joints have dirty transformations. Stretch may not work as expected")
 

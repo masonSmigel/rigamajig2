@@ -18,7 +18,8 @@ from shiboken2 import wrapInstance
 
 # RIGAMAJIG
 import rigamajig2.shared.common as common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, componentManager, overrideColorer, sliderGrp
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, overrideColorer, sliderGrp
+from rigamajig2.ui.builder_ui import componentManager
 import rigamajig2.maya.rig_builder.builder as cmptBuilder
 import rigamajig2.maya.data.abstract_data as abstract_data
 
@@ -34,7 +35,7 @@ LARGE_BTN_HEIGHT = 35
 EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 
 
-class RigamajigBuilderUi(QtWidgets.QDialog):
+class BuilderUi(QtWidgets.QDialog):
     WINDOW_TITLE = "Rigamajig2 Builder"
 
     dlg_instance = None
@@ -42,7 +43,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
     @classmethod
     def show_dialog(cls):
         if not cls.dlg_instance:
-            cls.dlg_instance = RigamajigBuilderUi()
+            cls.dlg_instance = BuilderUi()
 
         if cls.dlg_instance.isHidden():
             cls.dlg_instance.show()
@@ -56,7 +57,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
         else:
             maya_main_window = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
-        super(RigamajigBuilderUi, self).__init__(maya_main_window)
+        super(BuilderUi, self).__init__(maya_main_window)
         self.rig_env = None
 
         self.setWindowTitle(self.WINDOW_TITLE)
@@ -446,7 +447,6 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
 
         self.deformations_wdgt.addWidget(self.skin_path_selector)
         self.deformations_wdgt.addLayout(skin_btn_layout)
-
 
         psd_btn_layout = QtWidgets.QHBoxLayout()
         psd_btn_layout.setContentsMargins(0, 0, 0, 0)
@@ -915,7 +915,7 @@ class RigamajigBuilderUi(QtWidgets.QDialog):
             self.rig_builder.run(publish=True, outputfile=outputfile, assetName=assetName, fileType=fileType)
 
     def closeEvent(self, e):
-        super(RigamajigBuilderUi, self).closeEvent(e)
+        super(BuilderUi, self).closeEvent(e)
         self.cmpt_manager.set_scriptjob_enabled(False)
 
     # TOOLS MENU
@@ -1057,7 +1057,7 @@ if __name__ == '__main__':
     except:
         pass
 
-    rigamajig_builder_dialog = RigamajigBuilderUi()
+    rigamajig_builder_dialog = BuilderUi()
     rigamajig_builder_dialog.show()
 
     rigamajig_builder_dialog.set_rig_file(

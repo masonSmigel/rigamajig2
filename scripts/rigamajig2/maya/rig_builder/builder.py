@@ -34,6 +34,7 @@ import rigamajig2.maya.rig_builder.model as model
 import rigamajig2.maya.rig_builder.guides as guides
 import rigamajig2.maya.rig_builder.controlShapes as controlShapes
 import rigamajig2.maya.rig_builder.deform as deform
+import rigamajig2.maya.rig_builder.builderScriptRunner as builderScriptRunner
 
 logger = logging.getLogger(__name__)
 
@@ -368,86 +369,19 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     # RUN SCRIPTS UTILITIES
     # --------------------------------------------------------------------------------
-    def load_required_plugins(self):
-        """
-        loadSettings required plugins
-        NOTE: There are plugins REQUIRED for rigamajig such as matrix and quat nodes.
-              loading other plug-ins needed in production should be added into a pre-script file
-        """
-        loaded_plugins = cmds.pluginInfo(query=True, listPlugins=True)
-
-        for plugin in common.REQUIRED_PLUGINS:
-            if plugin not in loaded_plugins:
-                cmds.loadPlugin(plugin)
-
-    def validate_script_list(self, scripts_list=None):
-        res_list = list()
-
-        scripts_list = common.toList(scripts_list)
-
-        for item in scripts_list:
-            if not item:
-                continue
-
-            if rig_path.isFile(item):
-                res_list.append(item)
-
-            if rig_path.isDir(item):
-                for script in runScript.find_scripts(item):
-                    res_list.append(script)
-
-        return res_list
-
-    def pre_script(self, scripts=[]):
-        """
-        Run pre scripts. You can add scripts by path, but the main use is through the PRE SCRIPT path
-        :param scripts: path to scripts to run
-        """
-        run_list = list()
-        run_list += scripts
-
-        if self.get_rig_data(self.rig_file, PRE_SCRIPT):
-            run_list.append(self._absPath(self.get_rig_data(self.rig_file, PRE_SCRIPT)))
-
-        file_scripts = self.validate_script_list(run_list)
-
-        for script in file_scripts:
-            runScript.run_script(script)
+    def pre_script(self):
+        """ Run pre scripts. use  through the PRE SCRIPT path"""
+        builderScriptRunner.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, PRE_SCRIPT)))
         logger.info("pre scripts -- complete")
 
-    def post_script(self, scripts=[]):
-        """
-        Run post scripts. You can add scripts by path, but the main use is through the POST SCRIPT path
-        :param scripts: path to scripts to run
-        """
-        run_list = list()
-        run_list += scripts
+    def post_script(self):
+        """ Run pre scripts. use  through the POST SCRIPT path"""
+        builderScriptRunner.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, POST_SCRIPT)))
+        logger.info("pre scripts -- complete")
 
-        if self.get_rig_data(self.rig_file, POST_SCRIPT):
-            run_list.append(self._absPath(self.get_rig_data(self.rig_file, POST_SCRIPT)))
-
-        file_scripts = self.validate_script_list(run_list)
-
-        for script in file_scripts:
-            runScript.run_script(script)
-        logger.info("post scripts -- complete")
-
-    def pub_script(self, scripts=[]):
-        """
-        Run Post Scripts. You can add scripts by path, but the main use is through the POST SCRIPT path
-        :param scripts:
-        :return:
-        """
-        run_list = list()
-        run_list += scripts
-
-        if self.get_rig_data(self.rig_file, PUB_SCRIPT):
-            run_list.append(self._absPath(self.get_rig_data(self.rig_file, PUB_SCRIPT)))
-
-        file_scripts = self.validate_script_list(run_list)
-
-        for script in file_scripts:
-            runScript.run_script(script)
+    def pub_script(self):
+        """ Run pre scripts. use  through the PUB SCRIPT path"""
+        builderScriptRunner.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, PUB_SCRIPT)))
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
@@ -458,7 +392,7 @@ class Builder(object):
 
         start_time = time.time()
         print('\nBegin Rig Build\n{0}\nbuild env: {1}\n'.format('-' * 70, self.path))
-        self.load_required_plugins()
+        builderScriptRunner.load_required_plugins()
         self.pre_script()
         self.import_model()
         self.load_joints()

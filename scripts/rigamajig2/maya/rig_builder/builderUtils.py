@@ -5,7 +5,7 @@
     file: scripts.py
     author: masonsmigel
     date: 07/2022
-    discription: 
+    discription: This module contains utilities for the builder
 
 """
 # PYTHON
@@ -13,8 +13,6 @@ import os
 import shutil
 import logging
 import inspect
-
-
 
 # MAYA
 import maya.cmds as cmds
@@ -48,7 +46,6 @@ def _lookForComponents(path, excludedFolders, excludedFiles):
                     toReturn.append("{}.{}".format(module_file, cls[0]))
 
     return toReturn
-
 
 
 def load_required_plugins():

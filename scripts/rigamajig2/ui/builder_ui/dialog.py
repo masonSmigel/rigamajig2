@@ -167,50 +167,6 @@ class BuilderUi(QtWidgets.QDialog):
                              self.deformation_widget,
                              self.publish_widget]
 
-        # # Pre- script section
-        # self.preScript_wdgt = collapseableWidget.CollapsibleWidget('Setup Scene', addCheckbox=True)
-        # self.preScript_scriptRunner = scriptRunner.ScriptRunner()
-
-        # Component Section
-        # self.cmpt_path_selector = pathSelector.PathSelector("cmpts:", cap="Select a Component File", ff=JSON_FILTER,
-        #                                                     fm=1)
-        # self.load_components_btn = QtWidgets.QPushButton("Load Cmpts")
-        # self.append_components_btn = QtWidgets.QPushButton("Append Cmpts")
-        # self.save_components_btn = QtWidgets.QPushButton("Save Cmpts")
-        # self.save_components_btn.setIcon(QtGui.QIcon(":save.png"))
-        # self.add_components_btn = QtWidgets.QPushButton("Add Components")
-        # self.add_components_btn.setIcon(QtGui.QIcon(":freeformOff.png"))
-        # self.cmpt_manager = componentManager.ComponentManager()
-        #
-        # self.initalize_build_btn = QtWidgets.QPushButton("Initalize Build")
-        # self.initalize_build_btn.setFixedHeight(LARGE_BTN_HEIGHT)
-        # self.guide_path_selector = pathSelector.PathSelector("guides:", cap="Select a guide file", ff=JSON_FILTER, fm=1)
-        # self.load_guides_btn = QtWidgets.QPushButton("Load Guides")
-        # self.save_guides_btn = QtWidgets.QPushButton("Save Guides")
-
-        # self.load_ctls_on_build = QtWidgets.QCheckBox("Load Ctls")
-        # self.load_ctls_on_build.setChecked(True)
-        # self.load_ctls_on_build.setFixedWidth(80)
-        #
-        # self.complete_build_btn = QtWidgets.QPushButton("Build Rig")
-        # self.complete_build_btn.setFixedHeight(45)
-        #
-        # # Post - script section
-        # self.postScript_wdgt = collapseableWidget.CollapsibleWidget('Post-Script', addCheckbox=True)
-        # self.postScript_scriptRunner = scriptRunner.ScriptRunner()
-
-        # Publish Section
-        # self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
-        # self.publishScript_scriptRunner = scriptRunner.ScriptRunner()
-        # self.out_path_selector = pathSelector.PathSelector("out file:", cap="Select a location to save", ff=MAYA_FILTER,
-        #                                                    fm=2)
-        # self.pub_btn = QtWidgets.QPushButton("Publish Rig")
-        # self.pub_btn.setFixedHeight(LARGE_BTN_HEIGHT)
-        #
-        # self.out_file_type_cb = QtWidgets.QComboBox()
-        # self.out_file_type_cb.addItem('ma')
-        # self.out_file_type_cb.addItem('mb')
-
         self.run_selected_btn = QtWidgets.QPushButton("Run Selected")
         self.run_btn = QtWidgets.QPushButton("Run")
         self.run_btn.setFixedWidth(80)
@@ -228,30 +184,8 @@ class BuilderUi(QtWidgets.QDialog):
         rig_env_layout.addWidget(self.rig_path_selector)
         rig_env_layout.addLayout(rig_char_name_layout)
 
-        # prescript
-        # self.preScript_wdgt.addWidget(self.preScript_scriptRunner)
-
-        # Components
-        # build_layout = QtWidgets.QHBoxLayout()
-
-        # self.cmpt_wdgt.addLayout(build_layout)
-        # build_layout.addWidget(self.load_ctls_on_build)
-        # build_layout.addWidget(self.complete_build_btn)
-        #
-        # # Post Script
-        # self.postScript_wdgt.addWidget(self.postScript_scriptRunner)
-
-        # Publish
-        # self.publish_wdgt.addWidget(self.publishScript_scriptRunner)
-        # publish_file_layout = QtWidgets.QHBoxLayout()
-        # publish_file_layout.addWidget(self.out_path_selector)
-        # publish_file_layout.addWidget(self.out_file_type_cb)
-        # self.publish_wdgt.addLayout(publish_file_layout)
-        # self.publish_wdgt.addWidget(self.pub_btn)
-
         # add the collapseable widgets
         build_layout = QtWidgets.QVBoxLayout()
-        # build_layout.addWidget(self.preScript_wdgt)
         build_layout.addWidget(self.model_widget)
         build_layout.addWidget(self.joint_widget)
         build_layout.addWidget(self.initialize_widget)
@@ -363,71 +297,17 @@ class BuilderUi(QtWidgets.QDialog):
         self.rig_env = file_info.path()
         self.rig_file = file_info.filePath()
 
-        # set all path selectors to be realive to the new rig enviornment
-
-        # self.cmpt_path_selector.set_relativeTo(self.rig_env)
-        # self.guide_path_selector.set_relativeTo(self.rig_env)
-        # self.ctl_path_selector.set_relativeTo(self.rig_env)
-        # self.skin_path_selector.set_relativeTo(self.rig_env)
-        # self.psd_path_selector.set_relativeTo(self.rig_env)
-        # self.out_path_selector.set_relativeTo(self.rig_env)
-
         self.rig_builder = cmptBuilder.Builder(self.rig_file)
-        # self.cmpt_manager.set_rig_builder(self.rig_builder)
-        self.update_ui_with_rig_data()
 
-    def update_ui_with_rig_data(self):
         if not self.rig_file:
             return
 
-        # set the character name
+        # setup ui Data
         self.asset_name_le.setText(self.rig_builder.get_rig_data(self.rig_file, cmptBuilder.RIG_NAME))
 
-        # loadSettings prescripts, postscripts and pubscripts from file or rig_env
-        # self.reload_prescripts()
-        # self.reload_postscripts()
-        # self.reload_pubscripts()
-
-        # set rig paths
+        # set paths and widgets relative to the rig env
         for widget in self.main_widgets:
             widget.setBuilder(builder=self.rig_builder)
-
-        # self.model_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.MODEL_FILE))
-        # self.skel_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.SKELETON_FILE))
-        # self.joint_pos_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.SKELETON_POS))
-        # self.cmpt_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.COMPONENTS))
-        # self.guide_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.GUIDES))
-        # self.ctl_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.CONTROL_SHAPES))
-        # self.skin_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.SKINS))
-        # self.psd_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.PSD))
-        # self.out_path_selector.set_path(cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.OUTPUT_RIG))
-
-        # # set the default output file type
-        # file_type_text = cmptBuilder.Builder.get_rig_data(self.rig_file, cmptBuilder.OUTPUT_RIG_FILE_TYPE)
-        # index = self.out_file_type_cb.findText(file_type_text, QtCore.Qt.MatchFixedString)
-        # if index >= 0:
-        #     self.out_file_type_cb.setCurrentIndex(index)
-
-    # def reload_prescripts(self):
-    #     self.preScript_scriptRunner.clear_scripts()
-    #     self.preScript_scriptRunner.set_relative_dir(self.rig_builder.get_rig_env())
-    #     for path in self.rig_builder.get_rig_data(self.rig_file, cmptBuilder.PRE_SCRIPT):
-    #         # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
-    #         self.preScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
-
-    # def reload_postscripts(self):
-    #     self.postScript_scriptRunner.clear_scripts()
-    #     self.postScript_scriptRunner.set_relative_dir(self.rig_builder.get_rig_env())
-    #     for path in self.rig_builder.get_rig_data(self.rig_file, cmptBuilder.POST_SCRIPT):
-    #         # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
-    #         self.postScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
-
-    # def reload_pubscripts(self):
-    #     self.publishScript_scriptRunner.clear_scripts()
-    #     self.publishScript_scriptRunner.set_relative_dir(self.rig_builder.get_rig_env())
-    #     for path in self.rig_builder.get_rig_data(self.rig_file, cmptBuilder.PUB_SCRIPT):
-    #         # for script in self.rig_builder.validate_script_list(self.rig_builder._absPath(path)):
-    #         self.publishScript_scriptRunner.add_scripts(self.rig_builder._absPath(path))
 
     # UTILITIY FUNCTIONS
     def create_rig_env(self):
@@ -440,24 +320,11 @@ class BuilderUi(QtWidgets.QDialog):
         """run selected steps"""
         startTime = time.time()
 
-        if self.preScript_wdgt.isChecked():
-            self.preScript_scriptRunner.execute_all_scripts()
-        if self.model_wdgt.isChecked():
-            self.import_model()
-        if self.skeleton_wdgt.isChecked():
-            self.import_and_load_skeleton()
-        if self.cmpt_wdgt.isChecked():
-            self.load_components()
-            self.complete_build()
-        if self.ctlShape_wdgt.isChecked():
-            self.load_controlShapes()
-        if self.deformations_wdgt.isChecked():
-            self.load_all_skins()
-            self.load_posereaders()
-        if self.postScript_wdgt.isChecked():
-            self.postScript_scriptRunner.execute_all_scripts()
-        if self.publish_wdgt.isChecked():
-            self.publishScript_scriptRunner.execute_all_scripts()
+        # TODO: it would be cool to which node is the farthest checked and run everything before then.
+        for widget in self.main_widgets:
+
+            if widget.isChecked:
+                widget.runWidget()
 
         runTime = time.time() - startTime
         print("Time Elapsed: {}".format(str(runTime)))
@@ -465,23 +332,6 @@ class BuilderUi(QtWidgets.QDialog):
     def run_all(self):
         self.rig_builder.run()
         self.cmpt_manager.load_cmpts_from_scene()
-
-    # def publish(self):
-    #     confirm_pub_msg = QtWidgets.QMessageBox()
-    #     confirm_pub_msg.setText("Publish the rig")
-    #     confirm_pub_msg.setInformativeText(
-    #         "Proceeding will rebuild a fresh rig from saved data overwriting any existing any published rigs.")
-    #     confirm_pub_msg.setStandardButtons(
-    #         QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
-    #     confirm_pub_msg.setDefaultButton(QtWidgets.QMessageBox.Save)
-    #     res = confirm_pub_msg.exec_()
-    #
-    #     if res == QtWidgets.QMessageBox.Save:
-    #         outputfile = self.out_path_selector.get_abs_path()
-    #         assetName = self.asset_name_le.text()
-    #         fileType = self.out_file_type_cb.currentText()
-    #
-    #         self.rig_builder.run(publish=True, outputfile=outputfile, assetName=assetName, fileType=fileType)
 
     def closeEvent(self, e):
         super(BuilderUi, self).closeEvent(e)
@@ -609,13 +459,16 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         rig_name = self.rig_name_le.text()
         if self.from_archetype_rb.isChecked():
             archetype = self.archetype_cb.currentText()
-            rig_file = rigamajig2.maya.rig_builder.builderUtils.new_rigenv_from_archetype(new_env=dest_rig_env,
-                                                                                          archetype=archetype,
-                                                                                          rig_name=rig_name)
+            rig_file = rigamajig2.maya.rig_builder.builderUtils.new_rigenv_from_archetype(
+                new_env=dest_rig_env,
+                archetype=archetype,
+                rig_name=rig_name)
         else:
             src_env = self.src_path.get_path()
-            rig_file = rigamajig2.maya.rig_builder.builderUtils.create_rig_env(src_env=src_env, tgt_env=dest_rig_env,
-                                                                               rig_name=rig_name)
+            rig_file = rigamajig2.maya.rig_builder.builderUtils.create_rig_env(
+                src_env=src_env,
+                tgt_env=dest_rig_env,
+                rig_name=rig_name)
         self.new_env_created.emit(rig_file)
 
         self.close()

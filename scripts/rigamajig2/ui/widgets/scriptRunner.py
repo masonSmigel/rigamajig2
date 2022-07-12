@@ -25,7 +25,7 @@ def maya_main_window():
 
 
 class ScriptRunner(QtWidgets.QWidget):
-    def __init__(self, root_dir=None, *args, **kwargs):
+    def __init__(self, root_dir=None, title='Scripts',*args, **kwargs):
         """
         Script runner widget class.
         The script runner conists of a list of scripts that can be modified, a scripts loaded in run in order.
@@ -38,6 +38,7 @@ class ScriptRunner(QtWidgets.QWidget):
         super(ScriptRunner, self).__init__(*args, **kwargs)
 
         self.root_dir = root_dir
+        self.title = title
         self.current_scripts_list = list()
 
         self.create_actions()
@@ -46,6 +47,8 @@ class ScriptRunner(QtWidgets.QWidget):
         self.create_connections()
 
     def create_actions(self):
+        self.titleLabel = QtWidgets.QLabel(self.title)
+
         self.run_script_action = QtWidgets.QAction("Run Script", self)
         self.run_script_action.setIcon(QtGui.QIcon(":play_S_100.png"))
         self.run_script_action.triggered.connect(self.run_selected_scripts)
@@ -89,6 +92,7 @@ class ScriptRunner(QtWidgets.QWidget):
         self.main_layout.minimumSize()
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(4)
+        self.main_layout.addWidget(self.titleLabel)
         self.main_layout.addWidget(self.script_list)
         self.main_layout.addLayout(btn_layout)
 

@@ -108,7 +108,12 @@ class DeformationWidget(QtWidgets.QWidget):
             self.psd_path_selector.set_path(psdFile)
 
     def runWidget(self):
-        self.import_model()
+        self.load_posereaders()
+        self.load_all_skins()
+
+    @property
+    def isChecked(self):
+        return self.deformations_wdgt.isChecked()
 
     # CONNECTIONS
     def load_all_skins(self):

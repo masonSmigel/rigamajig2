@@ -32,7 +32,7 @@ class PublishWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
-        self.publishScript_scriptRunner = scriptRunner.ScriptRunner()
+        self.publishScript_scriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
         self.out_path_selector = pathSelector.PathSelector("out file:", cap="Select a location to save", ff=constants.MAYA_FILTER,
                                                            fm=2)
         self.pub_btn = QtWidgets.QPushButton("Publish Rig")
@@ -92,8 +92,11 @@ class PublishWidget(QtWidgets.QWidget):
             self.out_file_type_cb.setCurrentIndex(index)
 
     def runWidget(self):
-        self.preScript_scriptRunner.execute_all_scripts()
-        self.import_model()
+        self.publishScript_scriptRunner.execute_all_scripts()
+
+    @property
+    def isChecked(self):
+        return self.publish_wdgt.isChecked()
 
     # CONNECTIONS
     def publish(self):

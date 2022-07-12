@@ -171,6 +171,10 @@ class JointWidget(QtWidgets.QWidget):
     def runWidget(self):
         self.load_joint_positions()
 
+    @property
+    def isChecked(self):
+        return self.skeleton_wdgt.isChecked()
+
     # CONNECTIONS
     def load_joint_positions(self):
         self.builder.load_joints(self.joint_pos_path_selector.get_abs_path())

@@ -41,7 +41,7 @@ class BuildWidget(QtWidgets.QWidget):
         self.complete_build_btn.setFixedHeight(45)
 
         # Post - script section
-        self.postScript_scriptRunner = scriptRunner.ScriptRunner()
+        self.postScript_scriptRunner = scriptRunner.ScriptRunner(title="Post-Scripts:")
 
     def createLayouts(self):
         # setup the main layout.
@@ -79,6 +79,10 @@ class BuildWidget(QtWidgets.QWidget):
         self.complete_build()
         self.postScript_scriptRunner.execute_all_scripts()
 
+    @property
+    def isChecked(self):
+        return self.build_widget.isChecked()
+
     # CONNECTIONS
     def initalize_rig(self):
         self.builder.initalize()
@@ -106,4 +110,4 @@ class BuildWidget(QtWidgets.QWidget):
         self.builder.build()
         self.builder.connect()
         self.builder.finalize()
-        self.cmpt_manager.load_cmpts_from_scene()
+        # self.cmpt_manager.load_cmpts_from_scene()

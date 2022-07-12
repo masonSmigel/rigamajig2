@@ -142,6 +142,10 @@ class ControlsWidget(QtWidgets.QWidget):
     def runWidget(self):
         self.load_controlShapes()
 
+    @property
+    def isChecked(self):
+        return self.ctlShape_wdgt.isChecked()
+
     def set_ctlShape_items(self):
         control_shapes = rigamajig2.maya.rig.control.getAvailableControlShapes()
         for control_shape in control_shapes:

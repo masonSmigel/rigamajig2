@@ -18,6 +18,7 @@ from functools import partial
 # MAYA
 import maya.cmds as cmds
 from shiboken2.shiboken2 import wrapInstance
+import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
@@ -127,6 +128,10 @@ class InitializeWidget(QtWidgets.QWidget):
     def runWidget(self):
         self.load_components()
         self.initalize_rig()
+
+    @property
+    def isChecked(self):
+        return self.initalize_widget.isChecked()
 
     # CONNECTIONS
     def load_components(self):

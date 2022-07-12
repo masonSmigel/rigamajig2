@@ -43,7 +43,7 @@ class ModelWidget(QtWidgets.QWidget):
         self.open_model_btn.setFixedWidth(100)
 
         # pre script
-        self.preScript_scriptRunner = scriptRunner.ScriptRunner()
+        self.preScript_scriptRunner = scriptRunner.ScriptRunner(title="Pre-Scripts:")
 
     def createLayouts(self):
         # setup the main layout.
@@ -93,6 +93,10 @@ class ModelWidget(QtWidgets.QWidget):
     def runWidget(self):
         self.preScript_scriptRunner.execute_all_scripts()
         self.import_model()
+
+    @property
+    def isChecked(self):
+        return self.model_wdgt.isChecked()
 
     # CONNECTIONS
     def import_model(self):

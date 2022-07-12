@@ -42,7 +42,7 @@ LARGE_BTN_HEIGHT = 35
 EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 
 
-class BuilderUi(QtWidgets.QDialog):
+class BuilderDialog(QtWidgets.QDialog):
     WINDOW_TITLE = "Rigamajig2 Builder"
 
     dlg_instance = None
@@ -50,7 +50,7 @@ class BuilderUi(QtWidgets.QDialog):
     @classmethod
     def show_dialog(cls):
         if not cls.dlg_instance:
-            cls.dlg_instance = BuilderUi()
+            cls.dlg_instance = BuilderDialog()
 
         if cls.dlg_instance.isHidden():
             cls.dlg_instance.show()
@@ -64,7 +64,7 @@ class BuilderUi(QtWidgets.QDialog):
         else:
             maya_main_window = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
-        super(BuilderUi, self).__init__(maya_main_window)
+        super(BuilderDialog, self).__init__(maya_main_window)
         self.rig_env = None
         self.rig_builder = None
 
@@ -334,7 +334,7 @@ class BuilderUi(QtWidgets.QDialog):
         self.cmpt_manager.load_cmpts_from_scene()
 
     def closeEvent(self, e):
-        super(BuilderUi, self).closeEvent(e)
+        super(BuilderDialog, self).closeEvent(e)
         self.initialize_widget.cmpt_manager.set_scriptjob_enabled(False)
 
     # TOOLS MENU
@@ -482,7 +482,7 @@ if __name__ == '__main__':
     except:
         pass
 
-    rigamajig_builder_dialog = BuilderUi()
+    rigamajig_builder_dialog = BuilderDialog()
     rigamajig_builder_dialog.show()
 
     rigamajig_builder_dialog.set_rig_file(

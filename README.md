@@ -35,8 +35,8 @@ Rigamajig2 has two methods to utilize the tool:
 
 To launch the UI run the following code in python
 ```
-import rigamajig2.ui.builderUi
-rigamajig2.ui.builderUi.RigamajigBuilderUi.show_dialog()
+import rigamajig2.ui.builder_ui.dialog as builder_dialog
+builder_dialog.BuilderDialog.show_dialog()
 ```
 
 ## Getting started 

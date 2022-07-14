@@ -20,6 +20,7 @@ import rigamajig2.maya.data.joint_data as joint_data
 import rigamajig2.maya.data.guide_data as guide_data
 import rigamajig2.maya.meta as meta
 import rigamajig2.maya.joint as joint
+import rigamajig2.maya.attr as attr
 
 
 def load_joints(path=None):
@@ -43,6 +44,7 @@ def load_joints(path=None):
     for node in cmds.ls(data_obj.getKeys(), l=True):
         # add the joint orient to all joints in the file.
         joint.addJointOrientToChannelBox(node)
+        attr.nonKeyable(node, attr.TRANSFORMS + ["v"] + ["jox", "joy", "joz"])
 
         # find joints without a parent and make them a root
         if not len(node.split('|')) > 2:

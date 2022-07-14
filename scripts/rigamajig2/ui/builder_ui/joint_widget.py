@@ -30,6 +30,7 @@ import maya.cmds as cmds
 # RIGAMAJIG2
 import rigamajig2.maya.joint
 import rigamajig2.maya.rig.live as live
+import rigamajig2.maya.meta as meta
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.rig_builder.builder import SKELETON_POS
@@ -47,7 +48,7 @@ class JointWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.skeleton_wdgt = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
+        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
 
         self.joint_pos_path_selector = pathSelector.PathSelector(
             "joint pos: ",
@@ -59,6 +60,9 @@ class JointWidget(QtWidgets.QWidget):
         self.save_jnt_pos_btn = QtWidgets.QPushButton("Save joints")
 
         self.skeletonEdit_wdgt = collapseableWidget.CollapsibleWidget('Edit Skeleton')
+        self.skeletonEdit_wdgt.set_header_background_color(constants.EDIT_BG_HEADER_COLOR)
+        self.skeletonEdit_wdgt.set_widget_background_color(constants.EDIT_BG_WIDGET_COLOR)
+
         self.jnt_to_rot_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Rotation")
         self.jnt_to_ori_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Orientation")
         self.clean_skeleton_btn = QtWidgets.QPushButton("Clean Skeleton")
@@ -138,14 +142,15 @@ class JointWidget(QtWidgets.QWidget):
         self.skeletonEdit_wdgt.addLayout(pinJoint_layout)
         self.skeletonEdit_wdgt.addLayout(insertJoint_layout)
         self.skeletonEdit_wdgt.addWidget(self.prep_jnts_btn)
+        self.skeletonEdit_wdgt.addSpacing(3)
 
         # add widgets to the main skeleton widget.
-        self.skeleton_wdgt.addWidget(self.joint_pos_path_selector)
-        self.skeleton_wdgt.addLayout(save_load_jnt_layout)
-        self.skeleton_wdgt.addWidget(self.skeletonEdit_wdgt)
+        self.main_collapseable_widget.addWidget(self.joint_pos_path_selector)
+        self.main_collapseable_widget.addLayout(save_load_jnt_layout)
+        self.main_collapseable_widget.addWidget(self.skeletonEdit_wdgt)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.skeleton_wdgt)
+        self.main_layout.addWidget(self.main_collapseable_widget)
 
     def createConnections(self):
         self.load_jnt_pos_btn.clicked.connect(self.load_joint_positions)
@@ -155,6 +160,7 @@ class JointWidget(QtWidgets.QWidget):
         self.mirrorJnt_btn.clicked.connect(self.mirror_joint)
         self.pin_jnt_btn.clicked.connect(self.pin_joints)
         self.unpin_jnt_btn.clicked.connect(self.unpin_joints)
+        self.unpinAll_jnt_btn.clicked.connect(self.unpinAll_joints)
         self.insert_jnts_btn.clicked.connect(self.insert_joints)
         self.prep_jnts_btn.clicked.connect(self.prep_skeleton)
 
@@ -173,7 +179,7 @@ class JointWidget(QtWidgets.QWidget):
 
     @property
     def isChecked(self):
-        return self.skeleton_wdgt.isChecked()
+        return self.main_collapseable_widget.isChecked()
 
     # CONNECTIONS
     def load_joint_positions(self):
@@ -188,6 +194,10 @@ class JointWidget(QtWidgets.QWidget):
 
     def unpin_joints(self):
         live.unpin()
+
+    def unpinAll_joints(self):
+        pinnedNodes = meta.getTagged("isPinned")
+        live.unpin(pinnedNodes)
 
     def insert_joints(self):
         jnt_amt = self.insert_jnts_amt_slider.getValue()

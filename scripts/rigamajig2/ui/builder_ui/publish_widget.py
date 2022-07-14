@@ -31,7 +31,7 @@ class PublishWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.publish_wdgt = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
+        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
         self.publishScript_scriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
         self.out_path_selector = pathSelector.PathSelector("out file:", cap="Select a location to save", ff=constants.MAYA_FILTER,
                                                            fm=2)
@@ -54,14 +54,14 @@ class PublishWidget(QtWidgets.QWidget):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
 
-        self.publish_wdgt.addWidget(self.publishScript_scriptRunner)
+        self.main_collapseable_widget.addWidget(self.publishScript_scriptRunner)
         publish_file_layout = QtWidgets.QHBoxLayout()
         publish_file_layout.addWidget(self.out_path_selector)
         publish_file_layout.addWidget(self.out_file_type_cb)
-        self.publish_wdgt.addLayout(publish_file_layout)
-        self.publish_wdgt.addWidget(self.pub_btn)
+        self.main_collapseable_widget.addLayout(publish_file_layout)
+        self.main_collapseable_widget.addWidget(self.pub_btn)
 
-        self.main_layout.addWidget(self.publish_wdgt)
+        self.main_layout.addWidget(self.main_collapseable_widget)
 
     def createConnections(self):
         self.pub_btn.clicked.connect(self.publish)
@@ -96,7 +96,7 @@ class PublishWidget(QtWidgets.QWidget):
 
     @property
     def isChecked(self):
-        return self.publish_wdgt.isChecked()
+        return self.main_collapseable_widget.isChecked()
 
     # CONNECTIONS
     def publish(self):

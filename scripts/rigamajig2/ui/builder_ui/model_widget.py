@@ -31,7 +31,7 @@ class ModelWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.model_wdgt = collapseableWidget.CollapsibleWidget('Model/ Setup Scene', addCheckbox=True)
+        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Model/ Setup Scene', addCheckbox=True)
         self.model_path_selector = pathSelector.PathSelector(
             "model:",
             cap="Select a Model file",
@@ -51,7 +51,7 @@ class ModelWidget(QtWidgets.QWidget):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
 
-        self.model_wdgt.addWidget(self.preScript_scriptRunner)
+        self.main_collapseable_widget.addWidget(self.preScript_scriptRunner)
 
         # setup the button layout
         model_btn_layout = QtWidgets.QHBoxLayout()
@@ -61,11 +61,12 @@ class ModelWidget(QtWidgets.QWidget):
         model_btn_layout.addWidget(self.open_model_btn)
 
         # add widgets to the collapsable widget.
-        self.model_wdgt.addWidget(self.model_path_selector)
-        self.model_wdgt.addLayout(model_btn_layout)
+        self.main_collapseable_widget.addSpacing(10)
+        self.main_collapseable_widget.addWidget(self.model_path_selector)
+        self.main_collapseable_widget.addLayout(model_btn_layout)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.model_wdgt)
+        self.main_layout.addWidget(self.main_collapseable_widget)
 
     def createConnections(self):
         self.import_model_btn.clicked.connect(self.import_model)
@@ -96,7 +97,7 @@ class ModelWidget(QtWidgets.QWidget):
 
     @property
     def isChecked(self):
-        return self.model_wdgt.isChecked()
+        return self.main_collapseable_widget.isChecked()
 
     # CONNECTIONS
     def import_model(self):

@@ -32,7 +32,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.deformations_wdgt = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
+        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
 
         self.skin_path_selector = pathSelector.PathSelector(
             "skin:",
@@ -68,8 +68,8 @@ class DeformationWidget(QtWidgets.QWidget):
         skin_btn_layout.addWidget(self.load_single_skin_btn)
         skin_btn_layout.addWidget(self.save_skin_btn)
 
-        self.deformations_wdgt.addWidget(self.skin_path_selector)
-        self.deformations_wdgt.addLayout(skin_btn_layout)
+        self.main_collapseable_widget.addWidget(self.skin_path_selector)
+        self.main_collapseable_widget.addLayout(skin_btn_layout)
 
         psd_btn_layout = QtWidgets.QHBoxLayout()
         psd_btn_layout.setContentsMargins(0, 0, 0, 0)
@@ -79,11 +79,11 @@ class DeformationWidget(QtWidgets.QWidget):
         psd_btn_layout.addWidget(self.load_psd_mode_cbox)
 
         # add widgets to the collapsable widget.
-        self.deformations_wdgt.addWidget(self.psd_path_selector)
-        self.deformations_wdgt.addLayout(psd_btn_layout)
+        self.main_collapseable_widget.addWidget(self.psd_path_selector)
+        self.main_collapseable_widget.addLayout(psd_btn_layout)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.deformations_wdgt)
+        self.main_layout.addWidget(self.main_collapseable_widget)
 
     def createConnections(self):
         self.load_all_skin_btn.clicked.connect(self.load_all_skins)
@@ -113,7 +113,7 @@ class DeformationWidget(QtWidgets.QWidget):
 
     @property
     def isChecked(self):
-        return self.deformations_wdgt.isChecked()
+        return self.main_collapseable_widget.isChecked()
 
     # CONNECTIONS
     def load_all_skins(self):

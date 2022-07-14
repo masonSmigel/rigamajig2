@@ -33,7 +33,7 @@ class ControlsWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.ctlShape_wdgt = collapseableWidget.CollapsibleWidget('Controls', addCheckbox=True)
+        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Controls', addCheckbox=True)
         self.ctl_path_selector = pathSelector.PathSelector(
             "Controls:",
             cap="Select a Control Shape file",
@@ -47,6 +47,9 @@ class ControlsWidget(QtWidgets.QWidget):
         self.save_ctl_btn = QtWidgets.QPushButton("Save Controls")
 
         self.controlEdit_wgt = collapseableWidget.CollapsibleWidget('Edit Controls')
+        self.controlEdit_wgt.set_header_background_color(constants.EDIT_BG_HEADER_COLOR)
+        self.controlEdit_wgt.set_widget_background_color(constants.EDIT_BG_WIDGET_COLOR)
+
 
         self.ctlAxisX_rb = QtWidgets.QRadioButton('x')
         self.ctlAxisX_rb.setChecked(True)
@@ -74,7 +77,7 @@ class ControlsWidget(QtWidgets.QWidget):
         self.main_layout.setSpacing(0)
 
         # MAIN CONTROL LAYOUT
-        self.ctlShape_wdgt.addWidget(self.ctl_path_selector)
+        self.main_collapseable_widget.addWidget(self.ctl_path_selector)
 
         # create the load color checkbox
         load_color_label = QtWidgets.QLabel("Load Color:")
@@ -87,10 +90,10 @@ class ControlsWidget(QtWidgets.QWidget):
         control_btn_layout.addWidget(self.load_color_cb)
         control_btn_layout.addWidget(self.load_ctl_btn)
         control_btn_layout.addWidget(self.save_ctl_btn)
-        self.ctlShape_wdgt.addLayout(control_btn_layout)
+        self.main_collapseable_widget.addLayout(control_btn_layout)
 
         # EDIT CONTROL LAYOUT
-        self.ctlShape_wdgt.addWidget(self.controlEdit_wgt)
+        self.main_collapseable_widget.addWidget(self.controlEdit_wgt)
 
         # setup the mirror axis layout
         controlMirrorAxis_layout = QtWidgets.QHBoxLayout()
@@ -118,9 +121,10 @@ class ControlsWidget(QtWidgets.QWidget):
 
         # add the replace control button
         self.controlEdit_wgt.addWidget(self.replace_ctl_btn)
+        self.controlEdit_wgt.addSpacing(3)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.ctlShape_wdgt)
+        self.main_layout.addWidget(self.main_collapseable_widget)
 
     def createConnections(self):
         self.load_ctl_btn.clicked.connect(self.load_controlShapes)
@@ -144,7 +148,7 @@ class ControlsWidget(QtWidgets.QWidget):
 
     @property
     def isChecked(self):
-        return self.ctlShape_wdgt.isChecked()
+        return self.main_collapseable_widget.isChecked()
 
     def set_ctlShape_items(self):
         control_shapes = rigamajig2.maya.rig.control.getAvailableControlShapes()

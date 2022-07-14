@@ -32,13 +32,17 @@ class BuildWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.build_widget = collapseableWidget.CollapsibleWidget('Build Rig', addCheckbox=True)
+        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Build Rig', addCheckbox=True)
         self.load_ctls_on_build = QtWidgets.QCheckBox("Load Ctls")
         self.load_ctls_on_build.setChecked(True)
         self.load_ctls_on_build.setFixedWidth(80)
 
         self.complete_build_btn = QtWidgets.QPushButton("Build Rig")
         self.complete_build_btn.setFixedHeight(45)
+
+        self.build_btn = QtWidgets.QPushButton("Build")
+        self.connect_btn = QtWidgets.QPushButton("Connect")
+        self.finalize_btn = QtWidgets.QPushButton("Finalize")
 
         # Post - script section
         self.postScript_scriptRunner = scriptRunner.ScriptRunner(title="Post-Scripts:")
@@ -50,18 +54,26 @@ class BuildWidget(QtWidgets.QWidget):
         self.main_layout.setSpacing(0)
 
         build_layout = QtWidgets.QHBoxLayout()
+        build_layout.addWidget(self.build_btn)
+        build_layout.addWidget(self.connect_btn)
+        build_layout.addWidget(self.finalize_btn)
+
         # build_layout.addWidget(self.load_ctls_on_build)
-        build_layout.addWidget(self.complete_build_btn)
-        self.build_widget.addLayout(build_layout)
+        self.main_collapseable_widget.addWidget(self.complete_build_btn)
+        self.main_collapseable_widget.addLayout(build_layout)
 
         # Post Script
-        self.build_widget.addWidget(self.postScript_scriptRunner)
+        self.main_collapseable_widget.addSpacing()
+        self.main_collapseable_widget.addWidget(self.postScript_scriptRunner)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.build_widget)
+        self.main_layout.addWidget(self.main_collapseable_widget)
 
     def createConnections(self):
         self.complete_build_btn.clicked.connect(self.complete_build)
+        self.build_btn.clicked.connect(self.build_rig)
+        self.connect_btn.clicked.connect(self.connect_rig)
+        self.finalize_btn.clicked.connect(self.finalize_rig)
 
     def setBuilder(self, builder):
         rigEnv = builder.get_rig_env()
@@ -81,7 +93,7 @@ class BuildWidget(QtWidgets.QWidget):
 
     @property
     def isChecked(self):
-        return self.build_widget.isChecked()
+        return self.main_collapseable_widget.isChecked()
 
     # CONNECTIONS
     def initalize_rig(self):

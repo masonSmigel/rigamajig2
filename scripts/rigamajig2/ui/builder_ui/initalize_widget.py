@@ -45,7 +45,7 @@ class InitializeWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.initalize_widget = collapseableWidget.CollapsibleWidget('Initialize Rig', addCheckbox=True)
+        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Initialize Rig', addCheckbox=True)
         self.cmpt_path_selector = pathSelector.PathSelector("cmpts:",
                                                             cap="Select a Component File",
                                                             ff=constants.JSON_FILTER,
@@ -73,7 +73,7 @@ class InitializeWidget(QtWidgets.QWidget):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
 
-        self.initalize_widget.addWidget(self.cmpt_path_selector)
+        self.main_collapseable_widget.addWidget(self.cmpt_path_selector)
 
         cmpt_btn_layout = QtWidgets.QHBoxLayout()
         cmpt_btn_layout.setSpacing(4)
@@ -86,16 +86,16 @@ class InitializeWidget(QtWidgets.QWidget):
         cmpt_load_layout.addWidget(self.load_components_btn)
         cmpt_load_layout.addWidget(self.save_components_btn)
         cmpt_load_layout.addWidget(self.add_components_btn)
-        self.initalize_widget.addLayout(cmpt_load_layout)
+        self.main_collapseable_widget.addLayout(cmpt_load_layout)
 
-        self.initalize_widget.addWidget(self.cmpt_manager)
-        self.initalize_widget.addWidget(self.initalize_build_btn)
-        self.initalize_widget.addLayout(cmpt_btn_layout)
-        self.initalize_widget.addWidget(self.guide_path_selector)
-        self.initalize_widget.addLayout(guide_load_layout)
+        self.main_collapseable_widget.addWidget(self.cmpt_manager)
+        self.main_collapseable_widget.addWidget(self.initalize_build_btn)
+        self.main_collapseable_widget.addLayout(cmpt_btn_layout)
+        self.main_collapseable_widget.addWidget(self.guide_path_selector)
+        self.main_collapseable_widget.addLayout(guide_load_layout)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.initalize_widget)
+        self.main_layout.addWidget(self.main_collapseable_widget)
 
     def createConnections(self):
         self.load_guides_btn.clicked.connect(self.load_guides)
@@ -131,7 +131,7 @@ class InitializeWidget(QtWidgets.QWidget):
 
     @property
     def isChecked(self):
-        return self.initalize_widget.isChecked()
+        return self.main_collapseable_widget.isChecked()
 
     # CONNECTIONS
     def load_components(self):
@@ -195,8 +195,11 @@ class ComponentManager(QtWidgets.QWidget):
         self.select_container_action = QtWidgets.QAction("Select Container", self)
         self.select_container_action.setIcon(QtGui.QIcon(":selectModel.png"))
 
-        self.build_cmpt_action = QtWidgets.QAction("Build Cmpt", self)
-        self.build_cmpt_action.setIcon(QtGui.QIcon(":play_S_100.png"))
+        self.createSymetricalComponent = QtWidgets.QAction("Create Symetrical Component")
+        self.createSymetricalComponent.setIcon(QtGui.QIcon(":kinMirrorJoint_S.png"))
+
+        # self.build_cmpt_action = QtWidgets.QAction("Build Cmpt", self)
+        # self.build_cmpt_action.setIcon(QtGui.QIcon(":play_S_100.png"))
 
         self.reload_cmpt_action = QtWidgets.QAction("Reload Cmpts from Scene", self)
         self.reload_cmpt_action.setIcon(QtGui.QIcon(":refresh.png"))
@@ -205,7 +208,6 @@ class ComponentManager(QtWidgets.QWidget):
         self.del_cmpt_action.setIcon(QtGui.QIcon(":trash.png"))
 
         self.select_container_action.triggered.connect(self.select_container)
-        self.build_cmpt_action.triggered.connect(self.build_cmpt)
         self.reload_cmpt_action.triggered.connect(self.load_cmpts_from_scene)
         self.del_cmpt_action.triggered.connect(self.delete_cmpt)
 
@@ -224,7 +226,7 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.component_tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.component_tree.addAction(self.select_container_action)
-        self.component_tree.addAction(self.build_cmpt_action)
+        self.component_tree.addAction(self.createSymetricalComponent)
         self.component_tree.addAction(self.reload_cmpt_action)
         self.component_tree.addAction(self.del_cmpt_action)
 

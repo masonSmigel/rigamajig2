@@ -212,23 +212,23 @@ def getAveragePoint(transforms):
     return result.x, result.y, result.z
 
 
-def mirror(trs, axis='x', mode='rotate'):
+def mirror(trs=None, axis='x', leftToken=None, rightToken=None, mode='rotate'):
     """
     Mirrors transform axis vector. Searches for a destination node to mirror.
     The node "shouler_l_trs" mirror its position to "shouler_r_trs"
 
 
-    :param trs: transforms to mirror:
-    :type trs: str | list
-
-    :param axis: axis to mirror across. ['XY', 'YZ', 'XZ']:
-    :type axis: str
-
-    :param mode: mirror mode. 'rotate' mirrors the rotation behaviour where 'translate' mirrors translation behavior as well.
+    :param str list trs: transforms to mirror:
+    :param str axis: axis to mirror across. ['XY', 'YZ', 'XZ']:
+    :param str leftToken: token for the left side
+    :param str rightToken: token for the right side
+    :param str mode: mirror mode. 'rotate' mirrors the rotation behaviour where 'translate' mirrors translation behavior as well.
                 'translate' more is used more often in the face, 'rotate' in the body.
-    :type mode: str
 
     """
+    if trs is None:
+        trs = cmds.ls(sl=True)
+
     trs = common.toList(trs)
     # Validate cmds which to mirror axis,
     if axis.lower() not in ('x', 'y', 'z'):
@@ -240,7 +240,7 @@ def mirror(trs, axis='x', mode='rotate'):
             return
 
         # Get the worldspace matrix, as a list of 16 float values
-        destination = common.getMirrorName(transform)
+        destination = common.getMirrorName(transform, left=leftToken, right=rightToken)
         mtx = cmds.xform(transform, q=True, ws=True, m=True)
 
         # Invert rotation columns,

@@ -18,6 +18,7 @@ from collections import OrderedDict
 
 # MAYA
 import maya.cmds as cmds
+import maya.api.OpenMaya as om2
 
 # RIGAMAJIG
 import rigamajig2.shared.common as common
@@ -110,6 +111,8 @@ class Builder(object):
         for cmpt in self.cmpt_list:
             logger.info('Initalizing: {}'.format(cmpt.name))
             cmpt._intialize_cmpt()
+            self.updateMaya()
+
         self.load_guide_data()
         logger.info("initalize -- complete")
 
@@ -123,6 +126,9 @@ class Builder(object):
                 if hasattr(cmpt, "root_hrc"):
                     if not cmds.listRelatives(cmpt.root_hrc, p=True):
                         cmds.parent(cmpt.root_hrc, 'rig')
+
+            # refresh the viewport after each component is built.
+            self.updateMaya()
 
         # parent the bind joints to the bind group. if one exists
         if cmds.objExists('bind'):
@@ -143,6 +149,7 @@ class Builder(object):
         for cmpt in self.cmpt_list:
             logger.info('Connecting: {}'.format(cmpt.name))
             cmpt._connect_cmpt()
+            self.updateMaya()
         logger.info("connect -- complete")
 
     def finalize(self):
@@ -150,6 +157,7 @@ class Builder(object):
         for cmpt in self.cmpt_list:
             logger.info('Finalizing: {}'.format(cmpt.name))
             cmpt._finalize_cmpt()
+            self.updateMaya()
         logger.info("finalize -- complete")
 
     def optimize(self):
@@ -157,6 +165,7 @@ class Builder(object):
         for cmpt in self.cmpt_list:
             logger.info('Optimizing {}'.format(cmpt.name))
             cmpt._optimize_cmpt()
+            self.updateMaya()
         logger.info("optimize -- complete")
 
     def save_components(self, path=None):
@@ -300,7 +309,7 @@ class Builder(object):
         main_cmpt = None
         for cmpt in self.cmpt_list:
             if cmds.objExists(cmpt.container):
-                if cmpt.getComponenetType() == 'main.Main':
+                if cmpt.getComponenetType() == 'main.main':
                     main_cmpt = cmpt
                 else:
                     cmpt.deleteSetup()
@@ -426,6 +435,12 @@ class Builder(object):
             rig_path.make_dir(version_dir)
             version_path = file.incrimentSave(version_path, log=False)
             logger.info("out rig archived: {}".format(version_path))
+
+    def updateMaya(self):
+        """ Update maya if in an interactive session"""
+        # refresh the viewport after each component is built.
+        if not om2.MGlobal.mayaState():
+            cmds.refresh(f=True)
 
     # --------------------------------------------------------------------------------
     # GET

@@ -12,7 +12,6 @@ import rigamajig2.maya.joint
 
 import logging
 
-from rigamajig2.maya.cmpts.chain.splineFK import SplineFK
 
 logger = logging.getLogger(__name__)
 
@@ -106,15 +105,26 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
             if cmds.objExists('trs_motion'):
                 spaces.addSpace(self.fk_control_obj_list[0][1], ['trs_motion'], nameList=['world'], constraintType='orient')
 
+    @staticmethod
+    def createInputJoints(name=None, side=None, numJoints=4):
+        import rigamajig2.maya.naming as naming
+        import rigamajig2.maya.joint as joint
+        joints = list()
 
-if __name__ == '__main__':
-    import rigamajig2; rigamajig2.reloadModule()
-    try:
-        cmpt.deleteSetup()
-    except:
-        pass
+        parent = None
+        for i in range(numJoints):
+            name = name or 'chain'
+            jointName  = naming.getUniqueName("{}_0".format(name))
+            jnt = cmds.createNode("joint", name=jointName)
 
-    cmpt = SplineFK('tail', input=['joint1', 'joint2'], numControls=8)
+            if parent:
+                cmds.parent(jnt, parent)
+            if i > 0:
+                cmds.xform(jnt, objectSpace=True, t=(0, 5, 0))
 
-    cmpt._intialize_cmpt()
-    cmpt._build_cmpt()
+            joints.append(jnt)
+            parent = jnt
+
+        joint .orientJoints(joints, aimAxis='x', upAxis='y')
+        cmds.setAttr("{}.jox".format(joints[0]), -90)
+        return joints

@@ -115,7 +115,9 @@ class Builder(object):
             logger.info('Initalizing: {}'.format(cmpt.name))
             cmpt._intialize_cmpt()
             if hasattr(cmpt, "guides_hrc"):
-                cmds.parent(cmpt.guides_hrc, "guides")
+                parent = cmds.listRelatives(cmpt.guides_hrc, p=True)
+                if parent and parent == 'guides':
+                    cmds.parent(cmpt.guides_hrc, "guides")
             self.updateMaya()
 
         self.load_guide_data()

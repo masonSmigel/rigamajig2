@@ -24,9 +24,10 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 # RIGAMAJIG2
+import rigamajig2.shared.common as common
 from rigamajig2.maya import meta as meta
 from rigamajig2.maya.rig_builder import builder as builder
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.rig_builder.builder import COMPONENTS, GUIDES
 
@@ -162,7 +163,6 @@ def _get_cmpt_icon(cmpt):
 
 
 def get_cmpt_object(module_name=None):
-
     tmp_builder = builder.Builder()
 
     cmptDict = tmp_builder.getComponentRefDict()
@@ -281,7 +281,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.component_tree.addTopLevelItem(item)
         return item
 
-    def create_component(self,name, cmpt_type, input, rigParent):
+    def create_component(self, name, cmpt_type, input, rigParent):
         cmpt_obj = get_cmpt_object(cmpt_type)
         cmpt = cmpt_obj(name=name, input=ast.literal_eval(str(input)), rigParent=rigParent)
 
@@ -406,7 +406,6 @@ class ComponentManager(QtWidgets.QWidget):
         self.set_scriptjob_enabled(True)
 
     def show_add_component_dialog(self):
-
         dialog = CreateCmptDialog()
         dialog.new_cmpt_created.connect(self.create_component)
         dialog.show()
@@ -433,7 +432,7 @@ class CreateCmptDialog(QtWidgets.QDialog):
             self.setProperty("saveWindowPref", True)
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
         self.setMinimumSize(400, 180)
-        self.resize(400, 340)
+        self.resize(400, 440)
 
         self.create_widgets()
         self.create_layouts()
@@ -449,7 +448,9 @@ class CreateCmptDialog(QtWidgets.QDialog):
         self.component_type_cb.setMaxVisibleItems(15)
         self.component_type_cb.setMaxVisibleItems(30)
 
+        self.numJoints_slider = sliderGrp.SliderGroup(min=0, max=10, value=4)
         self.create_input_joints_btn = QtWidgets.QPushButton("Create Input Joints")
+        self.create_input_joints_btn.setMinimumWidth(180)
 
         self.input_le = QtWidgets.QLineEdit()
         self.input_le.setPlaceholderText("[]")
@@ -480,6 +481,11 @@ class CreateCmptDialog(QtWidgets.QDialog):
         name_layout.addWidget(QtWidgets.QLabel("type:"))
         name_layout.addWidget(self.component_type_cb)
 
+        createJoints_layout = QtWidgets.QHBoxLayout()
+        createJoints_layout.addWidget(QtWidgets.QLabel("num joints:"))
+        createJoints_layout.addWidget(self.numJoints_slider)
+        createJoints_layout.addWidget(self.create_input_joints_btn)
+
         input_layout = QtWidgets.QHBoxLayout()
         input_layout.addWidget(self.input_le)
         input_layout.addWidget(self.load_sel_as_input_btn)
@@ -498,13 +504,14 @@ class CreateCmptDialog(QtWidgets.QDialog):
         apply_btn_layout.addWidget(self.close_btn)
 
         main_layout.addLayout(name_layout)
-        main_layout.addWidget(self.create_input_joints_btn)
+        main_layout.addLayout(createJoints_layout)
         main_layout.addLayout(widget_layout)
         main_layout.addSpacing(5)
         main_layout.addWidget(self.discription_te)
         main_layout.addLayout(apply_btn_layout)
 
     def create_connections(self):
+        self.create_input_joints_btn.clicked.connect(self.createInputJoints)
         self.load_sel_as_input_btn.clicked.connect(self.add_selection_as_input)
         self.load_sel_as_rigParent_btn.clicked.connect(self.add_selection_as_rigParent)
         self.component_type_cb.currentIndexChanged.connect(self.update_discription)
@@ -524,7 +531,7 @@ class CreateCmptDialog(QtWidgets.QDialog):
 
         cmpt_type = self.component_type_cb.currentText()
 
-        cmpt_object  = get_cmpt_object(cmpt_type)
+        cmpt_object = get_cmpt_object(cmpt_type)
 
         docstring = cmpt_object.__init__.__doc__
         if docstring:
@@ -547,6 +554,22 @@ class CreateCmptDialog(QtWidgets.QDialog):
 
         if len(sel) > 0:
             self.rigParent_le.setText(str(sel[0]))
+
+    def createInputJoints(self):
+        """ create an input joint list"""
+        cmpt_type = self.component_type_cb.currentText()
+        cmpt_name = self.name_le.text()
+        numJoints = self.numJoints_slider.getValue()
+        side = common.getSide(cmpt_name)
+
+        class_ = get_cmpt_object(cmpt_type)
+        joints = class_.createInputJoints(name=cmpt_name, side=side, numJoints=numJoints)
+
+        str_list = list()
+        for s in joints:
+            str_list.append(str(s))
+
+        self.input_le.setText(str(str_list))
 
     def apply(self):
         cmpt_type = self.component_type_cb.currentText()

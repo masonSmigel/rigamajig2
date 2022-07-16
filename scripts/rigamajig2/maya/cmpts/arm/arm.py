@@ -1,7 +1,10 @@
 """
 Arm component
 """
+# MAYA
 import maya.cmds as cmds
+
+# RIGAMAJIG
 import rigamajig2.maya.cmpts.limb.limb
 import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.rig.spaces as spaces
@@ -66,6 +69,40 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
         super(Arm, self).finalize()
 
     @staticmethod
-    def createInputJoints():
+    def createInputJoints(name=None, side=None, numJoints=None):
         """static method to create input joints"""
-        pass
+        import rigamajig2.maya.naming as naming
+        import rigamajig2.maya.joint as joint
+        GUIDE_POSITIONS = {
+            "clavicle": (0, 0, 0),
+            "shoulder": (10, 0, 0),
+            "elbow": (25, 0, -2),
+            "wrist": (25, 0, 2)
+            }
+
+        joints = list()
+        parent = None
+        for key in ['clavicle', 'shoulder', 'elbow', 'wrist']:
+            name = naming.getUniqueName(key, side)
+            jnt = cmds.createNode("joint", name=name)
+            if parent:
+                cmds.parent(jnt, parent)
+
+            position = GUIDE_POSITIONS[key]
+            if side == 'r':
+                position = (position[0] * -1, position[1], position[2])
+            cmds.xform(jnt, objectSpace=True, t=position)
+
+            # add the joints to the joint list
+            joints.append(jnt)
+
+            parent = jnt
+
+        # orient the joints
+        aimAxis = 'x'
+        upAxis = 'z'
+        if side == 'r':
+            aimAxis = '-x'
+            upAxis = '-z'
+        joint.orientJoints(joints, aimAxis=aimAxis, upAxis=upAxis)
+        return joints

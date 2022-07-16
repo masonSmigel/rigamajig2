@@ -18,10 +18,6 @@ class SliderGroup(QtWidgets.QWidget):
         self.lineEdit.setFixedWidth(50)
 
         self.slider = QtWidgets.QSlider(QtCore.Qt.Horizontal)
-        self.setMinimun(min)
-        self.setMaximum(max)
-        self.setIncriment(sliderIncriment)
-        self.setValue(value)
 
         self.main_layout = QtWidgets.QHBoxLayout(self)
         self.main_layout.setContentsMargins(2, 2, 2, 2)
@@ -30,6 +26,11 @@ class SliderGroup(QtWidgets.QWidget):
 
         self.slider.valueChanged.connect(self.updateLineEdit)
         self.lineEdit.textChanged.connect(self.updateSlider)
+
+        self.setMinimun(min)
+        self.setMaximum(max)
+        self.setIncriment(sliderIncriment)
+        self.setValue(value)
 
     def setMinimun(self, val):
         self.slider.setMinimum(val)

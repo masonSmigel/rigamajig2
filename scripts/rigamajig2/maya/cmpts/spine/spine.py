@@ -194,3 +194,45 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
     def finalize(self):
         rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
         rig_attr.lockAndHide(self.params_hrc, rig_attr.TRANSFORMS + ['v'])
+
+    @staticmethod
+    def createInputJoints(name=None, side=None, numJoints=5):
+        import rigamajig2.maya.naming as naming
+        import rigamajig2.maya.joint as joint
+        GUIDE_POSITIONS = {"hips": (0, 0, 0),
+                           "spine": (0, 6, 0),
+                           "chest": (0, 3, 0)}
+
+        joints = list()
+        hipName = naming.getUniqueName("hips")
+        hip = cmds.createNode("joint", name=hipName)
+
+        cmds.setAttr("{}.radius".format(hip), 2)
+        joints.append(hip)
+
+        parent = hip
+        for i in range(numJoints):
+            spineName = naming.getUniqueName("spine_0")
+            spine = cmds.createNode("joint", name=spineName)
+
+            position = GUIDE_POSITIONS['spine']
+            if parent:
+                cmds.parent(spine, parent)
+            if i > 0:
+                cmds.xform(spine, objectSpace=True, t=position)
+            else:
+                cmds.xform(spine, objectSpace=True, t=(0, 1, 0))
+            joints.append(spine)
+
+            parent = spine
+
+        chestName = naming.getUniqueName("chest")
+        chest = cmds.createNode("joint", name=chestName)
+
+        cmds.parent(chest, parent)
+        cmds.xform(chest, objectSpace=True, t=GUIDE_POSITIONS['chest'])
+        joints.append(chest)
+
+        joint.orientJoints(joints, aimAxis='x', upAxis='y')
+        cmds.setAttr("{}.jox".format(hip), -90)
+        return joints

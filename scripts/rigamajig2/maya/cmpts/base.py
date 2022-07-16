@@ -292,15 +292,9 @@ class Base(object):
         self.cmptSettings.update(new_cmpt_data)
 
     @staticmethod
-    def createInputJoints():
+    def createInputJoints(name=None, side=None, numJoints=None):
         """static method to create input joints"""
-        GUIDE_POSITIONS = {
-            "clavicle": (0, 0, 0),
-            "shoulder": (10, 0, 0),
-            "elbow": (25, 0, -2),
-            "wrist": (25, 0, 2)
-            }
-
+        return list()
 
     # GET
     def getContainer(self):

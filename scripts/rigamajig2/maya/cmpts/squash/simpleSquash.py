@@ -24,7 +24,7 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
 
         :param name: name of the components
         :type name: str
-        :param input: list of two joints. A start and an end joint
+        :param input:  Single input joint
         :type input: list
         :param size: default size of the controls:
         :type size: float
@@ -155,3 +155,12 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         else:
             rig_attr.addSeparator(self.squash_end[-1], '----')
             rig_attr.driveAttribute('volumeFactor', self.params_hrc, self.squash_end[-1])
+
+    @staticmethod
+    def createInputJoints(name=None, side=None, numJoints=4):
+        import rigamajig2.maya.naming as naming
+
+        name = name or 'squash'
+        jnt = cmds.createNode("joint", name=name)
+
+        return [jnt]

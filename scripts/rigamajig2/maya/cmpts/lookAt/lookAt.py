@@ -52,6 +52,7 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         for input in self.input:
             input_upVec = rig_control.createGuide("{}_upVecTgt".format(input), parent=self.guides_hrc)
             setattr(self, "_{}_upVecTgt".format(input), input_upVec)
+            rig_transform.matchTranslate(input, input_upVec)
 
     def initalHierachy(self):
         """
@@ -121,3 +122,22 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
 
         if self.lookAtSpaces:
             spaces.addSpace(self.aimTarget[1], [self.lookAtSpaces[k] for k in self.lookAtSpaces.keys()], self.lookAtSpaces.keys(), 'parent')
+
+    @staticmethod
+    def createInputJoints(name=None, side=None, numJoints=4):
+        import rigamajig2.maya.naming as naming
+        import rigamajig2.maya.joint as joint
+        joints = list()
+
+        for i in range(numJoints):
+            name = name or 'lookAt'
+            jointName  = naming.getUniqueName("{}_0".format(name))
+            jnt = cmds.createNode("joint", name=jointName + "_{}".format(i))
+
+            jntEnd = cmds.createNode("joint", name=jointName + "_{}".format(i) + "_1")
+            cmds.parent(jntEnd, jnt)
+            cmds.xform(jntEnd, objectSpace=True, t=(0, 0, 10))
+
+            joints.append(jnt)
+
+        return joints

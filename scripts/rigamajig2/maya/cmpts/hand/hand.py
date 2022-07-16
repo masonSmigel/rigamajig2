@@ -103,3 +103,54 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         for cmpt in self.finger_cmpt_list:
             cmpt.deleteSetup()
         super(Hand, self).deleteSetup()
+
+    @staticmethod
+    def createInputJoints(name=None, side=None, numJoints=None):
+        """static method to create input joints"""
+        import rigamajig2.maya.naming as naming
+        import rigamajig2.maya.joint as joint
+        GUIDE_POSITIONS = {
+            "thumb": (1, 0, 6),
+            "index": (2, 0, 2),
+            "middle": (2, 0, 0),
+            "ring": (2, 0, -2),
+            "pinky": (2, 0, -4),
+            }
+        joints = list()
+
+        for i, finger in enumerate(['thumb', 'index', 'middle', 'ring', 'pinky']):
+            parent = None
+            jointNum = 6
+            if finger == 'thumb':
+                jointNum = 5
+
+            for j in range(jointNum):
+                name = finger + "_" + side if side else finger
+                jnt = cmds.createNode("joint", name=name + "_0")
+                if parent:
+                    cmds.parent(jnt, parent)
+
+                if j < 1:
+                    position = GUIDE_POSITIONS[finger]
+                    joints.append(jnt)
+                    rootJnt = jnt
+                elif j == 2:
+                    position = (6, 0, 0)
+                    if finger == 'thumb':
+                        position = (4, 0, 0)
+                elif j == 3:
+                    position = (3, 0, 0)
+                else:
+                    position = (2, 0, 0)
+
+                # apply the postion.
+                if side == 'r':
+                    position = (position[0] * -1, position[1], position[2])
+                cmds.xform(jnt, os=True, t=position)
+
+                parent = jnt
+
+            if side == 'r':
+                cmds.setAttr("{}.jox".format(rootJnt), 180)
+
+        return joints

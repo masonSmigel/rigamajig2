@@ -335,6 +335,8 @@ def orientJoints(joints, aimAxis='x', upAxis='y', worldUpVector=(0, 1, 0), autoU
     :param autoUpVector: Auto guess the up vector using the vector pependicular to the joints.
     :return:
     """
+    joints = common.toList(joints)
+
     aimVector = transform.getVectorFromAxis(aimAxis)
     upVector = transform.getVectorFromAxis(upAxis)
 
@@ -405,6 +407,16 @@ def orientJoints(joints, aimAxis='x', upAxis='y', worldUpVector=(0, 1, 0), autoU
         else:
             toOrientation(joint)
             cmds.setAttr('{}.jointOrient'.format(joint), 0, 0, 0)
+
+        # if the joint is the last joint in the list and we want to autoUpVector the joints then set the orientation to 0
+        if joint == joints[-1] and autoUpVector:
+            toOrientation(joint)
+            children = cmds.listRelatives(joint, c=True) or []
+            for child in children:
+                cmds.parent(child, world=True)
+            cmds.setAttr('{}.jointOrient'.format(joint), 0, 0, 0)
+            for child in children:
+                cmds.parent(child, joint)
 
 
 def getCrossUpVector(trs0, trs1, trs2):

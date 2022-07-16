@@ -108,9 +108,14 @@ class Builder(object):
 
     def initalize(self):
         """Initalize rig (this is where the user can make changes)"""
+        if not cmds.objExists("guides"):
+            cmds.createNode("transform", name="guides")
+
         for cmpt in self.cmpt_list:
             logger.info('Initalizing: {}'.format(cmpt.name))
             cmpt._intialize_cmpt()
+            if hasattr(cmpt, "guides_hrc"):
+                cmds.parent(cmpt.guides_hrc, "guides")
             self.updateMaya()
 
         self.load_guide_data()
@@ -158,6 +163,10 @@ class Builder(object):
             logger.info('Finalizing: {}'.format(cmpt.name))
             cmpt._finalize_cmpt()
             self.updateMaya()
+
+        # delete the guide group
+        cmds.delete("guides")
+
         logger.info("finalize -- complete")
 
     def optimize(self):

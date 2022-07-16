@@ -139,9 +139,6 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
 
         rig_transform.connectOffsetParentMatrix(self.neck[-1], self.ikspline.getGroup(), mo=True)
 
-        # delete the guides. We no longer need them.
-        cmds.delete(self.guides_hrc)
-
     def connect(self):
         """Create the connection"""
 

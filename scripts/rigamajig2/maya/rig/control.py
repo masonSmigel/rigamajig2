@@ -230,7 +230,7 @@ def getControls(namespace=None):
     return rigamajig2.maya.meta.getTagged(CONTROLTAG, namespace=namespace)
 
 
-def createDisplayLine(point1, point2, name=None, parent=None, displayType='ref'):
+def createDisplayLine(point1, point2, name=None, parent=None, displayType='temp'):
     """
     Create a display line between two points
     :param point1: First node to connect the line to.

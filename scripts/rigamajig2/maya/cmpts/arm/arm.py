@@ -52,10 +52,6 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
     def rigSetup(self):
         """Add the rig setup"""
         super(Arm, self).rigSetup()
-        # delete the guides. We no longer need them.
-        # Do it in the subclass so the guide_hrc still exists in other subclasses
-        # such as the legs where they are more important.
-        cmds.delete(self.guides_hrc)
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""

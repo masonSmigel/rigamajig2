@@ -98,23 +98,18 @@ class BuildWidget(QtWidgets.QWidget):
     # CONNECTIONS
     def initalize_rig(self):
         self.builder.initalize()
-        self.builder.load_component_settings()
-        self.cmpt_manager.load_cmpts_from_scene()
 
     def clear_components(self):
         self.builder.set_cmpts(list())
 
     def build_rig(self):
         self.builder.build()
-        self.builder.load_cmpts_from_scene()
 
     def connect_rig(self):
         self.builder.connect()
-        self.builder.load_cmpts_from_scene()
 
     def finalize_rig(self):
         self.builder.finalize()
-        self.cmpt_manager.load_cmpts_from_scene()
 
     def complete_build(self):
         self.builder.initalize()

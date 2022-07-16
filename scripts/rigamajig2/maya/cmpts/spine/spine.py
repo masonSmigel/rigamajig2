@@ -183,9 +183,6 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.hip_swing[-1], self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.chestTop[-1], self.ikspline._endTwist, mo=True)
 
-        # delete the guides. We no longer need them.
-        cmds.delete(self.guides_hrc)
-
     def connect(self):
         """Create the connection"""
 

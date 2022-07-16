@@ -137,7 +137,6 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         joint.connectChains(squash_jnt, self.input[0])
 
         # cleanup the rig
-        cmds.delete(self.guides_hrc)
         joint.hideJoints([start_jnt, end_jnt, squash_jnt])
         cmds.setAttr("{}.v".format(self.ikHandle), 0)
 

@@ -84,6 +84,9 @@ def createAtSelection(selection=None, mode='single', type='locator'):
     if selection is None:
         selection = cmds.ls(sl=True, fl=True)
 
+    if len(selection) < 1:
+        return createNode(type=type)
+
     nodeType = cmds.nodeType(selection[0])
     locators = list()
     # if a nurbs curve place one locator at each selected CV

@@ -139,8 +139,8 @@ class BuilderDialog(QtWidgets.QDialog):
                              self.deformation_widget,
                              self.publish_widget]
 
-        self.run_selected_btn = QtWidgets.QPushButton("Run Selected")
-        self.run_btn = QtWidgets.QPushButton("Run")
+        self.run_selected_btn = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
+        self.run_btn = QtWidgets.QPushButton(QtGui.QIcon(":executeAll.png"), "Run")
         self.run_btn.setFixedWidth(80)
 
         self.close_btn = QtWidgets.QPushButton("Close")
@@ -284,7 +284,7 @@ class BuilderDialog(QtWidgets.QDialog):
 
     def run_all(self):
         self.rig_builder.run()
-        self.cmpt_manager.load_cmpts_from_scene()
+        self.initialize_widget.cmpt_manager.load_cmpts_from_scene()
 
     def closeEvent(self, e):
         super(BuilderDialog, self).closeEvent(e)

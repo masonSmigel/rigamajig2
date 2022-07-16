@@ -193,22 +193,24 @@ class ComponentManager(QtWidgets.QWidget):
 
     def create_actions(self):
         self.select_container_action = QtWidgets.QAction("Select Container", self)
-        self.select_container_action.setIcon(QtGui.QIcon(":selectModel.png"))
+        self.select_container_action.setIcon(QtGui.QIcon(":out_container.png"))
+        self.select_container_action.triggered.connect(self.select_container)
 
-        self.createSymetricalComponent = QtWidgets.QAction("Create Symetrical Component")
+        self.editComponentSettings_action = QtWidgets.QAction("Edit Component Parameters")
+        self.editComponentSettings_action.setIcon(QtGui.QIcon(":toolSettings.png"))
+
+        self.createSymetricalComponent = QtWidgets.QAction("Create Mirroed Component")
         self.createSymetricalComponent.setIcon(QtGui.QIcon(":kinMirrorJoint_S.png"))
 
-        # self.build_cmpt_action = QtWidgets.QAction("Build Cmpt", self)
-        # self.build_cmpt_action.setIcon(QtGui.QIcon(":play_S_100.png"))
+        self.mirrorComponentSettings_action = QtWidgets.QAction("Mirror Component Parameters")
+        self.mirrorComponentSettings_action.setIcon(QtGui.QIcon(":QR_mirrorGuidesRightToLeft.png"))
 
         self.reload_cmpt_action = QtWidgets.QAction("Reload Cmpts from Scene", self)
         self.reload_cmpt_action.setIcon(QtGui.QIcon(":refresh.png"))
+        self.reload_cmpt_action.triggered.connect(self.load_cmpts_from_scene)
 
         self.del_cmpt_action = QtWidgets.QAction("Delete Cmpt", self)
         self.del_cmpt_action.setIcon(QtGui.QIcon(":trash.png"))
-
-        self.select_container_action.triggered.connect(self.select_container)
-        self.reload_cmpt_action.triggered.connect(self.load_cmpts_from_scene)
         self.del_cmpt_action.triggered.connect(self.delete_cmpt)
 
     def create_widgets(self):
@@ -226,7 +228,9 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.component_tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.component_tree.addAction(self.select_container_action)
+        self.component_tree.addAction(self.editComponentSettings_action)
         self.component_tree.addAction(self.createSymetricalComponent)
+        self.component_tree.addAction(self.mirrorComponentSettings_action)
         self.component_tree.addAction(self.reload_cmpt_action)
         self.component_tree.addAction(self.del_cmpt_action)
 

@@ -72,10 +72,9 @@ class ScriptRunner(QtWidgets.QWidget):
         self.script_list.addAction(self.show_in_folder_action)
         self.script_list.addAction(self.del_script_action)
 
-        self.add_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":fileNew.png"), "")
-        self.reload_scripts_btn = QtWidgets.QPushButton(QtGui.QIcon(":refresh.png"), "")
-        self.create_new_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":cmdWndIcon.png"), "")
-        self.save_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":save.png"), "")
+        self.add_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":fileNew.png"), "Add Script")
+        self.create_new_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":cmdWndIcon.png"), "New Script")
+        self.save_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":save.png"), "Save All")
         self.execute_scripts_btn = QtWidgets.QPushButton(QtGui.QIcon(":play_S_100.png"), "Execute All")
 
     def create_layouts(self):
@@ -83,7 +82,6 @@ class ScriptRunner(QtWidgets.QWidget):
         btn_layout.setContentsMargins(0, 0, 0, 0)
         btn_layout.addStretch()
         btn_layout.addWidget(self.add_script_btn)
-        btn_layout.addWidget(self.reload_scripts_btn)
         btn_layout.addWidget(self.create_new_script_btn)
         btn_layout.addWidget(self.save_script_btn)
         btn_layout.addWidget(self.execute_scripts_btn)

@@ -8,10 +8,12 @@
     discription: 
 
 """
-# PYTHON
+# MAYA
+import maya.cmds as cmds
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
+
 
 # RIGAMAJIG2
 import rigamajig2.maya.curve
@@ -49,7 +51,6 @@ class ControlsWidget(QtWidgets.QWidget):
         self.controlEdit_wgt = collapseableWidget.CollapsibleWidget('Edit Controls')
         self.controlEdit_wgt.set_header_background_color(constants.EDIT_BG_HEADER_COLOR)
         self.controlEdit_wgt.set_widget_background_color(constants.EDIT_BG_WIDGET_COLOR)
-
 
         self.ctlAxisX_rb = QtWidgets.QRadioButton('x')
         self.ctlAxisX_rb.setChecked(True)

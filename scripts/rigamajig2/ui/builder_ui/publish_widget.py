@@ -55,6 +55,7 @@ class PublishWidget(QtWidgets.QWidget):
         self.main_layout.setSpacing(0)
 
         self.main_collapseable_widget.addWidget(self.publishScript_scriptRunner)
+        self.main_collapseable_widget.addSpacing(10)
         publish_file_layout = QtWidgets.QHBoxLayout()
         publish_file_layout.addWidget(self.out_path_selector)
         publish_file_layout.addWidget(self.out_file_type_cb)

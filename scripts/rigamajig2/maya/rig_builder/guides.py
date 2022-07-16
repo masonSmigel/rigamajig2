@@ -44,7 +44,6 @@ def load_joints(path=None):
     for node in cmds.ls(data_obj.getKeys(), l=True):
         # add the joint orient to all joints in the file.
         joint.addJointOrientToChannelBox(node)
-        attr.nonKeyable(node, attr.TRANSFORMS + ["v"] + ["jox", "joy", "joz"])
 
         # find joints without a parent and make them a root
         if not len(node.split('|')) > 2:

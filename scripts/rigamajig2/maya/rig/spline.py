@@ -162,9 +162,6 @@ class SplineBase(object):
             self._ikJointList.append(ikJoint)
             debug.showLocalRotationAxis(ikJoint)
 
-            # relock the original joint
-            rig_attr.lock(joint, locked_attrs)
-
             if i:
                 cmds.parent(ikJoint, ikParent)
             else:

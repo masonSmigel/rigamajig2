@@ -105,11 +105,11 @@ class BuildWidget(QtWidgets.QWidget):
         self.builder.set_cmpts(list())
 
     def build_rig(self):
-        self.rig_builder.build()
+        self.builder.build()
         self.builder.load_cmpts_from_scene()
 
     def connect_rig(self):
-        self.rig_builder.connect()
+        self.builder.connect()
         self.builder.load_cmpts_from_scene()
 
     def finalize_rig(self):

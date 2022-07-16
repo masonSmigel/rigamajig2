@@ -433,7 +433,7 @@ class CreateCmptDialog(QtWidgets.QDialog):
             self.setProperty("saveWindowPref", True)
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
         self.setMinimumSize(400, 180)
-        self.resize(400, 240)
+        self.resize(400, 340)
 
         self.create_widgets()
         self.create_layouts()
@@ -443,10 +443,13 @@ class CreateCmptDialog(QtWidgets.QDialog):
 
     def create_widgets(self):
         self.name_le = QtWidgets.QLineEdit()
+
         self.component_type_cb = QtWidgets.QComboBox()
         self.component_type_cb.setMinimumHeight(30)
         self.component_type_cb.setMaxVisibleItems(15)
         self.component_type_cb.setMaxVisibleItems(30)
+
+        self.create_input_joints_btn = QtWidgets.QPushButton("Create Input Joints")
 
         self.input_le = QtWidgets.QLineEdit()
         self.input_le.setPlaceholderText("[]")
@@ -495,6 +498,7 @@ class CreateCmptDialog(QtWidgets.QDialog):
         apply_btn_layout.addWidget(self.close_btn)
 
         main_layout.addLayout(name_layout)
+        main_layout.addWidget(self.create_input_joints_btn)
         main_layout.addLayout(widget_layout)
         main_layout.addSpacing(5)
         main_layout.addWidget(self.discription_te)

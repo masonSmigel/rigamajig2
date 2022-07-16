@@ -83,120 +83,210 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
         self.guide_pv = live.createlivePoleVector(self.input[1:4])
         cmds.parent(self.guide_pv, self.guides_hrc)
-        rig_control.createDisplayLine(self.input[2], self.guide_pv, "{}_pvLine".format(self.name), self.guides_hrc, 'temp')
-        rig_control.createDisplayLine(self.input[1], self.input[3], "{}_ikLine".format(self.name), self.guides_hrc, "temp")
+        rig_control.createDisplayLine(self.input[2], self.guide_pv, "{}_pvLine".format(self.name), self.guides_hrc)
+        rig_control.createDisplayLine(self.input[1], self.input[3], "{}_ikLine".format(self.name), self.guides_hrc)
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
         super(Limb, self).initalHierachy()
 
-        if self.useScale:
-            hideAttrs = []
-        else:
-            hideAttrs = ['s']
+        hideAttrs = [] if self.useScale else ['s']
 
         # limbBase/swing controls
-        self.limbBase = rig_control.createAtObject(self.limbBaseName, self.side,
-                                                   hierarchy=['trsBuffer'], hideAttrs=['v'] + hideAttrs,
-                                                   size=self.size, color='blue', parent=self.control_hrc,
-                                                   shape='square', xformObj=self.input[0])
-        self.limbSwing = rig_control.createAtObject(self.limbSwingName, self.side,
-                                                    hierarchy=['trsBuffer', 'spaces_trs'],
-                                                    hideAttrs=['v', 's'], size=self.size, color='blue',
-                                                    parent=self.limbBase[-1], shape='square',
-                                                    xformObj=self.input[1])
+        self.limbBase = rig_control.createAtObject(
+            self.limbBaseName,
+            self.side,
+            hierarchy=['trsBuffer'],
+            hideAttrs=['v'] + hideAttrs,
+            size=self.size,
+            color='blue',
+            parent=self.control_hrc,
+            shape='square',
+            xformObj=self.input[0]
+            )
+        self.limbSwing = rig_control.createAtObject(
+            self.limbSwingName,
+            self.side,
+            hierarchy=['trsBuffer', 'spaces_trs'],
+            hideAttrs=['v', 's'],
+            size=self.size,
+            color='blue',
+            parent=self.limbBase[-1],
+            shape='square',
+            xformObj=self.input[1]
+            )
 
         # fk controls
-        self.joint1_fk = rig_control.createAtObject(self.joint1_fkName, self.side,
-                                                    hierarchy=['trsBuffer', 'spaces_trs'],
-                                                    hideAttrs=['v', 't'] + hideAttrs, size=self.size, color='blue',
-                                                    parent=self.control_hrc, shape='circle', shapeAim='x',
-                                                    xformObj=self.input[1])
-        self.joint2_fk = rig_control.createAtObject(self.joint2_fkName, self.side,
-                                                    hierarchy=['trsBuffer'], hideAttrs=['v', 't'] + hideAttrs,
-                                                    size=self.size, color='blue', parent=self.joint1_fk[-1],
-                                                    shape='circle', shapeAim='x', xformObj=self.input[2])
-        self.joint3_fk = rig_control.createAtObject(self.joint3_fkName, self.side,
-                                                    hierarchy=['trsBuffer'], hideAttrs=['v', 't'] + hideAttrs,
-                                                    size=self.size, color='blue', parent=self.joint2_fk[-1],
-                                                    shape='circle', shapeAim='x', xformObj=self.input[3])
-        self.joint3Gimble_fk = rig_control.createAtObject(self.joint3Gimble_fkName, self.side,
-                                                          hierarchy=['trsBuffer'], hideAttrs=['v', 't', 's'],
-                                                          size=self.size, color='blue', parent=self.joint3_fk[-1],
-                                                          shape='circle', shapeAim='x', xformObj=self.input[3])
+        self.joint1_fk = rig_control.createAtObject(
+            self.joint1_fkName,
+            self.side,
+            hierarchy=['trsBuffer', 'spaces_trs'],
+            hideAttrs=['v', 't'] + hideAttrs,
+            size=self.size, color='blue',
+            parent=self.control_hrc,
+            shape='circle',
+            shapeAim='x',
+            xformObj=self.input[1]
+            )
+        self.joint2_fk = rig_control.createAtObject(
+            self.joint2_fkName, self.side,
+            hierarchy=['trsBuffer'],
+            hideAttrs=['v', 't'] + hideAttrs,
+            size=self.size,
+            color='blue',
+            parent=self.joint1_fk[-1],
+            shape='circle',
+            shapeAim='x',
+            xformObj=self.input[2]
+            )
+        self.joint3_fk = rig_control.createAtObject(
+            self.joint3_fkName, self.side,
+            hierarchy=['trsBuffer'],
+            hideAttrs=['v', 't'] + hideAttrs,
+            size=self.size,
+            color='blue',
+            parent=self.joint2_fk[-1],
+            shape='circle',
+            shapeAim='x',
+            xformObj=self.input[3]
+            )
+        self.joint3Gimble_fk = rig_control.createAtObject(
+            self.joint3Gimble_fkName,
+            self.side,
+            hierarchy=['trsBuffer'],
+            hideAttrs=['v', 't', 's'],
+            size=self.size,
+            color='blue',
+            parent=self.joint3_fk[-1],
+            shape='circle',
+            shapeAim='x',
+            xformObj=self.input[3]
+            )
 
         # Ik controls
-        self.limb_ik = rig_control.create(self.limb_ikName, self.side,
-                                          hierarchy=['trsBuffer', 'spaces_trs'],
-                                          hideAttrs=['v'] + hideAttrs, size=self.size, color='blue',
-                                          parent=self.control_hrc,
-                                          shape='cube', position=cmds.xform(self.input[3], q=True, ws=True, t=True))
+        self.limb_ik = rig_control.create(
+            self.limb_ikName,
+            self.side,
+            hierarchy=['trsBuffer', 'spaces_trs'],
+            hideAttrs=['v'] + hideAttrs,
+            size=self.size,
+            color='blue',
+            parent=self.control_hrc,
+            shape='cube',
+            position=cmds.xform(self.input[3], q=True, ws=True, t=True)
+            )
 
-        self.limbGimble_ik = rig_control.create(self.limbGimble_ikName, self.side,
-                                                hierarchy=['trsBuffer'], hideAttrs=['v', 's'], size=self.size,
-                                                color='blue', parent=self.limb_ik[-1], shape='sphere',
-                                                position=cmds.xform(self.input[3], q=True, ws=True, t=True))
+        self.limbGimble_ik = rig_control.create(
+            self.limbGimble_ikName,
+            self.side,
+            hierarchy=['trsBuffer'],
+            hideAttrs=['v', 's'],
+            size=self.size,
+            color='blue',
+            parent=self.limb_ik[-1],
+            shape='sphere',
+            position=cmds.xform(self.input[3], q=True, ws=True, t=True)
+            )
 
         # pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:4], magnitude=0)
         pv_pos = cmds.xform(self.guide_pv, q=True, ws=True, t=True)
-        self.limb_pv = rig_control.create(self.limb_pvName, self.side,
-                                          hierarchy=['trsBuffer', 'spaces_trs'],
-                                          hideAttrs=['r', 's', 'v'], size=self.size, color='blue', shape='diamond',
-                                          position=pv_pos, parent=self.control_hrc, shapeAim='z')
+        self.limb_pv = rig_control.create(
+            self.limb_pvName,
+            self.side,
+            hierarchy=['trsBuffer', 'spaces_trs'],
+            hideAttrs=['r', 's', 'v'],
+            size=self.size,
+            color='blue',
+            shape='diamond',
+            position=pv_pos,
+            parent=self.control_hrc,
+            shapeAim='z'
+            )
 
         # if we dont want to use proxy attributes then create an attribute to hold attributes
         if not self.useProxyAttrs:
-            self.ikfk_control = rig_control.createAtObject(self.name,
-                                                           hierarchy=['trsBuffer'], hideAttrs=['t', 'r', 's', 'v'],
-                                                           size=self.size, color='lightorange', shape='peakedCube',
-                                                           xformObj=self.input[3], parent=self.control_hrc,
-                                                           shapeAim='x')
+            self.ikfk_control = rig_control.createAtObject(
+                self.name,
+                hierarchy=['trsBuffer'],
+                hideAttrs=['t', 'r', 's', 'v'],
+                size=self.size,
+                color='lightorange',
+                shape='peakedCube',
+                xformObj=self.input[3],
+                parent=self.control_hrc,
+                shapeAim='x')
 
         if self.addTwistJoints and self.addBendies:
             self.bend_ctl_hrc = cmds.createNode("transform", n=self.name + "_bendControl", parent=self.control_hrc)
 
-            self.bend1 = rig_control.create(self.bend1Name, self.side, hierarchy=['trsBuffer'],
-                                            hideAttrs=['v', 'r','s'], size=self.size,
-                                            color='blue', shape='circle', shapeAim='x',
-                                            position=cmds.xform(self.input[1], q=True, ws=True, t=True),
-                                            parent=self.bend_ctl_hrc)
+            self.bend1 = rig_control.create(
+                self.bend1Name,
+                self.side,
+                hierarchy=['trsBuffer'],
+                hideAttrs=['v', 'r', 's'],
+                size=self.size,
+                color='blue',
+                shape='circle', shapeAim='x',
+                position=cmds.xform(self.input[1], q=True, ws=True, t=True),
+                parent=self.bend_ctl_hrc
+                )
 
-            bend2_pos = mathUtils.nodePosLerp(self.input[1], self.input[2], 0.5)
-            self.bend2 = rig_control.create(self.bend2Name, self.side,
-                                            hierarchy=['trsBuffer'], hideAttrs=['v', 's'], size=self.size,
-                                            color='blue', shape='circle', shapeAim='x',
-                                            position=bend2_pos, parent=self.bend_ctl_hrc)
+            self.bend2 = rig_control.create(
+                self.bend2Name,
+                self.side,
+                hierarchy=['trsBuffer'],
+                hideAttrs=['v', 's'],
+                size=self.size,
+                color='blue',
+                shape='circle',
+                shapeAim='x',
+                position=mathUtils.nodePosLerp(self.input[1], self.input[2], 0.5),
+                parent=self.bend_ctl_hrc
+                )
 
-            self.bend3 = rig_control.create(self.bend3Name, self.side,
-                                            hierarchy=['trsBuffer'], hideAttrs=['v', 'r', 's'], size=self.size,
-                                            color='blue', shape='circle', shapeAim='x',
-                                            position=cmds.xform(self.input[2], q=True, ws=True, t=True),
-                                            parent=self.bend_ctl_hrc)
+            self.bend3 = rig_control.create(
+                self.bend3Name,
+                self.side,
+                hierarchy=['trsBuffer'],
+                hideAttrs=['v', 'r', 's'],
+                size=self.size,
+                color='blue',
+                shape='circle',
+                shapeAim='x',
+                position=cmds.xform(self.input[2], q=True, ws=True, t=True),
+                parent=self.bend_ctl_hrc
+                )
 
-            bend4_pos = mathUtils.nodePosLerp(self.input[2], self.input[3], 0.5)
-            self.bend4 = rig_control.create(self.bend2Name, self.side,
-                                            hierarchy=['trsBuffer'], hideAttrs=['v', 's'], size=self.size,
-                                            color='blue', shape='circle', shapeAim='x',
-                                            position=bend4_pos, parent=self.bend_ctl_hrc)
+            self.bend4 = rig_control.create(
+                self.bend2Name,
+                self.side,
+                hierarchy=['trsBuffer'],
+                hideAttrs=['v', 's'],
+                size=self.size,
+                color='blue',
+                shape='circle',
+                shapeAim='x',
+                position=mathUtils.nodePosLerp(self.input[2], self.input[3], 0.5),
+                parent=self.bend_ctl_hrc
+                )
 
-            self.bend5 = rig_control.create(self.bend4Name, self.side,
-                                            hierarchy=['trsBuffer'], hideAttrs=['v','r', 's'], size=self.size,
-                                            color='blue', shape='circle', shapeAim='x',
-                                            position=cmds.xform(self.input[3], q=True, ws=True, t=True),
-                                            parent=self.bend_ctl_hrc)
+            self.bend5 = rig_control.create(
+                self.bend4Name, self.side,
+                hierarchy=['trsBuffer'],
+                hideAttrs=['v', 'r', 's'],
+                size=self.size,
+                color='blue',
+                shape='circle',
+                shapeAim='x',
+                position=cmds.xform(self.input[3], q=True, ws=True, t=True),
+                parent=self.bend_ctl_hrc
+                )
 
+            # aim the controls down the chain
             bend_aim_list = [b[0] for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]]
             aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(self.input[1], allowNegative=True))
-            for i in range(len(bend_aim_list)):
-                upVector = (0, 0, 1)
+            rig_transform.aimChain(bend_aim_list, aimVector=aimVector, upVector=(0,0,1), worldUpObject=self.limb_pv[0])
 
-                if i == 4:
-                    aimVector = mathUtils.scalarMult(aimVector, -1)
-                    cmds.delete(cmds.aimConstraint(bend_aim_list[i - 1], bend_aim_list[i], aim=aimVector, u=upVector,
-                                                   wut='object', wuo=self.limb_pv[0], mo=False))
-                else:
-                    cmds.delete(cmds.aimConstraint(bend_aim_list[i + 1], bend_aim_list[i], aim=aimVector, u=upVector,
-                                                   wut='object', wuo=self.limb_pv[0], mo=False))
             self.bendControls = [b[-1] for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]]
 
         # add the controls to our controller list
@@ -239,7 +329,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         worldMatrix = "{}.worldMatrix[0]".format(self.limb_ik[-1])
         parentInverse = "{}.worldInverseMatrix[0]".format(self.ikfk.getIkJointList()[-2])
         offset = rig_transform.offsetMatrix(self.limb_ik[-1], self.ikfk.getIkJointList()[-1])
-        rigamajig2.maya.node.multMatrix([list(om2.MMatrix(offset)), worldMatrix, parentInverse], self.ikfk.getIkJointList()[-1], s=True,
+        rigamajig2.maya.node.multMatrix([list(om2.MMatrix(offset)), worldMatrix, parentInverse],
+                                        self.ikfk.getIkJointList()[-1], s=True,
                                         name='{}_scale'.format(self.ikfk.getIkJointList()[-1]))
 
         # connect twist of ikHandle to ik arm
@@ -260,8 +351,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
             # calculate an inverted rotation to negate the upp twist start.
             # This gives a more natural twist down the limb
-            twist_mm, twist_dcmp = rigamajig2.maya.node.multMatrix(["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(
-                                                                    self.input[0])], outputs=[""], name="{}_invStartTist".format(upp_spline._startTwist))
+            twist_mm, twist_dcmp = rigamajig2.maya.node.multMatrix(
+                ["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(
+                    self.input[0])], outputs=[""], name="{}_invStartTist".format(upp_spline._startTwist))
             if "-" not in rig_transform.getAimAxis(self.input[1]):
                 rigamajig2.maya.node.unitConversion("{}.outputRotate".format(twist_dcmp),
                                                     output="{}.r".format(upp_spline._startTwist),
@@ -301,7 +393,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 rig_transform.connectOffsetParentMatrix(self.bend5[-1], low_targets[2], mo=True)
 
             # create attributes for the volume factor
-            volumePlug = rig_attr.createAttr(self.params_hrc, "volumeFactor", 'float',value=1, minValue=0)
+            volumePlug = rig_attr.createAttr(self.params_hrc, "volumeFactor", 'float', value=1, minValue=0)
             cmds.connectAttr(volumePlug, "{}.{}".format(upp_spline.getGroup(), "volumeFactor"))
             cmds.connectAttr(volumePlug, "{}.{}".format(low_spline.getGroup(), "volumeFactor"))
 
@@ -310,13 +402,15 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             for i in range(len(setScaleList)):
                 percent = i / float(len(setScaleList) - 1)
                 value = mathUtils.lerp(0, 1, percent)
-                cmds.setAttr("{}.scale_{}".format(upp_spline._group, upp_spline._ikJointList.index(setScaleList[i])), value)
+                cmds.setAttr("{}.scale_{}".format(upp_spline._group, upp_spline._ikJointList.index(setScaleList[i])),
+                             value)
 
             setScaleList = list(low_spline._ikJointList)
             for i in range(len(setScaleList)):
                 percent = i / float(len(setScaleList) - 1)
                 value = mathUtils.lerp(1, 0, percent)
-                cmds.setAttr("{}.scale_{}".format(low_spline._group, low_spline._ikJointList.index(setScaleList[i])), value)
+                cmds.setAttr("{}.scale_{}".format(low_spline._group, low_spline._ikJointList.index(setScaleList[i])),
+                             value)
 
             # if the module is using the twisty bendy controls then we need to create a visibly control
             rig_attr.createAttr(self.params_hrc, "bendies", "bool", value=1, keyable=True, channelBox=True)
@@ -350,7 +444,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'stretchTop'), self.limb_ik[-1])
             rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'stretchBot'), self.limb_ik[-1])
             rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'softStretch'), self.limb_ik[-1])
-            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'pvPin'),[self.limb_ik[-1], self.limb_pv[-1]])
+            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'pvPin'), [self.limb_ik[-1], self.limb_pv[-1]])
             rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'twist'), self.limb_ik[-1])
             if self.addTwistJoints and self.addBendies:
                 rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'volumeFactor'), self.limb_ik[-1])
@@ -383,10 +477,12 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             spaces.addSpace(self.limbSwing[1], ['trs_motion'], nameList=['world'], constraintType='orient')
 
         if self.ikSpaces:
-            spaces.addSpace(self.limb_ik[1], [self.ikSpaces[k] for k in self.ikSpaces.keys()], self.ikSpaces.keys(), 'parent')
+            ikspaceValues = [self.ikSpaces[k] for k in self.ikSpaces.keys()]
+            spaces.addSpace(self.limb_ik[1], ikspaceValues, self.ikSpaces.keys(), 'parent')
 
         if self.pvSpaces:
-            spaces.addSpace(self.limb_pv[1], [self.pvSpaces[k] for k in self.pvSpaces.keys()], self.pvSpaces.keys(), 'parent')
+            pvSpaceValues = [self.pvSpaces[k] for k in self.pvSpaces.keys()]
+            spaces.addSpace(self.limb_pv[1], pvSpaceValues, self.pvSpaces.keys(), 'parent')
 
     def finalize(self):
         """ Lock some attributes we dont want to see"""

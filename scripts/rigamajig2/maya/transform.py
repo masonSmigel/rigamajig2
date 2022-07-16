@@ -8,6 +8,7 @@ import maya.api.OpenMaya as om2
 import rigamajig2.maya.hierarchy as dag
 import rigamajig2.shared.common as common
 import rigamajig2.maya.matrix as matrix
+import rigamajig2.maya.mathUtils as mathUtils
 
 ROTATEORDER = ['xyz', 'yzx', 'zxy', 'xzy', 'yxz', 'zyx']
 
@@ -295,7 +296,6 @@ def getAimAxis(transform, allowNegative=True):
 
 
 def getClosestAxis(transform, target, allowNegative=True):
-
     offset = offsetMatrix(transform, target)
     tx, ty, tz = matrix.getTranslation(offset)
 
@@ -396,6 +396,40 @@ def decomposeRotation(node, twistAxis='x'):
 
     # return the three attributes
     return ["{}.decompose{}".format(node, axis) for axis in 'XYZ']
+
+
+def aimChain(chain, aimVector, upVector, worldUpObject=None, worldUpType='object', worldUpVector=(0, 1, 0)):
+    """
+    aim a series of transforms at its child.
+    if its the child then reverse the aimVector and aim at the parent
+
+    :param list chain: list of transforms to aim
+    :param list tuple aimVector: aim vector to use.
+    :param list tuple upVector: up vector to use.
+    :param str worldUpObject: world up object to use in the aim constraint
+    :param str worldUpType: world up type to use in the aim constraint
+    :param list tuple worldUpVector: world up vector to use in the aim constraint
+    """
+
+    if not isinstance(chain, (list, tuple)):
+        raise Exception("{} Is not a list, nothing to aim".format(chain))
+
+    aimVector = aimVector
+    for i in range(len(chain)):
+        if i == len(chain) - 1:
+            aimVector = mathUtils.scalarMult(aimVector, -1)
+            aimTarget = chain[i - 1]
+        else:
+            aimTarget = chain[i + 1]
+
+        const = cmds.aimConstraint(aimTarget, chain[i],
+                                   aimVector=aimVector,
+                                   upVector=upVector,
+                                   worldUpType=worldUpType,
+                                   worldUpObject=worldUpObject,
+                                   worldUpVector=worldUpVector,
+                                   mo=False)
+        cmds.delete(const)
 
 
 def resetTransformations(nodes):

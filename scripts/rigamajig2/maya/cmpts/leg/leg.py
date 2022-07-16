@@ -20,7 +20,8 @@ logger = logging.getLogger(__name__)
 
 
 class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True, rigParent=str()):
+    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True,
+                 rigParent=str()):
         """
         Leg Component. (subclass of limb rig)
         The leg component includes a foot.
@@ -41,7 +42,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         :type useProxyAttrs: bool
         """
         super(Leg, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces,
-                                  useProxyAttrs=useProxyAttrs,useScale=useScale, rigParent=rigParent)
+                                  useProxyAttrs=useProxyAttrs, useScale=useScale, rigParent=rigParent)
         self.cmptSettings['toes_fkName'] = 'toes_fk'
         self.cmptSettings['toes_ikName'] = 'toes_ik'
         self.cmptSettings['ball_ikName'] = 'ball_ik'
@@ -67,27 +68,55 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
     def initalHierachy(self):
         """Build the initial hirarchy"""
         super(Leg, self).initalHierachy()
-        self.toes_fk = rig_control.createAtObject(self.toes_fkName, self.side,
-                                                  hierarchy=['trsBuffer'],
-                                                  hideAttrs=['v', 't', 's'], size=self.size, color='blue',
-                                                  parent=self.control_hrc, shape='square', shapeAim='x',
-                                                  xformObj=self.input[4])
+        self.toes_fk = rig_control.createAtObject(
+            self.toes_fkName,
+            self.side,
+            hierarchy=['trsBuffer'],
+            hideAttrs=['v', 't', 's'],
+            size=self.size,
+            color='blue',
+            parent=self.control_hrc,
+            shape='square',
+            shapeAim='x',
+            xformObj=self.input[4]
+            )
         # create ik piviot controls
-        self.heel_ik = rig_control.createAtObject(self.heel_ikName, self.side,
-                                                  hierarchy=['trsBuffer'],
-                                                  hideAttrs=['v', 't', 's'], size=self.size, color='blue',
-                                                  parent=self.control_hrc, shape='cube', shapeAim='x',
-                                                  xformObj=self._heel_piv)
-        self.ball_ik = rig_control.createAtObject(self.ball_ikName, self.side,
-                                                  hierarchy=['trsBuffer'],
-                                                  hideAttrs=['v', 't', 's'], size=self.size, color='blue',
-                                                  parent=self.control_hrc, shape='cube', shapeAim='x',
-                                                  xformObj=self._ball_piv)
-        self.toes_ik = rig_control.createAtObject(self.toes_ikName, self.side,
-                                                  hierarchy=['trsBuffer'],
-                                                  hideAttrs=['v', 't', 's'], size=self.size, color='blue',
-                                                  parent=self.control_hrc, shape='cube', shapeAim='x',
-                                                  xformObj=self._toe_piv)
+        self.heel_ik = rig_control.createAtObject(
+            self.heel_ikName,
+            self.side,
+            hierarchy=['trsBuffer'],
+            hideAttrs=['v', 't', 's'],
+            size=self.size,
+            color='blue',
+            parent=self.control_hrc,
+            shape='cube',
+            shapeAim='x',
+            xformObj=self._heel_piv
+            )
+        self.ball_ik = rig_control.createAtObject(
+            self.ball_ikName,
+            self.side,
+            hierarchy=['trsBuffer'],
+            hideAttrs=['v', 't', 's'],
+            size=self.size,
+            color='blue',
+            parent=self.control_hrc,
+            shape='cube',
+            shapeAim='x',
+            xformObj=self._ball_piv
+            )
+        self.toes_ik = rig_control.createAtObject(
+            self.toes_ikName,
+            self.side,
+            hierarchy=['trsBuffer'],
+            hideAttrs=['v', 't', 's'],
+            size=self.size,
+            color='blue',
+            parent=self.control_hrc,
+            shape='cube',
+            shapeAim='x',
+            xformObj=self._toe_piv
+            )
 
         self.ikControls += [self.heel_ik[-1], self.ball_ik[-1], self.toes_ik[-1]]
 

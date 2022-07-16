@@ -318,3 +318,28 @@ def unpin(nodes=None):
     # check if the pin hrc is empty. If it is we can delete it.
     if len(cmds.listRelatives(PIN_HRC_NAME, c=True) or list()) == 0:
         cmds.delete(PIN_HRC_NAME)
+
+
+def slideBetweenTransforms(target, start, end, attrHolder=None, attrName='position', defaultValue=0.5):
+    """
+    Slide a transform between two other transforms with an attribute
+
+    :param target: target transform to slide between start and end transform
+    :param start: start transform. this will be value 0 on the slider
+    :param end: end transform. this will be value 1 on the slider
+    :param attrHolder: node to hold the attribute
+    :param attrName: name of the attribute to drive the slide
+    :param defaultValue: default value of the slider
+    :return: the point constraint created
+    """
+    if not attrHolder:
+        attrHolder = target
+
+    const = cmds.pointConstraint(start, end, target, mo=False)[0]
+    rig_attr.createAttr(attrHolder, attrName, "float", defaultValue, minValue=0, maxValue=1, keyable=True)
+    cmds.connectAttr("{}.{}".format(attrHolder, attrName), "{}.{}".format(const, "target[1].targetWeight"), f=True)
+
+    revInputAttr = "{}.{}".format(attrHolder, attrName)
+    revOutputNode = "{}.{}".format(const, "target[0].targetWeight")
+    node.reverse(revInputAttr, output=revOutputNode, name="{}_reverse".format(target))
+    return const

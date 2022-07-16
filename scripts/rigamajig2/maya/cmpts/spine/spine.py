@@ -4,6 +4,7 @@ spine component
 import maya.cmds as cmds
 import rigamajig2.maya.cmpts.base
 import rigamajig2.maya.rig.control as rig_control
+import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.rig.spaces as spaces
 import rigamajig2.maya.rig.spline as spline
 import rigamajig2.maya.transform as rig_transform
@@ -54,36 +55,26 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
         self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
-        self.hipsSwivel_guide = rig_control.createGuide(self.name + "_hipSwivel", side=self.side,
+        self.hipsSwivel_guide = rig_control.createGuide(self.name + "_hipSwivel",
+                                                        side=self.side,
                                                         parent=self.guides_hrc)
-        # setup the slider for the guide
-        const = cmds.pointConstraint([self.input[1], self.input[-2], self.hipsSwivel_guide], mo=False)[0]
-        rig_attr.createAttr(self.hipsSwivel_guide, "position", "float", value=HIPS_PERCENT, minValue=0, maxValue=1,
-                            keyable=True)
-        cmds.connectAttr("{}.{}".format(self.hipsSwivel_guide, "position"),
-                         "{}.{}".format(const, "target[1].targetWeight"), f=True)
-        node.reverse("{}.{}".format(self.hipsSwivel_guide, "position"),
-                     output="{}.{}".format(const, "target[0].targetWeight"),
-                     name="{}_reverse".format(self.hipsSwivel_guide))
+        live.slideBetweenTransforms(self.hipsSwivel_guide, self.input[1], self.input[-2], defaultValue=HIPS_PERCENT)
 
         self.torso_guide = rig_control.createGuide(self.name + "_torso", side=self.side, parent=self.guides_hrc)
+
         # setup the slider for the guide
-        const = cmds.pointConstraint([self.input[1], self.input[-2], self.torso_guide], mo=False)[0]
-        rig_attr.createAttr(self.torso_guide, "position", "float", value=TORSO_PERCENT, minValue=0, maxValue=1,
-                            keyable=True)
-        cmds.connectAttr("{}.{}".format(self.torso_guide, "position"), "{}.{}".format(const, "target[1].targetWeight"),
-                         f=True)
-        node.reverse("{}.{}".format(self.torso_guide, "position"),
-                     output="{}.{}".format(const, "target[0].targetWeight"),
-                     name="{}_reverse".format(self.torso_guide))
+        live.slideBetweenTransforms(self.torso_guide, self.input[1], self.input[-2], defaultValue=TORSO_PERCENT)
 
-        spineEnd_pos = cmds.xform(self.input[-2], q=True, ws=True, t=True)
-        self.chest_guide = rig_control.createGuide(self.name + "_chest", side=self.side, parent=self.guides_hrc,
-                                                   position=spineEnd_pos)
+        self.chest_guide = rig_control.createGuide(self.name + "_chest",
+                                                   side=self.side,
+                                                   parent=self.guides_hrc,
+                                                   position=cmds.xform(self.input[-2], q=True, ws=True, t=True))
 
-        chest_pos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
-        self.chestTop_guide = rig_control.createGuide(self.name + "_chestTop", side=self.side, parent=self.guides_hrc,
-                                                      position=chest_pos)
+        self.chestTop_guide = rig_control.createGuide(self.name + "_chestTop",
+                                                      side=self.side,
+                                                      parent=self.guides_hrc,
+                                                      position=cmds.xform(self.input[-1], q=True, ws=True, t=True))
+
         for guide in [self.hipsSwivel_guide, self.torso_guide, self.chest_guide]:
             rig_attr.lock(guide, rig_attr.TRANSLATE)
 

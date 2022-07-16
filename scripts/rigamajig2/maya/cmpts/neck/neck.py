@@ -5,6 +5,7 @@ import maya.cmds as cmds
 import rigamajig2.maya.cmpts.base
 import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.rig.spaces as spaces
+import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.rig.spline as spline
 import rigamajig2.maya.transform as rig_transform
 import rigamajig2.maya.mathUtils as mathUtils
@@ -59,12 +60,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         rig_attr.lockAndHide(self.neck_guide, rig_attr.TRANSLATE + ['v'])
 
         self.head_guide = rig_control.createGuide(self.name + "_head", side=self.side, parent=self.guides_hrc)
-
-        const = cmds.pointConstraint([self.input[0], self.input[-1], self.head_guide], mo=False)[0]
-        rig_attr.createAttr(self.head_guide, "position", "float", value=HEAD_PERCENT, minValue=0, maxValue=1, keyable=True)
-        cmds.connectAttr("{}.{}".format(self.head_guide, "position"), "{}.{}".format(const, "target[1].targetWeight"), f=True)
-        node.reverse("{}.{}".format(self.head_guide, "position"), output="{}.{}".format(const, "target[0].targetWeight"),
-                     name="{}_reverse".format(self.head_guide))
+        live.slideBetweenTransforms(self.head_guide, start=self.input[0], end=self.input[-1], defaultValue=HEAD_PERCENT)
         rig_attr.lock(self.head_guide, rig_attr.TRANSLATE + ['v'])
 
         skull_pos = cmds.xform(self.input[-1], q=True, ws=True, t=True)

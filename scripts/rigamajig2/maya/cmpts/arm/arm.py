@@ -68,3 +68,8 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
     def finalize(self):
         """ Lock some attributes we dont want to see"""
         super(Arm, self).finalize()
+
+    @staticmethod
+    def createInputJoints():
+        """static method to create input joints"""
+        pass

@@ -30,7 +30,7 @@ class Base(object):
         :type rigParent: str
         """
         self.name = name
-        self.cmpt_type = ".".join([self.__module__.split('cmpts.')[-1], self.__class__.__name__])
+        self.cmpt_type = self.__module__.split('cmpts.')[-1]
         self.input = input
         self.container = self.name + '_container'
         self.metaNode = None

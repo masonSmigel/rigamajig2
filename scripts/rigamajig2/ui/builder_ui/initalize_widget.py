@@ -161,17 +161,23 @@ def _get_cmpt_icon(cmpt):
     return QtGui.QIcon(os.path.join(ICON_PATH, "{}.png".format(cmpt.split('.')[0])))
 
 
-def get_cmpt_object(component=None):
+def get_cmpt_object(module_name=None):
 
     tmp_builder = builder.Builder()
-    cmpt_list = tmp_builder.getComponents()
 
-    module_file = ".".join(component.rsplit('.', 1)[:-1])
-    modulesPath = 'rigamajig2.maya.cmpts.{}'
-    module_name = modulesPath.format(module_file)
-    module_object = __import__(module_name, globals(), locals(), ["*"], 0)
+    cmptDict = tmp_builder.getComponentRefDict()
+    if module_name not in list(cmptDict.keys()):
+        # this is a work around to account for the fact that some old .rig files use the cammel cased components
+        module, cls = module_name.split('.')
+        new_class = cls[0].lower() + cls[1:]
+        tmp_module_name = module + "." + new_class
+        if tmp_module_name in list(cmptDict.keys()):
+            module_name = tmp_module_name
 
-    class_ = getattr(module_object, component.rsplit('.', 1)[-1])
+    module_path = cmptDict[module_name][0]
+    class_name = cmptDict[module_name][1]
+    module_object = __import__(module_path, globals(), locals(), ["*"], 0)
+    class_ = getattr(module_object, class_name)
 
     return class_
 

@@ -161,6 +161,10 @@ class SplineBase(object):
             cmds.duplicate(joint, parentOnly=True, returnRootsOnly=True, name=ikJoint)
             self._ikJointList.append(ikJoint)
             debug.showLocalRotationAxis(ikJoint)
+
+            # relock the original joint
+            rig_attr.lock(joint, locked_attrs)
+
             if i:
                 cmds.parent(ikJoint, ikParent)
             else:

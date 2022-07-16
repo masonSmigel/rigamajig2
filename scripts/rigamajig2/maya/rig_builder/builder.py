@@ -79,6 +79,9 @@ class Builder(object):
     def getComponents(self):
         return self._available_cmpts
 
+    def getComponentRefDict(self):
+        return builderUtils._lookForComponents(CMPT_PATH, _EXCLUDED_FOLDERS, _EXCLUDED_FILES)
+
     def _absPath(self, path):
         if path:
             path = common.getFirstIndex(path)
@@ -116,7 +119,7 @@ class Builder(object):
             logger.info('Building: {}'.format(cmpt.name))
             cmpt._build_cmpt()
             # if the component is not a main parent the cmpt.root_hrc to the rig
-            if cmds.objExists('rig') and cmpt.getComponenetType() != 'main.Main':
+            if cmds.objExists('rig') and cmpt.getComponenetType() != 'main.main':
                 if hasattr(cmpt, "root_hrc"):
                     if not cmds.listRelatives(cmpt.root_hrc, p=True):
                         cmds.parent(cmpt.root_hrc, 'rig')
@@ -188,11 +191,22 @@ class Builder(object):
 
         self.set_cmpts(list())
         for cmpt in list(cmpt_data.keys()):
+
             # dynamically load component module into python
-            module_name, class_name = cmpt_data[cmpt]['type'].split(".")
-            modulesPath = 'rigamajig2.maya.cmpts.{}'
-            module_name = modulesPath.format(module_name)
-            module_object = __import__(module_name, globals(), locals(), ["*"], 0)
+            module_name = cmpt_data[cmpt]['type']
+
+            cmptDict = self.getComponentRefDict()
+            if module_name not in list(cmptDict.keys()):
+                # this is a work around to account for the fact that some old .rig files use the cammel cased components
+                module, cls = module_name.split('.')
+                new_class = cls[0].lower() + cls[1:]
+                tmp_module_name = module + "." + new_class
+                if tmp_module_name in list(cmptDict.keys()):
+                    module_name = tmp_module_name
+
+            module_path = cmptDict[module_name][0]
+            class_name = cmptDict[module_name][1]
+            module_object = __import__(module_path, globals(), locals(), ["*"], 0)
 
             cmpt_class = getattr(module_object, class_name)
             instance = cmpt_class(cmpt_data[cmpt]['name'], cmpt_data[cmpt]['input'])

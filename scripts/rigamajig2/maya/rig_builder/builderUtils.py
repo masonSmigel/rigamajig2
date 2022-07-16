@@ -26,24 +26,35 @@ from rigamajig2.maya.data import abstract_data as abstract_data
 
 logger = logging.getLogger(__name__)
 
+CMPT_ROOT_MODULE = 'cmpts'
+
 
 def _lookForComponents(path, excludedFolders, excludedFiles):
     res = os.listdir(path)
-    toReturn = list()
+    toReturn = dict()
     for r in res:
         full_path = os.path.join(path, r)
         if r not in excludedFolders and os.path.isdir(path + '/' + r) == True:
-            _lookForComponents(full_path, excludedFolders, excludedFiles)
+            subDict = _lookForComponents(full_path, excludedFolders, excludedFiles)
+            toReturn.update(subDict)
         if r.find('.py') != -1 and r.find('.pyc') == -1 and r not in excludedFiles:
             if r.find('reload') == -1:
 
                 # find classes in the file path
                 module_file = r.split('.')[0]
-                modulesPath = 'rigamajig2.maya.cmpts.{}'
-                module_name = modulesPath.format(module_file)
+                path_split = full_path.split('/')[:-1]
+                cmpts_index = path_split.index(CMPT_ROOT_MODULE)
+
+                local_path = '.'.join(path_split[cmpts_index:])
+                component_name = '{}.{}'.format(local_path, module_file)
+
+                module_name = 'rigamajig2.maya.{}'.format(component_name)
+
+                # module_name = modulesPath.format(module_file)
                 module_object = __import__(module_name, globals(), locals(), ["*"], 0)
                 for cls in inspect.getmembers(module_object, inspect.isclass):
-                    toReturn.append("{}.{}".format(module_file, cls[0]))
+                    component = '.'.join(component_name.rsplit('.')[1:])
+                    toReturn[component] = [module_name, cls[0]]
 
     return toReturn
 

@@ -3,7 +3,7 @@ hand component
 """
 import maya.cmds as cmds
 import rigamajig2.maya.cmpts.base
-import rigamajig2.maya.cmpts.chain
+import rigamajig2.maya.cmpts.chain.chain
 import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.rig.spaces as spaces
 import rigamajig2.maya.rig.ikfk as ikfk
@@ -61,9 +61,13 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
 
             # initalize a finger component
             finger_name = inputBaseNames[i] + '_' + self.side if self.side else inputBaseNames[i]
-            finger_cmpt = rigamajig2.maya.cmpts.chain.Chain(finger_name, input=[self.input[i], endJoint],
-                                                            useScale=self.useScale, addFKSpace=self.addFKSpace,
-                                                            rigParent=self.rigParent)
+            finger_cmpt = rigamajig2.maya.cmpts.chain.chain.Chain(
+                finger_name,
+                input=[self.input[i], endJoint],
+                useScale=self.useScale,
+                addFKSpace=self.addFKSpace,
+                rigParent=self.rigParent
+                )
             finger_cmpt._intialize_cmpt()
             cmds.container(self.container, e=True, f=True, addNode=finger_cmpt.getContainer())
             meta.tag(finger_cmpt.getContainer(), 'subComponent')
@@ -95,7 +99,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
             cmpt._optimize_cmpt()
 
     def delete_setup(self):
-        
+
         for cmpt in self.finger_cmpt_list:
             cmpt.deleteSetup()
         super(Hand, self).deleteSetup()

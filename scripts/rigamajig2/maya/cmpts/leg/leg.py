@@ -2,7 +2,7 @@
 main component
 """
 import maya.cmds as cmds
-import rigamajig2.maya.cmpts.limb
+import rigamajig2.maya.cmpts.limb.limb
 import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.rig.spaces as spaces
 import rigamajig2.maya.rig.ikfk as ikfk
@@ -19,7 +19,7 @@ import logging
 logger = logging.getLogger(__name__)
 
 
-class Leg(rigamajig2.maya.cmpts.limb.Limb):
+class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
     def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True, rigParent=str()):
         """
         Leg Component. (subclass of limb rig)

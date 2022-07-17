@@ -423,8 +423,308 @@
             ], 
             "drawStyle": 0
         }, 
-        "index_4_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|index_0_l_bind|index_1_l_bind|index_2_l_bind|index_3_l_bind|index_4_l_bind", 
+        "thumb_4_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|thumb_0_l_bind|thumb_1_l_bind|thumb_2_l_bind|thumb_3_l_bind|thumb_4_l_bind", 
+            "translate": [
+                2.5673, 
+                -0.0, 
+                0.0005
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                66.82524507903179, 
+                118.6933733820147, 
+                4.518818374376714
+            ], 
+            "world_rotate": [
+                120.80083774807689, 
+                -32.259815625139254, 
+                -33.752925658172884
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "thumb_3_l_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "thumb_3_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|thumb_0_l_bind|thumb_1_l_bind|thumb_2_l_bind|thumb_3_l_bind", 
+            "translate": [
+                3.1168, 
+                0.0, 
+                -0.0004
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                65.02030921922014, 
+                119.90004282738842, 
+                3.1487143886999087
+            ], 
+            "world_rotate": [
+                120.80083774807689, 
+                -32.259815625139254, 
+                -33.752925658172884
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "thumb_2_l_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "thumb_2_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|thumb_0_l_bind|thumb_1_l_bind|thumb_2_l_bind", 
+            "translate": [
+                1.25, 
+                0.0, 
+                0.0001
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                62.8287965725248, 
+                121.36411339745966, 
+                1.4849199046287356
+            ], 
+            "world_rotate": [
+                120.80083774807689, 
+                -32.259815625139254, 
+                -33.752925658172884
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "thumb_1_l_bind", 
+            "jointOrient": [
+                -0.0, 
+                -0.0, 
+                -20.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "thumb_1_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|thumb_0_l_bind|thumb_1_l_bind", 
+            "translate": [
+                1.25, 
+                -0.0, 
+                0.0001
+            ], 
+            "rotate": [
+                130.8934, 
+                -48.5904, 
+                -49.1066
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                62.28754319515953, 
+                121.98915669872984, 
+                0.5474415552638362
+            ], 
+            "world_rotate": [
+                130.8933946491309, 
+                -48.59037789072913, 
+                -49.106605350869096
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "thumb_0_l_bind", 
+            "jointOrient": [
+                -116.5651, 
+                14.4775, 
+                -63.4349
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "thumb_0_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|thumb_0_l_bind", 
+            "translate": [
+                0.783, 
+                1.6039, 
+                1.404
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                61.74628981779424, 
+                122.61420000000004, 
+                -0.39003679410106096
+            ], 
+            "world_rotate": [
+                130.89339464913087, 
+                -48.590377890729116, 
+                -49.10660535086908
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "wrist_l_bind", 
+            "jointOrient": [
+                -0.0, 
+                -30.0, 
+                55.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "index_5_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|index_0_l_bind|index_1_l_bind|index_2_l_bind|index_3_l_bind|index_4_l_bind|index_5_l_bind", 
             "translate": [
                 2.6241, 
                 -0.0001, 
@@ -459,18 +759,18 @@
                 1.0
             ], 
             "world_translate": [
-                75.71505522681638, 
-                121.69729758331704, 
-                2.1196513102171552
+                75.69226539250865, 
+                121.61061224027657, 
+                2.156037748938245
             ], 
             "world_rotate": [
-                1.9419365464580414, 
-                -11.589013828161265, 
-                -9.583767839061867
+                1.7655512597082097, 
+                -11.845608989619134, 
+                -10.213609908103367
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "index_3_l_bind", 
+            "parent": "index_4_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -483,8 +783,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "index_3_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|index_0_l_bind|index_1_l_bind|index_2_l_bind|index_3_l_bind", 
+        "index_4_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|index_0_l_bind|index_1_l_bind|index_2_l_bind|index_3_l_bind|index_4_l_bind", 
             "translate": [
                 2.1954, 
                 0.0001, 
@@ -519,18 +819,18 @@
                 1.0
             ], 
             "world_translate": [
-                73.18034395649616, 
-                122.12537465880541, 
-                1.5924989474670936
+                73.16476177968029, 
+                122.06610332210396, 
+                1.6173781333039208
             ], 
             "world_rotate": [
-                1.9419365464580414, 
-                -11.589013828161265, 
-                -9.583767839061867
+                1.7655512597082097, 
+                -11.845608989619134, 
+                -10.213609908103367
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "index_2_l_bind", 
+            "parent": "index_3_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -543,8 +843,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "index_2_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|index_0_l_bind|index_1_l_bind|index_2_l_bind", 
+        "index_3_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|index_0_l_bind|index_1_l_bind|index_2_l_bind|index_3_l_bind", 
             "translate": [
                 3.4781, 
                 -0.0002, 
@@ -579,18 +879,18 @@
                 1.0
             ], 
             "world_translate": [
-                71.05969989519497, 
-                122.48333545095691, 
-                1.1514615266621984
+                71.05014577803881, 
+                122.44699981726318, 
+                1.1667139616891566
             ], 
             "world_rotate": [
-                1.9419365464580414, 
-                -11.589013828161265, 
-                -9.583767839061867
+                1.7655512597082097, 
+                -11.845608989619134, 
+                -10.213609908103367
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "index_1_l_bind", 
+            "parent": "index_2_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -603,11 +903,11 @@
             ], 
             "drawStyle": 0
         }, 
-        "index_1_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|index_0_l_bind|index_1_l_bind", 
+        "index_2_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|index_0_l_bind|index_1_l_bind|index_2_l_bind", 
             "translate": [
-                5.5722, 
-                0.0002, 
+                3.3674, 
+                0.0001, 
                 0.0
             ], 
             "rotate": [
@@ -639,22 +939,82 @@
                 1.0
             ], 
             "world_translate": [
-                67.70009050374077, 
-                123.05079458595497, 
-                0.45275234756120963
+                67.70009050374075, 
+                123.050794585955, 
+                0.452752347561209
             ], 
             "world_rotate": [
-                1.9419365464580414, 
-                -11.589013828161265, 
-                -9.583767839061867
+                1.7655512597082097, 
+                -11.845608989619134, 
+                -10.213609908103367
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "index_1_l_bind", 
+            "jointOrient": [
+                0.0, 
+                -2.0, 
+                -0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "index_1_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|index_0_l_bind|index_1_l_bind", 
+            "translate": [
+                2.2048, 
+                0.0001, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                64.43422602510098, 
+                123.63543663528952, 
+                -0.12310767536036721
+            ], 
+            "world_rotate": [
+                1.7537834580934903, 
+                -9.846551939834065, 
+                -10.151081711048137
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
             "parent": "index_0_l_bind", 
             "jointOrient": [
-                0.2845, 
-                -1.7251, 
-                0.6091
+                0.0, 
+                0.0, 
+                0.0
             ], 
             "preferredAngle": [
                 0.0, 
@@ -668,7 +1028,7 @@
             "translate": [
                 1.3209, 
                 1.4463, 
-                -0.0
+                0.0
             ], 
             "rotate": [
                 0.0, 
@@ -699,14 +1059,14 @@
                 1.0
             ], 
             "world_translate": [
-                62.295878690954815, 
+                62.29587869095482, 
                 124.01820000000004, 
-                -0.5001560044963558
+                -0.5001560044963551
             ], 
             "world_rotate": [
-                1.7537834580934766, 
-                -9.846551939834063, 
-                -10.151081711048136
+                1.7537834580934903, 
+                -9.846551939834065, 
+                -10.151081711048137
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
@@ -723,8 +1083,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "middle_4_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|middle_0_l_bind|middle_1_l_bind|middle_2_l_bind|middle_3_l_bind|middle_4_l_bind", 
+        "middle_5_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|middle_0_l_bind|middle_1_l_bind|middle_2_l_bind|middle_3_l_bind|middle_4_l_bind|middle_5_l_bind", 
             "translate": [
                 3.2848, 
                 -0.0003, 
@@ -759,18 +1119,18 @@
                 1.0
             ], 
             "world_translate": [
-                77.349041942985, 
-                121.56048238289179, 
-                -0.36808925821548993
+                77.30339023872268, 
+                121.27492841000547, 
+                -0.37298125042222807
             ], 
             "world_rotate": [
-                0.7204129643771046, 
-                -4.953475325519515, 
-                -8.285260519060657
+                0.8703846749799956, 
+                -4.923849754810779, 
+                -10.037423045910709
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "middle_3_l_bind", 
+            "parent": "middle_4_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -783,8 +1143,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "middle_3_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|middle_0_l_bind|middle_1_l_bind|middle_2_l_bind|middle_3_l_bind", 
+        "middle_4_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|middle_0_l_bind|middle_1_l_bind|middle_2_l_bind|middle_3_l_bind|middle_4_l_bind", 
             "translate": [
                 2.6334, 
                 -0.0006, 
@@ -819,18 +1179,18 @@
                 1.0
             ], 
             "world_translate": [
-                74.11070887909771, 
-                122.0323564595035, 
-                -0.6517174534928148
+                74.08085538569782, 
+                121.84562338633171, 
+                -0.6549165178790831
             ], 
             "world_rotate": [
-                0.7204129643771046, 
-                -4.953475325519515, 
-                -8.285260519060657
+                0.8703846749799956, 
+                -4.923849754810779, 
+                -10.037423045910709
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "middle_2_l_bind", 
+            "parent": "middle_3_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -843,8 +1203,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "middle_2_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|middle_0_l_bind|middle_1_l_bind|middle_2_l_bind", 
+        "middle_3_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|middle_0_l_bind|middle_1_l_bind|middle_2_l_bind|middle_3_l_bind", 
             "translate": [
                 3.5736, 
                 -0.0, 
@@ -879,18 +1239,18 @@
                 1.0
             ], 
             "world_translate": [
-                71.51461249311912, 
-                122.41101020431532, 
-                -0.8790955884329441
+                71.49743508368195, 
+                122.30349938205161, 
+                -0.8809365074281892
             ], 
             "world_rotate": [
-                0.7204129643771046, 
-                -4.953475325519515, 
-                -8.285260519060657
+                0.8703846749799956, 
+                -4.923849754810779, 
+                -10.037423045910709
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "middle_1_l_bind", 
+            "parent": "middle_2_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -903,12 +1263,12 @@
             ], 
             "drawStyle": 0
         }, 
-        "middle_1_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|middle_0_l_bind|middle_1_l_bind", 
+        "middle_2_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|middle_0_l_bind|middle_1_l_bind|middle_2_l_bind", 
             "translate": [
-                5.7216, 
-                0.0004, 
-                -0.0
+                3.5101, 
+                0.0002, 
+                0.0
             ], 
             "rotate": [
                 0.0, 
@@ -939,22 +1299,82 @@
                 1.0
             ], 
             "world_translate": [
-                67.99151813071832, 
-                122.92404850976213, 
-                -1.1876644960758613
+                67.9915181307183, 
+                122.92404850976216, 
+                -1.1876644960758567
             ], 
             "world_rotate": [
-                0.7204129643771046, 
-                -4.953475325519515, 
-                -8.285260519060657
+                0.8703846749799956, 
+                -4.923849754810779, 
+                -10.037423045910709
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "middle_1_l_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "middle_1_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|middle_0_l_bind|middle_1_l_bind", 
+            "translate": [
+                2.2115, 
+                0.0002, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                64.54785524605627, 
+                123.53337554961848, 
+                -1.488945959488769
+            ], 
+            "world_rotate": [
+                0.8703846749799956, 
+                -4.923849754810779, 
+                -10.037423045910709
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
             "parent": "middle_0_l_bind", 
             "jointOrient": [
-                0.0008, 
-                -0.0054, 
-                1.7459
+                0.0, 
+                0.0, 
+                0.0
             ], 
             "preferredAngle": [
                 0.0, 
@@ -999,14 +1419,14 @@
                 1.0
             ], 
             "world_translate": [
-                62.378214539612124, 
+                62.37821453961213, 
                 123.91720000000004, 
-                -1.6787649252270112
+                -1.6787649252270103
             ], 
             "world_rotate": [
-                0.8703846749799832, 
+                0.8703846749799956, 
                 -4.923849754810779, 
-                -10.03742304591071
+                -10.037423045910709
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
@@ -1014,7 +1434,7 @@
             "jointOrient": [
                 -90.0, 
                 -10.0, 
-                -0.0
+                0.0
             ], 
             "preferredAngle": [
                 0.0, 
@@ -1023,8 +1443,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "ring_4_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|ring_0_l_bind|ring_1_l_bind|ring_2_l_bind|ring_3_l_bind|ring_4_l_bind", 
+        "ring_5_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|ring_0_l_bind|ring_1_l_bind|ring_2_l_bind|ring_3_l_bind|ring_4_l_bind|ring_5_l_bind", 
             "translate": [
                 2.6097, 
                 0.0003, 
@@ -1059,18 +1479,18 @@
                 1.0
             ], 
             "world_translate": [
-                76.40464788904646, 
-                121.73124373207943, 
-                -3.257368159247391
+                76.36899305396167, 
+                121.50921096928295, 
+                -3.2614090555089743
             ], 
             "world_rotate": [
-                0.004000000000027181, 
-                -0.0272999999999845, 
-                -8.3783
+                0.0, 
+                0.0, 
+                -10.0
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "ring_3_l_bind", 
+            "parent": "ring_4_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -1083,8 +1503,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "ring_3_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|ring_0_l_bind|ring_1_l_bind|ring_2_l_bind|ring_3_l_bind", 
+        "ring_4_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|ring_0_l_bind|ring_1_l_bind|ring_2_l_bind|ring_3_l_bind|ring_4_l_bind", 
             "translate": [
                 2.281, 
                 0.0004, 
@@ -1119,18 +1539,18 @@
                 1.0
             ], 
             "world_translate": [
-                73.82275626067423, 
-                122.1112019575534, 
-                -3.2586116366537468
+                73.79888816647241, 
+                121.96208517621443, 
+                -3.2614090555089743
             ], 
             "world_rotate": [
-                0.004000000000027181, 
-                -0.0272999999999845, 
-                -8.3783
+                0.0, 
+                0.0, 
+                -10.0
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "ring_2_l_bind", 
+            "parent": "ring_3_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -1143,8 +1563,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "ring_2_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|ring_0_l_bind|ring_1_l_bind|ring_2_l_bind", 
+        "ring_3_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|ring_0_l_bind|ring_1_l_bind|ring_2_l_bind|ring_3_l_bind", 
             "translate": [
                 3.59, 
                 0.0001, 
@@ -1179,18 +1599,18 @@
                 1.0
             ], 
             "world_translate": [
-                71.56604200305394, 
-                122.44316692283324, 
-                -3.2596985037523845
+                71.55247222258049, 
+                122.3577827463715, 
+                -3.2614090555089743
             ], 
             "world_rotate": [
-                0.004000000000027181, 
-                -0.0272999999999845, 
-                -8.3783
+                0.0, 
+                0.0, 
+                -10.0
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "ring_1_l_bind", 
+            "parent": "ring_2_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -1203,11 +1623,11 @@
             ], 
             "drawStyle": 0
         }, 
-        "ring_1_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|ring_0_l_bind|ring_1_l_bind", 
+        "ring_2_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|ring_0_l_bind|ring_1_l_bind|ring_2_l_bind", 
             "translate": [
-                5.6236, 
-                -0.0006, 
+                3.4607, 
+                -0.0003, 
                 0.0
             ], 
             "rotate": [
@@ -1239,22 +1659,82 @@
                 1.0
             ], 
             "world_translate": [
-                68.01434179095943, 
-                122.96616088782767, 
-                -3.2614090555089783
+                68.0169950244489, 
+                122.98108122342047, 
+                -3.2614090555089743
             ], 
             "world_rotate": [
-                0.004000000000027181, 
-                -0.0272999999999845, 
-                -8.3783
+                0.0, 
+                0.0, 
+                -10.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "ring_1_l_bind", 
+            "jointOrient": [
+                -0.0, 
+                -0.0, 
+                -0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "ring_1_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|ring_0_l_bind|ring_1_l_bind", 
+            "translate": [
+                2.1629, 
+                -0.0003, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                64.60891794282152, 
+                123.58232179322913, 
+                -3.2614090555089756
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                -10.0
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
             "parent": "ring_0_l_bind", 
             "jointOrient": [
-                0.004, 
-                -0.0273, 
-                1.7761
+                0.0, 
+                0.0, 
+                0.0
             ], 
             "preferredAngle": [
                 0.0, 
@@ -1301,19 +1781,19 @@
             "world_translate": [
                 62.47893433351601, 
                 123.95820000000003, 
-                -3.2614090555089765
+                -3.261409055508976
             ], 
             "world_rotate": [
                 0.0, 
                 0.0, 
-                -10.1544
+                -10.0
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
             "parent": "wrist_l_bind", 
             "jointOrient": [
                 -90.0, 
-                -10.1544, 
+                -10.0, 
                 -5.0
             ], 
             "preferredAngle": [
@@ -1323,8 +1803,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "pinky_4_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|pinky_0_l_bind|pinky_1_l_bind|pinky_2_l_bind|pinky_3_l_bind|pinky_4_l_bind", 
+        "pinky_5_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|pinky_0_l_bind|pinky_1_l_bind|pinky_2_l_bind|pinky_3_l_bind|pinky_4_l_bind|pinky_5_l_bind", 
             "translate": [
                 2.6099, 
                 -0.0009, 
@@ -1359,18 +1839,18 @@
                 1.0
             ], 
             "world_translate": [
-                75.51198530377539, 
-                121.81887431683613, 
-                -5.6981016739852866
+                75.47227726232444, 
+                121.57394610116204, 
+                -5.702260652485539
             ], 
             "world_rotate": [
-                -0.7044429901998015, 
-                4.893091175826684, 
-                -8.203297089023206
+                -0.8703846749799526, 
+                4.923849754810813, 
+                -10.037423045910712
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "pinky_3_l_bind", 
+            "parent": "pinky_4_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -1383,8 +1863,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "pinky_3_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|pinky_0_l_bind|pinky_1_l_bind|pinky_2_l_bind|pinky_3_l_bind", 
+        "pinky_4_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|pinky_0_l_bind|pinky_1_l_bind|pinky_2_l_bind|pinky_3_l_bind|pinky_4_l_bind", 
             "translate": [
                 1.7257, 
                 0.0, 
@@ -1419,18 +1899,18 @@
                 1.0
             ], 
             "world_translate": [
-                72.9383314446041, 
-                122.1908039163785, 
-                -5.475496628766178
+                72.91196377268822, 
+                122.02803680703266, 
+                -5.478262247069872
             ], 
             "world_rotate": [
-                -0.7044429901998015, 
-                4.893091175826684, 
-                -8.203297089023206
+                -0.8703846749799526, 
+                4.923849754810813, 
+                -10.037423045910712
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "pinky_2_l_bind", 
+            "parent": "pinky_3_l_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -1443,8 +1923,8 @@
             ], 
             "drawStyle": 0
         }, 
-        "pinky_2_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|pinky_0_l_bind|pinky_1_l_bind|pinky_2_l_bind", 
+        "pinky_3_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|pinky_0_l_bind|pinky_1_l_bind|pinky_2_l_bind|pinky_3_l_bind", 
             "translate": [
                 3.4444, 
                 0.0001, 
@@ -1479,14 +1959,74 @@
                 1.0
             ], 
             "world_translate": [
-                71.23651357967412, 
-                122.4361395826146, 
-                -5.328299972969734
+                71.21894807822623, 
+                122.32770146723249, 
+                -5.330142566632978
             ], 
             "world_rotate": [
-                -0.7044429901998015, 
-                4.893091175826684, 
-                -8.203297089023206
+                -0.8703846749799526, 
+                4.923849754810813, 
+                -10.037423045910712
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "pinky_2_l_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "pinky_2_l_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|pinky_0_l_bind|pinky_1_l_bind|pinky_2_l_bind", 
+            "translate": [
+                3.3716, 
+                0.0003, 
+                -0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                67.83976681239821, 
+                122.92571676961316, 
+                -5.034502513873843
+            ], 
+            "world_rotate": [
+                -0.8703846749799526, 
+                4.923849754810813, 
+                -10.037423045910712
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
@@ -1506,8 +2046,8 @@
         "pinky_1_l_bind": {
             "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|pinky_0_l_bind|pinky_1_l_bind", 
             "translate": [
-                5.4655, 
-                0.0006, 
+                2.0939, 
+                0.0003, 
                 0.0
             ], 
             "rotate": [
@@ -1539,22 +2079,22 @@
                 1.0
             ], 
             "world_translate": [
-                67.83976681239822, 
-                122.92571676961323, 
-                -5.034502513873844
+                64.53196845777713, 
+                123.5108941741881, 
+                -4.745107656614791
             ], 
             "world_rotate": [
-                -0.7044429901998015, 
-                4.893091175826684, 
-                -8.203297089023206
+                -0.8703846749799526, 
+                4.923849754810813, 
+                -10.037423045910712
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
             "parent": "pinky_0_l_bind", 
             "jointOrient": [
-                0.0081, 
-                -0.056, 
-                1.8268
+                0.0, 
+                0.0, 
+                0.0
             ], 
             "preferredAngle": [
                 0.0, 
@@ -1601,12 +2141,12 @@
             "world_translate": [
                 62.4776781569602, 
                 123.87420000000003, 
-                -4.565380543702051
+                -4.565380543702052
             ], 
             "world_rotate": [
-                -0.8703846749799532, 
-                4.92384975481081, 
-                -10.03742304591071
+                -0.8703846749799526, 
+                4.923849754810813, 
+                -10.037423045910712
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
@@ -1615,246 +2155,6 @@
                 -90.0, 
                 -10.0, 
                 -10.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "thumb_3_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|thumb_0_l_bind|thumb_1_l_bind|thumb_2_l_bind|thumb_3_l_bind", 
-            "translate": [
-                2.5673, 
-                -0.0, 
-                0.0005
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                66.71812539199583, 
-                118.5931541942983, 
-                4.246169792061584
-            ], 
-            "world_rotate": [
-                105.12040142319218, 
-                -24.472015662640818, 
-                -33.11518966076324
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "thumb_2_l_bind", 
-            "jointOrient": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "thumb_2_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|thumb_0_l_bind|thumb_1_l_bind|thumb_2_l_bind", 
-            "translate": [
-                3.1168, 
-                0.0, 
-                -0.0004
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                64.76121564139225, 
-                119.87016329910186, 
-                3.182787680945614
-            ], 
-            "world_rotate": [
-                105.12040142319218, 
-                -24.472015662640818, 
-                -33.11518966076324
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "thumb_1_l_bind", 
-            "jointOrient": [
-                -6.9281, 
-                -0.313, 
-                -11.996
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "thumb_1_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|thumb_0_l_bind|thumb_1_l_bind", 
-            "translate": [
-                2.3498, 
-                -0.0, 
-                0.0001
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                62.77187963192645, 
-                121.43921339745967, 
-                1.3675558967687127
-            ], 
-            "world_rotate": [
-                114.67688646144396, 
-                -35.61662229517527, 
-                -38.27214338217679
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "thumb_0_l_bind", 
-            "jointOrient": [
-                -8.5802, 
-                -1.3607, 
-                -14.9396
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "thumb_0_l_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_l_bind|shoulder_l_bind|elbow_l_bind|wrist_l_bind|thumb_0_l_bind", 
-            "translate": [
-                0.783, 
-                1.6039, 
-                1.404
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                61.746289817794235, 
-                122.61420000000004, 
-                -0.39003679410106185
-            ], 
-            "world_rotate": [
-                130.59225541472034, 
-                -48.41689388052016, 
-                -48.88105225003248
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "wrist_l_bind", 
-            "jointOrient": [
-                0.0, 
-                -30.0, 
-                54.7356
             ], 
             "preferredAngle": [
                 0.0, 
@@ -2703,131 +3003,11 @@
             ], 
             "drawStyle": 0
         }, 
-        "ring_4_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind|ring_1_r_bind|ring_2_r_bind|ring_3_r_bind|ring_4_r_bind", 
+        "index_5_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|index_0_r_bind|index_1_r_bind|index_2_r_bind|index_3_r_bind|index_4_r_bind|index_5_r_bind", 
             "translate": [
-                -2.6097, 
-                -0.0003, 
-                -0.0
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -76.40464788904644, 
-                121.73124373207943, 
-                -3.257368159247356
-            ], 
-            "world_rotate": [
-                -179.99599999999998, 
-                0.027300000000011093, 
-                8.3783
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "ring_3_r_bind", 
-            "jointOrient": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "ring_3_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind|ring_1_r_bind|ring_2_r_bind|ring_3_r_bind", 
-            "translate": [
-                -2.281, 
+                -2.624, 
                 -0.0004, 
-                0.0
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -73.82275626067421, 
-                122.1112019575534, 
-                -3.2586116366537126
-            ], 
-            "world_rotate": [
-                -179.99599999999998, 
-                0.027300000000011093, 
-                8.3783
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "ring_2_r_bind", 
-            "jointOrient": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "ring_2_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind|ring_1_r_bind|ring_2_r_bind", 
-            "translate": [
-                -3.59, 
-                -0.0001, 
                 -0.0
             ], 
             "rotate": [
@@ -2859,18 +3039,18 @@
                 1.0
             ], 
             "world_translate": [
-                -71.56604200305392, 
-                122.44316692283324, 
-                -3.259698503752351
+                -75.6923, 
+                121.61099999999998, 
+                2.156040000000002
             ], 
             "world_rotate": [
-                -179.99599999999998, 
-                0.027300000000011093, 
-                8.3783
+                -178.23441081293316, 
+                11.84560898756635, 
+                10.213609976147312
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "ring_1_r_bind", 
+            "parent": "index_4_r_bind", 
             "jointOrient": [
                 0.0, 
                 0.0, 
@@ -2883,12 +3063,12 @@
             ], 
             "drawStyle": 0
         }, 
-        "ring_1_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind|ring_1_r_bind", 
+        "index_4_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|index_0_r_bind|index_1_r_bind|index_2_r_bind|index_3_r_bind|index_4_r_bind", 
             "translate": [
-                -5.6236, 
-                0.0006, 
-                -0.0
+                -2.1955, 
+                -0.0, 
+                0.0
             ], 
             "rotate": [
                 0.0, 
@@ -2919,22 +3099,22 @@
                 1.0
             ], 
             "world_translate": [
-                -68.01434179095942, 
-                122.96616088782767, 
-                -3.2614090555089463
+                -73.16479999999999, 
+                122.06599999999999, 
+                1.6173800000000003
             ], 
             "world_rotate": [
-                -179.99599999999998, 
-                0.027300000000011093, 
-                8.3783
+                -178.2344298081976, 
+                11.845608987566349, 
+                10.21360997614731
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "ring_0_r_bind", 
+            "parent": "index_3_r_bind", 
             "jointOrient": [
-                0.004, 
-                -0.0273, 
-                1.7761
+                0.0, 
+                0.0, 
+                0.0
             ], 
             "preferredAngle": [
                 0.0, 
@@ -2943,70 +3123,10 @@
             ], 
             "drawStyle": 0
         }, 
-        "ring_0_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind", 
+        "index_3_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|index_0_r_bind|index_1_r_bind|index_2_r_bind|index_3_r_bind", 
             "translate": [
-                -1.2626, 
-                1.3204, 
-                -0.06
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -62.478934333515994, 
-                123.95820000000003, 
-                -3.261409055508947
-            ], 
-            "world_rotate": [
-                -179.99999999999997, 
-                -3.531125038440127e-31, 
-                10.1544
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "wrist_r_bind", 
-            "jointOrient": [
-                -90.0, 
-                -10.1544, 
-                -5.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "middle_4_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind|middle_1_r_bind|middle_2_r_bind|middle_3_r_bind|middle_4_r_bind", 
-            "translate": [
-                -3.2848, 
+                -3.4781, 
                 0.0004, 
                 -0.0
             ], 
@@ -3039,374 +3159,14 @@
                 1.0
             ], 
             "world_translate": [
-                -77.34910062205816, 
-                121.5601706508767, 
-                -0.36808412060737333
+                -71.05009999999997, 
+                122.44699999999995, 
+                1.1667099999999977
             ], 
             "world_rotate": [
-                -179.2795870356229, 
-                4.953475325519541, 
-                8.285260519060659
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "middle_3_r_bind", 
-            "jointOrient": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "middle_3_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind|middle_1_r_bind|middle_2_r_bind|middle_3_r_bind", 
-            "translate": [
-                -2.6335, 
-                0.0009, 
-                0.0
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -74.1107818597628, 
-                122.03214369160004, 
-                -0.6517110632559402
-            ], 
-            "world_rotate": [
-                -179.2795870356229, 
-                4.953475325519541, 
-                8.285260519060659
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "middle_2_r_bind", 
-            "jointOrient": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "middle_2_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind|middle_1_r_bind|middle_2_r_bind", 
-            "translate": [
-                -3.5736, 
-                -0.0, 
-                0.0
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -71.5146297918585, 
-                122.41110868509062, 
-                -0.8790940749893207
-            ], 
-            "world_rotate": [
-                -179.2795870356229, 
-                4.953475325519541, 
-                8.285260519060659
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "middle_1_r_bind", 
-            "jointOrient": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "middle_1_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind|middle_1_r_bind", 
-            "translate": [
-                -5.7216, 
-                -0.0005, 
-                0.0
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -67.9915354294577, 
-                122.92414699053744, 
-                -1.1876629826322396
-            ], 
-            "world_rotate": [
-                -179.2795870356229, 
-                4.953475325519541, 
-                8.285260519060659
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "middle_0_r_bind", 
-            "jointOrient": [
-                0.0008, 
-                -0.0054, 
-                1.7459
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "middle_0_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind", 
-            "translate": [
-                -1.3002, 
-                -0.265, 
-                -0.101
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -62.3782145396121, 
-                123.91720000000004, 
-                -1.6787649252269823
-            ], 
-            "world_rotate": [
-                -179.12961532502, 
-                4.923849754810807, 
-                10.037423045910714
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "wrist_r_bind", 
-            "jointOrient": [
-                -90.0, 
-                -10.0, 
-                -0.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "index_4_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|index_0_r_bind|index_1_r_bind|index_2_r_bind|index_3_r_bind|index_4_r_bind", 
-            "translate": [
-                -2.6241, 
-                0.0, 
-                -0.0
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -75.71505936785219, 
-                121.69729791757763, 
-                2.1196530813441914
-            ], 
-            "world_rotate": [
-                -178.05806345354196, 
-                11.589013828161292, 
-                9.583767839061867
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "index_3_r_bind", 
-            "jointOrient": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "index_3_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|index_0_r_bind|index_1_r_bind|index_2_r_bind|index_3_r_bind", 
-            "translate": [
-                -2.1954, 
-                -0.0001, 
-                -0.0
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -73.18033212940261, 
-                122.12527633203428, 
-                1.5924973990064866
-            ], 
-            "world_rotate": [
-                -178.05806345354196, 
-                11.589013828161292, 
-                9.583767839061867
+                -178.23443935367717, 
+                11.845608987566353, 
+                10.213609976147312
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
@@ -3426,8 +3186,8 @@
         "index_2_r_bind": {
             "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|index_0_r_bind|index_1_r_bind|index_2_r_bind", 
             "translate": [
-                -3.4782, 
-                0.0007, 
+                -3.3673, 
+                -0.0007, 
                 0.0
             ], 
             "rotate": [
@@ -3459,21 +3219,21 @@
                 1.0
             ], 
             "world_translate": [
-                -71.05968806810142, 
-                122.48323712418578, 
-                1.1514599782015904
+                -67.70010000000002, 
+                123.05099999999999, 
+                0.4527520000000052
             ], 
             "world_rotate": [
-                -178.05806345354196, 
-                11.589013828161292, 
-                9.583767839061867
+                -178.23444425823337, 
+                11.845608987566349, 
+                10.21360997614731
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
             "parent": "index_1_r_bind", 
             "jointOrient": [
                 0.0, 
-                0.0, 
+                -2.0, 
                 0.0
             ], 
             "preferredAngle": [
@@ -3486,8 +3246,8 @@
         "index_1_r_bind": {
             "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|index_0_r_bind|index_1_r_bind", 
             "translate": [
-                -5.5721, 
-                -0.0006, 
+                -2.2048, 
+                0.0001, 
                 -0.0
             ], 
             "rotate": [
@@ -3519,22 +3279,22 @@
                 1.0
             ], 
             "world_translate": [
-                -67.70006192313838, 
-                123.05120587387394, 
-                0.4527473080299176
+                -64.4342, 
+                123.63499999999995, 
+                -0.12310799999999672
             ], 
             "world_rotate": [
-                -178.05806345354196, 
-                11.589013828161292, 
-                9.583767839061867
+                -178.2462146328101, 
+                9.846551939834095, 
+                10.151081711048166
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
             "parent": "index_0_r_bind", 
             "jointOrient": [
-                0.2845, 
-                -1.7251, 
-                0.6091
+                0.0, 
+                0.0, 
+                -0.0
             ], 
             "preferredAngle": [
                 0.0, 
@@ -3548,7 +3308,7 @@
             "translate": [
                 -1.3209, 
                 -1.4463, 
-                0.0
+                -0.0002
             ], 
             "rotate": [
                 0.0, 
@@ -3579,14 +3339,14 @@
                 1.0
             ], 
             "world_translate": [
-                -62.295878690954794, 
-                124.01820000000004, 
-                -0.5001560044963269
+                -62.2959, 
+                124.01799999999999, 
+                -0.5001559999999992
             ], 
             "world_rotate": [
-                -178.24621654190653, 
-                9.846551939834088, 
-                10.151081711048137
+                -178.24621654190602, 
+                9.846551939834098, 
+                10.151081711048171
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
@@ -3603,251 +3363,11 @@
             ], 
             "drawStyle": 0
         }, 
-        "thumb_3_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|thumb_0_r_bind|thumb_1_r_bind|thumb_2_r_bind|thumb_3_r_bind", 
+        "middle_5_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind|middle_1_r_bind|middle_2_r_bind|middle_3_r_bind|middle_4_r_bind|middle_5_r_bind", 
             "translate": [
-                -2.5673, 
-                0.0, 
-                -0.0005
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -66.7181253919958, 
-                118.5931541942983, 
-                4.2461697920616155
-            ], 
-            "world_rotate": [
-                -74.87959857680784, 
-                24.472015662640842, 
-                33.11518966076324
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "thumb_2_r_bind", 
-            "jointOrient": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "thumb_2_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|thumb_0_r_bind|thumb_1_r_bind|thumb_2_r_bind", 
-            "translate": [
-                -3.1168, 
-                -0.0, 
-                0.0004
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -64.76121564139223, 
-                119.87016329910186, 
-                3.182787680945644
-            ], 
-            "world_rotate": [
-                -74.87959857680784, 
-                24.472015662640842, 
-                33.11518966076324
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "thumb_1_r_bind", 
-            "jointOrient": [
-                -6.9281, 
-                -0.313, 
-                -11.996
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "thumb_1_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|thumb_0_r_bind|thumb_1_r_bind", 
-            "translate": [
-                -2.3498, 
-                0.0, 
-                -0.0001
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -62.77187963192643, 
-                121.43921339745967, 
-                1.367555896768742
-            ], 
-            "world_rotate": [
-                -65.32311353855604, 
-                35.61662229517528, 
-                38.27214338217679
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "thumb_0_r_bind", 
-            "jointOrient": [
-                -8.5802, 
-                -1.3607, 
-                -14.9396
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "thumb_0_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|thumb_0_r_bind", 
-            "translate": [
-                -0.783, 
-                -1.6039, 
-                -1.404
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -61.746289817794214, 
-                122.61420000000004, 
-                -0.3900367941010332
-            ], 
-            "world_rotate": [
-                -49.40774458527963, 
-                48.41689388052019, 
-                48.881052250032475
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": false, 
-            "parent": "wrist_r_bind", 
-            "jointOrient": [
-                0.0, 
-                -30.0, 
-                54.7356
-            ], 
-            "preferredAngle": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "drawStyle": 0
-        }, 
-        "pinky_4_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|pinky_0_r_bind|pinky_1_r_bind|pinky_2_r_bind|pinky_3_r_bind|pinky_4_r_bind", 
-            "translate": [
-                -2.6099, 
-                0.001, 
+                -3.2848, 
+                0.0006, 
                 -0.0
             ], 
             "rotate": [
@@ -3879,14 +3399,794 @@
                 1.0
             ], 
             "world_translate": [
-                -75.51184674792587, 
-                121.81920033354945, 
-                -5.698089678413245
+                -77.30339999999998, 
+                121.27500000000002, 
+                -0.3729809999999946
             ], 
             "world_rotate": [
-                179.2955570098002, 
-                -4.8930911758266555, 
-                8.203297089023208
+                -179.12961532501865, 
+                4.923849754810807, 
+                10.037423045910716
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "middle_4_r_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "middle_4_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind|middle_1_r_bind|middle_2_r_bind|middle_3_r_bind|middle_4_r_bind", 
+            "translate": [
+                -2.6333, 
+                -0.0003, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -74.08090000000001, 
+                121.84599999999998, 
+                -0.6549169999999928
+            ], 
+            "world_rotate": [
+                -179.12961532501865, 
+                4.923849754810807, 
+                10.037423045910716
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "middle_3_r_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "middle_3_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind|middle_1_r_bind|middle_2_r_bind|middle_3_r_bind", 
+            "translate": [
+                -3.5737, 
+                0.0004, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -71.4974, 
+                122.30299999999997, 
+                -0.8809369999999951
+            ], 
+            "world_rotate": [
+                -179.12961532501865, 
+                4.923849754810807, 
+                10.037423045910716
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "middle_2_r_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "middle_2_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind|middle_1_r_bind|middle_2_r_bind", 
+            "translate": [
+                -3.51, 
+                -0.0005, 
+                -0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -67.9915, 
+                122.92399999999999, 
+                -1.187659999999998
+            ], 
+            "world_rotate": [
+                -179.12961532501865, 
+                4.923849754810807, 
+                10.037423045910716
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "middle_1_r_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "middle_1_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind|middle_1_r_bind", 
+            "translate": [
+                -2.2116, 
+                -0.0, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -64.54790000000001, 
+                123.53299999999999, 
+                -1.4889499999999978
+            ], 
+            "world_rotate": [
+                -179.12961532501865, 
+                4.923849754810807, 
+                10.037423045910716
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "middle_0_r_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "middle_0_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|middle_0_r_bind", 
+            "translate": [
+                -1.3002, 
+                -0.265, 
+                -0.1012
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -62.37820000000001, 
+                123.91699999999999, 
+                -1.6787599999999978
+            ], 
+            "world_rotate": [
+                -179.12961532501865, 
+                4.923849754810807, 
+                10.037423045910716
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "wrist_r_bind", 
+            "jointOrient": [
+                -90.0, 
+                -10.0, 
+                -0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "ring_5_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind|ring_1_r_bind|ring_2_r_bind|ring_3_r_bind|ring_4_r_bind|ring_5_r_bind", 
+            "translate": [
+                -2.6097, 
+                -0.0002, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -76.36900000000003, 
+                121.50900000000001, 
+                -3.2614099999999993
+            ], 
+            "world_rotate": [
+                -179.99999999999997, 
+                0.0, 
+                10.000000000000016
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "ring_4_r_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "ring_4_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind|ring_1_r_bind|ring_2_r_bind|ring_3_r_bind|ring_4_r_bind", 
+            "translate": [
+                -2.281, 
+                -0.0001, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -73.79890000000002, 
+                121.96200000000002, 
+                -3.2614099999999993
+            ], 
+            "world_rotate": [
+                -179.99999999999997, 
+                0.0, 
+                10.000000000000016
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "ring_3_r_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "ring_3_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind|ring_1_r_bind|ring_2_r_bind|ring_3_r_bind", 
+            "translate": [
+                -3.59, 
+                -0.0004, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -71.5525, 
+                122.35799999999998, 
+                -3.2614099999999993
+            ], 
+            "world_rotate": [
+                -179.99999999999997, 
+                0.0, 
+                10.000000000000016
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "ring_2_r_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "ring_2_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind|ring_1_r_bind|ring_2_r_bind", 
+            "translate": [
+                -3.4607, 
+                0.0001, 
+                -0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -68.01700000000002, 
+                122.98100000000001, 
+                -3.2614099999999993
+            ], 
+            "world_rotate": [
+                -179.99999999999997, 
+                0.0, 
+                10.000000000000016
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "ring_1_r_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "ring_1_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind|ring_1_r_bind", 
+            "translate": [
+                -2.1629, 
+                0.0004, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -64.6089, 
+                123.58199999999997, 
+                -3.2614099999999997
+            ], 
+            "world_rotate": [
+                -179.99999999999997, 
+                0.0, 
+                10.000000000000016
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "ring_0_r_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "ring_0_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|ring_0_r_bind", 
+            "translate": [
+                -1.2626, 
+                1.3204, 
+                -0.0602
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -62.47890000000001, 
+                123.95799999999998, 
+                -3.261409999999999
+            ], 
+            "world_rotate": [
+                -179.99999999999997, 
+                0.0, 
+                10.000000000000016
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "wrist_r_bind", 
+            "jointOrient": [
+                -90.0, 
+                -10.0, 
+                -5.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "pinky_5_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|pinky_0_r_bind|pinky_1_r_bind|pinky_2_r_bind|pinky_3_r_bind|pinky_4_r_bind|pinky_5_r_bind", 
+            "translate": [
+                -2.6099, 
+                0.0008, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -75.4723, 
+                121.57399999999998, 
+                -5.702260000000001
+            ], 
+            "world_rotate": [
+                179.12964538245845, 
+                -4.923849754810823, 
+                10.037423045910737
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "pinky_4_r_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "pinky_4_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|pinky_0_r_bind|pinky_1_r_bind|pinky_2_r_bind|pinky_3_r_bind|pinky_4_r_bind", 
+            "translate": [
+                -1.7258, 
+                0.0003, 
+                -0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -72.91200000000002, 
+                122.02800000000002, 
+                -5.4782600000000015
+            ], 
+            "world_rotate": [
+                179.12963030180907, 
+                -4.923849754810824, 
+                10.037423045910739
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
@@ -3906,9 +4206,9 @@
         "pinky_3_r_bind": {
             "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|pinky_0_r_bind|pinky_1_r_bind|pinky_2_r_bind|pinky_3_r_bind", 
             "translate": [
-                -1.7256, 
-                -0.0003, 
-                -0.0
+                -3.4443, 
+                -0.0001, 
+                0.0
             ], 
             "rotate": [
                 0.0, 
@@ -3939,14 +4239,14 @@
                 1.0
             ], 
             "world_translate": [
-                -72.93820705246972, 
-                122.19122891737649, 
-                -5.475485858167484
+                -71.2189, 
+                122.32799999999999, 
+                -5.33014
             ], 
             "world_rotate": [
-                179.2955570098002, 
-                -4.8930911758266555, 
-                8.203297089023208
+                179.12962271330292, 
+                -4.923849754810824, 
+                10.037423045910739
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
@@ -3966,9 +4266,9 @@
         "pinky_2_r_bind": {
             "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|pinky_0_r_bind|pinky_1_r_bind|pinky_2_r_bind", 
             "translate": [
-                -3.4444, 
-                0.0003, 
-                0.0
+                -3.3716, 
+                -0.0005, 
+                -0.0
             ], 
             "rotate": [
                 0.0, 
@@ -3999,14 +4299,14 @@
                 1.0
             ], 
             "world_translate": [
-                -71.23644531248432, 
-                122.43625341417014, 
-                -5.32829405712915
+                -67.8398, 
+                122.92600000000002, 
+                -5.0345
             ], 
             "world_rotate": [
-                179.2955570098002, 
-                -4.8930911758266555, 
-                8.203297089023208
+                179.1296188951111, 
+                -4.923849754810824, 
+                10.03742304591074
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
@@ -4026,8 +4326,248 @@
         "pinky_1_r_bind": {
             "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|pinky_0_r_bind|pinky_1_r_bind", 
             "translate": [
-                -5.4654, 
-                -0.0011, 
+                -2.0939, 
+                -0.0006, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -64.532, 
+                123.511, 
+                -4.745110000000001
+            ], 
+            "world_rotate": [
+                179.12961680380133, 
+                -4.923849754810824, 
+                10.037423045910737
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "pinky_0_r_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "pinky_0_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|pinky_0_r_bind", 
+            "translate": [
+                -1.1477, 
+                2.6193, 
+                -0.1442
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -62.4777, 
+                123.87399999999998, 
+                -4.565379999999999
+            ], 
+            "world_rotate": [
+                179.12961532502197, 
+                -4.923849754810824, 
+                10.037423045910739
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "wrist_r_bind", 
+            "jointOrient": [
+                -90.0, 
+                -10.0, 
+                -10.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "thumb_4_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|thumb_0_r_bind|thumb_1_r_bind|thumb_2_r_bind|thumb_3_r_bind|thumb_4_r_bind", 
+            "translate": [
+                -2.5674, 
+                -0.0001, 
+                -0.0008
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -66.82519999999998, 
+                118.69299999999996, 
+                4.5188199999999865
+            ], 
+            "world_rotate": [
+                -59.19916225192315, 
+                32.25981562513925, 
+                33.752925658172906
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "thumb_3_r_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "thumb_3_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|thumb_0_r_bind|thumb_1_r_bind|thumb_2_r_bind|thumb_3_r_bind", 
+            "translate": [
+                -3.1168, 
+                0.0, 
+                0.0005
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -65.0203, 
+                119.89999999999999, 
+                3.14871
+            ], 
+            "world_rotate": [
+                -59.19916225192315, 
+                32.25981562513925, 
+                33.752925658172906
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "thumb_2_r_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "thumb_2_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|thumb_0_r_bind|thumb_1_r_bind|thumb_2_r_bind", 
+            "translate": [
+                -1.25, 
+                0.0, 
                 -0.0
             ], 
             "rotate": [
@@ -4059,22 +4599,22 @@
                 1.0
             ], 
             "world_translate": [
-                -67.83975520006895, 
-                122.9262265383075, 
-                -5.0345014979266445
+                -62.82880000000001, 
+                121.36399999999998, 
+                1.4849200000000058
             ], 
             "world_rotate": [
-                179.2955570098002, 
-                -4.8930911758266555, 
-                8.203297089023208
+                -59.19916225192315, 
+                32.25981562513925, 
+                33.752925658172906
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
-            "parent": "pinky_0_r_bind", 
+            "parent": "thumb_1_r_bind", 
             "jointOrient": [
-                0.0081, 
-                -0.056, 
-                1.8268
+                -0.0, 
+                0.0, 
+                -20.0
             ], 
             "preferredAngle": [
                 0.0, 
@@ -4083,12 +4623,72 @@
             ], 
             "drawStyle": 0
         }, 
-        "pinky_0_r_bind": {
-            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|pinky_0_r_bind", 
+        "thumb_1_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|thumb_0_r_bind|thumb_1_r_bind", 
             "translate": [
-                -1.1477, 
-                2.6193, 
-                -0.144
+                -1.25, 
+                -0.0, 
+                -0.0
+            ], 
+            "rotate": [
+                130.8934, 
+                -48.5904, 
+                -49.1066
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -62.2875, 
+                121.98899999999999, 
+                0.547441999999996
+            ], 
+            "world_rotate": [
+                310.8933946491308, 
+                48.59037789072916, 
+                49.10660535086907
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "thumb_0_r_bind", 
+            "jointOrient": [
+                -116.5651, 
+                14.4775, 
+                -63.4349
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "thumb_0_r_bind": {
+            "dagPath": "|hips_bind|spine_0_bind|spine_1_bind|spine_2_bind|spine_3_bind|spine_4_bind|spine_5_bind|chest_bind|clavical_r_bind|shoulder_r_bind|elbow_r_bind|wrist_r_bind|thumb_0_r_bind", 
+            "translate": [
+                -0.783, 
+                -1.6039, 
+                -1.4042
             ], 
             "rotate": [
                 0.0, 
@@ -4119,22 +4719,22 @@
                 1.0
             ], 
             "world_translate": [
-                -62.47767815696018, 
-                123.87420000000003, 
-                -4.565380543702021
+                -61.7463, 
+                122.61399999999999, 
+                -0.3900369999999995
             ], 
             "world_rotate": [
-                179.12961532502004, 
-                -4.9238497548107825, 
-                10.037423045910709
+                -49.10660535086912, 
+                48.590377890729116, 
+                49.10660535086906
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": false, 
             "parent": "wrist_r_bind", 
             "jointOrient": [
-                -90.0, 
-                -10.0, 
-                -10.0
+                -0.0, 
+                -30.0, 
+                55.0
             ], 
             "preferredAngle": [
                 0.0, 
@@ -4153,7 +4753,7 @@
             "rotate": [
                 0.0, 
                 0.0, 
-                -0.0
+                0.0
             ], 
             "scale": [
                 1.0, 
@@ -4179,9 +4779,9 @@
                 1.0
             ], 
             "world_translate": [
-                -61.106058464981345, 
-                124.01820000000004, 
-                -2.0560764169418
+                -61.106058464981366, 
+                124.01820000000002, 
+                -2.0560764169418286
             ], 
             "world_rotate": [
                 -89.99999999999999, 
@@ -4193,7 +4793,7 @@
             "parent": "elbow_r_bind", 
             "jointOrient": [
                 0.0, 
-                0.0, 
+                -0.0, 
                 0.0
             ], 
             "preferredAngle": [

@@ -117,7 +117,8 @@ class Builder(object):
             if hasattr(cmpt, "guides_hrc"):
                 parent = cmds.listRelatives(cmpt.guides_hrc, p=True)
                 if parent and parent == 'guides':
-                    cmds.parent(cmpt.guides_hrc, "guides")
+                    break
+                cmds.parent(cmpt.guides_hrc, "guides")
             self.updateMaya()
 
         self.load_guide_data()
@@ -250,6 +251,10 @@ class Builder(object):
             cmpt_data = cd.getData()
             for cmpt in self.cmpt_list:
                 cmpt.loadSettings(cmpt_data[cmpt.name])
+
+    def load_meta_settings(self):
+        for cmpt in self.cmpt_list:
+            cmpt._load_meta_to_component()
 
     def load_controlShapes(self, path=None, applyColor=True):
         """

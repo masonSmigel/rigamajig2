@@ -4,13 +4,13 @@ functions for Joints
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 
-import rigamajig2.maya.decorators
 import rigamajig2.shared.common as common
 import rigamajig2.maya.utils as utils
 import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.naming as naming
 import rigamajig2.maya.attr as attr
 import rigamajig2.maya.transform as transform
+import rigamajig2.maya.decorators as decorators
 
 
 def isJoint(joint):
@@ -119,7 +119,7 @@ def duplicateChain(jointList, parent=None, names=None):
     return newJointList
 
 
-@rigamajig2.maya.decorators.oneUndo
+@decorators.oneUndo
 def insertJoints(startJoint, endJoint, amount=1, name=None):
     """
     Insert more joints between a start and end joint
@@ -175,7 +175,8 @@ def getInbetweenJoints(start, end):
     return [start] + btwnJoints + [end]
 
 
-@rigamajig2.maya.decorators.preserveSelection
+@decorators.oneUndo
+@decorators.preserveSelection
 def toOrientation(joints):
     """
     Remove all values from our rotation channels and add them to the Joint orient
@@ -209,7 +210,8 @@ def toOrientation(joints):
             cmds.setAttr("{0}.rotateAxis".format(jnt), 0, 0, 0)
 
 
-@rigamajig2.maya.decorators.preserveSelection
+@decorators.oneUndo
+@decorators.preserveSelection
 def toRotation(joints):
     """
     Remove all values from our joint orient channels and add them to the rotation
@@ -229,8 +231,8 @@ def toRotation(joints):
         cmds.xform(jnt, ws=True, rotation=orientation)
 
 
-@rigamajig2.maya.decorators.oneUndo
-@rigamajig2.maya.decorators.preserveSelection
+@decorators.oneUndo
+@decorators.preserveSelection
 def mirror(joints, axis='x', mode='rotate', zeroRotation=True):
     """
     Mirrors of one joint to its mirror across a given axis.
@@ -320,7 +322,7 @@ def mirror(joints, axis='x', mode='rotate', zeroRotation=True):
         toOrientation(mirroredJointList)
 
 
-# @utils.preserveSelection
+@decorators.preserveSelection
 def orientJoints(joints, aimAxis='x', upAxis='y', worldUpVector=(0, 1, 0), autoUpVector=False):
     """
     Orient joints using an aim constraint. If using autoUpVector select the only joints you want to orient together.

@@ -97,7 +97,7 @@ class BuilderDialog(QtWidgets.QDialog):
         self.actions = actions.Actions(self)
         file_menu.addAction(self.actions.new_rig_file_action)
         file_menu.addAction(self.actions.load_rig_file_action)
-        # file_menu.addAction(self.save_rig_file_action)
+        file_menu.addAction(self.actions.save_rig_file_action)
         file_menu.addSeparator()
         file_menu.addAction(self.actions.reload_rig_file_action)
 

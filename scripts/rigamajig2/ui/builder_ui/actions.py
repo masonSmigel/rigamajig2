@@ -22,8 +22,10 @@ from shiboken2 import wrapInstance
 
 # RIGAMJIG
 import rigamajig2.maya.qc as qc
+import rigamajig2.maya.data.abstract_data as abstract_data
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
-import rigamajig2.maya.rig_builder.builderUtils
+import rigamajig2.maya.rig_builder
+import rigamajig2.maya.rig_builder.builder as builder
 
 
 class Actions(object):
@@ -44,6 +46,10 @@ class Actions(object):
         self.load_rig_file_action = QtWidgets.QAction("Load Rig File", self.dialog)
         self.load_rig_file_action.setIcon(QtGui.QIcon(":folder-open.png"))
         self.load_rig_file_action.triggered.connect(self.load_rig_file)
+
+        self.save_rig_file_action = QtWidgets.QAction("Save Rig File", self.dialog)
+        self.save_rig_file_action.setIcon(QtGui.QIcon(":save.png"))
+        self.save_rig_file_action.triggered.connect(self.save_rig_file)
 
         self.reload_rig_file_action = QtWidgets.QAction("Reload Rig File", self.dialog)
         self.reload_rig_file_action.setIcon(QtGui.QIcon(":refresh.png"))
@@ -85,9 +91,53 @@ class Actions(object):
         #                             kc='Select'
         #                             )
 
-        print fname
         if file_dialog.selectedFiles():
             self.dialog.set_rig_file(file_dialog.selectedFiles()[0])
+
+    def save_rig_file(self):
+        """
+        Save out a rig file
+        :return:
+        """
+        data = abstract_data.AbstractData()
+        data.read(self.dialog.rig_file)
+        new_data = data.getData()
+
+        # Save the main feilds
+        new_data[builder.RIG_NAME] = self.dialog.asset_name_le.text()
+
+        preScripts = self.dialog.model_widget.preScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data[builder.PRE_SCRIPT] = preScripts
+
+        postScripts = self.dialog.build_widget.postScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data[builder.POST_SCRIPT] = postScripts
+        # new_data[cmptBuilder.POST_SCRIPT] = self.postScript_scriptRunner.get_current_script_list(relative_paths=True)
+        pubScripts = self.dialog.publish_widget.publishScript_scriptRunner.get_current_script_list(relative_paths=True)
+        new_data[builder.PUB_SCRIPT] = pubScripts
+        # new_data[cmptBuilder.PUB_SCRIPT] = self.publishScript_scriptRunner.get_current_script_list(relative_paths=True)
+        # new_data[cmptBuilder.MODEL_FILE] = self.model_path_selector.get_path()
+        new_data[builder.MODEL_FILE] = self.dialog.model_widget.model_path_selector.get_path()
+        # new_data[cmptBuilder.SKELETON_POS] = self.joint_pos_path_selector.get_path()
+        new_data[builder.SKELETON_POS] = self.dialog.joint_widget.joint_pos_path_selector.get_path()
+        # new_data[cmptBuilder.GUIDES] = self.guide_path_selector.get_path()
+        new_data[builder.GUIDES] = self.dialog.initialize_widget.guide_path_selector.get_path()
+        # new_data[cmptBuilder.COMPONENTS] = self.cmpt_path_selector.get_path()
+        new_data[builder.COMPONENTS] = self.dialog.initialize_widget.cmpt_path_selector.get_path()
+        # new_data[cmptBuilder.CONTROL_SHAPES] = self.ctl_path_selector.get_path()
+        new_data[builder.CONTROL_SHAPES] = self.dialog.controls_widget.ctl_path_selector.get_path()
+        # new_data[cmptBuilder.SKINS] = self.skin_path_selector.get_path()
+        new_data[builder.SKINS] = self.dialog.deformation_widget.skin_path_selector.get_path()
+        # new_data[cmptBuilder.PSD] = self.psd_path_selector.get_path()
+        new_data[builder.PSD] = self.dialog.deformation_widget.psd_path_selector.get_path()
+        # new_data[cmptBuilder.OUTPUT_RIG] = self.out_path_selector.get_path()
+        new_data[builder.OUTPUT_RIG] = self.dialog.publish_widget.out_path_selector.get_path()
+        # new_data[cmptBuilder.OUTPUT_RIG_FILE_TYPE] = self.out_file_type_cb.currentText()
+        new_data[builder.OUTPUT_RIG_FILE_TYPE] = self.dialog.publish_widget.out_file_type_cb.currentText()
+
+        data.setData(new_data)
+        data.write(self.dialog.rig_file)
+        builder.logger.info("data saved to : {}".format(self.dialog.rig_file))
+
 
     def reload_rig_file(self):
         self.dialog.set_rig_file(self.dialog.rig_file)

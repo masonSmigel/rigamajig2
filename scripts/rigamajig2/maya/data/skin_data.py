@@ -64,7 +64,7 @@ class SkinData(maya_data.MayaData):
             influenceObjects = self._data[node]['weights'].keys()
 
             if not rebind and mesh_skin:
-                assert len(skinCluster.getInfluenceObjects(mesh_skin)) == len(
+                assert len(skinCluster.getInfluenceJoints(mesh_skin)) == len(
                     influenceObjects), "Influence counts do not match."
 
             if rebind and mesh_skin:

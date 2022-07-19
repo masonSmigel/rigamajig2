@@ -115,7 +115,7 @@ def getWeights(mesh):
 
     weights, influenceCount = skinMfn.getWeights(meshDag, components)
 
-    influences = getInfluenceObjects(skinMfn)
+    influences = getInfluenceJoints(skinMfn)
     numInfluences = len(list(influences))
     numComponentsPerInfluence = int(len(weights) / numInfluences)
 
@@ -156,7 +156,7 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
     weights, influenceCount = skinMfn.getWeights(meshDag, components)
     weightList = weights
 
-    influences = getInfluenceObjects(skinMfn)
+    influences = getInfluenceJoints(skinMfn)
     numInfluences = len(list(influences))
     numComponentsPerInfluence = int(len(weights) / numInfluences)
 
@@ -240,7 +240,7 @@ def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
     skinMfn.setBlendWeights(meshDag, components, blendedWeights)
 
 
-def getInfluenceObjects(skinCluster):
+def getInfluenceJoints(skinCluster):
     """
     Get the influences of a skin cluster
     :param skinCluster: skinCluster to get influences from

@@ -7,6 +7,8 @@ Thanks to:
 Charles Wardlaw: Deformation Layering in Maya’s Parallel GPU World 
 (https://medium.com/@kattkieru/deformation-layering-in-mayas-parallel-gpu-world-15c2e3d66d82)
 """
+import logging
+
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 import maya.api.OpenMayaAnim as oma2
@@ -16,6 +18,7 @@ import rigamajig2.maya.deformer
 import rigamajig2.maya.utils
 import rigamajig2.maya.shape
 
+logger = logging.getLogger(__name__)
 
 def isSkinCluster(skinCluster):
     """
@@ -272,6 +275,46 @@ def getInfluenceIndex(skinCluster, influence):
     return skinClusterFn.indexForInfluenceObject(influencePath)
 
 
+def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestPoint', influenceMode='closestJoint'):
+    """
+    Copy skin cluster and all influences to a target mesh
+    :param str sourceMesh: source mesh to copy the skin cluster from
+    :param list tuple targetMeshes: target mesh to copy the skin clustes to
+    :param str surfaceMode: surface association method for copy skin weights
+    :param str influenceMode: influence association to copy the skin weights
+    :return:
+    """
+    targetMeshes = rigamajig2.shared.common.toList(targetMeshes)
+
+    srcSkinCluster = getSkinCluster(sourceMesh)
+    srcInfluences = getInfluenceJoints(srcSkinCluster)
+
+    for tgtMesh in targetMeshes:
+        tgtSkinCluster = getSkinCluster(tgtMesh)
+
+        # if the target does not have a skin cluster create one with the input joints
+        if not tgtSkinCluster:
+            skinClusterName = tgtMesh + "_skinCluster"
+            tgtSkinCluster = cmds.skinCluster(srcInfluences, tgtMesh, n=skinClusterName, tsb=True, bm=0, sm=0, nw=1)[0]
+
+        # otherwise add the missing influences to the skin cluster.
+        else:
+            tgtInfluences = getInfluenceJoints(tgtSkinCluster)
+            for influence in srcInfluences:
+                if influence not in tgtInfluences:
+                    cmds.skinCluster(tgtSkinCluster, edit=True, addInfluence=influence)
+
+        # copy the skin cluster settings
+        attrs = ["skinningMethod", "dqsSupportNonRigid", "normalizeWeights", "maxInfluences", "maintainMaxInfluences"]
+        for attr in attrs:
+            value = cmds.getAttr("{}.{}".format(srcSkinCluster, attr))
+            cmds.setAttr("{}.{}".format(tgtSkinCluster, attr), value)
+
+        # copy the skin weights
+        cmds.copySkinWeights(ss=srcSkinCluster, ds=tgtSkinCluster, nm=True, sa=surfaceMode, ia=influenceMode)
+        logger.info("weights copied: {}({}) -> {}({})".format(sourceMesh, srcSkinCluster, tgtMesh, tgtSkinCluster))
+
+
 def localize(skinclusters, transform):
     """
     Localize skincluster to given transform
@@ -302,4 +345,4 @@ def stack_skinclusters(source, target):
 
 
 if __name__ == '__main__':
-    print(getSkinCluster(cmds.ls(sl=True)))
+    copySkinClusterAndInfluences("pSphere1", "pSphere2")

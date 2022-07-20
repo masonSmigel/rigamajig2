@@ -72,7 +72,6 @@ class Control(object):
             return None
 
         sdk = rigamajig2.maya.hierarchy.create(self.control, [self.control + "_" + common.SDK], above=True)
-        cmds.parent(self.control, sdk)
         meta.addMessageConnection(sourceNode=self.control, dataNode=sdk[0], sourceAttr="__{}__".format(common.SDK))
         return sdk[0]
 
@@ -117,10 +116,18 @@ class Control(object):
     @property
     def trs(self):
         """
-        :return: spaces node
+        :return: trs node
         :rtype: str
         """
         return self.getNode(common.TRS)
+
+    @property
+    def sdk(self):
+        """
+        :return: sdk node
+        :rtype: str
+        """
+        return self.getNode(common.SDK)
 
 
 def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, sdk=False, parent=None,

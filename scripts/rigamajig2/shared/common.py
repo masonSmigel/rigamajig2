@@ -33,6 +33,12 @@ BIN_PATH = '/'.join(current_path.split('/')[0:-4]) + '/bin'
 PLUGIN_PATH = '/'.join(current_path.split('/')[0:-4]) + '/plug-ins'
 MISC_PATH = '/'.join(current_path.split('/')[0:-4]) + '/misc'
 
+# transform constants
+ORIG = 'orig'
+SPACES = 'spaces'
+TRS = 'trs'
+SDK = 'sdk'
+
 # Class Constants
 IK = 'ik'
 FK = 'fk'

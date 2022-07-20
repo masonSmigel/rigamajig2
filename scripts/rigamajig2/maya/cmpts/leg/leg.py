@@ -52,8 +52,9 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
             raise RuntimeError('Input list must have a length of 6')
 
     def setInitalData(self):
-        self.cmptSettings['ikSpaces']['hip'] = self.cmptSettings['limbSwingName'] + '_' + self.side
-        self.cmptSettings['pvSpaces']['foot'] = self.cmptSettings['limb_ikName'] + '_' + self.side
+        side = "_{}".format(self.side) if self.side else ""
+        self.cmptSettings['ikSpaces']['hip'] = self.cmptSettings['limbSwingName'] + side
+        self.cmptSettings['pvSpaces']['foot'] = self.cmptSettings['limb_ikName'] + side
 
     def createBuildGuides(self):
         """ create build guides_hrc """
@@ -71,7 +72,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.toes_fk = rig_control.createAtObject(
             self.toes_fkName,
             self.side,
-            hierarchy=['trsBuffer'],
+            orig=True,
             hideAttrs=['v', 't', 's'],
             size=self.size,
             color='blue',
@@ -84,7 +85,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.heel_ik = rig_control.createAtObject(
             self.heel_ikName,
             self.side,
-            hierarchy=['trsBuffer'],
+            orig=True,
             hideAttrs=['v', 't', 's'],
             size=self.size,
             color='blue',
@@ -96,7 +97,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.ball_ik = rig_control.createAtObject(
             self.ball_ikName,
             self.side,
-            hierarchy=['trsBuffer'],
+            orig=True,
             hideAttrs=['v', 't', 's'],
             size=self.size,
             color='blue',
@@ -108,7 +109,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.toes_ik = rig_control.createAtObject(
             self.toes_ikName,
             self.side,
-            hierarchy=['trsBuffer'],
+            orig=True,
             hideAttrs=['v', 't', 's'],
             size=self.size,
             color='blue',
@@ -118,7 +119,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
             xformObj=self._toe_piv
             )
 
-        self.ikControls += [self.heel_ik[-1], self.ball_ik[-1], self.toes_ik[-1]]
+        self.ikControls += [self.heel_ik.name, self.ball_ik.name, self.toes_ik.name]
 
     def rigSetup(self):
         """Add the rig setup"""
@@ -132,28 +133,28 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
 
         # connect the Foot IKFK to the ankle IK
         cmds.parent(self._ikEndTgt, self.footikfk.getPivotList()[6])
-        cmds.parent(self.footikfk.getPivotList()[0], self.limbGimble_ik[-1])
+        cmds.parent(self.footikfk.getPivotList()[0], self.limbGimble_ik.name)
         cmds.delete(cmds.listRelatives(self._ikEndTgt, ad=True, type='pointConstraint'))
 
         # add in the foot roll controllers
-        cmds.parent(self.heel_ik[0], self.footikfk.getPivotList()[1])
-        cmds.parent(self.footikfk.getPivotList()[2], self.heel_ik[-1])
+        cmds.parent(self.heel_ik.orig, self.footikfk.getPivotList()[1])
+        cmds.parent(self.footikfk.getPivotList()[2], self.heel_ik.name)
 
-        cmds.parent(self.toes_ik[0], self.footikfk.getPivotList()[4])
-        cmds.parent(self.footikfk.getPivotList()[5], self.toes_ik[-1])
-        cmds.parent(self.footikfk.getPivotList()[7], self.toes_ik[-1])
+        cmds.parent(self.toes_ik.orig, self.footikfk.getPivotList()[4])
+        cmds.parent(self.footikfk.getPivotList()[5], self.toes_ik.name)
+        cmds.parent(self.footikfk.getPivotList()[7], self.toes_ik.name)
 
-        cmds.parent(self.ball_ik[0], self.footikfk.getPivotList()[5])
-        cmds.parent(self.footikfk.getPivotList()[6], self.ball_ik[-1])
+        cmds.parent(self.ball_ik.orig, self.footikfk.getPivotList()[5])
+        cmds.parent(self.footikfk.getPivotList()[6], self.ball_ik.name)
 
         # setup the toes
-        rig_transform.connectOffsetParentMatrix(self.footikfk.getBlendJointList()[2], self.toes_fk[0], mo=True)
+        rig_transform.connectOffsetParentMatrix(self.footikfk.getBlendJointList()[2], self.toes_fk.orig, mo=True)
         # TODO: this is alittle hacky... maybe fix it later
         cmds.setAttr("{}.{}".format(self.footikfk.getIkJointList()[1], 'segmentScaleCompensate'), 0)
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
-        blendedJointlist = self.ikfk.getBlendJointList() + [self.toes_fk[-1]]
+        blendedJointlist = self.ikfk.getBlendJointList() + [self.toes_fk.name]
         rigamajig2.maya.joint.connectChains(blendedJointlist, self.input[1:-1])
         rigamajig2.maya.attr.lock(self.input[-1], rigamajig2.maya.attr.TRANSFORMS + ['v'])
         ikfk.IkFkBase.connectVisibility(self.params_hrc, 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
@@ -163,17 +164,17 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
                 cmds.setAttr("{}.{}".format(jnt, "drawStyle"), 2)
 
         # connect the base to the main bind chain
-        rigamajig2.maya.joint.connectChains(self.limbBase[-1], self.input[0])
+        rigamajig2.maya.joint.connectChains(self.limbBase.name, self.input[0])
 
     def setupAnimAttrs(self):
         """ setup animation attributes"""
         super(Leg, self).setupAnimAttrs()
         # connect the fook ik attributes to the foot control
-        rigamajig2.maya.attr.addSeparator(self.limb_ik[-1], '----')
-        rigamajig2.maya.attr.driveAttribute('roll', self.params_hrc, self.limb_ik[-1])
-        rigamajig2.maya.attr.driveAttribute('bank', self.params_hrc, self.limb_ik[-1])
-        rigamajig2.maya.attr.driveAttribute('ballAngle', self.params_hrc, self.limb_ik[-1])
-        rigamajig2.maya.attr.driveAttribute('toeStraightAngle', self.params_hrc, self.limb_ik[-1])
+        rigamajig2.maya.attr.addSeparator(self.limb_ik.name, '----')
+        rigamajig2.maya.attr.driveAttribute('roll', self.params_hrc, self.limb_ik.name)
+        rigamajig2.maya.attr.driveAttribute('bank', self.params_hrc, self.limb_ik.name)
+        rigamajig2.maya.attr.driveAttribute('ballAngle', self.params_hrc, self.limb_ik.name)
+        rigamajig2.maya.attr.driveAttribute('toeStraightAngle', self.params_hrc, self.limb_ik.name)
 
     def connect(self):
         """Create the connection"""
@@ -201,7 +202,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         parent = None
         for key in ['hip', 'thigh', 'knee', 'ankle', 'ball', 'toe']:
             name = naming.getUniqueName(key, side)
-            jnt = cmds.createNode("joint", name=name)
+            jnt = cmds.createNode("joint", name=name + "_jnt")
             if parent:
                 cmds.parent(jnt, parent)
 

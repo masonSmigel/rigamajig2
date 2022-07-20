@@ -371,7 +371,7 @@ class Builder(object):
     def post_script(self):
         """ Run pre scripts. use  through the POST SCRIPT path"""
         builderUtils.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, POST_SCRIPT)))
-        logger.info("pre scripts -- complete")
+        logger.info("post scripts -- complete")
 
     def pub_script(self):
         """ Run pre scripts. use  through the PUB SCRIPT path"""

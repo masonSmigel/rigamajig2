@@ -52,26 +52,24 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
         else:
             pos = (0,0,0)
         self.cog = rig_control.create(self.cog_name,
-                                      hierarchy=['trsBuffer'],
                                       hideAttrs=['s', 'v'], size=self.size, color='yellow',
                                       parent=self.control_hrc, shape=self.cog_control_shape, shapeAim='x',
                                       position=pos)
         self.cog_pivot = rig_control.create(self.cogPivot_name,
-                                            hierarchy=['trsBuffer'],
                                             hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                            parent=self.cog[-1], shape='sphere', shapeAim='x',
+                                            parent=self.cog.name, shape='sphere', shapeAim='x',
                                             position=pos)
         self.cog_gimble = rig_control.create(self.cogGimble_name,
-                                             hierarchy=['trsBuffer', 'neg'],
                                              hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                             parent=self.cog[-1], shape=self.cog_control_shape, shapeAim='x',
+                                             parent=self.cog.name, shape=self.cog_control_shape, shapeAim='x',
                                              position=pos)
+        self.cog_gimble.addTrs("neg")
 
     def rigSetup(self):
         # create the pivot negate
-        constrain.negate(self.cog_pivot[-1], self.cog_gimble[1], t=True)
+        constrain.negate(self.cog_pivot.name, self.cog_gimble.trs, t=True)
         if self.bind_to_input and len(self.input) >= 1:
-            self.input_trs = hierarchy.create(self.cog_gimble[-1], ['{}_trs'.format(self.input[0])], above=False)[0]
+            self.input_trs = hierarchy.create(self.cog_gimble.name, ['{}_trs'.format(self.input[0])], above=False)[0]
             rig_transform.matchTransform(self.input[0], self.input_trs)
             joint.connectChains(self.input_trs, self.input[0])
 

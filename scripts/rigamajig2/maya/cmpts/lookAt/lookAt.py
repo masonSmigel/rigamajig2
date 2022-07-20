@@ -61,7 +61,7 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         super(LookAt, self).initalHierachy()
 
         self.aimTarget = rig_control.createAtObject(self.aimTargetName,
-                                                    hierarchy=['trsBuffer', 'spaces_trs'],
+                                                    spaces=True,
                                                     hideAttrs=['v', 's'], size=self.size, color='banana',
                                                     parent=self.control_hrc, shape='square', shapeAim='z',
                                                     xformObj=self._lookAtTgt)
@@ -70,13 +70,14 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         for input in self.input:
             lookAtName = getattr(self, "{}Name".format(input))
             aimAxis = rig_transform.getAimAxis(input)
-            lookAt_ctl = rig_control.createAtObject(lookAtName, hierarchy=['trsBuffer',  'trsAim'], hideAttrs=['v'], size=self.size,
+            lookAt_ctl = rig_control.createAtObject(lookAtName, hideAttrs=['v'], size=self.size,
                                                     color='banana', parent=self.control_hrc, shape='circle',
                                                     shapeAim=aimAxis, xformObj=input)
+            lookAt_ctl.addTrs("aim")
 
             # postion the control at the end joint. Get the aim vector from the input and mutiply by joint length.
             translation = mathUtils.scalarMult(rig_transform.getVectorFromAxis(aimAxis), joint.length(input))
-            rig_control.translateShapes(lookAt_ctl[-1], translation)
+            rig_control.translateShapes(lookAt_ctl.name, translation)
 
             self.lookAtCtlList.append(lookAt_ctl)
 
@@ -93,15 +94,15 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
             lookAt_upVec_guide = getattr(self, "_{}_upVecTgt".format(input))
 
             # create an upvector and aim contraint
-            upVectorTrs = cmds.createNode("transform", name="{}_upVec".format(lookAt_ctl[1]), p=self.spaces_hrc)
+            upVectorTrs = cmds.createNode("transform", name="{}_upVec".format(lookAt_ctl.trs), p=self.spaces_hrc)
             rig_transform.matchTranslate(lookAt_upVec_guide, upVectorTrs)
             self.UpVecObjList.append(upVectorTrs)
 
-            cmds.aimConstraint(self.aimTarget[-1], lookAt_ctl[1], aim=lookAt_aimVec, upVector=lookAt_upVec,
+            cmds.aimConstraint(self.aimTarget.name, lookAt_ctl.trs, aim=lookAt_aimVec, upVector=lookAt_upVec,
                                worldUpType='object', worldUpObject=upVectorTrs, mo=True)
 
             # connect the control to input joint
-            joint.connectChains(lookAt_ctl[-1], input)
+            joint.connectChains(lookAt_ctl.name, input)
             # rig_transform.connectOffsetParentMatrix(lookAt_ctl[-1], input)
 
         # Delete the proxy guides_hrc:
@@ -114,14 +115,14 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         # connect the controls to the rig parent
         if cmds.objExists(self.rigParent):
             for ctl in self.lookAtCtlList:
-                rig_transform.connectOffsetParentMatrix(self.rigParent, ctl[0], mo=True)
+                rig_transform.connectOffsetParentMatrix(self.rigParent, ctl.orig, mo=True)
             for upVec in self.UpVecObjList:
                 rig_transform.connectOffsetParentMatrix(self.rigParent, upVec, mo=True)
 
-        spaces.create(self.aimTarget[1], self.aimTarget[-1], parent=self.spaces_hrc, defaultName='world')
+        spaces.create(self.aimTarget.spaces, self.aimTarget.name, parent=self.spaces_hrc, defaultName='world')
 
         if self.lookAtSpaces:
-            spaces.addSpace(self.aimTarget[1], [self.lookAtSpaces[k] for k in self.lookAtSpaces.keys()], self.lookAtSpaces.keys(), 'parent')
+            spaces.addSpace(self.aimTarget.spaces, [self.lookAtSpaces[k] for k in self.lookAtSpaces.keys()], self.lookAtSpaces.keys(), 'parent')
 
     @staticmethod
     def createInputJoints(name=None, side=None, numJoints=4):

@@ -45,8 +45,9 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
                                   useProxyAttrs=useProxyAttrs, useScale=useScale, rigParent=rigParent)
 
     def setInitalData(self):
-        self.cmptSettings['ikSpaces']['shoulder'] = self.cmptSettings['limbSwingName'] + '_' + self.side
-        self.cmptSettings['pvSpaces']['hand'] = self.cmptSettings['limb_ikName'] + '_' + self.side
+        side = "_{}".format(self.side) if self.side else ""
+        self.cmptSettings['ikSpaces']['shoulder'] = self.cmptSettings['limbSwingName'] + side
+        self.cmptSettings['pvSpaces']['hand'] = self.cmptSettings['limb_ikName'] + side
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
@@ -84,7 +85,7 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
         parent = None
         for key in ['clavicle', 'shoulder', 'elbow', 'wrist']:
             name = naming.getUniqueName(key, side)
-            jnt = cmds.createNode("joint", name=name)
+            jnt = cmds.createNode("joint", name=name + "_jnt")
             if parent:
                 cmds.parent(jnt, parent)
 

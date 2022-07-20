@@ -5,7 +5,7 @@ import os
 import maya.cmds as cmds
 
 import rigamajig2.maya.decorators
-import rigamajig2.shared.common
+import rigamajig2.shared.common as common
 import rigamajig2.shared.path
 import rigamajig2.maya.naming
 import rigamajig2.maya.hierarchy
@@ -13,7 +13,7 @@ import rigamajig2.maya.data.curve_data
 import rigamajig2.maya.curve
 import rigamajig2.maya.color
 import rigamajig2.maya.transform
-import rigamajig2.maya.meta
+import rigamajig2.maya.meta as meta
 import rigamajig2.maya.shape
 import rigamajig2.maya.attr
 import rigamajig2.maya.utils
@@ -24,51 +24,129 @@ CONTROLSHAPES = os.path.join(os.path.dirname(__file__), "controlShapes.data").re
 CONTROLTAG = 'control'
 
 
-def create(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None, position=[0, 0, 0],
+class Control(object):
+    def __init__(self, control):
+        """
+        this is the constructor for the Control class.
+        The control class manages transforms for a control such as the offset, trs and sdk groups.
+
+
+        transforms should go in the following order:
+        | orig
+          |- spaces
+            |- trs
+              |- sdk
+                |- control
+
+
+        :param control:
+        """
+        self.control = control
+
+    def addOrig(self):
+        if cmds.objExists("{}.__{}__".format(self.control, common.ORIG)):
+            return None
+
+        orig = rigamajig2.maya.hierarchy.create(self.control, [self.control + "_" + common.ORIG], above=True)
+        meta.addMessageConnection(sourceNode=self.control, dataNode=orig[0], sourceAttr="__{}__".format(common.ORIG))
+
+    def addSpaces(self):
+        if cmds.objExists("{}.__{}__".format(self.control, common.SPACES)):
+            return None
+
+        sdkNode = self.getNode(common.SDK)
+        trsNode = self.getNode(common.SDK)
+        if trsNode:
+            child = trsNode
+        elif sdkNode:
+            child = sdkNode
+        else:
+            child = self.control
+
+        spaces = rigamajig2.maya.hierarchy.create(child, [self.control + "_" + common.SPACES], above=True)
+        meta.addMessageConnection(sourceNode=self.control, dataNode=spaces[0],
+                                  sourceAttr="__{}__".format(common.SPACES))
+
+    def addSdk(self):
+        if cmds.objExists("{}.__{}__".format(self.control, common.SDK)):
+            return None
+
+        sdk = rigamajig2.maya.hierarchy.create(self.control, [self.control + "_" + common.SDK], above=True)
+        cmds.parent(self.control, sdk)
+        meta.addMessageConnection(sourceNode=self.control, dataNode=sdk[0], sourceAttr="__{}__".format(common.SDK))
+        return sdk[0]
+
+    def addTrs(self, name=None):
+        if cmds.objExists("{}.__{}__".format(self.control, common.TRS)):
+            return None
+
+        sdkNode = self.getNode(common.SDK)
+        if sdkNode:
+            trsChild = sdkNode
+        else:
+            trsChild = self.control
+
+        trsSuffix = "_{}Trs".format(name) if name else "_trs"
+        trs = rigamajig2.maya.hierarchy.create(trsChild, [self.control + trsSuffix], above=True)
+        meta.addMessageConnection(sourceNode=self.control, dataNode=trs[0], sourceAttr="__{}__".format(common.TRS))
+
+    def getNode(self, node):
+        if cmds.objExists("{}.__{}__".format(self.control, node)):
+            return meta.getMessageConnection("{}.__{}__".format(self.control, node))
+
+    @property
+    def name(self):
+        return self.control
+
+    @property
+    def orig(self):
+        """
+        :return: orign node
+        :rtype: str
+        """
+        return self.getNode(common.ORIG)
+
+    @property
+    def spaces(self):
+        """
+        :return: spaces node
+        :rtype: str
+        """
+        return self.getNode(common.SPACES)
+
+    @property
+    def trs(self):
+        """
+        :return: spaces node
+        :rtype: str
+        """
+        return self.getNode(common.TRS)
+
+
+def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, sdk=False, parent=None,
+           position=[0, 0, 0],
            rotation=[0, 0, 0], size=1, hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz',
            trasformType='transform', shapeAim='y'):
     """
     Create a control. It will also create a hierarchy above the control based on the hierarchy list.
 
-    :param name: Name of the control.
-    :type name: str
-
-    :param side: Optional name of the side
-    :type side: str
-
-    :param shape: Shape of the control.
-    :type shape: str
-
-    :param hierarchy: List of suffixes to add to the hierarchy to add above the control.
-    :type hierarchy: list | tuple
-
-    :param parent: Optional- Parent the control under this node in the hierarchy
-    :type parent: str
-
-    :param position: Optional- Point in world space to position the control.
-    :type position: list | tuple
-
-    :param rotation: Optional- Rotation in world space to rotate the control.
-    :type rotation: list | tuple
-
-    :param size: Optional- Size of the control
-    :type size: int | float
-
-    :param hideAttrs: Optional- list of attributes to lock and hide. Default is ['v']
-    :type hideAttrs: list
-
-    :param color: Optional- Color of the control
-    :type color: str | int
-
-    :param type: Optional- Specifiy a control type.
-    :type type: str
-
-    :param rotateOrder: Specify a rotation order. Default is 'xyz'
-    :type rotateOrder: str
-
-    :param trasformType: Type of transform to use as a control. "transform", "joint"
-
-    :param shapeAim: Set the direction to aim the control
+    :param str name: Name of the control.
+    :param str side: Optional name of the side
+    :param str shape: Shape of the control.
+    :param bool orig: add an orig node
+    :param bool spaces: add spaces node
+    :param bool trs: add a trs node
+    :param bool sdk: add an sdk node
+    :param str parent: Optional- Parent the control under this node in the hierarchy
+    :param list tuple position: Optional- Point in world space to position the control.
+    :param list tuple rotation: Optional- Rotation in world space to rotate the control.
+    :param int float size: Optional- Size of the control
+    :param list hideAttrs: Optional- list of attributes to lock and hide. Default is ['v']
+    :param str int color: Optional- Color of the control
+    :param str type: Optional- Specifiy a control type.
+    :param str rotateOrder: Specify a rotation order. Default is 'xyz'
+    :param str trasformType: Type of transform to use as a control. "transform", "joint"
+    :param str shapeAim: Set the direction to aim the control
 
     :return: list of hierarchy created above the control plus the control:
     :rtype: list | tuple
@@ -78,17 +156,29 @@ def create(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None
     else:
         name = rigamajig2.maya.naming.getUniqueName(name)
     control = cmds.createNode(trasformType, name=name)
+    tagAsControl(control, type=type)
     topNode = control
 
     setControlShape(control, shape)
 
-    hierarchyList = list()
-    if hierarchy:
-        for suffix in hierarchy:
-            node = rigamajig2.maya.naming.getUniqueName(control + "_" + suffix)
-            hierarchyList.append(node)
-        rigamajig2.maya.hierarchy.create(control, hierarchy=hierarchyList)
-        topNode = hierarchyList[0]
+    controlObj = Control(control)
+    if orig:
+        controlObj.addOrig()
+        topNode = controlObj.getNode(common.ORIG)
+    if spaces:
+        controlObj.addSpaces()
+    if trs:
+        controlObj.addTrs()
+    if sdk:
+        controlObj.addSdk()
+
+    # hierarchyList = list()
+    # if hierarchy:
+    #     for suffix in hierarchy:
+    #         node = rigamajig2.maya.naming.getUniqueName(control + "_" + suffix)
+    #         hierarchyList.append(node)
+    #     rigamajig2.maya.hierarchy.create(control, hierarchy=hierarchyList)
+    #     topNode = hierarchyList[0]
 
     if trasformType == 'joint':
         cmds.setAttr("{}.drawStyle".format(control), 2)
@@ -126,49 +216,30 @@ def create(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None
 
     tagAsControl(control, type=type)
 
-    return hierarchyList + [control]
+    return controlObj
 
 
-def createAtObject(name, side=None, shape='circle', hierarchy=['trsBuffer'], parent=None, xformObj=None, size=1,
+def createAtObject(name, side=None, shape='circle',orig=True, spaces=False, trs=False, sdk=False, parent=None, xformObj=None, size=1,
                    hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz', trasformType='transform', shapeAim='y'):
     """
     Wrapper to create a control at the position of a node.
-    :param name: Name of the control.
-    :type name: str
 
-    :param side: Optional name of the side
-    :type side: str
-
-    :param shape: Shape of the control.
-    :type shape: str
-
-    :param hierarchy: List of suffixes to add to the hierarchy to add above the control.
-    :type hierarchy: list | tuple
-
-    :param parent: Optional- Parent the control under this node in the hierarchy
-    :type parent: str
-
-    :param xformObj: object to snap the control to.
-    :type xformObj: str | list
-
-    :param size: Optional- Size of the control
-    :type size: int | float
-
-    :param hideAttrs: Optional- list of attributes to lock and hide. Default is ['v']
-    :type hideAttrs: list
-
-    :param color: Optional- Color of the control
-    :type color: str | int
-
-    :param type: Optional- Specifiy a control type.
-    :type type: str
-
-    :param rotateOrder: Specify a rotation order. Default is 'xyz'
-    :type rotateOrder: str
-
-    :param trasformType: Type of transform to use as a control. "transform", "joint"
-
-    :param shapeAim: Set the direction to aim the control
+    :param str name: Name of the control.
+    :param str side: Optional name of the side
+    :param str shape: Shape of the control.
+    :param bool orig: add an orig node
+    :param bool spaces: add spaces node
+    :param bool trs: add a trs node
+    :param bool sdk: add an sdk node
+    :param str parent: Optional- Parent the control under this node in the hierarchy
+    :param str list  xformObj: object to snap the control to.
+    :param int float size: Optional- Size of the control
+    :param list hideAttrs: Optional- list of attributes to lock and hide. Default is ['v']
+    :param str int color: Optional- Color of the control
+    :param str type: Optional- Specifiy a control type.
+    :param str rotateOrder: Specify a rotation order. Default is 'xyz'
+    :param str trasformType: Type of transform to use as a control. "transform", "joint"
+    :param str shapeAim: Set the direction to aim the control
 
     :return: list of hierarchy created above the control plus the control:
     :rtype: list | tuple
@@ -182,14 +253,30 @@ def createAtObject(name, side=None, shape='circle', hierarchy=['trsBuffer'], par
             "Object {} does not exist. cannot create a control at a transform that doesnt exist".format(xformObj))
         return
 
-    xformObj = rigamajig2.shared.common.getFirstIndex(xformObj)
+    xformObj = common.getFirstIndex(xformObj)
 
     position = cmds.xform(xformObj, q=True, ws=True, translation=True)
-    controlHierarchy = create(name=name, side=side, shape=shape, hierarchy=hierarchy, parent=parent, position=position,
-                              size=size, rotation=[0, 0, 0], hideAttrs=hideAttrs, color=color, type=type,
-                              rotateOrder=rotateOrder, trasformType=trasformType, shapeAim=shapeAim)
-    rigamajig2.maya.transform.matchRotate(xformObj, controlHierarchy[0])
-    return controlHierarchy
+    controlObj = create(name=name, side=side, shape=shape, orig=orig, spaces=spaces, trs=trs, sdk=sdk,
+                        parent=parent, position=position, size=size, rotation=[0, 0, 0],
+                        hideAttrs=hideAttrs, color=color, type=type, rotateOrder=rotateOrder,
+                        trasformType=trasformType, shapeAim=shapeAim)
+    orig = controlObj.getNode(common.ORIG)
+    rigamajig2.maya.transform.matchRotate(xformObj, orig)
+    return controlObj
+
+
+def addSdk(control):
+    """
+    add and sdk to a control
+    :param control: name of the control to add an sdk to
+    :return:
+    """
+
+    controls = common.toList(control)
+
+    for control in controls:
+        sdkName = rigamajig2.maya.naming.getUniqueName(control + "_sdk")
+        rigamajig2.maya.hierarchy.create(control, [sdkName], above=True, matchTransform=True)
 
 
 def getAvailableControlShapes():
@@ -209,7 +296,7 @@ def tagAsControl(control, type=None):
     :param type: Add a special type
     :return:
     """
-    rigamajig2.maya.meta.tag(control, CONTROLTAG, type=type)
+    meta.tag(control, CONTROLTAG, type=type)
 
 
 def untagAsControl(control):
@@ -217,7 +304,7 @@ def untagAsControl(control):
     untag specified controls as a control
     :param control: control to remove tag from
     """
-    rigamajig2.maya.meta.untag(control, CONTROLTAG)
+    meta.untag(control, CONTROLTAG)
 
 
 def getControls(namespace=None):
@@ -227,7 +314,7 @@ def getControls(namespace=None):
     :type namespace: str
     :return:
     """
-    return rigamajig2.maya.meta.getTagged(CONTROLTAG, namespace=namespace)
+    return meta.getTagged(CONTROLTAG, namespace=namespace)
 
 
 def createDisplayLine(point1, point2, name=None, parent=None, displayType='temp'):
@@ -281,7 +368,7 @@ def connectControlVisiblity(driverNode, driverAttr, controls):
     :param driverAttr: name of the attribute on the node to drive the control visibility
     :param controls: list of the controls to drive their visibility of
     """
-    controls = rigamajig2.shared.common.toList(controls)
+    controls = common.toList(controls)
 
     for control in controls:
         shapes = cmds.listRelatives(control, s=True) or []
@@ -366,7 +453,7 @@ def setLineWidth(controls, lineWidth=1):
     :param lineWidth: line weight to set on the controls
     :return:
     """
-    controls = rigamajig2.shared.common.toList(controls)
+    controls = common.toList(controls)
     for control in controls:
         shapes = cmds.listRelatives(control, s=True) or []
         for shape in shapes:
@@ -424,6 +511,6 @@ def createGuide(name, side=None, shape="loc", type=None, parent=None, joint=Fals
     if color:
         rigamajig2.maya.color.setOverrideColor(guide, color)
 
-    rigamajig2.maya.meta.tag(guide, 'guide', type=type)
+    meta.tag(guide, 'guide', type=type)
 
     return guide

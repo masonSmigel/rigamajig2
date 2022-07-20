@@ -73,21 +73,21 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         hideAttrs = ['v', 's']
         for i in range(self.numControls):
             parent = self.control_hrc
-            hierarchy = ['trsBuffer', 'spaces_trs']
+            addSpaces = True
             if i > 0:
-                parent = self.fk_control_obj_list[i - 1][-1]
-                hierarchy = ['trsBuffer']
-            fk_control = rig_control.create(self.fkControlName, hierarchy=hierarchy, hideAttrs=hideAttrs,
+                parent = self.fk_control_obj_list[i - 1].name
+                addSpaces = False
+            fk_control = rig_control.create(self.fkControlName, spaces=addSpaces, hideAttrs=hideAttrs,
                                             size=self.size, color='blue', parent=parent, shapeAim='x',
                                             shape='square')
-            ik_control = rig_control.create(self.ikControlName, hierarchy=[], hideAttrs=hideAttrs,
-                                            size=self.size * 0.5, color='blue', parent=fk_control[-1], shapeAim='x',
+            ik_control = rig_control.create(self.ikControlName, hideAttrs=hideAttrs,
+                                            size=self.size * 0.5, color='blue', parent=fk_control.name, shapeAim='x',
                                             shape='circle')
             self.fk_control_obj_list.append(fk_control)
             self.ik_control_obj_list.append(ik_control)
 
-        self.fkControls = [ctl[-1] for ctl in self.fk_control_obj_list]
-        self.ikControls = [ctl[-1] for ctl in self.ik_control_obj_list]
+        self.fkControls = [ctl.name for ctl in self.fk_control_obj_list]
+        self.ikControls = [ctl.name for ctl in self.ik_control_obj_list]
 
     def rigSetup(self):
         self.ikspline = spline.SplineBase(self.inputList, name=self.name)
@@ -118,18 +118,18 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
             cmds.delete(const)
 
             # setup the rig connections
-            rig_transform.matchTransform(tmp_obj, self.fk_control_obj_list[i][0])
-            cmds.parent(self.ikspline.getClusters()[i], self.ik_control_obj_list[i][-1])
+            rig_transform.matchTransform(tmp_obj, self.fk_control_obj_list[i].orig)
+            cmds.parent(self.ikspline.getClusters()[i], self.ik_control_obj_list[i].name)
 
             # delete temp objects
             cmds.delete(tmp_obj)
 
         # connect the orientation of the controls to the rig
-        cmds.orientConstraint(self.fk_control_obj_list[0][-1], self.ikspline._startTwist, mo=True)
-        cmds.orientConstraint(self.fk_control_obj_list[-1][-1], self.ikspline._endTwist, mo=True)
+        cmds.orientConstraint(self.fk_control_obj_list[0].name, self.ikspline._startTwist, mo=True)
+        cmds.orientConstraint(self.fk_control_obj_list[-1].name, self.ikspline._endTwist, mo=True)
 
         # setup the ik visablity attribute
-        rig_attr.createAttr(self.fk_control_obj_list[0][-1], "ikVis", "bool", value=0, keyable=False, channelBox=True)
+        rig_attr.createAttr(self.fk_control_obj_list[0].name, "ikVis", "bool", value=0, keyable=False, channelBox=True)
 
         for control in self.ikControls:
             rig_control.connectControlVisiblity(self.fkControls[0], "ikVis", control)
@@ -141,14 +141,14 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.fk_control_obj_list[0][0], s=False, sh=False, mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.fk_control_obj_list[0].orig, s=False, sh=False, mo=True)
 
         if self.addFKSpace:
-            spaces.create(self.fk_control_obj_list[0][1], self.fk_control_obj_list[0][-1], parent=self.spaces_hrc)
+            spaces.create(self.fk_control_obj_list[0].spaces, self.fk_control_obj_list[0].name, parent=self.spaces_hrc)
 
             # if the main control exists connect the world space
             if cmds.objExists('trs_motion'):
-                spaces.addSpace(self.fk_control_obj_list[0][1], ['trs_motion'], nameList=['world'], constraintType='orient')
+                spaces.addSpace(self.fk_control_obj_list[0].spaces, ['trs_motion'], nameList=['world'], constraintType='orient')
 
     @staticmethod
     def createInputJoints(name=None, side=None, numJoints=4):
@@ -172,4 +172,4 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
 
         joint .orientJoints(joints, aimAxis='x', upAxis='y')
         cmds.setAttr("{}.jox".format(joints[0]), -90)
-        return joints
+        return [joints[0], joints[-1]]

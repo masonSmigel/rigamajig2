@@ -12,7 +12,6 @@ import rigamajig2.maya.joint
 
 import logging
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -75,35 +74,36 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
 
         for i in range(len(self.inputList)):
             parent = self.control_hrc
-            heirarchy = ['trsBuffer', 'spaces_trs']
+            addSpaces = True
             if i > 0:
-                parent = self.fk_control_obj_list[i - 1][-1]
-                heirarchy = ['trsBuffer']
+                parent = self.fk_control_obj_list[i - 1].name
+                addSpaces = False
             control = rig_control.createAtObject(getattr(self, self.controlNameList[i]), self.side,
-                                                 hierarchy=heirarchy, hideAttrs=hideAttrs,
+                                                 spaces=addSpaces, hideAttrs=hideAttrs,
                                                  size=self.size, color='blue', parent=parent, shapeAim='x',
                                                  shape='square', xformObj=self.inputList[i])
 
             self.fk_control_obj_list.append(control)
 
-        self.fkControls = [ctl[-1] for ctl in self.fk_control_obj_list]
+        self.controlers = [ctl.name for ctl in self.fk_control_obj_list]
 
     def rigSetup(self):
         """Add the rig setup"""
-        rigamajig2.maya.joint.connectChains(self.fkControls, self.inputList)
+        rigamajig2.maya.joint.connectChains(self.controlers, self.inputList)
 
     def connect(self):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.fk_control_obj_list[0][0], mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.fk_control_obj_list[0].orig, mo=True)
 
         if self.addFKSpace:
-            spaces.create(self.fk_control_obj_list[0][1], self.fk_control_obj_list[0][-1], parent=self.spaces_hrc)
+            spaces.create(self.fk_control_obj_list[0][1], self.fk_control_obj_list[0].name, parent=self.spaces_hrc)
 
             # if the main control exists connect the world space
             if cmds.objExists('trs_motion'):
-                spaces.addSpace(self.fk_control_obj_list[0][1], ['trs_motion'], nameList=['world'], constraintType='orient')
+                spaces.addSpace(self.fk_control_obj_list[0].spaces, ['trs_motion'], nameList=['world'],
+                                constraintType='orient')
 
     @staticmethod
     def createInputJoints(name=None, side=None, numJoints=4):
@@ -114,7 +114,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         parent = None
         for i in range(numJoints):
             name = name or 'chain'
-            jointName  = naming.getUniqueName("{}_0".format(name))
+            jointName = naming.getUniqueName("{}_0".format(name))
             jnt = cmds.createNode("joint", name=jointName)
 
             if parent:
@@ -125,6 +125,6 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
             joints.append(jnt)
             parent = jnt
 
-        joint .orientJoints(joints, aimAxis='x', upAxis='y')
+        joint.orientJoints(joints, aimAxis='x', upAxis='y')
         cmds.setAttr("{}.jox".format(joints[0]), -90)
-        return joints
+        return [joints[0], joints[-1]]

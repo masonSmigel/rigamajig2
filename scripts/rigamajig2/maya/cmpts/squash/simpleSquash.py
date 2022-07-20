@@ -62,17 +62,15 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         super(SimpleSquash, self).initalHierachy()
 
         self.squash_start = rig_control.createAtObject(self.startControlName, self.side,
-                                                       hierarchy=['trsBuffer'],
                                                        hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
                                                        parent=self.control_hrc, shape='pyramid', shapeAim='x',
                                                        xformObj=self.start_guide)
         self.squash_end = rig_control.createAtObject(self.endControlName, self.side,
-                                                     hierarchy=['trsBuffer'],
                                                      hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
                                                      parent=self.control_hrc, shape='pyramid', shapeAim='x',
                                                      xformObj=self.end_guide)
 
-        self.controlers = [self.squash_start[-1], self.squash_end[-1]]
+        self.controlers = [self.squash_start.name, self.squash_end.name]
 
     def rigSetup(self):
         """Add the rig setup"""
@@ -99,13 +97,13 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         cmds.parent(self.ikHandle, self.ik_hrc)
 
         # connect the ik handle
-        rig_transform.connectOffsetParentMatrix(self.squash_end[-1], self.ikHandle)
-        rig_transform.connectOffsetParentMatrix(self.squash_start[-1], start_jnt)
+        rig_transform.connectOffsetParentMatrix(self.squash_end.name, self.ikHandle)
+        rig_transform.connectOffsetParentMatrix(self.squash_start.name, start_jnt)
 
         # get the distance
         dcmp = node.decomposeMatrix("{}.worldMatrix".format(self.root_hrc), name='{}_scale'.format(self.name))
-        distance = node.distance(self.squash_start[-1], self.squash_end[-1], name='{}_stretch'.format(self.name))
-        dist_float = mathUtils.distanceNodes(self.squash_start[-1], self.squash_end[-1])
+        distance = node.distance(self.squash_start.name, self.squash_end.name, name='{}_stretch'.format(self.name))
+        dist_float = mathUtils.distanceNodes(self.squash_start.name, self.squash_end.name)
 
         normalized_distance = node.multiplyDivide("{}.distance".format(distance), "{}.outputScale".format(dcmp),
                                                   operation='div', name="{}_normScale".format(self.name))
@@ -144,8 +142,8 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.squash_start[0], mo=True)
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.squash_end[0], mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.squash_start.orig, mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.squash_end.orig, mo=True)
 
     def setupAnimAttrs(self):
         if self.useProxyAttrs:
@@ -153,8 +151,8 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
                 rig_attr.addSeparator(control, '----')
             rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'volumeFactor'), self.controlers)
         else:
-            rig_attr.addSeparator(self.squash_end[-1], '----')
-            rig_attr.driveAttribute('volumeFactor', self.params_hrc, self.squash_end[-1])
+            rig_attr.addSeparator(self.squash_end.name, '----')
+            rig_attr.driveAttribute('volumeFactor', self.params_hrc, self.squash_end.name)
 
     @staticmethod
     def createInputJoints(name=None, side=None, numJoints=4):

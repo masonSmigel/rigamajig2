@@ -31,30 +31,30 @@ class Main(rigamajig2.maya.cmpts.base.Base):
 
         # Build our controls
         self.trs_global = rig_control.create('trs_global',
-                                             hierarchy=[],
+                                             orig=False,
                                              size=self.size * 1.2,
                                              color='yellow',
-                                             parent=self.root_hrc)[0]
-        self.trs_shot = rig_control.create('trs_shot', hierarchy=[],
+                                             parent=self.root_hrc)
+        self.trs_shot = rig_control.create('trs_shot', orig=False,
                                            size=self.size * 1.1,
                                            color='lightgreenyellow',
-                                           parent=self.trs_global)[0]
-        self.trs_motion = rig_control.create('trs_motion', hierarchy=[],
+                                           parent=self.trs_global.name)
+        self.trs_motion = rig_control.create('trs_motion', orig=False,
                                              size=self.size,
                                              color='yellowgreen',
-                                             parent=self.trs_shot)[0]
+                                             parent=self.trs_shot.name)
         # add the trs to the top of our outliner
-        cmds.reorder(self.trs_global, f=True)
+        cmds.reorder(self.trs_global.name, f=True)
 
         # add nodes to the container
-        self.controlers += [self.trs_global, self.trs_shot, self.trs_motion]
+        self.controlers += [self.trs_global.name, self.trs_shot.name, self.trs_motion.name]
 
     def rigSetup(self):
         """Add the self.rig setup"""
         # Setup the main scaling
-        rigamajig2.maya.node.multMatrix([self.trs_motion + '.matrix',
-                                        self.trs_shot + '.matrix',
-                                        self.trs_global + '.matrix'],
+        rigamajig2.maya.node.multMatrix([self.trs_motion.name + '.matrix',
+                                        self.trs_shot.name + '.matrix',
+                                        self.trs_global.name + '.matrix'],
                                         outputs=[self.rig_hrc, self.bind_hrc],
                                         t=True, r=True, s=True,
                                         name='main')
@@ -63,7 +63,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         cmds.setAttr("{}.{}".format(self.model_hrc, 'inheritsTransform'), 0)
 
         # Add the attribute for model override.
-        ovrmod = rigamajig2.maya.attr.createEnum(self.trs_shot,
+        ovrmod = rigamajig2.maya.attr.createEnum(self.trs_shot.name,
                                                  longName='modDisplay',
                                                  enum=['normal', 'template', 'reference'],
                                                  value=2,

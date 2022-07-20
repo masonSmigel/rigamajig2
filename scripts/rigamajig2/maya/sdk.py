@@ -103,6 +103,8 @@ def createSdk(driver, driven, values, preInfinity=False, postInfinity=False, tan
     cmds.setAttr("{}.preInfinity".format(sdkNode), preInfinity)
     cmds.setAttr("{}.postInfinity".format(sdkNode), postInfinity)
 
+    cmds.setInfinity(driven, preInfinite='cycleRelative', postInfinite='cycleRelative')
+
     # cut the key to save a bit of memory
     cmds.cutKey(sdkNode, f=(1000001, 1000001), clear=True)
 

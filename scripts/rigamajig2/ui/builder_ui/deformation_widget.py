@@ -42,11 +42,19 @@ class DeformationWidget(QtWidgets.QWidget):
         self.load_all_skin_btn = QtWidgets.QPushButton("Load All Skins")
         self.load_single_skin_btn = QtWidgets.QPushButton("Load Skin")
         self.save_skin_btn = QtWidgets.QPushButton("Save Skin")
+
+        self.skinEdit_wgt = collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
+        self.skinEdit_wgt.set_header_background_color(constants.EDIT_BG_HEADER_COLOR)
+        self.skinEdit_wgt.set_widget_background_color(constants.EDIT_BG_WIDGET_COLOR)
+
+        self.copySkinWeights_btn = QtWidgets.QPushButton("Copy Skin Weights and Influences")
+        self.copySkinWeights_btn.setIcon(QtGui.QIcon(":copySkinWeight"))
+
         self.psd_path_selector = pathSelector.PathSelector(
             "psd:",
-           cap="Select a Pose Reader File",
-           ff=constants.JSON_FILTER,
-           fm=1)
+            cap="Select a Pose Reader File",
+            ff=constants.JSON_FILTER,
+            fm=1)
         self.load_psd_btn = QtWidgets.QPushButton("Load Pose Readers")
         self.save_psd_btn = QtWidgets.QPushButton("Save Pose Readers")
 
@@ -71,6 +79,10 @@ class DeformationWidget(QtWidgets.QWidget):
         self.main_collapseable_widget.addWidget(self.skin_path_selector)
         self.main_collapseable_widget.addLayout(skin_btn_layout)
 
+        self.main_collapseable_widget.addWidget(self.skinEdit_wgt)
+        self.skinEdit_wgt.addWidget(self.copySkinWeights_btn)
+        self.skinEdit_wgt.addSpacing(4)
+
         psd_btn_layout = QtWidgets.QHBoxLayout()
         psd_btn_layout.setContentsMargins(0, 0, 0, 0)
         psd_btn_layout.setSpacing(4)
@@ -89,6 +101,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.load_all_skin_btn.clicked.connect(self.load_all_skins)
         self.load_single_skin_btn.clicked.connect(self.load_single_skin)
         self.save_skin_btn.clicked.connect(self.save_skin)
+        self.copySkinWeights_btn.clicked.connect(self.copySkinWeights)
         self.load_psd_btn.clicked.connect(self.load_posereaders)
         self.save_psd_btn.clicked.connect(self.save_posereaders)
 
@@ -130,7 +143,13 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def load_posereaders(self):
         self.builder.load_poseReaders(self.psd_path_selector.get_abs_path(),
-                                          replace=self.load_psd_mode_cbox.currentIndex())
+                                      replace=self.load_psd_mode_cbox.currentIndex())
 
     def save_posereaders(self):
         self.builder.save_poseReaders(self.psd_path_selector.get_abs_path())
+
+    def copySkinWeights(self):
+        import rigamajig2.maya.skinCluster as rig_skinCluster
+        src = cmds.ls(sl=True)[0]
+        dst = cmds.ls(sl=True)[1:]
+        rig_skinCluster.copySkinClusterAndInfluences(src, dst)

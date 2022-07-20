@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 class Chain(rigamajig2.maya.cmpts.base.Base):
 
-    def __init__(self, name, input=[], size=1, useScale=False, addFKSpace=False,
+    def __init__(self, name, input=[], size=1, useScale=False, addFKSpace=False, addSdk=True,
                  useProxyAttrs=True, rigParent=str()):
         """
         Fk chain component.
@@ -41,6 +41,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         # initalize cmpt settings.
         self.cmptSettings['useProxyAttrs'] = useProxyAttrs
         self.cmptSettings['useScale'] = useScale
+        self.cmptSettings['addSdk'] = addSdk
         self.cmptSettings['addFKSpace'] = addFKSpace
 
         # noinspection PyTypeChecker
@@ -79,7 +80,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
                 parent = self.fk_control_obj_list[i - 1].name
                 addSpaces = False
             control = rig_control.createAtObject(getattr(self, self.controlNameList[i]), self.side,
-                                                 spaces=addSpaces, hideAttrs=hideAttrs,
+                                                 spaces=addSpaces, sdk=self.addSdk, hideAttrs=hideAttrs,
                                                  size=self.size, color='blue', parent=parent, shapeAim='x',
                                                  shape='square', xformObj=self.inputList[i])
 

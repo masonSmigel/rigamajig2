@@ -6,7 +6,6 @@ import maya.api.OpenMaya as om2
 
 import rigamajig2.shared.common as common
 import rigamajig2.maya.shape as shape
-import rigamajig2.maya.utils as utils
 
 
 def isMesh(node):

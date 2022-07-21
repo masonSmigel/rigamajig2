@@ -16,7 +16,6 @@ import rigamajig2.maya.transform
 import rigamajig2.maya.meta as meta
 import rigamajig2.maya.shape
 import rigamajig2.maya.attr
-import rigamajig2.maya.utils
 import rigamajig2.maya.joint
 
 CONTROLSHAPES = os.path.join(os.path.dirname(__file__), "controlShapes.data").replace("\\", "/")

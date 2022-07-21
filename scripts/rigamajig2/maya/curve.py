@@ -7,7 +7,6 @@ import rigamajig2.maya.decorators
 import rigamajig2.shared.common as common
 import rigamajig2.maya.shape as shape
 import rigamajig2.maya.mathUtils as mathUtils
-import rigamajig2.maya.utils as utils
 
 
 def createCurve(points, degree=3, name='curve', transformType="transform", form="Open"):

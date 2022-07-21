@@ -15,7 +15,7 @@ import maya.api.OpenMayaAnim as oma2
 
 import rigamajig2.shared.common
 import rigamajig2.maya.deformer
-import rigamajig2.maya.utils
+import rigamajig2.maya.openMayaUtils
 import rigamajig2.maya.shape
 
 logger = logging.getLogger(__name__)
@@ -61,7 +61,7 @@ def getMfnSkin(skinCluster):
     if not isSkinCluster(skinCluster):
         raise Exception("{} is not a skinCluster".format(skinCluster))
 
-    skinClusterObj = rigamajig2.maya.utils.getMObject(skinCluster)
+    skinClusterObj = rigamajig2.maya.openMayaUtils.getMObject(skinCluster)
     return oma2.MFnSkinCluster(skinClusterObj)
 
 
@@ -70,7 +70,7 @@ def getMfnMesh(mesh):
     :param mesh: name of the mesh to get the Mfn mesh object from
     :return:
     """
-    mesh = rigamajig2.maya.utils.getMObject(mesh)
+    mesh = rigamajig2.maya.openMayaUtils.getMObject(mesh)
     return om2.MFnMesh(mesh)
 
 
@@ -111,7 +111,7 @@ def getWeights(mesh):
     mesh_skin = getSkinCluster(mesh)
     assert mesh_skin, "No Skin for mesh {} -- cannot save".format(mesh)
 
-    meshDag = rigamajig2.maya.utils.getDagPath(mesh)
+    meshDag = rigamajig2.maya.openMayaUtils.getDagPath(mesh)
     skinMfn = getMfnSkin(mesh_skin)
     meshMfn = getMfnMesh(meshShape)
     components = getCompleteComponents(meshMfn)
@@ -153,7 +153,7 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
 
     skinMfn = getMfnSkin(skincluster)
     meshMfn = getMfnMesh(meshShape)
-    meshDag = rigamajig2.maya.utils.getDagPath(meshShape)
+    meshDag = rigamajig2.maya.openMayaUtils.getDagPath(meshShape)
     components = getCompleteComponents(meshMfn)
 
     weights, influenceCount = skinMfn.getWeights(meshDag, components)
@@ -196,7 +196,7 @@ def getBlendWeights(mesh):
     mesh_skin = getSkinCluster(mesh)
     assert mesh_skin, "No Skin for mesh {} -- cannot save".format(mesh)
 
-    meshDag = rigamajig2.maya.utils.getDagPath(mesh)
+    meshDag = rigamajig2.maya.openMayaUtils.getDagPath(mesh)
     skinMfn = getMfnSkin(mesh_skin)
     meshMfn = getMfnMesh(meshShape)
     components = getCompleteComponents(meshMfn)
@@ -226,7 +226,7 @@ def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
 
     skinMfn = getMfnSkin(skincluster)
     meshMfn = getMfnMesh(meshShape)
-    meshDag = rigamajig2.maya.utils.getDagPath(meshShape)
+    meshDag = rigamajig2.maya.openMayaUtils.getDagPath(meshShape)
     components = getCompleteComponents(meshMfn)
 
     numVerts = skinMfn.getBlendWeights(meshDag, components)
@@ -270,7 +270,7 @@ def getInfluenceIndex(skinCluster, influence):
     if not cmds.objExists(influence):
         raise Exception("Influcence Object {} does not exist".format(influence))
     skinClusterFn = getMfnSkin(skinCluster)
-    influencePath = rigamajig2.maya.utils.getDagPath(influence)
+    influencePath = rigamajig2.maya.openMayaUtils.getDagPath(influence)
 
     return skinClusterFn.indexForInfluenceObject(influencePath)
 

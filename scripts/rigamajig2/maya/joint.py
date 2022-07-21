@@ -5,7 +5,7 @@ import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 
 import rigamajig2.shared.common as common
-import rigamajig2.maya.utils as utils
+import rigamajig2.maya.openMayaUtils as utils
 import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.naming as naming
 import rigamajig2.maya.attr as attr

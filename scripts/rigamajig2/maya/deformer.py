@@ -6,7 +6,7 @@ import maya.api.OpenMaya as om2
 import maya.OpenMayaAnim as oma
 import maya.OpenMaya as om
 import rigamajig2.shared.common as common
-import rigamajig2.maya.utils as utils
+import rigamajig2.maya.openMayaUtils as omu
 import rigamajig2.maya.shape
 
 
@@ -212,7 +212,7 @@ def getAffectedGeo(deformer):
 
     affectedObjects = list()
 
-    deformerObj = utils.getMObject(deformer)
+    deformerObj = omu.getMObject(deformer)
     deformFn = oma.MFnGeometryFilter(deformerObj)
 
     outputObjs = om.MObjectArray()

@@ -12,7 +12,6 @@ from shiboken2 import wrapInstance
 import rigamajig2.maya.decorators
 import rigamajig2.maya.transform
 import rigamajig2.maya.data.abstract_data as abstract_data
-import rigamajig2.maya.utils as utils
 from rigamajig2.ui.widgets import pathSelector
 
 

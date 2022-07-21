@@ -704,7 +704,7 @@ def getNextAvailableElement(plug):
     if not plug:
         raise RuntimeError('Plug not found')
 
-    return plug.elementByLogicalIndex(plug.numElements())
+    return plug.elementByLogicalIndex(plug.evaluateNumElements())
 
 
 def isCompound(plug):

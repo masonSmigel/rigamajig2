@@ -2,10 +2,21 @@
 Functions for working with SDKs
 """
 import maya.cmds as cmds
+import maya.api.OpenMayaAnim as oma
+
 import rigamajig2.shared.common as common
 import rigamajig2.maya.attr as attr
+import rigamajig2.maya.openMayaUtils as omu
 
 SDKNODETYPES = ['animCurveUU', 'animCurveUA', 'animCurveUL', 'animCurveUT']
+DEFAULT_SDK_TYPE = 'animCurveUU'
+
+TANGENT_TYPE_DICT = {"linear": oma.MFnAnimCurve.kTangentLinear,
+                     "auto": oma.MFnAnimCurve.kTangentAuto,
+                     "fast": oma.MFnAnimCurve.kTangentFast,
+                     "slow": oma.MFnAnimCurve.kTangentSlow,
+                     "step": oma.MFnAnimCurve.kTangentStep,
+                     "clamp": oma.MFnAnimCurve.kTangentClamped}
 
 
 def getSdkNode(driver, driven, type=None):
@@ -66,54 +77,107 @@ def getSdkDriven(sdk):
 
 
 # TODO:
-def createSdk(driver, driven, values, preInfinity=False, postInfinity=False, tangent='linear'):
+def createSdk(driverPlug, drivenPlug, values, preInfinity=False, postInfinity=False, tangent='linear'):
     """
     Create an SDK connection
-    :param driver: driver plug
-    :type driver: str
-    :param driven: driven plug
-    :type driven: str
-    :param values: list of values as tuples. in the format of: (driver, driven)
-    :type values: list | tuple
-    :param preInfinity: If true set the tanget to PreInfitity to linear
-    :type preInfinity: bool
-    :param postInfinity:If true set the tanget to postInfinity to linear
-    :type postInfinity: bool
-    :param tangent: type of tangent for the curve. Valid values are: "spline", "linear" "fast", "slow", "flat", "step", "clamped". Default is "linear"
-    :type tangent: str
+    :param str driverPlug: driver plug
+    :param str drivenPlug: driven plug
+    :param list tupple values: list of values as tuples. in the format of: [(driver, driven), ...]
+    :param bool preInfinity: If true set the tanget to PreInfitity to linear
+    :param bool postInfinity:If true set the tanget to postInfinity to linear
+    :param str tangent: type of tangent for the curve.
+                        Valid values are: "spline", "linear" "fast", "slow", "flat", "step", "clamped".
     :return: the name of the SDK node created
     :rtype: str
     """
+    driverNode, driverAttr = driverPlug.split(".")
+    drivenNode, drivenAttr = drivenPlug.split(".")
 
-    preTanget = 'spline' if preInfinity else tangent
-    postTanget = 'spline' if postInfinity else tangent
+    animCurveName = '{}_{}_{}_{}_animCurve'.format(driverNode, driverAttr, drivenNode, drivenAttr)
+    animCurveNode = cmds.createNode(DEFAULT_SDK_TYPE, n=animCurveName)
+
+    mObject = omu.getMObject(animCurveNode)
+    mfnAnimCurve = oma.MFnAnimCurve(mObject)
+
+    # connect the driver into the animCurveNode
+    cmds.connectAttr(driverPlug, "{}.input".format(animCurveNode))
+
+    # set the pre infinity behavior
+    if preInfinity:
+        mfnAnimCurve.setPreInfinityType(oma.MFnAnimCurve.kCycleRelative)
+    else:
+        mfnAnimCurve.setPreInfinityType(TANGENT_TYPE_DICT[tangent])
+
+    # set the post infitiy behavior
+    if postInfinity:
+        mfnAnimCurve.setPostInfinityType(oma.MFnAnimCurve.kCycleRelative)
+    else:
+        mfnAnimCurve.setPostInfinityType(TANGENT_TYPE_DICT[tangent])
 
     for i, point in enumerate(values):
-        itt = preTanget if i == 0 else tangent
-        ott = postTanget if i == (len(values) - 1) else tangent
-        cmds.setDrivenKeyframe(driven, cd=driver, dv=float(point[0]), v=float(point[1]), itt=itt, ott=ott, ib=True)
+        inn = point[0]
+        out = point[-1]
+        mfnAnimCurve.addKey(inn, out)
+        # set the in and out tangets based on the input
+        mfnAnimCurve.setInTangentType(i, TANGENT_TYPE_DICT[tangent])
+        mfnAnimCurve.setOutTangentType(i, TANGENT_TYPE_DICT[tangent])
 
-    # Get the sdk node
-    sdkNode = common.getFirstIndex(getSdkNode(driver, driven))
-    predictedName = "{}_{}_sdk".format(driver.replace('.', '_'), driven.replace('.', '_'))
-    if not cmds.objExists(predictedName):
-        sdkNode = cmds.rename(sdkNode, predictedName)
+    connected = cmds.listConnections(drivenPlug, source=True, destination=False, skipConversionNodes=True)
+    if connected:
+        nodeType = cmds.nodeType(connected[0])
 
-    # set the pre and post infinity nodes
-    cmds.setAttr("{}.preInfinity".format(sdkNode), preInfinity)
-    cmds.setAttr("{}.postInfinity".format(sdkNode), postInfinity)
+        # if the input is a set driven key then created a blendweighted node to add the values together
+        if nodeType in SDKNODETYPES:
+            blendWeightedNode = createBlendWeightedNode(drivenPlug)
+            nextInput = attr.getNextAvailableElement("{}.input".format(blendWeightedNode))
+            print nextInput
+            cmds.connectAttr("{}.output".format(animCurveNode), nextInput)
 
-    cmds.setInfinity(driven, preInfinite='cycleRelative', postInfinite='cycleRelative')
+        # if a blend weighted node is connected then connect the animCurve into the next available input
+        elif nodeType == 'blendWeighted':
+            blendWeightedNode = connected[0]
+            nextInput = attr.getNextAvailableElement("{}.input".format(blendWeightedNode))
+            cmds.connectAttr("{}.output".format(animCurveNode), nextInput)
 
-    # cut the key to save a bit of memory
-    cmds.cutKey(sdkNode, f=(1000001, 1000001), clear=True)
+        # if the connected plug is not a animCurve or a blendWeighted node then throw an error.
+        else:
+            raise Exception("{} is already connected to {}".format(drivenPlug, connected[0]))
 
-    # look for a blendWeighted, and try to rename it
-    for node in cmds.listConnections(sdkNode, d=True, scn=True):
-        if cmds.nodeType(node) == 'blendWeighted':
-            cmds.rename(node, "{}_{}_blendweighted".format(driver.split('.')[0], driven.replace('.', '_')))
+    # if nothing is connected we can connect directly to the driver plug
+    else:
+        cmds.connectAttr("{}.output".format(animCurveNode), drivenPlug, f=True)
 
-    return sdkNode
+    # return the anim curve created
+    return animCurveNode
+
+
+def createBlendWeightedNode(drivenPlug):
+    """
+    create a blend weighted node on the driven plug
+    :param drivenPlug: plug to add the blend weighted node to
+    :return: blend weighted node created
+    """
+    drivenNode, drivenAttr = drivenPlug.split(".")
+    # get the connected node. dont skip the conversion nodes in the case of connection to a rotation.
+    # also get a unit conversion node. later we will check if the first node is a unit conversion and if it is delete it.
+    connected = cmds.listConnections(drivenPlug, source=True, destination=False, plugs=True, skipConversionNodes=True)
+    uc = cmds.listConnections(drivenPlug, source=True, destination=False, plugs=True, skipConversionNodes=False)
+
+    blendWeightedNode = cmds.createNode("blendWeighted", n="{}_{}_blendWeighted".format(drivenNode, drivenAttr))
+
+    # if the drivenPlug has an incoming connection connect it to the blendWeightedNode
+    if connected:
+        nextPlug = attr.getNextAvailableElement("{}.input".format(blendWeightedNode))
+        # a node can only have one given input so we can get the first index of the connected list
+        cmds.connectAttr(connected[0], nextPlug, f=True)
+
+    if cmds.nodeType(uc[0]) == 'unitConversion':
+        cmds.delete(uc)
+
+    # connect the blendWeighted to the drivenPlug
+    cmds.connectAttr("{}.output".format(blendWeightedNode), drivenPlug, f=True)
+
+    return blendWeightedNode
 
 
 # TODO:

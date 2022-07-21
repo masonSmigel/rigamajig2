@@ -43,17 +43,3 @@ def getDagPath(name):
     """
     sel = om2.MGlobal.getSelectionListByName(name)
     return sel.getDagPath(0)
-
-
-class Timer(object):
-    startTime = 0
-    runTime = 0
-
-    @classmethod
-    def start(cls):
-        cls.startTime = time.time()
-
-    @classmethod
-    def stop(cls):
-        cls.runTime = time.time() - cls.startTime
-        print("Time Elapsed: {}".format(str(cls.runTime)))

@@ -11,7 +11,6 @@ import rigamajig2.maya.node as node
 import rigamajig2.maya.transform as transform
 import rigamajig2.maya.attr as rig_attr
 import rigamajig2.maya.meta as meta
-import rigamajig2.maya.utils as utils
 
 MIRROR_GRP_NAME = 'liveMirror_hrc'
 PIN_HRC_NAME = 'rigamajig_pin_hrc'

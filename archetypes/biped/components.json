@@ -1,30 +1,30 @@
 {
     "type": "AbstractData", 
     "user": "masonsmigel", 
-    "time": "2022-02-06 17:54:20", 
+    "time": "2022-07-21 22:26:04", 
     "data": {
         "main": {
-            "name": "main", 
-            "type": "main.Main", 
             "input": [], 
             "rigParent": "", 
+            "type": "main.main", 
+            "name": "main", 
             "size": 15
         }, 
-        "cog" : {
-            "name": "cog", 
-            "type": "cog.Cog", 
+        "cog": {
             "input": [
-                    "hips_bind"
+                "hips_bind"
             ], 
             "rigParent": "", 
+            "type": "cog.cog", 
+            "name": "cog", 
             "size": 4, 
+            "bind_to_input": false, 
+            "cog_control_shape": "cube", 
             "cog_name": "hips", 
             "cogGimble_name": "hipsGimble", 
             "cogPivot_name": "hips_pivot"
-        },
+        }, 
         "spine": {
-            "name": "spine", 
-            "type": "spine.Spine", 
             "input": [
                 "hips_bind", 
                 "spine_0_bind", 
@@ -36,19 +36,17 @@
                 "chest_bind"
             ], 
             "rigParent": "hipsGimble", 
+            "type": "spine.spine", 
+            "name": "spine", 
             "size": 4, 
             "hipsSwing_name": "hip_swing", 
             "torso_name": "torso", 
             "chest_name": "chest", 
             "chestTop_name": "chestTop", 
             "hipTanget_name": "hipTan", 
-            "chestTanget_name": "chestTan", 
-            "hipSwivel_percent": 0.333, 
-            "torso_percent": 0.15
+            "chestTanget_name": "chestTan"
         }, 
         "neck": {
-            "name": "neck", 
-            "type": "neck.Neck", 
             "input": [
                 "neck_0_bind", 
                 "neck_1_bind", 
@@ -57,6 +55,8 @@
                 "head_bind"
             ], 
             "rigParent": "chestTop", 
+            "type": "neck.neck", 
+            "name": "neck", 
             "size": 4, 
             "neck_name": "neck", 
             "head_name": "head", 
@@ -68,8 +68,6 @@
             "headSpaces": {}
         }, 
         "arm_l": {
-            "name": "arm_l", 
-            "type": "arm.Arm", 
             "input": [
                 "clavical_l_bind", 
                 "shoulder_l_bind", 
@@ -77,7 +75,10 @@
                 "wrist_l_bind"
             ], 
             "rigParent": "chestTop", 
+            "type": "arm.arm", 
+            "name": "arm_l", 
             "size": 4, 
+            "component_side": "l", 
             "useProxyAttrs": false, 
             "useScale": true, 
             "addTwistJoints": true, 
@@ -104,8 +105,6 @@
             }
         }, 
         "arm_r": {
-            "name": "arm_r", 
-            "type": "arm.Arm", 
             "input": [
                 "clavical_r_bind", 
                 "shoulder_r_bind", 
@@ -113,7 +112,10 @@
                 "wrist_r_bind"
             ], 
             "rigParent": "chestTop", 
+            "type": "arm.arm", 
+            "name": "arm_r", 
             "size": 4, 
+            "component_side": "r", 
             "useProxyAttrs": false, 
             "useScale": true, 
             "addTwistJoints": true, 
@@ -140,8 +142,6 @@
             }
         }, 
         "leg_l": {
-            "name": "leg_l", 
-            "type": "leg.Leg", 
             "input": [
                 "pelivs_l_bind", 
                 "thigh_l_bind", 
@@ -151,7 +151,10 @@
                 "toes_l_bind"
             ], 
             "rigParent": "hip_swing", 
+            "type": "leg.leg", 
+            "name": "leg_l", 
             "size": 4, 
+            "component_side": "l", 
             "useProxyAttrs": false, 
             "useScale": true, 
             "addTwistJoints": true, 
@@ -182,8 +185,6 @@
             "heel_ikName": "heel_ik"
         }, 
         "leg_r": {
-            "name": "leg_r", 
-            "type": "leg.Leg", 
             "input": [
                 "pelivs_r_bind", 
                 "thigh_r_bind", 
@@ -193,7 +194,10 @@
                 "toes_r_bind"
             ], 
             "rigParent": "hip_swing", 
+            "type": "leg.leg", 
+            "name": "leg_r", 
             "size": 4, 
+            "component_side": "r", 
             "useProxyAttrs": false, 
             "useScale": true, 
             "addTwistJoints": true, 
@@ -224,45 +228,47 @@
             "heel_ikName": "heel_ik"
         }, 
         "hand_l": {
-            "name": "hand_l", 
-            "type": "hand.Hand", 
             "input": [
-                "pinky_0_l_bind", 
-                "ring_0_l_bind", 
-                "middle_0_l_bind", 
+                "thumb_0_l_bind", 
                 "index_0_l_bind", 
-                "thumb_0_l_bind"
+                "middle_0_l_bind", 
+                "ring_0_l_bind", 
+                "pinky_0_l_bind"
             ], 
             "rigParent": "wrist_l_bind", 
+            "type": "hand.hand", 
+            "name": "hand_l", 
             "size": 1, 
             "useProxyAttrs": true, 
             "useScale": true, 
-            "addFKSpace": false
+            "addFKSpace": false, 
+            "useSubMeta": true
         }, 
         "hand_r": {
-            "name": "hand_r", 
-            "type": "hand.Hand", 
             "input": [
-                "pinky_0_r_bind", 
-                "ring_0_r_bind", 
-                "middle_0_r_bind", 
+                "thumb_0_r_bind", 
                 "index_0_r_bind", 
-                "thumb_0_r_bind"
+                "middle_0_r_bind", 
+                "ring_0_r_bind", 
+                "pinky_0_r_bind"
             ], 
             "rigParent": "wrist_r_bind", 
+            "type": "hand.hand", 
+            "name": "hand_r", 
             "size": 1, 
             "useProxyAttrs": true, 
             "useScale": true, 
-            "addFKSpace": false
+            "addFKSpace": false, 
+            "useSubMeta": true
         }, 
         "eyes": {
-            "name": "eyes", 
-            "type": "lookAt.LookAt", 
             "input": [
                 "eye_l_bind", 
                 "eye_r_bind"
             ], 
             "rigParent": "head_bind", 
+            "type": "lookAt.lookAt", 
+            "name": "eyes", 
             "size": 1, 
             "aimTargetName": "eyes_aim", 
             "lookAtSpaces": {

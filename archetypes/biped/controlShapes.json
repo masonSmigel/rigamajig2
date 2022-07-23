@@ -1,10 +1,10 @@
 {
     "type": "CurveData", 
     "user": "masonsmigel", 
-    "time": "2022-07-16 19:45:15", 
+    "time": "2022-07-23 11:50:47", 
     "data": {
         "wrist_fk_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|shoulder_fk_r_trsBuffer|shoulder_fk_r_spaces_trs|shoulder_fk_r|elbow_fk_r_trsBuffer|elbow_fk_r|wrist_fk_r_trsBuffer|wrist_fk_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|shoulder_fk_r_orig|shoulder_fk_r_spaces|shoulder_fk_r|elbow_fk_r_orig|elbow_fk_r|wrist_fk_r_orig|wrist_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -39,9 +39,9 @@
                 1.0
             ], 
             "world_translate": [
-                -61.10605846498136, 
-                124.01819999999998, 
-                -2.0560764169418295
+                -61.10605846498133, 
+                124.0182, 
+                -2.0560764169418007
             ], 
             "world_rotate": [
                 -89.99999999999996, 
@@ -102,7 +102,7 @@
             }
         }, 
         "wrist_fk_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|shoulder_fk_l_trsBuffer|shoulder_fk_l_spaces_trs|shoulder_fk_l|elbow_fk_l_trsBuffer|elbow_fk_l|wrist_fk_l_trsBuffer|wrist_fk_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|shoulder_fk_l_orig|shoulder_fk_l_spaces|shoulder_fk_l|elbow_fk_l_orig|elbow_fk_l|wrist_fk_l_orig|wrist_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -200,7 +200,7 @@
             }
         }, 
         "wristGimble_fk_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|shoulder_fk_r_trsBuffer|shoulder_fk_r_spaces_trs|shoulder_fk_r|elbow_fk_r_trsBuffer|elbow_fk_r|wrist_fk_r_trsBuffer|wrist_fk_r|wristGimble_fk_r_trsBuffer|wristGimble_fk_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|shoulder_fk_r_orig|shoulder_fk_r_spaces|shoulder_fk_r|elbow_fk_r_orig|elbow_fk_r|wrist_fk_r_orig|wrist_fk_r|wristGimble_fk_r_orig|wristGimble_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -235,9 +235,9 @@
                 1.0
             ], 
             "world_translate": [
-                -61.106058464981366, 
-                124.01819999999998, 
-                -2.05607641694183
+                -61.10605846498134, 
+                124.0182, 
+                -2.056076416941802
             ], 
             "world_rotate": [
                 -89.99999999999996, 
@@ -302,7 +302,7 @@
             }
         }, 
         "wristGimble_fk_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|shoulder_fk_l_trsBuffer|shoulder_fk_l_spaces_trs|shoulder_fk_l|elbow_fk_l_trsBuffer|elbow_fk_l|wrist_fk_l_trsBuffer|wrist_fk_l|wristGimble_fk_l_trsBuffer|wristGimble_fk_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|shoulder_fk_l_orig|shoulder_fk_l_spaces|shoulder_fk_l|elbow_fk_l_orig|elbow_fk_l|wrist_fk_l_orig|wrist_fk_l|wristGimble_fk_l_orig|wristGimble_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -702,7 +702,7 @@
             }
         }, 
         "torso": {
-            "dagPath": "|main|rig|spine_cmpt|spine_control|torso_trsBuffer|torso", 
+            "dagPath": "|main|rig|spine_cmpt|spine_control|torso_orig|torso", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -840,7 +840,7 @@
             }
         }, 
         "toes_ik_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_ik_r_trsBuffer|leg_ik_r_spaces_trs|leg_ik_r|legGimble_ik_r_trsBuffer|legGimble_ik_r|leg_r_ikfk_root_piv|leg_r_ikfk_heel_piv|heel_ik_r_trsBuffer|heel_ik_r|leg_r_ikfk_inn_piv|leg_r_ikfk_out_piv|leg_r_ikfk_end_piv|toes_ik_r_trsBuffer|toes_ik_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_ik_r_orig|leg_ik_r_spaces|leg_ik_r|legGimble_ik_r_orig|legGimble_ik_r|leg_r_ikfk_root_piv|leg_r_ikfk_heel_piv|heel_ik_r_orig|heel_ik_r|leg_r_ikfk_inn_piv|leg_r_ikfk_out_piv|leg_r_ikfk_end_piv|toes_ik_r_orig|toes_ik_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -978,7 +978,7 @@
             }
         }, 
         "toes_ik_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_ik_l_trsBuffer|leg_ik_l_spaces_trs|leg_ik_l|legGimble_ik_l_trsBuffer|legGimble_ik_l|leg_l_ikfk_root_piv|leg_l_ikfk_heel_piv|heel_ik_l_trsBuffer|heel_ik_l|leg_l_ikfk_inn_piv|leg_l_ikfk_out_piv|leg_l_ikfk_end_piv|toes_ik_l_trsBuffer|toes_ik_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_ik_l_orig|leg_ik_l_spaces|leg_ik_l|legGimble_ik_l_orig|legGimble_ik_l|leg_l_ikfk_root_piv|leg_l_ikfk_heel_piv|heel_ik_l_orig|heel_ik_l|leg_l_ikfk_inn_piv|leg_l_ikfk_out_piv|leg_l_ikfk_end_piv|toes_ik_l_orig|toes_ik_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1120,7 +1120,7 @@
             }
         }, 
         "toes_fk_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|toes_fk_r_trsBuffer|toes_fk_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|toes_fk_r_orig|toes_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1203,7 +1203,7 @@
             }
         }, 
         "toes_fk_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|toes_fk_l_trsBuffer|toes_fk_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|toes_fk_l_orig|toes_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1286,7 +1286,7 @@
             }
         }, 
         "thumb_fk_r_3": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|thumb_r_control|thumb_fk_r_trsBuffer|thumb_fk_r_spaces_trs|thumb_fk_r|thumb_fk_r_1_trsBuffer|thumb_fk_r_1|thumb_fk_r_2_trsBuffer|thumb_fk_r_2|thumb_fk_r_3_trsBuffer|thumb_fk_r_3", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|index_r_cupOrig|index_r_cupTrs|thumb_r_cupOrig|thumb_r_cupTrs|thumb_fk_r_orig|thumb_fk_r_spaces|thumb_fk_r_sdk|thumb_fk_r|thumb_fk_r_1_orig|thumb_fk_r_1_sdk|thumb_fk_r_1|thumb_fk_r_2_orig|thumb_fk_r_2_sdk|thumb_fk_r_2|thumb_fk_r_3_orig|thumb_fk_r_3_sdk|thumb_fk_r_3", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1321,14 +1321,14 @@
                 1.0
             ], 
             "world_translate": [
-                -65.02026953391399, 
-                119.89995770919509, 
-                3.14867610823905
+                -65.02034453389831, 
+                119.90001751689806, 
+                3.1488060118764114
             ], 
             "world_rotate": [
-                -59.19919511657344, 
-                32.25990116779593, 
-                33.75293205498525
+                -59.19919511657354, 
+                32.259901167795825, 
+                33.752932054985266
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -1369,7 +1369,7 @@
             }
         }, 
         "thumb_fk_r_2": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|thumb_r_control|thumb_fk_r_trsBuffer|thumb_fk_r_spaces_trs|thumb_fk_r|thumb_fk_r_1_trsBuffer|thumb_fk_r_1|thumb_fk_r_2_trsBuffer|thumb_fk_r_2", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|index_r_cupOrig|index_r_cupTrs|thumb_r_cupOrig|thumb_r_cupTrs|thumb_fk_r_orig|thumb_fk_r_spaces|thumb_fk_r_sdk|thumb_fk_r|thumb_fk_r_1_orig|thumb_fk_r_1_sdk|thumb_fk_r_1|thumb_fk_r_2_orig|thumb_fk_r_2_sdk|thumb_fk_r_2", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1404,14 +1404,14 @@
                 1.0
             ], 
             "world_translate": [
-                -62.82875911586401, 
-                121.36402714372969, 
-                1.4848776894274431
+                -62.828809115854234, 
+                121.36400034884932, 
+                1.4849642918770796
             ], 
             "world_rotate": [
-                -59.19919511657344, 
-                32.25990116779593, 
-                33.75293205498525
+                -59.19919511657354, 
+                32.259901167795825, 
+                33.752932054985266
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -1452,7 +1452,7 @@
             }
         }, 
         "thumb_fk_r_1": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|thumb_r_control|thumb_fk_r_trsBuffer|thumb_fk_r_spaces_trs|thumb_fk_r|thumb_fk_r_1_trsBuffer|thumb_fk_r_1", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|index_r_cupOrig|index_r_cupTrs|thumb_r_cupOrig|thumb_r_cupTrs|thumb_fk_r_orig|thumb_fk_r_spaces|thumb_fk_r_sdk|thumb_fk_r|thumb_fk_r_1_orig|thumb_fk_r_1_sdk|thumb_fk_r_1", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1487,14 +1487,14 @@
                 1.0
             ], 
             "world_translate": [
-                -62.28751941072392, 
-                121.98911281668482, 
-                0.5474196940771675
+                -62.287544410720045, 
+                121.98899941922107, 
+                0.5474629953390688
             ], 
             "world_rotate": [
-                -49.10661162499434, 
-                48.59046773889728, 
-                49.106624583920826
+                -49.10661162499454, 
+                48.590467738897225, 
+                49.1066245839208
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -1535,7 +1535,7 @@
             }
         }, 
         "thumb_fk_r": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|thumb_r_control|thumb_fk_r_trsBuffer|thumb_fk_r_spaces_trs|thumb_fk_r", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|index_r_cupOrig|index_r_cupTrs|thumb_r_cupOrig|thumb_r_cupTrs|thumb_fk_r_orig|thumb_fk_r_spaces|thumb_fk_r_sdk|thumb_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1570,14 +1570,14 @@
                 1.0
             ], 
             "world_translate": [
-                -61.74627857495885, 
-                122.61419950950686, 
-                -0.39003696847162783
+                -61.74627857495436, 
+                122.61399950950693, 
+                -0.39003696848788966
             ], 
             "world_rotate": [
-                -49.106598667067665, 
-                48.59037538399357, 
-                49.10661162600308
+                -49.10659866706775, 
+                48.59037538399351, 
+                49.10661162600306
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -1618,7 +1618,7 @@
             }
         }, 
         "thumb_fk_l_3": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|thumb_l_control|thumb_fk_l_trsBuffer|thumb_fk_l_spaces_trs|thumb_fk_l|thumb_fk_l_1_trsBuffer|thumb_fk_l_1|thumb_fk_l_2_trsBuffer|thumb_fk_l_2|thumb_fk_l_3_trsBuffer|thumb_fk_l_3", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|index_l_cupOrig|index_l_cupTrs|thumb_l_cupOrig|thumb_l_cupTrs|thumb_fk_l_orig|thumb_fk_l_spaces|thumb_fk_l_sdk|thumb_fk_l|thumb_fk_l_1_orig|thumb_fk_l_1_sdk|thumb_fk_l_1|thumb_fk_l_2_orig|thumb_fk_l_2_sdk|thumb_fk_l_2|thumb_fk_l_3_orig|thumb_fk_l_3_sdk|thumb_fk_l_3", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1654,13 +1654,13 @@
             ], 
             "world_translate": [
                 65.02026953391395, 
-                119.89995770919523, 
-                3.1486761082394956
+                119.89995770919525, 
+                3.148676108239492
             ], 
             "world_rotate": [
-                120.80080488342651, 
+                120.80080488342648, 
                 -32.25990116779594, 
-                -33.75293205498525
+                -33.75293205498527
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -1701,7 +1701,7 @@
             }
         }, 
         "thumb_fk_l_2": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|thumb_l_control|thumb_fk_l_trsBuffer|thumb_fk_l_spaces_trs|thumb_fk_l|thumb_fk_l_1_trsBuffer|thumb_fk_l_1|thumb_fk_l_2_trsBuffer|thumb_fk_l_2", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|index_l_cupOrig|index_l_cupTrs|thumb_l_cupOrig|thumb_l_cupTrs|thumb_fk_l_orig|thumb_fk_l_spaces|thumb_fk_l_sdk|thumb_fk_l|thumb_fk_l_1_orig|thumb_fk_l_1_sdk|thumb_fk_l_1|thumb_fk_l_2_orig|thumb_fk_l_2_sdk|thumb_fk_l_2", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1737,13 +1737,13 @@
             ], 
             "world_translate": [
                 62.82875911586396, 
-                121.3640271437298, 
-                1.4848776894278826
+                121.36402714372981, 
+                1.4848776894278788
             ], 
             "world_rotate": [
-                120.80080488342651, 
+                120.80080488342648, 
                 -32.25990116779594, 
-                -33.75293205498525
+                -33.75293205498527
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -1784,7 +1784,7 @@
             }
         }, 
         "thumb_fk_l_1": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|thumb_l_control|thumb_fk_l_trsBuffer|thumb_fk_l_spaces_trs|thumb_fk_l|thumb_fk_l_1_trsBuffer|thumb_fk_l_1", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|index_l_cupOrig|index_l_cupTrs|thumb_l_cupOrig|thumb_l_cupTrs|thumb_fk_l_orig|thumb_fk_l_spaces|thumb_fk_l_sdk|thumb_fk_l|thumb_fk_l_1_orig|thumb_fk_l_1_sdk|thumb_fk_l_1", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1820,12 +1820,12 @@
             ], 
             "world_translate": [
                 62.28751941072389, 
-                121.98911281668491, 
-                0.5474196940776085
+                121.98911281668492, 
+                0.547419694077605
             ], 
             "world_rotate": [
                 130.89338837500554, 
-                -48.59046773889732, 
+                -48.59046773889731, 
                 -49.106624583920876
             ], 
             "rotateOrder": 0, 
@@ -1867,7 +1867,7 @@
             }
         }, 
         "thumb_fk_l": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|thumb_l_control|thumb_fk_l_trsBuffer|thumb_fk_l_spaces_trs|thumb_fk_l", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|index_l_cupOrig|index_l_cupTrs|thumb_l_cupOrig|thumb_l_cupTrs|thumb_fk_l_orig|thumb_fk_l_spaces|thumb_fk_l_sdk|thumb_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -1903,12 +1903,12 @@
             ], 
             "world_translate": [
                 61.746278574958815, 
-                122.61419950950695, 
-                -0.3900369684711944
+                122.61419950950696, 
+                -0.39003696847119756
             ], 
             "world_rotate": [
-                130.89340133293234, 
-                -48.59037538399363, 
+                130.8934013329323, 
+                -48.59037538399362, 
                 -49.10661162600311
             ], 
             "rotateOrder": 0, 
@@ -1950,7 +1950,7 @@
             }
         }, 
         "thigh_fk_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|thigh_fk_r_trsBuffer|thigh_fk_r_spaces_trs|thigh_fk_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|thigh_fk_r_orig|thigh_fk_r_spaces|thigh_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2048,7 +2048,7 @@
             }
         }, 
         "thigh_fk_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|thigh_fk_l_trsBuffer|thigh_fk_l_spaces_trs|thigh_fk_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|thigh_fk_l_orig|thigh_fk_l_spaces|thigh_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2146,7 +2146,7 @@
             }
         }, 
         "thighSwing_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|pelivs_r_trsBuffer|pelivs_r|thighSwing_r_trsBuffer|thighSwing_r_spaces_trs|thighSwing_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|pelivs_r_orig|pelivs_r|thighSwing_r_orig|thighSwing_r_spaces|thighSwing_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2229,7 +2229,7 @@
             }
         }, 
         "thighSwing_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|pelivs_l_trsBuffer|pelivs_l|thighSwing_l_trsBuffer|thighSwing_l_spaces_trs|thighSwing_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|pelivs_l_orig|pelivs_l|thighSwing_l_orig|thighSwing_l_spaces|thighSwing_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2312,7 +2312,7 @@
             }
         }, 
         "skull": {
-            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_trsBuffer|neck_spaces_trs|neck|head_trsBuffer|head_spaces_trs|head|headGimble_trsBuffer|headGimble|skull_trsBuffer|skull", 
+            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_orig|neck_spaces_1|neck|head_orig|head_spaces|head|headGimble_orig|headGimble|skull_orig|skull", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2454,7 +2454,7 @@
             }
         }, 
         "shoulder_fk_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|shoulder_fk_r_trsBuffer|shoulder_fk_r_spaces_trs|shoulder_fk_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|shoulder_fk_r_orig|shoulder_fk_r_spaces|shoulder_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2552,7 +2552,7 @@
             }
         }, 
         "shoulder_fk_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|shoulder_fk_l_trsBuffer|shoulder_fk_l_spaces_trs|shoulder_fk_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|shoulder_fk_l_orig|shoulder_fk_l_spaces|shoulder_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2650,7 +2650,7 @@
             }
         }, 
         "shoulderSwing_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|clavical_r_trsBuffer|clavical_r|shoulderSwing_r_trsBuffer|shoulderSwing_r_spaces_trs|shoulderSwing_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|clavical_r_orig|clavical_r|shoulderSwing_r_orig|shoulderSwing_r_spaces|shoulderSwing_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2733,7 +2733,7 @@
             }
         }, 
         "shoulderSwing_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|clavical_l_trsBuffer|clavical_l|shoulderSwing_l_trsBuffer|shoulderSwing_l_spaces_trs|shoulderSwing_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|clavical_l_orig|clavical_l|shoulderSwing_l_orig|shoulderSwing_l_spaces|shoulderSwing_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2816,7 +2816,7 @@
             }
         }, 
         "ring_fk_r_4": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|ring_r_control|ring_fk_r_trsBuffer|ring_fk_r_spaces_trs|ring_fk_r|ring_fk_r_1_trsBuffer|ring_fk_r_1|ring_fk_r_2_trsBuffer|ring_fk_r_2|ring_fk_r_3_trsBuffer|ring_fk_r_3|ring_fk_r_4_trsBuffer|ring_fk_r_4", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|ring_r_cupOrig|ring_r_cupTrs|ring_fk_r_orig|ring_fk_r_spaces|ring_fk_r_sdk|ring_fk_r|ring_fk_r_1_orig|ring_fk_r_1_sdk|ring_fk_r_1|ring_fk_r_2_orig|ring_fk_r_2_sdk|ring_fk_r_2|ring_fk_r_3_orig|ring_fk_r_3_sdk|ring_fk_r_3|ring_fk_r_4_orig|ring_fk_r_4_sdk|ring_fk_r_4", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2851,14 +2851,14 @@
                 1.0
             ], 
             "world_translate": [
-                -73.79887699450852, 
-                121.96208466019507, 
-                -3.2614089265986204
+                -73.79889435932397, 
+                121.96198314097, 
+                -3.261408926606127
             ], 
             "world_rotate": [
                 -179.99999498832128, 
-                -9.47879159886693e-23, 
-                10.000001262283055
+                -9.478791598866932e-23, 
+                10.000001262283066
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -2899,7 +2899,7 @@
             }
         }, 
         "ring_fk_r_3": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|ring_r_control|ring_fk_r_trsBuffer|ring_fk_r_spaces_trs|ring_fk_r|ring_fk_r_1_trsBuffer|ring_fk_r_1|ring_fk_r_2_trsBuffer|ring_fk_r_2|ring_fk_r_3_trsBuffer|ring_fk_r_3", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|ring_r_cupOrig|ring_r_cupTrs|ring_fk_r_orig|ring_fk_r_spaces|ring_fk_r_sdk|ring_fk_r|ring_fk_r_1_orig|ring_fk_r_1_sdk|ring_fk_r_1|ring_fk_r_2_orig|ring_fk_r_2_sdk|ring_fk_r_2|ring_fk_r_3_orig|ring_fk_r_3_sdk|ring_fk_r_3", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -2934,14 +2934,14 @@
                 1.0
             ], 
             "world_translate": [
-                -71.5524610593342, 
-                122.35778227984291, 
-                -3.261408960210235
+                -71.55253051860947, 
+                122.35797620294261, 
+                -3.2614089601915013
             ], 
             "world_rotate": [
                 -179.99999498832128, 
-                -9.47879159886693e-23, 
-                10.000001262283055
+                0.0, 
+                10.000001262283067
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -2982,7 +2982,7 @@
             }
         }, 
         "ring_fk_r_2": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|ring_r_control|ring_fk_r_trsBuffer|ring_fk_r_spaces_trs|ring_fk_r|ring_fk_r_1_trsBuffer|ring_fk_r_1|ring_fk_r_2_trsBuffer|ring_fk_r_2", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|ring_r_cupOrig|ring_r_cupTrs|ring_fk_r_orig|ring_fk_r_spaces|ring_fk_r_sdk|ring_fk_r|ring_fk_r_1_orig|ring_fk_r_1_sdk|ring_fk_r_1|ring_fk_r_2_orig|ring_fk_r_2_sdk|ring_fk_r_2", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3017,14 +3017,14 @@
                 1.0
             ], 
             "world_translate": [
-                -68.01698387493452, 
-                122.98108083478193, 
-                -3.2614090130642643
+                -68.01700123974997, 
+                122.98097931555691, 
+                -3.2614090130717734
             ], 
             "world_rotate": [
                 -179.99999498832128, 
-                -9.47879159886693e-23, 
-                10.000001262283055
+                -9.478791598866932e-23, 
+                10.000001262283066
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3065,7 +3065,7 @@
             }
         }, 
         "ring_fk_r_1": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|ring_r_control|ring_fk_r_trsBuffer|ring_fk_r_spaces_trs|ring_fk_r|ring_fk_r_1_trsBuffer|ring_fk_r_1", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|ring_r_cupOrig|ring_r_cupTrs|ring_fk_r_orig|ring_fk_r_spaces|ring_fk_r_sdk|ring_fk_r|ring_fk_r_1_orig|ring_fk_r_1_sdk|ring_fk_r_1", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3100,14 +3100,14 @@
                 1.0
             ], 
             "world_translate": [
-                -64.60891179178438, 
-                123.58232060064302, 
-                -3.2614090639799915
+                -64.60889442695995, 
+                123.58202211986813, 
+                -3.2614090640049977
             ], 
             "world_rotate": [
                 -179.99999498832128, 
                 0.0, 
-                10.000001262283057
+                10.000001262283067
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3148,7 +3148,7 @@
             }
         }, 
         "ring_fk_r": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|ring_r_control|ring_fk_r_trsBuffer|ring_fk_r_spaces_trs|ring_fk_r", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|ring_r_cupOrig|ring_r_cupTrs|ring_fk_r_orig|ring_fk_r_spaces|ring_fk_r_sdk|ring_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3183,14 +3183,14 @@
                 1.0
             ], 
             "world_translate": [
-                -62.47892320552857, 
-                123.95819973337045, 
-                -3.261409095791927
+                -62.478923205524076, 
+                123.95799973337054, 
+                -3.2614090958081894
             ], 
             "world_rotate": [
                 -179.99999498832128, 
                 0.0, 
-                10.000001262283057
+                10.000001262283067
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3231,7 +3231,7 @@
             }
         }, 
         "ring_fk_l_4": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|ring_l_control|ring_fk_l_trsBuffer|ring_fk_l_spaces_trs|ring_fk_l|ring_fk_l_1_trsBuffer|ring_fk_l_1|ring_fk_l_2_trsBuffer|ring_fk_l_2|ring_fk_l_3_trsBuffer|ring_fk_l_3|ring_fk_l_4_trsBuffer|ring_fk_l_4", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|ring_l_cupOrig|ring_l_cupTrs|ring_fk_l_orig|ring_fk_l_spaces|ring_fk_l_sdk|ring_fk_l|ring_fk_l_1_orig|ring_fk_l_1_sdk|ring_fk_l_1|ring_fk_l_2_orig|ring_fk_l_2_sdk|ring_fk_l_2|ring_fk_l_3_orig|ring_fk_l_3_sdk|ring_fk_l_3|ring_fk_l_4_orig|ring_fk_l_4_sdk|ring_fk_l_4", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3266,14 +3266,14 @@
                 1.0
             ], 
             "world_translate": [
-                73.79887699450855, 
-                121.96208466019516, 
-                -3.261408926598157
+                73.79887699450853, 
+                121.96208466019515, 
+                -3.2614089265981603
             ], 
             "world_rotate": [
-                5.0116786988479344e-06, 
-                9.47879159886693e-23, 
-                -10.000001262283057
+                5.011678698902456e-06, 
+                0.0, 
+                -10.00000126228306
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3314,7 +3314,7 @@
             }
         }, 
         "ring_fk_l_3": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|ring_l_control|ring_fk_l_trsBuffer|ring_fk_l_spaces_trs|ring_fk_l|ring_fk_l_1_trsBuffer|ring_fk_l_1|ring_fk_l_2_trsBuffer|ring_fk_l_2|ring_fk_l_3_trsBuffer|ring_fk_l_3", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|ring_l_cupOrig|ring_l_cupTrs|ring_fk_l_orig|ring_fk_l_spaces|ring_fk_l_sdk|ring_fk_l|ring_fk_l_1_orig|ring_fk_l_1_sdk|ring_fk_l_1|ring_fk_l_2_orig|ring_fk_l_2_sdk|ring_fk_l_2|ring_fk_l_3_orig|ring_fk_l_3_sdk|ring_fk_l_3", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3349,14 +3349,14 @@
                 1.0
             ], 
             "world_translate": [
-                71.55246105933423, 
-                122.357782279843, 
-                -3.2614089602097773
+                71.55246105933422, 
+                122.35778227984298, 
+                -3.2614089602097804
             ], 
             "world_rotate": [
-                5.0116786988479344e-06, 
-                9.47879159886693e-23, 
-                -10.000001262283057
+                5.011678698902456e-06, 
+                0.0, 
+                -10.00000126228306
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3397,7 +3397,7 @@
             }
         }, 
         "ring_fk_l_2": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|ring_l_control|ring_fk_l_trsBuffer|ring_fk_l_spaces_trs|ring_fk_l|ring_fk_l_1_trsBuffer|ring_fk_l_1|ring_fk_l_2_trsBuffer|ring_fk_l_2", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|ring_l_cupOrig|ring_l_cupTrs|ring_fk_l_orig|ring_fk_l_spaces|ring_fk_l_sdk|ring_fk_l|ring_fk_l_1_orig|ring_fk_l_1_sdk|ring_fk_l_1|ring_fk_l_2_orig|ring_fk_l_2_sdk|ring_fk_l_2", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3432,14 +3432,14 @@
                 1.0
             ], 
             "world_translate": [
-                68.01698387493454, 
-                122.98108083478202, 
-                -3.261409013063815
+                68.01698387493452, 
+                122.981080834782, 
+                -3.2614090130638176
             ], 
             "world_rotate": [
-                5.0116786988479344e-06, 
-                9.47879159886693e-23, 
-                -10.000001262283057
+                5.011678698902456e-06, 
+                0.0, 
+                -10.00000126228306
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3480,7 +3480,7 @@
             }
         }, 
         "ring_fk_l_1": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|ring_l_control|ring_fk_l_trsBuffer|ring_fk_l_spaces_trs|ring_fk_l|ring_fk_l_1_trsBuffer|ring_fk_l_1", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|ring_l_cupOrig|ring_l_cupTrs|ring_fk_l_orig|ring_fk_l_spaces|ring_fk_l_sdk|ring_fk_l|ring_fk_l_1_orig|ring_fk_l_1_sdk|ring_fk_l_1", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3515,14 +3515,14 @@
                 1.0
             ], 
             "world_translate": [
-                64.6089117917844, 
-                123.58232060064307, 
-                -3.2614090639795505
+                64.60891179178438, 
+                123.58232060064306, 
+                -3.261409063979553
             ], 
             "world_rotate": [
-                5.0116786988479344e-06, 
-                9.47879159886693e-23, 
-                -10.000001262283057
+                5.011678698902456e-06, 
+                0.0, 
+                -10.00000126228306
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3563,7 +3563,7 @@
             }
         }, 
         "ring_fk_l": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|ring_l_control|ring_fk_l_trsBuffer|ring_fk_l_spaces_trs|ring_fk_l", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|ring_l_cupOrig|ring_l_cupTrs|ring_fk_l_orig|ring_fk_l_spaces|ring_fk_l_sdk|ring_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3598,14 +3598,14 @@
                 1.0
             ], 
             "world_translate": [
-                62.47892320552857, 
-                123.95819973337056, 
-                -3.2614090957914925
+                62.47892320552855, 
+                123.95819973337055, 
+                -3.261409095791495
             ], 
             "world_rotate": [
-                5.0116786988479344e-06, 
-                9.47879159886693e-23, 
-                -10.000001262283057
+                5.011678698902456e-06, 
+                0.0, 
+                -10.00000126228306
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3646,7 +3646,7 @@
             }
         }, 
         "pinky_fk_r_4": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|pinky_r_control|pinky_fk_r_trsBuffer|pinky_fk_r_spaces_trs|pinky_fk_r|pinky_fk_r_1_trsBuffer|pinky_fk_r_1|pinky_fk_r_2_trsBuffer|pinky_fk_r_2|pinky_fk_r_3_trsBuffer|pinky_fk_r_3|pinky_fk_r_4_trsBuffer|pinky_fk_r_4", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|ring_r_cupOrig|ring_r_cupTrs|pinky_r_cupOrig|pinky_r_cupTrs|pinky_fk_r_orig|pinky_fk_r_spaces|pinky_fk_r_sdk|pinky_fk_r|pinky_fk_r_1_orig|pinky_fk_r_1_sdk|pinky_fk_r_1|pinky_fk_r_2_orig|pinky_fk_r_2_sdk|pinky_fk_r_2|pinky_fk_r_3_orig|pinky_fk_r_3_sdk|pinky_fk_r_3|pinky_fk_r_4_orig|pinky_fk_r_4_sdk|pinky_fk_r_4", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3681,14 +3681,14 @@
                 1.0
             ], 
             "world_translate": [
-                -72.91195266798596, 
-                122.02803649584952, 
-                -5.478262138975768
+                -72.91198726546463, 
+                122.02803345739967, 
+                -5.478265165861703
             ], 
             "world_rotate": [
-                179.12962035581393, 
-                -4.9238489146827575, 
-                10.037423876392415
+                179.12962035581396, 
+                -4.923848914682754, 
+                10.037423876392435
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3729,7 +3729,7 @@
             }
         }, 
         "pinky_fk_r_3": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|pinky_r_control|pinky_fk_r_trsBuffer|pinky_fk_r_spaces_trs|pinky_fk_r|pinky_fk_r_1_trsBuffer|pinky_fk_r_1|pinky_fk_r_2_trsBuffer|pinky_fk_r_2|pinky_fk_r_3_trsBuffer|pinky_fk_r_3", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|ring_r_cupOrig|ring_r_cupTrs|pinky_r_cupOrig|pinky_r_cupTrs|pinky_fk_r_orig|pinky_fk_r_spaces|pinky_fk_r_sdk|pinky_fk_r|pinky_fk_r_1_orig|pinky_fk_r_1_sdk|pinky_fk_r_1|pinky_fk_r_2_orig|pinky_fk_r_2_sdk|pinky_fk_r_2|pinky_fk_r_3_orig|pinky_fk_r_3_sdk|pinky_fk_r_3", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3764,14 +3764,14 @@
                 1.0
             ], 
             "world_translate": [
-                -71.21893697572887, 
-                122.32770118096754, 
-                -5.33014248374943
+                -71.21892536340627, 
+                122.32801094966202, 
+                -5.330141467776247
             ], 
             "world_rotate": [
-                179.12962035581393, 
-                -4.9238489146827575, 
-                10.037423876392415
+                179.12962035581396, 
+                -4.923848914682755, 
+                10.037423876392436
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3812,7 +3812,7 @@
             }
         }, 
         "pinky_fk_r_2": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|pinky_r_control|pinky_fk_r_trsBuffer|pinky_fk_r_spaces_trs|pinky_fk_r|pinky_fk_r_1_trsBuffer|pinky_fk_r_1|pinky_fk_r_2_trsBuffer|pinky_fk_r_2", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|ring_r_cupOrig|ring_r_cupTrs|pinky_r_cupOrig|pinky_r_cupTrs|pinky_fk_r_orig|pinky_fk_r_spaces|pinky_fk_r_sdk|pinky_fk_r|pinky_fk_r_1_orig|pinky_fk_r_1_sdk|pinky_fk_r_1|pinky_fk_r_2_orig|pinky_fk_r_2_sdk|pinky_fk_r_2", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3847,14 +3847,14 @@
                 1.0
             ], 
             "world_translate": [
-                -67.83975571429946, 
-                122.92571653308372, 
-                -5.034502481317896
+                -67.83984220800302, 
+                122.92600893695904, 
+                -5.034510048508376
             ], 
             "world_rotate": [
-                179.12962035581393, 
-                -4.9238489146827575, 
-                10.037423876392415
+                179.12962035581396, 
+                -4.923848914682755, 
+                10.037423876392436
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3895,7 +3895,7 @@
             }
         }, 
         "pinky_fk_r_1": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|pinky_r_control|pinky_fk_r_trsBuffer|pinky_fk_r_spaces_trs|pinky_fk_r|pinky_fk_r_1_trsBuffer|pinky_fk_r_1", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|ring_r_cupOrig|ring_r_cupTrs|pinky_r_cupOrig|pinky_r_cupTrs|pinky_fk_r_orig|pinky_fk_r_spaces|pinky_fk_r_sdk|pinky_fk_r|pinky_fk_r_1_orig|pinky_fk_r_1_sdk|pinky_fk_r_1", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -3930,14 +3930,14 @@
                 1.0
             ], 
             "world_translate": [
-                -64.53196104238131, 
-                123.51089333526456, 
-                -4.745107995158863
+                -64.53201293860161, 
+                123.51098877758973, 
+                -4.74511253547965
             ], 
             "world_rotate": [
-                179.12962035581393, 
-                -4.923848914682759, 
-                10.037423876392413
+                179.12962035581396, 
+                -4.923848914682755, 
+                10.037423876392436
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -3978,7 +3978,7 @@
             }
         }, 
         "pinky_fk_r": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|pinky_r_control|pinky_fk_r_trsBuffer|pinky_fk_r_spaces_trs|pinky_fk_r", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|ring_r_cupOrig|ring_r_cupTrs|pinky_r_cupOrig|pinky_r_cupTrs|pinky_fk_r_orig|pinky_fk_r_spaces|pinky_fk_r_sdk|pinky_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4013,14 +4013,14 @@
                 1.0
             ], 
             "world_translate": [
-                -62.477667065831284, 
-                123.87419984239098, 
-                -4.565380591043453
+                -62.477667065826815, 
+                123.87399984239106, 
+                -4.565380591059711
             ], 
             "world_rotate": [
-                179.12962035581393, 
-                -4.923848914682759, 
-                10.037423876392413
+                179.12962035581396, 
+                -4.923848914682755, 
+                10.037423876392436
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -4061,7 +4061,7 @@
             }
         }, 
         "pinky_fk_l_4": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|pinky_l_control|pinky_fk_l_trsBuffer|pinky_fk_l_spaces_trs|pinky_fk_l|pinky_fk_l_1_trsBuffer|pinky_fk_l_1|pinky_fk_l_2_trsBuffer|pinky_fk_l_2|pinky_fk_l_3_trsBuffer|pinky_fk_l_3|pinky_fk_l_4_trsBuffer|pinky_fk_l_4", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|ring_l_cupOrig|ring_l_cupTrs|pinky_l_cupOrig|pinky_l_cupTrs|pinky_fk_l_orig|pinky_fk_l_spaces|pinky_fk_l_sdk|pinky_fk_l|pinky_fk_l_1_orig|pinky_fk_l_1_sdk|pinky_fk_l_1|pinky_fk_l_2_orig|pinky_fk_l_2_sdk|pinky_fk_l_2|pinky_fk_l_3_orig|pinky_fk_l_3_sdk|pinky_fk_l_3|pinky_fk_l_4_orig|pinky_fk_l_4_sdk|pinky_fk_l_4", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4097,13 +4097,13 @@
             ], 
             "world_translate": [
                 72.91195266798593, 
-                122.02803649584958, 
-                -5.478262138975306
+                122.02803649584956, 
+                -5.4782621389753094
             ], 
             "world_rotate": [
-                -0.8703796441861111, 
-                4.923848914682662, 
-                -10.037423876392424
+                -0.8703796441861104, 
+                4.923848914682664, 
+                -10.037423876392422
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -4144,7 +4144,7 @@
             }
         }, 
         "pinky_fk_l_3": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|pinky_l_control|pinky_fk_l_trsBuffer|pinky_fk_l_spaces_trs|pinky_fk_l|pinky_fk_l_1_trsBuffer|pinky_fk_l_1|pinky_fk_l_2_trsBuffer|pinky_fk_l_2|pinky_fk_l_3_trsBuffer|pinky_fk_l_3", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|ring_l_cupOrig|ring_l_cupTrs|pinky_l_cupOrig|pinky_l_cupTrs|pinky_fk_l_orig|pinky_fk_l_spaces|pinky_fk_l_sdk|pinky_fk_l|pinky_fk_l_1_orig|pinky_fk_l_1_sdk|pinky_fk_l_1|pinky_fk_l_2_orig|pinky_fk_l_2_sdk|pinky_fk_l_2|pinky_fk_l_3_orig|pinky_fk_l_3_sdk|pinky_fk_l_3", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4180,13 +4180,13 @@
             ], 
             "world_translate": [
                 71.21893697572885, 
-                122.3277011809676, 
-                -5.3301424837489755
+                122.32770118096758, 
+                -5.330142483748979
             ], 
             "world_rotate": [
-                -0.870379644186111, 
-                4.923848914682662, 
-                -10.037423876392424
+                -0.8703796441861105, 
+                4.923848914682664, 
+                -10.037423876392422
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -4227,7 +4227,7 @@
             }
         }, 
         "pinky_fk_l_2": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|pinky_l_control|pinky_fk_l_trsBuffer|pinky_fk_l_spaces_trs|pinky_fk_l|pinky_fk_l_1_trsBuffer|pinky_fk_l_1|pinky_fk_l_2_trsBuffer|pinky_fk_l_2", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|ring_l_cupOrig|ring_l_cupTrs|pinky_l_cupOrig|pinky_l_cupTrs|pinky_fk_l_orig|pinky_fk_l_spaces|pinky_fk_l_sdk|pinky_fk_l|pinky_fk_l_1_orig|pinky_fk_l_1_sdk|pinky_fk_l_1|pinky_fk_l_2_orig|pinky_fk_l_2_sdk|pinky_fk_l_2", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4263,13 +4263,13 @@
             ], 
             "world_translate": [
                 67.83975571429944, 
-                122.92571653308383, 
-                -5.034502481317447
+                122.92571653308381, 
+                -5.034502481317451
             ], 
             "world_rotate": [
-                -0.870379644186111, 
-                4.923848914682662, 
-                -10.037423876392424
+                -0.8703796441861105, 
+                4.923848914682664, 
+                -10.037423876392422
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -4310,7 +4310,7 @@
             }
         }, 
         "pinky_fk_l_1": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|pinky_l_control|pinky_fk_l_trsBuffer|pinky_fk_l_spaces_trs|pinky_fk_l|pinky_fk_l_1_trsBuffer|pinky_fk_l_1", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|ring_l_cupOrig|ring_l_cupTrs|pinky_l_cupOrig|pinky_l_cupTrs|pinky_fk_l_orig|pinky_fk_l_spaces|pinky_fk_l_sdk|pinky_fk_l|pinky_fk_l_1_orig|pinky_fk_l_1_sdk|pinky_fk_l_1", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4346,12 +4346,12 @@
             ], 
             "world_translate": [
                 64.53196104238125, 
-                123.51089333526463, 
-                -4.74510799515842
+                123.51089333526461, 
+                -4.745107995158423
             ], 
             "world_rotate": [
-                -0.870379644186111, 
-                4.923848914682662, 
+                -0.8703796441861105, 
+                4.923848914682665, 
                 -10.037423876392424
             ], 
             "rotateOrder": 0, 
@@ -4393,7 +4393,7 @@
             }
         }, 
         "pinky_fk_l": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|pinky_l_control|pinky_fk_l_trsBuffer|pinky_fk_l_spaces_trs|pinky_fk_l", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|ring_l_cupOrig|ring_l_cupTrs|pinky_l_cupOrig|pinky_l_cupTrs|pinky_fk_l_orig|pinky_fk_l_spaces|pinky_fk_l_sdk|pinky_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4429,12 +4429,12 @@
             ], 
             "world_translate": [
                 62.477667065831284, 
-                123.87419984239109, 
-                -4.5653805910430165
+                123.87419984239108, 
+                -4.56538059104302
             ], 
             "world_rotate": [
-                -0.870379644186111, 
-                4.923848914682662, 
+                -0.8703796441861105, 
+                4.923848914682665, 
                 -10.037423876392424
             ], 
             "rotateOrder": 0, 
@@ -4476,7 +4476,7 @@
             }
         }, 
         "pelivs_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|pelivs_r_trsBuffer|pelivs_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|pelivs_r_orig|pelivs_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4559,7 +4559,7 @@
             }
         }, 
         "pelivs_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|pelivs_l_trsBuffer|pelivs_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|pelivs_l_orig|pelivs_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4642,7 +4642,7 @@
             }
         }, 
         "neckTan": {
-            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_trsBuffer|neck_spaces_trs|neck|neckTan_trsBuffer|neckTan", 
+            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_orig|neck_spaces_1|neck|neckTan_orig|neckTan", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4780,7 +4780,7 @@
             }
         }, 
         "neck": {
-            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_trsBuffer|neck_spaces_trs|neck", 
+            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_orig|neck_spaces_1|neck", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4918,7 +4918,7 @@
             }
         }, 
         "middle_fk_r_4": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|middle_r_control|middle_fk_r_trsBuffer|middle_fk_r_spaces_trs|middle_fk_r|middle_fk_r_1_trsBuffer|middle_fk_r_1|middle_fk_r_2_trsBuffer|middle_fk_r_2|middle_fk_r_3_trsBuffer|middle_fk_r_3|middle_fk_r_4_trsBuffer|middle_fk_r_4", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|middle_fk_r_orig|middle_fk_r_spaces|middle_fk_r_sdk|middle_fk_r|middle_fk_r_1_orig|middle_fk_r_1_sdk|middle_fk_r_1|middle_fk_r_2_orig|middle_fk_r_2_sdk|middle_fk_r_2|middle_fk_r_3_orig|middle_fk_r_3_sdk|middle_fk_r_3|middle_fk_r_4_orig|middle_fk_r_4_sdk|middle_fk_r_4", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -4953,14 +4953,14 @@
                 1.0
             ], 
             "world_translate": [
-                -74.08084413379304, 
-                121.84562264623577, 
-                -0.6549163903328648
+                -74.08094792623763, 
+                121.84601353088463, 
+                -0.6549073096351172
             ], 
             "world_rotate": [
-                -179.12961029422613, 
-                4.923850594938786, 
-                10.037424739995116
+                -179.12961029422615, 
+                4.923850594938793, 
+                10.037424739995119
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -5001,7 +5001,7 @@
             }
         }, 
         "middle_fk_r_3": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|middle_r_control|middle_fk_r_trsBuffer|middle_fk_r_spaces_trs|middle_fk_r|middle_fk_r_1_trsBuffer|middle_fk_r_1|middle_fk_r_2_trsBuffer|middle_fk_r_2|middle_fk_r_3_trsBuffer|middle_fk_r_3", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|middle_fk_r_orig|middle_fk_r_spaces|middle_fk_r_sdk|middle_fk_r|middle_fk_r_1_orig|middle_fk_r_1_sdk|middle_fk_r_1|middle_fk_r_2_orig|middle_fk_r_2_sdk|middle_fk_r_2|middle_fk_r_3_orig|middle_fk_r_3_sdk|middle_fk_r_3", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -5036,14 +5036,14 @@
                 1.0
             ], 
             "world_translate": [
-                -71.49742384857417, 
-                122.30349871776293, 
-                -0.8809364183005486
+                -71.49747005837074, 
+                122.30298591061799, 
+                -0.8809323755072345
             ], 
             "world_rotate": [
-                -179.12961029422613, 
-                4.923850594938786, 
-                10.037424739995116
+                -179.12961029422615, 
+                4.923850594938793, 
+                10.037424739995119
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -5084,7 +5084,7 @@
             }
         }, 
         "middle_fk_r_2": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|middle_r_control|middle_fk_r_trsBuffer|middle_fk_r_spaces_trs|middle_fk_r|middle_fk_r_1_trsBuffer|middle_fk_r_1|middle_fk_r_2_trsBuffer|middle_fk_r_2", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|middle_fk_r_orig|middle_fk_r_spaces|middle_fk_r_sdk|middle_fk_r|middle_fk_r_1_orig|middle_fk_r_1_sdk|middle_fk_r_1|middle_fk_r_2_orig|middle_fk_r_2_sdk|middle_fk_r_2", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -5119,14 +5119,14 @@
                 1.0
             ], 
             "world_translate": [
-                -67.99150691838723, 
-                122.92404794835026, 
-                -1.1876644591545409
+                -67.99152421712427, 
+                122.92394642912517, 
+                -1.1876629457184675
             ], 
             "world_rotate": [
-                -179.12961029422613, 
-                4.923850594938786, 
-                10.037424739995116
+                -179.12961029422615, 
+                4.923850594938793, 
+                10.037424739995119
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -5167,7 +5167,7 @@
             }
         }, 
         "middle_fk_r_1": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|middle_r_control|middle_fk_r_trsBuffer|middle_fk_r_spaces_trs|middle_fk_r|middle_fk_r_1_trsBuffer|middle_fk_r_1", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|middle_fk_r_orig|middle_fk_r_spaces|middle_fk_r_sdk|middle_fk_r|middle_fk_r_1_orig|middle_fk_r_1_sdk|middle_fk_r_1", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -5202,14 +5202,14 @@
                 1.0
             ], 
             "world_translate": [
-                -64.54785271696161, 
-                123.53337355627812, 
-                -1.4889452161357726
+                -64.5479162254997, 
+                123.53295922990802, 
+                -1.4889396598901246
             ], 
             "world_rotate": [
-                -179.12961029422613, 
-                4.923850594938786, 
-                10.037424739995116
+                -179.12961029422615, 
+                4.923850594938792, 
+                10.037424739995119
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -5250,7 +5250,7 @@
             }
         }, 
         "middle_fk_r": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|middle_r_control|middle_fk_r_trsBuffer|middle_fk_r_spaces_trs|middle_fk_r", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|middle_fk_r_orig|middle_fk_r_spaces|middle_fk_r_sdk|middle_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -5285,14 +5285,14 @@
                 1.0
             ], 
             "world_translate": [
-                -62.378203363739736, 
-                123.91719960330363, 
-                -1.6787649719268898
+                -62.37820336373526, 
+                123.91699960330371, 
+                -1.6787649719431474
             ], 
             "world_rotate": [
-                -179.12961029422613, 
-                4.923850594938787, 
-                10.037424739995117
+                -179.12961029422615, 
+                4.923850594938793, 
+                10.037424739995119
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -5333,7 +5333,7 @@
             }
         }, 
         "middle_fk_l_4": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|middle_l_control|middle_fk_l_trsBuffer|middle_fk_l_spaces_trs|middle_fk_l|middle_fk_l_1_trsBuffer|middle_fk_l_1|middle_fk_l_2_trsBuffer|middle_fk_l_2|middle_fk_l_3_trsBuffer|middle_fk_l_3|middle_fk_l_4_trsBuffer|middle_fk_l_4", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|middle_fk_l_orig|middle_fk_l_spaces|middle_fk_l_sdk|middle_fk_l|middle_fk_l_1_orig|middle_fk_l_1_sdk|middle_fk_l_1|middle_fk_l_2_orig|middle_fk_l_2_sdk|middle_fk_l_2|middle_fk_l_3_orig|middle_fk_l_3_sdk|middle_fk_l_3|middle_fk_l_4_orig|middle_fk_l_4_sdk|middle_fk_l_4", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -5368,14 +5368,14 @@
                 1.0
             ], 
             "world_translate": [
-                74.08084413379302, 
-                121.8456226462359, 
-                -0.6549163903324121
+                74.08084413379304, 
+                121.84562264623591, 
+                -0.6549163903324136
             ], 
             "world_rotate": [
                 0.870389705773839, 
-                -4.923850594938891, 
-                -10.037424739995116
+                -4.923850594938889, 
+                -10.037424739995108
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -5416,7 +5416,7 @@
             }
         }, 
         "middle_fk_l_3": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|middle_l_control|middle_fk_l_trsBuffer|middle_fk_l_spaces_trs|middle_fk_l|middle_fk_l_1_trsBuffer|middle_fk_l_1|middle_fk_l_2_trsBuffer|middle_fk_l_2|middle_fk_l_3_trsBuffer|middle_fk_l_3", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|middle_fk_l_orig|middle_fk_l_spaces|middle_fk_l_sdk|middle_fk_l|middle_fk_l_1_orig|middle_fk_l_1_sdk|middle_fk_l_1|middle_fk_l_2_orig|middle_fk_l_2_sdk|middle_fk_l_2|middle_fk_l_3_orig|middle_fk_l_3_sdk|middle_fk_l_3", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -5451,14 +5451,14 @@
                 1.0
             ], 
             "world_translate": [
-                71.49742384857416, 
-                122.30349871776306, 
-                -0.8809364183000996
+                71.49742384857417, 
+                122.30349871776308, 
+                -0.8809364183001009
             ], 
             "world_rotate": [
                 0.870389705773839, 
-                -4.923850594938891, 
-                -10.037424739995116
+                -4.923850594938889, 
+                -10.037424739995108
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -5499,7 +5499,7 @@
             }
         }, 
         "middle_fk_l_2": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|middle_l_control|middle_fk_l_trsBuffer|middle_fk_l_spaces_trs|middle_fk_l|middle_fk_l_1_trsBuffer|middle_fk_l_1|middle_fk_l_2_trsBuffer|middle_fk_l_2", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|middle_fk_l_orig|middle_fk_l_spaces|middle_fk_l_sdk|middle_fk_l|middle_fk_l_1_orig|middle_fk_l_1_sdk|middle_fk_l_1|middle_fk_l_2_orig|middle_fk_l_2_sdk|middle_fk_l_2", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -5534,14 +5534,14 @@
                 1.0
             ], 
             "world_translate": [
-                67.99150691838723, 
-                122.92404794835036, 
-                -1.1876644591540964
+                67.99150691838724, 
+                122.92404794835038, 
+                -1.1876644591540977
             ], 
             "world_rotate": [
                 0.870389705773839, 
-                -4.923850594938891, 
-                -10.037424739995116
+                -4.923850594938889, 
+                -10.037424739995108
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -5582,7 +5582,7 @@
             }
         }, 
         "middle_fk_l_1": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|middle_l_control|middle_fk_l_trsBuffer|middle_fk_l_spaces_trs|middle_fk_l|middle_fk_l_1_trsBuffer|middle_fk_l_1", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|middle_fk_l_orig|middle_fk_l_spaces|middle_fk_l_sdk|middle_fk_l|middle_fk_l_1_orig|middle_fk_l_1_sdk|middle_fk_l_1", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -5617,14 +5617,14 @@
                 1.0
             ], 
             "world_translate": [
-                64.5478527169616, 
-                123.53337355627825, 
-                -1.4889452161353371
+                64.54785271696161, 
+                123.53337355627826, 
+                -1.4889452161353385
             ], 
             "world_rotate": [
                 0.870389705773839, 
-                -4.923850594938891, 
-                -10.037424739995116
+                -4.923850594938889, 
+                -10.037424739995108
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -5665,7 +5665,7 @@
             }
         }, 
         "middle_fk_l": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|middle_l_control|middle_fk_l_trsBuffer|middle_fk_l_spaces_trs|middle_fk_l", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|middle_fk_l_orig|middle_fk_l_spaces|middle_fk_l_sdk|middle_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -5700,14 +5700,14 @@
                 1.0
             ], 
             "world_translate": [
-                62.378203363739715, 
-                123.91719960330373, 
-                -1.6787649719264537
+                62.37820336373972, 
+                123.91719960330374, 
+                -1.678764971926455
             ], 
             "world_rotate": [
                 0.870389705773839, 
-                -4.923850594938891, 
-                -10.037424739995116
+                -4.923850594938889, 
+                -10.037424739995108
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -5748,7 +5748,7 @@
             }
         }, 
         "leg_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_trsBuffer|leg_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_orig|leg_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -5921,7 +5921,7 @@
             }
         }, 
         "leg_pv_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_pv_r_trsBuffer|leg_pv_r_spaces_trs|leg_pv_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_pv_r_orig|leg_pv_r_spaces|leg_pv_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -6059,7 +6059,7 @@
             }
         }, 
         "leg_pv_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_pv_l_trsBuffer|leg_pv_l_spaces_trs|leg_pv_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_pv_l_orig|leg_pv_l_spaces|leg_pv_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -6197,7 +6197,7 @@
             }
         }, 
         "leg_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_trsBuffer|leg_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_orig|leg_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -6370,7 +6370,7 @@
             }
         }, 
         "leg_ik_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_ik_r_trsBuffer|leg_ik_r_spaces_trs|leg_ik_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_ik_r_orig|leg_ik_r_spaces|leg_ik_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -6508,7 +6508,7 @@
             }
         }, 
         "leg_ik_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_ik_l_trsBuffer|leg_ik_l_spaces_trs|leg_ik_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_ik_l_orig|leg_ik_l_spaces|leg_ik_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -6646,7 +6646,7 @@
             }
         }, 
         "leg_5_bend_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_bendControl|leg_5_bend_r_trsBuffer|leg_5_bend_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_bendControl|leg_5_bend_r_orig|leg_5_bend_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -6748,7 +6748,7 @@
             }
         }, 
         "leg_5_bend_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_bendControl|leg_5_bend_l_trsBuffer|leg_5_bend_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_bendControl|leg_5_bend_l_orig|leg_5_bend_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -6846,7 +6846,7 @@
             }
         }, 
         "leg_4_bend_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_bendControl|leg_4_bend_r_trsBuffer|leg_4_bend_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_bendControl|leg_4_bend_r_orig|leg_4_bend_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -6948,7 +6948,7 @@
             }
         }, 
         "leg_4_bend_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_bendControl|leg_4_bend_l_trsBuffer|leg_4_bend_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_bendControl|leg_4_bend_l_orig|leg_4_bend_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -7046,7 +7046,7 @@
             }
         }, 
         "leg_3_bend_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_bendControl|leg_3_bend_r_trsBuffer|leg_3_bend_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_bendControl|leg_3_bend_r_orig|leg_3_bend_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -7148,7 +7148,7 @@
             }
         }, 
         "leg_3_bend_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_bendControl|leg_3_bend_l_trsBuffer|leg_3_bend_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_bendControl|leg_3_bend_l_orig|leg_3_bend_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -7246,7 +7246,7 @@
             }
         }, 
         "leg_2_bend_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_bendControl|leg_2_bend_r_trsBuffer|leg_2_bend_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_bendControl|leg_2_bend_r_orig|leg_2_bend_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -7348,7 +7348,7 @@
             }
         }, 
         "leg_2_bend_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_bendControl|leg_2_bend_l_trsBuffer|leg_2_bend_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_bendControl|leg_2_bend_l_orig|leg_2_bend_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -7446,7 +7446,7 @@
             }
         }, 
         "leg_1_bend_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_bendControl|leg_1_bend_r_trsBuffer|leg_1_bend_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_r_bendControl|leg_1_bend_r_orig|leg_1_bend_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -7548,7 +7548,7 @@
             }
         }, 
         "leg_1_bend_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_bendControl|leg_1_bend_l_trsBuffer|leg_1_bend_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_l_bendControl|leg_1_bend_l_orig|leg_1_bend_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -7646,7 +7646,7 @@
             }
         }, 
         "legGimble_ik_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_ik_r_trsBuffer|leg_ik_r_spaces_trs|leg_ik_r|legGimble_ik_r_trsBuffer|legGimble_ik_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_ik_r_orig|leg_ik_r_spaces|leg_ik_r|legGimble_ik_r_orig|legGimble_ik_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -7840,7 +7840,7 @@
             }
         }, 
         "legGimble_ik_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_ik_l_trsBuffer|leg_ik_l_spaces_trs|leg_ik_l|legGimble_ik_l_trsBuffer|legGimble_ik_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_ik_l_orig|leg_ik_l_spaces|leg_ik_l|legGimble_ik_l_orig|legGimble_ik_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8034,7 +8034,7 @@
             }
         }, 
         "knee_fk_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|thigh_fk_r_trsBuffer|thigh_fk_r_spaces_trs|thigh_fk_r|knee_fk_r_trsBuffer|knee_fk_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|thigh_fk_r_orig|thigh_fk_r_spaces|thigh_fk_r|knee_fk_r_orig|knee_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8132,7 +8132,7 @@
             }
         }, 
         "knee_fk_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|thigh_fk_l_trsBuffer|thigh_fk_l_spaces_trs|thigh_fk_l|knee_fk_l_trsBuffer|knee_fk_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|thigh_fk_l_orig|thigh_fk_l_spaces|thigh_fk_l|knee_fk_l_orig|knee_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8230,7 +8230,7 @@
             }
         }, 
         "index_fk_r_4": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|index_r_control|index_fk_r_trsBuffer|index_fk_r_spaces_trs|index_fk_r|index_fk_r_1_trsBuffer|index_fk_r_1|index_fk_r_2_trsBuffer|index_fk_r_2|index_fk_r_3_trsBuffer|index_fk_r_3|index_fk_r_4_trsBuffer|index_fk_r_4", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|index_r_cupOrig|index_r_cupTrs|index_fk_r_orig|index_fk_r_spaces|index_fk_r_sdk|index_fk_r|index_fk_r_1_orig|index_fk_r_1_sdk|index_fk_r_1|index_fk_r_2_orig|index_fk_r_2_sdk|index_fk_r_2|index_fk_r_3_orig|index_fk_r_3_sdk|index_fk_r_3|index_fk_r_4_orig|index_fk_r_4_sdk|index_fk_r_4", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8265,14 +8265,14 @@
                 1.0
             ], 
             "world_translate": [
-                -73.1647504651786, 
-                122.06610241226005, 
-                1.617378252084262
+                -73.16476690107937, 
+                122.06600090361269, 
+                1.6173846939577057
             ], 
             "world_rotate": [
                 -178.2344436163864, 
-                11.84560981433035, 
-                10.213612222197103
+                11.845609814330357, 
+                10.213612222197098
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -8313,7 +8313,7 @@
             }
         }, 
         "index_fk_r_3": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|index_r_control|index_fk_r_trsBuffer|index_fk_r_spaces_trs|index_fk_r|index_fk_r_1_trsBuffer|index_fk_r_1|index_fk_r_2_trsBuffer|index_fk_r_2|index_fk_r_3_trsBuffer|index_fk_r_3", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|index_r_cupOrig|index_r_cupTrs|index_fk_r_orig|index_fk_r_spaces|index_fk_r_sdk|index_fk_r|index_fk_r_1_orig|index_fk_r_1_sdk|index_fk_r_1|index_fk_r_2_orig|index_fk_r_2_sdk|index_fk_r_2|index_fk_r_3_orig|index_fk_r_3_sdk|index_fk_r_3", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8348,14 +8348,14 @@
                 1.0
             ], 
             "world_translate": [
-                -71.05013448530681, 
-                122.44699899167524, 
-                1.1667140495332855
+                -71.05007170269069, 
+                122.44701331804603, 
+                1.1667029792638366
             ], 
             "world_rotate": [
                 -178.2344436163864, 
-                11.84560981433035, 
-                10.213612222197103
+                11.845609814330357, 
+                10.213612222197098
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -8396,7 +8396,7 @@
             }
         }, 
         "index_fk_r_2": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|index_r_control|index_fk_r_trsBuffer|index_fk_r_spaces_trs|index_fk_r|index_fk_r_1_trsBuffer|index_fk_r_1|index_fk_r_2_trsBuffer|index_fk_r_2", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|index_r_cupOrig|index_r_cupTrs|index_fk_r_orig|index_fk_r_spaces|index_fk_r_sdk|index_fk_r|index_fk_r_1_orig|index_fk_r_1_sdk|index_fk_r_1|index_fk_r_2_orig|index_fk_r_2_sdk|index_fk_r_2", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8431,14 +8431,14 @@
                 1.0
             ], 
             "world_translate": [
-                -67.70007924550534, 
-                123.05079389384879, 
-                0.45275238642544124
+                -67.70005066490768, 
+                123.05100518176891, 
+                0.4527473469113861
             ], 
             "world_rotate": [
                 -178.2344436163864, 
-                11.845609814330349, 
-                10.213612222197105
+                11.845609814330357, 
+                10.213612222197098
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -8479,7 +8479,7 @@
             }
         }, 
         "index_fk_r_1": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|index_r_control|index_fk_r_trsBuffer|index_fk_r_spaces_trs|index_fk_r|index_fk_r_1_trsBuffer|index_fk_r_1", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|index_r_cupOrig|index_r_cupTrs|index_fk_r_orig|index_fk_r_spaces|index_fk_r_sdk|index_fk_r|index_fk_r_1_orig|index_fk_r_1_sdk|index_fk_r_1", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8514,14 +8514,14 @@
                 1.0
             ], 
             "world_translate": [
-                -64.43420170885602, 
-                123.63543840663327, 
-                -0.12310999234267772
+                -64.43416750683302, 
+                123.635041445084, 
+                -0.12311602311433412
             ], 
             "world_rotate": [
                 -178.24621145305892, 
-                9.846552770017558, 
-                10.151083843575403
+                9.846552770017562, 
+                10.151083843575398
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -8562,7 +8562,7 @@
             }
         }, 
         "index_fk_r": {
-            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|index_r_control|index_fk_r_trsBuffer|index_fk_r_spaces_trs|index_fk_r", 
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses|index_r_cupOrig|index_r_cupTrs|index_fk_r_orig|index_fk_r_spaces|index_fk_r_sdk|index_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8597,14 +8597,14 @@
                 1.0
             ], 
             "world_translate": [
-                -62.2958674823199, 
-                124.01819950660318, 
-                -0.5001560451983063
+                -62.295867482315394, 
+                124.01799950660326, 
+                -0.5001560452145695
             ], 
             "world_rotate": [
                 -178.24621145305892, 
-                9.846552770017558, 
-                10.151083843575403
+                9.846552770017562, 
+                10.151083843575398
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -8645,7 +8645,7 @@
             }
         }, 
         "index_fk_l_4": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|index_l_control|index_fk_l_trsBuffer|index_fk_l_spaces_trs|index_fk_l|index_fk_l_1_trsBuffer|index_fk_l_1|index_fk_l_2_trsBuffer|index_fk_l_2|index_fk_l_3_trsBuffer|index_fk_l_3|index_fk_l_4_trsBuffer|index_fk_l_4", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|index_l_cupOrig|index_l_cupTrs|index_fk_l_orig|index_fk_l_spaces|index_fk_l_sdk|index_fk_l|index_fk_l_1_orig|index_fk_l_1_sdk|index_fk_l_1|index_fk_l_2_orig|index_fk_l_2_sdk|index_fk_l_2|index_fk_l_3_orig|index_fk_l_3_sdk|index_fk_l_3|index_fk_l_4_orig|index_fk_l_4_sdk|index_fk_l_4", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8682,12 +8682,12 @@
             "world_translate": [
                 73.16475046517851, 
                 122.06610241226014, 
-                1.6173782520847113
+                1.6173782520847069
             ], 
             "world_rotate": [
-                1.7655563836136012, 
-                -11.845609814330462, 
-                -10.213612222197083
+                1.7655563836136003, 
+                -11.84560981433046, 
+                -10.213612222197082
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -8728,7 +8728,7 @@
             }
         }, 
         "index_fk_l_3": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|index_l_control|index_fk_l_trsBuffer|index_fk_l_spaces_trs|index_fk_l|index_fk_l_1_trsBuffer|index_fk_l_1|index_fk_l_2_trsBuffer|index_fk_l_2|index_fk_l_3_trsBuffer|index_fk_l_3", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|index_l_cupOrig|index_l_cupTrs|index_fk_l_orig|index_fk_l_spaces|index_fk_l_sdk|index_fk_l|index_fk_l_1_orig|index_fk_l_1_sdk|index_fk_l_1|index_fk_l_2_orig|index_fk_l_2_sdk|index_fk_l_2|index_fk_l_3_orig|index_fk_l_3_sdk|index_fk_l_3", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8765,12 +8765,12 @@
             "world_translate": [
                 71.05013448530678, 
                 122.44699899167531, 
-                1.1667140495337338
+                1.1667140495337294
             ], 
             "world_rotate": [
-                1.7655563836136015, 
-                -11.845609814330462, 
-                -10.213612222197083
+                1.7655563836136006, 
+                -11.84560981433046, 
+                -10.213612222197082
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -8811,7 +8811,7 @@
             }
         }, 
         "index_fk_l_2": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|index_l_control|index_fk_l_trsBuffer|index_fk_l_spaces_trs|index_fk_l|index_fk_l_1_trsBuffer|index_fk_l_1|index_fk_l_2_trsBuffer|index_fk_l_2", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|index_l_cupOrig|index_l_cupTrs|index_fk_l_orig|index_fk_l_spaces|index_fk_l_sdk|index_fk_l|index_fk_l_1_orig|index_fk_l_1_sdk|index_fk_l_1|index_fk_l_2_orig|index_fk_l_2_sdk|index_fk_l_2", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8848,12 +8848,12 @@
             "world_translate": [
                 67.70007924550528, 
                 123.05079389384888, 
-                0.4527523864258818
+                0.45275238642587734
             ], 
             "world_rotate": [
-                1.7655563836136015, 
-                -11.845609814330462, 
-                -10.213612222197083
+                1.7655563836136006, 
+                -11.84560981433046, 
+                -10.213612222197082
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -8894,7 +8894,7 @@
             }
         }, 
         "index_fk_l_1": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|index_l_control|index_fk_l_trsBuffer|index_fk_l_spaces_trs|index_fk_l|index_fk_l_1_trsBuffer|index_fk_l_1", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|index_l_cupOrig|index_l_cupTrs|index_fk_l_orig|index_fk_l_spaces|index_fk_l_sdk|index_fk_l|index_fk_l_1_orig|index_fk_l_1_sdk|index_fk_l_1", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -8931,12 +8931,12 @@
             "world_translate": [
                 64.43420170885598, 
                 123.63543840663341, 
-                -0.12310999234223796
+                -0.12310999234224229
             ], 
             "world_rotate": [
-                1.753788546941071, 
-                -9.846552770017658, 
-                -10.151083843575387
+                1.7537885469410706, 
+                -9.846552770017656, 
+                -10.151083843575384
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -8977,7 +8977,7 @@
             }
         }, 
         "index_fk_l": {
-            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|index_l_control|index_fk_l_trsBuffer|index_fk_l_spaces_trs|index_fk_l", 
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses|index_l_cupOrig|index_l_cupTrs|index_fk_l_orig|index_fk_l_spaces|index_fk_l_sdk|index_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -9014,12 +9014,12 @@
             "world_translate": [
                 62.29586748231986, 
                 124.0181995066033, 
-                -0.5001560451978737
+                -0.5001560451978779
             ], 
             "world_rotate": [
-                1.753788546941071, 
-                -9.846552770017658, 
-                -10.151083843575387
+                1.7537885469410706, 
+                -9.846552770017656, 
+                -10.151083843575384
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -9060,7 +9060,7 @@
             }
         }, 
         "hips_pivot": {
-            "dagPath": "|main|rig|cog_cmpt|cog_control|hips_trsBuffer|hips|hips_pivot_trsBuffer|hips_pivot", 
+            "dagPath": "|main|rig|cog_cmpt|cog_control|hips_orig|hips|hips_pivot_orig|hips_pivot", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -9254,7 +9254,7 @@
             }
         }, 
         "hipsGimble": {
-            "dagPath": "|main|rig|cog_cmpt|cog_control|hips_trsBuffer|hips|hipsGimble_trsBuffer|hipsGimble_neg_trs|hipsGimble_neg|hipsGimble", 
+            "dagPath": "|main|rig|cog_cmpt|cog_control|hips_orig|hips|hipsGimble_orig|hipsGimble_negTrs_trs|hipsGimble_negTrs|hipsGimble", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -9392,7 +9392,7 @@
             }
         }, 
         "hips": {
-            "dagPath": "|main|rig|cog_cmpt|cog_control|hips_trsBuffer|hips", 
+            "dagPath": "|main|rig|cog_cmpt|cog_control|hips_orig|hips", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -9530,7 +9530,7 @@
             }
         }, 
         "hip_swing": {
-            "dagPath": "|main|rig|spine_cmpt|spine_control|hip_swing_trsBuffer|hip_swing", 
+            "dagPath": "|main|rig|spine_cmpt|spine_control|hip_swing_orig|hip_swing", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -9668,7 +9668,7 @@
             }
         }, 
         "hipTan": {
-            "dagPath": "|main|rig|spine_cmpt|spine_control|hip_swing_trsBuffer|hip_swing|hipTan_trsBuffer|hipTan", 
+            "dagPath": "|main|rig|spine_cmpt|spine_control|hip_swing_orig|hip_swing|hipTan_orig|hipTan", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -9810,7 +9810,7 @@
             }
         }, 
         "heel_ik_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_ik_r_trsBuffer|leg_ik_r_spaces_trs|leg_ik_r|legGimble_ik_r_trsBuffer|legGimble_ik_r|leg_r_ikfk_root_piv|leg_r_ikfk_heel_piv|heel_ik_r_trsBuffer|heel_ik_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_ik_r_orig|leg_ik_r_spaces|leg_ik_r|legGimble_ik_r_orig|legGimble_ik_r|leg_r_ikfk_root_piv|leg_r_ikfk_heel_piv|heel_ik_r_orig|heel_ik_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -9948,7 +9948,7 @@
             }
         }, 
         "heel_ik_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_ik_l_trsBuffer|leg_ik_l_spaces_trs|leg_ik_l|legGimble_ik_l_trsBuffer|legGimble_ik_l|leg_l_ikfk_root_piv|leg_l_ikfk_heel_piv|heel_ik_l_trsBuffer|heel_ik_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_ik_l_orig|leg_ik_l_spaces|leg_ik_l|legGimble_ik_l_orig|legGimble_ik_l|leg_l_ikfk_root_piv|leg_l_ikfk_heel_piv|heel_ik_l_orig|heel_ik_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -10090,7 +10090,7 @@
             }
         }, 
         "headTan": {
-            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_trsBuffer|neck_spaces_trs|neck|head_trsBuffer|head_spaces_trs|head|headGimble_trsBuffer|headGimble|headTan_trsBuffer|headTan", 
+            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_orig|neck_spaces_1|neck|head_orig|head_spaces|head|headGimble_orig|headGimble|headTan_orig|headTan", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -10232,7 +10232,7 @@
             }
         }, 
         "headGimble": {
-            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_trsBuffer|neck_spaces_trs|neck|head_trsBuffer|head_spaces_trs|head|headGimble_trsBuffer|headGimble", 
+            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_orig|neck_spaces_1|neck|head_orig|head_spaces|head|headGimble_orig|headGimble", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -10370,7 +10370,7 @@
             }
         }, 
         "head": {
-            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_trsBuffer|neck_spaces_trs|neck|head_trsBuffer|head_spaces_trs|head", 
+            "dagPath": "|main|rig|neck_cmpt|neck_control|neck_orig|neck_spaces_1|neck|head_orig|head_spaces|head", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -10507,8 +10507,8 @@
                 }
             }
         }, 
-        "eyes_aim": {
-            "dagPath": "|main|rig|eyes_cmpt|eyes_control|eyes_aim_trsBuffer|eyes_aim_spaces_trs|eyes_aim", 
+        "hand_r_poses": {
+            "dagPath": "|main|rig|hand_r_cmpt|hand_r_control|hand_r_poses_orig|hand_r_poses", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -10543,9 +10543,175 @@
                 1.0
             ], 
             "world_translate": [
-                -0.00014999999998388525, 
-                149.23050000000006, 
-                -0.08730000000000038
+                -62.4076652793504, 
+                123.94174967141713, 
+                -2.501427676006403
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 13, 
+            "shapes": {
+                "hand_r_posesShape": {
+                    "points": [
+                        [
+                            -3.0891642528374987, 
+                            0.00019999999999242846, 
+                            -3.101383344580891
+                        ], 
+                        [
+                            -4.089164252837499, 
+                            0.00019999999999242846, 
+                            -3.101383344580891
+                        ], 
+                        [
+                            -4.089164252837513, 
+                            0.0001999999999782176, 
+                            3.2591488062773997
+                        ], 
+                        [
+                            -3.089164252837513, 
+                            0.0001999999999782176, 
+                            3.2591488062774
+                        ], 
+                        [
+                            -3.0891642528374987, 
+                            0.00019999999999242846, 
+                            -3.101383344580891
+                        ]
+                    ], 
+                    "form": "Open", 
+                    "degree": 1
+                }
+            }
+        }, 
+        "hand_l_poses": {
+            "dagPath": "|main|rig|hand_l_cmpt|hand_l_control|hand_l_poses_orig|hand_l_poses", 
+            "translate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                62.40766527935486, 
+                123.94194967141718, 
+                -2.5014276759897105
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 6, 
+            "shapes": {
+                "hand_l_posesShape": {
+                    "points": [
+                        [
+                            3.0891642528359924, 
+                            -5.684341886080802e-14, 
+                            -3.101383344597586
+                        ], 
+                        [
+                            4.089164252835992, 
+                            -5.684341886080802e-14, 
+                            -3.101383344597586
+                        ], 
+                        [
+                            4.089164252835992, 
+                            -5.684341886080802e-14, 
+                            3.2591488062607037
+                        ], 
+                        [
+                            3.0891642528359924, 
+                            -5.684341886080802e-14, 
+                            3.2591488062607037
+                        ], 
+                        [
+                            3.0891642528359924, 
+                            -5.684341886080802e-14, 
+                            -3.101383344597586
+                        ]
+                    ], 
+                    "form": "Open", 
+                    "degree": 1
+                }
+            }
+        }, 
+        "eyes_aim": {
+            "dagPath": "|main|rig|eyes_cmpt|eyes_control|eyes_aim_orig|eyes_aim_spaces|eyes_aim", 
+            "translate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -0.0001, 
+                149.2305, 
+                -0.0873
             ], 
             "world_rotate": [
                 0.0, 
@@ -10595,7 +10761,7 @@
             }
         }, 
         "eye_r": {
-            "dagPath": "|main|rig|eyes_cmpt|eyes_control|eye_r_trsBuffer|eye_r_trsAim|eye_r", 
+            "dagPath": "|main|rig|eyes_cmpt|eyes_control|eye_r_orig|eye_r_aimTrs|eye_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -10630,9 +10796,9 @@
                 1.0
             ], 
             "world_translate": [
-                -2.6779999999999844, 
+                -2.677999999999985, 
                 149.23050000000003, 
-                -0.08730000000000038
+                -0.08730000000000039
             ], 
             "world_rotate": [
                 0.0, 
@@ -10697,7 +10863,7 @@
             }
         }, 
         "eye_l": {
-            "dagPath": "|main|rig|eyes_cmpt|eyes_control|eye_l_trsBuffer|eye_l_trsAim|eye_l", 
+            "dagPath": "|main|rig|eyes_cmpt|eyes_control|eye_l_orig|eye_l_aimTrs|eye_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -10732,9 +10898,9 @@
                 1.0
             ], 
             "world_translate": [
-                2.6777000000000157, 
+                2.677700000000016, 
                 149.23050000000003, 
-                -0.08730000000000127
+                -0.08730000000000128
             ], 
             "world_rotate": [
                 0.0, 
@@ -10799,7 +10965,7 @@
             }
         }, 
         "elbow_fk_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|shoulder_fk_r_trsBuffer|shoulder_fk_r_spaces_trs|shoulder_fk_r|elbow_fk_r_trsBuffer|elbow_fk_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|shoulder_fk_r_orig|shoulder_fk_r_spaces|shoulder_fk_r|elbow_fk_r_orig|elbow_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -10897,7 +11063,7 @@
             }
         }, 
         "elbow_fk_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|shoulder_fk_l_trsBuffer|shoulder_fk_l_spaces_trs|shoulder_fk_l|elbow_fk_l_trsBuffer|elbow_fk_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|shoulder_fk_l_orig|shoulder_fk_l_spaces|shoulder_fk_l|elbow_fk_l_orig|elbow_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -10995,7 +11161,7 @@
             }
         }, 
         "clavical_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|clavical_r_trsBuffer|clavical_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|clavical_r_orig|clavical_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -11078,7 +11244,7 @@
             }
         }, 
         "clavical_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|clavical_l_trsBuffer|clavical_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|clavical_l_orig|clavical_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -11161,7 +11327,7 @@
             }
         }, 
         "chestTop": {
-            "dagPath": "|main|rig|spine_cmpt|spine_control|torso_trsBuffer|torso|chest_trsBuffer|chest_neg|chest|chestTop_trsBuffer|chestTop_len|chestTop", 
+            "dagPath": "|main|rig|spine_cmpt|spine_control|torso_orig|torso|chest_orig|chest_negTrs|chest|chestTop_orig|chestTop", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -11299,7 +11465,7 @@
             }
         }, 
         "chestTan": {
-            "dagPath": "|main|rig|spine_cmpt|spine_control|torso_trsBuffer|torso|chest_trsBuffer|chest_neg|chest|chestTan_trsBuffer|chestTan", 
+            "dagPath": "|main|rig|spine_cmpt|spine_control|torso_orig|torso|chest_orig|chest_negTrs|chest|chestTan_orig|chestTan", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -11441,7 +11607,7 @@
             }
         }, 
         "chest": {
-            "dagPath": "|main|rig|spine_cmpt|spine_control|torso_trsBuffer|torso|chest_trsBuffer|chest_neg|chest", 
+            "dagPath": "|main|rig|spine_cmpt|spine_control|torso_orig|torso|chest_orig|chest_negTrs|chest", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -11579,7 +11745,7 @@
             }
         }, 
         "ball_ik_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_ik_r_trsBuffer|leg_ik_r_spaces_trs|leg_ik_r|legGimble_ik_r_trsBuffer|legGimble_ik_r|leg_r_ikfk_root_piv|leg_r_ikfk_heel_piv|heel_ik_r_trsBuffer|heel_ik_r|leg_r_ikfk_inn_piv|leg_r_ikfk_out_piv|leg_r_ikfk_end_piv|toes_ik_r_trsBuffer|toes_ik_r|leg_r_ikfk_ball_piv|ball_ik_r_trsBuffer|ball_ik_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|leg_ik_r_orig|leg_ik_r_spaces|leg_ik_r|legGimble_ik_r_orig|legGimble_ik_r|leg_r_ikfk_root_piv|leg_r_ikfk_heel_piv|heel_ik_r_orig|heel_ik_r|leg_r_ikfk_inn_piv|leg_r_ikfk_out_piv|leg_r_ikfk_end_piv|toes_ik_r_orig|toes_ik_r|leg_r_ikfk_ball_piv|ball_ik_r_orig|ball_ik_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -11717,7 +11883,7 @@
             }
         }, 
         "ball_ik_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_ik_l_trsBuffer|leg_ik_l_spaces_trs|leg_ik_l|legGimble_ik_l_trsBuffer|legGimble_ik_l|leg_l_ikfk_root_piv|leg_l_ikfk_heel_piv|heel_ik_l_trsBuffer|heel_ik_l|leg_l_ikfk_inn_piv|leg_l_ikfk_out_piv|leg_l_ikfk_end_piv|toes_ik_l_trsBuffer|toes_ik_l|leg_l_ikfk_ball_piv|ball_ik_l_trsBuffer|ball_ik_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|leg_ik_l_orig|leg_ik_l_spaces|leg_ik_l|legGimble_ik_l_orig|legGimble_ik_l|leg_l_ikfk_root_piv|leg_l_ikfk_heel_piv|heel_ik_l_orig|heel_ik_l|leg_l_ikfk_inn_piv|leg_l_ikfk_out_piv|leg_l_ikfk_end_piv|toes_ik_l_orig|toes_ik_l|leg_l_ikfk_ball_piv|ball_ik_l_orig|ball_ik_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -11859,7 +12025,7 @@
             }
         }, 
         "arm_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_trsBuffer|arm_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_orig|arm_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -11894,14 +12060,14 @@
                 1.0
             ], 
             "world_translate": [
-                -61.1060473025348, 
-                124.01819966286821, 
-                -2.056076492964304
+                -61.10604730253475, 
+                124.01819966286824, 
+                -2.0560764929637965
             ], 
             "world_rotate": [
-                -89.99999519262155, 
-                5.00000170085718, 
-                3.990879864920466e-16
+                -89.99999519262154, 
+                5.000001700857298, 
+                0.0
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -12032,7 +12198,7 @@
             }
         }, 
         "arm_pv_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_pv_r_trsBuffer|arm_pv_r_spaces_trs|arm_pv_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_pv_r_orig|arm_pv_r_spaces|arm_pv_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -12170,7 +12336,7 @@
             }
         }, 
         "arm_pv_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_pv_l_trsBuffer|arm_pv_l_spaces_trs|arm_pv_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_pv_l_orig|arm_pv_l_spaces|arm_pv_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -12308,7 +12474,7 @@
             }
         }, 
         "arm_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_trsBuffer|arm_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_orig|arm_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -12481,7 +12647,7 @@
             }
         }, 
         "arm_ik_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_ik_r_trsBuffer|arm_ik_r_spaces_trs|arm_ik_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_ik_r_orig|arm_ik_r_spaces|arm_ik_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -12516,9 +12682,9 @@
                 1.0
             ], 
             "world_translate": [
-                -61.106058464981366, 
+                -61.10605846498133, 
                 124.01820000000002, 
-                -2.0560764169418286
+                -2.056076416941799
             ], 
             "world_rotate": [
                 0.0, 
@@ -12619,7 +12785,7 @@
             }
         }, 
         "arm_ik_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_ik_l_trsBuffer|arm_ik_l_spaces_trs|arm_ik_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_ik_l_orig|arm_ik_l_spaces|arm_ik_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -12654,9 +12820,9 @@
                 1.0
             ], 
             "world_translate": [
-                61.106058464981366, 
-                124.01820000000004, 
-                -2.0560764169418286
+                61.10605846498136, 
+                124.01820000000002, 
+                -2.056076416941828
             ], 
             "world_rotate": [
                 0.0, 
@@ -12757,7 +12923,7 @@
             }
         }, 
         "arm_5_bend_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_bendControl|arm_5_bend_r_trsBuffer|arm_5_bend_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_bendControl|arm_5_bend_r_orig|arm_5_bend_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -12792,14 +12958,14 @@
                 1.0
             ], 
             "world_translate": [
-                -61.1060473025348, 
-                124.01819966286821, 
-                -2.056076492964303
+                -61.10604730253475, 
+                124.01819966286824, 
+                -2.0560764929637965
             ], 
             "world_rotate": [
                 179.99999982906536, 
-                5.000001700857121, 
-                0.0
+                5.000001700857388, 
+                1.4867186043115206e-24
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -12859,7 +13025,7 @@
             }
         }, 
         "arm_5_bend_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_bendControl|arm_5_bend_l_trsBuffer|arm_5_bend_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_bendControl|arm_5_bend_l_orig|arm_5_bend_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -12957,7 +13123,7 @@
             }
         }, 
         "arm_4_bend_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_bendControl|arm_4_bend_r_trsBuffer|arm_4_bend_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_bendControl|arm_4_bend_r_orig|arm_4_bend_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -12992,14 +13158,14 @@
                 1.0
             ], 
             "world_translate": [
-                -49.71040737738207, 
+                -49.71040737738205, 
                 124.01819983143409, 
-                -3.063532064746319
+                -3.0635320647460658
             ], 
             "world_rotate": [
-                -179.9999901907232, 
-                5.052219093689133, 
-                0.0
+                -179.99999026560465, 
+                5.052219093690386, 
+                -9.515761750695564e-23
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -13059,7 +13225,7 @@
             }
         }, 
         "arm_4_bend_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_bendControl|arm_4_bend_l_trsBuffer|arm_4_bend_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_bendControl|arm_4_bend_l_orig|arm_4_bend_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -13157,7 +13323,7 @@
             }
         }, 
         "arm_3_bend_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_bendControl|arm_3_bend_r_trsBuffer|arm_3_bend_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_bendControl|arm_3_bend_r_orig|arm_3_bend_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -13197,9 +13363,9 @@
                 -4.070987636528335
             ], 
             "world_rotate": [
-                -179.99999014124322, 
-                5.052219093689045, 
-                0.0
+                -179.99999021392318, 
+                5.052219093690406, 
+                9.515761750695568e-23
             ], 
             "rotateOrder": 0, 
             "overrideEnabled": true, 
@@ -13259,7 +13425,7 @@
             }
         }, 
         "arm_3_bend_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_bendControl|arm_3_bend_l_trsBuffer|arm_3_bend_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_bendControl|arm_3_bend_l_orig|arm_3_bend_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -13357,7 +13523,7 @@
             }
         }, 
         "arm_2_bend_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_bendControl|arm_2_bend_r_trsBuffer|arm_2_bend_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_bendControl|arm_2_bend_r_orig|arm_2_bend_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -13459,7 +13625,7 @@
             }
         }, 
         "arm_2_bend_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_bendControl|arm_2_bend_l_trsBuffer|arm_2_bend_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_bendControl|arm_2_bend_l_orig|arm_2_bend_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -13557,7 +13723,7 @@
             }
         }, 
         "arm_1_bend_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_bendControl|arm_1_bend_r_trsBuffer|arm_1_bend_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_r_bendControl|arm_1_bend_r_orig|arm_1_bend_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -13659,7 +13825,7 @@
             }
         }, 
         "arm_1_bend_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_bendControl|arm_1_bend_l_trsBuffer|arm_1_bend_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_l_bendControl|arm_1_bend_l_orig|arm_1_bend_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -13757,7 +13923,7 @@
             }
         }, 
         "armGimble_ik_r": {
-            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_ik_r_trsBuffer|arm_ik_r_spaces_trs|arm_ik_r|armGimble_ik_r_trsBuffer|armGimble_ik_r", 
+            "dagPath": "|main|rig|arm_r_cmpt|arm_r_control|arm_ik_r_orig|arm_ik_r_spaces|arm_ik_r|armGimble_ik_r_orig|armGimble_ik_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -13792,9 +13958,9 @@
                 1.0
             ], 
             "world_translate": [
-                -61.106058464981366, 
+                -61.10605846498133, 
                 124.01820000000002, 
-                -2.0560764169418286
+                -2.056076416941799
             ], 
             "world_rotate": [
                 0.0, 
@@ -13951,7 +14117,7 @@
             }
         }, 
         "armGimble_ik_l": {
-            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_ik_l_trsBuffer|arm_ik_l_spaces_trs|arm_ik_l|armGimble_ik_l_trsBuffer|armGimble_ik_l", 
+            "dagPath": "|main|rig|arm_l_cmpt|arm_l_control|arm_ik_l_orig|arm_ik_l_spaces|arm_ik_l|armGimble_ik_l_orig|armGimble_ik_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -13986,9 +14152,9 @@
                 1.0
             ], 
             "world_translate": [
-                61.106058464981366, 
-                124.01820000000004, 
-                -2.0560764169418286
+                61.10605846498136, 
+                124.01820000000002, 
+                -2.056076416941828
             ], 
             "world_rotate": [
                 0.0, 
@@ -14145,7 +14311,7 @@
             }
         }, 
         "ankle_fk_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|thigh_fk_r_trsBuffer|thigh_fk_r_spaces_trs|thigh_fk_r|knee_fk_r_trsBuffer|knee_fk_r|ankle_fk_r_trsBuffer|ankle_fk_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|thigh_fk_r_orig|thigh_fk_r_spaces|thigh_fk_r|knee_fk_r_orig|knee_fk_r|ankle_fk_r_orig|ankle_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -14243,7 +14409,7 @@
             }
         }, 
         "ankle_fk_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|thigh_fk_l_trsBuffer|thigh_fk_l_spaces_trs|thigh_fk_l|knee_fk_l_trsBuffer|knee_fk_l|ankle_fk_l_trsBuffer|ankle_fk_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|thigh_fk_l_orig|thigh_fk_l_spaces|thigh_fk_l|knee_fk_l_orig|knee_fk_l|ankle_fk_l_orig|ankle_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -14341,7 +14507,7 @@
             }
         }, 
         "ankleGimble_fk_r": {
-            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|thigh_fk_r_trsBuffer|thigh_fk_r_spaces_trs|thigh_fk_r|knee_fk_r_trsBuffer|knee_fk_r|ankle_fk_r_trsBuffer|ankle_fk_r|ankleGimble_fk_r_trsBuffer|ankleGimble_fk_r", 
+            "dagPath": "|main|rig|leg_r_cmpt|leg_r_control|thigh_fk_r_orig|thigh_fk_r_spaces|thigh_fk_r|knee_fk_r_orig|knee_fk_r|ankle_fk_r_orig|ankle_fk_r|ankleGimble_fk_r_orig|ankleGimble_fk_r", 
             "translate": [
                 0.0, 
                 0.0, 
@@ -14443,7 +14609,7 @@
             }
         }, 
         "ankleGimble_fk_l": {
-            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|thigh_fk_l_trsBuffer|thigh_fk_l_spaces_trs|thigh_fk_l|knee_fk_l_trsBuffer|knee_fk_l|ankle_fk_l_trsBuffer|ankle_fk_l|ankleGimble_fk_l_trsBuffer|ankleGimble_fk_l", 
+            "dagPath": "|main|rig|leg_l_cmpt|leg_l_control|thigh_fk_l_orig|thigh_fk_l_spaces|thigh_fk_l|knee_fk_l_orig|knee_fk_l|ankle_fk_l_orig|ankle_fk_l|ankleGimble_fk_l_orig|ankleGimble_fk_l", 
             "translate": [
                 0.0, 
                 0.0, 

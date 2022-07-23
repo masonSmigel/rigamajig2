@@ -18,6 +18,14 @@ logger = logging.getLogger(__name__)
 
 class Base(object):
 
+    VERSION_MAJOR = 1
+    VERSION_MINOR = 0
+    VERSION_PATCH = 0
+
+    version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
+    version = '%i.%i.%i' % version_info
+    __version__ = version
+
     def __init__(self, name, input=[], size=1, rigParent=str()):
         """
         :param name: name of the components
@@ -165,6 +173,11 @@ class Base(object):
         if not cmds.objExists(self.container):
             self.container = rigamajig2.maya.container.create(self.container)
             rigamajig2.maya.meta.tag(self.container, 'component')
+
+            # tag the container with the proper component version
+            rigamajig2.maya.attr.createAttr(self.container, "__version__",  "string", value=self.__version__, keyable=False)
+            rigamajig2.maya.attr.lock(self.container, "__version__")
+
 
     def preScript(self):
         """run a prescript"""

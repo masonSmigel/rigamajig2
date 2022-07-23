@@ -19,6 +19,13 @@ from rigamajig2.shared import common as common
 
 
 class SplineFK(rigamajig2.maya.cmpts.base.Base):
+    VERSION_MAJOR = 1
+    VERSION_MINOR = 0
+    VERSION_PATCH = 0
+
+    version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
+    version = '%i.%i.%i' % version_info
+    __version__ = version
 
     def __init__(self, name, input=[], size=1, rigParent=str(), numControls=4, addFKSpace=False):
         """

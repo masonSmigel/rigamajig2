@@ -116,7 +116,7 @@ class Builder(object):
             cmpt._intialize_cmpt()
             if hasattr(cmpt, "guides_hrc"):
                 parent = cmds.listRelatives(cmpt.guides_hrc, p=True)
-                if parent and parent == 'guides':
+                if parent and parent[0] == 'guides':
                     break
                 cmds.parent(cmpt.guides_hrc, "guides")
             self.updateMaya()

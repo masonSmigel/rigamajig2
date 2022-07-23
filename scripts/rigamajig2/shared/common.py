@@ -255,3 +255,21 @@ def getSide(name):
         elif C_TOKENS[i] in name:
             return CENTER
     return None
+
+
+def fillList(values, fillName, amount):
+    """
+    add aditional strings to a name using a fill name and in index to match a given amount.
+    :param values: list of values to fill
+    :param fillName: base string used to fill out the list
+    :param amount: number of elements to fit the result list to. 0 based.
+    :return: list of the specificed length
+    """
+    result = list()
+    for i in range(amount):
+        if i <= len(values)-1:
+            result.append(values[i])
+        else:
+            name = fillName + str(i-len(values))
+            result.append(name)
+    return result

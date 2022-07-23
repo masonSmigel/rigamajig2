@@ -129,6 +129,15 @@ class Control(object):
         return self.getNode(common.SDK)
 
 
+def isControl(control):
+    """
+    Check if the controller is controller
+    :param control: name of the controller to check
+    :return: True if Valid. False is invalid.
+    """
+    return meta.hasTag(control, 'control')
+
+
 def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, sdk=False, parent=None,
            position=[0, 0, 0],
            rotation=[0, 0, 0], size=1, hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz',
@@ -225,7 +234,8 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     return controlObj
 
 
-def createAtObject(name, side=None, shape='circle',orig=True, spaces=False, trs=False, sdk=False, parent=None, xformObj=None, size=1,
+def createAtObject(name, side=None, shape='circle', orig=True, spaces=False, trs=False, sdk=False, parent=None,
+                   xformObj=None, size=1,
                    hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz', trasformType='transform', shapeAim='y'):
     """
     Wrapper to create a control at the position of a node.

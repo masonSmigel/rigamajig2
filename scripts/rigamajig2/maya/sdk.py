@@ -130,7 +130,6 @@ def createSdk(driverPlug, drivenPlug, values, preInfinity=False, postInfinity=Fa
         if nodeType in SDKNODETYPES:
             blendWeightedNode = createBlendWeightedNode(drivenPlug)
             nextInput = attr.getNextAvailableElement("{}.input".format(blendWeightedNode))
-            print nextInput
             cmds.connectAttr("{}.output".format(animCurveNode), nextInput)
 
         # if a blend weighted node is connected then connect the animCurve into the next available input

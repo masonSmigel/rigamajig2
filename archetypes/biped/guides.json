@@ -1,13 +1,366 @@
 {
-    "type": "NodeData", 
+    "type": "GuideData", 
     "user": "masonsmigel", 
-    "time": "2022-03-20 14:49:36", 
+    "time": "2022-07-23 12:50:33", 
     "data": {
-        "leg_r_toe": {
-            "dagPath": "|leg_r_guide|leg_r_toe", 
+        "spine_torso_guide": {
+            "dagPath": "|guides|spine_guide|spine_torso_guide", 
+            "translate": [
+                0.0, 
+                81.9125, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                9.772738284929778e-16, 
+                81.91245004983993, 
+                0.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28, 
+            "position": 0.15000000596046448
+        }, 
+        "spine_hipSwivel_guide": {
+            "dagPath": "|guides|spine_guide|spine_hipSwivel_guide", 
+            "translate": [
+                0.0, 
+                87.9329, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.3140846500201864e-15, 
+                87.93291076753472, 
+                0.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28, 
+            "position": 0.33000001311302185
+        }, 
+        "spine_chest_guide": {
+            "dagPath": "|guides|spine_guide|spine_chest_guide", 
+            "translate": [
+                0.0, 
+                110.3424, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                7.289990833214688e-15, 
+                110.34240000000004, 
+                0.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "spine_chestTop_guide": {
+            "dagPath": "|guides|spine_guide|spine_chestTop_guide", 
+            "translate": [
+                0.0, 
+                111.3256, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                7.508305088776978e-15, 
+                111.32560000000004, 
+                0.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "neck_skull_guide": {
+            "dagPath": "|guides|neck_guide|neck_skull_guide", 
+            "translate": [
+                0.0, 
+                139.6202, 
+                -2.587
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                1.3216538974347713e-14, 
+                139.62020000000007, 
+                -2.587
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "neck_neck_guide": {
+            "dagPath": "|guides|neck_guide|neck_neck_guide", 
+            "translate": [
+                0.0, 
+                124.3386, 
+                -2.587
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                9.823342139725355e-15, 
+                124.33860000000004, 
+                -2.587
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "neck_head_guide": {
+            "dagPath": "|guides|neck_guide|neck_head_guide", 
+            "translate": [
+                0.0, 
+                135.0357, 
+                -2.587
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                1.2198579883510946e-14, 
+                135.0357198178292, 
+                -2.587
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28, 
+            "position": 0.699999988079071
+        }, 
+        "leg_r_toe_guide": {
+            "dagPath": "|guides|leg_r_guide|leg_r_toe_guide", 
             "translate": [
                 -6.5443, 
-                0.7892, 
+                0.0, 
                 7.7421
             ], 
             "rotate": [
@@ -39,30 +392,230 @@
                 1.0
             ], 
             "world_translate": [
+                -6.544300079345703, 
+                0.0, 
+                7.742086887359619
+            ], 
+            "world_rotate": [
+                180.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_r_out_guide": {
+            "dagPath": "|guides|leg_r_guide|leg_r_out_guide", 
+            "translate": [
+                -8.9884, 
+                0.0, 
+                3.97
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -8.988355074175306, 
+                0.0, 
+                3.969986915588379
+            ], 
+            "world_rotate": [
+                180.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_r_inn_guide": {
+            "dagPath": "|guides|leg_r_guide|leg_r_inn_guide", 
+            "translate": [
+                -4.0261, 
+                0.0, 
+                3.97
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -4.0260724058333555, 
+                0.0, 
+                3.969986915588379
+            ], 
+            "world_rotate": [
+                180.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_r_heel_guide": {
+            "dagPath": "|guides|leg_r_guide|leg_r_heel_guide", 
+            "translate": [
+                -6.5443, 
+                0.0, 
+                -5.4502
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.544300079345703, 
+                0.0, 
+                -5.450229518242104
+            ], 
+            "world_rotate": [
+                180.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_r_ball_guide": {
+            "dagPath": "|guides|leg_r_guide|leg_r_ball_guide", 
+            "translate": [
                 -6.5443, 
                 0.7892, 
+                3.97
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.544300079345703, 
+                0.7891654968261719, 
+                3.969986915588379
+            ], 
+            "world_rotate": [
+                180.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_l_toe_guide": {
+            "dagPath": "|guides|leg_l_guide|leg_l_toe_guide", 
+            "translate": [
+                6.5443, 
+                0.0, 
                 7.7421
             ], 
-            "world_rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": true, 
-            "overrideRGBColors": false, 
-            "overrideColor": 28
-        }, 
-        "leg_r_out": {
-            "dagPath": "|leg_r_guide|leg_r_out", 
-            "translate": [
-                -9.0, 
-                0.0, 
-                4.0
-            ], 
             "rotate": [
                 0.0, 
-                0.0, 
+                -0.0, 
                 0.0
             ], 
             "scale": [
@@ -89,9 +642,9 @@
                 1.0
             ], 
             "world_translate": [
-                -9.0, 
+                6.544300079345703, 
                 0.0, 
-                4.0
+                7.742086887359619
             ], 
             "world_rotate": [
                 0.0, 
@@ -103,16 +656,16 @@
             "overrideRGBColors": false, 
             "overrideColor": 28
         }, 
-        "leg_r_inn": {
-            "dagPath": "|leg_r_guide|leg_r_inn", 
+        "leg_l_out_guide": {
+            "dagPath": "|guides|leg_l_guide|leg_l_out_guide", 
             "translate": [
-                -4.0, 
+                8.9884, 
                 0.0, 
-                4.0
+                3.97
             ], 
             "rotate": [
                 0.0, 
-                0.0, 
+                -0.0, 
                 0.0
             ], 
             "scale": [
@@ -139,9 +692,9 @@
                 1.0
             ], 
             "world_translate": [
-                -4.0, 
+                8.988355074175306, 
                 0.0, 
-                4.0
+                3.969986915588379
             ], 
             "world_rotate": [
                 0.0, 
@@ -153,16 +706,16 @@
             "overrideRGBColors": false, 
             "overrideColor": 28
         }, 
-        "leg_r_heel": {
-            "dagPath": "|leg_r_guide|leg_r_heel", 
+        "leg_l_inn_guide": {
+            "dagPath": "|guides|leg_l_guide|leg_l_inn_guide", 
             "translate": [
-                -6.5443, 
+                4.0261, 
                 0.0, 
-                -6.0
+                3.97
             ], 
             "rotate": [
                 0.0, 
-                0.0, 
+                -0.0, 
                 0.0
             ], 
             "scale": [
@@ -189,9 +742,9 @@
                 1.0
             ], 
             "world_translate": [
-                -6.5443, 
+                4.0260724058333555, 
                 0.0, 
-                -6.0
+                3.969986915588379
             ], 
             "world_rotate": [
                 0.0, 
@@ -203,216 +756,16 @@
             "overrideRGBColors": false, 
             "overrideColor": 28
         }, 
-        "leg_r_ball": {
-            "dagPath": "|leg_r_guide|leg_r_ball", 
-            "translate": [
-                -6.5443, 
-                0.7892, 
-                3.9701
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                -6.5443, 
-                0.7892, 
-                3.9701
-            ], 
-            "world_rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": true, 
-            "overrideRGBColors": false, 
-            "overrideColor": 28
-        }, 
-        "leg_l_toe": {
-            "dagPath": "|leg_l_guide|leg_l_toe", 
-            "translate": [
-                6.5443, 
-                0.7892, 
-                7.7421
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                6.5443, 
-                0.7892, 
-                7.7421
-            ], 
-            "world_rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": true, 
-            "overrideRGBColors": false, 
-            "overrideColor": 28
-        }, 
-        "leg_l_out": {
-            "dagPath": "|leg_l_guide|leg_l_out", 
-            "translate": [
-                9.0, 
-                0.0, 
-                4.0
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                9.0, 
-                0.0, 
-                4.0
-            ], 
-            "world_rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": true, 
-            "overrideRGBColors": false, 
-            "overrideColor": 28
-        }, 
-        "leg_l_inn": {
-            "dagPath": "|leg_l_guide|leg_l_inn", 
-            "translate": [
-                4.0, 
-                0.0, 
-                4.0
-            ], 
-            "rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "scale": [
-                1.0, 
-                1.0, 
-                1.0
-            ], 
-            "offsetParentMatrix": [
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                0.0, 
-                1.0
-            ], 
-            "world_translate": [
-                4.0, 
-                0.0, 
-                4.0
-            ], 
-            "world_rotate": [
-                0.0, 
-                0.0, 
-                0.0
-            ], 
-            "rotateOrder": 0, 
-            "overrideEnabled": true, 
-            "overrideRGBColors": false, 
-            "overrideColor": 28
-        }, 
-        "leg_l_heel": {
-            "dagPath": "|leg_l_guide|leg_l_heel", 
+        "leg_l_heel_guide": {
+            "dagPath": "|guides|leg_l_guide|leg_l_heel_guide", 
             "translate": [
                 6.5443, 
                 0.0, 
-                -6.0
+                -5.4502
             ], 
             "rotate": [
                 0.0, 
-                0.0, 
+                -0.0, 
                 0.0
             ], 
             "scale": [
@@ -439,9 +792,9 @@
                 1.0
             ], 
             "world_translate": [
-                6.5443, 
+                6.544300079345703, 
                 0.0, 
-                -6.0
+                -5.450229518242104
             ], 
             "world_rotate": [
                 0.0, 
@@ -453,16 +806,16 @@
             "overrideRGBColors": false, 
             "overrideColor": 28
         }, 
-        "leg_l_ball": {
-            "dagPath": "|leg_l_guide|leg_l_ball", 
+        "leg_l_ball_guide": {
+            "dagPath": "|guides|leg_l_guide|leg_l_ball_guide", 
             "translate": [
                 6.5443, 
                 0.7892, 
-                3.9701
+                3.97
             ], 
             "rotate": [
                 0.0, 
-                0.0, 
+                -0.0, 
                 0.0
             ], 
             "scale": [
@@ -489,9 +842,9 @@
                 1.0
             ], 
             "world_translate": [
-                6.5443, 
-                0.7892, 
-                3.9701
+                6.544300079345703, 
+                0.7891654968261719, 
+                3.969986915588379
             ], 
             "world_rotate": [
                 0.0, 
@@ -504,7 +857,7 @@
             "overrideColor": 28
         }, 
         "knee_r_bind_pvPos_tgt": {
-            "dagPath": "|leg_r_guide|knee_r_bind_pvPos_tgt", 
+            "dagPath": "|guides|leg_r_guide|knee_r_bind_pvPos_tgt", 
             "translate": [
                 -6.5443, 
                 39.067, 
@@ -551,10 +904,11 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 28
+            "overrideColor": 28, 
+            "pvMag": 0.0
         }, 
         "knee_l_bind_pvPos_tgt": {
-            "dagPath": "|leg_l_guide|knee_l_bind_pvPos_tgt", 
+            "dagPath": "|guides|leg_l_guide|knee_l_bind_pvPos_tgt", 
             "translate": [
                 6.5443, 
                 39.067, 
@@ -601,18 +955,19 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 28
+            "overrideColor": 28, 
+            "pvMag": 0.0
         }, 
-        "eyes_lookAtTgt": {
-            "dagPath": "|eyes_guide|eyes_lookAtTgt", 
+        "hand_r_thumbCup_guide": {
+            "dagPath": "|guides|hand_r_guide|hand_r_thumbCup_guide", 
             "translate": [
-                -0.0002, 
-                147.957, 
-                41.7086
+                -61.6555, 
+                123.0661, 
+                -0.399
             ], 
             "rotate": [
                 0.0, 
-                -0.0, 
+                0.0, 
                 0.0
             ], 
             "scale": [
@@ -639,9 +994,9 @@
                 1.0
             ], 
             "world_translate": [
-                -0.0002, 
-                147.957, 
-                41.7086
+                -61.6555, 
+                123.0661, 
+                -0.399
             ], 
             "world_rotate": [
                 0.0, 
@@ -653,11 +1008,61 @@
             "overrideRGBColors": false, 
             "overrideColor": 28
         }, 
-        "eye_r_bind_lookAtTgt": {
-            "dagPath": "|eyes_guide|eye_r_bind_lookAtTgt", 
+        "hand_l_thumbCup_guide": {
+            "dagPath": "|guides|hand_l_guide|hand_l_thumbCup_guide", 
             "translate": [
-                -2.678, 
-                152.9259, 
+                61.6555, 
+                123.0661, 
+                -0.399
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                61.6555, 
+                123.0661, 
+                -0.399
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "eyes_lookAtTgt_guide": {
+            "dagPath": "|guides|eyes_guide|eyes_lookAtTgt_guide", 
+            "translate": [
+                -0.0001, 
+                149.2305, 
                 -0.0873
             ], 
             "rotate": [
@@ -689,8 +1094,8 @@
                 1.0
             ], 
             "world_translate": [
-                -2.678, 
-                152.9259, 
+                -0.0001, 
+                149.2305, 
                 -0.0873
             ], 
             "world_rotate": [
@@ -703,11 +1108,61 @@
             "overrideRGBColors": false, 
             "overrideColor": 28
         }, 
-        "eye_l_bind_lookAtTgt": {
-            "dagPath": "|eyes_guide|eye_l_bind_lookAtTgt", 
+        "eye_r_bind_upVecTgt_guide": {
+            "dagPath": "|guides|eyes_guide|eye_r_bind_upVecTgt_guide", 
+            "translate": [
+                -2.678, 
+                149.2305, 
+                -0.0873
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -2.678, 
+                149.2305, 
+                -0.0873
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "eye_l_bind_upVecTgt_guide": {
+            "dagPath": "|guides|eyes_guide|eye_l_bind_upVecTgt_guide", 
             "translate": [
                 2.6777, 
-                152.9259, 
+                149.2305, 
                 -0.0873
             ], 
             "rotate": [
@@ -740,7 +1195,7 @@
             ], 
             "world_translate": [
                 2.6777, 
-                152.9259, 
+                149.2305, 
                 -0.0873
             ], 
             "world_rotate": [
@@ -754,11 +1209,11 @@
             "overrideColor": 28
         }, 
         "elbow_r_bind_pvPos_tgt": {
-            "dagPath": "|arm_r_guide|elbow_r_bind_pvPos_tgt", 
+            "dagPath": "|guides|arm_r_guide|elbow_r_bind_pvPos_tgt", 
             "translate": [
-                -38.7403, 
+                -38.6041, 
                 124.0182, 
-                -66.5003
+                -46.5008
             ], 
             "rotate": [
                 0.0, 
@@ -789,9 +1244,9 @@
                 1.0
             ], 
             "world_translate": [
-                -38.74028396606445, 
+                -38.604061126708984, 
                 124.01820373535156, 
-                -66.50028991699219
+                -46.500755310058594
             ], 
             "world_rotate": [
                 0.0, 
@@ -801,10 +1256,11 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 28
+            "overrideColor": 28, 
+            "pvMag": 0.0
         }, 
         "elbow_l_bind_pvPos_tgt": {
-            "dagPath": "|arm_l_guide|elbow_l_bind_pvPos_tgt", 
+            "dagPath": "|guides|arm_l_guide|elbow_l_bind_pvPos_tgt", 
             "translate": [
                 38.6041, 
                 124.0182, 
@@ -851,7 +1307,8 @@
             "rotateOrder": 0, 
             "overrideEnabled": true, 
             "overrideRGBColors": false, 
-            "overrideColor": 28
+            "overrideColor": 28, 
+            "pvMag": 0.0
         }
     }
 }

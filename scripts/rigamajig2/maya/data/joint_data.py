@@ -1,9 +1,22 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+"""
+    This is the json module for rigamajig joint data
+
+    project: rigamajig2
+    file: __init__.py
+    author: masonsmigel
+    date: 01/2021
+"""
+
 from collections import OrderedDict
 import rigamajig2.maya.data.node_data as node_data
 import maya.cmds as cmds
 
 
 class JointData(node_data.NodeData):
+    """Subclass for joint Data"""
+
     def __init__(self):
         """
         constructor for the joint data class

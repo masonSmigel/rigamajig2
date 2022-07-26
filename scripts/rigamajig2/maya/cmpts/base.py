@@ -28,6 +28,16 @@ class Base(object):
 
     def __init__(self, name, input=[], size=1, rigParent=str()):
         """
+        constructor of the base class.
+
+        An important note about rigamajig is that it has several
+        'magic variables' such as self.bindJoints, self.controlers, self.input.
+        These should always be available within the classes and can be used within subclasses.
+
+        Other varriables stored within the self.CmptSettings are published
+        into the class as parameters so they can be acessed through
+        self.myVariable within the the class.
+
         :param name: name of the components
         :type name: str
         :param input: list of input joints.
@@ -44,7 +54,7 @@ class Base(object):
         self.metaNode = None
 
         # element lists
-        self.joints = list()
+        self.bindjoints = list()
         self.controlers = list()
 
         # node metaData
@@ -177,7 +187,6 @@ class Base(object):
             # tag the container with the proper component version
             rigamajig2.maya.attr.createAttr(self.container, "__version__",  "string", value=self.__version__, keyable=False)
             rigamajig2.maya.attr.lock(self.container, "__version__")
-
 
     def preScript(self):
         """run a prescript"""

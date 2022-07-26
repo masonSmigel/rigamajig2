@@ -1,7 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-This module contains curve data
-"""
+    This is the json module for curve data
 
+    project: rigamajig2
+    file: __init__.py
+    author: masonsmigel
+    date: 01/2021
+"""
 from collections import OrderedDict
 import rigamajig2.maya.data.node_data as node_data
 import rigamajig2.shared.common as common
@@ -10,6 +16,8 @@ import maya.cmds as cmds
 
 
 class CurveData(node_data.NodeData):
+    """ This class to save and load curve data"""
+
     def __init__(self):
         """
         constructor for the curve data class
@@ -32,10 +40,10 @@ class CurveData(node_data.NodeData):
             cmds.delete(node, ch=True)
 
         data = OrderedDict()
-        shape_list = cmds.listRelatives(node, c=True, shapes=True, type="nurbsCurve", pa=True)
+        shapeList = cmds.listRelatives(node, c=True, shapes=True, type="nurbsCurve", pa=True)
         data['shapes'] = OrderedDict()
-        if shape_list:
-            for shape in shape_list:
+        if shapeList:
+            for shape in shapeList:
                 data['shapes'][shape] = OrderedDict()
                 data['shapes'][shape]['points'] = list()
                 for i, cv in enumerate(cmds.ls("{0}.cv[*]".format(shape), fl=True)):

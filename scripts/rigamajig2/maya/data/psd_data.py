@@ -1,5 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-This is the json module for rigamajig psd data
+    This is the json module for rigamajig psd data
+
+    project: rigamajig2
+    file: __init__.py
+    author: masonsmigel
+    date: 01/2021
 """
 import maya.cmds as cmds
 
@@ -11,6 +18,8 @@ import rigamajig2.maya.psd as psd
 
 
 class PSDData(maya_data.MayaData):
+    """ This class to save and load pose space deformer reader data"""
+
     def __init__(self):
         super(PSDData, self).__init__()
 
@@ -33,8 +42,8 @@ class PSDData(maya_data.MayaData):
         data = OrderedDict()
 
         outputAttrs = cmds.listAttr(outputNode, ud=True)
-        data['useTwist'] = True if len(filter(lambda x: x is True, [True if 'twist' in x else False for x in outputAttrs])) > 0 else False
-        data['useSwing'] = True if len(filter(lambda x: x is True, [True if 'swing' in x else False for x in outputAttrs])) > 0 else False
+        data['useTwist'] = True if True in [True if 'twist' in x else False for x in outputAttrs] else False
+        data['useSwing'] = True if True in [True if 'twist' in x else False for x in outputAttrs] else False
 
         # TODO: get output connections for pose readers and store them here too.
 
@@ -57,4 +66,4 @@ class PSDData(maya_data.MayaData):
                 continue
             psd.createPsdReader(node, twist=self._data[node]['useTwist'], swing=self._data[node]['useSwing'])
 
-            #TODO: This might need more complexity later... we'll see!
+            # TODO: This might need more complexity later... we'll see!

@@ -17,9 +17,10 @@ import maya.cmds as cmds
 
 # RIGAMAJIG
 import rigamajig2.shared.path as rig_path
-import rigamajig2.maya.data.psd_data as psd_data
-import rigamajig2.maya.data.skin_data as skin_data
-import rigamajig2.maya.skinCluster as skinCluster
+from rigamajig2.maya import meta
+from rigamajig2.maya.data import psd_data
+from rigamajig2.maya.data import skin_data
+from rigamajig2.maya import skinCluster
 
 
 logger = logging.getLogger(__name__)

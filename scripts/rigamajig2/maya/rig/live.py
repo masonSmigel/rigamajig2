@@ -155,24 +155,29 @@ def createLiveMirror(jointList, axis='x', mode='rotate'):
 
         # create the node network to mirror the position
         dcmp = node.decomposeMatrix("{}.worldMatrix".format(jnt), name=jnt + suf)
-        inversePos = node.multiplyDivide("{}.outputTranslate".format(dcmp),
-                                         [-1, -1, -1],
-                                         name=jnt + '_invertPos' + suf)
+        inversePos = node.multiplyDivide(
+            "{}.outputTranslate".format(dcmp),
+            [-1, -1, -1],
+            name=jnt + '_invertPos' + suf)
+
         # Issolate the x, y and z vectors.
-        x_vec = node.vectorProduct("{}.outputTranslate".format(dcmp),
-                                   [1, 0, 0], operation='dot',
-                                   name=jnt + 'XVec' + suf)
-        y_vec = node.vectorProduct("{}.outputTranslate".format(dcmp),
-                                   [0, 1, 0],
-                                   operation='dot',
-                                   name=jnt + 'YVec' + suf)
-        z_vec = node.vectorProduct("{}.outputTranslate".format(dcmp),
-                                   [0, 0, 1],
-                                   operation='dot',
-                                   name=jnt + 'ZVec' + suf)
+        xVector = node.vectorProduct(
+            "{}.outputTranslate".format(dcmp),
+            [1, 0, 0], operation='dot',
+            name=jnt + 'XVec' + suf)
+        yVector = node.vectorProduct(
+            "{}.outputTranslate".format(dcmp),
+            [0, 1, 0],
+            operation='dot',
+            name=jnt + 'YVec' + suf)
+        zVector = node.vectorProduct(
+            "{}.outputTranslate".format(dcmp),
+            [0, 0, 1],
+            operation='dot',
+            name=jnt + 'ZVec' + suf)
         # scale the vectors by 2
         scaled = node.multiplyDivide(
-            ["{}.outputX".format(x_vec), "{}.outputX".format(y_vec), "{}.outputX".format(z_vec)],
+            ["{}.outputX".format(xVector), "{}.outputX".format(yVector), "{}.outputX".format(zVector)],
             [2, 2, 2],
             name=jnt + 'dotScaled')
         # invert the isolated vectors
@@ -203,21 +208,35 @@ def createLiveMirror(jointList, axis='x', mode='rotate'):
         # Compose the mirrored position into a matrix to get a proper offset
         rotOrder = ['xyz', 'yzx', 'zxy', 'xzy', 'yxz', 'zyx'][cmds.getAttr("{}.rotateOrder".format(mirrorJnt))]
 
-        compMatrix = node.composeMatrix(inputTranslate=posList, inputQuat=quatList,
-                                        eulerRotation=False, rotateOrder=rotOrder, name=jnt + '_mirrorMatrix' + suf)
+        compMatrix = node.composeMatrix(
+            inputTranslate=posList,
+            inputQuat=quatList,
+            eulerRotation=False,
+            rotateOrder=rotOrder,
+            name=jnt + '_mirrorMatrix' + suf)
 
         # Calculate the offset
-        winv = om2.MMatrix(cmds.getAttr('{}.{}'.format(jnt, 'worldInverseMatrix')))
-        m = om2.MMatrix(cmds.getAttr('{}.{}'.format(mirrorTgt, 'worldMatrix')))
-        off = (m * winv)
+        worldInverseMatrix = om2.MMatrix(cmds.getAttr('{}.{}'.format(jnt, 'worldInverseMatrix')))
+        matrix = om2.MMatrix(cmds.getAttr('{}.{}'.format(mirrorTgt, 'worldMatrix')))
+        offsetMatrix = (matrix * worldInverseMatrix)
 
-        node.multMatrix(["{}.outputMatrix".format(compMatrix),
-                         "{}.parentInverseMatrix".format(mirrorTgt)],
-                        outputs=mirrorTgt, t=True, r=False,
-                        name=mirrorTgt + '_mirrorPos' + suf)
-        node.multMatrix([list(off), "{}.outputMatrix".format(compMatrix), "{}.parentInverseMatrix".format(mirrorTgt)],
-                        outputs=mirrorTgt, t=False, r=True,
-                        name=mirrorTgt + '_mirrorRot' + suf)
+        node.multMatrix([
+            "{}.outputMatrix".format(compMatrix),
+            "{}.parentInverseMatrix".format(mirrorTgt)],
+            outputs=mirrorTgt,
+            t=True,
+            r=False,
+            name=mirrorTgt + '_mirrorPos' + suf
+            )
+        node.multMatrix([
+            list(offsetMatrix),
+            "{}.outputMatrix".format(compMatrix),
+            "{}.parentInverseMatrix".format(mirrorTgt)],
+            outputs=mirrorTgt,
+            t=False,
+            r=True,
+            name=mirrorTgt + '_mirrorRot' + suf
+            )
 
         # connect our mirror target with a parent constraint
         cmds.pointConstraint(mirrorTgt, mirrorJnt, n=mirrorJnt + common.POINTCONSTRAINT, mo=False)
@@ -238,10 +257,10 @@ def pin(nodes=None):
     nodes = common.toList(nodes)
 
     # create a pin transform
-    pin_hrc = PIN_HRC_NAME
-    if not cmds.objExists(pin_hrc):
-        pin_hrc = cmds.createNode("transform", name=pin_hrc)
-    rig_attr.lockAndHide(pin_hrc, rig_attr.TRANSFORMS + ['v'])
+    pinHrc = PIN_HRC_NAME
+    if not cmds.objExists(pinHrc):
+        pinHrc = cmds.createNode("transform", name=pinHrc)
+    rig_attr.lockAndHide(pinHrc, rig_attr.TRANSFORMS + ['v'])
 
     for node in nodes:
         if cmds.objExists("{}.__isPinned__".format(node)):
@@ -249,11 +268,11 @@ def pin(nodes=None):
 
         cmds.addAttr(node, longName="__isPinned__", at="bool")
 
-        pin_trs = cmds.spaceLocator(name=node + "_pin")[0]
-        transform.matchTransform(node, pin_trs)
-        cmds.parent(pin_trs, pin_hrc)
-        rig_attr.lockAndHide(pin_trs, rig_attr.TRANSFORMS + ['v'])
-        cmds.parentConstraint(pin_trs, node, mo=True)
+        pinTrs = cmds.spaceLocator(name=node + "_pin")[0]
+        transform.matchTransform(node, pinTrs)
+        cmds.parent(pinTrs, pinHrc)
+        rig_attr.lockAndHide(pinTrs, rig_attr.TRANSFORMS + ['v'])
+        cmds.parentConstraint(pinTrs, node, mo=True)
         rig_attr.lock(node, rig_attr.TRANSFORMS)
 
         # store the color information before the pin.
@@ -265,14 +284,14 @@ def pin(nodes=None):
         else:
             data['prePin_overrideColor'] = cmds.getAttr("{}.overrideColor".format(node))
 
-        meta_node = meta.MetaNode(pin_trs)
-        meta_node.setDataDict(data, hide=True, lock=True)
+        metaNode = meta.MetaNode(pinTrs)
+        metaNode.setDataDict(data, hide=True, lock=True)
 
         # set a new color
-        for n in [node, pin_trs]:
-            cmds.setAttr("{}.overrideEnabled".format(n), 1)
-            cmds.setAttr("{}.overrideRGBColors".format(n), 0)
-            cmds.setAttr("{}.overrideColor".format(n), 3)
+        for node in [node, pinTrs]:
+            cmds.setAttr("{}.overrideEnabled".format(node), 1)
+            cmds.setAttr("{}.overrideRGBColors".format(node), 0)
+            cmds.setAttr("{}.overrideColor".format(node), 3)
 
 
 @rigamajig2.maya.decorators.oneUndo
@@ -290,29 +309,29 @@ def unpin(nodes=None):
         if not cmds.objExists("{}.__isPinned__".format(node)):
             continue
 
-        parent_const = cmds.ls(cmds.listConnections("{}.tx".format(node)), type='parentConstraint')[0] or None
-        if parent_const:
-            pin_trs = cmds.ls(cmds.listConnections("{}.target[0].targetParentMatrix".format(parent_const)),
-                              type='transform')[0] or None
+        parentConst = cmds.ls(cmds.listConnections("{}.tx".format(node)), type='parentConstraint')[0] or None
+        if parentConst:
+            pinTrs = cmds.ls(cmds.listConnections("{}.target[0].targetParentMatrix".format(parentConst)),
+                             type='transform')[0] or None
 
         # delete the parent constraint
         rig_attr.unlock(node, rig_attr.TRANSFORMS)
-        cmds.delete(parent_const)
+        cmds.delete(parentConst)
 
         # retreive color information and set it back
-        meta_node = meta.MetaNode(pin_trs)
-        color_data = meta_node.getAllData()
+        metaNode = meta.MetaNode(pinTrs)
+        colorData = metaNode.getAllData()
 
-        for key in list(color_data.keys()):
+        for key in list(colorData.keys()):
             attribute = key.split("_")[-1]
-            if isinstance(color_data[key], (list, tuple)):
-                cmds.setAttr("{0}.{1}".format(node, attribute), *color_data[key])
+            if isinstance(colorData[key], (list, tuple)):
+                cmds.setAttr("{0}.{1}".format(node, attribute), *colorData[key])
             else:
-                cmds.setAttr("{0}.{1}".format(node, attribute), color_data[key])
+                cmds.setAttr("{0}.{1}".format(node, attribute), colorData[key])
 
         # Remove the pinned tag so this node can be re-pined in the future.
         cmds.deleteAttr("{}.__isPinned__".format(node))
-        cmds.delete(pin_trs)
+        cmds.delete(pinTrs)
 
     # check if the pin hrc is empty. If it is we can delete it.
     if len(cmds.listRelatives(PIN_HRC_NAME, c=True) or list()) == 0:

@@ -11,6 +11,8 @@ if sys.version_info.major >= 3:
 
 
 class NodeData(maya_data.MayaData):
+    """Subclass for Node Data"""
+
     def __init__(self):
         """
         constructor for the node data class
@@ -64,18 +66,18 @@ class NodeData(maya_data.MayaData):
         :param worldSpace: If True apply translate and rotate in world space.
         :return:
         """
-        gather_attrs_from_file = False
+        gatherAttrsFromFile = False
         for node in nodes:
             if node not in self._data:
                 continue
             if not cmds.objExists(node):
                 continue
             if not attributes:
-                gather_attrs_from_file = True
+                gatherAttrsFromFile = True
                 attributes = list(self._data[node].keys())
 
             if worldSpace:
-                if not (not ('translate' in attributes) or 'world_translate' not in self._data[node]):
+                if 'translate' not in attributes or 'world_translate' not in self._data[node]:
                     cmds.xform(node, ws=True, t=self._data[node]['world_translate'])
                     attributes.remove('translate')
                 if 'rotate' in attributes and 'world_rotate' in self._data[node]:
@@ -85,7 +87,8 @@ class NodeData(maya_data.MayaData):
             # get set the offset parent matrix
             if cmds.about(api=True) > 20200000:
                 if 'offsetParentMatrix' in attributes:
-                    cmds.setAttr("{}.offsetParentMatrix".format(node), self._data[node]['offsetParentMatrix'], type='matrix')
+                    offsetParentMatrix = self._data[node]['offsetParentMatrix']
+                    cmds.setAttr("{}.offsetParentMatrix".format(node), offsetParentMatrix, type='matrix')
                     attributes.remove('offsetParentMatrix')
 
             for attribute in attributes:
@@ -108,5 +111,5 @@ class NodeData(maya_data.MayaData):
                         cmds.setAttr("{0}.{1}".format(node, attribute), value)
 
             # clear out attributes if getting from file
-            if gather_attrs_from_file:
+            if gatherAttrsFromFile:
                 attributes = None

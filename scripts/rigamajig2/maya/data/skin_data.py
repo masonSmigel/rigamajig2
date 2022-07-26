@@ -1,5 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-This module contains skin cluster data
+    This is the json module for skin cluster data
+
+    project: rigamajig2
+    file: __init__.py
+    author: masonsmigel
+    date: 01/2021
 """
 import logging
 
@@ -14,6 +21,8 @@ logger = logging.getLogger(__name__)
 
 
 class SkinData(maya_data.MayaData):
+    """ This class to save and load skinCluster data"""
+
     def __init__(self):
         super(SkinData, self).__init__()
 
@@ -59,41 +68,41 @@ class SkinData(maya_data.MayaData):
         for node in nodes:
             meshShape = deformer.getDeformShape(node)
             mesh = cmds.listRelatives(meshShape, p=True)[0]
-            mesh_skin = skinCluster.getSkinCluster(mesh)
+            meshSkin = skinCluster.getSkinCluster(mesh)
 
             influenceObjects = self._data[node]['weights'].keys()
 
-            if not rebind and mesh_skin:
-                assert len(skinCluster.getInfluenceJoints(mesh_skin)) == len(
+            if not rebind and meshSkin:
+                assert len(skinCluster.getInfluenceJoints(meshSkin)) == len(
                     influenceObjects), "Influence counts do not match."
 
-            if rebind and mesh_skin:
-                cmds.delete(mesh_skin)
-            if not rebind and not mesh_skin:
+            if rebind and meshSkin:
+                cmds.delete(meshSkin)
+            if not rebind and not meshSkin:
                 raise RuntimeError("No skin assosicated with the given node. Use the rebind argument to re-bind.")
             # preform the rebind
             if rebind:
                 cmds.select(influenceObjects, mesh, r=True)
-                mesh_skin = cmds.skinCluster(tsb=True, mi=3, dr=1.0, wd=1,  n=mesh + "_skinCluster")[0]
+                meshSkin = cmds.skinCluster(tsb=True, mi=3, dr=1.0, wd=1,  n=mesh + "_skinCluster")[0]
 
             # connect the prebind inputs
-            for index, bind_input in zip(range(len(influenceObjects)), self._data[node]['preBindInputs']):
-                if bind_input:
-                    cmds.connectAttr(bind_input, "{}.bindPreMatrix[{}]".format(mesh_skin, index), f=True)
+            for index, bindInput in zip(range(len(influenceObjects)), self._data[node]['preBindInputs']):
+                if bindInput:
+                    cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, index), f=True)
 
             # set the skinweights
-            skinCluster.setWeights(mesh, mesh_skin, self._data[node]['weights'])
+            skinCluster.setWeights(mesh, meshSkin, self._data[node]['weights'])
 
             # set other the attributes
-            cmds.setAttr("{}.{}".format(mesh_skin, "normalizeWeights"), self._data[node]['normalizeWeights'])
+            cmds.setAttr("{}.{}".format(meshSkin, "normalizeWeights"), self._data[node]['normalizeWeights'])
 
-            skinningMethodNames = cmds.attributeQuery("skinningMethod", node=mesh_skin, le=True)[0].split(":")
+            skinningMethodNames = cmds.attributeQuery("skinningMethod", node=meshSkin, le=True)[0].split(":")
             skinningMethod = skinningMethodNames.index(self._data[node]['skinningMethod'])
-            cmds.setAttr("{}.{}".format(mesh_skin, "skinningMethod"), skinningMethod)
+            cmds.setAttr("{}.{}".format(meshSkin, "skinningMethod"), skinningMethod)
             if skinningMethod > 0:
-                cmds.setAttr("{}.{}".format(mesh_skin, "dqsSupportNonRigid"), self._data[node]['dqsSupportNonRigid'])
+                cmds.setAttr("{}.{}".format(meshSkin, "dqsSupportNonRigid"), self._data[node]['dqsSupportNonRigid'])
 
             if skinningMethod ==2:
-                skinCluster.setBlendWeights(mesh, mesh_skin, self._data[node]['dqBlendWeights'])
+                skinCluster.setBlendWeights(mesh, meshSkin, self._data[node]['dqBlendWeights'])
 
             logger.info("Loaded skinweights for '{}'".format(mesh))

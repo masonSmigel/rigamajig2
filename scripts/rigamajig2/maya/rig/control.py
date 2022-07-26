@@ -24,6 +24,8 @@ CONTROLTAG = 'control'
 
 
 class Control(object):
+    """Utility class for working with rig controlers"""
+
     def __init__(self, control):
         """
         this is the constructor for the Control class.
@@ -43,6 +45,11 @@ class Control(object):
         self.control = control
 
     def addOrig(self):
+        """
+        Add a transform orig group.
+        It will be placed at the top of the controler node heirarchy
+        :return: name of the orig node if one was created
+        """
         if cmds.objExists("{}.__{}__".format(self.control, common.ORIG)):
             return None
 
@@ -50,6 +57,11 @@ class Control(object):
         meta.addMessageConnection(sourceNode=self.control, dataNode=orig[0], sourceAttr="__{}__".format(common.ORIG))
 
     def addSpaces(self):
+        """
+        Add a transform spaces group.
+        It will be placed under the orig group
+        :return: name of the spaces node if one was created
+        """
         if cmds.objExists("{}.__{}__".format(self.control, common.SPACES)):
             return None
 
@@ -67,6 +79,11 @@ class Control(object):
                                   sourceAttr="__{}__".format(common.SPACES))
 
     def addSdk(self):
+        """
+        Add a transform sdk group.
+        It will be placed between the trs and control nodes
+        :return: name of the sdk node if one was created
+        """
         if cmds.objExists("{}.__{}__".format(self.control, common.SDK)):
             return None
 
@@ -75,6 +92,12 @@ class Control(object):
         return sdk[0]
 
     def addTrs(self, name=None):
+        """
+        Add a transform offset group.
+        It will be placed between the spaces and sdk nodes
+        :param name: optional name to add. It will be added as "{}Trs"
+        :return: name of the trs node if one was created
+        """
         if cmds.objExists("{}.__{}__".format(self.control, common.TRS)):
             return None
 
@@ -89,11 +112,21 @@ class Control(object):
         meta.addMessageConnection(sourceNode=self.control, dataNode=trs[0], sourceAttr="__{}__".format(common.TRS))
 
     def getNode(self, node):
+        """
+        Get the name of a node associated with the controller.
+        This is used for other subclasses to get shapes in a more UX freindly way.
+        :param str node: type of controller node to return.
+        """
+
         if cmds.objExists("{}.__{}__".format(self.control, node)):
             return meta.getMessageConnection("{}.__{}__".format(self.control, node))
 
     @property
     def name(self):
+        """
+        :return: orign node
+        :rtype: str
+        """
         return self.control
 
     @property
@@ -138,9 +171,9 @@ def isControl(control):
     return meta.hasTag(control, 'control')
 
 
+# pylint:disable=too-many-arguments)
 def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, sdk=False, parent=None,
-           position=[0, 0, 0],
-           rotation=[0, 0, 0], size=1, hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz',
+           position=None, rotation=None, size=1, hideAttrs=None, color='blue', type=None, rotateOrder='xyz',
            trasformType='transform', shapeAim='y'):
     """
     Create a control. It will also create a hierarchy above the control based on the hierarchy list.
@@ -166,6 +199,17 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     :return: list of hierarchy created above the control plus the control:
     :rtype: list | tuple
     """
+
+    if position is None:
+        position = [0,0,0]
+
+    if rotation is None:
+        rotation = [0, 0, 0]
+    if hideAttrs is None:
+        hideAttrs = ['v']
+
+
+
     if side:
         name = rigamajig2.maya.naming.getUniqueName("{}_{}".format(name, side))
     else:
@@ -234,9 +278,10 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     return controlObj
 
 
+# pylint:disable=too-many-arguments
 def createAtObject(name, side=None, shape='circle', orig=True, spaces=False, trs=False, sdk=False, parent=None,
-                   xformObj=None, size=1,
-                   hideAttrs=['v'], color='blue', type=None, rotateOrder='xyz', trasformType='transform', shapeAim='y'):
+                   xformObj=None, size=1, hideAttrs=None, color='blue', type=None, rotateOrder='xyz',
+                   trasformType='transform', shapeAim='y'):
     """
     Wrapper to create a control at the position of a node.
 
@@ -281,28 +326,14 @@ def createAtObject(name, side=None, shape='circle', orig=True, spaces=False, trs
     return controlObj
 
 
-def addSdk(control):
-    """
-    add and sdk to a control
-    :param control: name of the control to add an sdk to
-    :return:
-    """
-
-    controls = common.toList(control)
-
-    for control in controls:
-        sdkName = rigamajig2.maya.naming.getUniqueName(control + "_sdk")
-        rigamajig2.maya.hierarchy.create(control, [sdkName], above=True, matchTransform=True)
-
-
 def getAvailableControlShapes():
     """
     Get a list of available control shapes
     """
     controlData = rigamajig2.maya.data.curve_data.CurveData()
     controlData.read(CONTROLSHAPES)
-    control_data = controlData.getData()
-    return control_data.keys()
+    controlData = controlData.getData()
+    return controlData.keys()
 
 
 def tagAsControl(control, type=None):
@@ -403,11 +434,10 @@ def setControlShape(control, shape, clearExisting=True):
     if clearExisting:
         rigamajig2.maya.curve.wipeCurveShape(control)
 
-    controlData = rigamajig2.maya.data.curve_data.CurveData()
-    controlData.read(CONTROLSHAPES)
-    control_data = controlData.getData()
-    if shape in control_data.keys():
-        source = controlData.applyData(shape, create=True)[0]
+    controlDataObj = rigamajig2.maya.data.curve_data.CurveData()
+    controlDataObj.read(CONTROLSHAPES)
+    if shape in controlDataObj.getData().keys():
+        source = controlDataObj.applyData(shape, create=True)[0]
         rigamajig2.maya.curve.copyShape(source, control)
         cmds.delete(source)
     else:
@@ -476,9 +506,10 @@ def setLineWidth(controls, lineWidth=1):
             cmds.setAttr("{}.{}".format(shape, "lineWidth"), lineWidth)
 
 
+# pylint:disable=too-many-arguments
 def createGuide(name, side=None, shape="loc", type=None, parent=None, joint=False,
-                position=[0, 0, 0], rotation=[0, 0, 0], size=1,
-                hideAttrs=['sx', 'sy', 'sz', 'v'], color='turquoise'):
+                position=None, rotation=None, size=1,
+                hideAttrs=None, color='turquoise'):
     """
     Create a guide controler
     :param name: Name of the guide
@@ -497,6 +528,13 @@ def createGuide(name, side=None, shape="loc", type=None, parent=None, joint=Fals
     if hideAttrs is None:
         hideAttrs = list()
 
+    if position is None:
+        position = [0, 0, 0]
+    if rotation is None:
+        rotation = [0, 0, 0]
+    if hideAttrs is None:
+        hideAttrs = ['sx', 'sy', 'sz', 'v']
+
     name = rigamajig2.maya.naming.getUniqueName(name, side=side)
     guide = cmds.createNode('joint', name=name + "_guide")
 
@@ -504,7 +542,7 @@ def createGuide(name, side=None, shape="loc", type=None, parent=None, joint=Fals
     if shape == "loc":
         loc = cmds.createNode('locator', p=guide, n="{}Shape".format(name))
         cmds.setAttr("{}.localScale".format(loc), size, size, size, type="double3")
-    elif shape is not "joint":
+    elif shape != "joint":
         setControlShape(guide, shape)
         scaleShapes(guide, (size, size, size))
 

@@ -51,7 +51,7 @@ def create(node, attrHolder=None, parent=None, spaceAttrName='space', defaultNam
                              choices=["{}.{}".format(localSpace, 'worldMatrix')],
                              name="{}_{}".format(node, 'spaces'))
 
-    mm, dcmp = rig_node.multMatrix(
+    multMatrix, decompMatrix = rig_node.multMatrix(
         inputs=["{}.{}".format(choice, "output"), "{}.{}".format(node, "parentInverseMatrix")],
         outputs=node, t=True, r=True,
         name="{}_{}".format(node, 'spaces'))
@@ -59,7 +59,7 @@ def create(node, attrHolder=None, parent=None, spaceAttrName='space', defaultNam
     # make some meta data connections
     meta.addMessageConnection(attrHolder, node, 'attrHolder')
     meta.addMessageConnection(choice, node, 'choiceNode')
-    meta.addMessageConnection(mm, node, 'multMatrixNode')
+    meta.addMessageConnection(multMatrix, node, 'multMatrixNode')
     meta.addMessageConnection(grp, node, 'spaceGroup')
 
     rig_attr.lockAndHide(grp, ['t', 'r', 's', 'v'])
@@ -110,8 +110,8 @@ def addSpace(node, targetList, nameList, constraintType='parent'):
                                 r=True, name="{}_{}".format(node, name))
 
         # connect the world matrix of the new space to our choice node.
-        choice_input = rig_attr.getNextAvailableElement(choice + '.input')
-        cmds.connectAttr(newSpace + '.worldMatrix', choice_input)
+        choiceInput = rig_attr.getNextAvailableElement(choice + '.input')
+        cmds.connectAttr(newSpace + '.worldMatrix', choiceInput)
 
         # lock and hide attrs we dont need
         rig_attr.lockAndHide(newSpace, ['t', 'r', 's', 'v'])

@@ -1,5 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-This is the json module
+    This is the json for abstract data
+
+    project: rigamajig2
+    file: __init__.py
+    author: masonsmigel
+    date: 01/2021
 """
 
 import getpass
@@ -15,9 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 class AbstractData(object):
-    """
-    This class is a template for any data we need to save.
-    """
+    """ This class is a template for any data we need to save."""
 
     def __init__(self):
         """

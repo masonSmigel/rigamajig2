@@ -1,5 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-This is the json module for maya transform data
+    This is the json module for guide data
+
+    project: rigamajig2
+    file: __init__.py
+    author: masonsmigel
+    date: 01/2021
 """
 from collections import OrderedDict
 import rigamajig2.maya.data.node_data as node_data
@@ -12,6 +19,8 @@ if sys.version_info.major >= 3:
 
 
 class GuideData(node_data.NodeData):
+    """ This class to save and load curve data"""
+
     def __init__(self):
         """
         constructor for the node data class

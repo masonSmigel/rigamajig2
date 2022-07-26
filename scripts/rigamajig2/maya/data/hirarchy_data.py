@@ -1,7 +1,13 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-This is the json module
-"""
+    This is the json module for heirarchy data
 
+    project: rigamajig2
+    file: __init__.py
+    author: masonsmigel
+    date: 01/2021
+"""
 import getpass
 import json
 from collections import OrderedDict
@@ -12,6 +18,8 @@ import rigamajig2.maya.hierarchy as hierarchy
 
 
 class HirachyData(maya_data.MayaData):
+    """ This class to save and load maya DAG heirarchy data"""
+
     def __init__(self):
         """
         constructor for the joint data class
@@ -37,5 +45,5 @@ class HirachyData(maya_data.MayaData):
         for node in nodes:
             if node not in self._data:
                 continue
-            hi = hierarchy.DictHierarchy(hierarchy=self._data[node]['hierarchy'])
-            hi.create()
+            nodeHierarchy = hierarchy.DictHierarchy(hierarchy=self._data[node]['hierarchy'])
+            nodeHierarchy.create()

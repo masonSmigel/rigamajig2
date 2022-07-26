@@ -199,13 +199,13 @@ class IkFkBase(object):
                 # if the node has a parent create a mult matrix to account for the offset
                 parent = cmds.listRelatives(blendJnt, parent=True, path=True)[0] or None
                 if parent:
-                    mm = cmds.createNode("multMatrix", name="{}_mm".format(blendJnt))
-                    cmds.connectAttr("{}.{}".format(blendMatrix, 'outputMatrix'), "{}.{}".format(mm, 'matrixIn[0]'),
-                                     f=True)
-                    cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[1]'),
-                                     f=True)
-                    cmds.connectAttr("{}.{}".format(mm, 'matrixSum'), "{}.{}".format(blendJnt, 'offsetParentMatrix'),
-                                     f=True)
+                    multMatrix = cmds.createNode("multMatrix", name="{}_mm".format(blendJnt))
+                    cmds.connectAttr("{}.{}".format(blendMatrix, 'outputMatrix'),
+                                     "{}.{}".format(multMatrix, 'matrixIn[0]'), f=True)
+                    cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'),
+                                     "{}.{}".format(multMatrix, 'matrixIn[1]'), f=True)
+                    cmds.connectAttr("{}.{}".format(multMatrix, 'matrixSum'),
+                                     "{}.{}".format(blendJnt, 'offsetParentMatrix'), f=True)
                 else:
                     cmds.connectAttr("{}.{}".format(blendMatrix, "outputMatrix"),
                                      "{}.{}".format(blendJnt, "offsetParentMatrix"))
@@ -217,7 +217,7 @@ class IkFkBase(object):
             meta.untag(self._ikJointList + self._fkJointList + self._blendJointList, "bind")
 
     @staticmethod
-    def connectVisibility(attrHolder, attr='ikfk', ikList=list(), fkList=list()):
+    def connectVisibility(attrHolder, attr='ikfk', ikList=None, fkList=None):
         """
         Connect the fkControls and Ik visibility. Mostly used for controls
         :param attrHolder: node that holds the attribute
@@ -225,6 +225,11 @@ class IkFkBase(object):
         :param ikList: list of ik controls
         :param fkList: list of fkControls controls
         """
+        if ikList is None:
+            ikList = list()
+        if fkList is None:
+            fkList = list()
+
         if not cmds.objExists(attrHolder):
             raise RuntimeError('Node {} does not exist'.format(attrHolder))
         if not cmds.objExists("{}.{}".format(attrHolder, attr)):
@@ -288,17 +293,18 @@ class IkFkLimb(IkFkBase):
         if not self._ikJointList:
             super(IkFkLimb, self).create(params=params)
 
-        guess_hdl = "{}_hdl".format(self._ikJointList[-1])
-        if not cmds.objExists(guess_hdl):
+        guessHandleName = "{}_hdl".format(self._ikJointList[-1])
+        if not cmds.objExists(guessHandleName):
             self._handle, self._effector = cmds.ikHandle(sj=self._ikJointList[0], ee=self._ikJointList[-1],
                                                          sol='ikRPsolver',
-                                                         name=guess_hdl)
+                                                         name=guessHandleName)
             cmds.parent(self._handle, self._group)
         else:
-            self._handle = guess_hdl
+            self._handle = guessHandleName
 
     @staticmethod
     # pylint:disable=too-many-locals
+    # pylint:disable=too-many-statements
     def createStretchyIk(ikHandle, grp=None, params=None):
         """
         Create a 2Bone stretchy ik from an  ikHandle
@@ -538,11 +544,12 @@ class IkFkLimb(IkFkBase):
         :return:
         """
         jointList = IkFkLimb.getJointsFromHandle(ikHandle)
-        pv_pos = IkFkLimb.getPoleVectorPos(jointList, magnitude)
-        return pv_pos
+        pvPos = IkFkLimb.getPoleVectorPos(jointList, magnitude)
+        return pvPos
 
 
 class IkFkFoot(IkFkBase):
+    """Build the Ik pivot heirarchy for an IK foot"""
     def __init__(self, jointList, heelPivot=None, innPivot=None, outPivot=None):
         """
         class to create an ikFk foot rig given several piviots.
@@ -559,20 +566,23 @@ class IkFkFoot(IkFkBase):
         self._pivotList = list()
 
         # additional pivots
-        self._heel_piviot = heelPivot
-        self._inn_piviot = innPivot
-        self._out_piviot = outPivot
+        self._heelPivot = heelPivot
+        self._innPiviot = innPivot
+        self._ouPiviot = outPivot
 
     def getHandles(self):
+        """get the ikHandles"""
         return self._handles
 
     def setPiviotList(self, value):
+        """set the pivot list"""
         if len(value) != 8:
             raise RuntimeError("Piviot list be have a length of 8")
 
         self._pivotList = value
 
     def getPivotList(self):
+        """get the pivot list"""
         return self._pivotList
 
     def setJointList(self, value):
@@ -657,9 +667,9 @@ class IkFkFoot(IkFkBase):
         cmds.connectAttr("{}.outColorG".format(bankCond), "{}.rz".format(pivotList[3]))
 
         # check to see if its on the right side.
-        inn_pos = cmds.xform(pivotList[2], q=True, ws=True, t=True)
-        out_pos = cmds.xform(pivotList[3], q=True, ws=True, t=True)
-        if out_pos < inn_pos:
+        innPos = cmds.xform(pivotList[2], q=True, ws=True, t=True)
+        outPos = cmds.xform(pivotList[3], q=True, ws=True, t=True)
+        if outPos < innPos:
             cmds.setAttr("{}.operation".format(bankCond), 4)
 
         # Setup the foot roll
@@ -697,7 +707,7 @@ class IkFkFoot(IkFkBase):
             7 - toe tap
         """
 
-        piviot_dict = {
+        pivotDict = {
             'root': {
                 'heel': {
                     'inn': {
@@ -711,20 +721,20 @@ class IkFkFoot(IkFkBase):
                 }
             }
 
-        piv_hierarchy = rig_hierarchy.DictHierarchy(piviot_dict, parent=self._group, prefix=self._group + "_",
+        pivHierarchy = rig_hierarchy.DictHierarchy(pivotDict, parent=self._group, prefix=self._group + "_",
                                                     suffix='_piv')
-        piv_hierarchy.create()
-        self._pivotList = piv_hierarchy.getNodes()
+        pivHierarchy.create()
+        self._pivotList = pivHierarchy.getNodes()
 
-        if not cmds.objExists(self._heel_piviot) or not cmds.objExists(self._inn_piviot) or not cmds.objExists(
-                self._out_piviot):
+        if not cmds.objExists(self._heelPivot) or not cmds.objExists(self._innPiviot) or not cmds.objExists(
+                self._ouPiviot):
             raise RuntimeError("missing required addional piviots. Please supply a heel, inn and out piviot")
 
         # matchup the piviots to their correct spots
         transform.matchTranslate(self._ikJointList[0], self._pivotList[0])
-        transform.matchTranslate(self._heel_piviot, self._pivotList[1])
-        transform.matchTranslate(self._inn_piviot, self._pivotList[2])
-        transform.matchTranslate(self._out_piviot, self._pivotList[3])
+        transform.matchTranslate(self._heelPivot, self._pivotList[1])
+        transform.matchTranslate(self._innPiviot, self._pivotList[2])
+        transform.matchTranslate(self._ouPiviot, self._pivotList[3])
         transform.matchTranslate(self._ikJointList[2], self._pivotList[4])
         transform.matchTranslate(self._ikJointList[1], self._pivotList[5])
         transform.matchTranslate(self._ikJointList[0], self._pivotList[6])

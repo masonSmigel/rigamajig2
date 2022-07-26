@@ -1,13 +1,18 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-Json module for anything that has weight data
+    This is the json module for anything that has weight data
+
+    project: rigamajig2
+    file: __init__.py
+    author: masonsmigel
+    date: 01/2021
 """
 import rigamajig2.maya.data.abstract_data as abstract_data
 
 
 class WeightData(abstract_data.AbstractData):
-    """
-    This class saves and loads weight data.
-    """
+    """ This class saves and loads weight data."""
 
     def __init__(self):
         super(WeightData, self).__init__()

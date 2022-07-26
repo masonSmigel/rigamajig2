@@ -1,5 +1,12 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-This is the json module for maya animation data
+    This is the json module for maya animation data
+
+    project: rigamajig2
+    file: __init__.py
+    author: masonsmigel
+    date: 01/2021
 """
 from collections import OrderedDict
 import rigamajig2.maya.data.maya_data as maya_data
@@ -18,12 +25,16 @@ logger = logging.getLogger(__name__)
 
 
 class AnimData(maya_data.MayaData):
+    """ This class to save and load  animation data"""
+
     def __init__(self):
         """
         constructor for the node data class
         """
         super(AnimData, self).__init__()
 
+    # pylint:disable=too-many-locals
+    # pylint:disable=too-many-statements
     def gatherData(self, node):
         """
         This method will gather data from the maya node passed as an argument.
@@ -138,12 +149,12 @@ class AnimData(maya_data.MayaData):
         else:
             retargetNodes = common.toList(retargetNodes)
 
-        gather_attrs_from_file = False
-        for node, retarget_node in zip(nodes, retargetNodes):
+        gatherAttrsFromFile = False
+        for node, retargetNode in zip(nodes, retargetNodes):
             if node not in self._data:
                 continue
             if not attributes:
-                gather_attrs_from_file = True
+                gatherAttrsFromFile = True
                 attributes = self._data[node].keys()
 
             # apply the data
@@ -153,7 +164,7 @@ class AnimData(maya_data.MayaData):
 
                 # get an MPlug for the current plug
                 mSelectionList = om.MSelectionList()
-                mSelectionList.add("{}.{}".format(retarget_node, attribute))
+                mSelectionList.add("{}.{}".format(retargetNode, attribute))
                 currentMPlug = mSelectionList.getPlug(0)
 
                 connectedList = currentMPlug.connectedTo(1,0)
@@ -198,7 +209,7 @@ class AnimData(maya_data.MayaData):
                     mfnAnimCurve.setWeight(keyIndex, self._data[node][attribute]['outTangentWeightList'][keyIndex], 0)
 
                 # clear out attributes if getting from file
-                if gather_attrs_from_file:
+                if gatherAttrsFromFile:
                     attributes = None
 
-            logger.info("anim loaded '{}' to '{}".format(node, retarget_node) )
+            logger.info("anim loaded '{}' to '{}".format(node, retargetNode))

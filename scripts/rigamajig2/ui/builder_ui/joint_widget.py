@@ -170,7 +170,7 @@ class JointWidget(QtWidgets.QWidget):
         self.joint_pos_path_selector.set_relativeTo(rigEnv)
 
         # update data within the rig
-        jointFile = self.builder.get_rig_data(self.builder.get_rig_file(), SKELETON_POS)
+        jointFile = self.builder.getRigData(self.builder.get_rig_file(), SKELETON_POS)
         if jointFile:
             self.joint_pos_path_selector.set_path(jointFile)
 

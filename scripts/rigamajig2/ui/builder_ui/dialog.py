@@ -243,7 +243,7 @@ class BuilderDialog(QtWidgets.QDialog):
 
         # setup ui Data
         rigName = rigamajig2.maya.rig_builder.builder.RIG_NAME
-        self.asset_name_le.setText(self.rig_builder.get_rig_data(self.rig_file, rigName))
+        self.asset_name_le.setText(self.rig_builder.getRigData(self.rig_file, rigName))
 
         # set paths and widgets relative to the rig env
         for widget in self.main_widgets:

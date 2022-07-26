@@ -112,11 +112,11 @@ class DeformationWidget(QtWidgets.QWidget):
         self.psd_path_selector.set_relativeTo(rigEnv)
 
         # update data within the rig
-        skinFile = self.builder.get_rig_data(self.builder.get_rig_file(), SKINS)
+        skinFile = self.builder.getRigData(self.builder.get_rig_file(), SKINS)
         if skinFile:
             self.skin_path_selector.set_path(skinFile)
 
-        psdFile = self.builder.get_rig_data(self.builder.get_rig_file(), PSD)
+        psdFile = self.builder.getRigData(self.builder.get_rig_file(), PSD)
         if psdFile:
             self.psd_path_selector.set_path(psdFile)
 

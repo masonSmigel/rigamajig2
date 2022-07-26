@@ -60,6 +60,7 @@ OUTPUT_RIG = 'output_file'
 OUTPUT_RIG_FILE_TYPE = 'output_file_type'
 
 
+#pylint:disable=too-many-public-methods
 class Builder(object):
     def __init__(self, rigFile=None):
         """
@@ -92,17 +93,17 @@ class Builder(object):
     # RIG BUILD STEPS
     # --------------------------------------------------------------------------------
     def import_model(self, path=None):
-        path = path or self._absPath(self.get_rig_data(self.rig_file, MODEL_FILE))
+        path = path or self._absPath(self.getRigData(self.rig_file, MODEL_FILE))
         model.import_model(path)
         logger.info("Model loaded")
 
     def load_joints(self, path=None):
-        path = path or self._absPath(self.get_rig_data(self.rig_file, SKELETON_POS))
+        path = path or self._absPath(self.getRigData(self.rig_file, SKELETON_POS))
         guides.load_joints(path)
         logger.info("Joints loaded")
 
     def save_joints(self, path=None):
-        path = path or self._absPath(self.get_rig_data(self.rig_file, SKELETON_POS))
+        path = path or self._absPath(self.getRigData(self.rig_file, SKELETON_POS))
         guides.save_joints(path)
         logger.info("Joint positions saved to: {}".format(path))
 
@@ -187,7 +188,7 @@ class Builder(object):
         :return:
         """
         if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, COMPONENTS))
+            path = self._absPath(self.getRigData(self.rig_file, COMPONENTS))
 
         cmpt_data = OrderedDict()
         cd = abstract_data.AbstractData()
@@ -205,7 +206,7 @@ class Builder(object):
         :return:
         """
         if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, COMPONENTS))
+            path = self._absPath(self.getRigData(self.rig_file, COMPONENTS))
         cd = abstract_data.AbstractData()
         cd.read(path)
         cmpt_data = cd.getData()
@@ -243,7 +244,7 @@ class Builder(object):
         :return:
         """
         if not path:
-            path = self._absPath(self.get_rig_data(self.rig_file, COMPONENTS))
+            path = self._absPath(self.getRigData(self.rig_file, COMPONENTS))
 
         if self.load_cmpts_from_file:
             cd = abstract_data.AbstractData()
@@ -263,13 +264,13 @@ class Builder(object):
         :param applyColor: Apply the control colors.
         :return:
         """
-        path = path or self._absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))
-        controlShapes.load_controlShapes(path, applyColor=applyColor)
+        path = path or self._absPath(self.getRigData(self.rig_file, CONTROL_SHAPES))
+        controlShapes.loadControlShapes(path, applyColor=applyColor)
         logger.info("control shapes -- complete")
 
     def save_controlShapes(self, path=None):
-        path = path or self._absPath(self.get_rig_data(self.rig_file, CONTROL_SHAPES))
-        controlShapes.save_controlShapes(path)
+        path = path or self._absPath(self.getRigData(self.rig_file, CONTROL_SHAPES))
+        controlShapes.saveControlShapes(path)
         logger.info("control shapes saved to: {}".format(path))
 
     def load_guide_data(self, path=None):
@@ -277,7 +278,7 @@ class Builder(object):
         Load guide data
         :return:
         """
-        path = path or self._absPath(self.get_rig_data(self.rig_file, GUIDES))
+        path = path or self._absPath(self.getRigData(self.rig_file, GUIDES))
         if guides.load_guide_data(path):
             logger.info("guides loaded")
 
@@ -287,20 +288,20 @@ class Builder(object):
         :param path:
         :return:
         """
-        path = path or self._absPath(self.get_rig_data(self.rig_file, GUIDES))
+        path = path or self._absPath(self.getRigData(self.rig_file, GUIDES))
         guides.save_guide_data(path)
         logger.info("guides saved to: {}".format(path))
 
     def load_poseReaders(self, path=None, replace=True):
         """ Load pose readers"""
 
-        path = path or self._absPath(self.get_rig_data(self.rig_file, PSD)) or ''
+        path = path or self._absPath(self.getRigData(self.rig_file, PSD)) or ''
         if deform.load_poseReaders(path, replace=replace):
             logger.info("pose readers loaded")
 
     def save_poseReaders(self, path=None):
         """Save out pose readers"""
-        path = path or self._absPath(self.get_rig_data(self.rig_file, PSD))
+        path = path or self._absPath(self.getRigData(self.rig_file, PSD))
         deform.save_poseReaders(path)
         logger.info("pose readers saved to: {}".format(path))
 
@@ -313,12 +314,12 @@ class Builder(object):
         logger.info("data loading -- complete")
 
     def load_skin_weights(self, path=None):
-        path = path or self._absPath(self.get_rig_data(self.rig_file, SKINS)) or ''
+        path = path or self._absPath(self.getRigData(self.rig_file, SKINS)) or ''
         if deform.load_skin_weights(path):
             logger.info("skin weights loaded")
 
     def save_skin_weights(self, path=None):
-        path = path or self._absPath(self.get_rig_data(self.rig_file, SKINS)) or ''
+        path = path or self._absPath(self.getRigData(self.rig_file, SKINS)) or ''
         deform.save_skin_weights(path)
 
     def delete_cmpts(self, clear_list=True):
@@ -365,17 +366,17 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     def pre_script(self):
         """ Run pre scripts. use  through the PRE SCRIPT path"""
-        builderUtils.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, PRE_SCRIPT)))
+        builderUtils.runAllScripts(self._absPath(self.getRigData(self.rig_file, PRE_SCRIPT)))
         logger.info("pre scripts -- complete")
 
     def post_script(self):
         """ Run pre scripts. use  through the POST SCRIPT path"""
-        builderUtils.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, POST_SCRIPT)))
+        builderUtils.runAllScripts(self._absPath(self.getRigData(self.rig_file, POST_SCRIPT)))
         logger.info("post scripts -- complete")
 
     def pub_script(self):
         """ Run pre scripts. use  through the PUB SCRIPT path"""
-        builderUtils.runAllScripts(self._absPath(self.get_rig_data(self.rig_file, PUB_SCRIPT)))
+        builderUtils.runAllScripts(self._absPath(self.getRigData(self.rig_file, PUB_SCRIPT)))
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
@@ -411,9 +412,9 @@ class Builder(object):
     # UTILITY FUNCTION TO PUBLISH THE RIG
     def publish(self, outputfile=None, assetName=None, fileType=None, versioning=True):
 
-        outputfile = outputfile or self._absPath(self.get_rig_data(self.rig_file, OUTPUT_RIG))
-        assetName = assetName or self._absPath(self.get_rig_data(self.rig_file, RIG_NAME))
-        fileType = fileType or self._absPath(self.get_rig_data(self.rig_file, OUTPUT_RIG_FILE_TYPE))
+        outputfile = outputfile or self._absPath(self.getRigData(self.rig_file, OUTPUT_RIG))
+        assetName = assetName or self._absPath(self.getRigData(self.rig_file, RIG_NAME))
+        fileType = fileType or self._absPath(self.getRigData(self.rig_file, OUTPUT_RIG_FILE_TYPE))
 
         # check if the provided path is a file path.
         # if so use the file naming and extension from the provided path
@@ -425,7 +426,7 @@ class Builder(object):
         else:
             dir_name = outputfile
             if assetName:
-                rig_name = self.get_rig_data(self.rig_file, RIG_NAME)
+                rig_name = self.getRigData(self.rig_file, RIG_NAME)
                 file_name = "{}_{}.{}".format(rig_name, 'rig', fileType)
             else:
                 raise RuntimeError("Must select an output path or character name to publish a rig")
@@ -521,28 +522,28 @@ class Builder(object):
         rig_data.read(self.rig_file)
         data = rig_data.getData()
         if "rig_env" not in data:
-            rig_env_path = '../'
+            rigEnviornmentPath = '../'
         else:
-            rig_env_path = data["rig_env"]
-        self.path = os.path.abspath(os.path.join(self.rig_file, rig_env_path))
+            rigEnviornmentPath = data["rig_env"]
+        self.path = os.path.abspath(os.path.join(self.rig_file, rigEnviornmentPath))
         logger.info('\n\nRig Enviornment path: {0}'.format(self.path))
 
     @staticmethod
-    def get_rig_data(rig_file, key):
+    def getRigData(rigFile, key):
         """
         read the data from the self.rig_file
-        :param rig_file:
+        :param rigFile:
         :param key:
         :return:
         """
-        if not rig_file:
+        if not rigFile:
             return None
 
-        if not os.path.exists(rig_file):
-            raise RuntimeError('rig file at {} does not exist'.format(rig_file))
+        if not os.path.exists(rigFile):
+            raise RuntimeError('rig file at {} does not exist'.format(rigFile))
 
         data = abstract_data.AbstractData()
-        data.read(rig_file)
+        data.read(rigFile)
         if key in data.getData():
             return data.getData()[key]
         return None

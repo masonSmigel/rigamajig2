@@ -77,17 +77,17 @@ class PublishWidget(QtWidgets.QWidget):
         self.publishScript_scriptRunner.clear_scripts()
 
         # update data within the rig
-        outFile = self.builder.get_rig_data(self.builder.get_rig_file(), OUTPUT_RIG)
+        outFile = self.builder.getRigData(self.builder.get_rig_file(), OUTPUT_RIG)
         if outFile:
             self.out_path_selector.set_path(outFile)
 
         # update the script runner
         self.publishScript_scriptRunner.set_relative_dir(rigEnv)
-        for path in self.builder.get_rig_data(rigFile, PUB_SCRIPT):
+        for path in self.builder.getRigData(rigFile, PUB_SCRIPT):
             self.publishScript_scriptRunner.add_scripts(self.builder._absPath(path))
 
         # set the default output file type
-        file_type_text = self.builder.get_rig_data(rigFile, OUTPUT_RIG_FILE_TYPE)
+        file_type_text = self.builder.getRigData(rigFile, OUTPUT_RIG_FILE_TYPE)
         index = self.out_file_type_cb.findText(file_type_text, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.out_file_type_cb.setCurrentIndex(index)

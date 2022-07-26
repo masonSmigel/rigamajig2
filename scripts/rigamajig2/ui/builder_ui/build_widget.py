@@ -84,7 +84,7 @@ class BuildWidget(QtWidgets.QWidget):
         self.postScript_scriptRunner.clear_scripts()
 
         self.postScript_scriptRunner.set_relative_dir(rigEnv)
-        for path in self.builder.get_rig_data(rigFile, POST_SCRIPT):
+        for path in self.builder.getRigData(rigFile, POST_SCRIPT):
             self.postScript_scriptRunner.add_scripts(self.builder._absPath(path))
 
     def runWidget(self):

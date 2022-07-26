@@ -18,7 +18,7 @@ import rigamajig2.maya.meta as meta
 import rigamajig2.maya.data.curve_data as curve_data
 
 
-def load_controlShapes(path=None, applyColor=True):
+def loadControlShapes(path=None, applyColor=True):
     """
     Load the control shapes
     :param path: path to control shape
@@ -28,15 +28,15 @@ def load_controlShapes(path=None, applyColor=True):
     if not os.path.exists(path):
         raise Exception("Path does no exist {}".format(path))
 
-    cd = curve_data.CurveData()
-    cd.read(path)
+    curveDataObj = curve_data.CurveData()
+    curveDataObj.read(path)
 
-    controls = [ctl for ctl in cd.getKeys() if cmds.objExists(ctl)]
-    cd.applyData(controls, create=True, applyColor=applyColor)
+    controls = [ctl for ctl in curveDataObj.getKeys() if cmds.objExists(ctl)]
+    curveDataObj.applyData(controls, create=True, applyColor=applyColor)
 
 
-def save_controlShapes(path=None):
+def saveControlShapes(path=None):
     """save the control shapes"""
-    cd = curve_data.CurveData()
-    cd.gatherDataIterate(meta.getTagged("control"))
-    cd.write(path)
+    curveDataObj = curve_data.CurveData()
+    curveDataObj.gatherDataIterate(meta.getTagged("control"))
+    curveDataObj.write(path)

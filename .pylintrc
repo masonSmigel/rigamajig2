@@ -72,7 +72,7 @@ score=yes
 ignore-long-lines=^\s*(# )?<?https?://\S+>?$
 
 # Maximum number of characters on a single line.
-max-line-length=120
+max-line-length=125
 
 # Maximum number of lines in a module.
 max-module-lines=1000
@@ -112,7 +112,7 @@ function-naming-style=camelCase
 module-naming-style=any
 
 # Good variable names which should always be accepted, separated by a comma.
-good-names= i, j, k, f, ex, Run, _, A, B, C, logger
+good-names= i, j, k, r, f,cv, d, ex, ik, fk, Run, _, A, B, C, logger, basestring
 
 
 [CLASSES]

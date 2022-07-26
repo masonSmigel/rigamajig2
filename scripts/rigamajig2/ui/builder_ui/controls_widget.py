@@ -140,7 +140,7 @@ class ControlsWidget(QtWidgets.QWidget):
         self.ctl_path_selector.set_relativeTo(rigEnv)
 
         # update data within the rig
-        controlFile = self.builder.get_rig_data(self.builder.get_rig_file(), CONTROL_SHAPES)
+        controlFile = self.builder.getRigData(self.builder.get_rig_file(), CONTROL_SHAPES)
         if controlFile:
             self.ctl_path_selector.set_path(controlFile)
 
@@ -158,10 +158,10 @@ class ControlsWidget(QtWidgets.QWidget):
 
     # CONNECTIONS
     def load_controlShapes(self):
-        self.builder.load_controlShapes(self.ctl_path_selector.get_abs_path(), self.load_color_cb.isChecked())
+        self.builder.loadControlShapes(self.ctl_path_selector.get_abs_path(), self.load_color_cb.isChecked())
 
     def save_controlShapes(self):
-        self.builder.save_controlShapes(self.ctl_path_selector.get_abs_path())
+        self.builder.saveControlShapes(self.ctl_path_selector.get_abs_path())
 
     def mirror_control(self):
         axis = 'x'

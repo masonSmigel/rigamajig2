@@ -118,11 +118,11 @@ class InitializeWidget(QtWidgets.QWidget):
         self.cmpt_manager.clear_cmpt_tree()
 
         # update data within the rig
-        cmptsFile = self.builder.get_rig_data(self.builder.get_rig_file(), COMPONENTS)
+        cmptsFile = self.builder.getRigData(self.builder.get_rig_file(), COMPONENTS)
         if cmptsFile:
             self.cmpt_path_selector.set_path(cmptsFile)
 
-        guidesFile = self.builder.get_rig_data(self.builder.get_rig_file(), GUIDES)
+        guidesFile = self.builder.getRigData(self.builder.get_rig_file(), GUIDES)
         if guidesFile:
             self.guide_path_selector.set_path(guidesFile)
 

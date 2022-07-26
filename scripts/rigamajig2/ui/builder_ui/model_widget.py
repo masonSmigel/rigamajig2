@@ -82,13 +82,13 @@ class ModelWidget(QtWidgets.QWidget):
         self.preScript_scriptRunner.clear_scripts()
 
         # update data within the rig
-        modelFile = self.builder.get_rig_data(self.builder.get_rig_file(), MODEL_FILE)
+        modelFile = self.builder.getRigData(self.builder.get_rig_file(), MODEL_FILE)
         if modelFile:
             self.model_path_selector.set_path(modelFile)
 
         # update the script runner
         self.preScript_scriptRunner.set_relative_dir(rigEnv)
-        for path in self.builder.get_rig_data(rigFile, PRE_SCRIPT):
+        for path in self.builder.getRigData(rigFile, PRE_SCRIPT):
             self.preScript_scriptRunner.add_scripts(self.builder._absPath(path))
 
     def runWidget(self):

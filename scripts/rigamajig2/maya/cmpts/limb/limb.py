@@ -353,9 +353,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             self.twist_hrc = cmds.createNode("transform", n="{}_twist".format(self.name), p=self.root_hrc)
 
             upp_targets, upp_spline = spline.addTwistJoints(self.input[1], self.input[2], name=self.name + "_upp_twist",
-                                                            bind_parent=self.input[1], rig_parent=self.twist_hrc)
+                                                            bindParent=self.input[1], rigParent=self.twist_hrc)
             low_targets, low_spline = spline.addTwistJoints(self.input[2], self.input[3], name=self.name + "_low_twist",
-                                                            bind_parent=self.input[2], rig_parent=self.twist_hrc)
+                                                            bindParent=self.input[2], rigParent=self.twist_hrc)
 
             # calculate an inverted rotation to negate the upp twist start.
             # This gives a more natural twist down the limb

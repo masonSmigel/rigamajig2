@@ -19,6 +19,7 @@ if sys.version_info[0] >= 3:
     basestring = str
 
 
+# pylint:disable=too-many-instance-attributes
 class SplineBase(object):
     """
     base class for ik spline
@@ -129,6 +130,8 @@ class SplineBase(object):
         """
         self._name = name
 
+    # pylint:disable=too-many-statements
+    # pylint:disable=too-many-locals
     def create(self, clusters=4, params=None):
         """
         This will create the ik spline and connect them to the jointList.
@@ -194,10 +197,10 @@ class SplineBase(object):
         # CLUSTERS SCALE
 
         # STRETCH
-        curve_info = cmds.rename(cmds.arclen(self._curve, ch=True), self._name + '_curveInfo')
-        cmds.connectAttr(self._curve + '.local', curve_info + '.inputCurve', f=True)
-        arc_len = cmds.getAttr("{}.{}".format(curve_info, 'arcLength'))
-        stretchBta = node.blendTwoAttrs(arc_len, "{}.arcLength".format(curve_info), weight=stretchyAttr,
+        curveInfo = cmds.rename(cmds.arclen(self._curve, ch=True), self._name + '_curveInfo')
+        cmds.connectAttr(self._curve + '.local', curveInfo + '.inputCurve', f=True)
+        arc_len = cmds.getAttr("{}.{}".format(curveInfo, 'arcLength'))
+        stretchBta = node.blendTwoAttrs(arc_len, "{}.arcLength".format(curveInfo), weight=stretchyAttr,
                                         name="{}_stretch".format(self._name))
 
         scaleAll = node.multiplyDivide(["{}.output".format(stretchBta), 1, 1], [arc_len, 1, 1], operation='div',
@@ -210,15 +213,15 @@ class SplineBase(object):
 
         for i, joint in enumerate(self._ikJointList[1:]):
             if i > 0:
-                jnt_len = mathUtils.distanceNodes(self._ikJointList[i], self._ikJointList[i + 1])
+                jntLen = mathUtils.distanceNodes(self._ikJointList[i], self._ikJointList[i + 1])
             else:
-                jnt_len = mathUtils.distanceNodes(self._ikJointList[0], self._ikJointList[i + 1])
+                jntLen = mathUtils.distanceNodes(self._ikJointList[0], self._ikJointList[i + 1])
 
             if isNegative:
-                jnt_len *= -1
+                jntLen *= -1
 
             # Connect the stretch to the joint translation
-            node.multDoubleLinear("{}.outputX".format(scaleAll), jnt_len,
+            node.multDoubleLinear("{}.outputX".format(scaleAll), jntLen,
                                   output="{}.t{}".format(joint, aimAxis),
                                   name='{}_stretch'.format(joint))
         # start twist decompose
@@ -236,8 +239,8 @@ class SplineBase(object):
         endTwist = rig_transform.decomposeRotation(self._endTwist, aimAxis)[list('xyz').index(aimAxis)]
 
         # The overall twist is calculated as roll = startTwist, twist =  (endTwist - startTwist)
-        twist_multipler = -1 if isNegative else -1
-        reverseStartTwist = node.multDoubleLinear(startTwist, twist_multipler,
+        twistMultipler = -1 if isNegative else -1
+        reverseStartTwist = node.multDoubleLinear(startTwist, twistMultipler,
                                                   name="{}_reverseStart".format(self._name))
         if isNegative:
             endReverse = node.multDoubleLinear(endTwist, -1, name="{}_reverseEnd".format(self._name))
@@ -293,15 +296,15 @@ class SplineBase(object):
         meta.untag(self._ikJointList, "bind")
 
 
-def addTwistJoints(start, end, jnts=4, name="twist", bind_parent=None, rig_parent=None):
+def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=None):
     """
     add twist and bend joints between a start and end joint
     :param start: start joint
     :param end: end joint
     :param jnts: number of joints to add
     :param name: name of the group
-    :param bind_parent: parent the bind group here
-    :param rig_parent: parent the rig group
+    :param bindParent: parent the bind group here
+    :param rigParent: parent the rig group
     :return: returns a list of targets and a spline object created.
             reminder: to get the first target you must first acess the list. ex addTwistJoints[0][0]
     """
@@ -326,22 +329,22 @@ def addTwistJoints(start, end, jnts=4, name="twist", bind_parent=None, rig_paren
     rig_transform.unfreezeToTransform(jointList)
     rig_joint.toOrientation(jointList)
 
-    spline_ = SplineBase(jointList=jointList, name=name)
-    if not cmds.objExists(spline_.getGroup()):
-        cmds.createNode("transform", n=spline_.getGroup())
+    spline = SplineBase(jointList=jointList, name=name)
+    if not cmds.objExists(spline.getGroup()):
+        cmds.createNode("transform", n=spline.getGroup())
 
     # parent the bind group
-    rig_group = spline_.getGroup()
-    if bind_parent and cmds.objExists(bind_parent):
-        cmds.parent(jointList[0], bind_parent)
+    rigGroup = spline.getGroup()
+    if bindParent and cmds.objExists(bindParent):
+        cmds.parent(jointList[0], bindParent)
     else:
-        rig_group = [rig_group] + [bind_grp]
+        rigGroup = [rigGroup] + [bind_grp]
 
     # parent the rig group
-    if rig_parent and cmds.objExists(rig_parent):
-        cmds.parent(rig_group, rig_parent)
+    if rigParent and cmds.objExists(rigParent):
+        cmds.parent(rigGroup, rigParent)
 
-    spline_.create()
+    spline.create()
 
     # create three output joints
     startTgt = cmds.createNode('joint', n="{}_start_spline_{}".format(name, common.TARGET))
@@ -354,19 +357,19 @@ def addTwistJoints(start, end, jnts=4, name="twist", bind_parent=None, rig_paren
     endTgt = cmds.createNode('joint', n="{}_end_spline_{}".format(name, common.TARGET))
     rig_transform.matchTransform(jointList[-1], endTgt)
 
-    cmds.parent(startTgt, midTgt, endTgt, spline_.getGroup())
+    cmds.parent(startTgt, midTgt, endTgt, spline.getGroup())
 
     # connect the targets to the main joints source
-    cmds.parent(spline_.getClusters()[0], startTgt)
-    cmds.parent(spline_.getClusters()[1:-1], midTgt)
-    cmds.parent(spline_.getClusters()[-1], endTgt)
+    cmds.parent(spline.getClusters()[0], startTgt)
+    cmds.parent(spline.getClusters()[1:-1], midTgt)
+    cmds.parent(spline.getClusters()[-1], endTgt)
 
     # connect to the twist of the joints
-    rig_transform.connectOffsetParentMatrix(start, spline_.getGroup(), mo=True)
-    cmds.orientConstraint(end, spline_._endTwist, mo=True)
+    rig_transform.connectOffsetParentMatrix(start, spline.getGroup(), mo=True)
+    cmds.orientConstraint(end, spline._endTwist, mo=True)
 
     # general cleanup
     for jnt in [startTgt, midTgt, endTgt]:
         cmds.setAttr('{}.drawStyle'.format(jnt), 2)
 
-    return [startTgt, midTgt, endTgt], spline_
+    return [startTgt, midTgt, endTgt], spline

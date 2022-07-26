@@ -171,7 +171,7 @@ def isControl(control):
     return meta.hasTag(control, 'control')
 
 
-# pylint:disable=too-many-arguments)
+# pylint:disable=too-many-arguments
 def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, sdk=False, parent=None,
            position=None, rotation=None, size=1, hideAttrs=None, color='blue', type=None, rotateOrder='xyz',
            trasformType='transform', shapeAim='y'):

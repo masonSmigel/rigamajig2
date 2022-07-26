@@ -108,7 +108,7 @@ class InitializeWidget(QtWidgets.QWidget):
         self.initalize_build_btn.clicked.connect(self.initalize_rig)
 
     def setBuilder(self, builder):
-        rigEnv = builder.get_rig_env()
+        rigEnv = builder.getRigEnviornment()
         self.builder = builder
         self.cmpt_path_selector.set_relativeTo(rigEnv)
         self.guide_path_selector.set_relativeTo(rigEnv)
@@ -118,11 +118,11 @@ class InitializeWidget(QtWidgets.QWidget):
         self.cmpt_manager.clear_cmpt_tree()
 
         # update data within the rig
-        cmptsFile = self.builder.getRigData(self.builder.get_rig_file(), COMPONENTS)
+        cmptsFile = self.builder.getRigData(self.builder.getRigFile(), COMPONENTS)
         if cmptsFile:
             self.cmpt_path_selector.set_path(cmptsFile)
 
-        guidesFile = self.builder.getRigData(self.builder.get_rig_file(), GUIDES)
+        guidesFile = self.builder.getRigData(self.builder.getRigFile(), GUIDES)
         if guidesFile:
             self.guide_path_selector.set_path(guidesFile)
 
@@ -136,24 +136,24 @@ class InitializeWidget(QtWidgets.QWidget):
 
     # CONNECTIONS
     def load_components(self):
-        self.builder.set_cmpts(list())
-        self.builder.load_components(self.cmpt_path_selector.get_abs_path())
-        self.builder.load_component_settings(self.cmpt_path_selector.get_abs_path())
+        self.builder.setComponents(list())
+        self.builder.loadComponents(self.cmpt_path_selector.get_abs_path())
+        self.builder.loadComponentSettings(self.cmpt_path_selector.get_abs_path())
         self.cmpt_manager.load_list_from_builder()
 
     def save_components(self):
-        self.builder.load_meta_settings()
-        self.builder.save_components(self.cmpt_path_selector.get_abs_path())
+        self.builder.loadMetadataToComponentSettings()
+        self.builder.saveComponents(self.cmpt_path_selector.get_abs_path())
 
     def load_guides(self):
-        self.builder.load_guide_data(self.guide_path_selector.get_abs_path())
+        self.builder.loadGuideData(self.guide_path_selector.get_abs_path())
 
     def save_guides(self):
-        self.builder.save_guide_data(self.guide_path_selector.get_abs_path())
+        self.builder.saveGuideData(self.guide_path_selector.get_abs_path())
 
     def initalize_rig(self):
         self.builder.initalize()
-        self.builder.load_component_settings()
+        self.builder.loadComponentSettings()
         self.cmpt_manager.load_cmpts_from_scene()
 
 
@@ -286,7 +286,7 @@ class ComponentManager(QtWidgets.QWidget):
         cmpt = cmpt_obj(name=name, input=ast.literal_eval(str(input)), rigParent=rigParent)
 
         self.add_component(name=name, cmpt_type=cmpt_type, build_step='unbuilt', container=None)
-        self.builder.append_cmpts([cmpt])
+        self.builder.appendComponents([cmpt])
 
     def load_cmpts_from_scene(self):
         """ load exisiting components from the scene"""
@@ -328,7 +328,7 @@ class ComponentManager(QtWidgets.QWidget):
             item = self.get_selected_item()[0]
 
         item_dict = self.get_data_from_item(item)
-        cmpt = self.builder.find_cmpt(item_dict['name'], item_dict['type'])
+        cmpt = self.builder.findComponent(item_dict['name'], item_dict['type'])
         return cmpt
 
     def select_container(self):
@@ -351,7 +351,7 @@ class ComponentManager(QtWidgets.QWidget):
         for item in items:
             item_dict = self.get_data_from_item(item)
 
-            self.builder.build_single_cmpt(item_dict['name'], item_dict['type'])
+            self.builder.buildSingleComponent(item_dict['name'], item_dict['type'])
             self.update_cmpt_from_scene(item)
 
     def delete_cmpt(self):
@@ -362,7 +362,7 @@ class ComponentManager(QtWidgets.QWidget):
                 component.deleteSetup()
             self.component_tree.takeTopLevelItem(self.component_tree.indexOfTopLevelItem(item))
 
-            self.builder.cmpt_list.remove(component)
+            self.builder.componentList.remove(component)
 
     def clear_cmpt_tree(self):
         """ clear the component tree"""
@@ -380,7 +380,7 @@ class ComponentManager(QtWidgets.QWidget):
 
         if not self.builder:
             raise RuntimeError("No valid rig builder found")
-        for cmpt in self.builder.get_cmpt_list():
+        for cmpt in self.builder.getComponentList():
             name = cmpt.name
             cmpt_type = cmpt.cmpt_type
             build_step_str = ['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize']
@@ -522,7 +522,7 @@ class CreateCmptDialog(QtWidgets.QDialog):
     def update_comboBox(self):
         self.component_type_cb.clear()
         tmp_builder = builder.Builder()
-        for i, component in enumerate(sorted(tmp_builder.getComponents())):
+        for i, component in enumerate(sorted(tmp_builder.getAvailableComponents())):
             self.component_type_cb.addItem(component)
             self.component_type_cb.setItemIcon(i, QtGui.QIcon(_get_cmpt_icon(component)))
 

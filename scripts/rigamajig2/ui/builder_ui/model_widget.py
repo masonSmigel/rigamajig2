@@ -73,8 +73,8 @@ class ModelWidget(QtWidgets.QWidget):
         self.open_model_btn.clicked.connect(self.open_model)
 
     def setBuilder(self, builder):
-        rigEnv = builder.get_rig_env()
-        rigFile = builder.get_rig_file()
+        rigEnv = builder.getRigEnviornment()
+        rigFile = builder.getRigFile()
         self.builder = builder
         self.model_path_selector.set_relativeTo(rigEnv)
 
@@ -82,14 +82,14 @@ class ModelWidget(QtWidgets.QWidget):
         self.preScript_scriptRunner.clear_scripts()
 
         # update data within the rig
-        modelFile = self.builder.getRigData(self.builder.get_rig_file(), MODEL_FILE)
+        modelFile = self.builder.getRigData(self.builder.getRigFile(), MODEL_FILE)
         if modelFile:
             self.model_path_selector.set_path(modelFile)
 
         # update the script runner
         self.preScript_scriptRunner.set_relative_dir(rigEnv)
         for path in self.builder.getRigData(rigFile, PRE_SCRIPT):
-            self.preScript_scriptRunner.add_scripts(self.builder._absPath(path))
+            self.preScript_scriptRunner.add_scripts(self.builder.getAbsoultePath(path))
 
     def runWidget(self):
         self.preScript_scriptRunner.execute_all_scripts()
@@ -101,7 +101,7 @@ class ModelWidget(QtWidgets.QWidget):
 
     # CONNECTIONS
     def import_model(self):
-        self.builder.import_model(self.model_path_selector.get_abs_path())
+        self.builder.importModel(self.model_path_selector.get_abs_path())
 
     def open_model(self):
         cmds.file(self.model_path_selector.get_abs_path(), o=True, f=True)

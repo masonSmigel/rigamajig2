@@ -76,8 +76,8 @@ class BuildWidget(QtWidgets.QWidget):
         self.finalize_btn.clicked.connect(self.finalize_rig)
 
     def setBuilder(self, builder):
-        rigEnv = builder.get_rig_env()
-        rigFile = builder.get_rig_file()
+        rigEnv = builder.getRigEnviornment()
+        rigFile = builder.getRigFile()
         self.builder = builder
 
         # clear the ui
@@ -85,7 +85,7 @@ class BuildWidget(QtWidgets.QWidget):
 
         self.postScript_scriptRunner.set_relative_dir(rigEnv)
         for path in self.builder.getRigData(rigFile, POST_SCRIPT):
-            self.postScript_scriptRunner.add_scripts(self.builder._absPath(path))
+            self.postScript_scriptRunner.add_scripts(self.builder.getAbsoultePath(path))
 
     def runWidget(self):
         self.complete_build()
@@ -100,7 +100,7 @@ class BuildWidget(QtWidgets.QWidget):
         self.builder.initalize()
 
     def clear_components(self):
-        self.builder.set_cmpts(list())
+        self.builder.setComponents(list())
 
     def build_rig(self):
         self.builder.build()
@@ -113,7 +113,7 @@ class BuildWidget(QtWidgets.QWidget):
 
     def complete_build(self):
         self.builder.initalize()
-        self.builder.load_component_settings()
+        self.builder.loadComponentSettings()
         self.builder.build()
         self.builder.connect()
         self.builder.finalize()

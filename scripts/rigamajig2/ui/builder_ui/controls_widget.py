@@ -135,12 +135,12 @@ class ControlsWidget(QtWidgets.QWidget):
         self.replace_ctl_btn.clicked.connect(self.replace_controlShape)
 
     def setBuilder(self, builder):
-        rigEnv = builder.get_rig_env()
+        rigEnv = builder.getRigEnviornment()
         self.builder = builder
         self.ctl_path_selector.set_relativeTo(rigEnv)
 
         # update data within the rig
-        controlFile = self.builder.getRigData(self.builder.get_rig_file(), CONTROL_SHAPES)
+        controlFile = self.builder.getRigData(self.builder.getRigFile(), CONTROL_SHAPES)
         if controlFile:
             self.ctl_path_selector.set_path(controlFile)
 

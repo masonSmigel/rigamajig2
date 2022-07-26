@@ -75,7 +75,7 @@ class Actions(object):
 
     def create_rig_env(self):
         create_dialog = CreateRigEnvDialog()
-        create_dialog.new_env_created.connect(self.dialog.set_rig_file)
+        create_dialog.new_env_created.connect(self.dialog.setRigFile)
         create_dialog.show_dialog()
 
     def load_rig_file(self):
@@ -92,7 +92,7 @@ class Actions(object):
         #                             )
 
         if file_dialog.selectedFiles():
-            self.dialog.set_rig_file(file_dialog.selectedFiles()[0])
+            self.dialog.setRigFile(file_dialog.selectedFiles()[0])
 
     def save_rig_file(self):
         """
@@ -100,7 +100,7 @@ class Actions(object):
         :return:
         """
         data = abstract_data.AbstractData()
-        data.read(self.dialog.rig_file)
+        data.read(self.dialog.rigFile)
         new_data = data.getData()
 
         # Save the main feilds
@@ -135,12 +135,12 @@ class Actions(object):
         new_data[builder.OUTPUT_RIG_FILE_TYPE] = self.dialog.publish_widget.out_file_type_cb.currentText()
 
         data.setData(new_data)
-        data.write(self.dialog.rig_file)
-        builder.logger.info("data saved to : {}".format(self.dialog.rig_file))
+        data.write(self.dialog.rigFile)
+        builder.logger.info("data saved to : {}".format(self.dialog.rigFile))
 
 
     def reload_rig_file(self):
-        self.dialog.set_rig_file(self.dialog.rig_file)
+        self.dialog.setRigFile(self.dialog.rigFile)
 
     # TOOLS MENU
     def run_performace_test(self):

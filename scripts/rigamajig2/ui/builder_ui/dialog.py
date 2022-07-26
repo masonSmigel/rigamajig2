@@ -73,8 +73,8 @@ class BuilderDialog(QtWidgets.QDialog):
             maya_main_window = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
         super(BuilderDialog, self).__init__(maya_main_window)
-        self.rig_env = None
-        self.rig_builder = None
+        self.rigEnviornment = None
+        self.rigBuilder = None
 
         self.setWindowTitle(self.WINDOW_TITLE)
         if cmds.about(ntOS=True):
@@ -123,13 +123,13 @@ class BuilderDialog(QtWidgets.QDialog):
 
         self.main_widgets = list()
 
-        self.model_widget = model_widget.ModelWidget(self.rig_builder)
-        self.joint_widget = joint_widget.JointWidget(self.rig_builder)
-        self.controls_widget = controls_widget.ControlsWidget(self.rig_builder)
-        self.initialize_widget = initalize_widget.InitializeWidget(self.rig_builder)
-        self.build_widget = build_widget.BuildWidget(self.rig_builder)
-        self.deformation_widget = deformation_widget.DeformationWidget(self.rig_builder)
-        self.publish_widget = publish_widget.PublishWidget(self.rig_builder)
+        self.model_widget = model_widget.ModelWidget(self.rigBuilder)
+        self.joint_widget = joint_widget.JointWidget(self.rigBuilder)
+        self.controls_widget = controls_widget.ControlsWidget(self.rigBuilder)
+        self.initialize_widget = initalize_widget.InitializeWidget(self.rigBuilder)
+        self.build_widget = build_widget.BuildWidget(self.rigBuilder)
+        self.deformation_widget = deformation_widget.DeformationWidget(self.rigBuilder)
+        self.publish_widget = publish_widget.PublishWidget(self.rigBuilder)
 
         self.main_widgets = [self.model_widget,
                              self.joint_widget,
@@ -228,26 +228,26 @@ class BuilderDialog(QtWidgets.QDialog):
     def path_selector_load_rig_file(self):
         new_path = self.rig_path_selector.get_abs_path()
         if new_path:
-            self.set_rig_file(new_path)
+            self.setRigFile(new_path)
 
-    def set_rig_file(self, path=None):
+    def setRigFile(self, path=None):
         self.rig_path_selector.select_path(path=path)
         file_info = QtCore.QFileInfo(self.rig_path_selector.get_abs_path())
-        self.rig_env = file_info.path()
-        self.rig_file = file_info.filePath()
+        self.rigEnviornment = file_info.path()
+        self.rigFile = file_info.filePath()
 
-        self.rig_builder = rigamajig2.maya.rig_builder.builder.Builder(self.rig_file)
+        self.rigBuilder = rigamajig2.maya.rig_builder.builder.Builder(self.rigFile)
 
-        if not self.rig_file:
+        if not self.rigFile:
             return
 
         # setup ui Data
         rigName = rigamajig2.maya.rig_builder.builder.RIG_NAME
-        self.asset_name_le.setText(self.rig_builder.getRigData(self.rig_file, rigName))
+        self.asset_name_le.setText(self.rigBuilder.getRigData(self.rigFile, rigName))
 
         # set paths and widgets relative to the rig env
         for widget in self.main_widgets:
-            widget.setBuilder(builder=self.rig_builder)
+            widget.setBuilder(builder=self.rigBuilder)
 
     # BULDER FUNCTIONS
     def update_widget_checks(self, selectedWidget):
@@ -283,7 +283,7 @@ class BuilderDialog(QtWidgets.QDialog):
         print("Time Elapsed: {}".format(str(runTime)))
 
     def run_all(self):
-        self.rig_builder.run()
+        self.rigBuilder.run()
         self.initialize_widget.cmpt_manager.load_cmpts_from_scene()
 
     def closeEvent(self, e):
@@ -302,5 +302,5 @@ if __name__ == '__main__':
     rigamajig_builder_dialog = BuilderDialog()
     rigamajig_builder_dialog.show()
 
-    rigamajig_builder_dialog.set_rig_file(
+    rigamajig_builder_dialog.setRigFile(
         path='/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/biped.rig')

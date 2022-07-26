@@ -291,7 +291,7 @@ class TestDialog(QtWidgets.QDialog):
 
         self.body_layout.addWidget(self.scriptExecuter)
         self.scriptExecuter.add_scripts_from_dir(
-            "/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/pre_script")
+            "/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/preScript")
         self.scriptExecuter.add_scripts_from_dir("/Users/masonsmigel/Desktop/demo_scripts")
 
         self.body_scroll_area = QtWidgets.QScrollArea()

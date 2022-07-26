@@ -106,17 +106,17 @@ class DeformationWidget(QtWidgets.QWidget):
         self.save_psd_btn.clicked.connect(self.save_posereaders)
 
     def setBuilder(self, builder):
-        rigEnv = builder.get_rig_env()
+        rigEnv = builder.getRigEnviornment()
         self.builder = builder
         self.skin_path_selector.set_relativeTo(rigEnv)
         self.psd_path_selector.set_relativeTo(rigEnv)
 
         # update data within the rig
-        skinFile = self.builder.getRigData(self.builder.get_rig_file(), SKINS)
+        skinFile = self.builder.getRigData(self.builder.getRigFile(), SKINS)
         if skinFile:
             self.skin_path_selector.set_path(skinFile)
 
-        psdFile = self.builder.getRigData(self.builder.get_rig_file(), PSD)
+        psdFile = self.builder.getRigData(self.builder.getRigFile(), PSD)
         if psdFile:
             self.psd_path_selector.set_path(psdFile)
 
@@ -130,7 +130,7 @@ class DeformationWidget(QtWidgets.QWidget):
 
     # CONNECTIONS
     def load_all_skins(self):
-        self.builder.load_skin_weights(self.skin_path_selector.get_abs_path())
+        self.builder.loadSkinWeights(self.skin_path_selector.get_abs_path())
 
     def load_single_skin(self):
         path = cmds.fileDialog2(ds=2, cap="Select a skin file", ff=JSON_FILTER, okc="Select",
@@ -139,14 +139,14 @@ class DeformationWidget(QtWidgets.QWidget):
             deform.load_single_skin(path[0])
 
     def save_skin(self):
-        self.builder.save_skin_weights(path=self.skin_path_selector.get_abs_path())
+        self.builder.saveSkinWeights(path=self.skin_path_selector.get_abs_path())
 
     def load_posereaders(self):
-        self.builder.load_poseReaders(self.psd_path_selector.get_abs_path(),
-                                      replace=self.load_psd_mode_cbox.currentIndex())
+        self.builder.loadPoseReaders(self.psd_path_selector.get_abs_path(),
+                                     replace=self.load_psd_mode_cbox.currentIndex())
 
     def save_posereaders(self):
-        self.builder.save_poseReaders(self.psd_path_selector.get_abs_path())
+        self.builder.savePoseReaders(self.psd_path_selector.get_abs_path())
 
     def copySkinWeights(self):
         import rigamajig2.maya.skinCluster as rig_skinCluster

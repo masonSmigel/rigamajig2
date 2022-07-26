@@ -34,7 +34,7 @@ def isDir(path):
         return True
 
 
-def get_rel_path(path, start):
+def getRelativePath(path, start):
     """
     :param path:
     :param start:
@@ -43,20 +43,20 @@ def get_rel_path(path, start):
     return os.path.relpath(path, start)
 
 
-def get_abs_from_rel(rel, start):
+def getAbsoultePath(rel, start):
     """
     :param rel: relative path
     :param start: path to start from
     :return: abs path
     """
 
-    abs_path = os.path.join(start, rel)
-    norm_path = os.path.normpath(abs_path)
+    absoultePath = os.path.join(start, rel)
+    normalizedPath = os.path.normpath(absoultePath)
 
-    return norm_path
+    return normalizedPath
 
 
-def make_dir(path):
+def mkdir(path):
     """
     :param path: path to create
     :type path: str

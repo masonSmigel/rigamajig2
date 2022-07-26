@@ -431,7 +431,7 @@ class Builder(object):
                 raise RuntimeError("Must select an output path or character name to publish a rig")
 
         # create output directory and save
-        rig_path.make_dir(dir_name)
+        rig_path.mkdir(dir_name)
         publish_path = os.path.join(dir_name, file_name)
         file.saveAs(publish_path, log=False)
         logger.info("out rig published: {}".format(publish_path))
@@ -448,7 +448,7 @@ class Builder(object):
             version_path = os.path.join(version_dir, version_file)
 
             # make the output directory and save the file
-            rig_path.make_dir(version_dir)
+            rig_path.mkdir(version_dir)
             version_path = file.incrimentSave(version_path, log=False)
             logger.info("out rig archived: {}".format(version_path))
 

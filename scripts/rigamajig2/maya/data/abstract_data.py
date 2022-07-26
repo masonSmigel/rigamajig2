@@ -42,10 +42,10 @@ class AbstractData(object):
         data.update(other.getData())
         # Make a new data Object
 
-        data_object = other.__class__()
-        data_object.setData(data)
+        dataObject = other.__class__()
+        dataObject.setData(data)
         # return to data object
-        return data_object
+        return dataObject
 
     def __sub__(self, other):
         """
@@ -63,10 +63,10 @@ class AbstractData(object):
         for key in other.getData():
             data.pop(key)
         # Make a new data Object
-        data_object = other.__class__()
-        data_object.setData(data)
+        dataObject = other.__class__()
+        dataObject.setData(data)
         # return to data object
-        return data_object
+        return dataObject
 
     def gatherData(self, item):
         """

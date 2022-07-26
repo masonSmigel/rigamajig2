@@ -85,7 +85,7 @@ def validate_script_list(scripts_list=None):
             res_list.append(item)
 
         if rig_path.isDir(item):
-            for script in runScript.find_scripts(item):
+            for script in runScript.findScripts(item):
                 res_list.append(script)
     return res_list
 
@@ -97,7 +97,7 @@ def runAllScripts(scripts=[]):
     """
     file_scripts = validate_script_list(scripts)
     for script in file_scripts:
-        runScript.run_script(script)
+        runScript.runScript(script)
 
 
 def get_available_archetypes():

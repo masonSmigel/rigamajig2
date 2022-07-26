@@ -40,8 +40,7 @@ disable=all
 enable=basic,
        line-too-long,
        design,
-       too-complex,
-       missing_docstring
+       too-complex
 
 [REPORTS]
 
@@ -100,21 +99,20 @@ min-similarity-lines=15
 variable-naming-style=camelCase
 argument-naming-style=camelCase
 attr-naming-style=camelCase
-const-naming-style=UPPER_CASE
 
 
 # Naming style matching correct class, and class constant names
-class-attribute-naming-style=camelCase
-class-const-naming-style=UPPER_CASE
-class-naming-style=PascalCase
+# class-attribute-naming-style=camelCase
+# class-const-naming-style=UPPER_CASE
+# constant-naming=any
 
 # Naming style matching correct method, function and module  names.
 method-naming-style=camelCase
 function-naming-style=camelCase
-module-naming-style=camelCase
+module-naming-style=any
 
 # Good variable names which should always be accepted, separated by a comma.
-good-names= i, j, k, ex, Run, _, A, B, C
+good-names= i, j, k, f, ex, Run, _, A, B, C, logger
 
 
 [CLASSES]

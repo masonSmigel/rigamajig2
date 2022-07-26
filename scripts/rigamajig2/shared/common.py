@@ -24,14 +24,14 @@ BOTTOM = 'bt'
 LOCATIONS = {'front': FRONT, 'back': BACK, 'middle': MIDDLE, 'top': TOP, 'bottom': BOTTOM}
 
 # Project path Constants
-current_path = __file__.replace('\\', '/')
+CURRENT_FILE = __file__.replace('\\', '/')
 
-ICONS_PATH = '/'.join(current_path.split('/')[0:-4]) + '/icons'
-SCRIPTS_PATH = '/'.join(current_path.split('/')[0:-4]) + '/scripts'
-ARCHETYPES_PATH = '/'.join(current_path.split('/')[0:-4]) + '/archetypes'
-BIN_PATH = '/'.join(current_path.split('/')[0:-4]) + '/bin'
-PLUGIN_PATH = '/'.join(current_path.split('/')[0:-4]) + '/plug-ins'
-MISC_PATH = '/'.join(current_path.split('/')[0:-4]) + '/misc'
+ICONS_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/icons'
+SCRIPTS_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/scripts'
+ARCHETYPES_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/archetypes'
+BIN_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/bin'
+PLUGIN_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/plug-ins'
+MISC_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/misc'
 
 # transform constants
 ORIG = 'orig'
@@ -108,6 +108,7 @@ SIMULATION = 'sim'
 
 # Naming Template
 DELIMINATOR = '_'
+# pylint:disable=line-too-long
 NAMETEMPLATE = '{BASE}' + DELIMINATOR + '{SIDE}' + DELIMINATOR + '{LOCATION}{WARBLE}{INDEX}' + DELIMINATOR + '{EXTENSION}'
 PADDING = 2
 MAXITTERATIONS = 2000
@@ -194,19 +195,27 @@ def convertUnicodeList(unicodeList):
 
 
 def flattenList(selList):
-    flat_list = []
+    """
+    Flatten a list of compound list indecies.
+    Compound lists are commonly returned within maya such as polyCube.vtx[0:3].
+    This function will return a list with separate indexies such as polyCube.vtx[0], polyCube.vtx[1] ...
+
+    :param selList:
+    :return:
+    """
+    flatList = []
     for each in selList:
         if not ":" in each:
-            flat_list.append(each)
+            flatList.append(each)
             continue
 
         begin, end = re.findall(r'\[(.*?)\]', each)[0].split(":")
-        base_part = each.split("[")[0]
+        basepart = each.split("[")[0]
 
         for number in range(int(begin), int(end) + 1):
-            flat_list.append("{}[{}]".format(base_part, number))
+            flatList.append("{}[{}]".format(basepart, number))
 
-    return flat_list
+    return flatList
 
 
 def getMirrorName(name, left=None, right=None):

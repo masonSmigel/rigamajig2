@@ -130,7 +130,7 @@ class ScriptRunner(QtWidgets.QWidget):
 
             # if the item is a directory then add all scripts in the directory
             if rig_path.isDir(item):
-                for script in runScript.find_scripts(item):
+                for script in runScript.findScripts(item):
                     self._add_script_to_widget(script)
 
             # Append the item to the current script list.
@@ -186,7 +186,7 @@ class ScriptRunner(QtWidgets.QWidget):
     def run_script(self, item):
         """run a script list item"""
         script_path = item.data(QtCore.Qt.UserRole)
-        runScript.run_script(script_path)
+        runScript.runScript(script_path)
 
     def delete_item(self, item):
         """delete a script list item"""

@@ -5,6 +5,11 @@ import maya.api.OpenMaya as om2
 IDENTITY_MATRIX = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 
 
+# Here we have duplicate code from the ikfk class.
+# It is separate to keep the swithcer class completely un-reliant on rigamajig,
+# allowing it to be used within script nodes in maya
+# pylint:disable=duplicate-code
+
 class IkFkSwitch(object):
     def __init__(self, node):
         """initalize"""
@@ -115,4 +120,3 @@ class IkFkSwitch(object):
 if __name__ == '__main__':
     switcher = IkFkSwitch('arm_l_ikfk')
     switcher.switch(not cmds.getAttr('{}.ikfk'.format('arm_l_ikfk')))
-

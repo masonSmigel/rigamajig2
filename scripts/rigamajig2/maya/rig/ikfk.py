@@ -132,6 +132,7 @@ class IkFkBase(object):
             cmds.rename(self._group, value)
         self._group = value
 
+    # pylint:disable=too-many-statements
     def create(self, params=None):
         """
         This will create the ik/fkControls joints and connect them to the blendchain.
@@ -216,7 +217,7 @@ class IkFkBase(object):
             meta.untag(self._ikJointList + self._fkJointList + self._blendJointList, "bind")
 
     @staticmethod
-    def connectVisibility(attrHolder, attr='ikfk', ikList=[], fkList=[]):
+    def connectVisibility(attrHolder, attr='ikfk', ikList=list(), fkList=list()):
         """
         Connect the fkControls and Ik visibility. Mostly used for controls
         :param attrHolder: node that holds the attribute
@@ -297,6 +298,7 @@ class IkFkLimb(IkFkBase):
             self._handle = guess_hdl
 
     @staticmethod
+    # pylint:disable=too-many-locals
     def createStretchyIk(ikHandle, grp=None, params=None):
         """
         Create a 2Bone stretchy ik from an  ikHandle
@@ -465,23 +467,23 @@ class IkFkLimb(IkFkBase):
         mid = cmds.xform(matchList[1], q=True, ws=True, t=True)
         end = cmds.xform(matchList[2], q=True, ws=True, t=True)
 
-        start_vector = om2.MVector(*start)
-        mid_vector = om2.MVector(*mid)
-        end_vector = om2.MVector(*end)
+        startVector = om2.MVector(*start)
+        midVector = om2.MVector(*mid)
+        endVector = om2.MVector(*end)
 
-        line = (end_vector - start_vector)
-        point = (mid_vector - start_vector)
+        line = (endVector - startVector)
+        point = (midVector - startVector)
 
-        scale_value = (line * point) / (line * line)
-        proj_vec = (line * scale_value) + start_vector
+        scaleValue = (line * point) / (line * line)
+        projVec = (line * scaleValue) + startVector
 
-        avLen = ((start_vector - mid_vector).length() + (mid_vector - end_vector).length())
-        pv_pos = ((mid_vector - proj_vec).normal() * (magnitude + avLen)) + mid_vector
+        avLen = ((startVector - midVector).length() + (midVector - endVector).length())
+        pvPos = ((midVector - projVec).normal() * (magnitude + avLen)) + midVector
 
-        return pv_pos
+        return pvPos
 
     @staticmethod
-    def match_magnitude(vector, magnitude, attempts=20):
+    def matchMagnitude(vector, magnitude, attempts=20):
         """
         Match the magnitude of a vector to a given value
         :param vector: vector to match magnitude of
@@ -491,7 +493,7 @@ class IkFkLimb(IkFkBase):
         """
         if not vector.length() >= magnitude and attempts > 0:
             vector = vector * 2
-            return IkFkLimb.match_magnitude(vector, magnitude, attempts - 1)
+            return IkFkLimb.matchMagnitude(vector, magnitude, attempts - 1)
         return vector
 
     @staticmethod
@@ -542,6 +544,13 @@ class IkFkLimb(IkFkBase):
 
 class IkFkFoot(IkFkBase):
     def __init__(self, jointList, heelPivot=None, innPivot=None, outPivot=None):
+        """
+        class to create an ikFk foot rig given several piviots.
+        :param jointList: list of input joints
+        :param heelPivot: transform for the heel piviot
+        :param innPivot: transform for the inner bank pivot
+        :param outPivot: transform for the outer bank pivot
+        """
         super(IkFkFoot, self).__init__(jointList)
 
         self.setJointList(jointList)

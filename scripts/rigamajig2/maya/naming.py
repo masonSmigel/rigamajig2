@@ -133,7 +133,12 @@ def formatName(base=None, side=None, location=None, warble=None, index=None, ext
         index = str(index).zfill(common.PADDING)
 
     name = str(
-        common.NAMETEMPLATE.format(BASE=base, SIDE=side, LOCATION=location, WARBLE=warble, INDEX=index, EXTENSION=ext))
+        common.NAMETEMPLATE.format(BASE=base,
+                                   SIDE=side,
+                                   LOCATION=location,
+                                   WARBLE=warble,
+                                   INDEX=index,
+                                   EXTENSION=ext))
 
     # Look through the string and remove any double underscores.
     # These may appear if some attributes are not provided

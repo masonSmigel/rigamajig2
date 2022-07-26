@@ -386,7 +386,7 @@ class Builder(object):
 
         start_time = time.time()
         print('\nBegin Rig Build\n{0}\nbuild env: {1}\n'.format('-' * 70, self.path))
-        builderUtils.load_required_plugins()
+        builderUtils.loadRequiredPlugins()
         self.pre_script()
         self.import_model()
         self.load_joints()

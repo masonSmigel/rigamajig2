@@ -199,11 +199,11 @@ class SplineBase(object):
         # STRETCH
         curveInfo = cmds.rename(cmds.arclen(self._curve, ch=True), self._name + '_curveInfo')
         cmds.connectAttr(self._curve + '.local', curveInfo + '.inputCurve', f=True)
-        arc_len = cmds.getAttr("{}.{}".format(curveInfo, 'arcLength'))
-        stretchBta = node.blendTwoAttrs(arc_len, "{}.arcLength".format(curveInfo), weight=stretchyAttr,
+        arcLen = cmds.getAttr("{}.{}".format(curveInfo, 'arcLength'))
+        stretchBta = node.blendTwoAttrs(arcLen, "{}.arcLength".format(curveInfo), weight=stretchyAttr,
                                         name="{}_stretch".format(self._name))
 
-        scaleAll = node.multiplyDivide(["{}.output".format(stretchBta), 1, 1], [arc_len, 1, 1], operation='div',
+        scaleAll = node.multiplyDivide(["{}.output".format(stretchBta), 1, 1], [arcLen, 1, 1], operation='div',
                                        name="{}_scale".format(self._name))
 
         # get aim axis and rotate order

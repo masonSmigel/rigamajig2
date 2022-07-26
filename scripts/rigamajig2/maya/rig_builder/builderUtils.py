@@ -33,148 +33,158 @@ def _lookForComponents(path, excludedFolders, excludedFiles):
     res = os.listdir(path)
     toReturn = dict()
     for r in res:
-        full_path = os.path.join(path, r)
-        if r not in excludedFolders and os.path.isdir(path + '/' + r) == True:
-            subDict = _lookForComponents(full_path, excludedFolders, excludedFiles)
+        fullList = os.path.join(path, r)
+        if r not in excludedFolders and os.path.isdir(path + '/' + r):
+            subDict = _lookForComponents(fullList, excludedFolders, excludedFiles)
             toReturn.update(subDict)
         if r.find('.py') != -1 and r.find('.pyc') == -1 and r not in excludedFiles:
             if r.find('reload') == -1:
 
                 # find classes in the file path
-                module_file = r.split('.')[0]
-                path_split = full_path.split('/')[:-1]
-                cmpts_index = path_split.index(CMPT_ROOT_MODULE)
+                moduleFile = r.split('.')[0]
+                pathSplit = fullList.split('/')[:-1]
+                cmptsIndex = pathSplit.index(CMPT_ROOT_MODULE)
 
-                local_path = '.'.join(path_split[cmpts_index:])
-                component_name = '{}.{}'.format(local_path, module_file)
+                localPath = '.'.join(pathSplit[cmptsIndex:])
+                componentName = '{}.{}'.format(localPath, moduleFile)
 
-                module_name = 'rigamajig2.maya.{}'.format(component_name)
+                moduleName = 'rigamajig2.maya.{}'.format(componentName)
 
                 # module_name = modulesPath.format(module_file)
-                module_object = __import__(module_name, globals(), locals(), ["*"], 0)
-                for cls in inspect.getmembers(module_object, inspect.isclass):
-                    component = '.'.join(component_name.rsplit('.')[1:])
-                    toReturn[component] = [module_name, cls[0]]
+                moduleObject = __import__(moduleName, globals(), locals(), ["*"], 0)
+                for cls in inspect.getmembers(moduleObject, inspect.isclass):
+                    component = '.'.join(componentName.rsplit('.')[1:])
+                    toReturn[component] = [moduleName, cls[0]]
 
     return toReturn
 
 
-def load_required_plugins():
+def loadRequiredPlugins():
     """
     loadSettings required plugins
     NOTE: There are plugins REQUIRED for rigamajig such as matrix and quat nodes.
           loading other plug-ins needed in production should be added into a pre-script file
     """
-    loaded_plugins = cmds.pluginInfo(query=True, listPlugins=True)
+    loadedPlugins = cmds.pluginInfo(query=True, listPlugins=True)
 
     for plugin in common.REQUIRED_PLUGINS:
-        if plugin not in loaded_plugins:
+        if plugin not in loadedPlugins:
             cmds.loadPlugin(plugin)
 
 
-def validate_script_list(scripts_list=None):
-    res_list = list()
+def validateScriptList(scriptsList=None):
+    """
+    Validate the script list.
+    This will filter all the items in the script into a script type.
+    If the item is a directory then get scripts within the directory.
+    :param scriptsList:
+    :return:
+    """
+    resultList = list()
 
-    scripts_list = common.toList(scripts_list)
+    scriptsList = common.toList(scriptsList)
 
-    for item in scripts_list:
+    for item in scriptsList:
         if not item:
             continue
 
         if rig_path.isFile(item):
-            res_list.append(item)
+            resultList.append(item)
 
         if rig_path.isDir(item):
             for script in runScript.findScripts(item):
-                res_list.append(script)
-    return res_list
+                resultList.append(script)
+    return resultList
 
 
-def runAllScripts(scripts=[]):
+def runAllScripts(scripts=None):
     """
     Run pre scripts. You can add scripts by path, but the main use is through the PRE SCRIPT path
     :param scripts: path to scripts to run
     """
-    file_scripts = validate_script_list(scripts)
-    for script in file_scripts:
+    if scripts is None:
+        scripts = list()
+
+    fileScripts = validateScriptList(scripts)
+    for script in fileScripts:
         runScript.runScript(script)
 
 
-def get_available_archetypes():
+def getAvailableArchetypes():
     """
     get a list of avaible archetypes. Archetypes are defined as a folder containng a .rig file.
     :return: list of archetypes
     """
-    archetype_list = list()
+    archetypeList = list()
 
-    path_contents = os.listdir(common.ARCHETYPES_PATH)
-    for archetype in path_contents:
-        archetype_path = os.path.join(common.ARCHETYPES_PATH, archetype)
+    pathContents = os.listdir(common.ARCHETYPES_PATH)
+    for archetype in pathContents:
+        archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
         if archetype.startswith("."):
             continue
-        if find_rig_file(archetype_path):
-            archetype_list.append(archetype)
-    return archetype_list
+        if findRigFile(archetypePath):
+            archetypeList.append(archetype)
+    return archetypeList
 
 
-def find_rig_file(path):
+def findRigFile(path):
     """ find a rig file within the path"""
     if rig_path.isFile(path):
         return False
 
-    path_contents = os.listdir(path)
-    for f in path_contents:
+    pathContents = os.listdir(path)
+    for f in pathContents:
         if f.startswith("."):
             continue
         if not rig_path.isDir(path):
             continue
-        file_name, file_ext = os.path.splitext(os.path.join(path, f))
-        if not file_ext == '.rig':
+        fileName, fileExt = os.path.splitext(os.path.join(path, f))
+        if fileExt != '.rig':
             continue
         return os.path.join(path, f)
     return False
 
 
-def new_rigenv_from_archetype(new_env, archetype, rig_name=None):
+def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
     """
     Create a new rig envirnment from and archetype
-    :param new_env: target driectory for the new rig enviornment
-    :param rig_name: name of the new rig enviornment
+    :param newEnv: target driectory for the new rig enviornment
+    :param rigName: name of the new rig enviornment
     :param archetype: archetype to copy
     :return:
     """
-    if archetype not in get_available_archetypes():
+    if archetype not in getAvailableArchetypes():
         raise RuntimeError("{} is not a valid archetype".format(archetype))
 
-    archetype_path = os.path.join(common.ARCHETYPES_PATH, archetype)
-    return create_rig_env(src_env=archetype_path, tgt_env=new_env, rig_name=rig_name)
+    archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
+    return createRigEnviornment(sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName)
 
 
-def create_rig_env(src_env, tgt_env, rig_name):
+def createRigEnviornment(sourceEnviornment, targetEnviornment, rigName):
     """
-    create a new rig enviornment
-    :param src_env: source rig enviornment
-    :param tgt_env: target rig direction
-    :param rig_name: new name of the rig enviornment and .rig file
+    create a new rig enviornment from an existing rig enviornment.
+    :param sourceEnviornment: source rig enviornment
+    :param targetEnviornment: target rig direction
+    :param rigName: new name of the rig enviornment and .rig file
     :return:
     """
 
-    tgt_env_path = os.path.join(tgt_env, rig_name)
-    shutil.copytree(src_env, tgt_env_path)
+    tgtEnvPath = os.path.join(targetEnviornment, rigName)
+    shutil.copytree(sourceEnviornment, tgtEnvPath)
 
-    src_rig_file = find_rig_file(tgt_env_path)
-    rig_file = os.path.join(tgt_env_path, "{}.rig".format(rig_name))
+    srcRigFile = findRigFile(tgtEnvPath)
+    rigFile = os.path.join(tgtEnvPath, "{}.rig".format(rigName))
 
     # rename the .rig file and the rig_name within the .rig file
-    os.rename(src_rig_file, rig_file)
+    os.rename(srcRigFile, rigFile)
 
     data = abstract_data.AbstractData()
-    data.read(rig_file)
+    data.read(rigFile)
 
-    new_data = data.getData()
-    new_data['rig_name'] = rig_name
-    data.setData(new_data)
-    data.write(rig_file)
+    newData = data.getData()
+    newData['rig_name'] = rigName
+    data.setData(newData)
+    data.write(rigFile)
 
-    logger.info("New rig environment created: {}".format(tgt_env_path))
-    return os.path.join(tgt_env_path, rig_file)
+    logger.info("New rig environment created: {}".format(tgtEnvPath))
+    return os.path.join(tgtEnvPath, rigFile)

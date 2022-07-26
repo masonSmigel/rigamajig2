@@ -202,7 +202,7 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         self.archetype_cb_widget = QtWidgets.QWidget()
         self.archetype_cb_widget.setFixedHeight(25)
         self.archetype_cb = QtWidgets.QComboBox()
-        for archetype in rigamajig2.maya.rig_builder.builderUtils.get_available_archetypes():
+        for archetype in rigamajig2.maya.rig_builder.builderUtils.getAvailableArchetypes():
             self.archetype_cb.addItem(archetype)
 
         self.src_path = pathSelector.PathSelector("Source:", fm=2)
@@ -269,16 +269,16 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         rig_name = self.rig_name_le.text()
         if self.from_archetype_rb.isChecked():
             archetype = self.archetype_cb.currentText()
-            rig_file = rigamajig2.maya.rig_builder.builderUtils.new_rigenv_from_archetype(
-                new_env=dest_rig_env,
+            rig_file = rigamajig2.maya.rig_builder.builderUtils.newRigEnviornmentFromArchetype(
+                newEnv=dest_rig_env,
                 archetype=archetype,
-                rig_name=rig_name)
+                rigName=rig_name)
         else:
             src_env = self.src_path.get_path()
-            rig_file = rigamajig2.maya.rig_builder.builderUtils.create_rig_env(
-                src_env=src_env,
-                tgt_env=dest_rig_env,
-                rig_name=rig_name)
+            rig_file = rigamajig2.maya.rig_builder.builderUtils.createRigEnviornment(
+                sourceEnviornment=src_env,
+                targetEnviornment=dest_rig_env,
+                rigName=rig_name)
         self.new_env_created.emit(rig_file)
 
         self.close()

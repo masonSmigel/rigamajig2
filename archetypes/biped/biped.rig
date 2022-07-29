@@ -1,9 +1,9 @@
 {
     "type": "AbstractData", 
     "user": "masonsmigel", 
-    "time": "2022-03-31 18:18:46", 
+    "time": "2022-07-26 23:13:24", 
     "data": {
-        "rig_name": null, 
+        "rig_name": "", 
         "model_file": "", 
         "skeleton_file": "skeleton.ma", 
         "skeleton_pos": "skeleton_pos.json", 
@@ -19,8 +19,8 @@
         "control_shapes": "controlShapes.json", 
         "guides": "guides.json", 
         "components": "components.json", 
-        "skins": "skin_weights/",
-        "psd": null, 
+        "skins": "skin_weights/", 
+        "psd": "", 
         "output_file": "../out/", 
         "output_file_type": "mb"
     }

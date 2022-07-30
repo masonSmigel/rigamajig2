@@ -29,7 +29,7 @@ def loadJoints(path=None):
     :param path: path to joint file
     :return:
     """
-    if not os.path.exists(path):
+    if path and not os.path.exists(path):
         return
 
     dataObj = joint_data.JointData()
@@ -74,7 +74,7 @@ def loadGuideData(path=None):
     :param path: path to guide data to save
     :return:
     """
-    if not os.path.exists(path):
+    if path and not os.path.exists(path):
         return
 
     try:

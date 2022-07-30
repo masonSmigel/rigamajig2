@@ -65,7 +65,7 @@ class Builder(object):
     """
     The builder is the foundational class used to construct rigs with Rigamajig2.
     """
-    def __init__(self, rigFile=None):
+    def __init__(self, rigFile=None, log=True):
         """
         Initalize the builder
         :param rigFile: path to the rig file
@@ -80,6 +80,10 @@ class Builder(object):
         # varibles we need
         self.topSkeletonNodes = list()
         self.loadComponentsFromFile = False
+
+        # turn off the logger
+        if log is False:
+            logger.disabled = True
 
     def getAvailableComponents(self):
         """ Get all available components"""

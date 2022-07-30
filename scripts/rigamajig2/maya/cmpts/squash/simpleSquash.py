@@ -54,10 +54,21 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
 
         pos = cmds.xform(self.input[0], q=True, ws=True, t=True)
         rot = cmds.xform(self.input[0], q=True, ws=True, ro=True)
-        self.startGuide = rig_control.createGuide(self.name + "_start", side=self.side, parent=self.guidesHierarchy,
-                                                  position=pos, rotation=rot)
-        self.endGuide = rig_control.createGuide(self.name + "_end", side=self.side, parent=self.guidesHierarchy,
-                                                position=pos, rotation=rot)
+
+        startPos = mathUtils.addVector(pos, [0, 5, 0])
+        endPos = mathUtils.addVector(pos, [0, -5, 0])
+        self.startGuide = rig_control.createGuide(self.name + "_start",
+                                                  side=self.side,
+                                                  parent=self.guidesHierarchy,
+                                                  position=startPos,
+                                                  rotation=rot
+                                                  )
+        self.endGuide = rig_control.createGuide(self.name + "_end",
+                                                side=self.side,
+                                                parent=self.guidesHierarchy,
+                                                position=endPos,
+                                                rotation=rot
+                                                )
 
     def initalHierachy(self):
         """Build the initial hirarchy"""

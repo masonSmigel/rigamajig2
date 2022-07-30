@@ -1,8 +1,65 @@
 import maya.cmds as cmds
 import rigamajig2.maya.meta as meta
 import maya.api.OpenMaya as om2
+import logging
+from rigamajig2.maya.rig import control
+from rigamajig2.maya import container
 
-IDENTITY_MATRIX = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+logger = logging.getLogger(__name__)
+
+VALID_IKFK_COMPONENTS = ["arm.arm", "leg.leg", "limb.limb"]
+
+
+def switchSelectedComponent(controlNode=None, ik=None, fk=None):
+    """
+    Switch the components ikfk switch from the given control node.
+    The user can specify a switch to ik, fk, or a smart switch by leaving both ik and fk at False.
+
+    :param str list controlNode: spedify a control to get the component from. if None use the active selection.
+    :param bool ik: if true the component will be switched to ik
+    :param bool fk: if true the component will be switched to fk.
+    """
+
+    if controlNode is None:
+        if len(cmds.ls(sl=True)) > 0:
+            controlNode = cmds.ls(sl=True)[0]
+        else:
+            raise Exception("Please select a control to switch components")
+
+    # Validate the control. it must be a component type that supports IkFk switching
+    if not control.isControl(controlNode):
+        raise Exception("The node {} is not a rigamajig2 control".format(controlNode))
+
+    # Get the container from the control
+    componentContainer = container.getContainerFromNode(controlNode)
+
+    # Check the component type to make sure it is a valid IKFK switchable component.
+    componentType = cmds.getAttr("{}.type".format(componentContainer))
+    if componentType not in VALID_IKFK_COMPONENTS:
+        raise Exception("The component {} is not an ikfk switchable component. Valid types are: {}".
+                        format(componentContainer, VALID_IKFK_COMPONENTS))
+
+    # Now get the ikfk group. This node stores the data for the ikfk switch.
+    nodesInComponent = container.getNodesInContainer(componentContainer)
+
+    ikfkGroup = None
+    for node in nodesInComponent:
+        # check if the node has an message connection
+        if cmds.attributeQuery("ikControls", node = node, ex=True):
+            ikfkGroup = node
+            break
+
+    # create an isntance of the IkFkSwithcer class. with that we can switch the component
+    switcher = IkFkSwitch(ikfkGroup)
+    if ik is None and fk is None:
+        value = not cmds.getAttr("{}.ikfk".format(switcher.ikfkControl))
+    elif ik:
+        value = 0
+    elif fk:
+        value = 1
+
+    # do the switch
+    switcher.switch(value=value)
 
 
 # Here we have duplicate code from the ikfk class.
@@ -18,6 +75,13 @@ class IkFkSwitch(object):
 
     def gatherInfo(self):
 
+        # By default the ikfkControl will  be the ikfk group.
+        # However if the ikfkGroup has a message connection to an ikfkControl
+        # then the connected control will be used.
+        self.ikfkControl = self.node
+        if cmds.attributeQuery("ikfkControl", node=self.node, ex=True):
+            self.ikfkControl = meta.getMessageConnection("{}.{}".format(self.node, 'ikfkControl'))
+
         self.ikControls = meta.getMessageConnection("{}.{}".format(self.node, 'ikControls'))
         self.fkControls = meta.getMessageConnection("{}.{}".format(self.node, 'fkControls'))
         self.ikMatchList = meta.getMessageConnection("{}.{}".format(self.node, 'ikMatchList'))
@@ -30,17 +94,19 @@ class IkFkSwitch(object):
         """
 
         if value == 0:
-            self.__setSourceAttr('{}.ikfk'.format(self.node), value)
-            self.__setSourceAttr('{}.pvPin'.format(self.node), 0)
-            self.__setSourceAttr('{}.twist'.format(self.node), 0)
-            self.__setSourceAttr('{}.stretch'.format(self.node), 1)
-            self.__setSourceAttr('{}.stretchTop'.format(self.node), 1)
-            self.__setSourceAttr('{}.stretchBot'.format(self.node), 1)
+            self.__setSourceAttr('{}.ikfk'.format(self.ikfkControl), value)
+            self.__setSourceAttr('{}.pvPin'.format(self.ikfkControl), 0)
+            # self.__setSourceAttr('{}.twist'.format(self.ikfkControl), 0)
+            self.__setSourceAttr('{}.stretch'.format(self.ikfkControl), 1)
+            self.__setSourceAttr('{}.stretchTop'.format(self.ikfkControl), 1)
+            self.__setSourceAttr('{}.stretchBot'.format(self.ikfkControl), 1)
 
             self.ikMatchFk(self.fkMatchList, self.ikControls[0], self.ikControls[1], self.ikControls[2])
+            logger.info("switched {}: ik -> fk".format(self.ikfkControl))
         else:
-            self.__setSourceAttr('{}.ikfk'.format(self.node), value)
+            self.__setSourceAttr('{}.ikfk'.format(self.ikfkControl), value)
             self.fkMatchIk(self.fkControls, self.ikMatchList)
+            logger.info("switched {}: fk -> ik".format(self.ikfkControl))
 
     @staticmethod
     def fkMatchIk(fkControls, ikJoints):
@@ -118,5 +184,6 @@ class IkFkSwitch(object):
 
 
 if __name__ == '__main__':
-    switcher = IkFkSwitch('arm_l_ikfk')
-    switcher.switch(not cmds.getAttr('{}.ikfk'.format('arm_l_ikfk')))
+    switchSelectedComponent("skeleton_rig:arm_ik_l")
+    # switcher = IkFkSwitch('arm_l_ikfk')
+    # switcher.switch(not cmds.getAttr('{}.ikfk'.format('arm_l_ikfk')))

@@ -427,7 +427,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 for shape in shapes:
                     cmds.connectAttr("{}.{}".format(self.params_hrc, 'bendies'), "{}.{}".format(shape, 'v'))
 
-        self.ikfkMatchSetup()
+        self.createIkFkMatchSetup()
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
@@ -510,19 +510,21 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     # --------------------------------------------------------------------------------
     # helper functions to shorten functions.
     # --------------------------------------------------------------------------------
-    def ikfkMatchSetup(self):
+    def createIkFkMatchSetup(self):
         """Setup the ikFKMatching"""
         wristIkOffset = cmds.createNode('transform', name="{}_ikMatch".format(self.input[3]), p=self.fkJnts[-1])
+        fkJointsMatchList = self.fkJnts[:-1] + [wristIkOffset]
         rig_transform.matchTransform(self.limb_ik.name, wristIkOffset)
         rig_attr.lock(wristIkOffset, ['t', 'r', 's', 'v'])
 
         # add required data to the ikFkSwitchGroup
-        # TODO: try to check this out. maybe use the ikfk group instead of the attribute
-        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkJnts[:-1] + [wristIkOffset], 'fkMatchList',
-                                      'matchNode')
-        meta.addMessageListConnection(self.ikfk.getGroup(), self.ikJnts, 'ikMatchList', 'matchNode')
-        meta.addMessageListConnection(self.ikfk.getGroup(), self.fkControls, 'fkControls', 'matchNode')
-        meta.addMessageListConnection(self.ikfk.getGroup(), self.ikControls, 'ikControls', 'matchNode')
+        # give the node that will store the ikfkSwitch attribute
+        if not self.useProxyAttrs:
+            meta.createMessageConnection(self.ikfk.getGroup(), self.ikfk_control.name, "ikfkControl")
+        meta.createMessageConnection(self.ikfk.getGroup(), fkJointsMatchList, 'fkMatchList','matchNode')
+        meta.createMessageConnection(self.ikfk.getGroup(), self.ikJnts, 'ikMatchList', 'matchNode')
+        meta.createMessageConnection(self.ikfk.getGroup(), self.fkControls, 'fkControls', 'matchNode')
+        meta.createMessageConnection(self.ikfk.getGroup(), self.ikControls, 'ikControls', 'matchNode')
 
     @staticmethod
     def createInputJoints(name=None, side=None, numJoints=None):

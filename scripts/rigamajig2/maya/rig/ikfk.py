@@ -237,7 +237,7 @@ class IkFkBase(object):
 
         if not cmds.objExists("{}.ikVisNode".format(attrHolder)):
             rev = node.reverse("{}.{}".format(attrHolder, attr), name="{}_{}".format(attrHolder, attr))
-            meta.addMessageConnection(attrHolder, rev, 'ikfkReverseNode')
+            meta.createMessageConnection(attrHolder, rev, 'ikfkReverseNode')
         else:
             rev = meta.getMessageConnection('{}.ikVisNode'.format(attrHolder))
 

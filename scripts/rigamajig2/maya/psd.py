@@ -97,7 +97,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     # setup the hirarchy node.
     rig_transform.matchTransform(joint, hrc)
     attr.lock(hrc, attr.TRANSFORMS + ['v'])
-    meta.addMessageConnection(joint, hrc, sourceAttr="poseReaderRoot")
+    meta.createMessageConnection(joint, hrc, sourceAttr="poseReaderRoot")
     meta.tag(hrc, "poseReader")
 
     # create and setup the output parameter node.
@@ -105,7 +105,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     output = cmds.createNode("transform", n="{}_poseReader_out".format(joint))
     attr.lockAndHide(output, attr.TRANSFORMS + ['v'])
     cmds.parent(output, hrc)
-    meta.addMessageConnection(joint, output, sourceAttr="poseReaderOut")
+    meta.createMessageConnection(joint, output, sourceAttr="poseReaderOut")
 
     # add attributes to the joint so we have an access point for later
     aimAxis = rig_transform.getAimAxis(aimJoint, allowNegative=False)
@@ -291,6 +291,6 @@ def __createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outpu
     # cleanup the setup
     attr.lockAndHide(pose_reader, attr.TRANSFORMS)
     cmds.setAttr("{}.{}".format(pose_reader, "v"), 0)
-    meta.addMessageConnection(joint, pose_reader, sourceAttr="swingPsdReaderNurbs")
+    meta.createMessageConnection(joint, pose_reader, sourceAttr="swingPsdReaderNurbs")
 
     return pose_reader

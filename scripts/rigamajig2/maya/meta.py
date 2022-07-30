@@ -91,22 +91,42 @@ def hasTag(node, tag):
 # TODO: refactor all this!
 
 
-def addMessageConnection(sourceNode, dataNode, sourceAttr, dataAttr=None):
+def createMessageConnection(sourceNode, destNode, sourceAttr, destAttr=None):
     """
-    Add a message connection between a source and target node
+    Add a message connection between a source and destination node.
+
+    If the destination node is a list it will create a multi-message attribute for the connection.
+
     :param sourceNode: source node of the message connection
-    :param dataNode: destination of the message connection
+    :param destNode: destination of the message connection
     :param sourceAttr: name of the source attribute
-    :param dataAttr: name of the destination attribute
+    :param destAttr: name of the destination attribute
     """
-    if cmds.objExists("{}.{}".format(dataNode, dataAttr)):
-        raise RuntimeError("The desination '{}.{}' already exist".format(dataNode, dataAttr))
+    if cmds.objExists("{}.{}".format(destNode, destAttr)):
+        raise RuntimeError("The desination '{}.{}' already exist".format(destNode, destAttr))
+
+    asMessageList = False
+    if isinstance(destNode, (list, tuple)):
+        asMessageList = True
+        destList = destNode
+
     if not cmds.objExists("{}.{}".format(sourceNode, sourceAttr)):
-        cmds.addAttr(sourceNode, ln=sourceAttr, at='message')
-    if dataAttr is None:
-        dataAttr = sourceAttr
-    cmds.addAttr(dataNode, ln=dataAttr, at='message')
-    cmds.connectAttr("{}.{}".format(sourceNode, sourceAttr), "{}.{}".format(dataNode, dataAttr))
+        cmds.addAttr(sourceNode, ln=sourceAttr, at='message', m=asMessageList)
+
+    if destAttr is None:
+        destAttr = sourceAttr
+
+    # if the destNode is a list then create a complex message connection.
+    if asMessageList:
+        for destNode in destList:
+            nextIndex = rig_attr.getNextAvailableElement("{}.{}".format(sourceNode, sourceAttr))
+            cmds.addAttr(destNode, ln=destAttr, at='message')
+            cmds.connectAttr(nextIndex, "{}.{}".format(destNode, destAttr))
+
+    # otherwise create a simple message connection.
+    else:
+        cmds.addAttr(destNode, ln=destAttr, at='message')
+        cmds.connectAttr("{}.{}".format(sourceNode, sourceAttr), "{}.{}".format(destNode, destAttr))
 
 
 def addMessageListConnection(sourceNode, dataList, sourceAttr, dataAttr=None):

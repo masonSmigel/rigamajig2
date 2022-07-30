@@ -54,7 +54,7 @@ class Control(object):
             return None
 
         orig = rigamajig2.maya.hierarchy.create(self.control, [self.control + "_" + common.ORIG], above=True)
-        meta.addMessageConnection(sourceNode=self.control, dataNode=orig[0], sourceAttr="__{}__".format(common.ORIG))
+        meta.createMessageConnection(sourceNode=self.control, destNode=orig[0], sourceAttr="__{}__".format(common.ORIG))
 
     def addSpaces(self):
         """
@@ -75,8 +75,8 @@ class Control(object):
             child = self.control
 
         spaces = rigamajig2.maya.hierarchy.create(child, [self.control + "_" + common.SPACES], above=True)
-        meta.addMessageConnection(sourceNode=self.control, dataNode=spaces[0],
-                                  sourceAttr="__{}__".format(common.SPACES))
+        meta.createMessageConnection(sourceNode=self.control, destNode=spaces[0],
+                                     sourceAttr="__{}__".format(common.SPACES))
 
     def addSdk(self):
         """
@@ -88,7 +88,7 @@ class Control(object):
             return None
 
         sdk = rigamajig2.maya.hierarchy.create(self.control, [self.control + "_" + common.SDK], above=True)
-        meta.addMessageConnection(sourceNode=self.control, dataNode=sdk[0], sourceAttr="__{}__".format(common.SDK))
+        meta.createMessageConnection(sourceNode=self.control, destNode=sdk[0], sourceAttr="__{}__".format(common.SDK))
         return sdk[0]
 
     def addTrs(self, name=None):
@@ -109,7 +109,7 @@ class Control(object):
 
         trsSuffix = "_{}Trs".format(name) if name else "_trs"
         trs = rigamajig2.maya.hierarchy.create(trsChild, [self.control + trsSuffix], above=True)
-        meta.addMessageConnection(sourceNode=self.control, dataNode=trs[0], sourceAttr="__{}__".format(common.TRS))
+        meta.createMessageConnection(sourceNode=self.control, destNode=trs[0], sourceAttr="__{}__".format(common.TRS))
 
     def getNode(self, node):
         """

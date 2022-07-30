@@ -98,8 +98,8 @@ def __createSimpleMatrixConstraintNetwork(driver, driven):
 
         # create message connections to the mult matrix and decompose matrix.
         # this is used if we ever create another constraint to re-use the old nodes
-        meta.addMessageConnection(driven, mm, '{}_constraintMm'.format(driver))
-        meta.addMessageConnection(driven, dcmp, '{}_constraintDcmp'.format(driver))
+        meta.createMessageConnection(driven, mm, '{}_constraintMm'.format(driver))
+        meta.createMessageConnection(driven, dcmp, '{}_constraintDcmp'.format(driver))
 
     return mm, dcmp
 

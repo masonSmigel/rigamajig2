@@ -105,6 +105,8 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.attr.lock(self.bind_hrc, rigamajig2.maya.attr.TRANSFORMS)
         rigamajig2.maya.attr.lock(self.model_hrc, rigamajig2.maya.attr.TRANSFORMS)
 
+        self.addMetadataToMain()
+
     def deleteSetup(self):
         if cmds.objExists(BIND_HRC_NAME):
             skel_children = cmds.listRelatives(BIND_HRC_NAME, c=True)
@@ -119,3 +121,24 @@ class Main(rigamajig2.maya.cmpts.base.Base):
             if model_children: cmds.parent(model_children, world=True)
 
         super(Main, self).deleteSetup()
+
+    def addMetadataToMain(self):
+        import rigamajig2
+        import getpass
+        from time import gmtime, strftime
+
+        rigamajig2.maya.attr.createAttr(self.root_hrc, "__rigamajigVersion__", "string",
+                                        value=rigamajig2.version,
+                                        keyable=False,
+                                        locked=True
+                                        )
+        rigamajig2.maya.attr.createAttr(self.root_hrc, "__createdBy__", "string",
+                                        value=getpass.getuser(),
+                                        keyable=False,
+                                        locked=True
+                                        )
+        rigamajig2.maya.attr.createAttr(self.root_hrc, "__createdAt__", "string",
+                                        value=strftime("%Y-%m-%d %H:%M:%S", gmtime()),
+                                        keyable=False,
+                                        locked=True
+                                        )

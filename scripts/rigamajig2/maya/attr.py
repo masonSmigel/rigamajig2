@@ -38,7 +38,7 @@ def isAttr(plug):
 
 
 def createAttr(node, longName, attributeType, value=None, niceName=None, shortName=None, minValue=None, maxValue=None,
-               keyable=True, readable=True, writable=True, storable=True, channelBox=False):
+               keyable=True, readable=True, writable=True, storable=True, channelBox=False, locked=False):
     """
     Add a new attribute to the provided node.
 
@@ -68,6 +68,7 @@ def createAttr(node, longName, attributeType, value=None, niceName=None, shortNa
     :type storable: bool
     :param channelBox: (Optional) If the attribute is non-keyable should it be in the channel box.
     :type channelBox:
+    :param locked: (Optional) Lock the the attribute on creation
 
     :return: Attribute Added
     :rtype: str
@@ -103,7 +104,10 @@ def createAttr(node, longName, attributeType, value=None, niceName=None, shortNa
             cmds.setAttr(plug, value, type=attributeType)
         else:
             cmds.setAttr(plug, value)
-    if channelBox: cmds.setAttr(plug, cb=True)
+    if channelBox:
+        cmds.setAttr(plug, cb=True)
+    if locked:
+        lock(node, longName)
 
     return plug
 

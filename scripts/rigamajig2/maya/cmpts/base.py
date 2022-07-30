@@ -185,8 +185,11 @@ class Base(object):
             rigamajig2.maya.meta.tag(self.container, 'component')
 
             # tag the container with the proper component version
-            rigamajig2.maya.attr.createAttr(self.container, "__version__",  "string", value=self.__version__, keyable=False)
-            rigamajig2.maya.attr.lock(self.container, "__version__")
+            rigamajig2.maya.attr.createAttr(self.container, "__version__",  "string",
+                                            value=self.__version__,
+                                            keyable=False,
+                                            locked=True
+                                            )
 
     def preScript(self):
         """run a prescript"""

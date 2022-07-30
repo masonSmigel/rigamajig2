@@ -226,7 +226,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
     def optimize(self):
         """Optimize the component"""
         for cmpt in self.fingerComponentList:
-            cmpt._optimize_cmpt()
+            cmpt._optimizeComponent()
 
     def deleteSetup(self):
         """Delete the rig setup"""

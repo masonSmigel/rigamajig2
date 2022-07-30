@@ -17,13 +17,21 @@ logger = logging.getLogger(__name__)
 
 
 class Basic(rigamajig2.maya.cmpts.base.Base):
+    """
+    Single control component
+    """
+    VERSION_MAJOR = 1
+    VERSION_MINOR = 0
+    VERSION_PATCH = 0
 
-    def __init__(self, name, input=[], size=1, rigParent=str(),
+    version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
+    version = '%i.%i.%i' % version_info
+    __version__ = version
+
+    def __init__(self, name, input, size=1, rigParent=str(),
                  addSpaces=False,  addTrs=False, addSdk=False,
                  controlShape='cube', worldOrient=False):
         """
-        Single control component.
-
         :param name: Component name. To add a side use a side token
         :param input: Single input joint
         :param size:  Default size of the controls.
@@ -50,7 +58,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
 
         self.control = rig_control.create(self.controlName, self.side,
                                           spaces=self.addSpaces, trs=self.addTrs, sdk=self.addSdk,
-                                          color='blue', parent=self.control_hrc, shape=self.controlShape)
+                                          color='blue', parent=self.controlHierarchy, shape=self.controlShape)
 
         rig_transform.matchTranslate(self.input[0], self.control.orig)
         if not self.worldOrient:

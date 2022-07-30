@@ -18,10 +18,10 @@ import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
 
 
-def import_model(path=None):
+def importModel(path=None):
     """
     import the model into the scene.
-    :param path:
+    :param path: path to model
     :return:
     """
     nodes = list()

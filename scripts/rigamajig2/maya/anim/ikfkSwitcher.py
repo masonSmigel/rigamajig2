@@ -1,3 +1,6 @@
+"""
+Ik FK switcher
+"""
 import maya.cmds as cmds
 import rigamajig2.maya.meta as meta
 import maya.api.OpenMaya as om2
@@ -68,13 +71,14 @@ def switchSelectedComponent(controlNode=None, ik=None, fk=None):
 # pylint:disable=duplicate-code
 
 class IkFkSwitch(object):
+    """Class to switch IKFK components"""
     def __init__(self, node):
         """initalize"""
         self.node = node
         self.gatherInfo()
 
     def gatherInfo(self):
-
+        """Gather Ikfk component data """
         # By default the ikfkControl will  be the ikfk group.
         # However if the ikfkGroup has a message connection to an ikfkControl
         # then the connected control will be used.
@@ -94,17 +98,17 @@ class IkFkSwitch(object):
         """
 
         if value == 0:
-            self.__setSourceAttr('{}.ikfk'.format(self.ikfkControl), value)
-            self.__setSourceAttr('{}.pvPin'.format(self.ikfkControl), 0)
-            # self.__setSourceAttr('{}.twist'.format(self.ikfkControl), 0)
-            self.__setSourceAttr('{}.stretch'.format(self.ikfkControl), 1)
-            self.__setSourceAttr('{}.stretchTop'.format(self.ikfkControl), 1)
-            self.__setSourceAttr('{}.stretchBot'.format(self.ikfkControl), 1)
+            self._setSourceAttr('{}.ikfk'.format(self.ikfkControl), value)
+            self._setSourceAttr('{}.pvPin'.format(self.ikfkControl), 0)
+            # self._setSourceAttr('{}.twist'.format(self.ikfkControl), 0)
+            self._setSourceAttr('{}.stretch'.format(self.ikfkControl), 1)
+            self._setSourceAttr('{}.stretchTop'.format(self.ikfkControl), 1)
+            self._setSourceAttr('{}.stretchBot'.format(self.ikfkControl), 1)
 
             self.ikMatchFk(self.fkMatchList, self.ikControls[0], self.ikControls[1], self.ikControls[2])
             logger.info("switched {}: ik -> fk".format(self.ikfkControl))
         else:
-            self.__setSourceAttr('{}.ikfk'.format(self.ikfkControl), value)
+            self._setSourceAttr('{}.ikfk'.format(self.ikfkControl), value)
             self.fkMatchIk(self.fkControls, self.ikMatchList)
             logger.info("switched {}: fk -> ik".format(self.ikfkControl))
 
@@ -158,23 +162,23 @@ class IkFkSwitch(object):
         mid = cmds.xform(matchList[1], q=True, ws=True, t=True)
         end = cmds.xform(matchList[2], q=True, ws=True, t=True)
 
-        start_vector = om2.MVector(*start)
-        mid_vector = om2.MVector(*mid)
-        end_vector = om2.MVector(*end)
+        startVector = om2.MVector(*start)
+        midVector = om2.MVector(*mid)
+        endVector = om2.MVector(*end)
 
-        line = (end_vector - start_vector)
-        point = (mid_vector - start_vector)
+        line = (endVector - startVector)
+        point = (midVector - startVector)
 
-        scale_value = (line * point) / (line * line)
-        proj_vec = (line * scale_value) + start_vector
+        scaleValue = (line * point) / (line * line)
+        projVector = (line * scaleValue) + startVector
 
-        avLen = ((start_vector - mid_vector).length() + (mid_vector - end_vector).length())
-        pv_pos = ((mid_vector - proj_vec).normal() * (magnitude + avLen)) + mid_vector
+        avLen = ((startVector - midVector).length() + (midVector - endVector).length())
+        pvPositions = ((midVector - projVector).normal() * (magnitude + avLen)) + midVector
 
-        return pv_pos
+        return pvPositions
 
     @staticmethod
-    def __setSourceAttr(attribute, value):
+    def _setSourceAttr(attribute, value):
         connection = cmds.listConnections(attribute, s=True, d=False)
         if connection and len(connection) > 0:
             src = cmds.listConnections(attribute, s=True, d=False, plugs=True)[0]

@@ -25,21 +25,22 @@ FINGER_NAMES = ['thumb', 'index', 'middle', 'ring', 'pinky']
 
 
 class Hand(rigamajig2.maya.cmpts.base.Base):
-
+    """
+    Hand component.
+    The Hand is a system of chain components based on the input of each start finger joint.
+    The component also adds a pose control.
+    """
     VERSION_MAJOR = 1
     VERSION_MINOR = 0
     VERSION_PATCH = 1
 
     version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
     version = '%i.%i.%i' % version_info
-    __version__= version
+    __version__ = version
 
-    def __init__(self, name, input=[], size=1, useProxyAttrs=True, useScale=False, addFKSpace=False, useSubMeta=True,
+    def __init__(self, name, input, size=1, useProxyAttrs=True, useScale=False, addFKSpace=False, useSubMeta=True,
                  rigParent=str()):
         """
-        Hand component.
-        The Hand is a system of chain components.
-
         :param name: name of the components
         :type name: str
         :param input: list of base joints for each finger. Add the joints in from thumb to pinky
@@ -63,9 +64,9 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
 
     def createBuildGuides(self):
         """Show Advanced Proxy"""
-        self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
+        self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
-        self.thumbCupGuide = rig_control.createGuide("{}_thumbCup".format(self.name), parent=self.guides_hrc)
+        self.thumbCupGuide = rig_control.createGuide("{}_thumbCup".format(self.name), parent=self.guidesHierarchy)
         rig_transform.matchTranslate(self.input[0], self.thumbCupGuide)
 
         if self.side == 'r':
@@ -80,22 +81,22 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         self.wrist = rig_control.create("{}_poses".format(self.name),
                                         shape='square',
                                         position=pos,
-                                        parent=self.control_hrc,
+                                        parent=self.controlHierarchy,
                                         hideAttrs=['t', 'r', 's', 'v'])
 
         # disable auto-container placement
         cmds.container(self.container, e=True, c=False)
 
         # intialize new compoents
-        self.finger_cmpt_list = list()
+        self.fingerComponentList = list()
         inputBaseNames = [x.split("_")[0] for x in self.input]
         for i in range(len(self.input)):
             endJoint = cmds.ls(reversed(cmds.listRelatives(self.input[i], ad=True)), type='joint')[-1]
 
             # initalize a finger component
-            finger_name = inputBaseNames[i] + '_' + self.side if self.side else inputBaseNames[i]
-            finger_cmpt = rigamajig2.maya.cmpts.chain.chain.Chain(
-                finger_name,
+            fingerName = inputBaseNames[i] + '_' + self.side if self.side else inputBaseNames[i]
+            fingerComponent = rigamajig2.maya.cmpts.chain.chain.Chain(
+                fingerName,
                 input=[self.input[i], endJoint],
                 useScale=self.useScale,
                 addSdk=True,
@@ -103,17 +104,17 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
                 rigParent=self.wrist.name
                 )
 
-            finger_cmpt._intialize_cmpt()
-            cmds.container(self.container, e=True, f=True, addNode=finger_cmpt.getContainer())
-            meta.tag(finger_cmpt.getContainer(), 'subComponent')
-            self.finger_cmpt_list.append(finger_cmpt)
+            fingerComponent._initalizeComponent()
+            cmds.container(self.container, e=True, f=True, addNode=fingerComponent.getContainer())
+            meta.tag(fingerComponent.getContainer(), 'subComponent')
+            self.fingerComponentList.append(fingerComponent)
 
     def rigSetup(self):
         self.cupTransforms = list()
-        for i, cmpt in enumerate(self.finger_cmpt_list):
-            cmpt._build_cmpt()
-            cmds.parent(cmpt.control_hrc, self.control_hrc)
-            cmds.parent(cmpt.spaces_hrc, self.spaces_hrc)
+        for i, cmpt in enumerate(self.fingerComponentList):
+            cmpt._buildComponent()
+            cmds.parent(cmpt.controlHierarchy, self.controlHierarchy)
+            cmds.parent(cmpt.spacesHierarchy, self.spacesHierarchy)
 
             # setup the cup controls
 
@@ -149,18 +150,18 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
                 self.cupTransforms.append(cupTrs)
 
             # delete the root hrc from the finger component and re-assign the hand to be the componet root
-            cmds.delete(cmpt.root_hrc)
-            cmds.delete(cmpt.control_hrc)
-            cmpt.root_hrc = self.root_hrc
+            cmds.delete(cmpt.rootHierarchy)
+            cmds.delete(cmpt.controlHierarchy)
+            cmpt.rootHierarchy = self.rootHierarchy
 
         self.setupSdk()
 
     def setupSdk(self):
         """setup the sdks in the rig """
         metaControlsNum = 2 if self.useSubMeta else 1
-        metasList = [x.controlers[0] for x in self.finger_cmpt_list]
-        metaSecondList = [x.controlers[1] for x in self.finger_cmpt_list]
-        fingerBaseList = [x.controlers[metaControlsNum] for x in self.finger_cmpt_list]
+        metasList = [x.controlers[0] for x in self.fingerComponentList]
+        metaSecondList = [x.controlers[1] for x in self.fingerComponentList]
+        fingerBaseList = [x.controlers[metaControlsNum] for x in self.fingerComponentList]
 
         # setup the spreads
         rig_attr.addSeparator(self.wrist.name, 'spread')
@@ -174,8 +175,8 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         gestureUtils.setupSpreadSdk(metaSecondList[1:], self.wrist.name, "palmSpread", multiplier=1)
 
         rig_attr.addSeparator(self.wrist.name, 'curl')
-        fingerNameList = common.fillList(FINGER_NAMES, 'finger', len(self.finger_cmpt_list))
-        for finger, cmpt in zip(fingerNameList, self.finger_cmpt_list):
+        fingerNameList = common.fillList(FINGER_NAMES, 'finger', len(self.fingerComponentList))
+        for finger, cmpt in zip(fingerNameList, self.fingerComponentList):
             gestureUtils.setupCurlSdk(cmpt.controlers, self.wrist.name, "{}Curl".format(finger),
                                       metaControls=metaControlsNum)
 
@@ -189,7 +190,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         # the lenFingers varrible is used to create a multiplier to stablize the rotation when there are
         # more or less then 4 fingers.
         offset = 0.25
-        for i, cmpt in enumerate(self.finger_cmpt_list[1:]):
+        for i, cmpt in enumerate(self.fingerComponentList[1:]):
             value = offset  * (i + 1)
             gestureUtils.setupCurlSdk(cmpt.controlers, self.wrist.name, "relax", multiplier=value,
                                       metaControls=metaControlsNum)
@@ -209,7 +210,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
 
         if self.addFKSpace:
             self.wrist.addSdk()
-            spaces.create(self.wrist.spaces, self.wrist.name, parent=self.spaces_hrc)
+            spaces.create(self.wrist.spaces, self.wrist.name, parent=self.spacesHierarchy)
 
             # if the main control exists connect the world space
             if cmds.objExists('trs_motion'):
@@ -217,18 +218,19 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
 
     def finalize(self):
         # navigate around container parenting since we have already parented the containers to the hand container
-        for cmpt in self.finger_cmpt_list:
+        for cmpt in self.fingerComponentList:
             cmpt.finalize()
             cmpt.setAttrs()
             cmpt.postScript()
 
     def optimize(self):
-        for cmpt in self.finger_cmpt_list:
+        """Optimize the component"""
+        for cmpt in self.fingerComponentList:
             cmpt._optimize_cmpt()
 
-    def delete_setup(self):
-
-        for cmpt in self.finger_cmpt_list:
+    def deleteSetup(self):
+        """Delete the rig setup"""
+        for cmpt in self.fingerComponentList:
             cmpt.deleteSetup()
         super(Hand, self).deleteSetup()
 
@@ -237,7 +239,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         """static method to create input joints"""
         import rigamajig2.maya.naming as naming
         import rigamajig2.maya.joint as joint
-        GUIDE_POSITIONS = {
+        guidePostions = {
             "thumb": (1, 0, 6),
             "index": (2, 0, 2),
             "middle": (2, 0, 0),
@@ -260,7 +262,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
                     cmds.parent(jnt, parent)
 
                 if j < 1:
-                    position = GUIDE_POSITIONS[finger]
+                    position = guidePostions[finger]
                     joints.append(jnt)
                     rootJnt = jnt
                 elif j == 2:

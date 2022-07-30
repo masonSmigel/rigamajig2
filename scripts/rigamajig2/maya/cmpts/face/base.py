@@ -18,6 +18,9 @@ logger = logging.getLogger(__name__)
 
 
 class Base(object):
+    """
+    Base class which all components are subclassed from
+    """
 
     def __init__(self, name, rigParent=str()):
         self.name = name
@@ -35,9 +38,9 @@ class Base(object):
 
     def initalHierachy(self):
         """Setup the inital Hirarchy. implement in subclass"""
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
+        self.rootHeirarchy = cmds.createNode('transform', n=self.name + '_cmpt')
+        self.paramsHierarchy = cmds.createNode('transform', n=self.name + '_params', parent=self.rootHeirarchy)
+        self.controlHierarchy = cmds.createNode('transform', n=self.name + '_control', parent=self.rootHeirarchy)
 
     def createGuides(self):
         """Create component guides"""

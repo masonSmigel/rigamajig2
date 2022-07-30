@@ -112,7 +112,7 @@ function-naming-style=camelCase
 module-naming-style=any
 
 # Good variable names which should always be accepted, separated by a comma.
-good-names= i, j, k, r, f,cv, d, ex, ik, fk, Run, _, A, B, C, logger, basestring
+good-names= i, j, k, r, p, f,cv, ro, a, b, c, d, e, n, ex, ik, fk, Run, _, A, B, C, logger, basestring, dlg_instance, pv, unicode
 
 
 [CLASSES]
@@ -144,7 +144,7 @@ valid-metaclass-classmethod-first-arg=cls
 max-args=10
 
 # Maximum number of attributes for a class (see R0902).
-max-attributes=10
+max-attributes=15
 
 # Maximum number of boolean expressions in an if statement (see R0916).
 max-bool-expr=5

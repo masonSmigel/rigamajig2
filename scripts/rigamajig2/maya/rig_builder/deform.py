@@ -27,64 +27,83 @@ logger = logging.getLogger(__name__)
 
 
 # POSE SPACE DEFORMERS
-def save_poseReaders(path=None):
-    """Save out pose readers"""
+def savePoseReaders(path=None):
+    """
+    Save out pose readers
+    :param path: path to the pose reader file
+    """
 
-    pd = psd_data.PSDData()
-    pd.gatherDataIterate(meta.getTagged("poseReader"))
-    pd.write(path)
+    dataObj = psd_data.PSDData()
+    dataObj.gatherDataIterate(meta.getTagged("poseReader"))
+    dataObj.write(path)
 
 
-def load_poseReaders(path=None, replace=True):
-    """ Load pose readers"""
+def loadPoseReaders(path=None, replace=True):
+    """
+    Load pose readers
+    :param path: path to the pose reader file
+    :param replace: If true replace existing pose readers.
+    """
     if not os.path.exists(path):
         return False
 
-    pd = psd_data.PSDData()
-    pd.read(path)
-    pd.applyData(nodes=pd.getData().keys(), replace=replace)
+    dataObj = psd_data.PSDData()
+    dataObj.read(path)
+    dataObj.applyData(nodes=dataObj.getData().keys(), replace=replace)
     return True
 
 
 # SKINWEIGHTS
-def load_skin_weights(path=None):
-    """load all skinweights within the folder"""
-
+def loadSkinWeights(path=None):
+    """
+    Load all skinweights within the folder
+    :param path: path to skin weights directory
+    """
     if not os.path.exists(path):
         return
 
     root, ext = os.path.splitext(path)
     if ext:
-        load_single_skin(path)
+        loadSingleSkin(path)
     else:
         files = os.listdir(path)
         for f in files:
-            file_path = os.path.join(path, f)
-            _, fileext = os.path.splitext(file_path)
+            filePath = os.path.join(path, f)
+            _, fileext = os.path.splitext(filePath)
             if fileext == '.json':
-                load_single_skin(file_path)
+                loadSingleSkin(filePath)
         return True
 
 
-def load_single_skin(path):
+def loadSingleSkin(path):
+    """
+    load a single skin weight file
+    :param path: path to skin weight file
+    :return:
+    """
     if path:
-        sd = skin_data.SkinData()
-        sd.read(path)
-        sd.applyData(nodes=sd.getData().keys())
+        dataObj = skin_data.SkinData()
+        dataObj.read(path)
+        dataObj.applyData(nodes=dataObj.getData().keys())
 
 
-def save_skin_weights(path=None):
+def saveSkinWeights(path=None):
+    """
+    Save skin weights for selected object
+    :param path: path to skin weights directory
+    :return:
+    """
     if rig_path.isFile(path):
-        sd = skin_data.SkinData()
-        sd.gatherDataIterate(cmds.ls(sl=True))
-        sd.write(path)
+        dataObj = skin_data.SkinData()
+        dataObj.gatherDataIterate(cmds.ls(sl=True))
+        dataObj.write(path)
         logging.info("skin weights for: {} saved to:{}".format(cmds.ls(sl=True), path))
 
     else:
         for geo in cmds.ls(sl=True):
             if not skinCluster.getSkinCluster(geo):
                 continue
-            sd = skin_data.SkinData()
-            sd.gatherData(geo)
-            sd.write("{}/{}.json".format(path, geo))
+            dataObj = skin_data.SkinData()
+            dataObj.gatherData(geo)
+            dataObj.write("{}/{}.json".format(path, geo))
             logging.info("skin weights for: {} saved to:{}.json".format(path, geo))

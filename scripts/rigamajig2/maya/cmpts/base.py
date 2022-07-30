@@ -16,8 +16,11 @@ import logging
 logger = logging.getLogger(__name__)
 
 
+# pylint:disable=too-many-public-methods
 class Base(object):
-
+    """
+    Base component all components are subclassed from
+    """
     VERSION_MAJOR = 1
     VERSION_MINOR = 0
     VERSION_PATCH = 0
@@ -26,7 +29,7 @@ class Base(object):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input=[], size=1, rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str()):
         """
         constructor of the base class.
 
@@ -48,7 +51,7 @@ class Base(object):
         :type rigParent: str
         """
         self.name = name
-        self.cmpt_type = self.__module__.split('cmpts.')[-1]
+        self.componentType = self.__module__.split('cmpts.')[-1]
         self.input = input
         self.container = self.name + '_container'
         self.metaNode = None
@@ -56,11 +59,18 @@ class Base(object):
         # element lists
         self.bindjoints = list()
         self.controlers = list()
+        self.guidesHierarchy = None
 
         # node metaData
-        self.cmptSettings = OrderedDict(name=name, type=self.cmpt_type, input=self.input, size=size, rigParent=rigParent)
+        self.cmptSettings = OrderedDict(
+            name=name,
+            type=self.componentType,
+            input=self.input,
+            size=size,
+            rigParent=rigParent
+            )
 
-    def _intialize_cmpt(self):
+    def _initalizeComponent(self):
         """
         setup all intialize functions for the component
 
@@ -68,7 +78,7 @@ class Base(object):
             self.createContainer
             self.preScript
         """
-        if not self.getStep() >= 1:
+        if self.getStep() < 1:
             # fullDict = dict(self.metaData, **self.cmptSettings)
             self.setInitalData()
             self.createContainer()
@@ -89,7 +99,7 @@ class Base(object):
         else:
             logger.debug('component {} already initalized.'.format(self.name))
 
-    def _build_cmpt(self):
+    def _buildComponent(self):
         """
         build the rig
 
@@ -99,9 +109,9 @@ class Base(object):
             self.rigSetup
             self.postRigSetup
         """
-        self._load_meta_to_component()
+        self._loadComponentParametersToClass()
 
-        if not self.getStep() >= 2:
+        if self.getStep() < 2:
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -114,11 +124,11 @@ class Base(object):
         else:
             logger.debug('component {} already built.'.format(self.name))
 
-    def _connect_cmpt(self):
+    def _connectComponent(self):
         """ connect components within the rig"""
-        self._load_meta_to_component()
+        self._loadComponentParametersToClass()
 
-        if not self.getStep() >= 3:
+        if self.getStep() < 3:
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.initConnect()
                 self.connect()
@@ -127,7 +137,7 @@ class Base(object):
         else:
             logger.debug('component {} already connected.'.format(self.name))
 
-    def _finalize_cmpt(self):
+    def _finalizeComponent(self):
         """
         finalize component
 
@@ -137,9 +147,9 @@ class Base(object):
             self.finalize
             self.postScripts
         """
-        self._load_meta_to_component()
+        self._loadComponentParametersToClass()
 
-        if not self.getStep() >= 4:
+        if self.getStep() < 4:
             self.publishNodes()
             self.publishAttributes()
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -150,11 +160,11 @@ class Base(object):
         else:
             logger.debug('component {} already finalized.'.format(self.name))
 
-    def _optimize_cmpt(self):
+    def _optimizeComponent(self):
         """"""
-        self._load_meta_to_component()
+        self._loadComponentParametersToClass()
 
-        if not self.getStep() == 5:
+        if self.getStep() != 5:
             self.optimize()
             self.setStep(5)
         else:
@@ -178,14 +188,14 @@ class Base(object):
         """
         pass
 
-    def createContainer(self, data={}):
+    def createContainer(self):
         """Create a Container for the component"""
         if not cmds.objExists(self.container):
             self.container = rigamajig2.maya.container.create(self.container)
             rigamajig2.maya.meta.tag(self.container, 'component')
 
             # tag the container with the proper component version
-            rigamajig2.maya.attr.createAttr(self.container, "__version__",  "string",
+            rigamajig2.maya.attr.createAttr(self.container, "__version__", "string",
                                             value=self.__version__,
                                             keyable=False,
                                             locked=True
@@ -201,10 +211,13 @@ class Base(object):
 
     def initalHierachy(self):
         """Setup the inital Hirarchy. implement in subclass"""
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.params_hrc = cmds.createNode('transform', n=self.name + '_params', parent=self.root_hrc)
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
-        self.spaces_hrc = cmds.createNode('transform', n=self.name + '_spaces', parent=self.root_hrc)
+        self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
+        self.paramsHierarchy = cmds.createNode('transform', n=self.name + '_params',
+                                               parent=self.rootHierarchy)
+        self.controlHierarchy = cmds.createNode('transform', n=self.name + '_control',
+                                                parent=self.rootHierarchy)
+        self.spacesHierarchy = cmds.createNode('transform', n=self.name + '_spaces',
+                                               parent=self.rootHierarchy)
 
     def preRigSetup(self):
         """Pre rig setup. implement in subclass"""
@@ -232,8 +245,8 @@ class Base(object):
 
     def publishNodes(self):
         """Publush nodes. implement in subclass"""
-        rigamajig2.maya.container.addParentAnchor(self.root_hrc, container=self.container)
-        rigamajig2.maya.container.addChildAnchor(self.root_hrc, container=self.container)
+        rigamajig2.maya.container.addParentAnchor(self.rootHierarchy, container=self.container)
+        rigamajig2.maya.container.addChildAnchor(self.rootHierarchy, container=self.container)
         rigamajig2.maya.container.addPublishNodes(self.controlers)
 
     def publishAttributes(self):
@@ -281,8 +294,8 @@ class Base(object):
         """
         if not cmds.objExists("{}.{}".format(self.container, 'build_step')):
             rigamajig2.maya.attr.createEnum(self.container, 'build_step', value=0,
-                                         enum=['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize'],
-                                         keyable=False, channelBox=False)
+                                            enum=['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize'],
+                                            keyable=False, channelBox=False)
 
         cmds.setAttr("{}.{}".format(self.container, 'build_step'), step)
 
@@ -296,25 +309,32 @@ class Base(object):
         return 0
 
     def loadSettings(self, data):
-        keys_to_remove = ['name', 'type', 'input']
-        new_dict = {key: val for key, val in data.items() if key not in keys_to_remove}
+        """
+        Load setting data onto the self.metaNode
+        :param data: data to store on the self.metaNode
+        :return:
+        """
+        keysToRemove = ['name', 'type', 'input']
+        newDict = {key: val for key, val in data.items() if key not in keysToRemove}
         if self.metaNode:
-            self.metaNode.setDataDict(new_dict)
+            self.metaNode.setDataDict(newDict)
 
-    def _load_meta_to_component(self):
+    def _loadComponentParametersToClass(self):
         """
         loadSettings meta data from the settings node into a dictionary
         """
-        new_cmpt_data = OrderedDict()
+        newComponentData = OrderedDict()
         for key in self.cmptSettings.keys():
-            if self.metaNode: data = self.metaNode.getAllData()
-            else:data = self.cmptSettings
+            if self.metaNode:
+                data = self.metaNode.getAllData()
+            else:
+                data = self.cmptSettings
 
             if key in data.keys():
                 setattr(self, key, data[key])
-                new_cmpt_data[key] = data[key]
+                newComponentData[key] = data[key]
 
-        self.cmptSettings.update(new_cmpt_data)
+        self.cmptSettings.update(newComponentData)
 
     @staticmethod
     def createInputJoints(name=None, side=None, numJoints=None):
@@ -325,39 +345,48 @@ class Base(object):
     def getContainer(self):
         """
         get the component container
-        :return:
         """
         if cmds.objExists(self.container):
             return self.container
         return None
 
     def getInputs(self):
+        """Get component inputs"""
         return self.input
 
     def getComponentData(self):
+        """Get all component Data """
         # create an info dictionary with the important component settings.
         # This is used to save the component to a file
-        info_dict = OrderedDict()
+        infoDict = OrderedDict()
         data = self.cmptSettings
 
         for key in self.cmptSettings.keys() + ['name', 'type', 'input']:
-            info_dict[key] = data[key]
-        return info_dict
+            infoDict[key] = data[key]
+        return infoDict
 
     def getComponenetType(self):
-        return self.cmpt_type
+        """Get the component type"""
+        return self.componentType
 
     # SET
     def setInputs(self, value):
+        """Set the component input"""
         self.input = value
 
     def setName(self, value):
+        """Set the component name"""
         self.name = value
 
     @classmethod
     def testBuild(cls, cmpt):
-        cmpt._intialize_cmpt()
-        cmpt._build_cmpt()
-        cmpt._connect_cmpt()
-        cmpt._finalize_cmpt()
-        cmpt._optimize_cmpt()
+        """
+        Static method to run the initialize, build, connect, finalize and optimize steps
+        :param cmpt: component to test the build.
+        :return:
+        """
+        cmpt._initalizeComponent()
+        cmpt._buildComponent()
+        cmpt._connectComponent()
+        cmpt._finalizeComponent()
+        cmpt._optimizeComponent()

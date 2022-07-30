@@ -23,25 +23,25 @@ import rigamajig2.maya.joint as joint
 import rigamajig2.maya.attr as attr
 
 
-def load_joints(path=None):
+def loadJoints(path=None):
     """
     Load all joints for the builder
-    :param path:
+    :param path: path to joint file
     :return:
     """
     if not os.path.exists(path):
         return
 
-    data_obj = joint_data.JointData()
-    data_obj.read(path)
-    data_obj.applyData(data_obj.getKeys())
+    dataObj = joint_data.JointData()
+    dataObj.read(path)
+    dataObj.applyData(dataObj.getKeys())
 
     # tag all bind joints
     for jnt in cmds.ls("*_bind", type='joint'):
         meta.tag(jnt, "bind")
 
-    data_obj.getData().keys()
-    for node in cmds.ls(data_obj.getKeys(), l=True):
+    dataObj.getData().keys()
+    for node in cmds.ls(dataObj.getKeys(), l=True):
         # add the joint orient to all joints in the file.
         joint.addJointOrientToChannelBox(node)
 
@@ -50,44 +50,48 @@ def load_joints(path=None):
             meta.tag(node, 'skeleton_root')
 
 
-def save_joints(path=None):
-    """save the joints"""
+def saveJoints(path=None):
+    """
+    save the joints
+    :param path: path to save joints
+    """
 
     # find all skeleton roots and get the positions of their children
-    skeleton_roots = common.toList(meta.getTagged('skeleton_root'))
-    if len(skeleton_roots) > 0:
-        data_obj = joint_data.JointData()
-        for root in skeleton_roots:
-            data_obj.gatherData(root)
-            data_obj.gatherDataIterate(cmds.listRelatives(root, allDescendents=True, type='joint'))
-        data_obj.write(path)
+    skeletonRoots = common.toList(meta.getTagged('skeleton_root'))
+    if len(skeletonRoots) > 0:
+        dataObj = joint_data.JointData()
+        for root in skeletonRoots:
+            dataObj.gatherData(root)
+            dataObj.gatherDataIterate(cmds.listRelatives(root, allDescendents=True, type='joint'))
+        dataObj.write(path)
     else:
-        raise RuntimeError("the root_hrc joint {} does not exists".format(skeleton_roots))
+        raise RuntimeError("the rootHierarchy joint {} does not exists".format(skeletonRoots))
 
 
-def load_guide_data(path=None):
+def loadGuideData(path=None):
     """
     Load guide data
+    :param path: path to guide data to save
     :return:
     """
     if not os.path.exists(path):
         return
 
     try:
-        nd = guide_data.GuideData()
-        nd.read(path)
-        nd.applyData(nodes=nd.getKeys())
+        dataObj = guide_data.GuideData()
+        dataObj.read(path)
+        dataObj.applyData(nodes=dataObj.getKeys())
         return True
     except:
         return False
 
 
-def save_guide_data(path=None):
+def saveGuideData(path=None):
     """
     Save guides data
-    :param path:
+    :param path: path to guide data to save
     :return:
     """
-    nd = guide_data.GuideData()
-    nd.gatherDataIterate(meta.getTagged("guide"))
-    nd.write(path)
+    dataObj = guide_data.GuideData()
+    dataObj.gatherDataIterate(meta.getTagged("guide"))
+    dataObj.write(path)

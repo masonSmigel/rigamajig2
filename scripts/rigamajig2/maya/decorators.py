@@ -19,6 +19,7 @@ def preserveSelection(func):
     :return:
     """
 
+    # pylint:disable=missing-docstring
     @wraps(func)
     def wrap(*args, **kwargs):
         selection = cmds.ls(sl=True)
@@ -42,7 +43,7 @@ def oneUndo(func):
     :param func:
     :return:
     """
-
+    # pylint:disable=missing-docstring
     @wraps(func)
     def wrap(*args, **kwargs):
         cmds.undoInfo(openChunk=True, chunkName=func.__name__)

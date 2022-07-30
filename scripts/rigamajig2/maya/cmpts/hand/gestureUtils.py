@@ -24,9 +24,9 @@ def setupSpreadSdk(controlsList, attrHolder, driverAttr, axis='y', multiplier=1.
 
 
     Note: different numbers of fingers are supported however 4 if the typically expected amount.
-    :param controlsList:
-    :param attrHolder:
-    :param driverAttr:
+    :param controlsList: list of controls to apply the sdk to
+    :param attrHolder: node to hold the drive attribute
+    :param driverAttr: attribute to drive the sdk
     :param str axis: the axis that the transformation should take place on. the default value is z for spread.
     :param multiplier: overal multiplier on the values of the spread system
     :return:
@@ -62,9 +62,9 @@ def setupCurlSdk(controlsList, attrHolder, driverAttr, axis='z', multiplier=1.0,
     setup the curl controls.
 
 
-    :param controlsList: list of controls to apply the curl to
+    :param controlsList: list of controls to apply the sdk to
     :param attrHolder: node to hold the drive attribute
-    :param driverAttr: attribute to drive the curl
+    :param driverAttr: attribute to drive the sdk
     :param axis: axis to curl on
     :param multiplier: overal multiplier on the values of the curl system
     :param metaControls: number of meta joints
@@ -101,9 +101,9 @@ def setupFanSdk(controlsList, attrHolder, driverAttr, axis='z', multiplier=1.0):
 
 
     Note: different numbers of fingers are supported however 4 if the typically expected amount.
-    :param controlsList:
-    :param attrHolder:
-    :param driverAttr:
+    :param controlsList: list of controls to apply sdk to
+    :param attrHolder: node to hold the drive attribute
+    :param driverAttr: attribute to drive the sdk
     :param str axis: the axis that the transformation should take place on. the default value is z for spread.
     :param multiplier: overal multiplier on the values of the spread system
     :return:
@@ -137,7 +137,14 @@ def setupFanSdk(controlsList, attrHolder, driverAttr, axis='z', multiplier=1.0):
 
 
 def setupSimple(controlsList, attrHolder, driverAttr, axis='x', multplier=1.0):
-
+    """
+    Setup a simple connection
+    :param controlsList: list of controls to apply sdk to
+    :param attrHolder: node to hold the drive attribute
+    :param driverAttr: attribute to drive the sdk
+    :param axis: the axis that the transformation should take place on. the default value is z for spread.
+    :param multplier: overal multiplier on the values of the spread system
+    """
     controlsList = common.toList(controlsList)
 
     if not cmds.objExists("{}.{}".format(attrHolder, driverAttr)):
@@ -154,6 +161,11 @@ def setupSimple(controlsList, attrHolder, driverAttr, axis='x', multplier=1.0):
 
 
 def checkForSDK(control):
+    """
+    Check if a control has an sdk already. If it doesnt create one.
+    :param control: control object to check for an existing sdk
+    :return: control object
+    """
     if rig_control.isControl(control):
         controlObj = rig_control.Control(control)
         return controlObj.sdk

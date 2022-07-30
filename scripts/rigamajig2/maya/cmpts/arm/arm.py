@@ -17,6 +17,9 @@ logger = logging.getLogger(__name__)
 
 
 class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
+    """
+    Arm component (sublcass of the limb.limb)
+    """
     VERSION_MAJOR = 1
     VERSION_MINOR = 0
     VERSION_PATCH = 0
@@ -25,26 +28,23 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(),
+    def __init__(self, name, input, size=1, ikSpaces=None, pvSpaces=None,
                  useProxyAttrs=True, useScale=True, rigParent=str()):
         """
-        Arm Component (subclass of limb rig)
-
-        :param name: component name. To add a side use a side token
-        :type name: str
-        :param input: list of 4 joints starting with the clavical and ending with the wrist.
-        :type input: list
-        :param size: default size of the controls.
-        :type size: float
-        :param rigParent: connect the component to a rigParent.
-        :type rigParent: str
-        :param: ikSpaces: dictionary of key and space for the ik control. formated as {"attrName": object}
-        :type ikSpaces: dict
-        :param: pvSpaces: dictionary of key and space for the pv control. formated as {"attrName": object}
-        :type pvSpaces: dict
-        :param useProxyAttrs: use proxy attributes instead of an ikfk control
-        :type useProxyAttrs: bool
+        :param str name: component name. To add a side use a side token
+        :param list input: list of 4 joints starting with the clavical and ending with the wrist.
+        :param float int size: default size of the controls.
+        :param str rigParent: connect the component to a rigParent.
+        :param dict ikSpaces: dictionary of key and space for the ik control. formated as {"attrName": object}
+        :param dict pvSpaces: dictionary of key and space for the pv control. formated as {"attrName": object}
+        :param bool useProxyAttrs: use proxy attributes instead of an ikfk control
         """
+        if ikSpaces is None:
+            ikSpaces = dict()
+
+        if pvSpaces is None:
+            pvSpaces = dict()
+
         # noinspection PyTypeChecker
         if len(input) != 4:
             raise RuntimeError('Input list must have a length of 4')
@@ -82,7 +82,8 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
         """static method to create input joints"""
         import rigamajig2.maya.naming as naming
         import rigamajig2.maya.joint as joint
-        GUIDE_POSITIONS = {
+
+        guidePositions = {
             "clavicle": (0, 0, 0),
             "shoulder": (10, 0, 0),
             "elbow": (25, 0, -2),
@@ -97,7 +98,7 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
             if parent:
                 cmds.parent(jnt, parent)
 
-            position = GUIDE_POSITIONS[key]
+            position = guidePositions[key]
             if side == 'r':
                 position = (position[0] * -1, position[1], position[2])
             cmds.xform(jnt, objectSpace=True, t=position)

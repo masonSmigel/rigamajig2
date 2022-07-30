@@ -14,6 +14,11 @@ import rigamajig2.maya.mathUtils as mathUtils
 
 
 class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
+    """
+    Squash component.
+    This is a simple squash component made of a single joint that will scale
+    based on the distance between the two end controls.
+    """
     VERSION_MAJOR = 1
     VERSION_MINOR = 0
     VERSION_PATCH = 0
@@ -22,23 +27,13 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input=[], size=1, useProxyAttrs=True, rigParent=str()):
+    def __init__(self, name, input, size=1, useProxyAttrs=True, rigParent=str()):
         """
-        Squash component.
-        This is a simple squash component made of a single joint.
-
-        Important note: the guides will control the placement of this components input!
-
-        :param name: name of the components
-        :type name: str
-        :param input:  Single input joint
-        :type input: list
-        :param size: default size of the controls:
-        :type size: float
-        :param addFKSpace: add a world/local space switch to the base of the fk chain
-        :type addFKSpace: bool
-        :param rigParent: node to parent to connect the component to in the heirarchy
-        :type rigParent: str
+        :param str name: name of the components
+        :param list input:  Single input joint
+        :param float int size: default size of the controls:
+        :param bool addFKSpace: add a world/local space switch to the base of the fk chain
+        :param str rigParent: node to parent to connect the component to in the heirarchy
         """
         super(SimpleSquash, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
@@ -55,111 +50,112 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
 
     def createBuildGuides(self):
         """Create the build guides"""
-        self.guides_hrc = cmds.createNode("transform", name='{}_guide'.format(self.name))
+        self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
         pos = cmds.xform(self.input[0], q=True, ws=True, t=True)
         rot = cmds.xform(self.input[0], q=True, ws=True, ro=True)
-        self.start_guide = rig_control.createGuide(self.name + "_start", side=self.side, parent=self.guides_hrc,
-                                                   position=pos, rotation=rot)
-        self.end_guide = rig_control.createGuide(self.name + "_end", side=self.side, parent=self.guides_hrc,
-                                                 position=pos, rotation=rot)
+        self.startGuide = rig_control.createGuide(self.name + "_start", side=self.side, parent=self.guidesHierarchy,
+                                                  position=pos, rotation=rot)
+        self.endGuide = rig_control.createGuide(self.name + "_end", side=self.side, parent=self.guidesHierarchy,
+                                                position=pos, rotation=rot)
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
         super(SimpleSquash, self).initalHierachy()
 
-        self.squash_start = rig_control.createAtObject(self.startControlName, self.side,
-                                                       hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
-                                                       parent=self.control_hrc, shape='pyramid', shapeAim='x',
-                                                       xformObj=self.start_guide)
-        self.squash_end = rig_control.createAtObject(self.endControlName, self.side,
-                                                     hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
-                                                     parent=self.control_hrc, shape='pyramid', shapeAim='x',
-                                                     xformObj=self.end_guide)
+        self.squashStart = rig_control.createAtObject(self.startControlName, self.side,
+                                                      hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
+                                                      parent=self.controlHierarchy, shape='pyramid', shapeAim='x',
+                                                      xformObj=self.startGuide)
+        self.squashEnd = rig_control.createAtObject(self.endControlName, self.side,
+                                                    hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
+                                                    parent=self.controlHierarchy, shape='pyramid', shapeAim='x',
+                                                    xformObj=self.endGuide)
 
-        self.controlers = [self.squash_start.name, self.squash_end.name]
+        self.controlers = [self.squashStart.name, self.squashEnd.name]
 
     def rigSetup(self):
         """Add the rig setup"""
-        self.ik_hrc = cmds.createNode('transform', n=self.name + '_ik', parent=self.root_hrc)
+        self.ikHierarchy = cmds.createNode('transform', n=self.name + '_ik', parent=self.rootHierarchy)
 
-        start_jnt = cmds.createNode("joint", n="{}_start_tgt".format(self.name), p=self.ik_hrc)
-        squash_jnt = cmds.createNode("joint", n="{}_squash_jnt".format(self.name), p=start_jnt)
-        end_jnt = cmds.createNode("joint", n="{}_end_tgt".format(self.name), p=start_jnt)
+        startJoint = cmds.createNode("joint", n="{}_start_tgt".format(self.name), p=self.ikHierarchy)
+        squashJoint = cmds.createNode("joint", n="{}_squash_jnt".format(self.name), p=startJoint)
+        endJoint = cmds.createNode("joint", n="{}_end_tgt".format(self.name), p=startJoint)
 
-        rig_transform.matchTransform(self.start_guide, start_jnt)
-        rig_transform.matchTransform(self.end_guide, end_jnt)
+        rig_transform.matchTransform(self.startGuide, startJoint)
+        rig_transform.matchTransform(self.endGuide, endJoint)
 
         # add parameters
-        volumeFactorAttr = rig_attr.createAttr(self.params_hrc, "volumeFactor", "float", value=1, minValue=0, maxValue=10)
+        volumeFactorAttr = rig_attr.createAttr(self.paramsHierarchy, "volumeFactor", "float", value=1, minValue=0,
+                                               maxValue=10)
 
         # orient the joints
-        for jnt in [start_jnt, end_jnt, squash_jnt]:
+        for jnt in [startJoint, endJoint, squashJoint]:
             rig_transform.matchRotate(self.input[0], jnt)
 
-        joint.toOrientation([start_jnt, end_jnt, squash_jnt])
+        joint.toOrientation([startJoint, endJoint, squashJoint])
 
         # create an ik handle to control the angle
-        self.ikHandle, self.effector = cmds.ikHandle(sj=start_jnt, ee=end_jnt, sol='ikSCsolver')
-        cmds.parent(self.ikHandle, self.ik_hrc)
+        self.ikHandle, self.effector = cmds.ikHandle(sj=startJoint, ee=endJoint, sol='ikSCsolver')
+        cmds.parent(self.ikHandle, self.ikHierarchy)
 
         # connect the ik handle
-        rig_transform.connectOffsetParentMatrix(self.squash_end.name, self.ikHandle)
-        rig_transform.connectOffsetParentMatrix(self.squash_start.name, start_jnt)
+        rig_transform.connectOffsetParentMatrix(self.squashEnd.name, self.ikHandle)
+        rig_transform.connectOffsetParentMatrix(self.squashStart.name, startJoint)
 
         # get the distance
-        dcmp = node.decomposeMatrix("{}.worldMatrix".format(self.root_hrc), name='{}_scale'.format(self.name))
-        distance = node.distance(self.squash_start.name, self.squash_end.name, name='{}_stretch'.format(self.name))
-        dist_float = mathUtils.distanceNodes(self.squash_start.name, self.squash_end.name)
+        dcmp = node.decomposeMatrix("{}.worldMatrix".format(self.rootHierarchy), name='{}_scale'.format(self.name))
+        distance = node.distance(self.squashStart.name, self.squashEnd.name, name='{}_stretch'.format(self.name))
+        distanceFloat = mathUtils.distanceNodes(self.squashStart.name, self.squashEnd.name)
 
-        normalized_distance = node.multiplyDivide("{}.distance".format(distance), "{}.outputScale".format(dcmp),
-                                                  operation='div', name="{}_normScale".format(self.name))
+        normalizedDistance = node.multiplyDivide("{}.distance".format(distance), "{}.outputScale".format(dcmp),
+                                                 operation='div', name="{}_normScale".format(self.name))
 
         # set the translation to be half of the distance
-        aim_axis = rig_transform.getAimAxis(start_jnt, allowNegative=True)
-        pos_factor = 0.5
-        if "-" in aim_axis:
-            pos_factor = -0.5
+        aimAxis = rig_transform.getAimAxis(startJoint, allowNegative=True)
+        posFactor = 0.5
+        if "-" in aimAxis:
+            posFactor = -0.5
 
-        mid_trs = node.multDoubleLinear("{}.outputX".format(normalized_distance), pos_factor,
-                                        output="{}.t{}".format(squash_jnt, aim_axis[-1]),
-                                        name="{}_midPos".format(self.name))
+        midTrs = node.multDoubleLinear("{}.outputX".format(normalizedDistance), posFactor,
+                                       output="{}.t{}".format(squashJoint, aimAxis[-1]),
+                                       name="{}_midPos".format(self.name))
 
         # build the stretch and squash
-        stretch_mult = node.multiplyDivide("{}.outputX".format(normalized_distance), [dist_float, 1, 1],
-                                           operation='div',
-                                           name="{}_stretch".format(self.name),
-                                           output="{}.s{}".format(squash_jnt, aim_axis[-1]))
+        stretchMult = node.multiplyDivide("{}.outputX".format(normalizedDistance), [distanceFloat, 1, 1],
+                                          operation='div',
+                                          name="{}_stretch".format(self.name),
+                                          output="{}.s{}".format(squashJoint, aimAxis[-1]))
 
-        volumeLoss_mdl = node.multDoubleLinear(-0.666, volumeFactorAttr, name="{}_volume".format(self.name))
-        volume_power = node.multiplyDivide("{}.outputX".format(stretch_mult), "{}.output".format(volumeLoss_mdl),
-                                           operation="pow", name="{}_volume".format(self.name))
+        volumeLossPercent = node.multDoubleLinear(-0.666, volumeFactorAttr, name="{}_volume".format(self.name))
+        volumePower = node.multiplyDivide("{}.outputX".format(stretchMult), "{}.output".format(volumeLossPercent),
+                                          operation="pow", name="{}_volume".format(self.name))
 
-        for axis in [x for x in 'xyz' if x != aim_axis[-1]]:
-            cmds.connectAttr("{}.outputX".format(volume_power), "{}.s{}".format(squash_jnt, axis))
+        for axis in [x for x in 'xyz' if x != aimAxis[-1]]:
+            cmds.connectAttr("{}.outputX".format(volumePower), "{}.s{}".format(squashJoint, axis))
 
         # connect the squash joint to the bind joint
-        joint.connectChains(squash_jnt, self.input[0])
+        joint.connectChains(squashJoint, self.input[0])
 
         # cleanup the rig
-        joint.hideJoints([start_jnt, end_jnt, squash_jnt])
+        joint.hideJoints([startJoint, endJoint, squashJoint])
         cmds.setAttr("{}.v".format(self.ikHandle), 0)
 
     def connect(self):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.squash_start.orig, mo=True)
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.squash_end.orig, mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.squashStart.orig, mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.squashEnd.orig, mo=True)
 
     def setupAnimAttrs(self):
         if self.useProxyAttrs:
             for control in self.controlers:
                 rig_attr.addSeparator(control, '----')
-            rig_attr.createProxy('{}.{}'.format(self.params_hrc, 'volumeFactor'), self.controlers)
+            rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'volumeFactor'), self.controlers)
         else:
-            rig_attr.addSeparator(self.squash_end.name, '----')
-            rig_attr.driveAttribute('volumeFactor', self.params_hrc, self.squash_end.name)
+            rig_attr.addSeparator(self.squashEnd.name, '----')
+            rig_attr.driveAttribute('volumeFactor', self.paramsHierarchy, self.squashEnd.name)
 
     @staticmethod
     def createInputJoints(name=None, side=None, numJoints=4):

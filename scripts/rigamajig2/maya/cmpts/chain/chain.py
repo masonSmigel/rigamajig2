@@ -16,6 +16,10 @@ logger = logging.getLogger(__name__)
 
 
 class Chain(rigamajig2.maya.cmpts.base.Base):
+    """
+    Fk chain component.
+    This is a simple chain component made of only an fk chain.
+    """
     VERSION_MAJOR = 1
     VERSION_MINOR = 0
     VERSION_PATCH = 0
@@ -24,22 +28,14 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input=[], size=1, useScale=False, addFKSpace=False, addSdk=True,
+    def __init__(self, name, input, size=1, useScale=False, addFKSpace=False, addSdk=True,
                  useProxyAttrs=True, rigParent=str()):
-        """
-        Fk chain component.
-        This is a simple chain component made of only an fk chain.
-
-        :param name: name of the components
-        :type name: str
-        :param input: list of two joints. A start and an end joint
-        :type input: list
-        :param size: default size of the controls:
-        :type size: float
-        :param addFKSpace: add a world/local space switch to the base of the fk chain
-        :type addFKSpace: bool
-        :param rigParent: node to parent to connect the component to in the heirarchy
-        :type rigParent: str
+        """"
+        :param str name: name of the components
+        :param list input: list of two joints. A start and an end joint
+        :param float int size: default size of the controls:
+        :param bool addFKSpace: add a world/local space switch to the base of the fk chain
+        :param str rigParent: node to parent to connect the component to in the heirarchy
         """
         super(Chain, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
@@ -74,26 +70,26 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         """Build the initial hirarchy"""
         super(Chain, self).initalHierachy()
 
-        self.fk_control_obj_list = list()
+        self.fkControlList = list()
         if self.useScale:
             hideAttrs = ['v']
         else:
             hideAttrs = ['v', 's']
 
         for i in range(len(self.inputList)):
-            parent = self.control_hrc
+            parent = self.controlHierarchy
             addSpaces = True
             if i > 0:
-                parent = self.fk_control_obj_list[i - 1].name
+                parent = self.fkControlList[i - 1].name
                 addSpaces = False
             control = rig_control.createAtObject(getattr(self, self.controlNameList[i]), self.side,
                                                  spaces=addSpaces, sdk=self.addSdk, hideAttrs=hideAttrs,
                                                  size=self.size, color='blue', parent=parent, shapeAim='x',
                                                  shape='square', xformObj=self.inputList[i])
 
-            self.fk_control_obj_list.append(control)
+            self.fkControlList.append(control)
 
-        self.controlers = [ctl.name for ctl in self.fk_control_obj_list]
+        self.controlers = [ctl.name for ctl in self.fkControlList]
 
     def rigSetup(self):
         """Add the rig setup"""
@@ -103,14 +99,14 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.fk_control_obj_list[0].orig, mo=True)
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.fkControlList[0].orig, mo=True)
 
         if self.addFKSpace:
-            spaces.create(self.fk_control_obj_list[0][1], self.fk_control_obj_list[0].name, parent=self.spaces_hrc)
+            spaces.create(self.fkControlList[0][1], self.fkControlList[0].name, parent=self.spacesHierarchy)
 
             # if the main control exists connect the world space
             if cmds.objExists('trs_motion'):
-                spaces.addSpace(self.fk_control_obj_list[0].spaces, ['trs_motion'], nameList=['world'],
+                spaces.addSpace(self.fkControlList[0].spaces, ['trs_motion'], nameList=['world'],
                                 constraintType='orient')
 
     @staticmethod

@@ -382,7 +382,7 @@ class ComponentManager(QtWidgets.QWidget):
             raise RuntimeError("No valid rig builder found")
         for cmpt in self.builder.getComponentList():
             name = cmpt.name
-            cmpt_type = cmpt.cmpt_type
+            cmpt_type = cmpt.componentType
             build_step_str = ['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize']
             build_step = build_step_str[cmpt.getStep()]
 
@@ -530,10 +530,11 @@ class CreateCmptDialog(QtWidgets.QDialog):
         self.discription_te.clear()
 
         cmpt_type = self.component_type_cb.currentText()
-
         cmpt_object = get_cmpt_object(cmpt_type)
 
-        docstring = cmpt_object.__init__.__doc__
+        classDocs = cmpt_object.__doc__ or ''
+        initDocs = cmpt_object.__init__.__doc__ or ''
+        docstring = classDocs + '\n---- parameters ----\n' + initDocs
         if docstring:
             docstring = re.sub(" {4}", "", docstring.strip())
 

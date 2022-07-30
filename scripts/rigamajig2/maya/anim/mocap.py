@@ -15,11 +15,11 @@ import rigamajig2.maya.data.abstract_data as abstract_data
 from rigamajig2.ui.widgets import pathSelector
 
 
-def prepSkeleton(namespace=None, mocapData=dict()):
+def prepSkeleton(mocapData, namespace=None):
     """
-    prepare the skeleton for mocap ipmort
-    :param namespace: namespace of the character
+    prepare the skeleton for mocap import
     :param mocapData: dictionary of mocap data
+    :param namespace: namespace of the character
     """
     if "prepAttrs" not in mocapData.keys():
         raise RuntimeError("Mocap Data is invalid")
@@ -36,11 +36,11 @@ def prepSkeleton(namespace=None, mocapData=dict()):
 
 
 @rigamajig2.maya.decorators.oneUndo
-def connectMocapData(namespace=None, mocapData=dict(), applyToLayer=False):
+def connectMocapData(mocapData, namespace=None, applyToLayer=False):
     """
     connect the mocap data to the rig
-    :param namespace: namespace of the character
     :param mocapData: dictionary of mocap data
+    :param namespace: namespace of the character
     :param applyToLayer: bake the animation onto an animaton layer
     """
     if "joints" not in mocapData.keys():
@@ -49,10 +49,10 @@ def connectMocapData(namespace=None, mocapData=dict(), applyToLayer=False):
     controls = list()
     for srcJoint in mocapData["joints"]:
         # check if the transfer locator exists, if it does delete it then re-create
-        tmp_locator = "{}_mocap_trs".format(srcJoint)
-        if cmds.objExists(tmp_locator):
-            cmds.delete(tmp_locator)
-        tmp_locator = cmds.spaceLocator(name="{}_mocap_trs".format(srcJoint))
+        tmpLocator = "{}_mocap_trs".format(srcJoint)
+        if cmds.objExists(tmpLocator):
+            cmds.delete(tmpLocator)
+        tmpLocator = cmds.spaceLocator(name="{}_mocap_trs".format(srcJoint))
 
         # get the name of the control
         control = mocapData["joints"][srcJoint]['control']
@@ -61,25 +61,25 @@ def connectMocapData(namespace=None, mocapData=dict(), applyToLayer=False):
         controls.append(control)
 
         # position the locator. it matches the position of the joint but the orientation of the control
-        cmds.parent(tmp_locator, srcJoint)
-        rigamajig2.maya.transform.matchTranslate(srcJoint, tmp_locator)
-        rigamajig2.maya.transform.matchRotate(control, tmp_locator)
+        cmds.parent(tmpLocator, srcJoint)
+        rigamajig2.maya.transform.matchTranslate(srcJoint, tmpLocator)
+        rigamajig2.maya.transform.matchRotate(control, tmpLocator)
 
         # setup a constraint between the tmp_locator and the control
         constraint = mocapData["joints"][srcJoint]['constraint']
         if constraint == 'orient':
-            cmds.orientConstraint(tmp_locator, control, mo=True)
+            cmds.orientConstraint(tmpLocator, control, mo=True)
         elif constraint == "point":
-            cmds.pointConstraint(tmp_locator, control, mo=True)
+            cmds.pointConstraint(tmpLocator, control, mo=True)
         else:
-            cmds.parentConstraint(tmp_locator, control, mo=True)
+            cmds.parentConstraint(tmpLocator, control, mo=True)
 
     # bake the control to the keys.
-    min_time = cmds.playbackOptions(q=True, min=True)
-    max_time = cmds.playbackOptions(q=True, max=True)
+    minTime = cmds.playbackOptions(q=True, min=True)
+    maxTime = cmds.playbackOptions(q=True, max=True)
     cmds.bakeResults(controls,
                      simulation=True,
-                     time=(min_time, max_time),
+                     time=(minTime, maxTime),
                      hi='none',
                      sampleBy=1,
                      oversamplingRate=1,
@@ -93,12 +93,14 @@ def connectMocapData(namespace=None, mocapData=dict(), applyToLayer=False):
 
 
 class MocapImportDialog(QtWidgets.QDialog):
+    """ Dialog for the mocap import """
     WINDOW_TITLE = "Apply Mocap Data"
 
     dlg_instance = None
 
     @classmethod
-    def show_dialog(cls):
+    def showDialog(cls):
+        """Show the dialog"""
         if not cls.dlg_instance:
             cls.dlg_instance = MocapImportDialog()
 
@@ -110,12 +112,11 @@ class MocapImportDialog(QtWidgets.QDialog):
 
     def __init__(self):
         if sys.version_info.major < 3:
-            maya_main_window = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+            mayaMainWindow = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
         else:
-            maya_main_window = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+            mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
-        super(MocapImportDialog, self).__init__(maya_main_window)
-        self.rig_env = None
+        super(MocapImportDialog, self).__init__(mayaMainWindow)
 
         self.setWindowTitle(self.WINDOW_TITLE)
         if cmds.about(ntOS=True):
@@ -125,74 +126,77 @@ class MocapImportDialog(QtWidgets.QDialog):
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
         self.setMinimumSize(300, 250)
 
-        self.create_widgets()
-        self.create_layouts()
-        self.create_connections()
-        self.update_namespaces()
+        self.createWidgets()
+        self.createLayouts()
+        self.createConnections()
+        self.updateNamespaces()
 
-    def create_widgets(self):
-        """create widgets"""
-        self.import_fbx_btn = QtWidgets.QPushButton("Import FBX")
-        self.cleanup_namespaces_btn = QtWidgets.QPushButton("Cleanup Namespaces")
-        self.mocap_template_pathSelector = pathSelector.PathSelector(cap='Select a Mocap Template',
-                                                                     ff="JSON Files (*.json)", fm=1)
-        self.namespace_cb = QtWidgets.QComboBox()
-        self.apply_to_layer_chbx = QtWidgets.QCheckBox("Apply to Layer")
-        self.apply_to_layer_chbx.setChecked(False)
-        self.prep_rig_btn = QtWidgets.QPushButton("Prep Rig")
-        self.connect_data_btn = QtWidgets.QPushButton("Connect to Rig")
+    def createWidgets(self):
+        """Create widgets"""
+        self.importFbxButton = QtWidgets.QPushButton("Import FBX")
+        self.cleanupNamespacesButton = QtWidgets.QPushButton("Cleanup Namespaces")
+        self.mocapTemplatePathselector = pathSelector.PathSelector(cap='Select a Mocap Template',
+                                                                   ff="JSON Files (*.json)", fm=1)
+        self.namespaceComboBox = QtWidgets.QComboBox()
+        self.applyToLayerCheckbox = QtWidgets.QCheckBox("Apply to Layer")
+        self.applyToLayerCheckbox.setChecked(False)
+        self.prepRigButton = QtWidgets.QPushButton("Prep Rig")
+        self.connectDataButton = QtWidgets.QPushButton("Connect to Rig")
 
-    def create_layouts(self):
-        """create layouts"""
-        main_layout = QtWidgets.QVBoxLayout(self)
-        main_layout.setContentsMargins(6, 6, 6, 6)
-        main_layout.setSpacing(4)
+    def createLayouts(self):
+        """Create layouts"""
+        mainLayout = QtWidgets.QVBoxLayout(self)
+        mainLayout.setContentsMargins(6, 6, 6, 6)
+        mainLayout.setSpacing(4)
 
-        main_layout.addWidget(QtWidgets.QLabel("1. Import fbx data: "))
-        main_layout.addWidget(self.import_fbx_btn)
-        main_layout.addWidget(self.cleanup_namespaces_btn)
+        mainLayout.addWidget(QtWidgets.QLabel("1. Import fbx data: "))
+        mainLayout.addWidget(self.importFbxButton)
+        mainLayout.addWidget(self.cleanupNamespacesButton)
 
-        main_layout.addStretch()
+        mainLayout.addStretch()
 
-        main_layout.addWidget(QtWidgets.QLabel("2. Select a mocap template file: "))
-        main_layout.addWidget(self.mocap_template_pathSelector)
+        mainLayout.addWidget(QtWidgets.QLabel("2. Select a mocap template file: "))
+        mainLayout.addWidget(self.mocapTemplatePathselector)
 
-        main_layout.addStretch()
-        main_layout.addWidget(QtWidgets.QLabel("3. Select a character namespace: "))
+        mainLayout.addStretch()
+        mainLayout.addWidget(QtWidgets.QLabel("3. Select a character namespace: "))
 
-        namespace_layout = QtWidgets.QHBoxLayout()
-        namespace_layout.addWidget(QtWidgets.QLabel("Character Namespace: "))
-        namespace_layout.addWidget(self.namespace_cb)
-        main_layout.addLayout(namespace_layout)
+        namespaceLayout = QtWidgets.QHBoxLayout()
+        namespaceLayout.addWidget(QtWidgets.QLabel("Character Namespace: "))
+        namespaceLayout.addWidget(self.namespaceComboBox)
+        mainLayout.addLayout(namespaceLayout)
 
-        main_layout.addStretch()
+        mainLayout.addStretch()
 
-        main_layout.addWidget(QtWidgets.QLabel("3. Pose the rig to match the fbx data start position. "))
-        main_layout.addStretch()
+        mainLayout.addWidget(QtWidgets.QLabel("3. Pose the rig to match the fbx data start position. "))
+        mainLayout.addStretch()
 
-        main_layout.addWidget(QtWidgets.QLabel("4. Apply the mocap data to the rig: "))
+        mainLayout.addWidget(QtWidgets.QLabel("4. Apply the mocap data to the rig: "))
 
-        options_layout = QtWidgets.QHBoxLayout()
-        options_layout.addWidget(self.apply_to_layer_chbx)
-        options_layout.addWidget(self.prep_rig_btn)
+        optionsLayout = QtWidgets.QHBoxLayout()
+        optionsLayout.addWidget(self.applyToLayerCheckbox)
+        optionsLayout.addWidget(self.prepRigButton)
 
-        main_layout.addLayout(options_layout)
-        main_layout.addWidget(self.connect_data_btn)
+        mainLayout.addLayout(optionsLayout)
+        mainLayout.addWidget(self.connectDataButton)
 
-    def create_connections(self):
-        self.import_fbx_btn.clicked.connect(self.import_fbx)
-        self.cleanup_namespaces_btn.clicked.connect(self.cleanup_namespaces)
-        self.connect_data_btn.clicked.connect(self.connect_mocap_data)
-        self.prep_rig_btn.clicked.connect(self.prep_rig)
+    def createConnections(self):
+        """Create Pyside connections"""
+        self.importFbxButton.clicked.connect(self.importFbx)
+        self.cleanupNamespacesButton.clicked.connect(self.cleanupNamespaces)
+        self.connectDataButton.clicked.connect(self.connectMocapData)
+        self.prepRigButton.clicked.connect(self.prepareRig)
 
-    def update_namespaces(self):
-        self.namespace_cb.clear()
+    def updateNamespaces(self):
+        """update the namespace combobox"""
+        self.namespaceComboBox.clear()
         toExclude = ('UI', 'shared')
-        for ns_find in (x for x in cmds.namespaceInfo(':', listOnlyNamespaces=True, recurse=True, fn=True) if
+        for namespacesFound in (x for x in cmds.namespaceInfo(':', listOnlyNamespaces=True, recurse=True, fn=True) if
                         x not in toExclude):
-            self.namespace_cb.addItem(ns_find)
+            self.namespaceComboBox.addItem(namespacesFound)
 
-    def import_fbx(self):
+    def importFbx(self):
+        """Import the mocap Fbx"""
         path = cmds.fileDialog2(ds=2, cap="Select FBX mocap data", ff="FBX (*.fbx)", fm=1,
                                 okc='Select', dir=cmds.workspace(q=True, dir=True))
         if path:
@@ -207,20 +211,20 @@ class MocapImportDialog(QtWidgets.QDialog):
             # ensure the framerate is set to intergers.
             # Sometimes importing the fbx with a mismatched framerate can cause fractional keys.
             # this is ensures the timerange works before baking the simulaiton
-            int_min = int(cmds.playbackOptions(q=True, min=True))
-            int_max = int(cmds.playbackOptions(q=True, max=True))
-            cmds.playbackOptions(min=int_min, ast=int_min)
-            cmds.playbackOptions(max=int_max, aet=int_max)
-            cmds.currentTime(int_min)
+            intMin = int(cmds.playbackOptions(q=True, min=True))
+            intMax = int(cmds.playbackOptions(q=True, max=True))
+            cmds.playbackOptions(min=intMin, ast=intMin)
+            cmds.playbackOptions(max=intMax, aet=intMax)
+            cmds.currentTime(intMin)
 
-    def connect_mocap_data(self):
+    def connectMocapData(self):
         """
         connect the mocap data to the rig
         """
 
-        path = self.mocap_template_pathSelector.get_path()
-        namespace = self.namespace_cb.currentText()
-        applyToLayer = self.apply_to_layer_chbx.isChecked()
+        path = self.mocapTemplatePathselector.get_path()
+        namespace = self.namespaceComboBox.currentText()
+        applyToLayer = self.applyToLayerCheckbox.isChecked()
 
         if not os.path.exists(path):
             raise RuntimeError("Mocap template is invalid or not specified")
@@ -232,9 +236,10 @@ class MocapImportDialog(QtWidgets.QDialog):
         prepSkeleton(namespace, data)
         connectMocapData(namespace, data, applyToLayer=applyToLayer)
 
-    def prep_rig(self):
-        path = self.mocap_template_pathSelector.get_path()
-        namespace = self.namespace_cb.currentText()
+    def prepareRig(self):
+        """Set attributes to prepare the rig to ingest mocap data"""
+        path = self.mocapTemplatePathselector.get_path()
+        namespace = self.namespaceComboBox.currentText()
         
         d = abstract_data.AbstractData()
         d.read(path)
@@ -242,19 +247,19 @@ class MocapImportDialog(QtWidgets.QDialog):
 
         prepSkeleton(namespace, data)
 
-    def cleanup_namespaces(self):
+    def cleanupNamespaces(self):
         """
         cleanup unused namespaces
         :return:
         """
         toExclude = ('UI', 'shared')
-        ns_dict = {}
-        for ns_find in (x for x in cmds.namespaceInfo(':', listOnlyNamespaces=True, recurse=True, fn=True) if
+        namespaceDict = {}
+        for namespacesFound in (x for x in cmds.namespaceInfo(':', listOnlyNamespaces=True, recurse=True, fn=True) if
                         x not in toExclude):
-            ns_dict.setdefault(len(ns_find.split(":")), []).append(ns_find)
+            namespaceDict.setdefault(len(namespacesFound.split(":")), []).append(namespacesFound)
 
-        for i, lvl in enumerate(reversed(ns_dict.keys())):
-            for namespace in ns_dict[lvl]:
+        for i, lvl in enumerate(reversed(namespaceDict.keys())):
+            for namespace in namespaceDict[lvl]:
                 if not len(cmds.ls("{}:*".format(namespace))) > 0:
                     cmds.namespace(removeNamespace=namespace, mergeNamespaceWithParent=True)
-        self.update_namespaces()
+        self.updateNamespaces()

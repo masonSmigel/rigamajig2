@@ -27,7 +27,7 @@ def isBlendshape(blendshape):
     return True
 
 
-def create(base, targets=[], origin='local', prefix=None):
+def create(base, targets=None, origin='local', prefix=None):
     """
     Create a blendshape deformer on the specified geometry
     :param base: base shape of the blendshape
@@ -92,26 +92,26 @@ def getWeights(blendshape, targets=None, geometry=None):
     if not targets: targets = getTargetList(blendshape)
     if not geometry: geometry = cmds.blendShape(blendshape, q=True, g=True)[0]
 
-    point_count = rigamajig2.maya.shape.getPointCount(geometry) - 1
+    pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
 
     # Get the target weights
     for target in targets:
         targetIndex = getTargetIndex(blendshape, target)
 
-        attr = '{}.it[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, point_count)
-        attr_default_test = '{}.it[0].itg[{}].tw[*]'.format(blendshape, targetIndex)
-        if not cmds.objExists(attr_default_test):
-            values = [1 for _ in range(point_count + 1)]
+        attr = '{}.it[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, pointCount)
+        attrDefaultTest = '{}.it[0].itg[{}].tw[*]'.format(blendshape, targetIndex)
+        if not cmds.objExists(attrDefaultTest):
+            values = [1 for _ in range(pointCount + 1)]
         else:
             values = cmds.getAttr(attr)
             values = [round(v, 5) for v in values]
         weightList[target] = values
 
     # get the base weights
-    attr = '{}.it[0].baseWeights[0:{}]'.format(blendshape, point_count)
-    attr_default_test = '{}.it[0].baseWeights[*]'.format(blendshape)
-    if not cmds.objExists(attr_default_test):
-        values = [1 for _ in range(point_count + 1)]
+    attr = '{}.it[0].baseWeights[0:{}]'.format(blendshape, pointCount)
+    attrDefaultTest = '{}.it[0].baseWeights[*]'.format(blendshape)
+    if not cmds.objExists(attrDefaultTest):
+        values = [1 for _ in range(pointCount + 1)]
     else:
         values = cmds.getAttr(attr)
         values = [round(v, 5) for v in values]
@@ -136,13 +136,13 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
     if not targets: targets = getTargetList(blendshape) + ['baseWeights']
     if not geometry: geometry = cmds.blendShape(blendshape, q=True, g=True)[0]
 
-    point_count = rigamajig2.maya.shape.getPointCount(geometry) - 1
+    pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
 
     for target in targets:
         if target == 'baseWeights':
-            attr = '{}.it[0].baseWeights[0:{}]'.format(blendshape, point_count)
+            attr = '{}.it[0].baseWeights[0:{}]'.format(blendshape, pointCount)
             cmds.setAttr(attr, *weights[target])
         else:
             targetIndex = getTargetIndex(blendshape, target)
-            attr = '{}.it[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, point_count)
+            attr = '{}.it[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, pointCount)
             cmds.setAttr(attr, *weights[target])

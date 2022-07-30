@@ -20,6 +20,10 @@ logger = logging.getLogger(__name__)
 
 
 class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
+    """
+    Leg Component  (sublcass of the limb.limb)
+    The leg component includes a foot.
+    """
     VERSION_MAJOR = 1
     VERSION_MINOR = 0
     VERSION_PATCH = 0
@@ -28,29 +32,26 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input=[], size=1, ikSpaces=dict(), pvSpaces=dict(), useProxyAttrs=True, useScale=True,
+    def __init__(self, name, input, size=1, ikSpaces=None, pvSpaces=None, useProxyAttrs=True, useScale=True,
                  rigParent=str()):
         """
-        Leg Component. (subclass of limb rig)
-        The leg component includes a foot.
-
-        :param name: component name. To add a side use a side token
-        :type name: str
-        :param input: list of 6 joints starting with the pelvis and ending with the toes.
-        :type input: list
-        :param size: default size of the controls.
-        :type size: float
-        :param rigParent: connect the component to a rigParent.
-        :type rigParent: str
-        :param: ikSpaces: dictionary of key and space for the ik control. formated as {"attrName": object}
-        :type ikSpaces: dict
-        :param: pvSpaces: dictionary of key and space for the pv control. formated as {"attrName": object}
-        :type pvSpaces: dict
-        :param useProxyAttrs: use proxy attributes instead of an ikfk control
-        :type useProxyAttrs: bool
+        :param str  name: component name. To add a side use a side token
+        :param list input: list of 6 joints starting with the pelvis and ending with the toes.
+        :param float int size: default size of the controls.
+        :param str rigParent: connect the component to a rigParent.
+        :param dict ikSpaces: dictionary of key and space for the ik control. formated as {"attrName": object}
+        :param dict pvSpaces: dictionary of key and space for the pv control. formated as {"attrName": object}
+        :param bool useProxyAttrs: use proxy attributes instead of an ikfk control
         """
+        if ikSpaces is None:
+            ikSpaces = dict()
+
+        if pvSpaces is None:
+            pvSpaces = dict()
+
         super(Leg, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces,
                                   useProxyAttrs=useProxyAttrs, useScale=useScale, rigParent=rigParent)
+
         self.cmptSettings['toes_fkName'] = 'toes_fk'
         self.cmptSettings['toes_ikName'] = 'toes_ik'
         self.cmptSettings['ball_ikName'] = 'ball_ik'
@@ -68,104 +69,104 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         """ create build guides_hrc """
         super(Leg, self).createBuildGuides()
 
-        self._heel_piv = rig_control.createGuide("{}_heel".format(self.name), parent=self.guides_hrc)
-        self._inn_piv = rig_control.createGuide("{}_inn".format(self.name), parent=self.guides_hrc)
-        self._out_piv = rig_control.createGuide("{}_out".format(self.name), parent=self.guides_hrc)
-        self._ball_piv = rig_control.createGuide("{}_ball".format(self.name), parent=self.guides_hrc)
-        self._toe_piv = rig_control.createGuide("{}_toe".format(self.name), parent=self.guides_hrc)
+        self.heelGuide = rig_control.createGuide("{}_heel".format(self.name), parent=self.guidesHierarchy)
+        self.innGuide = rig_control.createGuide("{}_inn".format(self.name), parent=self.guidesHierarchy)
+        self.outGuide = rig_control.createGuide("{}_out".format(self.name), parent=self.guidesHierarchy)
+        self.ballGuide = rig_control.createGuide("{}_ball".format(self.name), parent=self.guidesHierarchy)
+        self.toeGuide = rig_control.createGuide("{}_toe".format(self.name), parent=self.guidesHierarchy)
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
         super(Leg, self).initalHierachy()
-        self.toes_fk = rig_control.createAtObject(
+        self.toesFk = rig_control.createAtObject(
             self.toes_fkName,
             self.side,
             orig=True,
             hideAttrs=['v', 't', 's'],
             size=self.size,
             color='blue',
-            parent=self.control_hrc,
+            parent=self.controlHierarchy,
             shape='square',
             shapeAim='x',
             xformObj=self.input[4]
             )
         # create ik piviot controls
-        self.heel_ik = rig_control.createAtObject(
+        self.heelIk = rig_control.createAtObject(
             self.heel_ikName,
             self.side,
             orig=True,
             hideAttrs=['v', 't', 's'],
             size=self.size,
             color='blue',
-            parent=self.control_hrc,
+            parent=self.controlHierarchy,
             shape='cube',
             shapeAim='x',
-            xformObj=self._heel_piv
+            xformObj=self.heelGuide
             )
-        self.ball_ik = rig_control.createAtObject(
+        self.ballIk = rig_control.createAtObject(
             self.ball_ikName,
             self.side,
             orig=True,
             hideAttrs=['v', 't', 's'],
             size=self.size,
             color='blue',
-            parent=self.control_hrc,
+            parent=self.controlHierarchy,
             shape='cube',
             shapeAim='x',
-            xformObj=self._ball_piv
+            xformObj=self.ballGuide
             )
-        self.toes_ik = rig_control.createAtObject(
+        self.toesIk = rig_control.createAtObject(
             self.toes_ikName,
             self.side,
             orig=True,
             hideAttrs=['v', 't', 's'],
             size=self.size,
             color='blue',
-            parent=self.control_hrc,
+            parent=self.controlHierarchy,
             shape='cube',
             shapeAim='x',
-            xformObj=self._toe_piv
+            xformObj=self.toeGuide
             )
 
-        self.ikControls += [self.heel_ik.name, self.ball_ik.name, self.toes_ik.name]
+        self.ikControls += [self.heelIk.name, self.ballIk.name, self.toesIk.name]
 
     def rigSetup(self):
         """Add the rig setup"""
         super(Leg, self).rigSetup()
         # setup the foot Ik
         self.footikfk = ikfk.IkFkFoot(jointList=self.input[3:],
-                                      heelPivot=self._heel_piv, innPivot=self._inn_piv, outPivot=self._out_piv)
+                                      heelPivot=self.heelGuide, innPivot=self.innGuide, outPivot=self.outGuide)
         self.footikfk.setGroup(self.ikfk.getGroup())
-        self.footikfk.create(params=self.params_hrc)
-        ikfk.IkFkFoot.createFootRoll(self.footikfk.getPivotList(), self.footikfk.getGroup(), params=self.params_hrc)
+        self.footikfk.create(params=self.paramsHierarchy)
+        ikfk.IkFkFoot.createFootRoll(self.footikfk.getPivotList(), self.footikfk.getGroup(), params=self.paramsHierarchy)
 
         # connect the Foot IKFK to the ankle IK
         cmds.parent(self._ikEndTgt, self.footikfk.getPivotList()[6])
-        cmds.parent(self.footikfk.getPivotList()[0], self.limbGimble_ik.name)
+        cmds.parent(self.footikfk.getPivotList()[0], self.limbGimbleIk.name)
         cmds.delete(cmds.listRelatives(self._ikEndTgt, ad=True, type='pointConstraint'))
 
         # add in the foot roll controllers
-        cmds.parent(self.heel_ik.orig, self.footikfk.getPivotList()[1])
-        cmds.parent(self.footikfk.getPivotList()[2], self.heel_ik.name)
+        cmds.parent(self.heelIk.orig, self.footikfk.getPivotList()[1])
+        cmds.parent(self.footikfk.getPivotList()[2], self.heelIk.name)
 
-        cmds.parent(self.toes_ik.orig, self.footikfk.getPivotList()[4])
-        cmds.parent(self.footikfk.getPivotList()[5], self.toes_ik.name)
-        cmds.parent(self.footikfk.getPivotList()[7], self.toes_ik.name)
+        cmds.parent(self.toesIk.orig, self.footikfk.getPivotList()[4])
+        cmds.parent(self.footikfk.getPivotList()[5], self.toesIk.name)
+        cmds.parent(self.footikfk.getPivotList()[7], self.toesIk.name)
 
-        cmds.parent(self.ball_ik.orig, self.footikfk.getPivotList()[5])
-        cmds.parent(self.footikfk.getPivotList()[6], self.ball_ik.name)
+        cmds.parent(self.ballIk.orig, self.footikfk.getPivotList()[5])
+        cmds.parent(self.footikfk.getPivotList()[6], self.ballIk.name)
 
         # setup the toes
-        rig_transform.connectOffsetParentMatrix(self.footikfk.getBlendJointList()[2], self.toes_fk.orig, mo=True)
+        rig_transform.connectOffsetParentMatrix(self.footikfk.getBlendJointList()[2], self.toesFk.orig, mo=True)
         # TODO: this is alittle hacky... maybe fix it later
         cmds.setAttr("{}.{}".format(self.footikfk.getIkJointList()[1], 'segmentScaleCompensate'), 0)
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
-        blendedJointlist = self.ikfk.getBlendJointList() + [self.toes_fk.name]
+        blendedJointlist = self.ikfk.getBlendJointList() + [self.toesFk.name]
         rigamajig2.maya.joint.connectChains(blendedJointlist, self.input[1:-1])
         rigamajig2.maya.attr.lock(self.input[-1], rigamajig2.maya.attr.TRANSFORMS + ['v'])
-        ikfk.IkFkBase.connectVisibility(self.params_hrc, 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
+        ikfk.IkFkBase.connectVisibility(self.paramsHierarchy, 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
 
         if self.addTwistJoints:
             for jnt in [self.input[1], self.input[2]]:
@@ -178,11 +179,11 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         """ setup animation attributes"""
         super(Leg, self).setupAnimAttrs()
         # connect the fook ik attributes to the foot control
-        rigamajig2.maya.attr.addSeparator(self.limb_ik.name, '----')
-        rigamajig2.maya.attr.driveAttribute('roll', self.params_hrc, self.limb_ik.name)
-        rigamajig2.maya.attr.driveAttribute('bank', self.params_hrc, self.limb_ik.name)
-        rigamajig2.maya.attr.driveAttribute('ballAngle', self.params_hrc, self.limb_ik.name)
-        rigamajig2.maya.attr.driveAttribute('toeStraightAngle', self.params_hrc, self.limb_ik.name)
+        rigamajig2.maya.attr.addSeparator(self.limbIk.name, '----')
+        rigamajig2.maya.attr.driveAttribute('roll', self.paramsHierarchy, self.limbIk.name)
+        rigamajig2.maya.attr.driveAttribute('bank', self.paramsHierarchy, self.limbIk.name)
+        rigamajig2.maya.attr.driveAttribute('ballAngle', self.paramsHierarchy, self.limbIk.name)
+        rigamajig2.maya.attr.driveAttribute('toeStraightAngle', self.paramsHierarchy, self.limbIk.name)
 
     def connect(self):
         """Create the connection"""
@@ -197,7 +198,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         """static method to create input joints"""
         import rigamajig2.maya.naming as naming
         import rigamajig2.maya.joint as joint
-        GUIDE_POSITIONS = {
+        guidePostions = {
             "hip": (0, 70, 0),
             "thigh": (10, 0, 0),
             "knee": (0, -30, 2),
@@ -214,7 +215,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
             if parent:
                 cmds.parent(jnt, parent)
 
-            position = GUIDE_POSITIONS[key]
+            position = guidePostions[key]
             if side == 'r':
                 position = (position[0] * -1, position[1], position[2])
             cmds.xform(jnt, objectSpace=True, t=position)

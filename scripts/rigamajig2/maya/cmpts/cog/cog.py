@@ -19,6 +19,9 @@ logger = logging.getLogger(__name__)
 
 
 class Cog(rigamajig2.maya.cmpts.base.Base):
+    """
+    Center of gravity (COG) component.
+    """
     VERSION_MAJOR = 1
     VERSION_MINOR = 0
     VERSION_PATCH = 0
@@ -27,19 +30,14 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input=[], size=1, bindToInput=False):
+    def __init__(self, name, input, size=1, bindToInput=False):
         """
-        Center of gravity (COG) component.
-
-        :param name: name of the components
-        :param input: list of one joint. typically the hips.
-        :type input: list
-        :param size: default size of the controls:
-        :type size: float
-        :param rigParent:  Connect the component to a rigParent.
-        :param bindToInput: connect the output position of the COG cmpt to the input.
+        :param str name: name of the components
+        :param list input: list of one joint. typically the hips.
+        :param float int size: default size of the controls:
+        :param str rigParent:  Connect the component to a rigParent.
+        :param bool bindToInput: connect the output position of the COG cmpt to the input.
                             This should be False in most rigs as the hips will be controlled by the spine.
-        :type bindToInput: bool
         """
         super(Cog, self).__init__(name, input=input, size=size)
 
@@ -51,8 +49,8 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         """Build the initial hirarchy"""
-        self.root_hrc = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.control_hrc = cmds.createNode('transform', n=self.name + '_control', parent=self.root_hrc)
+        self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
+        self.controlHierarchy = cmds.createNode('transform', n=self.name + '_control', parent=self.rootHierarchy)
 
         if len(self.input) >= 1:
             pos = cmds.xform(self.input[0], q=True, ws=True, t=True)
@@ -60,25 +58,25 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
             pos = (0,0,0)
         self.cog = rig_control.create(self.cog_name,
                                       hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                      parent=self.control_hrc, shape=self.cog_control_shape, shapeAim='x',
+                                      parent=self.controlHierarchy, shape=self.cog_control_shape, shapeAim='x',
                                       position=pos)
-        self.cog_pivot = rig_control.create(self.cogPivot_name,
+        self.cogPivot = rig_control.create(self.cogPivot_name,
+                                           hideAttrs=['s', 'v'], size=self.size, color='yellow',
+                                           parent=self.cog.name, shape='sphere', shapeAim='x',
+                                           position=pos)
+        self.cogGimble = rig_control.create(self.cogGimble_name,
                                             hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                            parent=self.cog.name, shape='sphere', shapeAim='x',
+                                            parent=self.cog.name, shape=self.cog_control_shape, shapeAim='x',
                                             position=pos)
-        self.cog_gimble = rig_control.create(self.cogGimble_name,
-                                             hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                             parent=self.cog.name, shape=self.cog_control_shape, shapeAim='x',
-                                             position=pos)
-        self.cog_gimble.addTrs("neg")
+        self.cogGimble.addTrs("neg")
 
     def rigSetup(self):
         # create the pivot negate
-        constrain.negate(self.cog_pivot.name, self.cog_gimble.trs, t=True)
+        constrain.negate(self.cogPivot.name, self.cogGimble.trs, t=True)
         if self.bind_to_input and len(self.input) >= 1:
-            self.input_trs = hierarchy.create(self.cog_gimble.name, ['{}_trs'.format(self.input[0])], above=False)[0]
-            rig_transform.matchTransform(self.input[0], self.input_trs)
-            joint.connectChains(self.input_trs, self.input[0])
+            self.inputTrs = hierarchy.create(self.cogGimble.name, ['{}_trs'.format(self.input[0])], above=False)[0]
+            rig_transform.matchTransform(self.input[0], self.inputTrs)
+            joint.connectChains(self.inputTrs, self.input[0])
 
     def connect(self):
 

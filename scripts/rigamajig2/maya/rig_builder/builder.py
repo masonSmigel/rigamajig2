@@ -111,7 +111,7 @@ class Builder(object):
         :param path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, MODEL_FILE))
-        model.import_model(path)
+        model.importModel(path)
         logger.info("Model loaded")
 
     def loadJoints(self, path=None):
@@ -121,7 +121,7 @@ class Builder(object):
         :return:
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, SKELETON_POS))
-        guides.load_joints(path)
+        guides.loadJoints(path)
         logger.info("Joints loaded")
 
     def saveJoints(self, path=None):
@@ -131,7 +131,7 @@ class Builder(object):
         :return:
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, SKELETON_POS))
-        guides.save_joints(path)
+        guides.saveJoints(path)
         logger.info("Joint positions saved to: {}".format(path))
 
     def initalize(self):
@@ -141,12 +141,12 @@ class Builder(object):
 
         for cmpt in self.componentList:
             logger.info('Initalizing: {}'.format(cmpt.name))
-            cmpt._intialize_cmpt()
-            if hasattr(cmpt, "guides_hrc"):
-                parent = cmds.listRelatives(cmpt.guides_hrc, p=True)
+            cmpt._initalizeComponent()
+            if hasattr(cmpt, "guidesHierarchy") and cmpt.guidesHierarchy:
+                parent = cmds.listRelatives(cmpt.guidesHierarchy, p=True)
                 if parent and parent[0] == 'guides':
                     break
-                cmds.parent(cmpt.guides_hrc, "guides")
+                cmds.parent(cmpt.guidesHierarchy, "guides")
             self.updateMaya()
 
         self.loadGuideData()
@@ -156,12 +156,12 @@ class Builder(object):
         """build rig"""
         for cmpt in self.componentList:
             logger.info('Building: {}'.format(cmpt.name))
-            cmpt._build_cmpt()
-            # if the component is not a main parent the cmpt.root_hrc to the rig
+            cmpt._buildComponent()
+            # if the component is not a main parent the cmpt.rootHierarchy to the rig
             if cmds.objExists('rig') and cmpt.getComponenetType() != 'main.main':
-                if hasattr(cmpt, "root_hrc"):
-                    if not cmds.listRelatives(cmpt.root_hrc, p=True):
-                        cmds.parent(cmpt.root_hrc, 'rig')
+                if hasattr(cmpt, "rootHierarchy"):
+                    if not cmds.listRelatives(cmpt.rootHierarchy, p=True):
+                        cmds.parent(cmpt.rootHierarchy, 'rig')
 
             # refresh the viewport after each component is built.
             self.updateMaya()
@@ -184,7 +184,7 @@ class Builder(object):
         """connect rig"""
         for cmpt in self.componentList:
             logger.info('Connecting: {}'.format(cmpt.name))
-            cmpt._connect_cmpt()
+            cmpt._connectComponent()
             self.updateMaya()
         logger.info("connect -- complete")
 
@@ -192,7 +192,7 @@ class Builder(object):
         """finalize rig"""
         for cmpt in self.componentList:
             logger.info('Finalizing: {}'.format(cmpt.name))
-            cmpt._finalize_cmpt()
+            cmpt._finalizeComponent()
             self.updateMaya()
 
         # delete the guide group
@@ -204,7 +204,7 @@ class Builder(object):
         """optimize rig"""
         for cmpt in self.componentList:
             logger.info('Optimizing {}'.format(cmpt.name))
-            cmpt._optimize_cmpt()
+            cmpt._optimizeComponent()
             self.updateMaya()
         logger.info("optimize -- complete")
 
@@ -287,7 +287,7 @@ class Builder(object):
         :return:
         """
         for cmpt in self.componentList:
-            cmpt._load_meta_to_component()
+            cmpt._loadComponentParametersToClass()
 
     def loadControlShapes(self, path=None, applyColor=True):
         """
@@ -316,7 +316,7 @@ class Builder(object):
         :return:
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, GUIDES))
-        if guides.load_guide_data(path):
+        if guides.loadGuideData(path):
             logger.info("guides loaded")
 
     def saveGuideData(self, path=None):
@@ -326,7 +326,7 @@ class Builder(object):
         :return:
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, GUIDES))
-        guides.save_guide_data(path)
+        guides.saveGuideData(path)
         logger.info("guides saved to: {}".format(path))
 
     def loadPoseReaders(self, path=None, replace=True):
@@ -337,7 +337,7 @@ class Builder(object):
         """
 
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, PSD)) or ''
-        if deform.load_poseReaders(path, replace=replace):
+        if deform.loadPoseReaders(path, replace=replace):
             logger.info("pose readers loaded")
 
     def savePoseReaders(self, path=None):
@@ -346,7 +346,7 @@ class Builder(object):
         :param path: Path to the json file. if none is provided use the data from the rigFile.
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, PSD))
-        deform.save_poseReaders(path)
+        deform.savePoseReaders(path)
         logger.info("pose readers saved to: {}".format(path))
 
     def loadDeformationData(self):
@@ -363,7 +363,7 @@ class Builder(object):
         :param path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, SKINS)) or ''
-        if deform.load_skin_weights(path):
+        if deform.loadSkinWeights(path):
             logger.info("skin weights loaded")
 
     def saveSkinWeights(self, path=None):
@@ -372,7 +372,7 @@ class Builder(object):
         :param path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, SKINS)) or ''
-        deform.save_skin_weights(path)
+        deform.saveSkinWeights(path)
 
     def deleteComponents(self, clearList=True):
         """
@@ -411,9 +411,9 @@ class Builder(object):
             cmpt._finalize_cmpt()
 
             if cmds.objExists('rig') and cmpt.getComponenetType() != 'main.Main':
-                if hasattr(cmpt, "root_hrc"):
-                    if not cmds.listRelatives(cmpt.root_hrc, p=True):
-                        cmds.parent(cmpt.root_hrc, 'rig')
+                if hasattr(cmpt, "rootHierarchy"):
+                    if not cmds.listRelatives(cmpt.rootHierarchy, p=True):
+                        cmds.parent(cmpt.rootHierarchy, 'rig')
 
             logger.info("build: {} -- complete".format(cmpt.name))
 
@@ -577,7 +577,7 @@ class Builder(object):
         """
         for cmpt in self.componentList:
             _name = cmpt.name
-            _type = cmpt.cmpt_type
+            _type = cmpt.componentType
             if name == _name:
                 if type == _type:
                     return cmpt

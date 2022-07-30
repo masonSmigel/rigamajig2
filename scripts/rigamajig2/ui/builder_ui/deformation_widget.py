@@ -136,7 +136,7 @@ class DeformationWidget(QtWidgets.QWidget):
         path = cmds.fileDialog2(ds=2, cap="Select a skin file", ff=JSON_FILTER, okc="Select",
                                 dir=self.skin_path_selector.get_abs_path())
         if path:
-            deform.load_single_skin(path[0])
+            deform.loadSingleSkin(path[0])
 
     def save_skin(self):
         self.builder.saveSkinWeights(path=self.skin_path_selector.get_abs_path())

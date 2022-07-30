@@ -18,6 +18,7 @@ if sys.version_info.major >= 3:
     basestring = str
     unicode = basestring
 
+
 def tag(nodes, tag, type=None):
     """
     Tag the specified nodes with the proper type
@@ -174,6 +175,7 @@ def getMessageConnection(dataPlug, silent=True):
     return None
 
 
+# pylint:disable = too-many-return-statements
 def validateDataType(val):
     """
     Validate the attribute type for all the  handling
@@ -196,6 +198,7 @@ def validateDataType(val):
 
 
 class MetaNode(object):
+    """Meta Node class"""
     def __init__(self, node):
         """
         Constructor for mayaJson.
@@ -223,18 +226,20 @@ class MetaNode(object):
         value = cmds.getAttr("{}.{}".format(self.node, attr), silent=True)
         if attrType == 'string':
             try:
-                value = self.__deserializeComplex(value)  # if the data is a string try to deserialize it.
+                value = self.deserializeComplex(value)  # if the data is a string try to deserialize it.
             except:
                 logger.debug('string {} is not json deserializable'.format(value))
         return value
 
-    def getAllData(self, excludedAttrs=[]):
+    def getAllData(self, excludedAttrs=None):
         """
         Retrieve all data from the maya node.
         :param excludedAttrs: Optoinal - list of attributes to data collection from.
         :return: dictionary of data on the node
         :rtype: OrderedDict
         """
+        if excludedAttrs is None:
+            excludedAttrs = list()
         userAttrs = list([str(a) for a in cmds.listAttr(self.node, ud=True) or [] if '.' not in a])
         data = OrderedDict()
         for attr in userAttrs:
@@ -266,7 +271,7 @@ class MetaNode(object):
             return
 
         if attrType == 'complex':
-            value = self.__serializeComplex(value)
+            value = self.serializeComplex(value)
             attrType = validateDataType(value)
         # if the attribute does not exist then add the attribute
         if not cmds.objExists("{}.{}".format(self.node, attr)):
@@ -293,7 +298,7 @@ class MetaNode(object):
         for attr, value in data.items():
             self.setData(attr, value, hide=hide, lock=lock)
 
-    def __serializeComplex(self, data):
+    def serializeComplex(self, data):
         """
         Serialize data into a string for use in maya.
         Also check to see if the string is longer than the length maya will allow before trunicating it.
@@ -304,7 +309,7 @@ class MetaNode(object):
             logger.warning('Length of string is over 16bit Maya Attr Template limit - lock this after setting it!')
         return json.dumps(data)
 
-    def __deserializeComplex(self, data):
+    def deserializeComplex(self, data):
         """
         Deserialize data into a string for use with json.
         :param data: data to deserialize

@@ -44,13 +44,13 @@ def loadPoseReaders(path=None, replace=True):
     :param path: path to the pose reader file
     :param replace: If true replace existing pose readers.
     """
-    if not os.path.exists(path):
-        return False
-
-    dataObj = psd_data.PSDData()
-    dataObj.read(path)
-    dataObj.applyData(nodes=dataObj.getData().keys(), replace=replace)
-    return True
+    if path and not os.path.exists(path):
+        return
+    if path:
+        dataObj = psd_data.PSDData()
+        dataObj.read(path)
+        dataObj.applyData(nodes=dataObj.getData().keys(), replace=replace)
+        return True
 
 
 # SKINWEIGHTS
@@ -59,7 +59,7 @@ def loadSkinWeights(path=None):
     Load all skinweights within the folder
     :param path: path to skin weights directory
     """
-    if not os.path.exists(path):
+    if path and not os.path.exists(path):
         return
 
     root, ext = os.path.splitext(path)

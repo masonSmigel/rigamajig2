@@ -84,7 +84,7 @@ def removeNodes(nodes, container, removeShapes=True):
                 [cmds.container(container, e=True, removeNode=shape) for shape in shapes]
 
 
-def listNodes(container):
+def getNodesInContainer(container):
     """
     get the nodes within a container
     :param container: container
@@ -210,7 +210,7 @@ def addChildAnchor(node, container=None, assetNodeName=None):
 
 
 def safeDeleteContainer(container):
-    nodes = listNodes(container)
+    nodes = getNodesInContainer(container)
     removeNodes(nodes, container, removeShapes=False)
     cmds.delete(container)
 

@@ -9,8 +9,12 @@
 * Added smart switch function: `ikfkSwitcher.switchSelectedComponent()`
 Smart switch allows the animator to select any control within a component
 that allows ikfk blending (`limb.limb`, `arm.arm`, `leg.leg`).
-* added a versioning system to the components. 
-
+* Added a versioning system to the components. 
+* Added some metadata to the main group of a finalized rig. This is added in the `finalize`step.
+Data includes: 
+  * rigamajig version
+  * creation user 
+  * creation date
 ### Changed: 
 * changed the name of `meta.addMessageConnection` to `meta.createMessageConnection`. 
 * changed the name of `container.listNodes` to `container.getNodesInContainer`

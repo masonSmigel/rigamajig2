@@ -80,21 +80,10 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.control.orig, mo=True)
 
     @staticmethod
-    def createBindJoints(inputJoints):
-        """
-        Create bind joints from given input joints
-        :return:
-        """
-
-
-        pass
-
-
-    @staticmethod
     def createInputJoints(name=None, side=None, numJoints=4):
         import rigamajig2.maya.naming as naming
 
         name = name or 'basic'
-        jnt = cmds.createNode("joint", name=name + "jnt")
+        jnt = cmds.createNode("joint", name=name + "_jnt")
 
         return [jnt]

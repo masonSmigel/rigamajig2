@@ -37,7 +37,7 @@ class TestNodeData(TestCase):
         cmds.file(f=True, new=True)
 
     def test_export_data(self):
-        file_path = self.get_temp_filename("test_node_data.json")
+        file_path = self.getTempFilename("test_node_data.json")
         self.create_source_locator(file_path)
         # Check if the file was created
         self.assertTrue(os.path.exists(file_path))
@@ -52,7 +52,7 @@ class TestNodeData(TestCase):
         self.assertListAlmostEqual(cmds.xform(common.getFirstIndex(loc), q=True, m=True), self.goal_matrix, 4)
 
     def test_import_worldspace(self):
-        file_path = self.get_temp_filename("test_node_data.json")
+        file_path = self.getTempFilename("test_node_data.json")
         self.create_source_locator(file_path)
         # Check if the file was created
         # self.assertTrue(os.path.exists(file_path))

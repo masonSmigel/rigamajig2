@@ -93,8 +93,8 @@ def runTests(directories=None, test=None, testSuite=None):
 def getTests(directories=None, test=None, testSuite=None):
     """
     Run all tests in the given path
-    :param directories: list of directories to search for tests. if ommited all moules in rigamajig/tests
-                        will be used.
+    :param directories: list of directories to search for tests.
+                        if ommited all moules in rigamajig/tests will be used.
     :type directories: str
     :param test: Optional name of a specific tests to run (tests.SomeTest.test_function)
     :type directories: str

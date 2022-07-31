@@ -12,9 +12,9 @@ that allows ikfk blending (`limb.limb`, `arm.arm`, `leg.leg`).
 * Added a versioning system to the components. 
 * Added some metadata to the main group of a finalized rig. This is added in the `finalize`step.
 Data includes: 
-  * rigamajig version
-  * creation user 
-  * creation date
+  * Rigamajig version
+  * Creation user 
+  * Creation date
 ### Changed: 
 * changed the name of `meta.addMessageConnection` to `meta.createMessageConnection`. 
 * changed the name of `container.listNodes` to `container.getNodesInContainer`

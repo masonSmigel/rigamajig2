@@ -33,7 +33,7 @@ import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.meta as meta
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp
 from rigamajig2.ui.builder_ui import constants
-from rigamajig2.maya.rig_builder.builder import SKELETON_POS
+from rigamajig2.maya.builder.builder import SKELETON_POS
 
 
 class JointWidget(QtWidgets.QWidget):

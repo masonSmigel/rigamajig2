@@ -24,8 +24,8 @@ from shiboken2 import wrapInstance
 import rigamajig2.maya.qc as qc
 import rigamajig2.maya.data.abstract_data as abstract_data
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
-import rigamajig2.maya.rig_builder
-import rigamajig2.maya.rig_builder.builder as builder
+import rigamajig2.maya.builder
+import rigamajig2.maya.builder.builder as builder
 
 
 class Actions(object):
@@ -202,7 +202,7 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         self.archetype_cb_widget = QtWidgets.QWidget()
         self.archetype_cb_widget.setFixedHeight(25)
         self.archetype_cb = QtWidgets.QComboBox()
-        for archetype in rigamajig2.maya.rig_builder.builderUtils.getAvailableArchetypes():
+        for archetype in rigamajig2.maya.builder.core.getAvailableArchetypes():
             self.archetype_cb.addItem(archetype)
 
         self.src_path = pathSelector.PathSelector("Source:", fm=2)
@@ -269,13 +269,13 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         rig_name = self.rig_name_le.text()
         if self.from_archetype_rb.isChecked():
             archetype = self.archetype_cb.currentText()
-            rig_file = rigamajig2.maya.rig_builder.builderUtils.newRigEnviornmentFromArchetype(
+            rig_file = rigamajig2.maya.builder.core.newRigEnviornmentFromArchetype(
                 newEnv=dest_rig_env,
                 archetype=archetype,
                 rigName=rig_name)
         else:
             src_env = self.src_path.get_path()
-            rig_file = rigamajig2.maya.rig_builder.builderUtils.createRigEnviornment(
+            rig_file = rigamajig2.maya.builder.core.createRigEnviornment(
                 sourceEnviornment=src_env,
                 targetEnviornment=dest_rig_env,
                 rigName=rig_name)

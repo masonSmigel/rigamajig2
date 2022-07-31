@@ -26,10 +26,10 @@ from PySide2 import QtWidgets
 # RIGAMAJIG2
 import rigamajig2.shared.common as common
 from rigamajig2.maya import meta as meta
-from rigamajig2.maya.rig_builder import builder as builder
+from rigamajig2.maya.builder import builder
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp
 from rigamajig2.ui.builder_ui import constants
-from rigamajig2.maya.rig_builder.builder import COMPONENTS, GUIDES
+from rigamajig2.maya.builder.builder import COMPONENTS, GUIDES
 
 ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 

@@ -17,7 +17,7 @@ from PySide2 import QtWidgets
 # RIGAMAJIG2
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget
 from rigamajig2.ui.builder_ui import constants
-from rigamajig2.maya.rig_builder.builder import PSD, SKINS
+from rigamajig2.maya.builder.builder import PSD, SKINS
 
 
 class DeformationWidget(QtWidgets.QWidget):

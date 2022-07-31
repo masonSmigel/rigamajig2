@@ -16,7 +16,7 @@ from PySide2 import QtWidgets
 # RIGAMAJIG2
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
 from rigamajig2.ui.builder_ui import constants
-from rigamajig2.maya.rig_builder.builder import MODEL_FILE, PRE_SCRIPT
+from rigamajig2.maya.builder.builder import MODEL_FILE, PRE_SCRIPT
 
 
 class ModelWidget(QtWidgets.QWidget):

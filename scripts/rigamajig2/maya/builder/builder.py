@@ -28,11 +28,11 @@ import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
 
 # BUILDER
-import rigamajig2.maya.rig_builder.model as model
-import rigamajig2.maya.rig_builder.guides as guides
-import rigamajig2.maya.rig_builder.controlShapes as controlShapes
-import rigamajig2.maya.rig_builder.deform as deform
-import rigamajig2.maya.rig_builder.builderUtils as builderUtils
+from rigamajig2.maya.builder import model
+from rigamajig2.maya.builder import guides
+from rigamajig2.maya.builder import controlShapes
+from rigamajig2.maya.builder import deform
+from rigamajig2.maya.builder import core
 
 logger = logging.getLogger(__name__)
 
@@ -74,7 +74,7 @@ class Builder(object):
         self.setRigFile(rigFile)
         self.componentList = list()
 
-        self._availableComponents = builderUtils._lookForComponents(CMPT_PATH, _EXCLUDED_FOLDERS, _EXCLUDED_FILES)
+        self._availableComponents = core._lookForComponents(CMPT_PATH, _EXCLUDED_FOLDERS, _EXCLUDED_FILES)
         # self.__lookForComponents(CMPT_PATH)
 
         # varibles we need
@@ -94,7 +94,7 @@ class Builder(object):
         Get the component reference dictionary
         :return:
         """
-        return builderUtils._lookForComponents(CMPT_PATH, _EXCLUDED_FOLDERS, _EXCLUDED_FILES)
+        return core._lookForComponents(CMPT_PATH, _EXCLUDED_FOLDERS, _EXCLUDED_FILES)
 
     def getAbsoultePath(self, path):
         """
@@ -426,17 +426,17 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     def preScript(self):
         """ Run pre scripts. use  through the PRE SCRIPT path"""
-        builderUtils.runAllScripts(self.getAbsoultePath(self.getRigData(self.rigFile, PRE_SCRIPT)))
+        core.runAllScripts(self.getAbsoultePath(self.getRigData(self.rigFile, PRE_SCRIPT)))
         logger.info("pre scripts -- complete")
 
     def postScript(self):
         """ Run pre scripts. use  through the POST SCRIPT path"""
-        builderUtils.runAllScripts(self.getAbsoultePath(self.getRigData(self.rigFile, POST_SCRIPT)))
+        core.runAllScripts(self.getAbsoultePath(self.getRigData(self.rigFile, POST_SCRIPT)))
         logger.info("post scripts -- complete")
 
     def publishScript(self):
         """ Run pre scripts. use  through the PUB SCRIPT path"""
-        builderUtils.runAllScripts(self.getAbsoultePath(self.getRigData(self.rigFile, PUB_SCRIPT)))
+        core.runAllScripts(self.getAbsoultePath(self.getRigData(self.rigFile, PUB_SCRIPT)))
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
@@ -461,7 +461,7 @@ class Builder(object):
 
         startTime = time.time()
         print('\nBegin Rig Build\n{0}\nbuild env: {1}\n'.format('-' * 70, self.path))
-        builderUtils.loadRequiredPlugins()
+        core.loadRequiredPlugins()
         self.preScript()
         self.importModel()
         self.loadJoints()

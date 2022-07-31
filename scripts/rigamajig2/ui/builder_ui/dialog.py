@@ -24,8 +24,8 @@ from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
 # RIGAMAJIG
-import rigamajig2.maya.rig_builder.builder
-import rigamajig2.maya.rig_builder.builderUtils
+import rigamajig2.maya.builder.builder
+import rigamajig2.maya.builder.core
 import rigamajig2.shared.common as common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
 from rigamajig2.ui.builder_ui import model_widget
@@ -38,7 +38,7 @@ from rigamajig2.ui.builder_ui import publish_widget
 from rigamajig2.ui.builder_ui import actions
 
 import rigamajig2.maya.data.abstract_data as abstract_data
-import rigamajig2.maya.rig_builder.deform as deform
+from rigamajig2.maya.builder import deform
 
 logger = logging.getLogger(__name__)
 logger.setLevel(5)
@@ -236,13 +236,13 @@ class BuilderDialog(QtWidgets.QDialog):
         self.rigEnviornment = file_info.path()
         self.rigFile = file_info.filePath()
 
-        self.rigBuilder = rigamajig2.maya.rig_builder.builder.Builder(self.rigFile)
+        self.rigBuilder = rigamajig2.maya.builder.builder.Builder(self.rigFile)
 
         if not self.rigFile:
             return
 
         # setup ui Data
-        rigName = rigamajig2.maya.rig_builder.builder.RIG_NAME
+        rigName = rigamajig2.maya.builder.builder.RIG_NAME
         self.asset_name_le.setText(self.rigBuilder.getRigData(self.rigFile, rigName))
 
         # set paths and widgets relative to the rig env

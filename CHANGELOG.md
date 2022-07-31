@@ -16,14 +16,13 @@ Data includes:
   * Creation user 
   * Creation date
 ### Changed: 
-* changed the name of `meta.addMessageConnection` to `meta.createMessageConnection`. 
-* changed the name of `container.listNodes` to `container.getNodesInContainer`
+* Changed the name of `meta.addMessageConnection` to `meta.createMessageConnection`. 
+* Changed the name of `container.listNodes` to `container.getNodesInContainer`
 ## 1.0.1
 
 ### Added: 
 * Updated the  set driven key system to use the maya API. 
-* Implemented the pose set driven key control to the hand.hand component. 
-It works with any number of fingers over 3. 
+* `hand.hand v1.0.2` Implemented the set driven key control to the component. 
 * added a versioning system to the components. 
     
 

@@ -13,7 +13,7 @@ import os
 import maya.cmds as cmds
 
 from rigamajig2.maya.test.mayaunittest import TestCase
-from rigamajig2.maya.rig_builder import builder
+from rigamajig2.maya.builder import builder
 from rigamajig2.maya.cmpts.main import main
 from rigamajig2.maya.cmpts.basic import basic
 from rigamajig2.maya.cmpts.limb import limb

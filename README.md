@@ -17,9 +17,9 @@ To install rigamajig2 on your computer:
 3. Copy the rigamajig2-master folder somewhere on your hard drive. 
 If you're unsure of a good place the Maya modules folder is a good bet. 
 ```
-    a. Windows: Users<username>Documents/Mayamodules
-    b. Linux: ~/maya/modules
-    c. Mac OS X: ~/maya/modules
+Windows: Users<username>Documents/Mayamodules
+Linux: ~/maya/modules
+Mac OS X:/Users/<username>/Library/Preferences/Autodesk/maya/modules
 ```
 
 4. Open Autodesk Maya
@@ -34,7 +34,7 @@ Rigamajig2 has two methods to utilize the tool:
 2. The BuilderUI (a more straightforward PySide interface)
 
 To launch the UI run the following code in python
-```
+```python
 import rigamajig2.ui.builder_ui.dialog as builder_dialog
 builder_dialog.BuilderDialog.show_dialog()
 ```
@@ -46,15 +46,57 @@ More documentation to come
 ## Dev Tools
 
 ### Reloading the modules
-to reload all rigamajig2 modules run the following code 
-```
+To reload all rigamajig2 modules in a python session run the following code 
+```python 
 import rigamajig2
 rigamajig2.reloadModule()
 ```
 
+### Pylint 
+Rigamajig2 adheres to some general coding practices. To test any additions made
+ the run the following command:
+
+```commandline
+cd path/to/rigamajig2 
+pylint scripts/rigamajig2
+```
+
+Or if you using PyCharm configure your project to use the `rigamajig2/scripts` folder 
+as the content root. Then you can run: 
+
+```commandline
+pylint rigamajig2
+```
+
 ### Testing 
-To run the rigamajig2 tests... 
+Rigamajig2 comes with unitesting capiblilities. 
+
+
+#### Running the Unittests
+To run tests run the python command 
+located in the bin at `rigamajig2/bin/testrigamajig`. 
+
+```commandline
+cd path/to/rigamajig2/bin 
+python testrigamajig
+```
+
+#### Creating new Unittests
+Added unittests must be subclasses of the base unittest class.To setup your own unittest 
+confugure your test as shown below: 
+
+```python
+from rigamajig2.maya.test.mayaunittest import TestCase
+
+class TestSomething(TestCase):
+    def test_someSuperCoolTest(self):
+        """ Your awesome test goes here"""
+        pass
+```
 
 ## More info
 Rigamajig2 development blog: 
 https://www.masonsmigel.com/blog
+
+Questions? 
+email me at mgsmigel@gmail.com! 

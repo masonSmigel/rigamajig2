@@ -248,11 +248,11 @@ def getGeoIndex(deformer, geo):
     geo = cmds.ls(geo, l=1)[0]
 
     # Get all used indexes
-    deformed_indexes = cmds.deformer(deformer, q=1, gi=1)
+    deformedIndecies = cmds.deformer(deformer, q=1, gi=1)
 
     for n in range(len(deformed_geos)):
         if deformed_geos[n] == geo:
-            return int(deformed_indexes[n])
+            return int(deformedIndecies[n])
 
 
 def getWeights(deformer, geometry=None):
@@ -275,9 +275,9 @@ def getWeights(deformer, geometry=None):
     geometryIndex = getGeoIndex(deformer, geometry)
 
     attr = "{}.wl[{}].w[0:{}]".format(deformer, geometryIndex, point_count)
-    attr_default_test = "{}.wl[{}].w[*]".format(deformer, geometryIndex)
+    attrDefaultTest = "{}.wl[{}].w[*]".format(deformer, geometryIndex)
 
-    if not cmds.objExists(attr_default_test):
+    if not cmds.objExists(attrDefaultTest):
         values = [1 for _ in range(point_count + 1)]
     else:
         values = cmds.getAttr(attr)
@@ -301,11 +301,11 @@ def setWeights(deformer, weights, geometry=None):
         return
 
     if not geometry: geometry = common.getFirstIndex(getAffectedGeo(deformer))
-    point_count = rigamajig2.maya.shape.getPointCount(geometry) - 1
+    pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
 
     geometryIndex = getGeoIndex(deformer, geometry)
 
-    attr = "{}.wl[{}].w[0:{}]".format(deformer, geometryIndex, point_count)
+    attr = "{}.wl[{}].w[0:{}]".format(deformer, geometryIndex, pointCount)
     weightList = weights[0]
     cmds.setAttr(attr, *weightList)
 

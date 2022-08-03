@@ -256,7 +256,7 @@ class MetaNode(object):
         :param lock: lock the attributes from the channelbox.
         """
 
-        data_type_dict = {'string': {'dt': 'string'},
+        dataTypeDict = {'string': {'dt': 'string'},
                           'unicode': {'dt': 'string'},
                           'int': {'at': 'long'},
                           'long': {'at': 'long'},
@@ -275,7 +275,7 @@ class MetaNode(object):
             attrType = validateDataType(value)
         # if the attribute does not exist then add the attribute
         if not cmds.objExists("{}.{}".format(self.node, attr)):
-            cmds.addAttr(self.node, longName=attr, **data_type_dict[attrType])
+            cmds.addAttr(self.node, longName=attr, **dataTypeDict[attrType])
         else:
             # Todo: try to change the attribute data if it doesnt match
             pass

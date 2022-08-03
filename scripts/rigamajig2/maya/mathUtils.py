@@ -42,9 +42,9 @@ def distance(point0=(0, 0, 0), point1=(0, 0, 0)):
     """
     vector0 = om2.MVector(point0[0], point0[1], point0[2])
     vector1 = om2.MVector(point1[0], point1[1], point1[2])
-    v = vector0 - vector1
+    vector = vector0 - vector1
 
-    return v.length()
+    return vector.length()
 
 
 def distanceNodes(transform0, transform1):
@@ -135,8 +135,8 @@ def normalize(vector):
     :param vector: vector to normalize
     :return: normalized vector
     """
-    v = om2.MVector(vector[0], vector[1], vector[2]).normalize()
-    return [v[0], v[1], v[1]]
+    vector = om2.MVector(vector[0], vector[1], vector[2]).normalize()
+    return [vector[0], vector[1], vector[1]]
 
 
 def remapValue(value, nMin, nMax, oMin=0, oMax=1):
@@ -238,16 +238,16 @@ def closestPointOnLine(point, lineA, lineB, clamp=False):
     :param clamp: clamp the result to the line segment
     :return: point on the line closest to the given point
     """
-    line_vec = subtractVector(lineA, lineB)
-    pnt_vec = subtractVector(lineA, point)
+    lineVector = subtractVector(lineA, lineB)
+    pointVector = subtractVector(lineA, point)
 
     # scale both vectors to the length of the line.
-    line_len = mag(line_vec)
-    line_norm_vec = normalize(line_vec)
-    pnt_vec_scaled = scalarMult(pnt_vec, (1.0 / line_len))
+    lineLength = mag(lineVector)
+    lineNormalizedVector = normalize(lineVector)
+    pointVectorScaled = scalarMult(pointVector, (1.0 / lineLength))
 
     # get the dot product.
-    dot = dotProduct(line_norm_vec, pnt_vec_scaled)
+    dot = dotProduct(lineNormalizedVector, pointVectorScaled)
 
     # clamp the return to the line segment. if not false the result vector can be any point on the line.
     if clamp:
@@ -255,9 +255,9 @@ def closestPointOnLine(point, lineA, lineB, clamp=False):
         if dot > 1.0: dot = 1.0
 
     # get the closest distance from the point to the line (offset from line to point at closest distance)
-    offset_vec = scalarMult(line_vec, dot)
+    offsetVector = scalarMult(lineVector, dot)
     # add the offset to the first point of the line to get the vector in proper 3D space
-    nearest = addVector(offset_vec, lineA)
+    nearest = addVector(offsetVector, lineA)
     return nearest
 
 
@@ -270,10 +270,10 @@ def slerp(min, max, percent, smooth=1.0):
     :param smooth: strength of smooth applied
     :return:
     """
-    range_val = max - min
-    smooth_value = pow(percent, 2) * (3 - percent * 2)
-    smooth_value = percent + ((smooth_value - percent) * smooth)
-    value = min + range_val * smooth_value
+    rangeValue = max - min
+    smoothValue = pow(percent, 2) * (3 - percent * 2)
+    smoothValue = percent + ((smoothValue - percent) * smooth)
+    value = min + rangeValue * smoothValue
     return value
 
 

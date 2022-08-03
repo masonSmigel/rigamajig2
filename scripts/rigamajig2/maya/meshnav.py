@@ -44,11 +44,11 @@ def getClosestVertex(mesh, point, returnDistance=False):
     :rtype: str
     """
     pos = om2.MPoint(point[0], point[1], point[2])
-    mfn_mesh = rigamajig2.maya.mesh.getMeshFn(mesh)
+    mfnMesh = rigamajig2.maya.mesh.getMeshFn(mesh)
 
-    index = mfn_mesh.getClosestPoint(pos, space=om2.MSpace.kWorld)[1]
-    faceVtx = mfn_mesh.getPolygonVertices(index)
-    vtxDist = [(vtx, mfn_mesh.getPoint(vtx, om2.MSpace.kWorld).distanceTo(pos)) for vtx in faceVtx]
+    index = mfnMesh.getClosestPoint(pos, space=om2.MSpace.kWorld)[1]
+    faceVtx = mfnMesh.getPolygonVertices(index)
+    vtxDist = [(vtx, mfnMesh.getPoint(vtx, om2.MSpace.kWorld).distanceTo(pos)) for vtx in faceVtx]
 
     vertexId, dist = min(vtxDist, key=operator.itemgetter(1))
     if returnDistance:
@@ -69,8 +69,8 @@ def getClosestUV(mesh, point):
 
     pos = om2.MPoint(point[0], point[1], point[2])
     uvFace = mfnMesh.getUVAtPoint(pos)
-    closest_UV = (uvFace[0], uvFace[1])
-    return closest_UV
+    closestUv = (uvFace[0], uvFace[1])
+    return closestUv
 
 
 # bounding box Info
@@ -81,7 +81,7 @@ def getBboxCenter(obj):
     :return:
     """
     bbox = cmds.exactWorldBoundingBox(obj)
-    bbox_min = bbox[:3]
-    bbox_max = bbox[3:]
-    center = [(bbox_min[x] + bbox_max[x]) / 2.0 for x in range(3)]
+    bboxMin = bbox[:3]
+    bboxMax = bbox[3:]
+    center = [(bboxMin[x] + bboxMax[x]) / 2.0 for x in range(3)]
     return center

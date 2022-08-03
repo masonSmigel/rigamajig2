@@ -112,7 +112,8 @@ function-naming-style=camelCase
 module-naming-style=any
 
 # Good variable names which should always be accepted, separated by a comma.
-good-names= i, j, k, r, p, f,cv, ro, a, b, c, d, e, n, ex, ik, fk, Run, _, A, B, C, logger, basestring, dlg_instance, pv, unicode
+good-names= i, j, k, r, p, f,cv, ro, a, b, c, d, e, n, x, y, z, ex, ik, fk,
+            Run, _, A, B, C, logger, basestring, dlg_instance, pv, unicode
 
 
 [CLASSES]

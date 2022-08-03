@@ -36,7 +36,8 @@ def isAttr(plug):
         return True
     return False
 
-
+# We need alot of arguments here
+# pylint:disable=too-many-arguments
 def createAttr(node, longName, attributeType, value=None, niceName=None, shortName=None, minValue=None, maxValue=None,
                keyable=True, readable=True, writable=True, storable=True, channelBox=False, locked=False):
     """
@@ -112,6 +113,8 @@ def createAttr(node, longName, attributeType, value=None, niceName=None, shortNa
     return plug
 
 
+# We need alot of arguments here
+# pylint:disable=too-many-arguments
 def createEnum(node, longName, enum, value=None, niceName=None, shortName=None,
                keyable=True, readable=True, writable=True, storable=True, channelBox=False):
     """
@@ -210,6 +213,8 @@ def createProxy(sources, targets):
                 cmds.error("Attribute {} already exists. Cannot make a proxy".format(target + '.' + attrName))
 
 
+# We need alot of arguments here
+# pylint:disable=too-many-arguments
 def createColorAttr(node, longName, value=False, niceName=None, shortName=None,
                     keyable=True, readable=True, storable=True, writable=True, channelBox=False, channelBoxType='rgb'):
     """
@@ -352,12 +357,12 @@ def moveAttribute(attr, source, target):
     """
     copyAttribute(attr=attr, source=source, target=target)
 
-    source_connections = cmds.listConnections("{}.{}".format(source, attr), s=True, d=False, plugs=True) or []
-    destination_connections = cmds.listConnections("{}.{}".format(source, attr), d=True, s=False, plugs=True) or []
+    sourceConnections = cmds.listConnections("{}.{}".format(source, attr), s=True, d=False, plugs=True) or []
+    destConnections = cmds.listConnections("{}.{}".format(source, attr), d=True, s=False, plugs=True) or []
 
     # connect source and  destination attributes
-    for plug in source_connections: cmds.connectAttr(plug, "{}.{}".format(target, attr), f=True)
-    for plug in destination_connections: cmds.connectAttr("{}.{}".format(target, attr), plug, f=True)
+    for plug in sourceConnections: cmds.connectAttr(plug, "{}.{}".format(target, attr), f=True)
+    for plug in destConnections: cmds.connectAttr("{}.{}".format(target, attr), plug, f=True)
 
 
 def driveAttribute(attr, source, target, forceVisable=False):
@@ -529,12 +534,23 @@ def resetDefault(nodes, attrs):
             apiType = pAttribute.apiType()
             if apiType is not om2.MFn.kTypedAttribute:
                 if not plug.isCompound:
-                    dv = cmds.attributeQuery(attr, node=node, listDefault=True)
-                    if dv:
-                        setAttr(node, attr, dv[0])
+                    defaultValue = cmds.attributeQuery(attr, node=node, listDefault=True)
+                    if defaultValue:
+                        setAttr(node, attr, defaultValue[0])
 
 
-def disconnectAttrs(node, source=True, destination=True, skipAttrs=list()):
+def disconnectAttrs(node, source=True, destination=True, skipAttrs=None):
+    """
+    disconnect all  connections between a source and node.
+    :param node: node to disconnect attributes from
+    :param source: node with the input connections to disconnect
+    :param destination:
+    :param skipAttrs: list of attributes we dont want to skip
+    :return:
+    """
+    if skipAttrs is None:
+        skipAttrs = list()
+
     connectionPairs = []
     skipAttrs = common.toList(skipAttrs)
     if source:
@@ -572,6 +588,8 @@ def hasAttr(node, attr):
     return True if cmds.attributeQuery(attr, exists=True, node=node) else False
 
 
+# disable the name checking because we want this to be like a constant
+# pylint:disable=invalid-name
 def USER(node):
     """
     Get user defined attributes of a node
@@ -581,6 +599,8 @@ def USER(node):
     return list([str(a) for a in cmds.listAttr(node, ud=True) or [] if '.' not in a])
 
 
+# disable the name checking because we want this to be like a constant
+# pylint:disable=invalid-name
 def KEYABLE(node):
     """
     Get keyable attributes of a node
@@ -590,6 +610,8 @@ def KEYABLE(node):
     return list([str(a) for a in cmds.listAttr(node, k=True) or [] if '.' not in a])
 
 
+# disable the name checking because we want this to be like a constant
+# pylint:disable=invalid-name
 def NONKEYABLE(node):
     """
     Get non keyable attributes of a node
@@ -599,6 +621,8 @@ def NONKEYABLE(node):
     return list([str(a) for a in cmds.listAttr(node, cb=True) or [] if '.' not in a])
 
 
+# disable the name checking because we want this to be like a constant
+# pylint:disable=invalid-name
 def CHANNELBOX(node):
     """
     Get attributes in the channelbox of a node
@@ -608,6 +632,8 @@ def CHANNELBOX(node):
     return KEYABLE(node) + NONKEYABLE(node)
 
 
+# disable the name checking because we want this to be like a constant
+# pylint:disable=invalid-name
 def ALL(node):
     """
     Get all attribues of a node
@@ -627,14 +653,14 @@ def _editAttrParams(nodes, attrs, channelBox=-1, lock=-1, keyable=-1):
     for node in nodes:
         for attr in attrs:
             if isCompound("{}.{}".format(node, attr)):
-                c_plugs = getCompoundChildren("{}.{}".format(node, attr))
-                c_attrs = [a.split('.')[-1] for a in c_plugs]
-                if c_attrs not in attrs:
-                    attrs += c_attrs
+                childPlugs = getCompoundChildren("{}.{}".format(node, attr))
+                childAttrs = [a.split('.')[-1] for a in childPlugs]
+                if childAttrs not in attrs:
+                    attrs += childAttrs
 
-            if lock is not -1: cmds.setAttr(node + "." + attr, lock=lock)
-            if keyable is not -1: cmds.setAttr(node + "." + attr, keyable=keyable)
-            if channelBox is not -1: cmds.setAttr(node + "." + attr, channelBox=channelBox)
+            if lock != -1: cmds.setAttr(node + "." + attr, lock=lock)
+            if keyable != -1: cmds.setAttr(node + "." + attr, keyable=keyable)
+            if channelBox != -1: cmds.setAttr(node + "." + attr, channelBox=channelBox)
 
 
 def reorderToBottom(node, attr):
@@ -702,7 +728,7 @@ def getNextAvailableElement(plug):
     :param plug: plug to get the next available element of
     :return:
     """
-    if not type(plug) == om2.MPlug:
+    if not isinstance(plug, om2.MPlug):
         plug = _getPlug(plug)
 
     if not plug:
@@ -718,7 +744,7 @@ def isCompound(plug):
     :type plug: str
     :return:
     """
-    if not type(plug) == om2.MPlug:
+    if not isinstance(plug, om2.MPlug):
         plug = _getPlug(plug)
 
     if not plug:
@@ -742,7 +768,7 @@ def getCompoundChildren(plug):
     :return: list of child plugs
     :rtype: list
     """
-    if not type(plug) == om2.MPlug:
+    if not isinstance(plug, om2.MPlug):
         plug = _getPlug(plug)
 
     if not plug:
@@ -754,8 +780,8 @@ def getCompoundChildren(plug):
     childPlugs = list()
     if plug.isCompound:
         for i in range(plug.numChildren()):
-            cp = plug.child(i)
-            childPlugs.append(str(cp))
+            compoundChild = plug.child(i)
+            childPlugs.append(str(compoundChild))
     return childPlugs
 
 
@@ -790,8 +816,8 @@ def _getPlug(plug):
                 if p.isArray:
                     if apiType == om2.MFn.kTypedAttribute:
                         for i in xrange(p.numElements()):
-                            cp = p.elementByLogicalIndex(i)
-                            _getChildPlugs(cp)
+                            compountAttr = p.elementByLogicalIndex(i)
+                            _getChildPlugs(compountAttr)
                     elif apiType == om2.MFn.kMessageAttribute:
                         childPlugs.append(p)
                     else:
@@ -805,12 +831,12 @@ def _getPlug(plug):
                         except TypeError:
                             pass
                         for i in range(numChildren):
-                            cp = om2.MPlug(p.elementByLogicalIndex(i))
-                            _getChildPlugs(cp)
+                            compountAttr = om2.MPlug(p.elementByLogicalIndex(i))
+                            _getChildPlugs(compountAttr)
                 elif p.isCompound:
                     for i in range(p.numChildren()):
-                        cp = p.child(i)
-                        _getChildPlugs(cp)
+                        compountAttr = p.child(i)
+                        _getChildPlugs(compountAttr)
 
             # get child plugs
             childPlugs = list()
@@ -829,6 +855,7 @@ def _getPlug(plug):
     return
 
 
+# pylint: disable=too-many-return-statements
 def getPlugValue(plug):
     """
     Gets the value of the given plug.
@@ -839,7 +866,7 @@ def getPlugValue(plug):
     :return: The value of the passed in node plug.
     """
 
-    if not type(plug) == om2.MPlug:
+    if not isinstance(plug, om2.MPlug):
         plug = _getPlug(plug)
 
     if not plug:
@@ -899,6 +926,9 @@ def getPlugValue(plug):
         return plug.asInt()
 
 
+# this is a long function with alot of checks
+# pylint: disable=too-many-statements
+# pylint: disable=too-many-branches
 def setPlugValue(plug, value):
     """
     Sets the given plug's value to the passed in value.
@@ -909,7 +939,7 @@ def setPlugValue(plug, value):
     :param value: Any value of any data type.
     :type value:
     """
-    if not type(plug) == om2.MPlug:
+    if not isinstance(plug, om2.MPlug):
         plug = _getPlug(plug)
 
     if not plug:
@@ -927,7 +957,7 @@ def setPlugValue(plug, value):
                     result.append(setPlugValue(plug.child(c), value[c]))
                 return result
 
-            elif type(value) == om2.MEulerRotation:
+            elif isinstance(value, om2.MEulerRotation):
                 setPlugValue(plug.child(0), value.x)
                 setPlugValue(plug.child(1), value.y)
                 setPlugValue(plug.child(2), value.z)
@@ -972,9 +1002,9 @@ def setPlugValue(plug, value):
                 pass
             else:
                 plugNode = plug.node()
-                MFnTrans = om2.MFnTransform(plugNode)
+                mfnTransform = om2.MFnTransform(plugNode)
                 sourceMatrix = om2.MTransformationMatrix(value)  # .asMatrix()
-                MFnTrans.set(sourceMatrix)
+                mfnTransform.set(sourceMatrix)
 
         # String
         elif pType == om2.MFnData.kString:

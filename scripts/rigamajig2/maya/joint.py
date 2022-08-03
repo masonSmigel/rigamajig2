@@ -4,13 +4,13 @@ functions for Joints
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 
-import rigamajig2.shared.common as common
-import rigamajig2.maya.openMayaUtils as utils
-import rigamajig2.maya.mathUtils as mathUtils
-import rigamajig2.maya.naming as naming
-import rigamajig2.maya.attr as attr
-import rigamajig2.maya.transform as transform
-import rigamajig2.maya.decorators as decorators
+from rigamajig2.shared import common
+from rigamajig2.maya import mathUtils
+from rigamajig2.maya import naming
+from rigamajig2.maya import attr
+from rigamajig2.maya import transform
+from rigamajig2.maya import decorators
+from rigamajig2.maya import meta
 
 
 def isJoint(joint):
@@ -487,3 +487,63 @@ def hideJoints(joints):
     for joint in joints:
         if isJoint(joint):
             cmds.setAttr("{}.drawStyle".format(joint), 2)
+
+
+def createInterpJoint(joint, parentJoint=None, t=False, r=True, s=False, sh=False, bind=True):
+    """
+    Add an interpolation rotation joint on the given joint. We will
+    also add an attribute to the joint to blend between the joint and
+    parent.
+
+    0 will follow 100% the joint, 1 will follow the parent joint.
+
+    If a parentJoint is provided it will be added as the parent.
+    Otherwise it will get the parent of the joint.
+
+    :param joint: joint to add the interpolation joint on
+    :param parentJoint: parentjoint to blend the rotation between
+    :param t: Apply translation transformations
+    :param r: Apply rotation transformations
+    :param s: Apply scale transformations
+    :param sh: Apply shear transformations
+    :param bind: Tag the created joint as a bind joint
+    :return: name of the interpolation joint
+    """
+
+    if parentJoint is None:
+        parentJoint = cmds.listRelatives(joint, parent=True, type='joint')
+        parentJoint = parentJoint[0]  if parentJoint else  None
+
+    if not parentJoint:
+        raise Exception("Please provide a valid parent joint or set a hierarchy parent. ")
+
+    interpJointName = '{}_interp'.format(joint)
+
+    interpJoint = cmds.createNode('joint', name=interpJointName)
+
+    # set the radius to be slightly larger.
+    # This is just to help us see alittle better
+    cmds.setAttr("{}.radius".format(interpJoint), 1.25)
+
+    # match the interp joint to the parent postion and set the joint as the parent
+    transform.matchTransform(joint, interpJoint)
+    toOrientation(interpJoint)
+    cmds.parent(interpJoint, joint)
+
+    # create an attribute to control the blending
+    blendAttr = attr.createAttr(interpJoint, 'interpBlend', 'float', value=0.5, minValue=0, maxValue=1.0)
+
+    # blend the rotation between the two joints
+    multMatrix, pickMatrix = transform.connectOffsetParentMatrix(parentJoint, interpJoint, mo=True, t=t, r=r, s=s, sh=sh)
+    blendMatrix = cmds.createNode("blendMatrix", n="{}_{}_blendMatrix".format(parentJoint, joint))
+    cmds.connectAttr("{}.matrixSum".format(multMatrix), "{}.target[0].targetMatrix".format(blendMatrix))
+    cmds.connectAttr(blendAttr, "{}.envelope".format(blendMatrix))
+
+    # connect the blendMatrix to the pick matrix (and therefore the interp joint)
+    cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.inputMatrix".format(pickMatrix), f=True)
+
+    if bind:
+        meta.tag(interpJoint, "bind")
+    return interpJoint
+
+

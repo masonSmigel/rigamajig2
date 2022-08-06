@@ -48,20 +48,20 @@ class JointWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
+        self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
 
         self.joint_pos_path_selector = pathSelector.PathSelector(
             "joint pos: ",
-            cap="Select a Skeleton position file",
-            ff=constants.JSON_FILTER,
-            fm=1
+            caption="Select a Skeleton position file",
+            fileFilter=constants.JSON_FILTER,
+            fileMode=1
             )
         self.load_jnt_pos_btn = QtWidgets.QPushButton("Load joints")
         self.save_jnt_pos_btn = QtWidgets.QPushButton("Save joints")
 
         self.skeletonEdit_wdgt = collapseableWidget.CollapsibleWidget('Edit Skeleton')
-        self.skeletonEdit_wdgt.set_header_background_color(constants.EDIT_BG_HEADER_COLOR)
-        self.skeletonEdit_wdgt.set_widget_background_color(constants.EDIT_BG_WIDGET_COLOR)
+        self.skeletonEdit_wdgt.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
+        self.skeletonEdit_wdgt.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
 
         self.jnt_to_rot_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Rotation")
         self.jnt_to_ori_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Orientation")
@@ -145,12 +145,12 @@ class JointWidget(QtWidgets.QWidget):
         self.skeletonEdit_wdgt.addSpacing(3)
 
         # add widgets to the main skeleton widget.
-        self.main_collapseable_widget.addWidget(self.joint_pos_path_selector)
-        self.main_collapseable_widget.addLayout(save_load_jnt_layout)
-        self.main_collapseable_widget.addWidget(self.skeletonEdit_wdgt)
+        self.mainCollapseableWidget .addWidget(self.joint_pos_path_selector)
+        self.mainCollapseableWidget .addLayout(save_load_jnt_layout)
+        self.mainCollapseableWidget .addWidget(self.skeletonEdit_wdgt)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.main_collapseable_widget)
+        self.main_layout.addWidget(self.mainCollapseableWidget )
 
     def createConnections(self):
         self.load_jnt_pos_btn.clicked.connect(self.load_joint_positions)
@@ -167,27 +167,27 @@ class JointWidget(QtWidgets.QWidget):
     def setBuilder(self, builder):
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
-        self.joint_pos_path_selector.set_relativeTo(rigEnv)
+        self.joint_pos_path_selector.setRelativePath(rigEnv)
 
         # update data within the rig
         jointFile = self.builder.getRigData(self.builder.getRigFile(), SKELETON_POS)
         if jointFile:
-            self.joint_pos_path_selector.set_path(jointFile)
+            self.joint_pos_path_selector.setPath(jointFile)
 
     def runWidget(self):
         self.load_joint_positions()
 
     @property
     def isChecked(self):
-        return self.main_collapseable_widget.isChecked()
+        return self.mainCollapseableWidget .isChecked()
 
     # CONNECTIONS
     def load_joint_positions(self):
-        self.builder.loadJoints(self.joint_pos_path_selector.get_abs_path())
+        self.builder.loadJoints(self.joint_pos_path_selector.getPath())
 
     def save_joint_positions(self):
         # TODO add a check about saving a blank scene.
-        self.builder.saveJoints(self.joint_pos_path_selector.get_abs_path())
+        self.builder.saveJoints(self.joint_pos_path_selector.getPath())
 
     def pin_joints(self):
         live.pin()

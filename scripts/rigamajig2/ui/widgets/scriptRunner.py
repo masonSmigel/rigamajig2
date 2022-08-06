@@ -1,3 +1,6 @@
+"""
+Script runner widget
+"""
 import sys
 from os.path import relpath
 
@@ -10,98 +13,128 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
 import rigamajig2.shared.runScript as runScript
+from rigamajig2.ui import showInFolder
 import rigamajig2.shared.path as rig_path
 
 SCRIPT_FILE_FILTER = "Python (*.py) ;; Mel (*.mel)"
 
 
-def maya_main_window():
+def mayaMainWindow():
     """ Return the Maya main window widget as a Python object """
-    main_window_ptr = omui.MQtUtil.mainWindow()
+    mainWindowPointer = omui.MQtUtil.mainWindow()
     if sys.version_info.major >= 3:
-        return wrapInstance(int(main_window_ptr), QtWidgets.QWidget)
+        return wrapInstance(int(mainWindowPointer), QtWidgets.QWidget)
     else:
-        return wrapInstance(long(main_window_ptr), QtWidgets.QWidget)
+        return wrapInstance(long(mainWindowPointer), QtWidgets.QWidget)
 
 
+# ignore too many public methods to UI classes.
+# pylint: disable = too-many-public-methods
 class ScriptRunner(QtWidgets.QWidget):
-    def __init__(self, root_dir=None, title='Scripts',*args, **kwargs):
+    """
+    Ui element to run a list of scripts in a folder
+    """
+    def __init__(self, rootDirectory=None, title='Scripts', *args, **kwargs):
         """
         Script runner widget class.
         The script runner conists of a list of scripts that can be modified, a scripts loaded in run in order.
         Paths relative to the root directory specified.
-        :param root_dir: root directory of the script runner. All paths are relative to the script runner
+        :param rootDirectory: root directory of the script runner. All paths are relative to the script runner
         :param args:
         :param kwargs:
         """
 
         super(ScriptRunner, self).__init__(*args, **kwargs)
 
-        self.root_dir = root_dir
+        self.rootDirectory = rootDirectory
         self.title = title
-        self.current_scripts_list = list()
+        self.currentScriptsList = list()
 
-        self.create_actions()
-        self.create_widgets()
-        self.create_layouts()
-        self.create_connections()
+        self.createActions()
+        self.createWidgets()
+        self.createLayouts()
+        self.createConnections()
 
-    def create_actions(self):
+    def createActions(self):
+        """ Create actions"""
         self.titleLabel = QtWidgets.QLabel(self.title)
 
-        self.run_script_action = QtWidgets.QAction("Run Script", self)
-        self.run_script_action.setIcon(QtGui.QIcon(":play_S_100.png"))
-        self.run_script_action.triggered.connect(self.run_selected_scripts)
+        self.executeAllAction = QtWidgets.QAction("Execute All Scripts", self)
+        self.executeAllAction.setIcon(QtGui.QIcon(":play_S_100.png"))
+        self.executeAllAction.triggered.connect(self.executeAllScripts)
 
-        self.show_in_folder_action = QtWidgets.QAction("Show in Folder", self)
-        self.show_in_folder_action.setIcon(QtGui.QIcon(":folder-open.png"))
-        self.show_in_folder_action.triggered.connect(self.show_in_folder)
+        self.executeSelectedAction = QtWidgets.QAction("Run Script", self)
+        self.executeSelectedAction.setIcon(QtGui.QIcon(":play_S_100.png"))
+        self.executeSelectedAction.triggered.connect(self.runSelectedScripts)
 
-        self.del_script_action = QtWidgets.QAction("Delete Script", self)
-        self.del_script_action.setIcon(QtGui.QIcon(":trash.png"))
-        self.del_script_action.triggered.connect(self.delete_selected_scripts)
+        self.showInFolderAction = QtWidgets.QAction("Show in Folder", self)
+        self.showInFolderAction.setIcon(QtGui.QIcon(":folder-open.png"))
+        self.showInFolderAction.triggered.connect(self.showInFolder)
 
-    def create_widgets(self):
-        self.script_list = QtWidgets.QListWidget()
-        self.script_list.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.script_list.setFixedHeight(155)
-        self.script_list.setAlternatingRowColors(True)
+        self.newScriptAction = QtWidgets.QAction("Create New Script", self)
+        self.newScriptAction.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
+        self.newScriptAction.triggered.connect(self.createNewScript)
 
-        self.script_list.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-        self.script_list.addAction(self.run_script_action)
-        self.script_list.addAction(self.show_in_folder_action)
-        self.script_list.addAction(self.del_script_action)
+        self.deleteScriptAction = QtWidgets.QAction("Delete Script", self)
+        self.deleteScriptAction.setIcon(QtGui.QIcon(":trash.png"))
+        self.deleteScriptAction.triggered.connect(self.deleteSelectedScripts)
 
-        self.add_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":fileNew.png"), "Add Script")
-        self.create_new_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":cmdWndIcon.png"), "New Script")
-        self.save_script_btn = QtWidgets.QPushButton(QtGui.QIcon(":save.png"), "Save All")
-        self.execute_scripts_btn = QtWidgets.QPushButton(QtGui.QIcon(":play_S_100.png"), "Execute All")
+    def createWidgets(self):
+        """ Create Widgets """
+        self.scriptList = QtWidgets.QListWidget()
+        self.scriptList.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.scriptList.setFixedHeight(155)
+        self.scriptList.setAlternatingRowColors(True)
 
-    def create_layouts(self):
-        btn_layout = QtWidgets.QHBoxLayout()
-        btn_layout.setContentsMargins(0, 0, 0, 0)
-        btn_layout.addStretch()
-        btn_layout.addWidget(self.add_script_btn)
-        btn_layout.addWidget(self.create_new_script_btn)
-        btn_layout.addWidget(self.save_script_btn)
-        btn_layout.addWidget(self.execute_scripts_btn)
+        self.scriptList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.scriptList.customContextMenuRequested.connect(self._createContextMenu)
 
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.minimumSize()
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(4)
-        self.main_layout.addWidget(self.titleLabel)
-        self.main_layout.addWidget(self.script_list)
-        self.main_layout.addLayout(btn_layout)
 
-    def create_connections(self):
-        self.add_script_btn.clicked.connect(self.add_script_browser)
+
+        # self.addScriptButton = QtWidgets.QPushButton(QtGui.QIcon(":fileNew.png"), "Add Script")
+        # self.createNewScriptButton = QtWidgets.QPushButton(QtGui.QIcon(":cmdWndIcon.png"), "New Script")
+        # self.saveScriptButton = QtWidgets.QPushButton(QtGui.QIcon(":save.png"), "Save All")
+        # self.executeScriptButton = QtWidgets.QPushButton(QtGui.QIcon(":play_S_100.png"), "Execute All")
+
+    def createLayouts(self):
+        """ Create layouts """
+        # buttonLayout = QtWidgets.QHBoxLayout()
+        # buttonLayout.setContentsMargins(0, 0, 0, 0)
+        # buttonLayout.addStretch()
+        # buttonLayout.addWidget(self.addScriptButton)
+        # buttonLayout.addWidget(self.createNewScriptButton)
+        # buttonLayout.addWidget(self.executeScriptButton)
+
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.minimumSize()
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(4)
+        self.mainLayout.addWidget(self.titleLabel)
+        self.mainLayout.addWidget(self.scriptList)
+        # self.mainLayout.addLayout(buttonLayout)
+
+    def createConnections(self):
+        """ Create connections"""
+        # self.addScriptButton.clicked.connect(self.addScriptBrowser)
         # self.reload_scripts_btn.clicked.connect(self.reload_scripts)
-        self.create_new_script_btn.clicked.connect(self.create_new_script)
-        self.save_script_btn.clicked.connect(self.save_scripts)
-        self.execute_scripts_btn.clicked.connect(self.execute_all_scripts)
+        # self.createNewScriptButton.clicked.connect(self.createNewScript)
+        # self.executeScriptButton.clicked.connect(self.executeAllScripts)
 
-    def _add_item(self, name, data=None, icon=None):
+    def _createContextMenu(self, position):
+        """Create the right click context menu"""
+
+        menu = QtWidgets.QMenu(self.scriptList)
+        menu.addAction(self.executeAllAction)
+        menu .addAction(self.executeSelectedAction)
+        menu .addSeparator()
+        menu .addAction(self.showInFolderAction)
+        menu .addAction(self.newScriptAction)
+        menu .addSeparator()
+        menu .addAction(self.deleteScriptAction)
+
+        menu.exec_(self.scriptList.mapToGlobal(position))
+
+    def _addItem(self, name, data=None, icon=None):
         """ add an item to the script list"""
         item = QtWidgets.QListWidgetItem(name)
         if data:
@@ -109,160 +142,129 @@ class ScriptRunner(QtWidgets.QWidget):
         if icon:
             item.setIcon(icon)
 
-        self.script_list.addItem(item)
+        self.scriptList.addItem(item)
 
-    def add_scripts(self, scripts_list):
+    def addScripts(self, scriptsList):
         """
         add many scripts using a list of scripts and directories
-        :param scripts_list:
+        :param scriptsList:
         :return:
         """
-        if not isinstance(scripts_list, (list, tuple)):
-            scripts_list = [scripts_list]
+        if not isinstance(scriptsList, (list, tuple)):
+            scriptsList = [scriptsList]
 
-        for item in scripts_list:
+        for item in scriptsList:
             if not item:
                 continue
 
             # if the item is a script then add it 
             if rig_path.isFile(item):
-                self._add_script_to_widget(item)
+                self._addScriptToWidget(item)
 
             # if the item is a directory then add all scripts in the directory
             if rig_path.isDir(item):
                 for script in runScript.findScripts(item):
-                    self._add_script_to_widget(script)
+                    self._addScriptToWidget(script)
 
             # Append the item to the current script list.
             # This keeps a list of all the current directories and scripts added to the UI
-            self.current_scripts_list.append(item)
+            self.currentScriptsList.append(item)
 
-    def _add_script_to_widget(self, script):
+    def _addScriptToWidget(self, script):
         """private method to add scripts to the list """
-        file_info = QtCore.QFileInfo(script)
-        if file_info.exists():
-            if self.root_dir:
-                file_name = relpath(file_info.filePath(), self.root_dir)
+        fileInfo = QtCore.QFileInfo(script)
+        if fileInfo.exists():
+            if self.rootDirectory:
+                fileName = relpath(fileInfo.filePath(), self.rootDirectory)
             else:
-                file_name = file_info.fileName()
-            self._add_item(file_name, data=file_info.filePath(), icon=QtGui.QIcon(":fileNew.png"))
+                fileName = fileInfo.fileName()
+            self._addItem(fileName, data=fileInfo.filePath(), icon=QtGui.QIcon(":fileNew.png"))
 
-    def add_script_browser(self):
+    def addScriptBrowser(self):
         """add script through a browswer"""
-        file_path, selected_filter = QtWidgets.QFileDialog.getOpenFileName(self, "Select File", "", SCRIPT_FILE_FILTER)
-        self.add_scripts(file_path)
+        filePath, selectedFilter = QtWidgets.QFileDialog.getOpenFileName(self, "Select File", "", SCRIPT_FILE_FILTER)
+        self.addScripts(filePath)
 
-    def create_new_script(self):
+    def createNewScript(self):
         """create a new script"""
-        file_path, selected_filter = QtWidgets.QFileDialog.getSaveFileName(self, "Select File", "", SCRIPT_FILE_FILTER)
-        f = open(file_path, "w")
+        filePath, selectedFilter = QtWidgets.QFileDialog.getSaveFileName(self, "Select File", "", SCRIPT_FILE_FILTER)
+        f = open(filePath, "w")
         f.write("")
         f.close()
-        self.add_scripts(file_path)
+        self.addScripts(filePath)
 
-    def save_scripts(self):
-        print ("TODO: save scripts to rig file: {}".format(self.get_current_script_list()))
-
-    def clear_scripts(self):
+    def clearScript(self):
         """Clear all scripts from the UI"""
-        self.script_list.clear()
-        self.current_scripts_list = list()
+        self.scriptList.clear()
+        self.currentScriptsList = list()
 
-    def execute_all_scripts(self):
+    def executeAllScripts(self):
         """run all script list items"""
-        for item in self.get_all_items():
-            self.run_script(item)
+        for item in self.getAllItems():
+            self.runScript(item)
 
-    def run_selected_scripts(self):
+    def runSelectedScripts(self):
         """run the selected script list items"""
-        for item in self.get_sel_items():
-            self.run_script(item)
+        for item in self.getSelectedItems():
+            self.runScript(item)
 
-    def delete_selected_scripts(self):
+    def deleteSelectedScripts(self):
         """delete the selected script list items"""
-        for item in self.get_sel_items():
-            self.delete_item(item)
+        for item in self.getSelectedItems():
+            self.deleteItems(item)
 
-    def run_script(self, item):
+    def runScript(self, item):
         """run a script list item"""
-        script_path = item.data(QtCore.Qt.UserRole)
-        runScript.runScript(script_path)
+        scriptPath = item.data(QtCore.Qt.UserRole)
+        runScript.runScript(scriptPath)
 
-    def delete_item(self, item):
+    def deleteItems(self, item):
         """delete a script list item"""
-        self.script_list.takeItem(self.script_list.row(item))
+        self.scriptList.takeItem(self.scriptList.row(item))
 
-    def get_all_items(self):
+    def getAllItems(self):
         """get all items in the script list"""
-        return [self.script_list.item(i) for i in range(self.script_list.count())]
+        return [self.scriptList.item(i) for i in range(self.scriptList.count())]
 
-    def get_sel_items(self):
+    def getSelectedItems(self):
         """get selected items in the script list"""
-        return [i for i in self.script_list.selectedItems()]
+        return [i for i in self.scriptList.selectedItems()]
 
-    def get_current_script_list(self, relative_paths=False):
+    def getCurrentScriptList(self, relativePaths=False):
         """ get a list of current items in the script list """
-        script_list = list()
-        if relative_paths:
-            for script in self.current_scripts_list:
-                script_list.append(relpath(script, self.root_dir))
-            return script_list
-        return self.current_scripts_list
+        scriptList = list()
+        if relativePaths:
+            for script in self.currentScriptsList:
+                scriptList.append(relpath(script, self.rootDirectory))
+            return scriptList
+        return self.currentScriptsList
 
-    def show_in_folder(self):
-        items = self.get_sel_items()
+    def showInFolder(self):
+        """ Show the selected file in the enclosing folder """
+        items = self.getSelectedItems()
 
         for item in items:
-            file_path = item.data(QtCore.Qt.UserRole)
+            filePath = item.data(QtCore.Qt.UserRole)
+            showInFolder.showInFolder(filePath=filePath)
 
-            if cmds.about(windows=True):
-                if self.open_in_exporer(file_path):
-                    return
-            elif cmds.about(macOS=True):
-                if self.open_in_finder(file_path):
-                    return
 
-            file_info = QtCore.QFileInfo(file_path)
-            if file_info.exists():
-                if file_info.isDir():
-                    QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(file_path))
-                else:
-                    QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(file_info.path()))
-            else:
-                cmds.error("Invalid Directory")
 
-    def open_in_exporer(self, file_path):
-        file_info = QtCore.QFileInfo(file_path)
-        args = []
-        if not file_info.isDir():
-            args.append("/select,")
-        args.append(QtCore.QDir.toNativeSeparators(file_path))
-
-        if QtCore.QProcess.startDetached("explorer", args):
-            return True
-        return False
-
-    def open_in_finder(self, file_path):
-        args = ['-e', 'tell application "Finder"', '-e', 'activate', '-e', 'select POSIX file "{0}"'.format(file_path),
-                '-e', 'end tell', '-e', 'return']
-
-        if QtCore.QProcess.startDetached("/usr/bin/osascript", args):
-            return True
-        return False
-
-    def set_relative_dir(self, value):
+    def setRelativeDirectory(self, value):
         """
         Make all scripts in the UI relative to this path
         :param value: path to make scripts relative to
         :return:
         """
-        self.root_dir = value
+        self.rootDirectory = value
 
 
 class TestDialog(QtWidgets.QDialog):
+    """
+    Test dialog for the script executer
+    """
     WINDOW_TITLE = "Test Dialog"
 
-    def __init__(self, parent=maya_main_window()):
+    def __init__(self, parent=mayaMainWindow()):
         super(TestDialog, self).__init__(parent)
 
         self.setWindowTitle(self.WINDOW_TITLE)
@@ -274,43 +276,45 @@ class TestDialog(QtWidgets.QDialog):
 
         self.setMinimumSize(250, 200)
 
-        self.create_widgets()
-        self.create_layout()
+        self.createWidgets()
+        self.createLayouts()
 
-    def create_widgets(self):
+    def createWidgets(self):
+        """ Create widgets """
         self.scriptExecuter = ScriptRunner()
 
-    def create_layout(self):
+    def createLayouts(self):
+        """ Create layouts"""
 
-        self.body_wdg = QtWidgets.QWidget()
+        self.bodyWidget = QtWidgets.QWidget()
 
-        self.body_layout = QtWidgets.QVBoxLayout(self.body_wdg)
-        self.body_layout.setContentsMargins(4, 2, 4, 2)
-        self.body_layout.setSpacing(3)
-        self.body_layout.setAlignment(QtCore.Qt.AlignTop)
+        self.bodyLayout = QtWidgets.QVBoxLayout(self.bodyWidget)
+        self.bodyLayout.setContentsMargins(4, 2, 4, 2)
+        self.bodyLayout.setSpacing(3)
+        self.bodyLayout.setAlignment(QtCore.Qt.AlignTop)
 
-        self.body_layout.addWidget(self.scriptExecuter)
+        self.bodyLayout.addWidget(self.scriptExecuter)
         self.scriptExecuter.add_scripts_from_dir(
             "/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/preScript")
         self.scriptExecuter.add_scripts_from_dir("/Users/masonsmigel/Desktop/demo_scripts")
 
-        self.body_scroll_area = QtWidgets.QScrollArea()
-        self.body_scroll_area.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.body_scroll_area.setWidgetResizable(True)
-        self.body_scroll_area.setWidget(self.body_wdg)
+        self.bodyScrollAra = QtWidgets.QScrollArea()
+        self.bodyScrollAra.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.bodyScrollAra.setWidgetResizable(True)
+        self.bodyScrollAra.setWidget(self.bodyWidget)
 
-        main_layout = QtWidgets.QVBoxLayout(self)
-        main_layout.setContentsMargins(0, 0, 0, 0)
-        main_layout.addWidget(self.body_scroll_area)
+        mainLayout = QtWidgets.QVBoxLayout(self)
+        mainLayout.setContentsMargins(0, 0, 0, 0)
+        mainLayout.addWidget(self.bodyScrollAra)
 
 
 if __name__ == "__main__":
 
     try:
-        test_dialog.close()  # pylint: disable=E0601
-        test_dialog.deleteLater()
+        testDialog.close()  # pylint: disable=E0601
+        testDialog.deleteLater()
     except:
         pass
-
-    test_dialog = TestDialog()
-    test_dialog.show()
+    # pylint: disable=invalid-name
+    testDialog = TestDialog()
+    testDialog.show()

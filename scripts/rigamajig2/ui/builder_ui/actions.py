@@ -106,33 +106,33 @@ class Actions(object):
         # Save the main feilds
         new_data[builder.RIG_NAME] = self.dialog.asset_name_le.text()
 
-        preScripts = self.dialog.model_widget.preScript_scriptRunner.get_current_script_list(relative_paths=True)
+        preScripts = self.dialog.model_widget.preScript_scriptRunner.getCurrentScriptList(relativePaths=True)
         new_data[builder.PRE_SCRIPT] = preScripts
 
-        postScripts = self.dialog.build_widget.postScript_scriptRunner.get_current_script_list(relative_paths=True)
+        postScripts = self.dialog.build_widget.postScriptScriptRunner.getCurrentScriptList(relativePaths=True)
         new_data[builder.POST_SCRIPT] = postScripts
-        # new_data[cmptBuilder.POST_SCRIPT] = self.postScript_scriptRunner.get_current_script_list(relative_paths=True)
-        pubScripts = self.dialog.publish_widget.publishScript_scriptRunner.get_current_script_list(relative_paths=True)
+        # new_data[cmptBuilder.POST_SCRIPT] = self.postScript_scriptRunner.getCurrentScriptList(relative_paths=True)
+        pubScripts = self.dialog.publish_widget.publishScriptRunner.getCurrentScriptList(relativePaths=True)
         new_data[builder.PUB_SCRIPT] = pubScripts
-        # new_data[cmptBuilder.PUB_SCRIPT] = self.publishScript_scriptRunner.get_current_script_list(relative_paths=True)
-        # new_data[cmptBuilder.MODEL_FILE] = self.model_path_selector.get_path()
-        new_data[builder.MODEL_FILE] = self.dialog.model_widget.model_path_selector.get_path()
-        # new_data[cmptBuilder.SKELETON_POS] = self.joint_pos_path_selector.get_path()
-        new_data[builder.SKELETON_POS] = self.dialog.joint_widget.joint_pos_path_selector.get_path()
-        # new_data[cmptBuilder.GUIDES] = self.guide_path_selector.get_path()
-        new_data[builder.GUIDES] = self.dialog.initialize_widget.guide_path_selector.get_path()
-        # new_data[cmptBuilder.COMPONENTS] = self.cmpt_path_selector.get_path()
-        new_data[builder.COMPONENTS] = self.dialog.initialize_widget.cmpt_path_selector.get_path()
-        # new_data[cmptBuilder.CONTROL_SHAPES] = self.ctl_path_selector.get_path()
-        new_data[builder.CONTROL_SHAPES] = self.dialog.controls_widget.ctl_path_selector.get_path()
-        # new_data[cmptBuilder.SKINS] = self.skin_path_selector.get_path()
-        new_data[builder.SKINS] = self.dialog.deformation_widget.skin_path_selector.get_path()
-        # new_data[cmptBuilder.PSD] = self.psd_path_selector.get_path()
-        new_data[builder.PSD] = self.dialog.deformation_widget.psd_path_selector.get_path()
-        # new_data[cmptBuilder.OUTPUT_RIG] = self.out_path_selector.get_path()
-        new_data[builder.OUTPUT_RIG] = self.dialog.publish_widget.out_path_selector.get_path()
+        # new_data[cmptBuilder.PUB_SCRIPT] = self.publishScript_scriptRunner.getCurrentScriptList(relative_paths=True)
+        # new_data[cmptBuilder.MODEL_FILE] = self.model_path_selector.getPath()
+        new_data[builder.MODEL_FILE] = self.dialog.model_widget.model_path_selector.getPath()
+        # new_data[cmptBuilder.SKELETON_POS] = self.joint_pos_path_selector.getPath()
+        new_data[builder.SKELETON_POS] = self.dialog.joint_widget.joint_pos_path_selector.getPath()
+        # new_data[cmptBuilder.GUIDES] = self.guide_path_selector.getPath()
+        new_data[builder.GUIDES] = self.dialog.initialize_widget.guidePathSelector.getPath()
+        # new_data[cmptBuilder.COMPONENTS] = self.cmpt_path_selector.getPath()
+        new_data[builder.COMPONENTS] = self.dialog.initialize_widget.componentsPathSelector.getPath()
+        # new_data[cmptBuilder.CONTROL_SHAPES] = self.ctl_path_selector.getPath()
+        new_data[builder.CONTROL_SHAPES] = self.dialog.controls_widget.controlPathSelector.getPath()
+        # new_data[cmptBuilder.SKINS] = self.skin_path_selector.getPath()
+        new_data[builder.SKINS] = self.dialog.deformation_widget.skin_path_selector.getPath()
+        # new_data[cmptBuilder.PSD] = self.psd_path_selector.getPath()
+        new_data[builder.PSD] = self.dialog.deformation_widget.psd_path_selector.getPath()
+        # new_data[cmptBuilder.OUTPUT_RIG] = self.out_path_selector.getPath()
+        new_data[builder.OUTPUT_RIG] = self.dialog.publish_widget.outPathSelector.getPath()
         # new_data[cmptBuilder.OUTPUT_RIG_FILE_TYPE] = self.out_file_type_cb.currentText()
-        new_data[builder.OUTPUT_RIG_FILE_TYPE] = self.dialog.publish_widget.out_file_type_cb.currentText()
+        new_data[builder.OUTPUT_RIG_FILE_TYPE] = self.dialog.publish_widget.outFileTypeComboBox.currentText()
 
         data.setData(new_data)
         data.write(self.dialog.rigFile)
@@ -188,12 +188,12 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
         self.setFixedSize(375, 135)
 
-        self.create_widgets()
-        self.create_layouts()
-        self.create_connections()
+        self.createWidgets()
+        self.createLayouts()
+        self.createConnections()
         self.update_create_method()
 
-    def create_widgets(self):
+    def createWidgets(self):
 
         self.from_archetype_rb = QtWidgets.QRadioButton("New From Archetype")
         self.from_existing_rb = QtWidgets.QRadioButton("Clone Existing")
@@ -205,15 +205,15 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         for archetype in rigamajig2.maya.builder.core.getAvailableArchetypes():
             self.archetype_cb.addItem(archetype)
 
-        self.src_path = pathSelector.PathSelector("Source:", fm=2)
-        self.dst_path = pathSelector.PathSelector("New Env:", fm=2)
+        self.src_path = pathSelector.PathSelector("Source:", fileMode=2)
+        self.dst_path = pathSelector.PathSelector("New Env:", fileMode=2)
         self.rig_name_le = QtWidgets.QLineEdit()
         self.rig_name_le.setPlaceholderText("rig_name")
 
         self.create_btn = QtWidgets.QPushButton("Create")
         self.cancel_btn = QtWidgets.QPushButton("Cancel")
 
-    def create_layouts(self):
+    def createLayouts(self):
         main_layout = QtWidgets.QVBoxLayout(self)
         main_layout.setContentsMargins(6, 6, 6, 6)
         main_layout.setSpacing(4)
@@ -248,7 +248,7 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         main_layout.addLayout(rig_name_layout)
         main_layout.addLayout(button_layout)
 
-    def create_connections(self):
+    def createConnections(self):
         self.from_archetype_rb.toggled.connect(self.update_create_method)
         self.from_existing_rb.toggled.connect(self.update_create_method)
 
@@ -265,7 +265,7 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
 
     def create_new_rig_env(self):
 
-        dest_rig_env = self.dst_path.get_path()
+        dest_rig_env = self.dst_path.getPath()
         rig_name = self.rig_name_le.text()
         if self.from_archetype_rb.isChecked():
             archetype = self.archetype_cb.currentText()
@@ -274,7 +274,7 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
                 archetype=archetype,
                 rigName=rig_name)
         else:
-            src_env = self.src_path.get_path()
+            src_env = self.src_path.getPath()
             rig_file = rigamajig2.maya.builder.core.createRigEnviornment(
                 sourceEnviornment=src_env,
                 targetEnviornment=dest_rig_env,

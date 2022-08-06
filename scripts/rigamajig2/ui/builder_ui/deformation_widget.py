@@ -32,29 +32,29 @@ class DeformationWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
+        self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
 
         self.skin_path_selector = pathSelector.PathSelector(
             "skin:",
-            cap="Select the skin weight folder",
-            ff=constants.JSON_FILTER,
-            fm=2)
+            caption="Select the skin weight folder",
+            fileFilter=constants.JSON_FILTER,
+            fileMode=2)
         self.load_all_skin_btn = QtWidgets.QPushButton("Load All Skins")
         self.load_single_skin_btn = QtWidgets.QPushButton("Load Skin")
         self.save_skin_btn = QtWidgets.QPushButton("Save Skin")
 
         self.skinEdit_wgt = collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
-        self.skinEdit_wgt.set_header_background_color(constants.EDIT_BG_HEADER_COLOR)
-        self.skinEdit_wgt.set_widget_background_color(constants.EDIT_BG_WIDGET_COLOR)
+        self.skinEdit_wgt.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
+        self.skinEdit_wgt.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
 
         self.copySkinWeights_btn = QtWidgets.QPushButton("Copy Skin Weights and Influences")
         self.copySkinWeights_btn.setIcon(QtGui.QIcon(":copySkinWeight"))
 
         self.psd_path_selector = pathSelector.PathSelector(
             "psd:",
-            cap="Select a Pose Reader File",
-            ff=constants.JSON_FILTER,
-            fm=1)
+            caption="Select a Pose Reader File",
+            fileFilter=constants.JSON_FILTER,
+            fileMode=1)
         self.load_psd_btn = QtWidgets.QPushButton("Load Pose Readers")
         self.save_psd_btn = QtWidgets.QPushButton("Save Pose Readers")
 
@@ -76,10 +76,10 @@ class DeformationWidget(QtWidgets.QWidget):
         skin_btn_layout.addWidget(self.load_single_skin_btn)
         skin_btn_layout.addWidget(self.save_skin_btn)
 
-        self.main_collapseable_widget.addWidget(self.skin_path_selector)
-        self.main_collapseable_widget.addLayout(skin_btn_layout)
+        self.mainCollapseableWidget .addWidget(self.skin_path_selector)
+        self.mainCollapseableWidget .addLayout(skin_btn_layout)
 
-        self.main_collapseable_widget.addWidget(self.skinEdit_wgt)
+        self.mainCollapseableWidget .addWidget(self.skinEdit_wgt)
         self.skinEdit_wgt.addWidget(self.copySkinWeights_btn)
         self.skinEdit_wgt.addSpacing(4)
 
@@ -91,11 +91,11 @@ class DeformationWidget(QtWidgets.QWidget):
         psd_btn_layout.addWidget(self.load_psd_mode_cbox)
 
         # add widgets to the collapsable widget.
-        self.main_collapseable_widget.addWidget(self.psd_path_selector)
-        self.main_collapseable_widget.addLayout(psd_btn_layout)
+        self.mainCollapseableWidget .addWidget(self.psd_path_selector)
+        self.mainCollapseableWidget .addLayout(psd_btn_layout)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.main_collapseable_widget)
+        self.main_layout.addWidget(self.mainCollapseableWidget )
 
     def createConnections(self):
         self.load_all_skin_btn.clicked.connect(self.load_all_skins)
@@ -108,17 +108,17 @@ class DeformationWidget(QtWidgets.QWidget):
     def setBuilder(self, builder):
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
-        self.skin_path_selector.set_relativeTo(rigEnv)
-        self.psd_path_selector.set_relativeTo(rigEnv)
+        self.skin_path_selector.setRelativePath(rigEnv)
+        self.psd_path_selector.setRelativePath(rigEnv)
 
         # update data within the rig
         skinFile = self.builder.getRigData(self.builder.getRigFile(), SKINS)
         if skinFile:
-            self.skin_path_selector.set_path(skinFile)
+            self.skin_path_selector.setPath(skinFile)
 
         psdFile = self.builder.getRigData(self.builder.getRigFile(), PSD)
         if psdFile:
-            self.psd_path_selector.set_path(psdFile)
+            self.psd_path_selector.setPath(psdFile)
 
     def runWidget(self):
         self.load_posereaders()
@@ -126,27 +126,27 @@ class DeformationWidget(QtWidgets.QWidget):
 
     @property
     def isChecked(self):
-        return self.main_collapseable_widget.isChecked()
+        return self.mainCollapseableWidget .isChecked()
 
     # CONNECTIONS
     def load_all_skins(self):
-        self.builder.loadSkinWeights(self.skin_path_selector.get_abs_path())
+        self.builder.loadSkinWeights(self.skin_path_selector.getPath())
 
     def load_single_skin(self):
         path = cmds.fileDialog2(ds=2, cap="Select a skin file", ff=JSON_FILTER, okc="Select",
-                                dir=self.skin_path_selector.get_abs_path())
+                                dir=self.skin_path_selector.getPath())
         if path:
             deform.loadSingleSkin(path[0])
 
     def save_skin(self):
-        self.builder.saveSkinWeights(path=self.skin_path_selector.get_abs_path())
+        self.builder.saveSkinWeights(path=self.skin_path_selector.getPath())
 
     def load_posereaders(self):
-        self.builder.loadPoseReaders(self.psd_path_selector.get_abs_path(),
+        self.builder.loadPoseReaders(self.psd_path_selector.getPath(),
                                      replace=self.load_psd_mode_cbox.currentIndex())
 
     def save_posereaders(self):
-        self.builder.savePoseReaders(self.psd_path_selector.get_abs_path())
+        self.builder.savePoseReaders(self.psd_path_selector.getPath())
 
     def copySkinWeights(self):
         import rigamajig2.maya.skinCluster as rig_skinCluster

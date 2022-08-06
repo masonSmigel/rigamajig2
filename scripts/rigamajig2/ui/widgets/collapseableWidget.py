@@ -1,3 +1,6 @@
+"""
+Collapseable Widget
+"""
 import sys
 
 from PySide2 import QtCore
@@ -10,43 +13,54 @@ import maya.OpenMayaUI as omui
 
 
 class CollapsibleHeader(QtWidgets.QWidget):
+    """
+    Collapsible Header. Used in the collapseable widget.
+    """
     COLLASPED_PIXMAP = QtGui.QPixmap(':teRightArrow.png')
     EXPANDED_PIXMAP = QtGui.QPixmap(':teDownArrow.png')
 
     clicked = QtCore.Signal()
 
     def __init__(self, text, parent=None, addCheckbox=False):
+        """
+        Constructor for the header widget
+        :param text: Text of the title
+        :param parent: Ui parent
+        :param addCheckbox: Add a checkbox to the ui header
+        """
         super(CollapsibleHeader, self).__init__(parent)
 
         self.setAutoFillBackground(True)
-        self.set_background_color(None)
+        self.setBackgroundColor(None)
 
-        self._haschbx = addCheckbox
+        self.hasCheckBox = addCheckbox
 
-        self.icon_label = QtWidgets.QLabel()
-        self.icon_label.setFixedWidth(self.COLLASPED_PIXMAP.width())
+        self.iconLabel = QtWidgets.QLabel()
+        self.iconLabel.setFixedWidth(self.COLLASPED_PIXMAP.width())
 
         if addCheckbox:
             self.checkbox = QtWidgets.QCheckBox()
 
-        self.text_label = QtWidgets.QLabel()
-        self.text_label.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
+        self.textLabel = QtWidgets.QLabel()
+        self.textLabel.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
 
-        self.main_layout = QtWidgets.QHBoxLayout(self)
-        self.main_layout.setContentsMargins(4, 4, 4, 4)
-        self.main_layout.addWidget(self.icon_label)
+        self.mainLayout = QtWidgets.QHBoxLayout(self)
+        self.mainLayout.setContentsMargins(4, 4, 4, 4)
+        self.mainLayout.addWidget(self.iconLabel)
         if addCheckbox:
-            self.main_layout.addWidget(self.checkbox)
-        self.main_layout.addWidget(self.text_label)
-        self.main_layout.addStretch()
+            self.mainLayout.addWidget(self.checkbox)
+        self.mainLayout.addWidget(self.textLabel)
+        self.mainLayout.addStretch()
 
-        self.set_text(text)
-        self.set_expanded(False)
+        self.setText(text)
+        self.setExpanded(False)
 
-    def set_text(self, text):
-        self.text_label.setText("<b>{0}<b>".format(text))
+    def setText(self, text):
+        """ Set the header text"""
+        self.textLabel.setText("<b>{0}<b>".format(text))
 
-    def set_background_color(self, color=None):
+    def setBackgroundColor(self, color=None):
+        """ Set the header background"""
         if not color:
             color = QtWidgets.QPushButton().palette().color(QtGui.QPalette.Button)
 
@@ -54,85 +68,90 @@ class CollapsibleHeader(QtWidgets.QWidget):
         pallete.setColor(QtGui.QPalette.Window, color)
         self.setPalette(pallete)
 
-    def is_expanded(self):
+    def isExpanded(self):
+        """return the state of the header"""
         return self._expanded
 
-    def set_expanded(self, expanded):
+    def setExpanded(self, expanded):
+        """ set the expanded state of the header"""
         self._expanded = expanded
 
         if self._expanded:
-            self.icon_label.setPixmap(self.EXPANDED_PIXMAP)
+            self.iconLabel.setPixmap(self.EXPANDED_PIXMAP)
         else:
-            self.icon_label.setPixmap(self.COLLASPED_PIXMAP)
+            self.iconLabel.setPixmap(self.COLLASPED_PIXMAP)
 
     def mouseReleaseEvent(self, event):
+        """Emit a signal on mouse release"""
         self.clicked.emit()
 
 
 class CollapsibleWidget(QtWidgets.QWidget):
+    """
+    Collpsible widget acts like a maya collapsible widget.
+
+    It can be expanded and contracted to save ui space.
+    It allows the user to manage the widgets and layouts added to the self.bodyWidget
+    by using methods like addWidget(), addlayout() and addSpacing()
+    """
 
     def __init__(self, text, parent=None, addCheckbox=False):
         super(CollapsibleWidget, self).__init__(parent)
 
-        self.header_wdg = CollapsibleHeader(text, addCheckbox=addCheckbox)
-        self.header_wdg.clicked.connect(self.on_header_clicked)
+        self.headerWidget = CollapsibleHeader(text, addCheckbox=addCheckbox)
+        self.headerWidget.clicked.connect(self.onHeaderClicked)
 
-        self.body_wdg = QtWidgets.QWidget()
-        self.body_layout = QtWidgets.QVBoxLayout(self.body_wdg)
-        self.body_layout.setContentsMargins(4, 2, 4, 2)
-        self.body_layout.setSpacing(5)
+        self.bodyWidget = QtWidgets.QWidget()
+        self.bodyLayout = QtWidgets.QVBoxLayout(self.bodyWidget)
+        self.bodyLayout.setContentsMargins(4, 2, 4, 2)
+        self.bodyLayout.setSpacing(5)
 
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.addWidget(self.header_wdg)
-        self.main_layout.addWidget(self.body_wdg)
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.addWidget(self.headerWidget)
+        self.mainLayout.addWidget(self.bodyWidget)
 
-        self.set_expanded(False)
+        self.setExpanded(False)
 
     def addWidget(self, widget):
         """ override default addWidget to add one to the body widget instead"""
-        self.body_layout.addWidget(widget)
+        self.bodyLayout.addWidget(widget)
 
     def addLayout(self, layout):
         """ override default addLayout to add one to the body widget instead"""
-        self.body_layout.addLayout(layout)
+        self.bodyLayout.addLayout(layout)
 
     def addSpacing(self, spacing=10):
-        """ override the default addSpacing to add one to the body widget instead"""
-        self.body_layout.addSpacing(spacing)
+        """ Override the default addSpacing to add one to the body widget instead"""
+        self.bodyLayout.addSpacing(spacing)
 
-    def set_expanded(self, expanded):
-        self.header_wdg.set_expanded(expanded)
-        self.body_wdg.setVisible(expanded)
+    def setExpanded(self, expanded):
+        """ Set the expanded state of the UI"""
+        self.headerWidget.setExpanded(expanded)
+        self.bodyWidget.setVisible(expanded)
 
-    def set_checked(self, checked):
-        self.header_wdg.checkbox.setChecked(checked)
+    def setChecked(self, checked):
+        """ Set the checked state of the UI"""
+        self.headerWidget.checkbox.setChecked(checked)
 
-    def set_header_background_color(self, color):
-        self.header_wdg.set_background_color(color)
+    def setHeaderBackground(self, color):
+        """ Set the header color """
+        self.headerWidget.setBackgroundColor(color)
 
-    def set_widget_background_color(self, color):
+    def setWidgetBackground(self, color):
+        """ Set the background color of the pallete"""
         pallete = self.palette()
         pallete.setColor(QtGui.QPalette.Window, color)
         self.setAutoFillBackground(True)
         self.setPalette(pallete)
 
-    def on_header_clicked(self):
-        self.set_expanded(not self.header_wdg.is_expanded())
+    def onHeaderClicked(self):
+        """ expand or close the ui when the header is clicked"""
+        self.setExpanded(not self.headerWidget.isExpanded())
 
     def isChecked(self):
-        if self.header_wdg._haschbx:
-            if self.header_wdg.checkbox.isChecked():
+        """Return the state of the checkbox if one exists. """
+        if self.headerWidget.hasCheckBox:
+            if self.headerWidget.checkbox.isChecked():
                 return True
         return False
-
-
-def maya_main_window():
-    """
-    Return the Maya main window widget as a Python object
-    """
-    main_window_ptr = omui.MQtUtil.mainWindow()
-    if sys.version_info.major >= 3:
-        return wrapInstance(int(main_window_ptr), QtWidgets.QWidget)
-    else:
-        return wrapInstance(long(main_window_ptr), QtWidgets.QWidget)

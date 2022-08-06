@@ -9,127 +9,108 @@ from PySide2 import QtWidgets
 
 import maya.cmds as cmds
 
+from rigamajig2.ui import showInFolder
+
 
 class PathSelector(QtWidgets.QWidget):
-    def __init__(self, label=None, cap='Select a file or Folder', ff="All Files (*.*)", fm=1, relativeTo=None,
+    """ Widget to select valid file or folder paths """
+    def __init__(self,
+                 label=None,
+                 caption='Select a file or Folder',
+                 fileFilter="All Files (*.*)",
+                 fileMode=1,
+                 relativePath=None,
                  parent=None):
         super(PathSelector, self).__init__(parent)
-        self.cap = cap
-        self.ff = ff
-        self.fm = fm
-        self.relaiveTo = relativeTo
+        self.caption = caption
+        self.fileFilter = fileFilter
+        self.fileMode = fileMode
+        self.relativePath = relativePath
         self.label = label
 
-        self.path_label = QtWidgets.QLabel()
+        self.pathLabel = QtWidgets.QLabel()
 
-        self.path_le = QtWidgets.QLineEdit()
-        self.path_le.setPlaceholderText("path/to/file/or/folder")
+        self.pathLineEdit = QtWidgets.QLineEdit()
+        self.pathLineEdit.setPlaceholderText("path/to/file/or/folder")
 
-        self.select_path_btn = QtWidgets.QPushButton("...")
-        self.select_path_btn.setFixedSize(24, 19)
-        self.select_path_btn.setToolTip(self.cap)
-        self.select_path_btn.clicked.connect(self.select_path)
+        self.selectPathButton = QtWidgets.QPushButton("...")
+        self.selectPathButton.setFixedSize(24, 19)
+        self.selectPathButton.setToolTip(self.caption)
+        self.selectPathButton.clicked.connect(self.selectPath)
 
-        self.show_in_folder_btn = QtWidgets.QPushButton(QtGui.QIcon(":fileOpen.png"), "")
-        self.show_in_folder_btn.setFixedSize(24, 19)
-        self.show_in_folder_btn.setToolTip("Show in Folder")
-        self.show_in_folder_btn.clicked.connect(self.show_in_folder)
+        self.showInFolderButton = QtWidgets.QPushButton(QtGui.QIcon(":fileOpen.png"), "")
+        self.showInFolderButton.setFixedSize(24, 19)
+        self.showInFolderButton.setToolTip("Show in Folder")
+        self.showInFolderButton.clicked.connect(self.showInFolder)
 
-        self.main_layout = QtWidgets.QHBoxLayout(self)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(4)
+        self.mainLayout = QtWidgets.QHBoxLayout(self)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(4)
         if self.label is not None:
-            self.main_layout.addWidget(self.path_label)
-            self.set_label_text(self.label)
-            self.path_label.setFixedWidth(60)
+            self.mainLayout.addWidget(self.pathLabel)
+            self.setLabelText(self.label)
+            self.pathLabel.setFixedWidth(60)
 
-        self.main_layout.addWidget(self.path_le)
-        self.main_layout.addWidget(self.select_path_btn)
-        self.main_layout.addWidget(self.show_in_folder_btn)
+        self.mainLayout.addWidget(self.pathLineEdit)
+        self.mainLayout.addWidget(self.selectPathButton)
+        self.mainLayout.addWidget(self.showInFolderButton)
 
-    def set_path(self, path):
-        self.path_le.setText(path)
+    def setPath(self, path):
+        """ Set the widgets path"""
+        self.pathLineEdit.setText(path)
 
-    def select_path(self, path=None):
+    def selectPath(self, path=None):
         """
         Select an existing path. this is smarter than set path because it will create a dailog and check if the path exists.
         :param path:
         :return:
         """
-        current_path = self.path_le.text()
-        if not current_path:
-            current_path = self.path_le.placeholderText()
+        currentPath = self.pathLineEdit.text()
+        if not currentPath:
+            currentPath = self.pathLineEdit.placeholderText()
 
         if not path:
-            file_info = QtCore.QFileInfo(current_path)
-            if not file_info.exists():
-                current_path = cmds.workspace(q=True, dir=True)
+            fileInfo = QtCore.QFileInfo(currentPath)
+            if not fileInfo.exists():
+                currentPath = cmds.workspace(q=True, dir=True)
 
-            new_path = cmds.fileDialog2(ds=2, cap=self.cap, ff=self.ff, fm=self.fm, okc='Select', dir=current_path)
-            if new_path: new_path = new_path[0]
+            newPath = cmds.fileDialog2(
+                ds=2,
+                cap=self.caption,
+                ff=self.fileFilter,
+                fm=self.fileMode,
+                okc='Select',
+                dir=currentPath
+                )
+            if newPath: newPath = newPath[0]
         else:
-            new_path = path
+            newPath = path
 
-        if new_path and os.path.exists(new_path):
-            self.path_le.setText(self.resolve_path(new_path))
+        if newPath and os.path.exists(newPath):
+            if self.relativePath:
+                newPath = os.path.relpath(path, self.relativePath)
+            self.pathLineEdit.setText(newPath)
 
-    def show_in_folder(self):
-        file_path = self.get_abs_path()
+    def showInFolder(self):
+        """ show the given file in the enclosing folder"""
+        filePath = self.getPath()
+        showInFolder.showInFolder(filePath=filePath)
 
-        if cmds.about(windows=True):
-            if self.open_in_explorer(file_path):
-                return
-        elif cmds.about(macOS=True):
-            if self.open_in_finder(file_path):
-                return
-
-        file_info = QtCore.QFileInfo(file_path)
-        if file_info.exists():
-            if file_info.isDir():
-                QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(file_path))
+    def getPath(self):
+        """
+        Get the path of the widget.
+        if a relative path is set get the absoulte path
+        """
+        if self.pathLineEdit.text():
+            if self.relativePath:
+                return os.path.abspath(os.path.join(self.relativePath, self.pathLineEdit.text()))
             else:
-                QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(file_info.path()))
-        else:
-            cmds.error("Invalid Directory")
+                return self.pathLineEdit.text()
 
-    def open_in_explorer(self, file_path):
-        file_info = QtCore.QFileInfo(file_path)
-        args = []
-        if not file_info.isDir():
-            args.append("/select,")
-        args.append(QtCore.QDir.toNativeSeparators(file_path))
+    def setRelativePath(self, relativeTo):
+        """ Set the path display relative to a folder """
+        self.relativePath = relativeTo
 
-        if QtCore.QProcess.startDetached("explorer", args):
-            return True
-
-        return False
-
-    def open_in_finder(self, file_path):
-        args = ['-e', 'tell application "Finder"', '-e', 'activate', '-e', 'select POSIX file "{0}"'.format(file_path),
-                '-e', 'end tell', '-e', 'return']
-
-        if QtCore.QProcess.startDetached("/usr/bin/osascript", args):
-            return True
-
-        return False
-
-    def resolve_path(self, path):
-        if self.relaiveTo:
-            return os.path.relpath(path, self.relaiveTo)
-        return path
-
-    def get_path(self):
-        return self.path_le.text()
-
-    def get_abs_path(self):
-        if self.path_le.text():
-            if self.relaiveTo:
-                return os.path.abspath(os.path.join(self.relaiveTo, self.path_le.text()))
-            else:
-                return self.path_le.text()
-
-    def set_relativeTo(self, relativeTo):
-        self.relaiveTo = relativeTo
-
-    def set_label_text(self, text):
-        self.path_label.setText(text)
+    def setLabelText(self, text):
+        """ Set the label text"""
+        self.pathLabel.setText(text)

@@ -31,12 +31,12 @@ class ModelWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Model/ Setup Scene', addCheckbox=True)
+        self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Model/ Setup Scene', addCheckbox=True)
         self.model_path_selector = pathSelector.PathSelector(
             "model:",
-            cap="Select a Model file",
-            ff=constants.MAYA_FILTER,
-            fm=1
+            caption="Select a Model file",
+            fileFilter=constants.MAYA_FILTER,
+            fileMode=1
             )
         self.import_model_btn = QtWidgets.QPushButton('Import Model')
         self.open_model_btn = QtWidgets.QPushButton('Open Model')
@@ -51,7 +51,7 @@ class ModelWidget(QtWidgets.QWidget):
         self.main_layout.setContentsMargins(0, 0, 0, 0)
         self.main_layout.setSpacing(0)
 
-        self.main_collapseable_widget.addWidget(self.preScript_scriptRunner)
+        self.mainCollapseableWidget .addWidget(self.preScript_scriptRunner)
 
         # setup the button layout
         model_btn_layout = QtWidgets.QHBoxLayout()
@@ -61,12 +61,12 @@ class ModelWidget(QtWidgets.QWidget):
         model_btn_layout.addWidget(self.open_model_btn)
 
         # add widgets to the collapsable widget.
-        self.main_collapseable_widget.addSpacing(10)
-        self.main_collapseable_widget.addWidget(self.model_path_selector)
-        self.main_collapseable_widget.addLayout(model_btn_layout)
+        self.mainCollapseableWidget .addSpacing(10)
+        self.mainCollapseableWidget .addWidget(self.model_path_selector)
+        self.mainCollapseableWidget .addLayout(model_btn_layout)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.main_collapseable_widget)
+        self.main_layout.addWidget(self.mainCollapseableWidget )
 
     def createConnections(self):
         self.import_model_btn.clicked.connect(self.import_model)
@@ -76,32 +76,32 @@ class ModelWidget(QtWidgets.QWidget):
         rigEnv = builder.getRigEnviornment()
         rigFile = builder.getRigFile()
         self.builder = builder
-        self.model_path_selector.set_relativeTo(rigEnv)
+        self.model_path_selector.setRelativePath(rigEnv)
 
         # clear the ui
-        self.preScript_scriptRunner.clear_scripts()
+        self.preScript_scriptRunner.clearScript()
 
         # update data within the rig
         modelFile = self.builder.getRigData(self.builder.getRigFile(), MODEL_FILE)
         if modelFile:
-            self.model_path_selector.set_path(modelFile)
+            self.model_path_selector.setPath(modelFile)
 
         # update the script runner
-        self.preScript_scriptRunner.set_relative_dir(rigEnv)
+        self.preScript_scriptRunner.setRelativeDirectory(rigEnv)
         for path in self.builder.getRigData(rigFile, PRE_SCRIPT):
-            self.preScript_scriptRunner.add_scripts(self.builder.getAbsoultePath(path))
+            self.preScript_scriptRunner.addScripts(self.builder.getAbsoultePath(path))
 
     def runWidget(self):
-        self.preScript_scriptRunner.execute_all_scripts()
+        self.preScript_scriptRunner.executeAllScripts()
         self.import_model()
 
     @property
     def isChecked(self):
-        return self.main_collapseable_widget.isChecked()
+        return self.mainCollapseableWidget .isChecked()
 
     # CONNECTIONS
     def import_model(self):
-        self.builder.importModel(self.model_path_selector.get_abs_path())
+        self.builder.importModel(self.model_path_selector.getPath())
 
     def open_model(self):
-        cmds.file(self.model_path_selector.get_abs_path(), o=True, f=True)
+        cmds.file(self.model_path_selector.getPath(), o=True, f=True)

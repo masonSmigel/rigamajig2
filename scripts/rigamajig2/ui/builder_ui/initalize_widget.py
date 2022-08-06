@@ -35,8 +35,13 @@ ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 
 
 class InitializeWidget(QtWidgets.QWidget):
+    """ Initalize layout for the builder UI """
 
     def __init__(self, builder=None):
+        """
+        Constructor for the initalize widget
+        :param builder: builder to connect to the ui
+        """
         super(InitializeWidget, self).__init__()
 
         self.builder = builder
@@ -46,143 +51,164 @@ class InitializeWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Initialize Rig', addCheckbox=True)
-        self.cmpt_path_selector = pathSelector.PathSelector("cmpts:",
-                                                            cap="Select a Component File",
-                                                            ff=constants.JSON_FILTER,
-                                                            fm=1)
-        self.load_components_btn = QtWidgets.QPushButton("Load Cmpts")
-        self.append_components_btn = QtWidgets.QPushButton("Append Cmpts")
-        self.save_components_btn = QtWidgets.QPushButton("Save Cmpts")
-        self.save_components_btn.setIcon(QtGui.QIcon(":save.png"))
-        self.add_components_btn = QtWidgets.QPushButton("Add Components")
-        self.add_components_btn.setIcon(QtGui.QIcon(":freeformOff.png"))
-        self.cmpt_manager = ComponentManager()
+        """ Create Widgets """
+        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Initialize Rig', addCheckbox=True)
+        self.componentsPathSelector = pathSelector.PathSelector("cmpts:",
+                                                                caption="Select a Component File",
+                                                                fileFilter=constants.JSON_FILTER,
+                                                                fileMode=1)
+        self.loadComponentsButton = QtWidgets.QPushButton("Load Cmpts")
+        self.appendComponentsButton = QtWidgets.QPushButton("Append Cmpts")
+        self.saveComponentsButton = QtWidgets.QPushButton("Save Cmpts")
+        self.saveComponentsButton.setIcon(QtGui.QIcon(":save.png"))
+        self.addComponentsButton = QtWidgets.QPushButton("Add Components")
+        self.addComponentsButton.setIcon(QtGui.QIcon(":freeformOff.png"))
+        self.componentManager = ComponentManager()
 
-        self.initalize_build_btn = QtWidgets.QPushButton("Initalize Components")
-        self.initalize_build_btn.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.guide_path_selector = pathSelector.PathSelector("guides:",
-                                                             cap="Select a guide file",
-                                                             ff=constants.JSON_FILTER,
-                                                             fm=1)
-        self.load_guides_btn = QtWidgets.QPushButton("Load Guides")
-        self.save_guides_btn = QtWidgets.QPushButton("Save Guides")
+        self.initalizeBuildButton = QtWidgets.QPushButton("Initalize Components")
+        self.initalizeBuildButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.guidePathSelector = pathSelector.PathSelector("guides:",
+                                                           caption="Select a guide file",
+                                                           fileFilter=constants.JSON_FILTER,
+                                                           fileMode=1)
+        self.loadGuidesButton = QtWidgets.QPushButton("Load Guides")
+        self.saveGuidesButton = QtWidgets.QPushButton("Save Guides")
 
     def createLayouts(self):
+        """ Create Layouts"""
         # setup the main layout.
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(0)
 
-        self.main_collapseable_widget.addWidget(self.cmpt_path_selector)
+        self.mainCollapseableWidget.addWidget(self.componentsPathSelector)
 
-        cmpt_btn_layout = QtWidgets.QHBoxLayout()
-        cmpt_btn_layout.setSpacing(4)
+        componentButtonLayout = QtWidgets.QHBoxLayout()
+        componentButtonLayout.setSpacing(4)
 
-        guide_load_layout = QtWidgets.QHBoxLayout()
-        guide_load_layout.addWidget(self.load_guides_btn)
-        guide_load_layout.addWidget(self.save_guides_btn)
+        guideLoadLayout = QtWidgets.QHBoxLayout()
+        guideLoadLayout.addWidget(self.loadGuidesButton)
+        guideLoadLayout.addWidget(self.saveGuidesButton)
 
-        cmpt_load_layout = QtWidgets.QHBoxLayout()
-        cmpt_load_layout.addWidget(self.load_components_btn)
-        cmpt_load_layout.addWidget(self.save_components_btn)
-        cmpt_load_layout.addWidget(self.add_components_btn)
-        self.main_collapseable_widget.addLayout(cmpt_load_layout)
+        loadComponentsLayout = QtWidgets.QHBoxLayout()
+        loadComponentsLayout.addWidget(self.loadComponentsButton)
+        loadComponentsLayout.addWidget(self.saveComponentsButton)
+        loadComponentsLayout.addWidget(self.addComponentsButton)
+        self.mainCollapseableWidget.addLayout(loadComponentsLayout)
 
-        self.main_collapseable_widget.addWidget(self.cmpt_manager)
-        self.main_collapseable_widget.addWidget(self.initalize_build_btn)
-        self.main_collapseable_widget.addLayout(cmpt_btn_layout)
-        self.main_collapseable_widget.addWidget(self.guide_path_selector)
-        self.main_collapseable_widget.addLayout(guide_load_layout)
+        self.mainCollapseableWidget.addWidget(self.componentManager)
+        self.mainCollapseableWidget.addWidget(self.initalizeBuildButton)
+        self.mainCollapseableWidget.addLayout(componentButtonLayout)
+        self.mainCollapseableWidget.addWidget(self.guidePathSelector)
+        self.mainCollapseableWidget.addLayout(guideLoadLayout)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.main_collapseable_widget)
+        self.mainLayout.addWidget(self.mainCollapseableWidget)
 
     def createConnections(self):
-        self.load_guides_btn.clicked.connect(self.load_guides)
-        self.save_guides_btn.clicked.connect(self.save_guides)
-        self.load_components_btn.clicked.connect(self.load_components)
-        self.save_components_btn.clicked.connect(self.save_components)
+        """ Create Connections"""
+        self.loadGuidesButton.clicked.connect(self.loadGuides)
+        self.saveGuidesButton.clicked.connect(self.saveGuides)
+        self.loadComponentsButton.clicked.connect(self.loadComponents)
+        self.saveComponentsButton.clicked.connect(self.saveComponents)
 
-        self.add_components_btn.clicked.connect(self.cmpt_manager.show_add_component_dialog)
-        self.initalize_build_btn.clicked.connect(self.initalize_rig)
+        self.addComponentsButton.clicked.connect(self.componentManager.showAddComponentDialog)
+        self.initalizeBuildButton.clicked.connect(self.initalizeRig)
 
     def setBuilder(self, builder):
+        """ Set a builder for intialize widget"""
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
-        self.cmpt_path_selector.set_relativeTo(rigEnv)
-        self.guide_path_selector.set_relativeTo(rigEnv)
-        self.cmpt_manager.set_rig_builder(self.builder)
+        self.componentsPathSelector.setRelativePath(rigEnv)
+        self.guidePathSelector.setRelativePath(rigEnv)
+        self.componentManager.setRigBuilder(self.builder)
 
         # reset the UI
-        self.cmpt_manager.clear_cmpt_tree()
+        self.componentManager.clearTree()
 
         # update data within the rig
         cmptsFile = self.builder.getRigData(self.builder.getRigFile(), COMPONENTS)
         if cmptsFile:
-            self.cmpt_path_selector.set_path(cmptsFile)
+            self.componentsPathSelector.setPath(cmptsFile)
 
         guidesFile = self.builder.getRigData(self.builder.getRigFile(), GUIDES)
         if guidesFile:
-            self.guide_path_selector.set_path(guidesFile)
+            self.guidePathSelector.setPath(guidesFile)
 
     def runWidget(self):
-        self.load_components()
-        self.initalize_rig()
+        """ Run this widget from the builder breakpoint runner"""
+        self.loadComponents()
+        self.initalizeRig()
 
     @property
     def isChecked(self):
-        return self.main_collapseable_widget.isChecked()
+        """ Check it the widget is checked"""
+        return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
-    def load_components(self):
+    def loadComponents(self):
+        """ Load component setup from json using the builder """
         self.builder.setComponents(list())
-        self.builder.loadComponents(self.cmpt_path_selector.get_abs_path())
-        self.builder.loadComponentSettings(self.cmpt_path_selector.get_abs_path())
-        self.cmpt_manager.load_list_from_builder()
+        self.builder.loadComponents(self.componentsPathSelector.getPath())
+        self.builder.loadComponentSettings(self.componentsPathSelector.getPath())
+        self.componentManager.loadListFromBuilder()
 
-    def save_components(self):
+    def saveComponents(self):
+        """ Save component setup from json using the builder """
         self.builder.loadMetadataToComponentSettings()
-        self.builder.saveComponents(self.cmpt_path_selector.get_abs_path())
+        self.builder.saveComponents(self.componentsPathSelector.getPath())
 
-    def load_guides(self):
-        self.builder.loadGuideData(self.guide_path_selector.get_abs_path())
+    def loadGuides(self):
+        """ Load guide setup to json using the builder """
 
-    def save_guides(self):
-        self.builder.saveGuideData(self.guide_path_selector.get_abs_path())
+        self.builder.loadGuideData(self.guidePathSelector.getPath())
 
-    def initalize_rig(self):
+    def saveGuides(self):
+        """ Save guides setup to json using the builder """
+        self.builder.saveGuideData(self.guidePathSelector.getPath())
+
+    def initalizeRig(self):
+        """Run the comppnent intialize on the builder and update the UI """
         self.builder.initalize()
         self.builder.loadComponentSettings()
-        self.cmpt_manager.load_cmpts_from_scene()
+        self.componentManager.loadFromScene()
 
 
-def _get_cmpt_icon(cmpt):
+def _getComponentIcon(cmpt):
     """ get the component icon from the module.Class of the component"""
     return QtGui.QIcon(os.path.join(ICON_PATH, "{}.png".format(cmpt.split('.')[0])))
 
 
-def get_cmpt_object(module_name=None):
-    tmp_builder = builder.Builder()
+# TODO: find a way to merge this with existing code... its written somewhere else
+def getComponentObject(moduleName=None):
+    """
+    Get an instance of the component object based on the componentType
+    :param moduleName:
+    :return:
+    """
+    tempBuilder = builder.Builder()
 
-    cmptDict = tmp_builder.getComponentRefDict()
-    if module_name not in list(cmptDict.keys()):
+    cmptDict = tempBuilder.getComponentRefDict()
+    if moduleName not in list(cmptDict.keys()):
         # this is a work around to account for the fact that some old .rig files use the cammel cased components
-        module, cls = module_name.split('.')
-        new_class = cls[0].lower() + cls[1:]
-        tmp_module_name = module + "." + new_class
-        if tmp_module_name in list(cmptDict.keys()):
-            module_name = tmp_module_name
+        module, cls = moduleName.split('.')
+        newClass = cls[0].lower() + cls[1:]
+        tempModuleName = module + "." + newClass
+        if tempModuleName in list(cmptDict.keys()):
+            moduleName = tempModuleName
 
-    module_path = cmptDict[module_name][0]
-    class_name = cmptDict[module_name][1]
-    module_object = __import__(module_path, globals(), locals(), ["*"], 0)
-    class_ = getattr(module_object, class_name)
+    modulePath = cmptDict[moduleName][0]
+    className = cmptDict[moduleName][1]
+    moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
+    classInstance = getattr(moduleObject, className)
 
-    return class_
+    return classInstance
 
 
 class ComponentManager(QtWidgets.QWidget):
+    """
+    Component manager wiget used within the intialize Widget
+    """
     component_icons = dict()
 
     def __init__(self, builder=None, *args, **kwargs):
@@ -190,73 +216,81 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.builder = builder
 
-        self.scriptjob_number = -1
+        self.scriptJobID = -1
 
-        self.create_actions()
-        self.create_widgets()
-        self.create_layouts()
+        self.createActions()
+        self.createWidgets()
+        self.createLayouts()
         self.setFixedHeight(280)
 
-    def create_actions(self):
-        self.select_container_action = QtWidgets.QAction("Select Container", self)
-        self.select_container_action.setIcon(QtGui.QIcon(":out_container.png"))
-        self.select_container_action.triggered.connect(self.select_container)
+    def createActions(self):
+        """ Create Actions"""
+        self.selectContainerAction = QtWidgets.QAction("Select Container", self)
+        self.selectContainerAction.setIcon(QtGui.QIcon(":out_container.png"))
+        self.selectContainerAction.triggered.connect(self.selectContainer)
 
-        self.editComponentSettings_action = QtWidgets.QAction("Edit Component Parameters")
-        self.editComponentSettings_action.setIcon(QtGui.QIcon(":toolSettings.png"))
+        self.editComponentSettingsAction = QtWidgets.QAction("Edit Componet Parameters")
+        self.editComponentSettingsAction.setIcon(QtGui.QIcon(":toolSettings.png"))
 
         self.createSymetricalComponent = QtWidgets.QAction("Create Mirroed Component")
         self.createSymetricalComponent.setIcon(QtGui.QIcon(":kinMirrorJoint_S.png"))
 
-        self.mirrorComponentSettings_action = QtWidgets.QAction("Mirror Component Parameters")
-        self.mirrorComponentSettings_action.setIcon(QtGui.QIcon(":QR_mirrorGuidesRightToLeft.png"))
+        self.mirrorComponentSettingsAction = QtWidgets.QAction("Mirror Component Parameters")
+        self.mirrorComponentSettingsAction.setIcon(QtGui.QIcon(":QR_mirrorGuidesRightToLeft.png"))
 
-        self.reload_cmpt_action = QtWidgets.QAction("Reload Cmpts from Scene", self)
-        self.reload_cmpt_action.setIcon(QtGui.QIcon(":refresh.png"))
-        self.reload_cmpt_action.triggered.connect(self.load_cmpts_from_scene)
+        self.reloadComponentAction = QtWidgets.QAction("Reload Cmpts from Scene", self)
+        self.reloadComponentAction.setIcon(QtGui.QIcon(":refresh.png"))
+        self.reloadComponentAction.triggered.connect(self.loadFromScene)
 
-        self.del_cmpt_action = QtWidgets.QAction("Delete Cmpt", self)
-        self.del_cmpt_action.setIcon(QtGui.QIcon(":trash.png"))
-        self.del_cmpt_action.triggered.connect(self.delete_cmpt)
+        self.deleteComponentAction = QtWidgets.QAction("Delete Cmpt", self)
+        self.deleteComponentAction.setIcon(QtGui.QIcon(":trash.png"))
+        self.deleteComponentAction.triggered.connect(self.deleteComponent)
 
-    def create_widgets(self):
-        self.component_tree = QtWidgets.QTreeWidget()
-        self.component_tree.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.component_tree.setHeaderHidden(True)
-        self.component_tree.setAlternatingRowColors(True)
+    def createWidgets(self):
+        """ Create Widgets"""
+        self.componentTree = QtWidgets.QTreeWidget()
+        self.componentTree.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+        self.componentTree.setHeaderHidden(True)
+        self.componentTree.setAlternatingRowColors(True)
 
-        self.component_tree.setIndentation(5)
-        self.component_tree.setColumnCount(3)
-        self.component_tree.setUniformRowHeights(True)
-        self.component_tree.setColumnWidth(0, 130)
-        self.component_tree.setColumnWidth(1, 120)
-        self.component_tree.setColumnWidth(2, 60)
+        self.componentTree.setIndentation(5)
+        self.componentTree.setColumnCount(3)
+        self.componentTree.setUniformRowHeights(True)
+        self.componentTree.setColumnWidth(0, 130)
+        self.componentTree.setColumnWidth(1, 120)
+        self.componentTree.setColumnWidth(2, 60)
 
-        self.component_tree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-        self.component_tree.addAction(self.select_container_action)
-        self.component_tree.addAction(self.editComponentSettings_action)
-        self.component_tree.addAction(self.createSymetricalComponent)
-        self.component_tree.addAction(self.mirrorComponentSettings_action)
-        self.component_tree.addAction(self.reload_cmpt_action)
-        self.component_tree.addAction(self.del_cmpt_action)
+        self.componentTree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
+        self.componentTree.addAction(self.selectContainerAction)
+        self.componentTree.addAction(self.editComponentSettingsAction)
+        self.componentTree.addAction(self.createSymetricalComponent)
+        self.componentTree.addAction(self.mirrorComponentSettingsAction)
+        self.componentTree.addAction(self.reloadComponentAction)
+        self.componentTree.addAction(self.deleteComponentAction)
 
-    def create_layouts(self):
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.minimumSize()
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(4)
-        self.main_layout.addWidget(self.component_tree)
+    def createLayouts(self):
+        """ Create Layouts"""
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.minimumSize()
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(4)
+        self.mainLayout.addWidget(self.componentTree)
 
-    def set_scriptjob_enabled(self, enabled):
-        if enabled and self.scriptjob_number < 0:
-            self.scriptjob_number = cmds.scriptJob(event=["NewSceneOpened", partial(self.load_cmpts_from_scene)],
-                                                   protected=True)
-        elif not enabled and self.scriptjob_number > 0:
-            cmds.scriptJob(kill=self.scriptjob_number, f=True)
-            self.scriptjob_number = -1
+    def setScriptJobEnabled(self, enabled):
+        """
+        Set the state of the script job.
+        The script job ensures the widget displays changes when the scene changes
+        """
+        if enabled and self.scriptJobID < 0:
+            self.scriptJobID = cmds.scriptJob(event=["NewSceneOpened", partial(self.loadFromScene)],
+                                              protected=True)
+        elif not enabled and self.scriptJobID > 0:
+            cmds.scriptJob(kill=self.scriptJobID, f=True)
+            self.scriptJobID = -1
 
-    def add_component(self, name, cmpt_type, build_step='unbuilt', container=None):
-        rowcount = self.component_tree.topLevelItemCount()
+    def addComponent(self, name, componentType, buildStep='unbuilt', container=None):
+        """ append a new component to the ui """
+        rowcount = self.componentTree.topLevelItemCount()
         item = QtWidgets.QTreeWidgetItem(rowcount)
         item.setSizeHint(0, QtCore.QSize(item.sizeHint(0).width(), 24))  # set height
 
@@ -264,166 +298,180 @@ class ComponentManager(QtWidgets.QWidget):
         item.setText(0, name)
         item.setFont(0, QtGui.QFont())
 
-        item.setText(1, cmpt_type)
-        item.setText(2, build_step)
+        item.setText(1, componentType)
+        item.setText(2, buildStep)
 
         item.setTextColor(1, QtGui.QColor(156, 156, 156))
         item.setTextColor(2, QtGui.QColor(156, 156, 156))
 
         # set the icon
-        cmpt_icon = _get_cmpt_icon(cmpt_type)
-        item.setIcon(0, cmpt_icon)
+        icon = _getComponentIcon(componentType)
+        item.setIcon(0, icon)
 
         # set the data
         if container:
             item.setData(QtCore.Qt.UserRole, 0, container)
 
-        self.component_tree.addTopLevelItem(item)
+        self.componentTree.addTopLevelItem(item)
         return item
 
-    def create_component(self, name, cmpt_type, input, rigParent):
-        cmpt_obj = get_cmpt_object(cmpt_type)
-        cmpt = cmpt_obj(name=name, input=ast.literal_eval(str(input)), rigParent=rigParent)
+    def createComponent(self, name, componentType, input, rigParent):
+        """
+        Create a new component.
+        This will both add it to the active builder the the tree widget UI
+        :param name: name of the component
+        :param componentType: component type
+        :param input: component inputs
+        :param rigParent: component rigParent
+        :return:
+        """
+        componentObject = getComponentObject(componentType)
+        cmpt = componentObject(name=name, input=ast.literal_eval(str(input)), rigParent=rigParent)
 
-        self.add_component(name=name, cmpt_type=cmpt_type, build_step='unbuilt', container=None)
+        self.addComponent(name=name, componentType=componentType, buildStep='unbuilt', container=None)
         self.builder.appendComponents([cmpt])
 
-    def load_cmpts_from_scene(self):
-        """ load exisiting components from the scene"""
-        self.clear_cmpt_tree()
+    def loadFromScene(self):
+        """ Load exisiting components from the scene"""
+        self.clearTree()
         components = meta.getTagged('component')
 
         for component in components:
             name = cmds.getAttr("{}.name".format(component))
-            cmpt_type = cmds.getAttr("{}.type".format(component))
-            build_step_str = cmds.attributeQuery("build_step", n=component, le=True)[0].split(":")
-            build_step = build_step_str[cmds.getAttr("{}.build_step".format(component))]
+            componentType = cmds.getAttr("{}.type".format(component))
+            buildStepList = cmds.attributeQuery("build_step", n=component, le=True)[0].split(":")
+            buildStep = buildStepList[cmds.getAttr("{}.build_step".format(component))]
             isSubComponent = meta.hasTag(component, "subComponent")
             if not isSubComponent:
-                self.add_component(name=name, cmpt_type=cmpt_type, build_step=build_step, container=component)
+                self.addComponent(name=name, componentType=componentType, buildStep=buildStep, container=component)
 
-    def get_data_from_item(self, item):
+    def parseData(self, item):
         """
-        return a dictionary of data for the item
+        return a dictionary of data for the selected item.
         :return:
         """
-        item_data = dict()
-        item_data['name'] = item.text(0)
-        item_data['type'] = item.text(1)
-        item_data['step'] = item.text(2)
-        item_data['container'] = item.data(QtCore.Qt.UserRole, 0)
+        itemData = dict()
+        itemData['name'] = item.text(0)
+        itemData['type'] = item.text(1)
+        itemData['step'] = item.text(2)
+        itemData['container'] = item.data(QtCore.Qt.UserRole, 0)
 
-        return item_data
+        return itemData
 
-    def get_all_cmpts(self):
+    def getAll(self):
         """ get all components in the component tree"""
-        return [self.component_tree.topLevelItem(i) for i in range(self.component_tree.topLevelItemCount())]
+        return [self.componentTree.topLevelItem(i) for i in range(self.componentTree.topLevelItemCount())]
 
-    def get_selected_item(self):
+    def getSelectedItem(self):
         """ get the selected items in the component tree"""
-        return [item for item in self.component_tree.selectedItems()]
+        return [item for item in self.componentTree.selectedItems()]
 
-    def get_component_obj(self, item=None):
+    def getComponentObj(self, item=None):
+        """ Get the component object instance from the builder based on the item in the tree widget. """
         if not item:
-            item = self.get_selected_item()[0]
+            item = self.getSelectedItem()[0]
 
-        item_dict = self.get_data_from_item(item)
-        cmpt = self.builder.findComponent(item_dict['name'], item_dict['type'])
+        itemDict = self.parseData(item)
+        cmpt = self.builder.findComponent(itemDict['name'], itemDict['type'])
         return cmpt
 
-    def select_container(self):
-        """ select the container node of the selected components """
+    def selectContainer(self):
+        """ Select the container node of the selected components """
         cmds.select(cl=True)
-        for item in self.get_selected_item():
-            item_dict = self.get_data_from_item(item)
-            cmds.select(item_dict['container'], add=True)
+        for item in self.getSelectedItem():
+            itemDict = self.parseData(item)
+            cmds.select(itemDict['container'], add=True)
 
-    def edit_cmpt(self):
-        items = self.get_selected_item()
+    def buildComponent(self):
+        """ Build a single component"""
+        items = self.getSelectedItem()
         for item in items:
-            item_dict = self.get_data_from_item(item)
-            self.builder.edit_single_cmpt(item_dict['name'], item_dict['type'])
+            itemDict = self.parseData(item)
 
-            self.update_cmpt_from_scene(item)
+            self.builder.buildSingleComponent(itemDict['name'], itemDict['type'])
+            self.updateComponentFromScene(item)
 
-    def build_cmpt(self):
-        items = self.get_selected_item()
+    def deleteComponent(self):
+        """ Delete a component and the item from the tree widget"""
+        items = self.getSelectedItem()
         for item in items:
-            item_dict = self.get_data_from_item(item)
-
-            self.builder.buildSingleComponent(item_dict['name'], item_dict['type'])
-            self.update_cmpt_from_scene(item)
-
-    def delete_cmpt(self):
-        items = self.get_selected_item()
-        for item in items:
-            component = self.get_component_obj(item)
+            component = self.getComponentObj(item)
             if component.getContainer():
                 component.deleteSetup()
-            self.component_tree.takeTopLevelItem(self.component_tree.indexOfTopLevelItem(item))
+            self.componentTree.takeTopLevelItem(self.componentTree.indexOfTopLevelItem(item))
 
             self.builder.componentList.remove(component)
 
-    def clear_cmpt_tree(self):
+    def clearTree(self):
         """ clear the component tree"""
         try:
-            if self.component_tree.topLevelItemCount() > 0:
-                self.component_tree.clear()
+            if self.componentTree.topLevelItemCount() > 0:
+                self.componentTree.clear()
         except RuntimeError:
             pass
 
-    def set_rig_builder(self, builder):
+    def setRigBuilder(self, builder):
+        """ Set a new Rig Builder"""
         self.builder = builder
 
-    def load_list_from_builder(self):
-        self.clear_cmpt_tree()
+    def loadListFromBuilder(self):
+        """ Load the compoonent list from the builder"""
+        self.clearTree()
 
         if not self.builder:
             raise RuntimeError("No valid rig builder found")
         for cmpt in self.builder.getComponentList():
             name = cmpt.name
-            cmpt_type = cmpt.componentType
-            build_step_str = ['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize']
-            build_step = build_step_str[cmpt.getStep()]
+            componentType = cmpt.componentType
+            buildStepString = ['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize']
+            buildStep = buildStepString[cmpt.getStep()]
 
-            self.add_component(name=name, cmpt_type=cmpt_type, build_step=build_step)
+            self.addComponent(name=name, componentType=componentType, buildStep=buildStep)
 
-    def update_cmpt_from_scene(self, item):
-        item_dict = self.get_data_from_item(item)
-        container = item_dict['container']
+    def updateComponentFromScene(self, item):
+        """ Update a given list item from its scene data """
+        itemDict = self.parseData(item)
+        container = itemDict['container']
 
         name = cmds.getAttr("{}.name".format(container))
         cmpt = cmds.getAttr("{}.type".format(container))
-        build_step_str = cmds.attributeQuery("build_step", n=container, le=True)[0].split(":")
-        build_step = build_step_str[cmds.getAttr("{}.build_step".format(container))]
+        buildStepList = cmds.attributeQuery("build_step", n=container, le=True)[0].split(":")
+        buildStep = buildStepList[cmds.getAttr("{}.build_step".format(container))]
 
         item.setText(0, name)
         item.setText(1, cmpt)
-        item.setText(2, build_step)
+        item.setText(2, buildStep)
 
     def showEvent(self, e):
+        """ override the show event to add the script job. """
         super(ComponentManager, self).showEvent(e)
-        self.set_scriptjob_enabled(True)
+        self.setScriptJobEnabled(True)
 
-    def show_add_component_dialog(self):
-        dialog = CreateCmptDialog()
-        dialog.new_cmpt_created.connect(self.create_component)
+    def showAddComponentDialog(self):
+        """ Show the add Component dialog"""
+        dialog = CreateComponentDialog()
+        dialog.newComponentCreatedSignal.connect(self.createComponent)
         dialog.show()
 
 
-class CreateCmptDialog(QtWidgets.QDialog):
+class CreateComponentDialog(QtWidgets.QDialog):
+    """
+    Create new component dialog
+    """
     WINDOW_TITLE = "Create New Component"
 
-    new_cmpt_created = QtCore.Signal(str, str, str, str)
+    newComponentCreatedSignal = QtCore.Signal(str, str, str, str)
 
-    def __init__(self, cmpt_manager=None):
+    def __init__(self):
+        """
+        constructor for the create component dialog
+        """
         if sys.version_info.major < 3:
-            maya_main_window = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+            mainMainWindow = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
         else:
-            maya_main_window = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+            mainMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
-        super(CreateCmptDialog, self).__init__(maya_main_window)
-        self.cmpt_manager = cmpt_manager
+        super(CreateComponentDialog, self).__init__(mainMainWindow)
 
         self.setWindowTitle(self.WINDOW_TITLE)
         if cmds.about(ntOS=True):
@@ -434,158 +482,172 @@ class CreateCmptDialog(QtWidgets.QDialog):
         self.setMinimumSize(400, 180)
         self.resize(400, 440)
 
-        self.create_widgets()
-        self.create_layouts()
-        self.create_connections()
+        self.createWidgets()
+        self.createLayouts()
+        self.createConnections()
 
-        self.update_comboBox()
+        self.updateComboBox()
 
-    def create_widgets(self):
-        self.name_le = QtWidgets.QLineEdit()
+    def createWidgets(self):
+        """ Create widgets"""
+        self.nameLineEdit = QtWidgets.QLineEdit()
 
-        self.component_type_cb = QtWidgets.QComboBox()
-        self.component_type_cb.setMinimumHeight(30)
-        self.component_type_cb.setMaxVisibleItems(15)
-        self.component_type_cb.setMaxVisibleItems(30)
+        self.componentTypeComboBox = QtWidgets.QComboBox()
+        self.componentTypeComboBox.setMinimumHeight(30)
+        self.componentTypeComboBox.setMaxVisibleItems(15)
+        self.componentTypeComboBox.setMaxVisibleItems(30)
 
-        self.numJoints_slider = sliderGrp.SliderGroup(min=0, max=10, value=4)
-        self.create_input_joints_btn = QtWidgets.QPushButton("Create Input Joints")
-        self.create_input_joints_btn.setMinimumWidth(180)
+        self.numJointsSlider = sliderGrp.SliderGroup(min=0, max=10, value=4)
+        self.createInputJointsButton = QtWidgets.QPushButton("Create Input Joints")
+        self.createInputJointsButton.setMinimumWidth(180)
 
-        self.input_le = QtWidgets.QLineEdit()
-        self.input_le.setPlaceholderText("[]")
-        self.load_sel_as_input_btn = QtWidgets.QPushButton("<")
-        self.load_sel_as_input_btn.setMaximumWidth(30)
+        self.inputLineEdit = QtWidgets.QLineEdit()
+        self.inputLineEdit.setPlaceholderText("[]")
+        self.loadSelectedAsInput = QtWidgets.QPushButton("<")
+        self.loadSelectedAsInput.setMaximumWidth(30)
 
-        self.rigParent_le = QtWidgets.QLineEdit()
-        self.rigParent_le.setPlaceholderText("None")
-        self.load_sel_as_rigParent_btn = QtWidgets.QPushButton("<")
-        self.load_sel_as_rigParent_btn.setMaximumWidth(30)
+        self.rigParentLineEdit = QtWidgets.QLineEdit()
+        self.rigParentLineEdit.setPlaceholderText("None")
+        self.loadSelectedAsRigParent = QtWidgets.QPushButton("<")
+        self.loadSelectedAsRigParent.setMaximumWidth(30)
 
-        self.discription_te = QtWidgets.QTextEdit()
-        self.discription_te.setReadOnly(True)
+        self.discriptionTextEdit = QtWidgets.QTextEdit()
+        self.discriptionTextEdit.setReadOnly(True)
 
-        self.apply_close_btn = QtWidgets.QPushButton("Create and Close")
-        self.apply_btn = QtWidgets.QPushButton("Create")
-        self.close_btn = QtWidgets.QPushButton("Cancel")
+        self.applyAndCloseButton = QtWidgets.QPushButton("Create and Close")
+        self.applyButton = QtWidgets.QPushButton("Create")
+        self.closeButton = QtWidgets.QPushButton("Cancel")
 
-    def create_layouts(self):
-        main_layout = QtWidgets.QVBoxLayout(self)
-        main_layout.setContentsMargins(6, 6, 6, 6)
-        main_layout.setSpacing(4)
+    def createLayouts(self):
+        """ Create Layouts"""
+        mainLayout = QtWidgets.QVBoxLayout(self)
+        mainLayout.setContentsMargins(6, 6, 6, 6)
+        mainLayout.setSpacing(4)
 
-        name_layout = QtWidgets.QHBoxLayout()
-        name_layout.addWidget(QtWidgets.QLabel("name:"))
-        name_layout.addWidget(self.name_le)
-        name_layout.addSpacing(30)
-        name_layout.addWidget(QtWidgets.QLabel("type:"))
-        name_layout.addWidget(self.component_type_cb)
+        nameLayout = QtWidgets.QHBoxLayout()
+        nameLayout.addWidget(QtWidgets.QLabel("name:"))
+        nameLayout.addWidget(self.nameLineEdit)
+        nameLayout.addSpacing(30)
+        nameLayout.addWidget(QtWidgets.QLabel("type:"))
+        nameLayout.addWidget(self.componentTypeComboBox)
 
-        createJoints_layout = QtWidgets.QHBoxLayout()
-        createJoints_layout.addWidget(QtWidgets.QLabel("num joints:"))
-        createJoints_layout.addWidget(self.numJoints_slider)
-        createJoints_layout.addWidget(self.create_input_joints_btn)
+        createJointsLayout = QtWidgets.QHBoxLayout()
+        createJointsLayout.addWidget(QtWidgets.QLabel("num joints:"))
+        createJointsLayout.addWidget(self.numJointsSlider)
+        createJointsLayout.addWidget(self.createInputJointsButton)
 
-        input_layout = QtWidgets.QHBoxLayout()
-        input_layout.addWidget(self.input_le)
-        input_layout.addWidget(self.load_sel_as_input_btn)
+        inputLayout = QtWidgets.QHBoxLayout()
+        inputLayout.addWidget(self.inputLineEdit)
+        inputLayout.addWidget(self.loadSelectedAsInput)
 
-        rigParent_layout = QtWidgets.QHBoxLayout()
-        rigParent_layout.addWidget(self.rigParent_le)
-        rigParent_layout.addWidget(self.load_sel_as_rigParent_btn)
+        rigParentLayout = QtWidgets.QHBoxLayout()
+        rigParentLayout.addWidget(self.rigParentLineEdit)
+        rigParentLayout.addWidget(self.loadSelectedAsRigParent)
 
-        widget_layout = QtWidgets.QFormLayout()
-        widget_layout.addRow(QtWidgets.QLabel("input:"), input_layout)
-        widget_layout.addRow(QtWidgets.QLabel("rigParent:"), rigParent_layout)
+        widgetLayout = QtWidgets.QFormLayout()
+        widgetLayout.addRow(QtWidgets.QLabel("input:"), inputLayout)
+        widgetLayout.addRow(QtWidgets.QLabel("rigParent:"), rigParentLayout)
 
-        apply_btn_layout = QtWidgets.QHBoxLayout()
-        apply_btn_layout.addWidget(self.apply_close_btn)
-        apply_btn_layout.addWidget(self.apply_btn)
-        apply_btn_layout.addWidget(self.close_btn)
+        applyButtonLayout = QtWidgets.QHBoxLayout()
+        applyButtonLayout.addWidget(self.applyAndCloseButton)
+        applyButtonLayout.addWidget(self.applyButton)
+        applyButtonLayout.addWidget(self.closeButton)
 
-        main_layout.addLayout(name_layout)
-        main_layout.addLayout(createJoints_layout)
-        main_layout.addLayout(widget_layout)
-        main_layout.addSpacing(5)
-        main_layout.addWidget(self.discription_te)
-        main_layout.addLayout(apply_btn_layout)
+        mainLayout.addLayout(nameLayout)
+        mainLayout.addLayout(createJointsLayout)
+        mainLayout.addLayout(widgetLayout)
+        mainLayout.addSpacing(5)
+        mainLayout.addWidget(self.discriptionTextEdit)
+        mainLayout.addLayout(applyButtonLayout)
 
-    def create_connections(self):
-        self.create_input_joints_btn.clicked.connect(self.createInputJoints)
-        self.load_sel_as_input_btn.clicked.connect(self.add_selection_as_input)
-        self.load_sel_as_rigParent_btn.clicked.connect(self.add_selection_as_rigParent)
-        self.component_type_cb.currentIndexChanged.connect(self.update_discription)
-        self.close_btn.clicked.connect(self.close)
-        self.apply_btn.clicked.connect(self.apply)
-        self.apply_close_btn.clicked.connect(self.apply_and_close)
+    def createConnections(self):
+        """ Create Connections"""
+        self.createInputJointsButton.clicked.connect(self.createInputJoints)
+        self.loadSelectedAsInput.clicked.connect(self.addSelectionAsInput)
+        self.loadSelectedAsRigParent.clicked.connect(self.addSelectionAsRigParent)
+        self.componentTypeComboBox.currentIndexChanged.connect(self.updateDiscription)
+        self.closeButton.clicked.connect(self.close)
+        self.applyButton.clicked.connect(self.apply)
+        self.applyAndCloseButton.clicked.connect(self.applyAndClose)
 
-    def update_comboBox(self):
-        self.component_type_cb.clear()
-        tmp_builder = builder.Builder()
-        for i, component in enumerate(sorted(tmp_builder.getAvailableComponents())):
-            self.component_type_cb.addItem(component)
-            self.component_type_cb.setItemIcon(i, QtGui.QIcon(_get_cmpt_icon(component)))
+    def updateComboBox(self):
+        """ Update the combobox with the exisitng component types """
+        self.componentTypeComboBox.clear()
+        tempBuilder = builder.Builder()
+        for i, component in enumerate(sorted(tempBuilder.getAvailableComponents())):
+            self.componentTypeComboBox.addItem(component)
+            self.componentTypeComboBox.setItemIcon(i, QtGui.QIcon(_getComponentIcon(component)))
 
-    def update_discription(self):
-        self.discription_te.clear()
+    def updateDiscription(self):
+        """
+        Update the UI discription based on the currently selection component type
+        """
+        self.discriptionTextEdit.clear()
 
-        cmpt_type = self.component_type_cb.currentText()
-        cmpt_object = get_cmpt_object(cmpt_type)
+        componentType = self.componentTypeComboBox.currentText()
+        componentObject = getComponentObject(componentType)
 
-        classDocs = cmpt_object.__doc__ or ''
-        initDocs = cmpt_object.__init__.__doc__ or ''
+        classDocs = componentObject.__doc__ or ''
+        initDocs = componentObject.__init__.__doc__ or ''
         docstring = classDocs + '\n---- parameters ----\n' + initDocs
         if docstring:
             docstring = re.sub(" {4}", "", docstring.strip())
 
-        self.discription_te.setText(docstring)
+        self.discriptionTextEdit.setText(docstring)
 
-    def add_selection_as_input(self):
-        self.input_le.clear()
+    def addSelectionAsInput(self):
+        """Add the selection as the input"""
+        self.inputLineEdit.clear()
         sel = cmds.ls(sl=True)
-        sel_list = list()
+        selList = list()
         for s in sel:
-            sel_list.append(str(s))
+            selList.append(str(s))
 
-        self.input_le.setText(str(sel_list))
+        self.inputLineEdit.setText(str(selList))
 
-    def add_selection_as_rigParent(self):
-        self.rigParent_le.clear()
+    def addSelectionAsRigParent(self):
+        """Add the selection as the rigParent"""
+        self.rigParentLineEdit.clear()
         sel = cmds.ls(sl=True)
 
         if len(sel) > 0:
-            self.rigParent_le.setText(str(sel[0]))
+            self.rigParentLineEdit.setText(str(sel[0]))
 
     def createInputJoints(self):
         """ create an input joint list"""
-        cmpt_type = self.component_type_cb.currentText()
-        cmpt_name = self.name_le.text()
-        numJoints = self.numJoints_slider.getValue()
-        side = common.getSide(cmpt_name)
+        componentType = self.componentTypeComboBox.currentText()
+        componentName = self.nameLineEdit.text()
+        numJoints = self.numJointsSlider.getValue()
+        side = common.getSide(componentName)
 
-        class_ = get_cmpt_object(cmpt_type)
-        joints = class_.createInputJoints(name=cmpt_name, side=side, numJoints=numJoints)
+        componentClassInstance = getComponentObject(componentType)
+        joints = componentClassInstance.createInputJoints(name=componentName, side=side, numJoints=numJoints)
 
-        str_list = list()
+        stringList = list()
         for s in joints:
-            str_list.append(str(s))
+            stringList.append(str(s))
 
-        self.input_le.setText(str(str_list))
+        self.inputLineEdit.setText(str(stringList))
 
     def apply(self):
-        cmpt_type = self.component_type_cb.currentText()
+        """
+        Apply (create the component and widget) but keep the UI open
+        :return:
+        """
+        componentType = self.componentTypeComboBox.currentText()
 
-        name = self.name_le.text() or None
-        input = self.input_le.text() or []
-        rigParent = self.rigParent_le.text() or None
+        name = self.nameLineEdit.text() or None
+        input = self.inputLineEdit.text() or []
+        rigParent = self.rigParentLineEdit.text() or None
 
-        # emit the data to the create_component mehtod of the component manager.
+        # emit the data to the createComponent mehtod of the component manager.
         # if the type is main then we can ignore the input.
-        if name and cmpt_type == 'main.Main':
-            self.new_cmpt_created.emit(name, cmpt_type, "[]", rigParent)
+        if name and componentType == 'main.Main':
+            self.newComponentCreatedSignal.emit(name, componentType, "[]", rigParent)
         elif name and input:
-            self.new_cmpt_created.emit(name, cmpt_type, input, rigParent)
+            self.newComponentCreatedSignal.emit(name, componentType, input, rigParent)
 
-    def apply_and_close(self):
+    def applyAndClose(self):
+        """Apply and close the Ui"""
         self.apply()
         self.close()

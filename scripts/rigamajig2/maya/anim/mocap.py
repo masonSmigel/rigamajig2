@@ -135,8 +135,8 @@ class MocapImportDialog(QtWidgets.QDialog):
         """Create widgets"""
         self.importFbxButton = QtWidgets.QPushButton("Import FBX")
         self.cleanupNamespacesButton = QtWidgets.QPushButton("Cleanup Namespaces")
-        self.mocapTemplatePathselector = pathSelector.PathSelector(cap='Select a Mocap Template',
-                                                                   ff="JSON Files (*.json)", fm=1)
+        self.mocapTemplatePathselector = pathSelector.PathSelector(caption='Select a Mocap Template',
+                                                                   fileFilter="JSON Files (*.json)", fileMode=1)
         self.namespaceComboBox = QtWidgets.QComboBox()
         self.applyToLayerCheckbox = QtWidgets.QCheckBox("Apply to Layer")
         self.applyToLayerCheckbox.setChecked(False)
@@ -222,7 +222,7 @@ class MocapImportDialog(QtWidgets.QDialog):
         connect the mocap data to the rig
         """
 
-        path = self.mocapTemplatePathselector.get_path()
+        path = self.mocapTemplatePathselector.getPath()
         namespace = self.namespaceComboBox.currentText()
         applyToLayer = self.applyToLayerCheckbox.isChecked()
 
@@ -238,7 +238,7 @@ class MocapImportDialog(QtWidgets.QDialog):
 
     def prepareRig(self):
         """Set attributes to prepare the rig to ingest mocap data"""
-        path = self.mocapTemplatePathselector.get_path()
+        path = self.mocapTemplatePathselector.getPath()
         namespace = self.namespaceComboBox.currentText()
         
         d = abstract_data.AbstractData()

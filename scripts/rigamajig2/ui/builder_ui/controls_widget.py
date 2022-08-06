@@ -23,7 +23,10 @@ from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.builder.builder import CONTROL_SHAPES
 
 
+# For this UI its important to have alot of instance attributes
+# pylint: disable = too-many-instance-attributes
 class ControlsWidget(QtWidgets.QWidget):
+    """ Controls layout for the builder UI """
 
     def __init__(self, builder=None):
         super(ControlsWidget, self).__init__()
@@ -35,150 +38,160 @@ class ControlsWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Controls', addCheckbox=True)
-        self.ctl_path_selector = pathSelector.PathSelector(
+        """ Create Widgets """
+        self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Controls', addCheckbox=True)
+        self.controlPathSelector = pathSelector.PathSelector(
             "Controls:",
-            cap="Select a Control Shape file",
-            ff=constants.JSON_FILTER,
-            fm=1
+            caption="Select a Control Shape file",
+            fileFilter=constants.JSON_FILTER,
+            fileMode=1
             )
-        self.load_color_cb = QtWidgets.QCheckBox()
-        self.load_color_cb.setChecked(True)
-        self.load_color_cb.setFixedWidth(25)
-        self.load_ctl_btn = QtWidgets.QPushButton("Load Controls")
-        self.save_ctl_btn = QtWidgets.QPushButton("Save Controls")
+        self.loadColorCheckBox = QtWidgets.QCheckBox()
+        self.loadColorCheckBox.setChecked(True)
+        self.loadColorCheckBox.setFixedWidth(25)
+        self.loadControlsButton = QtWidgets.QPushButton("Load Controls")
+        self.saveControlsButton = QtWidgets.QPushButton("Save Controls")
 
-        self.controlEdit_wgt = collapseableWidget.CollapsibleWidget('Edit Controls')
-        self.controlEdit_wgt.set_header_background_color(constants.EDIT_BG_HEADER_COLOR)
-        self.controlEdit_wgt.set_widget_background_color(constants.EDIT_BG_WIDGET_COLOR)
+        self.editControlsWidget = collapseableWidget.CollapsibleWidget('Edit Controls')
+        self.editControlsWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
+        self.editControlsWidget.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
 
-        self.ctlAxisX_rb = QtWidgets.QRadioButton('x')
-        self.ctlAxisX_rb.setChecked(True)
-        self.ctlAxisY_rb = QtWidgets.QRadioButton('y')
-        self.ctlAxisZ_rb = QtWidgets.QRadioButton('z')
-        self.mirrorCtlMode_cbox = QtWidgets.QComboBox()
-        self.mirrorCtlMode_cbox.setFixedHeight(24)
-        self.mirrorCtlMode_cbox.addItem("replace")
-        self.mirrorCtlMode_cbox.addItem("match")
-        self.mirror_control_btn = QtWidgets.QPushButton("Mirror")
+        self.controlAxisXRadioButton = QtWidgets.QRadioButton('x')
+        self.controlAxisXRadioButton.setChecked(True)
+        self.controlAxisYRadioButton = QtWidgets.QRadioButton('y')
+        self.controlAxisZRadioButton = QtWidgets.QRadioButton('z')
+        self.mirrorControlModeComboBox = QtWidgets.QComboBox()
+        self.mirrorControlModeComboBox.setFixedHeight(24)
+        self.mirrorControlModeComboBox.addItem("replace")
+        self.mirrorControlModeComboBox.addItem("match")
+        self.mirrorControlButton = QtWidgets.QPushButton("Mirror")
 
-        self.ctlColor_ovrcol = overrideColorer.OverrideColorer()
+        self.controlColorOverrideColor = overrideColorer.OverrideColorer()
 
-        self.ctlShape_cbox = QtWidgets.QComboBox()
-        self.ctlShape_cbox.setFixedHeight(24)
-        self.set_ctlShape_items()
-        self.setCtlShape_btn = QtWidgets.QPushButton("Set Shape")
+        self.controlShapeCheckbox = QtWidgets.QComboBox()
+        self.controlShapeCheckbox.setFixedHeight(24)
+        self.setAvailableControlShapes()
+        self.setControlShapeButton = QtWidgets.QPushButton("Set Shape")
 
-        self.replace_ctl_btn = QtWidgets.QPushButton("Replace Control Shape ")
+        self.replaceControlButton = QtWidgets.QPushButton("Replace Control Shape ")
 
     def createLayouts(self):
+        """ Create Layouts"""
         # setup the main layout.
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(0)
 
         # MAIN CONTROL LAYOUT
-        self.main_collapseable_widget.addWidget(self.ctl_path_selector)
+        self.mainCollapseableWidget .addWidget(self.controlPathSelector)
 
         # create the load color checkbox
-        load_color_label = QtWidgets.QLabel("Load Color:")
-        load_color_label.setFixedWidth(60)
+        loadColorLabel = QtWidgets.QLabel("Load Color:")
+        loadColorLabel.setFixedWidth(60)
 
         # setup the load option layout
-        control_btn_layout = QtWidgets.QHBoxLayout()
-        control_btn_layout.setSpacing(4)
-        control_btn_layout.addWidget(load_color_label)
-        control_btn_layout.addWidget(self.load_color_cb)
-        control_btn_layout.addWidget(self.load_ctl_btn)
-        control_btn_layout.addWidget(self.save_ctl_btn)
-        self.main_collapseable_widget.addLayout(control_btn_layout)
+        controlButtonLayout = QtWidgets.QHBoxLayout()
+        controlButtonLayout.setSpacing(4)
+        controlButtonLayout.addWidget(loadColorLabel)
+        controlButtonLayout.addWidget(self.loadColorCheckBox)
+        controlButtonLayout.addWidget(self.loadControlsButton)
+        controlButtonLayout.addWidget(self.saveControlsButton)
+        self.mainCollapseableWidget .addLayout(controlButtonLayout)
 
         # EDIT CONTROL LAYOUT
-        self.main_collapseable_widget.addWidget(self.controlEdit_wgt)
+        self.mainCollapseableWidget .addWidget(self.editControlsWidget)
 
         # setup the mirror axis layout
-        controlMirrorAxis_layout = QtWidgets.QHBoxLayout()
-        controlMirrorAxis_layout.addWidget(QtWidgets.QLabel("Axis: "))
-        controlMirrorAxis_layout.addWidget(self.ctlAxisX_rb)
-        controlMirrorAxis_layout.addWidget(self.ctlAxisY_rb)
-        controlMirrorAxis_layout.addWidget(self.ctlAxisZ_rb)
+        controlMirrorAxisLayout = QtWidgets.QHBoxLayout()
+        controlMirrorAxisLayout.addWidget(QtWidgets.QLabel("Axis: "))
+        controlMirrorAxisLayout.addWidget(self.controlAxisXRadioButton)
+        controlMirrorAxisLayout.addWidget(self.controlAxisYRadioButton)
+        controlMirrorAxisLayout.addWidget(self.controlAxisZRadioButton)
 
         # setup the mirror controlLayout
-        mirrorControl_layout = QtWidgets.QHBoxLayout()
-        mirrorControl_layout.setSpacing(4)
-        mirrorControl_layout.addLayout(controlMirrorAxis_layout)
-        mirrorControl_layout.addWidget(self.mirrorCtlMode_cbox)
-        mirrorControl_layout.addWidget(self.mirror_control_btn)
-        self.controlEdit_wgt.addLayout(mirrorControl_layout)
+        mirrorControlLayout = QtWidgets.QHBoxLayout()
+        mirrorControlLayout.setSpacing(4)
+        mirrorControlLayout.addLayout(controlMirrorAxisLayout)
+        mirrorControlLayout.addWidget(self.mirrorControlModeComboBox)
+        mirrorControlLayout.addWidget(self.mirrorControlButton)
+        self.editControlsWidget.addLayout(mirrorControlLayout)
 
         # add the override color layout
-        self.controlEdit_wgt.addWidget(self.ctlColor_ovrcol)
+        self.editControlsWidget.addWidget(self.controlColorOverrideColor)
 
         # setup the control shape layout
-        setControlShape_layout = QtWidgets.QHBoxLayout()
-        setControlShape_layout.addWidget(self.ctlShape_cbox)
-        setControlShape_layout.addWidget(self.setCtlShape_btn)
-        self.controlEdit_wgt.addLayout(setControlShape_layout)
+        setControlShapeLayout = QtWidgets.QHBoxLayout()
+        setControlShapeLayout.addWidget(self.controlShapeCheckbox)
+        setControlShapeLayout.addWidget(self.setControlShapeButton)
+        self.editControlsWidget.addLayout(setControlShapeLayout)
 
         # add the replace control button
-        self.controlEdit_wgt.addWidget(self.replace_ctl_btn)
-        self.controlEdit_wgt.addSpacing(3)
+        self.editControlsWidget.addWidget(self.replaceControlButton)
+        self.editControlsWidget.addSpacing(3)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.main_collapseable_widget)
+        self.mainLayout.addWidget(self.mainCollapseableWidget)
 
     def createConnections(self):
-        self.load_ctl_btn.clicked.connect(self.load_controlShapes)
-        self.save_ctl_btn.clicked.connect(self.save_controlShapes)
-        self.mirror_control_btn.clicked.connect(self.mirror_control)
-        self.setCtlShape_btn.clicked.connect(self.set_controlShape)
-        self.replace_ctl_btn.clicked.connect(self.replace_controlShape)
+        """ Create Connections"""
+        self.loadControlsButton.clicked.connect(self.loadControlShapes)
+        self.saveControlsButton.clicked.connect(self.saveControlShapes)
+        self.mirrorControlButton.clicked.connect(self.mirrorControl)
+        self.setControlShapeButton.clicked.connect(self.setControlShape)
+        self.replaceControlButton.clicked.connect(self.replaceControlShape)
 
     def setBuilder(self, builder):
+        """ Set a builder for intialize widget"""
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
-        self.ctl_path_selector.set_relativeTo(rigEnv)
+        self.controlPathSelector.setRelativePath(rigEnv)
 
         # update data within the rig
         controlFile = self.builder.getRigData(self.builder.getRigFile(), CONTROL_SHAPES)
         if controlFile:
-            self.ctl_path_selector.set_path(controlFile)
+            self.controlPathSelector.setPath(controlFile)
 
     def runWidget(self):
-        self.load_controlShapes()
+        """ Run this widget from the builder breakpoint runner"""
+        self.loadControlShapes()
 
     @property
     def isChecked(self):
-        return self.main_collapseable_widget.isChecked()
+        """ Check it the widget is checked"""
+        return self.mainCollapseableWidget .isChecked()
 
-    def set_ctlShape_items(self):
-        control_shapes = rigamajig2.maya.rig.control.getAvailableControlShapes()
-        for control_shape in control_shapes:
-            self.ctlShape_cbox.addItem(control_shape)
+    def setAvailableControlShapes(self):
+        """ Set control shape items"""
+        controlShapes = rigamajig2.maya.rig.control.getAvailableControlShapes()
+        for controlShape in controlShapes:
+            self.controlShapeCheckbox.addItem(controlShape)
 
     # CONNECTIONS
-    def load_controlShapes(self):
-        self.builder.loadControlShapes(self.ctl_path_selector.get_abs_path(), self.load_color_cb.isChecked())
+    def loadControlShapes(self):
+        """ Load controlshapes from json using the builder """
+        self.builder.loadControlShapes(self.controlPathSelector.getPath(), self.loadColorCheckBox.isChecked())
 
-    def save_controlShapes(self):
-        self.builder.saveControlShapes(self.ctl_path_selector.get_abs_path())
+    def saveControlShapes(self):
+        """ Save controlshapes to json using the builder """
+        self.builder.saveControlShapes(self.controlPathSelector.getPath())
 
-    def mirror_control(self):
+    def mirrorControl(self):
+        """ Mirror a control shape """
         axis = 'x'
-        if self.ctlAxisY_rb.isChecked():
+        if self.controlAxisYRadioButton.isChecked():
             axis = 'y'
-        if self.ctlAxisZ_rb.isChecked():
+        if self.controlAxisZRadioButton.isChecked():
             axis = 'z'
-        mirrorMode = self.mirrorCtlMode_cbox.currentText()
+        mirrorMode = self.mirrorControlModeComboBox.currentText()
         rigamajig2.maya.curve.mirror(cmds.ls(sl=True, type='transform'), axis=axis, mode=mirrorMode)
 
-    def set_controlShape(self):
+    def setControlShape(self):
         """Set the control shape of the selected node"""
-        shape = self.ctlShape_cbox.currentText()
+        shape = self.controlShapeCheckbox.currentText()
         for node in cmds.ls(sl=True, type='transform'):
             rigamajig2.maya.rig.control.setControlShape(node, shape)
 
-    def replace_controlShape(self):
+    def replaceControlShape(self):
         """Replace the control shape"""
         selection = cmds.ls(sl=True, type='transform')
         if len(selection) >= 2:

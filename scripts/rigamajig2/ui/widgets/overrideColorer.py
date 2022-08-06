@@ -14,60 +14,72 @@ import rigamajig2.maya.color as rig_color
 
 
 class OverrideColorer(QtWidgets.QWidget):
+    """
+    A small line ui to apply an override color to transform elements.
+
+    The UI inlcudes a line edit to type in the name of the color,
+    A swatch pixmap that displays a context menu of all avialable colors
+    A button to apply the color to the selection
+    """
+
     color_changed = QtCore.Signal()
 
     def __init__(self, parent=None):
         super(OverrideColorer, self).__init__(parent)
 
-        self.create_widgets()
-        self.create_layouts()
-        self.create_connections()
+        self.createWidgets()
+        self.createLayouts()
+        self.createConnections()
 
         self.setColorSwatch(self.getColor())
 
-    def create_widgets(self):
-        self.color_le = QtWidgets.QLineEdit()
-        self.color_le.setPlaceholderText("blue")
-        self.color_le.setFixedHeight(24)
+    def createWidgets(self):
+        """ Create widgets"""
+        self.colorLineEdit = QtWidgets.QLineEdit()
+        self.colorLineEdit.setPlaceholderText("blue")
+        self.colorLineEdit.setFixedHeight(24)
 
         completer = QtWidgets.QCompleter()
-        completer_model = QtCore.QStringListModel()
-        completer_model.setStringList(rig_color.COLORS.keys())
-        completer.setModel(completer_model)
-        self.color_le.setCompleter(completer)
+        completerModel = QtCore.QStringListModel()
+        completerModel.setStringList(rig_color.COLORS.keys())
+        completer.setModel(completerModel)
+        self.colorLineEdit.setCompleter(completer)
 
-        self.color_swatch = QtWidgets.QLabel()
-        self.color_swatch.setFixedSize(24, 24)
+        self.colorSwatch = QtWidgets.QLabel()
+        self.colorSwatch.setFixedSize(24, 24)
 
-        self.apply_color_btn = QtWidgets.QPushButton("Apply Color")
-        self.apply_color_btn.setFixedHeight(24)
+        self.applyColorButton = QtWidgets.QPushButton("Apply Color")
+        self.applyColorButton.setFixedHeight(24)
 
-    def create_layouts(self):
-        self.main_layout = QtWidgets.QHBoxLayout(self)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(4)
+    def createLayouts(self):
+        """ Create Layouts and setup the layout"""
+        self.mainLayout = QtWidgets.QHBoxLayout(self)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(4)
 
-        self.main_layout.addWidget(self.color_le)
-        self.main_layout.addWidget(self.color_swatch)
-        self.main_layout.addWidget(self.apply_color_btn)
+        self.mainLayout.addWidget(self.colorLineEdit)
+        self.mainLayout.addWidget(self.colorSwatch)
+        self.mainLayout.addWidget(self.applyColorButton)
 
-    def create_connections(self):
-        self.color_le.textChanged.connect(self.updateColor)
-        self.apply_color_btn.clicked.connect(self.applyColor)
+    def createConnections(self):
+        """ Create connections"""
+        self.colorLineEdit.textChanged.connect(self.updateColor)
+        self.applyColorButton.clicked.connect(self.applyColor)
 
     def createContextMenu(self):
-        self.colorPresets_menu = QtWidgets.QMenu()
+        """ Create a context menu """
+        self.colorPresetsMenu = QtWidgets.QMenu()
         for color in sorted(rig_color.getAvailableColors()):
             action = QtWidgets.QAction(color, self)
             action.setIcon(QtGui.QIcon(self._getPixmapFromName(color)))
-            self.colorPresets_menu.addAction(action)
+            self.colorPresetsMenu.addAction(action)
             action.triggered.connect(partial(self.setColorText, color))
-        return self.colorPresets_menu
+        return self.colorPresetsMenu
 
     def getColor(self):
         """ Get color from the color line edit"""
-        color = self.color_le.text()
-        if not color: color = self.color_le.placeholderText()
+        color = self.colorLineEdit.text()
+        if not color: color = self.colorLineEdit.placeholderText()
         return str(color)
 
     def setColorSwatch(self, color):
@@ -75,15 +87,15 @@ class OverrideColorer(QtWidgets.QWidget):
         set the color
         :param color: color as a string
         """
-        self.color_swatch.setPixmap(self._getPixmapFromName(color))
+        self.colorSwatch.setPixmap(self._getPixmapFromName(color))
 
     def setColorText(self, text):
         """ Set the color text """
-        self.color_le.setText(text)
+        self.colorLineEdit.setText(text)
 
     def updateColor(self):
         """ Update the swatch based on the color"""
-        color = self.color_le.text()
+        color = self.colorLineEdit.text()
         if color in rig_color.COLORS:
             self.setColorSwatch(color=color)
 

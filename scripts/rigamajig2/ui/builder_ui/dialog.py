@@ -85,9 +85,9 @@ class BuilderDialog(QtWidgets.QDialog):
         self.setMinimumSize(380, 825)
 
         self.create_menus()
-        self.create_widgets()
-        self.create_layouts()
-        self.create_connections()
+        self.createWidgets()
+        self.createLayouts()
+        self.createConnections()
 
     def create_menus(self):
         """create menu actions"""
@@ -112,8 +112,8 @@ class BuilderDialog(QtWidgets.QDialog):
         help_menu.addAction(self.actions.show_documentation_action)
         help_menu.addAction(self.actions.show_about_action)
 
-    def create_widgets(self):
-        self.rig_path_selector = pathSelector.PathSelector(cap='Select a Rig File', ff="Rig Files (*.rig)", fm=1)
+    def createWidgets(self):
+        self.rig_path_selector = pathSelector.PathSelector(caption='Select a Rig File', fileFilter="Rig Files (*.rig)", fileMode=1)
 
         self.create_new_rigenv = QtWidgets.QPushButton("New Rig Env")
         self.create_new_rigenv.setToolTip("Create a new rig enviornment")
@@ -145,7 +145,7 @@ class BuilderDialog(QtWidgets.QDialog):
 
         self.close_btn = QtWidgets.QPushButton("Close")
 
-    def create_layouts(self):
+    def createLayouts(self):
 
         rig_char_name_layout = QtWidgets.QHBoxLayout()
         rig_char_name_layout.addWidget(QtWidgets.QLabel("Rig Name:"))
@@ -203,19 +203,19 @@ class BuilderDialog(QtWidgets.QDialog):
         main_layout.addWidget(body_scroll_area)
         main_layout.addLayout(low_buttons_layout)
 
-    def create_connections(self):
+    def createConnections(self):
 
         # setup each widget with a connection to uncheck all over widgets when one is checked.
         # This ensures all setups until a breakpoint are run
-        self.model_widget.main_collapseable_widget.header_wdg.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.model_widget))
-        self.joint_widget.main_collapseable_widget.header_wdg.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.joint_widget))
-        self.initialize_widget.main_collapseable_widget.header_wdg.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.initialize_widget))
-        self.build_widget.main_collapseable_widget.header_wdg.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.build_widget))
-        self.controls_widget.main_collapseable_widget.header_wdg.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.controls_widget))
-        self.deformation_widget.main_collapseable_widget.header_wdg.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.deformation_widget))
-        self.publish_widget.main_collapseable_widget.header_wdg.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.publish_widget))
+        self.model_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.model_widget))
+        self.joint_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.joint_widget))
+        self.initialize_widget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.initialize_widget))
+        self.build_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.build_widget))
+        self.controls_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.controls_widget))
+        self.deformation_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.deformation_widget))
+        self.publish_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.publish_widget))
 
-        self.rig_path_selector.select_path_btn.clicked.connect(self.path_selector_load_rig_file)
+        self.rig_path_selector.selectPathButton.clicked.connect(self.path_selector_load_rig_file)
         self.create_new_rigenv.clicked.connect(self.actions.create_rig_env)
         self.run_selected_btn.clicked.connect(self.run_selected)
         self.run_btn.clicked.connect(self.run_all)
@@ -226,13 +226,13 @@ class BuilderDialog(QtWidgets.QDialog):
     # --------------------------------------------------------------------------------
 
     def path_selector_load_rig_file(self):
-        new_path = self.rig_path_selector.get_abs_path()
+        new_path = self.rig_path_selector.getPath()
         if new_path:
             self.setRigFile(new_path)
 
     def setRigFile(self, path=None):
-        self.rig_path_selector.select_path(path=path)
-        file_info = QtCore.QFileInfo(self.rig_path_selector.get_abs_path())
+        self.rig_path_selector.selectPath(path=path)
+        file_info = QtCore.QFileInfo(self.rig_path_selector.getPath())
         self.rigEnviornment = file_info.path()
         self.rigFile = file_info.filePath()
 
@@ -254,7 +254,7 @@ class BuilderDialog(QtWidgets.QDialog):
         """ This function ensures only one build step is selected at a time. it is run whenever a checkbox is toggled."""
         for widget in self.main_widgets:
             if widget is not selectedWidget:
-                widget.main_collapseable_widget.set_checked(False)
+                widget.mainCollapseableWidget.setChecked(False)
 
     def run_selected(self):
         """run selected steps"""
@@ -262,7 +262,7 @@ class BuilderDialog(QtWidgets.QDialog):
         # ensure at least one breakpoint is selected
         breakpointSelected = False
         for widget in self.main_widgets:
-            if widget.main_collapseable_widget.isChecked():
+            if widget.mainCollapseableWidget.isChecked():
                 breakpointSelected = True
 
         if not breakpointSelected:
@@ -284,11 +284,11 @@ class BuilderDialog(QtWidgets.QDialog):
 
     def run_all(self):
         self.rigBuilder.run()
-        self.initialize_widget.cmpt_manager.load_cmpts_from_scene()
+        self.initialize_widget.componentManager.loadFromScene()
 
     def closeEvent(self, e):
         super(BuilderDialog, self).closeEvent(e)
-        self.initialize_widget.cmpt_manager.set_scriptjob_enabled(False)
+        self.initialize_widget.componentManager.setScriptJobEnabled(False)
 
 
 if __name__ == '__main__':

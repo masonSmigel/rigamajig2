@@ -21,6 +21,7 @@ from rigamajig2.ui.builder_ui import controls_widget
 
 
 class BuildWidget(QtWidgets.QWidget):
+    """ Build layout for the builder UI """
 
     def __init__(self, builder=None):
         super(BuildWidget, self).__init__()
@@ -32,89 +33,89 @@ class BuildWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        self.main_collapseable_widget = collapseableWidget.CollapsibleWidget('Build Rig', addCheckbox=True)
-        self.load_ctls_on_build = QtWidgets.QCheckBox("Load Ctls")
-        self.load_ctls_on_build.setChecked(True)
-        self.load_ctls_on_build.setFixedWidth(80)
+        """ Create Widgets"""
+        self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Build Rig', addCheckbox=True)
 
-        self.complete_build_btn = QtWidgets.QPushButton("Build Rig")
-        self.complete_build_btn.setFixedHeight(45)
+        self.completeButton = QtWidgets.QPushButton("Build Rig")
+        self.completeButton.setFixedHeight(45)
 
-        self.build_btn = QtWidgets.QPushButton("Build")
-        self.connect_btn = QtWidgets.QPushButton("Connect")
-        self.finalize_btn = QtWidgets.QPushButton("Finalize")
+        self.buildButton = QtWidgets.QPushButton("Build")
+        self.connectButton = QtWidgets.QPushButton("Connect")
+        self.finalizeButton = QtWidgets.QPushButton("Finalize")
 
         # Post - script section
-        self.postScript_scriptRunner = scriptRunner.ScriptRunner(title="Post-Scripts:")
+        self.postScriptScriptRunner = scriptRunner.ScriptRunner(title="Post-Scripts:")
 
     def createLayouts(self):
+        """ Create Layouts"""
         # setup the main layout.
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(0)
 
-        build_layout = QtWidgets.QHBoxLayout()
-        build_layout.addWidget(self.build_btn)
-        build_layout.addWidget(self.connect_btn)
-        build_layout.addWidget(self.finalize_btn)
+        buildLayout = QtWidgets.QHBoxLayout()
+        buildLayout.addWidget(self.buildButton)
+        buildLayout.addWidget(self.connectButton)
+        buildLayout.addWidget(self.finalizeButton)
 
         # build_layout.addWidget(self.load_ctls_on_build)
-        self.main_collapseable_widget.addWidget(self.complete_build_btn)
-        self.main_collapseable_widget.addLayout(build_layout)
+        self.mainCollapseableWidget .addWidget(self.completeButton)
+        self.mainCollapseableWidget .addLayout(buildLayout)
 
         # Post Script
-        self.main_collapseable_widget.addSpacing()
-        self.main_collapseable_widget.addWidget(self.postScript_scriptRunner)
+        self.mainCollapseableWidget .addSpacing()
+        self.mainCollapseableWidget .addWidget(self.postScriptScriptRunner)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.main_collapseable_widget)
+        self.mainLayout.addWidget(self.mainCollapseableWidget )
 
     def createConnections(self):
-        self.complete_build_btn.clicked.connect(self.complete_build)
-        self.build_btn.clicked.connect(self.build_rig)
-        self.connect_btn.clicked.connect(self.connect_rig)
-        self.finalize_btn.clicked.connect(self.finalize_rig)
+        """ Create Connections """
+        self.completeButton.clicked.connect(self.completeBuild)
+        self.buildButton.clicked.connect(self.executeBuilderBuild)
+        self.connectButton.clicked.connect(self.executeBuilderConnect)
+        self.finalizeButton.clicked.connect(self.executeBuilderFinalize)
 
     def setBuilder(self, builder):
+        """ Set the builder"""
         rigEnv = builder.getRigEnviornment()
         rigFile = builder.getRigFile()
         self.builder = builder
 
         # clear the ui
-        self.postScript_scriptRunner.clear_scripts()
+        self.postScriptScriptRunner.clearScript()
 
-        self.postScript_scriptRunner.set_relative_dir(rigEnv)
+        self.postScriptScriptRunner.setRelativeDirectory(rigEnv)
         for path in self.builder.getRigData(rigFile, POST_SCRIPT):
-            self.postScript_scriptRunner.add_scripts(self.builder.getAbsoultePath(path))
+            self.postScriptScriptRunner.addScripts(self.builder.getAbsoultePath(path))
 
     def runWidget(self):
-        self.complete_build()
-        self.postScript_scriptRunner.execute_all_scripts()
+        """ Run this widget from the builder breakpoint runner"""
+        self.completeBuild()
+        self.postScriptScriptRunner.executeAllScripts()
 
     @property
     def isChecked(self):
-        return self.main_collapseable_widget.isChecked()
+        """ return the checked state of the collapseable widget"""
+        return self.mainCollapseableWidget .isChecked()
 
-    # CONNECTIONS
-    def initalize_rig(self):
-        self.builder.initalize()
-
-    def clear_components(self):
-        self.builder.setComponents(list())
-
-    def build_rig(self):
+    def executeBuilderBuild(self):
+        """ execute the builder build function """
         self.builder.build()
 
-    def connect_rig(self):
+    def executeBuilderConnect(self):
+        """ execute the builder connect function """
         self.builder.connect()
 
-    def finalize_rig(self):
+    def executeBuilderFinalize(self):
+        """ execute the builder finalize function """
         self.builder.finalize()
 
-    def complete_build(self):
+    def completeBuild(self):
+        """ Execute a complete rig build (steps intialize - finalize)"""
         self.builder.initalize()
         self.builder.loadComponentSettings()
         self.builder.build()
         self.builder.connect()
         self.builder.finalize()
-        # self.cmpt_manager.load_cmpts_from_scene()
+        # self.cmpt_manager.loadFromScene()

@@ -53,50 +53,50 @@ def getDeformShape(node):
     if len(shapes) == 1:
         return shapes[0]
     else:
-        real_shapes = [x for x in shapes if not cmds.getAttr('{}.intermediateObject'.format(x))]
-        return real_shapes[0] if len(real_shapes) else None
+        realShapes = [x for x in shapes if not cmds.getAttr('{}.intermediateObject'.format(x))]
+        return realShapes[0] if len(realShapes) else None
 
 
-def reorderToTop(geo, deformer):
+def reorderToTop(geometry, deformer):
     """
     Reorder the deformer stack so the specifed deformer is at the top of the deformer stack for the geometries
-    :param geo: geometries to act on
-    :type geo: list | str
+    :param geometry: geometries to act on
+    :type geometry: list | str
     :param deformer: deformer to reorder
     :type deformer: str
     """
-    geo = common.toList(geo)
-    for g in geo:
-        stack = getDeformerStack(g)
+    geometry = common.toList(geometry)
+    for geo in geometry:
+        stack = getDeformerStack(geo)
 
         if len(stack) < 2:
-            cmds.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geo))
+            cmds.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geometry))
 
         if deformer not in stack:
-            cmds.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geo))
+            cmds.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geometry))
             continue
 
         stack = [d for d in stack if d != deformer]
 
         # reorder the deformer
-        cmds.reorderDeformers(stack[0], deformer, g)
-        cmds.reorderDeformers(deformer, stack[0], g)
+        cmds.reorderDeformers(stack[0], deformer, geo)
+        cmds.reorderDeformers(deformer, stack[0], geo)
 
     # Refresh UI
     cmds.channelBox('mainChannelBox', e=True, update=True)
 
 
-def reorderToBottom(geo, deformer):
+def reorderToBottom(geometry, deformer):
     """
     Reorder the deformer stack so the specifed deformer is at the bottom of the deformer stack for the geometries
-    :param geo: geometries to act on
-    :type geo: list | str
+    :param geometry: geometries to act on
+    :type geometry: list | str
     :param deformer: deformer to reorder
     :type deformer: str
     """
-    geo = common.toList(geo)
-    for g in geo:
-        stack = getDeformerStack(g)
+    geometry = common.toList(geometry)
+    for geo in geometry:
+        stack = getDeformerStack(geometry)
 
         if len(stack) < 2:
             cmds.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geo))
@@ -107,30 +107,29 @@ def reorderToBottom(geo, deformer):
 
         stack = [d for d in stack if d != deformer]
         # reorder the deformer
-        cmds.reorderDeformers(stack[-1], deformer, g)
+        cmds.reorderDeformers(stack[-1], deformer, geo)
 
     # Refresh UI
     cmds.channelBox('mainChannelBox', e=True, update=True)
 
 
-def reorderSlide(geo, deformer, up=True):
+def reorderSlide(geometry, deformer, up=True):
     """
     Reorder the deformer stack so the specifed deformer up or down in the deformer stack.
-    :param geo: geometries to act on
-    :type geo: list | str
-    :param deformer: deformer to reorder
-    :type deformer: str
-    :param up: if True move the deformer up in the deformer stack, false is down
+    :param geometry: geometries to act on
+    :type geometry: list | str
+    :param str deformer: deformer to reorder
+    :param bool up: if True move the deformer up in the deformer stack, false is down
     """
-    geo = common.toList(geo)
-    for g in geo:
-        stack = getDeformerStack(g)
+    geometry = common.toList(geometry)
+    for geo in geometry:
+        stack = getDeformerStack(geo)
 
         if len(stack) < 2:
-            cmds.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geo))
+            cmds.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geometry))
 
         if deformer not in stack:
-            cmds.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geo))
+            cmds.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geometry))
             continue
 
         if stack.index(deformer) == 0 and up: return
@@ -139,36 +138,45 @@ def reorderSlide(geo, deformer, up=True):
         neighbor = stack[stack.index(deformer) - 1] if up else stack[stack.index(deformer) + 1]
         # reorder the deformer
         if up:
-            cmds.reorderDeformers(deformer, neighbor, g)
+            cmds.reorderDeformers(deformer, neighbor, geo)
         else:
-            cmds.reorderDeformers(neighbor, deformer, g)
+            cmds.reorderDeformers(neighbor, deformer, geo)
 
     # Refresh UI
     cmds.channelBox('mainChannelBox', e=True, update=True)
 
 
-def getDeformerStack(geo, ignoreTypes=['tweak']):
+def getDeformerStack(geo, ignoreTypes=None):
     """
     Return the whole deformer stack as a list
     :param geo: geometry object
     :param ignoreTypes: types of deformers to exclude from the list
     :return: list of deformers affecting the specified geo
     """
+
+    ignoreTypes = ignoreTypes or ['tweak']
+
     geo = common.getFirstIndex(geo)
 
     inputs = cmds.ls(cmds.listHistory(geo, pruneDagObjects=True, interestLevel=1), type="geometryFilter")
     return [i for i in inputs if not cmds.nodeType(i) in ignoreTypes]
 
 
-def getDeformersForShape(geo, ignoreTypes=['tweak']):
+def getDeformersForShape(geo, ignoreTypes=None, ignoreTweaks=True):
     """
     Return the whole deformer stack as a list
     :param geo: geometry object
-    :param ignoreTypes: types of deformers to exclude from the list
+    :param list ignoreTypes: types of deformers to exclude from the list
+    :param bool ignoreTweaks: Ignore tweak nodes from the deformer list
     :return: list of deformers affecting the specified geo
     """
+    ignoreTypes = ignoreTypes or list()
+
     geo = common.getFirstIndex(geo)
     result = []
+
+    if ignoreTweaks:
+        ignoreTypes += ['tweak']
 
     geometryFilters = cmds.ls(cmds.listHistory(geo), type="geometryFilter")
     shape = getDeformShape(geo)
@@ -179,6 +187,7 @@ def getDeformersForShape(geo, ignoreTypes=['tweak']):
     for deformer in geometryFilters:
         deformerSet = cmds.ls(cmds.listConnections(deformer), type="objectSet")[0]
         if deformerSet in shapeSets:
+            # in almost every case we
             if not cmds.nodeType(deformer) in ignoreTypes:
                 result.append(deformer)
     return result
@@ -239,19 +248,19 @@ def getGeoIndex(deformer, geo):
     geo = rigamajig2.maya.shape.getShapes(geo)
     if not geo:
         return
-    deformed_geos = cmds.deformer(deformer, q=1, g=1, gi=1)
-    if not deformed_geos:
+    deformedGeometry = cmds.deformer(deformer, q=1, g=1, gi=1)
+    if not deformedGeometry:
         return
 
     # Get full path names in case a full path name was passed
-    deformed_geos = cmds.ls(deformed_geos, l=1)
+    deformedGeometry = cmds.ls(deformedGeometry, l=1)
     geo = cmds.ls(geo, l=1)[0]
 
     # Get all used indexes
     deformedIndecies = cmds.deformer(deformer, q=1, gi=1)
 
-    for n in range(len(deformed_geos)):
-        if deformed_geos[n] == geo:
+    for n in range(len(deformedGeometry)):
+        if deformedGeometry[n] == geo:
             return int(deformedIndecies[n])
 
 
@@ -270,15 +279,15 @@ def getWeights(deformer, geometry=None):
 
     if not geometry: geometry = common.getFirstIndex(getAffectedGeo(deformer))
 
-    point_count = rigamajig2.maya.shape.getPointCount(geometry) - 1
+    pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
 
     geometryIndex = getGeoIndex(deformer, geometry)
 
-    attr = "{}.wl[{}].w[0:{}]".format(deformer, geometryIndex, point_count)
+    attr = "{}.wl[{}].w[0:{}]".format(deformer, geometryIndex, pointCount)
     attrDefaultTest = "{}.wl[{}].w[*]".format(deformer, geometryIndex)
 
     if not cmds.objExists(attrDefaultTest):
-        values = [1 for _ in range(point_count + 1)]
+        values = [1 for _ in range(pointCount + 1)]
     else:
         values = cmds.getAttr(attr)
         values = [round(float(v), 5) for v in values]

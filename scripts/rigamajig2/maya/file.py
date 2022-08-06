@@ -9,18 +9,18 @@ import sys
 import re
 
 MAYA_FILE_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;All Files (*.*);;"
-IMPORT_FILE_FILTER = "All Files (*.*);;Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;Obj (*.obj);; FBX (*.fbx);;"
+IMPORT_FILE_FILTER = "All Files (*.*);;{0};;Obj (*.obj);; FBX (*.fbx);;".format(MAYA_FILE_FILTER)
 DELIMINATOR = '_'
 VERSION_TOKEN = 'v'
 
 
 def _pathDialog(cap='Select a file',
-                okc='Do Stuff',
-                cc='Cancel',
-                fm=1,
-                ff=MAYA_FILE_FILTER
+                acceptCaption='Do Stuff',
+                cancleCaption='Cancel',
+                fileMode=1,
+                fileFilter=MAYA_FILE_FILTER
                 ):
-    file = cmds.fileDialog2(ds=2, cap=cap, okc=okc, cc=cc, fm=fm, ff=ff)
+    file = cmds.fileDialog2(ds=2, cap=cap, okc=acceptCaption, cc=cancleCaption, fm=fileMode, ff=fileFilter)
     if file:
         return file[0]
     return None
@@ -39,6 +39,9 @@ def new(f=False):
     container.sainityCheck()
 
 
+# Disable the name error here, we want to keep the name as open,
+# so we add an underscore to the end to avoid conflicting with pythin builtin
+# pylint: disable=invalid-name
 def open_(path=None, f=False):
     """
     Open a maya file
@@ -47,7 +50,7 @@ def open_(path=None, f=False):
     :return:
     """
     if not path:
-        path = _pathDialog(cap='Open', okc='Open', )
+        path = _pathDialog(cap='Open', acceptCaption='Open', )
     cmds.file(path, o=True, f=f)
 
 
@@ -59,9 +62,12 @@ def save(log=True):
     sceneName = cmds.file(q=True, sn=True)
     extension = sceneName.split('.')[-1]
 
-    if extension == 'ma': fileType = 'mayaAscii'
-    elif extension == 'mb': fileType = 'mayaBinary'
-    else: raise RuntimeError("Must save using a maya file type: mayaAscii or mayaBinary")
+    if extension == 'ma':
+        fileType = 'mayaAscii'
+    elif extension == 'mb':
+        fileType = 'mayaBinary'
+    else:
+        raise RuntimeError("Must save using a maya file type: mayaAscii or mayaBinary")
 
     file = cmds.file(s=True, typ=fileType)
     if log: print('File saved to "{}"'.format(file))
@@ -76,7 +82,7 @@ def saveAs(path=None, log=True):
     :return:
     """
     if not path:
-        path = _pathDialog(cap='Save As', okc='Save As', fm=0)
+        path = _pathDialog(cap='Save As', acceptCaption='Save As', fileMode=0)
 
     if path:
         cmds.file(rename=path)
@@ -105,11 +111,11 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
     file = os.path.basename(path)
 
     # Separate out the base name, the extension and any exta
-    base_name = file.split('.')[0]
+    baseName = file.split('.')[0]
     extension = file.split('.')[-1]
     warble = '.'.join(file.split('.')[1:-1])
 
-    fileSplit = base_name.split(DELIMINATOR)
+    fileSplit = baseName.split(DELIMINATOR)
     indexStr = [s for s in fileSplit if s.startswith(VERSION_TOKEN)]
 
     if indexStr:
@@ -133,14 +139,14 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
     for i in range(2000):
         newIndexStr = "v{}".format(str(newIndex).zfill(padding))
         fileSplit[indexPosition] = newIndexStr
-        new_base = DELIMINATOR.join(fileSplit)
+        nameBase = DELIMINATOR.join(fileSplit)
 
         if warble:
-            new_file_name = '.'.join([new_base, warble, extension])
+            newFileName = '.'.join([nameBase, warble, extension])
         else:
-            new_file_name = '.'.join([new_base, extension])
+            newFileName = '.'.join([nameBase, extension])
 
-        path = os.path.join(dir, new_file_name)
+        path = os.path.join(dir, newFileName)
         if not isUniqueFile(path):
             newIndex += 1
         else:
@@ -148,24 +154,27 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
     return saveAs(path, log=log)
 
 
-def import_(path=None, ns=False, f=False):
+# Disable the name error here, we want to keep the name as import,
+# so we add an underscore to the end to avoid conflicting with pythin builtin
+# pylint: disable=invalid-name
+def import_(path=None, namespace=False, force=False):
     """
     import a file
     :param path: path to the file to import
-    :param ns: import with a namespace
-    :param f: force the opperation to occur
+    :param namespace: import with a namespace
+    :param force: force the opperation to occur
     :return: path of the file imported
     """
     if not path:
-        path = _pathDialog(cap='Import', okc='Import', fm=0, ff=IMPORT_FILE_FILTER)
+        path = _pathDialog(cap='Import', acceptCaption='Import', fileMode=0, fileFilter=IMPORT_FILE_FILTER)
 
-    kwargs = {"i": True, "f": f, "rnn": True}
-    if ns:
+    kwargs = {"i": True, "f": force, "rnn": True}
+    if namespace:
         namespace = os.path.basename(path).split('.')[0]
         kwargs["ns"] = namespace
 
-    file_ = cmds.file(path, **kwargs)
-    return file_
+    file = cmds.file(path, **kwargs)
+    return file
 
 
 def reference(path=None):
@@ -175,7 +184,7 @@ def reference(path=None):
     :return:
     """
     if not path:
-        path = _pathDialog(cap='Reference', okc='Reference', fm=0, ff=MAYA_FILE_FILTER)
+        path = _pathDialog(cap='Reference', acceptCaption='Reference', fileMode=0, fileFilter=MAYA_FILE_FILTER)
     namespace = os.path.basename(path).split('.')[0]
     return cmds.file(path, r=True, ns=namespace)
 
@@ -193,6 +202,10 @@ def isUniqueFile(path):
 
 
 def getEnvironment():
+    """
+    print out a bunch of enviornment variables for maya
+    :return:
+    """
     import platform
 
     if platform == 'win32':

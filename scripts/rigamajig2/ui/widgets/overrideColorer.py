@@ -23,7 +23,7 @@ class OverrideColorer(QtWidgets.QWidget):
         self.create_layouts()
         self.create_connections()
 
-        self.set_color_swatch(self.get_color())
+        self.setColorSwatch(self.getColor())
 
     def create_widgets(self):
         self.color_le = QtWidgets.QLineEdit()
@@ -52,54 +52,60 @@ class OverrideColorer(QtWidgets.QWidget):
         self.main_layout.addWidget(self.apply_color_btn)
 
     def create_connections(self):
-        self.color_le.textChanged.connect(self.update_swatch)
-        self.apply_color_btn.clicked.connect(self.apply_color)
+        self.color_le.textChanged.connect(self.updateColor)
+        self.apply_color_btn.clicked.connect(self.applyColor)
 
-    def create_context_menu(self):
+    def createContextMenu(self):
         self.colorPresets_menu = QtWidgets.QMenu()
         for color in sorted(rig_color.getAvailableColors()):
             action = QtWidgets.QAction(color, self)
-            action.setIcon(QtGui.QIcon(self.__get_pixmap_from_name(color)))
+            action.setIcon(QtGui.QIcon(self._getPixmapFromName(color)))
             self.colorPresets_menu.addAction(action)
-            action.triggered.connect(partial(self.set_color_text, color))
+            action.triggered.connect(partial(self.setColorText, color))
         return self.colorPresets_menu
 
-    def get_color(self):
+    def getColor(self):
+        """ Get color from the color line edit"""
         color = self.color_le.text()
         if not color: color = self.color_le.placeholderText()
         return str(color)
 
-    def set_color_swatch(self, color):
+    def setColorSwatch(self, color):
         """
         set the color
         :param color: color as a string
         """
-        self.color_swatch.setPixmap(self.__get_pixmap_from_name(color))
+        self.color_swatch.setPixmap(self._getPixmapFromName(color))
 
-    def set_color_text(self, text):
+    def setColorText(self, text):
+        """ Set the color text """
         self.color_le.setText(text)
 
-    def update_swatch(self):
+    def updateColor(self):
+        """ Update the swatch based on the color"""
         color = self.color_le.text()
         if color in rig_color.COLORS:
-            self.set_color_swatch(color=color)
+            self.setColorSwatch(color=color)
 
-    def __get_pixmap_from_name(self, name):
+    def _getPixmapFromName(self, name):
+        """ Get the matching pixmap from a given name"""
         pixmap = QtGui.QPixmap(32, 32)
         pixmap.fill(QtGui.QColor(rig_color.COLORS[name][0], rig_color.COLORS[name][1], rig_color.COLORS[name][2]))
         return pixmap
 
-    def apply_color(self):
+    def applyColor(self):
+        """ Apply the color to the active selection """
         selection = cmds.ls(sl=True, type='transform')
-        color = self.get_color()
+        color = self.getColor()
         if color not in rig_color.COLORS:
             raise RuntimeError("{} is not a valid color".format(color))
         if selection:
             rig_color.setOverrideColor(selection, color)
 
     def mousePressEvent(self, event):
+        """ Override the default behavior of the mouse press event"""
         super(OverrideColorer, self).mousePressEvent(event)
         if event.button() == QtCore.Qt.LeftButton:
             p = self.mapToGlobal(event.pos())  # or QtGui.QCursor.pos()
-            menu = self.create_context_menu()
+            menu = self.createContextMenu()
             action = menu.exec_(p)

@@ -34,12 +34,12 @@ def getShapes(node):
     :param node: object to get shapes from
     :return:
     """
-    shape_types = ['mesh', 'nurbsSurface', 'nurbsCurve', 'subdiv']
-    node_type = cmds.nodeType(node)
-    if node_type in shape_types:
+    shapeTypes = ['mesh', 'nurbsSurface', 'nurbsCurve', 'subdiv']
+    nodeType = cmds.nodeType(node)
+    if nodeType in shapeTypes:
         return node
 
-    if node_type == 'transform':
+    if nodeType == 'transform':
         shape = cmds.listRelatives(node, s=1, ni=1)
         if shape:
             return shape[0]
@@ -54,11 +54,11 @@ def getPointCount(shape):
     if cmds.nodeType(shape) == 'transform':
         shape = cmds.listRelatives(shape, s=True, ni=True)[0]
 
-    shape_type = cmds.nodeType(shape)
-    if shape_type == 'mesh':
+    shapeType = cmds.nodeType(shape)
+    if shapeType == 'mesh':
         pointCount = cmds.polyEvaluate(shape, v=True)
-    if shape_type == 'nurbsCurve':
-        pointCount = int(cmds.ls("{}.cv[*]".format(shape_type))[0].split(":")[1][:-1])
+    if shapeType == 'nurbsCurve':
+        pointCount = int(cmds.ls("{}.cv[*]".format(shapeType))[0].split(":")[1][:-1])
         pointCount += 1
     return pointCount
 

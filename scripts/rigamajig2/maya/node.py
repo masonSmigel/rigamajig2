@@ -6,7 +6,15 @@ import rigamajig2.shared.common as common
 import rigamajig2.maya.attr as attr
 
 
-def _setConnection(plug, value):
+def setConnection(plug, value):
+    """
+    Set a connection to a given value.
+
+    Depending on the type of the value it will either connect the attribute or set the value
+    :param plug: plug to be connected to
+    :param value: value to set the plug to
+    :return: None
+    """
     if isinstance(value, str):
         try:
             cmds.connectAttr(value, plug)
@@ -16,23 +24,40 @@ def _setConnection(plug, value):
         cmds.setAttr(plug, value)
 
 
-def _setCompoundConnection(plug, value):
+def setCompoundConnection(plug, value):
+    """
+    Set a compound connection to a given value.
+
+    Depending on the type of the value it will either connect the attribute or set the value
+    :param plug: plug to be connected to
+    :param value: value to set the plug to
+    :return: None
+    """
     if isinstance(value, str):
         if attr.isCompound(value):
             cmds.connectAttr(value, plug)
         else:
             cAttrs = attr.getCompoundChildren(plug)
-            _setConnection(cAttrs[0], value)
+            setConnection(cAttrs[0], value)
     elif isinstance(value, (list, tuple)):
         cAttrs = attr.getCompoundChildren(plug)
         for v, cAttr in zip(value, cAttrs):
-            _setConnection(cAttr, v)
+            setConnection(cAttr, v)
     elif isinstance(value, (float, int)):
         value = [value, 0, 0]
         cmds.setAttr(plug, *value)
 
 
-def _connectOutput(source, destination, f=True):
+def connectOutput(source, destination, f=True):
+    """
+    Connect a source plug to a destination plug.
+
+    This function checks to ensure the attribute is connected to any compound children if they exist.
+    :param source: source plug to connect
+    :param destination: desitnation plug to be connectected to
+    :param f: force the connection
+    :return:
+    """
     if not cmds.objExists(destination) and attr.isAttr(destination):
         cmds.error('Destination: {} does not exist or is not a valid attribute'.format(destination))
         return
@@ -71,11 +96,11 @@ def addDoubleLinear(input1=None, input2=None, output=None, name=None):
         node = cmds.createNode('addDoubleLinear')
 
     if input1:
-        _setConnection(node + '.' + 'input1', input1)
+        setConnection(node + '.' + 'input1', input1)
     if input2:
-        _setConnection(node + '.' + 'input2', input2)
+        setConnection(node + '.' + 'input2', input2)
     if output:
-        _connectOutput(node + '.output', output)
+        connectOutput(node + '.output', output)
 
     return node
 
@@ -100,11 +125,11 @@ def multDoubleLinear(input1=None, input2=None, output=None, name=None):
         node = cmds.createNode('multDoubleLinear')
 
     if input1:
-        _setConnection(node + '.' + 'input1', input1)
+        setConnection(node + '.' + 'input1', input1)
     if input2:
-        _setConnection(node + '.' + 'input2', input2)
+        setConnection(node + '.' + 'input2', input2)
     if output:
-        _connectOutput(node + '.output', output)
+        connectOutput(node + '.output', output)
 
     return node
 
@@ -134,11 +159,11 @@ def multiplyDivide(input1=None, input2=None, operation='mult', output=None, name
     cmds.setAttr(node + '.operation', operationDict[operation])
 
     if input1:
-        _setCompoundConnection(node + '.' + 'input1', input1)
+        setCompoundConnection(node + '.' + 'input1', input1)
     if input2:
-        _setCompoundConnection(node + '.' + 'input2', input2)
+        setCompoundConnection(node + '.' + 'input2', input2)
     if output:
-        _connectOutput(node + '.output', output)
+        connectOutput(node + '.output', output)
 
     return node
 
@@ -159,9 +184,9 @@ def unitConversion(input=None, output=None, conversionFactor=None, name=None):
         node = cmds.createNode('multiplyDivide')
 
     if input:
-        _setConnection(node + '.' + 'input', input)
+        setConnection(node + '.' + 'input', input)
     if conversionFactor:
-        _setConnection(node + '.' + 'conversionFactor', conversionFactor)
+        setConnection(node + '.' + 'conversionFactor', conversionFactor)
     if output:
         # use the regular old connect attribute for this since it can be super flexible and doesnt need checks
         cmds.connectAttr(node + '.output', output)
@@ -192,10 +217,10 @@ def plusMinusAverage1D(inputs, operation='sum', output=None, name=None):
     cmds.setAttr(node + '.operation', operationDict[operation])
 
     for index, i in enumerate(inputs):
-        _setConnection(node + ".input1D[{}]".format(index), i)
+        setConnection(node + ".input1D[{}]".format(index), i)
 
     if output:
-        _connectOutput(node + '.output1D', output)
+        connectOutput(node + '.output1D', output)
 
     return node
 
@@ -223,15 +248,15 @@ def plusMinusAverage3D(inputs, operation='sum', output=None, name=None):
     cmds.setAttr(node + '.operation', operationDict[operation])
 
     for index, i in enumerate(inputs):
-        _setCompoundConnection(node + ".input3D[{}]".format(index), i)
+        setCompoundConnection(node + ".input3D[{}]".format(index), i)
 
     if output:
-        _connectOutput(node + '.output3D', output)
+        connectOutput(node + '.output3D', output)
 
     return node
 
 
-def choice(selector=None, choices=[], output=None, name=None):
+def choice(selector=None, choices=None, output=None, name=None):
     """
     Create a choice node
     :param selector: selctor value. Can be a list of 3 values or a plug (as a string)
@@ -244,13 +269,15 @@ def choice(selector=None, choices=[], output=None, name=None):
     :type name: str
     :return: name of the node created. (use node.output)
     """
+    choices = choices or list()
+
     if name:
         node = cmds.createNode('choice', name=name + '_' + common.CHOICE)
     else:
         node = cmds.createNode('choice')
 
     if selector:
-        _setConnection(node + '.selector', selector)
+        setConnection(node + '.selector', selector)
 
     for i, choice in enumerate(choices):
         if isinstance(choice, str):
@@ -259,7 +286,7 @@ def choice(selector=None, choices=[], output=None, name=None):
             cmds.setAttr(node + '.input[{}]'.format(i), choice)
 
     if output:
-        _connectOutput(node + '.output', output)
+        connectOutput(node + '.output', output)
 
     return node
 
@@ -292,15 +319,15 @@ def condition(firstTerm=None, secondTerm=None, ifTrue=None, ifFalse=None, operat
     cmds.setAttr(node + '.operation', operationDict[operation])
 
     if firstTerm:
-        _setConnection(node + '.firstTerm', firstTerm, )
+        setConnection(node + '.firstTerm', firstTerm, )
     if secondTerm:
-        _setConnection(node + '.secondTerm', secondTerm)
+        setConnection(node + '.secondTerm', secondTerm)
     if ifTrue:
-        _setCompoundConnection(node + '.colorIfTrue', ifTrue)
+        setCompoundConnection(node + '.colorIfTrue', ifTrue)
     if ifFalse:
-        _setCompoundConnection(node + '.colorIfFalse', ifFalse)
+        setCompoundConnection(node + '.colorIfFalse', ifFalse)
     if output:
-        _connectOutput(node + '.outColor', output)
+        connectOutput(node + '.outColor', output)
 
     return node
 
@@ -321,10 +348,10 @@ def reverse(input1=None, output=None, name=None):
         node = cmds.createNode('reverse')
 
     if input1:
-        _setCompoundConnection(node + '.input', input1)
+        setCompoundConnection(node + '.input', input1)
 
     if output:
-        _connectOutput(node + '.output', output)
+        connectOutput(node + '.output', output)
 
     return node
 
@@ -357,18 +384,18 @@ def pairBlend(input1=None, input2=None, weight=None, output=None, outputRot=True
         node = cmds.createNode('pairBlend')
 
     if weight:
-        _setConnection(node + '.weight', weight)
+        setConnection(node + '.weight', weight)
     if input1:
-        _setCompoundConnection(node + '.inTranslate1', input1 + '.t')
-        _setCompoundConnection(node + '.inRotate1', input1 + '.r')
+        setCompoundConnection(node + '.inTranslate1', input1 + '.t')
+        setCompoundConnection(node + '.inRotate1', input1 + '.r')
     if input2:
-        _setCompoundConnection(node + '.inTranslate2', input2 + '.t')
-        _setCompoundConnection(node + '.inRotate2', input2 + '.r')
+        setCompoundConnection(node + '.inTranslate2', input2 + '.t')
+        setCompoundConnection(node + '.inRotate2', input2 + '.r')
     if output:
         if outputPos:
-            _connectOutput(node + '.outTranslate', output + '.t')
+            connectOutput(node + '.outTranslate', output + '.t')
         if outputRot:
-            _connectOutput(node + '.outRotate', output + '.r')
+            connectOutput(node + '.outRotate', output + '.r')
 
     rotInterpDict = {'euler': 0, 'quat': 1}
     cmds.setAttr(node + '.rotInterpolation', rotInterpDict[rotInterp])
@@ -398,13 +425,13 @@ def blendColors(input1=None, input2=None, weight=None, output=None, name=None):
         node = cmds.createNode('blendColors')
 
     if weight:
-        _setConnection(node + '.blender', weight)
+        setConnection(node + '.blender', weight)
     if input1:
-        _setCompoundConnection(node + '.color2', input1)
+        setCompoundConnection(node + '.color2', input1)
     if input2:
-        _setCompoundConnection(node + '.color1', input2)
+        setCompoundConnection(node + '.color1', input2)
     if output:
-        _connectOutput(node + '.output', output)
+        connectOutput(node + '.output', output)
     return node
 
 
@@ -430,14 +457,14 @@ def blendTwoAttrs(input1=None, input2=None, weight=None, output=None, name=None)
         node = cmds.createNode('blendTwoAttr')
 
     if weight:
-        _setConnection(node + '.attributesBlender', weight)
+        setConnection(node + '.attributesBlender', weight)
 
     if input1:
-        _setConnection(node + ".input[0]", input1)
+        setConnection(node + ".input[0]", input1)
     if input2:
-        _setConnection(node + ".input[1]", input2)
+        setConnection(node + ".input[1]", input2)
     if output:
-        _connectOutput(node + '.output', output)
+        connectOutput(node + '.output', output)
     return node
 
 
@@ -474,7 +501,7 @@ def distance(input1, input2, output=None, name=None):
         cmds.connectAttr(input2, node + '.point2')
 
     if output:
-        _connectOutput(node + ".distance", output)
+        connectOutput(node + ".distance", output)
 
     return node
 
@@ -560,7 +587,8 @@ def decomposeMatrix(matrix=None, outputs=None, t=True, r=True, s=False, name=Non
     return node
 
 
-def composeMatrix(inputTranslate=[0, 0, 0], inputRotate=[0, 0, 0], inputScale=[1, 1, 1], inputQuat=[0, 0, 0, 0],
+# pylint: disable = too-many-arguments
+def composeMatrix(inputTranslate=None, inputRotate=None, inputScale=None, inputQuat=None,
                   rotateOrder='xyz', eulerRotation=True, outputs=None, t=False, r=False, s=False, name=None):
     """
     Creates a composeMatrix Node
@@ -577,19 +605,24 @@ def composeMatrix(inputTranslate=[0, 0, 0], inputRotate=[0, 0, 0], inputScale=[1
     :param name:  Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created
     """
+    inputTranslate = inputTranslate or [0, 0, 0]
+    inputRotate = inputRotate or [0, 0, 0]
+    inputScale = inputScale or [1, 1, 1]
+    inputQuat = inputQuat or [0, 0, 0, 0]
+
     if name:
         node = cmds.createNode('composeMatrix', name=name + '_' + common.COMPOSEMATRIX)
     else:
         node = cmds.createNode('composeMatrix')
 
-    _setCompoundConnection(node + '.inputTranslate', inputTranslate)
-    _setCompoundConnection(node + '.inputRotate', inputRotate)
-    _setCompoundConnection(node + '.inputScale', inputScale)
+    setCompoundConnection(node + '.inputTranslate', inputTranslate)
+    setCompoundConnection(node + '.inputRotate', inputRotate)
+    setCompoundConnection(node + '.inputScale', inputScale)
     # Set the quaternion values
-    _setConnection(node + '.inputQuatX', inputQuat[0])
-    _setConnection(node + '.inputQuatY', inputQuat[1])
-    _setConnection(node + '.inputQuatZ', inputQuat[2])
-    _setConnection(node + '.inputQuatW', inputQuat[3])
+    setConnection(node + '.inputQuatX', inputQuat[0])
+    setConnection(node + '.inputQuatY', inputQuat[1])
+    setConnection(node + '.inputQuatZ', inputQuat[2])
+    setConnection(node + '.inputQuatW', inputQuat[3])
 
     import rigamajig2.maya.axis
     cmds.setAttr(node + '.inputRotateOrder', rigamajig2.maya.axis.getRotateOrder(rotateOrder))
@@ -663,15 +696,15 @@ def clamp(input, inMin=None, inMax=None, output=None, name=None):
     else:
         node = cmds.createNode('clamp')
 
-    _setCompoundConnection(node + ".input", input)
+    setCompoundConnection(node + ".input", input)
 
     if inMin:
-        _setCompoundConnection(node + ".min", inMin)
+        setCompoundConnection(node + ".min", inMin)
     if inMax:
-        _setCompoundConnection(node + ".max", inMax)
+        setCompoundConnection(node + ".max", inMax)
 
     if output:
-        _connectOutput(node + ".output", output)
+        connectOutput(node + ".output", output)
 
     return node
 
@@ -702,7 +735,7 @@ def remapValue(input, inMin=None, inMax=None, outMin=None, outMax=None, interp='
     else:
         node = cmds.createNode('remapValue')
 
-    _setConnection(node + '.inputValue', input)
+    setConnection(node + '.inputValue', input)
 
     # For all interperlation presets each list represents [position, value, interperlation]
     linearDict = {"0": [0.0, 0.0, 1],
@@ -729,16 +762,16 @@ def remapValue(input, inMin=None, inMax=None, outMin=None, outMax=None, interp='
         cmds.setAttr(node + '.value[{}].value_Interp'.format(i), interpDict[i][2])
 
     if inMin:
-        _setConnection(node + '.inputMin', inMin)
+        setConnection(node + '.inputMin', inMin)
     if inMax:
-        _setConnection(node + '.inputMax', inMax)
+        setConnection(node + '.inputMax', inMax)
     if outMin:
-        _setConnection(node + '.outputMin', outMin)
+        setConnection(node + '.outputMin', outMin)
     if outMax:
-        _setConnection(node + '.outputMax', outMax)
+        setConnection(node + '.outputMax', outMax)
 
     if output:
-        _connectOutput(node + ".outValue", output)
+        connectOutput(node + ".outValue", output)
 
     return node
 
@@ -765,9 +798,9 @@ def vectorProduct(input1=None, input2=None, output=None, operation='dot', normal
         node = cmds.createNode('vectorProduct')
 
     if input1:
-        _setCompoundConnection(node + ".input1", input1)
+        setCompoundConnection(node + ".input1", input1)
     if input2:
-        _setCompoundConnection(node + ".input2", input2)
+        setCompoundConnection(node + ".input2", input2)
 
     operationDict = {"none": 0, "dot": 1, "cross": 2}
     cmds.setAttr(node + ".operation", operationDict[operation])
@@ -775,7 +808,7 @@ def vectorProduct(input1=None, input2=None, output=None, operation='dot', normal
     if normalize:
         cmds.setAttr(node + ".normalizeOutput", 1)
     if output:
-        _connectOutput(node + ".output", output)
+        connectOutput(node + ".output", output)
 
     return node
 
@@ -795,12 +828,12 @@ def sin(input, output=None, name=None):
         mdl = cmds.createNode('multDoubleLinear')
         quat = cmds.createNode('eulerToQuat')
 
-    _setConnection(mdl + ".input1", 2 * 57.2958)  # convert to degrees
-    _setConnection(mdl + ".input2", input)
+    setConnection(mdl + ".input1", 2 * 57.2958)  # convert to degrees
+    setConnection(mdl + ".input2", input)
     cmds.connectAttr(mdl + '.output', quat + '.inputRotateX')
 
     if output:
-        _connectOutput(quat + '.outputQuatX', output)
+        connectOutput(quat + '.outputQuatX', output)
 
     return quat + '.outputQuatX'
 
@@ -820,12 +853,12 @@ def cos(input, output=None, name=None):
         mdl = cmds.createNode('multDoubleLinear')
         quat = cmds.createNode('eulerToQuat')
 
-    _setConnection(mdl + ".input1", 2 * 57.2958)  # convert to degrees
-    _setConnection(mdl + ".input2", input)
+    setConnection(mdl + ".input1", 2 * 57.2958)  # convert to degrees
+    setConnection(mdl + ".input2", input)
     cmds.connectAttr(mdl + '.output', quat + '.inputRotateX')
 
     if output:
-        _connectOutput(quat + '.outputQuatW', output)
+        connectOutput(quat + '.outputQuatW', output)
 
     return quat + '.outputQuatW'
 
@@ -838,15 +871,15 @@ def tan(input, output=None, name=None):
     :param name: name of the nodes created
     :return: attribute with the output of the sin operation
     """
-    half_pi = 3.14159265359 * 0.5
+    halfPi = 3.14159265359 * 0.5
     if name:
-        adl = addDoubleLinear(input, half_pi * -1, name=name + '_tan')
+        adl = addDoubleLinear(input, halfPi * -1, name=name + '_tan')
         opp = sin(input, name=name + '_opp_tan')
         adj = sin(str(adl + '.output'), name=name + '_adj_tan')
         div = multiplyDivide(str(opp), str(adj), operation='div', name=name + 'opp_adj')
 
     else:
-        adl = addDoubleLinear(input, half_pi * -1)
+        adl = addDoubleLinear(input, halfPi * -1)
         opp = sin(input)
         adj = sin(str(adl + '.output'))
         div = multiplyDivide(str(opp), str(adj), operation='div')

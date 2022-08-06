@@ -29,7 +29,7 @@ def getUvCoordsFromVertex(geometry, vertexId):
     :rtype: tuple
     """
 
-    if not rigamajig2.maya.shape.getType(geometry) == 'mesh':
+    if rigamajig2.maya.shape.getType(geometry) != 'mesh':
         return
     cmds.select('{}.vtx[{}]'.format(geometry, vertexId), r=True)
     mel.eval("ConvertSelectionToUVs()")
@@ -49,9 +49,9 @@ def transferUvsToRigged(source, targets):
     targets = common.toList(targets)
 
     for target in targets:
-        target_shapes = cmds.listRelatives(target, s=True, pa=True)
+        targetShapes = cmds.listRelatives(target, s=True, pa=True)
         orig = None
-        for shape in target_shapes:
+        for shape in targetShapes:
             if cmds.getAttr('{}.intermediateObject'.format(shape)):
                 orig = shape
                 break

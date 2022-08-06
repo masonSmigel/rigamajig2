@@ -1,8 +1,15 @@
+"""
+Functions for working with matricies
+"""
 from maya.api import OpenMaya as om2
 import math
 
 
 def buildMatrix():
+    """
+    Build matrix
+    :return:
+    """
     pass
 
 
@@ -16,8 +23,8 @@ def matrixMult(matrix1, matrix2):
 
     matrix1 = om2.MMatrix(matrix1)
     matrix2 = om2.MMatrix(matrix2)
-    res_matrix = matrix1 * matrix2
-    return tuple(res_matrix)
+    resultMatrix = matrix1 * matrix2
+    return tuple(resultMatrix)
 
 
 def getTranslation(matrix):

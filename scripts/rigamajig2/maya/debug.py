@@ -1,3 +1,7 @@
+"""
+This module is used for debugging a rigamajig2 builder
+"""
+
 import os.path
 
 import maya.cmds as cmds
@@ -82,8 +86,8 @@ def createAxisMarker(nodes=None):
         if cmds.objExists(marker):
             raise RuntimeError("A marker already exists with the name '{}'".format(marker))
 
-        marker_node = cmds.ls(cmds.file(asset, i=True, returnNewNodes=True, ns='marker'), type='transform')
-        cmds.rename(marker_node,marker)
+        markerNode = cmds.ls(cmds.file(asset, i=True, returnNewNodes=True, ns='marker'), type='transform')
+        cmds.rename(markerNode,marker)
         cmds.parent(marker, "axisMarker_hrc")
 
         rig_transform.matchTransform(node, marker)

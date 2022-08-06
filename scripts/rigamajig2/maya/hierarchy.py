@@ -54,7 +54,19 @@ def create(node, hierarchy=None, above=True, matchTransform=True, nodeType='tran
 
 
 class DictHierarchy(object):
-    def __init__(self, hierarchy=dict(), parent=None, prefix=None, suffix=None, nodeType='transform'):
+    """
+    Hierarchy Dictionary class.
+    """
+    def __init__(self, hierarchy=None, parent=None, prefix=None, suffix=None, nodeType='transform'):
+        """
+        Constructor for the DictHierarchy class
+        :param hierarchy: Existing hierarchy dictionary
+        :param parent: parent of the hierarchy
+        :param prefix: prefix to add to all items of the hierarchy
+        :param suffix: suffix to add to all items of the hierarchy
+        :param nodeType: type of node to create the hierarchy with.
+        """
+        hierarchy = hierarchy or dict()
         self.hierarchy = hierarchy
         self.parent = parent
         self.prefix = prefix or ""
@@ -101,21 +113,27 @@ class DictHierarchy(object):
         :return:
         """
         node = common.getFirstIndex(node)
-        heirarchy_dict = OrderedDict()
+        hierarchyDict = OrderedDict()
 
-        def getChildren(n, heirarchy_dict):
+        def getChildren(n, hierarchyDict):
+            """
+            get children of a hierachy
+            :param n: node
+            :param hierarchyDict: hierarchy dict 
+            :return: 
+            """
             children = cmds.listRelatives(n, c=True, pa=True, type='transform')
             if children:
-                heirarchy_dict[n] = OrderedDict()
+                hierarchyDict[n] = OrderedDict()
                 for child in children:
-                    heirarchy_dict[n][child] = OrderedDict()
-                    getChildren(child, heirarchy_dict[n])
+                    hierarchyDict[n][child] = OrderedDict()
+                    getChildren(child, hierarchyDict[n])
             else:
-                heirarchy_dict[n] = None
+                hierarchyDict[n] = None
 
-        getChildren(node, heirarchy_dict)
+        getChildren(node, hierarchyDict)
 
-        return heirarchy_dict
+        return hierarchyDict
 
 
 def getTopParent(node):

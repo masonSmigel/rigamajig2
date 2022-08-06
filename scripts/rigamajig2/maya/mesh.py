@@ -50,7 +50,7 @@ def getVertPositions(mesh, world=True):
     if isinstance(mesh, (list, tuple)):
         mesh = mesh[0]
 
-    if not shape.getType(mesh) == 'mesh':
+    if shape.getType(mesh) != 'mesh':
         cmds.error("Node must be of type 'mesh'. {} is of type {}".format(mesh, shape.getType(mesh)))
 
     sel = om2.MGlobal.getSelectionListByName(mesh)
@@ -118,9 +118,9 @@ def cleanShapes(nodes):
         if len(shapes) == 1:
             return shapes[0]
         else:
-            intermidiate_shapes = [x for x in shapes if cmds.getAttr('{}.intermediateObject'.format(x))]
-            cmds.delete(intermidiate_shapes)
-            print("Deleted Intermeidate Shapes: {}".format(intermidiate_shapes))
+            intermidiateShapes = [x for x in shapes if cmds.getAttr('{}.intermediateObject'.format(x))]
+            cmds.delete(intermidiateShapes)
+            print("Deleted Intermeidate Shapes: {}".format(intermidiateShapes))
 
 
 def cleanModel(nodes=None):

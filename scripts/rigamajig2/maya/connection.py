@@ -46,9 +46,9 @@ def connectPlugs(source, destination):
     sourcePlug = attr._getPlug(source)
     destPlug = attr._getPlug(destination)
 
-    MDGMod = om2.MDGModifier()
-    MDGMod.connect(sourcePlug, destPlug)
-    MDGMod.doIt()
+    mdgModifier = om2.MDGModifier()
+    mdgModifier.connect(sourcePlug, destPlug)
+    mdgModifier.doIt()
 
 
 def connectPlugs2(source, destination):

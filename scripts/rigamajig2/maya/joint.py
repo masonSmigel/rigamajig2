@@ -433,8 +433,12 @@ def getCrossUpVector(trs0, trs1, trs2):
     B = om2.MPoint(cmds.xform(trs1, q=True, ws=True, t=True))
     C = om2.MPoint(cmds.xform(trs2, q=True, ws=True, t=True))
 
-    # get two vectors from points
+    # AB represent a distance between point A and B
+    # pylint: disable = invalid-name
     AB = om2.MVector(A - B)
+
+    # AC represent a distance between point A and C
+    # pylint: disable = invalid-name
     AC = om2.MVector(A - C)
 
     crossProd = AB ^ AC

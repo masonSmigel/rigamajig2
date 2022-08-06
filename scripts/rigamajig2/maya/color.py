@@ -5,12 +5,12 @@ import maya.cmds as cmds
 from collections import OrderedDict
 
 
-def rgb_to_percent(color):
+def rgbToPercent(color):
     """Returns the RGB color between a value of 0 - 1"""
     return [float(x) / 255 for x in color]
 
 
-def rgb_to_hex(self):
+def rgbToHex(self):
     """Returns color in hex format"""
     return '#{:02X}{:02X}{:02X}'.format(self.red, self.green, self.blue)
 
@@ -76,6 +76,11 @@ MAYA_INDEX_COLORS = OrderedDict(
 
 
 def getAvailableColors():
+    """
+    Get a list of all available colors.
+    The color string can be used to set the override or outliner color.
+    :return:
+    """
     return COLORS.keys()
 
 
@@ -101,7 +106,7 @@ def setOverrideColor(nodes, color):
         if strColor in MAYA_INDEX_COLORS.keys():
             color = MAYA_INDEX_COLORS[strColor]
         else:
-            color = rgb_to_percent(color)
+            color = rgbToPercent(color)
             useIndex = False
 
     for node in nodes:
@@ -128,7 +133,7 @@ def setOutlinerColor(nodes, color):
     if isinstance(color, str):
         color = COLORS[color]
 
-    color = rgb_to_percent(color)
+    color = rgbToPercent(color)
     for node in nodes:
         cmds.setAttr("{}.useOutlinerColor".format(node), 1)
         cmds.setAttr("{}.outlinerColor".format(node), color[0], color[1], color[2])

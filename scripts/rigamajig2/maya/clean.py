@@ -14,6 +14,7 @@ import logging
 import maya.cmds as cmds
 import maya.mel as mel
 
+EVIL_METHOD_NAMES = ['DCF_updateViewportList', 'CgAbBlastPanelOptChangeCallback', 'onModelChange3dc']
 
 logger = logging.getLogger(__name__)
 
@@ -55,35 +56,40 @@ def cleanPlugins():
                 pass
 
 
-def cleanScriptNodes(excludedScriptNodes=list(), excludePrefix='rigamajig2'):
+def cleanScriptNodes(excludedScriptNodes=None, excludePrefix='rigamajig2'):
     """
     Clean all scriptnodes in the scene
     :param excludedScriptNodes: list of script nodes to be kept
     :param excludePrefix: prefix used to filter script nodes. All nodes with the prefix are kept.
     :return:
     """
-    all_script_nodes = cmds.ls(type='script')
-    for script_node in all_script_nodes:
-        if script_node.startswith(excludePrefix):
+    excludedScriptNodes = excludedScriptNodes or list()
+
+    allScriptNodes = cmds.ls(type='script')
+    for scriptNode in allScriptNodes:
+        if scriptNode.startswith(excludePrefix):
             continue
-        if script_node in excludedScriptNodes:
+        if scriptNode in excludedScriptNodes:
             continue
 
-        cmds.delete(script_node)
-        logger.info("Cleaned Script Node: '{}'".format(script_node))
+        cmds.delete(scriptNode)
+        logger.info("Cleaned Script Node: '{}'".format(scriptNode))
 
 
-def cleanRougePanels(panels=list()):
+def cleanRougePanels(panels=None):
     """
     cleanup rouge procedures from all modelPanels
     It will remove errors like:
         // Error: line 1: Cannot find procedure "CgAbBlastPanelOptChangeCallback". //
         // Error: line 1: Cannot find procedure "DCF_updateViewportList". //
     """
+    panels = panels or list()
+
     if not isinstance(panels, (list, tuple)):
         panels = [panels]
-    EVIL_METHOD_NAMES = ['DCF_updateViewportList', 'CgAbBlastPanelOptChangeCallback', 'onModelChange3dc'] + panels
-    capitalEvilMethodNames = [name.upper() for name in EVIL_METHOD_NAMES]
+
+    evilMethodNodes = EVIL_METHOD_NAMES + panels
+    capitalEvilMethodNames = [name.upper() for name in evilMethodNodes]
     modelPanelLabel = mel.eval('localizedPanelLabel("ModelPanel")')
     processedPanelNames = []
     panelName = cmds.sceneUIReplacement(getNextPanel=('modelPanel', modelPanelLabel))

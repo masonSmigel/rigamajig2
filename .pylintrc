@@ -112,8 +112,12 @@ function-naming-style=camelCase
 module-naming-style=any
 
 # Good variable names which should always be accepted, separated by a comma.
-good-names= i, j, k, r, p, f,cv, ro, a, b, c, d, e, n, x, y, z, ex, ik, fk,
-            Run, _, A, B, C, logger, basestring, dlg_instance, pv, unicode
+# This is a bunch of names that we want to allow in the package that does not
+# conform with general pylint rules. Some of these are maya shorthand or functions that
+# are useful to keep in a different syntax such as 'logger', 'basestring', and 'unicode'
+good-names= i, j, k, r, p, f,cv, ro, a, b, c, d, e, n, x, y, z, v,  ex, ik, fk,
+            Run, _, A, B, C, up, t, r, s, sh, tx, ty, tz, rx, ry, rz, sx, sy, sz, mo,
+            logger, basestring, dlg_instance, pv, unicode,
 
 
 [CLASSES]

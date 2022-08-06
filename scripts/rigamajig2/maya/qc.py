@@ -8,12 +8,21 @@ import rigamajig2.maya.transform as rig_transform
 
 SKIPS = {"bool", "enum"}
 
+SCALE_TOKENS = ["Mult", "Thickness", "Scale", "Factor"]
 
-def has_scale_token(node, attr):
-    # attr = common.getFirstIndex(attr)
-    scale_tokens = ["Mult", "Thickness", "Scale", "Factor"]
-    result = filter(lambda x: x in cmds.attributeName("{}.{}".format(node, attr), l=True), scale_tokens)
-    return bool(len(result))
+
+def hasScaleToken(node, attr):
+    """
+    Check if an attribute has a scale token
+    :param node: node to check on
+    :param attr: attribute to check
+    :return: bool if the attribute has a
+    """
+    attr = cmds.attributeName("{}.{}".format(node, attr), l=True)
+    for token in SCALE_TOKENS:
+        if token in attr:
+            return True
+    return False
 
 
 def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
@@ -29,7 +38,7 @@ def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
     start = start or cmds.playbackOptions(q=True, ast=True)
     end = end or cmds.playbackOptions(q=True, aet=True)
 
-    key_frames = range(int(start), int(end + 1), keysIncriment)
+    keyFrames = range(int(start), int(end + 1), keysIncriment)
 
     nodes = nodes or meta.getTagged("control")
 
@@ -37,31 +46,35 @@ def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
         nodes = [nodes]
 
     for node in nodes:
-        keyables = filter(lambda x: not cmds.getAttr("{}.{}".format(node, x), type=True) in SKIPS,
-                          cmds.listAttr(node, k=True))
+        keyables = [x for x in cmds.listAttr(node, k=True) if cmds.getAttr("{}.{}".format(node, x), type=True) not in SKIPS]
+
         translates = cmds.attributeQuery("translate", node=node, listChildren=True)
         rotates = cmds.attributeQuery("rotate", node=node, listChildren=True)
         scales = cmds.attributeQuery("scale", node=node, listChildren=True)
 
         for attr in keyables:
-            if attr in scales or has_scale_token(node, attr):
-                r_start, r_end = 1.0, 1.2
+            if attr in scales or hasScaleToken(node, attr):
+                timeStart, timeEnd = 1.0, 1.2
             elif attr in rotates or "Angle" in cmds.getAttr("{}.{}".format(node, attr), type=True):
-                r_start, r_end = -10, 10
+                timeStart, timeEnd = -10, 10
             elif attr in translates:
-                r_start, r_end = -1, 1
+                timeStart, timeEnd = -1, 1
             else:
-                r_start, r_end = 0, 1
+                timeStart, timeEnd = 0, 1
 
-            r_start, r_end = map(float, [r_start, r_end])
-            for frame in key_frames:
-                value = random.uniform(r_start, r_end)
+            timeStart, timeEnd = map(float, [timeStart, timeEnd])
+            for frame in keyFrames:
+                value = random.uniform(timeStart, timeEnd)
                 cmds.setKeyframe(node, attribute=attr, v=value, t=frame)
 
     print("Generated Test animation for {} nodes with time range of {}-{}.".format(len(nodes), start, end))
 
 
 def runPerformanceTest():
+    """
+    wrapper to run the performace test within the maya evaluation toolkit.
+    :return:
+    """
     import maya.app.evaluationToolkit.evaluationToolkit as et
     # query the playback speed, so we can set it back to default after the performace test.
     playbackSpeed = cmds.playbackOptions(q=True, ps=True)

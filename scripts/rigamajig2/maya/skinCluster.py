@@ -39,7 +39,7 @@ def getSkinCluster(obj):
     """
     shape = rigamajig2.maya.deformer.getDeformShape(obj)
     deformers = rigamajig2.maya.deformer.getDeformersForShape(shape)
-    skins = list(filter(lambda x: cmds.nodeType(x) == 'skinCluster', deformers))
+    skins = [x for x in deformers if cmds.nodeType(x) == 'skinCluster']
 
     assert len(skins) < 2, "Cannot use getSkinCluster on Stacked Skins"
     skin = skins[0] if len(skins) else None
@@ -75,12 +75,17 @@ def getMfnMesh(mesh):
 
 
 def getCompleteComponents(mesh):
+    """
+    Wrapper to get the complete component data from a mesh
+    :param mesh: mesh to get the component data from
+    :return:
+    """
     if not isinstance(mesh, om2.MFnMesh):
         mesh = getMfnMesh(mesh)
-    comp = om2.MFnSingleIndexedComponent()
-    ob = comp.create(om2.MFn.kMeshVertComponent)
-    comp.setCompleteData(mesh.numVertices)
-    return ob
+    indexedComponent = om2.MFnSingleIndexedComponent()
+    completeComponentData = indexedComponent.create(om2.MFn.kMeshVertComponent)
+    indexedComponent.setCompleteData(mesh.numVertices)
+    return completeComponentData
 
 
 def tryMatrixSet(plug, value):
@@ -108,11 +113,11 @@ def getWeights(mesh):
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
     mesh = cmds.listRelatives(meshShape, p=True)[0]
 
-    mesh_skin = getSkinCluster(mesh)
-    assert mesh_skin, "No Skin for mesh {} -- cannot save".format(mesh)
+    meshSkin = getSkinCluster(mesh)
+    assert meshSkin, "No Skin for mesh {} -- cannot save".format(mesh)
 
     meshDag = rigamajig2.maya.openMayaUtils.getDagPath(mesh)
-    skinMfn = getMfnSkin(mesh_skin)
+    skinMfn = getMfnSkin(meshSkin)
     meshMfn = getMfnMesh(meshShape)
     components = getCompleteComponents(meshMfn)
 
@@ -123,16 +128,16 @@ def getWeights(mesh):
     numComponentsPerInfluence = int(len(weights) / numInfluences)
 
     weightDict = {}
-    for ii in range(len(influences)):
-        influenceName = influences[ii]
+    for influence in range(len(influences)):
+        influenceName = influences[influence]
         influenceNoNs = influenceName.split(":")[-1]
 
         # build a dictionary of vtx:weight. Skip 0.0 weights
         # This is a super slick solution from Mgear!
         infWeightDict = {
-            jj: weights[jj * numInfluences + ii]
-            for jj in range(numComponentsPerInfluence)
-            if weights[jj * numInfluences + ii] != 0.0
+            i: weights[i * numInfluences + influence]
+            for i in range(numComponentsPerInfluence)
+            if weights[i * numInfluences + influence] != 0.0
             }
         vertexCount = int(len(weights) / float(numInfluences))
         weightDict[str(influenceNoNs)] = infWeightDict
@@ -164,14 +169,14 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
     numComponentsPerInfluence = int(len(weights) / numInfluences)
 
     for importedIfluence, wtValues in weightDict.items():
-        for ii in range(len(influences)):
-            influenceName = influences[ii]
+        for influence in range(len(influences)):
+            influenceName = influences[influence]
             influenceNoNs = influenceName.split(":")[-1]
             if influenceNoNs == importedIfluence:
                 if compressed:
-                    for jj in range(numComponentsPerInfluence):
-                        wt = wtValues.get(jj) or wtValues.get(str(jj)) or 0.0
-                        weightList[jj * numInfluences + ii] = wt
+                    for i in range(numComponentsPerInfluence):
+                        weight = wtValues.get(i) or wtValues.get(str(i)) or 0.0
+                        weightList[i * numInfluences + influence] = weight
     allIndices = om2.MIntArray(range(numInfluences))
     skinMfn.setWeights(meshDag, components, allIndices, weightList, False)
 
@@ -193,11 +198,11 @@ def getBlendWeights(mesh):
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
     mesh = cmds.listRelatives(meshShape, p=True)[0]
 
-    mesh_skin = getSkinCluster(mesh)
-    assert mesh_skin, "No Skin for mesh {} -- cannot save".format(mesh)
+    meshSkin = getSkinCluster(mesh)
+    assert meshSkin, "No Skin for mesh {} -- cannot save".format(mesh)
 
     meshDag = rigamajig2.maya.openMayaUtils.getDagPath(mesh)
-    skinMfn = getMfnSkin(mesh_skin)
+    skinMfn = getMfnSkin(meshSkin)
     meshMfn = getMfnMesh(meshShape)
     components = getCompleteComponents(meshMfn)
 
@@ -234,8 +239,8 @@ def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
 
     if compressed:
         for i in range(len(blendedWeights)):
-            wt = weightDict.get(i) or weightDict.get(str(i)) or 0.0
-            blendedWeights[int(i)] = wt
+            weight = weightDict.get(i) or weightDict.get(str(i)) or 0.0
+            blendedWeights[int(i)] = weight
     else:
         raise NotImplementedError("Not implemented")
 
@@ -326,7 +331,7 @@ def localize(skinclusters, transform):
         pass
 
 
-def break_localization(skinClusters):
+def breakLocalization(skinClusters):
     """
     Remove Localization from skinclusters
     :return:
@@ -335,7 +340,7 @@ def break_localization(skinClusters):
         pass
 
 
-def stack_skinclusters(source, target):
+def stackSkinCluster(source, target):
     """
     create stacked skinclusters
     :param source: mesh to copy skincluster from

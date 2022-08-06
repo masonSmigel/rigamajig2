@@ -3,7 +3,7 @@ import maya.cmds as cmds
 import inspect
 import os
 
-scriptTypes = [
+SCRIPT_TYPES = [
     "Demand",
     "Open/Close",
     "GUI Open/Close",
@@ -13,7 +13,7 @@ scriptTypes = [
     "Scene Configuration (Internal)",
     "Time Changed"]
 
-func_format = """# scriptNode created with rigamajig from: {function}
+FUNCTION_FORMAT = """# scriptNode created with rigamajig from: {function}
 
 {imports}
 
@@ -47,11 +47,11 @@ def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None
     :type afterScript: str | function
     :return:
     """
-    if not sourceType == 'mel':
+    if sourceType != 'mel':
         sourceType = 'python'
 
-    if scriptType not in scriptTypes:
-        raise RuntimeError('The script type "{}" is not valid. valid types are: {}'.format(scriptType, scriptTypes))
+    if scriptType not in SCRIPT_TYPES:
+        raise RuntimeError('The script type "{}" is not valid. valid types are: {}'.format(scriptType, SCRIPT_TYPES))
 
     if cmds.objExists(name):
         raise RuntimeError("Object {} already exists. Cannot create a scriptNode with that name".format(name))
@@ -67,7 +67,7 @@ def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None
     if not afterScript: afterScript = 'pass' if sourceType == 'python' else ''
 
     scriptNode = cmds.scriptNode(n=name,
-                                 scriptType=scriptTypes.index(scriptType),
+                                 scriptType=SCRIPT_TYPES.index(scriptType),
                                  sourceType=sourceType,
                                  beforeScript=beforeScript,
                                  afterScript=afterScript,
@@ -108,10 +108,18 @@ def createFromFile(name, scriptType='Open/Close', beforeScript=None, afterScript
 
 
 def getScriptNodes():
+    """
+    Return a list of all script nodes in the scene
+    :return:
+    """
     return cmds.ls(type='script')
 
 
 def removeAllScriptNodes():
+    """
+    Remove all script nodes from the scene
+    :return:
+    """
     cmds.delete(cmds.ls(type='script'))
 
 
@@ -123,7 +131,7 @@ def validateScriptString(script, defaultImports=''):
     :return:
     """
     if inspect.isfunction(script):
-        func_src = inspect.getsource(script)
-        func_call = script.__name__ + '()'
-        func_path = ".".join([script.__module__, script.__name__])
-        return func_format.format(function=func_path, imports=defaultImports, src=func_src, call=func_call)
+        functionSource = inspect.getsource(script)
+        functionCall = script.__name__ + '()'
+        functionPath = ".".join([script.__module__, script.__name__])
+        return FUNCTION_FORMAT.format(function=functionPath, imports=defaultImports, src=functionSource, call=functionCall)

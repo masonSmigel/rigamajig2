@@ -61,7 +61,8 @@ def addNodes(nodes, container, addShape=True):
         for node in nodes:
             shapes = cmds.listRelatives(node, s=True)
             if shapes:
-                [cmds.container(container, e=True, addNode=shape) for shape in shapes]
+                for shape in shapes:
+                    cmds.container(container, e=True, addNode=shape)
     return nodes
 
 
@@ -81,7 +82,8 @@ def removeNodes(nodes, container, removeShapes=True):
         for node in nodes:
             shapes = cmds.listRelatives(node, s=True)
             if shapes:
-                [cmds.container(container, e=True, removeNode=shape) for shape in shapes]
+                for shape in shapes:
+                    cmds.container(container, e=True, removeNode=shape)
 
 
 def getNodesInContainer(container):
@@ -210,6 +212,12 @@ def addChildAnchor(node, container=None, assetNodeName=None):
 
 
 def safeDeleteContainer(container):
+    """
+    Safely delete the container.
+    This will delete the container without deleting any contained nodes.
+    :param container: container to delete
+    :return:
+    """
     nodes = getNodesInContainer(container)
     removeNodes(nodes, container, removeShapes=False)
     cmds.delete(container)
@@ -235,6 +243,12 @@ def sainityCheck():
 
 
 class ActiveContainer(object):
+    """
+    context to set and exit from setting an active container.
+
+    When the context manager is active any newly created
+    nodes are added to the container.
+    """
     def __init__(self, container):
         """
         Set the current container to active
@@ -245,5 +259,5 @@ class ActiveContainer(object):
     def __enter__(self):
         cmds.container(self.container, e=True, c=True)
 
-    def __exit__(self, exc_type, exc_val, exc_tb):
+    def __exit__(self, type, value, traceback):
         cmds.container(self.container, e=True, c=False)

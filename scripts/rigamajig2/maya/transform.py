@@ -92,14 +92,14 @@ def unfreezeToTransform(nodes):
     :return:
     """
     nodes = common.toList(nodes)
-    identity_matrix = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
+    identityMatrix = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
 
     if cmds.about(api=True) < 20200000:
         raise RuntimeError("OffsetParentMatrix is only available in Maya 2020 and beyond")
     for node in nodes:
         offest = localOffset(node)
         cmds.xform(node, m=offest)
-        cmds.setAttr("{}.offsetParentMatrix".format(node), identity_matrix, type='matrix')
+        cmds.setAttr("{}.offsetParentMatrix".format(node), identityMatrix, type='matrix')
 
 
 def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, sh=True):
@@ -132,16 +132,16 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
         if not parent and not mo:
             outputPlug = "{}.{}".format(driver, 'worldMatrix')
         else:
-            mm = cmds.createNode("multMatrix", name="{}_{}_mm".format(driver, driven))
+            multMatrix = cmds.createNode("multMatrix", name="{}_{}_mm".format(driver, driven))
             if offset:
-                cmds.setAttr("{}.{}".format(mm, "matrixIn[0]"), offset, type='matrix')
+                cmds.setAttr("{}.{}".format(multMatrix, "matrixIn[0]"), offset, type='matrix')
 
-            cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(mm, 'matrixIn[1]'), f=True)
+            cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(multMatrix, 'matrixIn[1]'), f=True)
 
             if parent:
-                cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(mm, 'matrixIn[2]'),
+                cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(multMatrix, 'matrixIn[2]'),
                                  f=True)
-            outputPlug = "{}.{}".format(mm, 'matrixSum')
+            outputPlug = "{}.{}".format(multMatrix, 'matrixSum')
 
         pickMat = None
         if not t or not r or not s or not sh:
@@ -159,7 +159,7 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
         # now we need to reset the trs
         resetTransformations(driven)
 
-    return mm, pickMat
+    return multMatrix, pickMat
 
 
 def localOffset(node):
@@ -184,12 +184,12 @@ def offsetMatrix(node1, node2):
     :param node2:
     :return:
     """
-    node1_mat = om2.MMatrix(cmds.getAttr("{}.{}".format(node1, 'worldMatrix')))
-    node2_mat = om2.MMatrix(cmds.getAttr("{}.{}".format(node2, 'worldMatrix')))
+    node1Matrix = om2.MMatrix(cmds.getAttr("{}.{}".format(node1, 'worldMatrix')))
+    node2Matrix = om2.MMatrix(cmds.getAttr("{}.{}".format(node2, 'worldMatrix')))
 
     # invert the parent matrix
-    node1_inverted = om2.MTransformationMatrix(node1_mat).asMatrixInverse()
-    offset = node2_mat * node1_inverted
+    node1Inverted = om2.MTransformationMatrix(node1Matrix).asMatrixInverse()
+    offset = node2Matrix * node1Inverted
 
     return offset
 
@@ -223,8 +223,9 @@ def mirror(trs=None, axis='x', leftToken=None, rightToken=None, mode='rotate'):
     :param str axis: axis to mirror across. ['XY', 'YZ', 'XZ']:
     :param str leftToken: token for the left side
     :param str rightToken: token for the right side
-    :param str mode: mirror mode. 'rotate' mirrors the rotation behaviour where 'translate' mirrors translation behavior as well.
-                'translate' more is used more often in the face, 'rotate' in the body.
+    :param str mode: mirror mode. 'rotate' mirrors the rotation behaviour
+                    where 'translate' mirrors translation behavior as well.
+                    'translate' more is used more often in the face, 'rotate' in the body.
 
     """
     if trs is None:
@@ -278,25 +279,45 @@ def mirror(trs=None, axis='x', leftToken=None, rightToken=None, mode='rotate'):
         cmds.xform(destination, ws=True, m=mtx)
 
 
-def getAimAxis(transform, allowNegative=True):
+def getAimAxis(transform, allowNegative=True, asVector=False):
     """
     Get the aim axis of a given transform.
     The axis closest to the offset between the child (aim at) and transform will be returned.
     The aim axis is calucated in the local space of the transform.
 
-    :param transform: transform node to get the axis of
-    :param allowNegative: allow negative axis
-    :return: axis with the closest
+    :param str transform: transform node to get the axis of
+    :param bool allowNegative: if true allow negative axis returns.
+    :param bool asVector: if true return the aim axis as a vector
+    :return: aim axis
     """
     child = cmds.listRelatives(transform, type='transform')
     if not child:
         raise RuntimeError('{} does not have a child to aim at'.format(transform))
 
-    return getClosestAxis(transform, child[0], allowNegative=allowNegative)
+    axis = getClosestAxis(transform, child[0], allowNegative=allowNegative)
+
+    if asVector:
+        return getVectorFromAxis(axis)
+    return axis
 
 
 def getClosestAxis(transform, target, allowNegative=True):
+    """
+    Get the closest axis betwen the transform and target node.
+
+    This is caulculated by extracting the local offset matrix and
+    comparing the lenghts of the directions.
+
+    The longest direction can be assumed as the aim direction,
+    considering most often a single translate is the aim axis)
+
+    :param transform: transform to get the axis from
+    :param target: target to get the axis from
+    :param allowNegative: if true allow negative axis returns.
+    :return str: closest axis
+    """
     offset = offsetMatrix(transform, target)
+
     tx, ty, tz = matrix.getTranslation(offset)
 
     if (abs(tx) > abs(ty)) and (abs(tx) > abs(tz)):
@@ -338,9 +359,9 @@ def decomposeRotation(node, twistAxis='x'):
     cmds.connectAttr(worldMatrix, "{}.matrixIn[0]".format(mult))
     cmds.connectAttr(parentInverse, "{}.matrixIn[1]".format(mult))
 
-    pinv = om2.MMatrix(cmds.getAttr(parentInverse))
-    m = om2.MMatrix(cmds.getAttr(worldMatrix))
-    invLocalRest = (m * pinv).inverse()
+    parentInverseMatrix = om2.MMatrix(cmds.getAttr(parentInverse))
+    worldMatrix = om2.MMatrix(cmds.getAttr(worldMatrix))
+    invLocalRest = (worldMatrix * parentInverseMatrix).inverse()
     cmds.setAttr("{}.matrixIn[2]".format(mult), list(invLocalRest), type='matrix')
 
     # get the twist
@@ -444,21 +465,26 @@ def resetTransformations(nodes):
             if cmds.objExists("{}.{}".format(node, attr)):
                 cmds.setAttr("{}.{}".format(node, attr), 0, 0, 0)
         for attr in ["{}{}".format(x, y) for x in 'trs' for y in 'xyz']:
-            is_locked = cmds.getAttr("{}.{}".format(node, attr), lock=True)
+            isLocked = cmds.getAttr("{}.{}".format(node, attr), lock=True)
             connection = cmds.listConnections("{}.{}".format(node, attr), s=True, d=False, plugs=True) or []
-            is_connected = len(connection)
-            if is_locked:
+            isConnected = len(connection)
+            if isLocked:
                 cmds.setAttr("{}.{}".format(node, attr), lock=False)
-            if is_connected:
+            if isConnected:
                 cmds.disconnectAttr(connection[0], "{}.{}".format(node, attr))
 
             value = 1.0 if attr.startswith('s') else 0.0
             cmds.setAttr("{}.{}".format(node, attr), value)
-            if is_connected: cmds.connectAttr(connection[0], "{}.{}".format(node, attr), f=True)
-            if is_locked:  cmds.setAttr("{}.{}".format(node, attr), lock=True)
+            if isConnected: cmds.connectAttr(connection[0], "{}.{}".format(node, attr), f=True)
+            if isLocked:  cmds.setAttr("{}.{}".format(node, attr), lock=True)
 
 
 def getVectorFromAxis(axis):
+    """
+    Return a vector based on the given axis string
+    :param axis: Axis name. Valid values are ['x', 'y', 'z', '-x', '-y', '-z']
+    :return list tuple: Axis
+    """
     if axis.lower() == 'x':
         vector = [1, 0, 0]
     elif axis.lower() == 'y':

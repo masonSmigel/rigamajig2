@@ -62,6 +62,11 @@ def getSdkDriver(sdk):
 
 
 def getSdkDriven(sdk):
+    """
+    Get the nodes driven by a set driven key (anim curve) node
+    :param sdk: Set driven key animation curve node. must be a valid rigamaig sdk curve type.
+    :return: nodes driven by the sdk
+    """
     if not cmds.ls(sdk, type=SDKNODETYPES):
         cmds.error('{} is not an SDK node'.format(sdk))
         return
@@ -160,7 +165,7 @@ def createBlendWeightedNode(drivenPlug):
     # get the connected node. dont skip the conversion nodes in the case of connection to a rotation.
     # also get a unit conversion node. later we will check if the first node is a unit conversion and if it is delete it.
     connected = cmds.listConnections(drivenPlug, source=True, destination=False, plugs=True, skipConversionNodes=True)
-    uc = cmds.listConnections(drivenPlug, source=True, destination=False, plugs=True, skipConversionNodes=False)
+    unitConvert = cmds.listConnections(drivenPlug, source=True, destination=False, plugs=True, skipConversionNodes=False)
 
     blendWeightedNode = cmds.createNode("blendWeighted", n="{}_{}_blendWeighted".format(drivenNode, drivenAttr))
 
@@ -170,8 +175,8 @@ def createBlendWeightedNode(drivenPlug):
         # a node can only have one given input so we can get the first index of the connected list
         cmds.connectAttr(connected[0], nextPlug, f=True)
 
-    if cmds.nodeType(uc[0]) == 'unitConversion':
-        cmds.delete(uc)
+    if cmds.nodeType(unitConvert[0]) == 'unitConversion':
+        cmds.delete(unitConvert)
 
     # connect the blendWeighted to the drivenPlug
     cmds.connectAttr("{}.output".format(blendWeightedNode), drivenPlug, f=True)
@@ -181,4 +186,10 @@ def createBlendWeightedNode(drivenPlug):
 
 # TODO:
 def setSdk(sdk, keyList):
+    """
+    Set sdk keyframes
+    :param sdk:
+    :param keyList:
+    :return:
+    """
     pass

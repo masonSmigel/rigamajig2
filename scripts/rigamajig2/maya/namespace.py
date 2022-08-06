@@ -9,13 +9,16 @@ def deleteAllNamespace():
     Delete all namespaces from a scene
     """
     toExclude = ('UI', 'shared')
-    ns_dict = {}
-    for ns_find in (x for x in cmds.namespaceInfo(':', listOnlyNamespaces=True, recurse=True, fn=True) if
-                    x not in toExclude):
-        ns_dict.setdefault(len(ns_find.split(":")), []).append(ns_find)
+    namespaceDict = {}
 
-    for i, lvl in enumerate(reversed(ns_dict.keys())):
-        for namespace in ns_dict[lvl]:
+    namespacesFound = cmds.namespaceInfo(':', listOnlyNamespaces=True, recurse=True, fn=True)
+    for namespace in namespacesFound:
+        if namespace in toExclude:
+            continue
+        namespaceDict.setdefault(len(namespace.split(":")), []).append(namespace)
+
+    for i, lvl in enumerate(reversed(namespaceDict.keys())):
+        for namespace in namespaceDict[lvl]:
             cmds.namespace(removeNamespace=namespace, mergeNamespaceWithParent=True)
 
 

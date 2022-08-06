@@ -114,7 +114,7 @@ def getCvPositions(curve, world=True):
     if isinstance(curve, (list, tuple)):
         curve = curve[0]
 
-    if not shape.getType(curve) == 'nurbsCurve':
+    if shape.getType(curve) != 'nurbsCurve':
         cmds.error("Node must be of type 'nurbsCurve'. {} is of type {}".format(curve, shape.getType(curve)))
 
     cvPos = list()
@@ -147,7 +147,7 @@ def setCvPositions(curve, cvList, world=True):
     if isinstance(curve, (list, tuple)):
         curve = curve[0]
 
-    if not shape.getType(curve) == 'nurbsCurve':
+    if shape.getType(curve) != 'nurbsCurve':
         cmds.error("Node must be of type 'nurbsCurve'. {} is of type {}".format(curve, shape.getType(curve)))
 
     for i, cv in enumerate(getCvs(curve)):
@@ -187,9 +187,9 @@ def copyShape(source, destinations):
     # Collect data about the curve
     data = OrderedDict()
     data['shapes'] = OrderedDict()
-    shape_list = cmds.listRelatives(source, c=True, shapes=True, type="nurbsCurve", pa=True)
-    if shape_list:
-        for shape in shape_list:
+    shapeList = cmds.listRelatives(source, c=True, shapes=True, type="nurbsCurve", pa=True)
+    if shapeList:
+        for shape in shapeList:
             data['shapes'][shape] = OrderedDict()
             data['shapes'][shape]['points'] = list()
             for i, cv in enumerate(cmds.ls("{0}.cv[*]".format(shape), fl=True)):
@@ -254,10 +254,10 @@ def mirror(curves, axis='x', mode='replace'):
         if mode == 'replace':
 
             # store any incomming visibility connections to the FIRST curve.
-            tmp_destinationShape = cmds.listRelatives(destinationCurve, s=True) or []
+            tempDestinationShape = cmds.listRelatives(destinationCurve, s=True) or []
             connections = None
-            if tmp_destinationShape:
-                connections = cmds.listConnections("{}.v".format(tmp_destinationShape[0]), d=False, s=True, p=True)
+            if tempDestinationShape:
+                connections = cmds.listConnections("{}.v".format(tempDestinationShape[0]), d=False, s=True, p=True)
 
             wipeCurveShape(destinationCurve)
             copyShape(curve, destinationCurve)

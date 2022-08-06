@@ -16,17 +16,13 @@ def parentConstraint(driver, driven):
     :param driven: node driven by the parent constraint
     :return: mult matrix and decompose matrix used in the constraint
     """
-    mm, dcmp = __createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
+    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
 
     # connect the translate and rotate
-    cmds.connectAttr("{}.{}".format(dcmp, 'outputTranslate'), "{}.{}".format(driven, 'translate'), f=True)
-    cmds.connectAttr("{}.{}".format(dcmp, 'outputRotate'), "{}.{}".format(driven, 'rotate'), f=True)
+    cmds.connectAttr("{}.{}".format(decompMatrix, 'outputTranslate'), "{}.{}".format(driven, 'translate'), f=True)
+    cmds.connectAttr("{}.{}".format(decompMatrix, 'outputRotate'), "{}.{}".format(driven, 'rotate'), f=True)
 
-    return mm, dcmp
-
-
-def jointConstraint(driver, driven):
-    pass
+    return multMatrix, decompMatrix
 
 
 def pointConstraint(driver, driven):
@@ -36,12 +32,12 @@ def pointConstraint(driver, driven):
     :param driven: node driven by the point constraint
     :return: mult matrix and decompose matrix used in the constraint
     """
-    mm, dcmp = __createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
+    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
 
     # connect the translate and rotate
-    cmds.connectAttr("{}.{}".format(dcmp, 'outputTranslate'), "{}.{}".format(driven, 'translate'), f=True)
+    cmds.connectAttr("{}.{}".format(decompMatrix, 'outputTranslate'), "{}.{}".format(driven, 'translate'), f=True)
 
-    return mm, dcmp
+    return multMatrix, decompMatrix
 
 
 def orientConstraint(driver, driven):
@@ -52,12 +48,12 @@ def orientConstraint(driver, driven):
     :return: mult matrix and decompose matrix used in the constraint
     :return:
     """
-    mm, dcmp = __createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
+    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
 
     # connect the translate and rotate
-    cmds.connectAttr("{}.{}".format(dcmp, 'outputRotate'), "{}.{}".format(driven, 'rotate'), f=True)
+    cmds.connectAttr("{}.{}".format(decompMatrix, 'outputRotate'), "{}.{}".format(driven, 'rotate'), f=True)
 
-    return mm, dcmp
+    return multMatrix, decompMatrix
 
 
 def scaleConstraint(driver, driven):
@@ -67,41 +63,41 @@ def scaleConstraint(driver, driven):
     :param driven: node driven by the scale constraint
     :return: mult matrix and decompose matrix used in the constraint
     """
-    mm, dcmp = __createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
+    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
     # connect the translate and rotate
-    cmds.connectAttr("{}.{}".format(dcmp, 'outputScale'), "{}.{}".format(driven, 'scale'), f=True)
+    cmds.connectAttr("{}.{}".format(decompMatrix, 'outputScale'), "{}.{}".format(driven, 'scale'), f=True)
 
-    return mm, dcmp
+    return multMatrix, decompMatrix
 
 
-def __createSimpleMatrixConstraintNetwork(driver, driven):
+def _createSimpleMatrixConstraintNetwork(driver, driven):
     """
     This private function is used to check if a matrix constraint network exists and if not create it
-    :param driver:
-    :param driven:
-    :return:
+    :param driver: driver node
+    :param driven: driven node
+    :return: mult matrix, decompose matrix
     """
     driven = common.getFirstIndex(driven)
     if cmds.objExists("{}.{}".format(driven, '{}_constraintMm'.format(driver))):
-        mm = meta.getMessageConnection('{}.{}'.format(driven, '{}_constraintMm'.format(driver)))
-        dcmp = meta.getMessageConnection('{}.{}'.format(driven, '{}_constraintDcmp'.format(driver)))
+        multMatrix = meta.getMessageConnection('{}.{}'.format(driven, '{}_constraintMm'.format(driver)))
+        decomposeMatrix = meta.getMessageConnection('{}.{}'.format(driven, '{}_constraintDcmp'.format(driver)))
     else:
-        mm = cmds.createNode('multMatrix', name=driven + '_mm')
-        dcmp = cmds.createNode('decomposeMatrix', name=driven + '_dcmp')
+        multMatrix = cmds.createNode('multMatrix', name=driven + '_mm')
+        decomposeMatrix = cmds.createNode('decomposeMatrix', name=driven + '_dcmp')
 
         # convert the driver's world matrix into the parent space of the driven
-        cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(mm, 'matrixIn[0]'))
-        cmds.connectAttr("{}.{}".format(driven, 'parentInverseMatrix'), "{}.{}".format(mm, 'matrixIn[1]'))
+        cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(multMatrix, 'matrixIn[0]'))
+        cmds.connectAttr("{}.{}".format(driven, 'parentInverseMatrix'), "{}.{}".format(multMatrix, 'matrixIn[1]'))
 
         # connect the new matrix to the decompose matrix
-        cmds.connectAttr("{}.{}".format(mm, 'matrixSum'), "{}.{}".format(dcmp, 'inputMatrix'))
+        cmds.connectAttr("{}.{}".format(multMatrix, 'matrixSum'), "{}.{}".format(decomposeMatrix, 'inputMatrix'))
 
         # create message connections to the mult matrix and decompose matrix.
         # this is used if we ever create another constraint to re-use the old nodes
-        meta.createMessageConnection(driven, mm, '{}_constraintMm'.format(driver))
-        meta.createMessageConnection(driven, dcmp, '{}_constraintDcmp'.format(driver))
+        meta.createMessageConnection(driven, multMatrix, '{}_constraintMm'.format(driver))
+        meta.createMessageConnection(driven, decomposeMatrix, '{}_constraintDcmp'.format(driver))
 
-    return mm, dcmp
+    return multMatrix, decomposeMatrix
 
 
 def negate(driver, driven, t=False, r=False, s=False):
@@ -118,8 +114,8 @@ def negate(driver, driven, t=False, r=False, s=False):
 
     for driven in drivens:
         if driven not in cmds.listRelatives(driver, ad=True):
-            neg_trs = hierarchy.create(driven, [driven + '_trs'], above=True, matchTransform=True)[0]
-            parentConstraint(driver=driver, driven=neg_trs)
+            negativeTrs = hierarchy.create(driven, [driven + '_trs'], above=True, matchTransform=True)[0]
+            parentConstraint(driver=driver, driven=negativeTrs)
 
         if t:
             node.unitConversion('{}.{}'.format(driver, 't'), '{}.{}'.format(driven, 't'), -1, name=driven + '_t_neg')

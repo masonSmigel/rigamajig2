@@ -26,6 +26,7 @@ def getSelectedChannels():
     return cmds.channelBox('mainChannelBox', q=True, sma=True)
 
 
+# pylint: disable=too-many-return-statements
 def getFocusNode(input=False, shape=False, output=False):
     """
     Get the name of the node with focus in the channel box.

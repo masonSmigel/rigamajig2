@@ -9,16 +9,7 @@
 
 """
 
-# !/usr/bin/env python
-# -*- coding: utf-8 -*-
-"""
-    project: rigamajig2
-    file: model_widget.py
-    author: masonsmigel
-    date: 07/2022
-    discription: 
 
-"""
 # PYTHON
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -35,10 +26,15 @@ from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.builder.builder import SKELETON_POS
 
-
+# pylint: disable= too-many-instance-attributes
 class JointWidget(QtWidgets.QWidget):
+    """ Joint layout for the builder UI """
 
     def __init__(self, builder=None):
+        """
+        Constructor for the joint widget
+        :param builder: builder to connect to the ui
+        """
         super(JointWidget, self).__init__()
 
         self.builder = builder
@@ -48,182 +44,200 @@ class JointWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
+        """ Create Widgets"""
         self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
 
-        self.joint_pos_path_selector = pathSelector.PathSelector(
+        self.jointPositionPathSelector = pathSelector.PathSelector(
             "joint pos: ",
             caption="Select a Skeleton position file",
             fileFilter=constants.JSON_FILTER,
             fileMode=1
             )
-        self.load_jnt_pos_btn = QtWidgets.QPushButton("Load joints")
-        self.save_jnt_pos_btn = QtWidgets.QPushButton("Save joints")
+        self.loadJointPositionButton = QtWidgets.QPushButton("Load joints")
+        self.saveJointPositionButton = QtWidgets.QPushButton("Save joints")
 
-        self.skeletonEdit_wdgt = collapseableWidget.CollapsibleWidget('Edit Skeleton')
-        self.skeletonEdit_wdgt.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
-        self.skeletonEdit_wdgt.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
+        self.skeletonEditWidget = collapseableWidget.CollapsibleWidget('Edit Skeleton')
+        self.skeletonEditWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
+        self.skeletonEditWidget.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
 
-        self.jnt_to_rot_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Rotation")
-        self.jnt_to_ori_btn = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Orientation")
-        self.clean_skeleton_btn = QtWidgets.QPushButton("Clean Skeleton")
-        self.jntAxisX_rb = QtWidgets.QRadioButton('x')
-        self.jntAxisY_rb = QtWidgets.QRadioButton('y')
-        self.jntAxisZ_rb = QtWidgets.QRadioButton('z')
-        self.jntAxisX_rb.setChecked(True)
+        self.jointToRotationButton = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Rotation")
+        self.jointToOrientationButton = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Orientation")
+        self.cleanSkeletonButton = QtWidgets.QPushButton("Clean Skeleton")
+        self.jointAxisXRadioButton = QtWidgets.QRadioButton('x')
+        self.jointAxisYRadioButton = QtWidgets.QRadioButton('y')
+        self.jointAxisZRadioButton = QtWidgets.QRadioButton('z')
+        self.jointAxisXRadioButton.setChecked(True)
 
-        self.mirrorJntMode_cbox = QtWidgets.QComboBox()
-        self.mirrorJntMode_cbox.setFixedHeight(24)
-        self.mirrorJntMode_cbox.addItem("rotate")
-        self.mirrorJntMode_cbox.addItem("translate")
-        self.mirrorJnt_btn = QtWidgets.QPushButton(QtGui.QIcon(":kinMirrorJoint_S"), "Mirror")
-        self.mirrorJnt_btn.setFixedHeight(24)
+        self.mirrorJointModeCheckbox = QtWidgets.QComboBox()
+        self.mirrorJointModeCheckbox.setFixedHeight(24)
+        self.mirrorJointModeCheckbox.addItem("rotate")
+        self.mirrorJointModeCheckbox.addItem("translate")
+        self.mirrorJointsButton = QtWidgets.QPushButton(QtGui.QIcon(":kinMirrorJoint_S"), "Mirror")
+        self.mirrorJointsButton.setFixedHeight(24)
 
-        self.pin_jnt_btn = QtWidgets.QPushButton("Pin Joints")
-        self.pin_jnt_btn.setIcon(QtGui.QIcon(":pinned"))
-        self.unpin_jnt_btn = QtWidgets.QPushButton("Un-Pin Joints")
-        self.unpin_jnt_btn.setIcon(QtGui.QIcon(":unpinned"))
+        self.pinJointsButton = QtWidgets.QPushButton("Pin Joints")
+        self.pinJointsButton.setIcon(QtGui.QIcon(":pinned"))
+        self.unpinJointsButton = QtWidgets.QPushButton("Un-Pin Joints")
+        self.unpinJointsButton.setIcon(QtGui.QIcon(":unpinned"))
 
-        self.unpinAll_jnt_btn = QtWidgets.QPushButton("Un-Pin All Joints")
-        self.unpinAll_jnt_btn.setIcon(QtGui.QIcon(":unpinned"))
+        self.unpinAllJointsButton = QtWidgets.QPushButton("Un-Pin All Joints")
+        self.unpinAllJointsButton.setIcon(QtGui.QIcon(":unpinned"))
 
-        self.insert_jnts_amt_slider = sliderGrp.SliderGroup()
-        self.insert_jnts_amt_slider.setValue(1)
-        self.insert_jnts_amt_slider.setRange(1, 10)
-        self.insert_jnts_btn = QtWidgets.QPushButton("Insert Joints")
+        self.insertJointsAmountSlider = sliderGrp.SliderGroup()
+        self.insertJointsAmountSlider.setValue(1)
+        self.insertJointsAmountSlider.setRange(1, 10)
+        self.insertJointsButton = QtWidgets.QPushButton("Insert Joints")
 
-        self.prep_jnts_btn = QtWidgets.QPushButton("Prep Skeleton")
+        self.prepareJointsButton = QtWidgets.QPushButton("Prep Skeleton")
 
     def createLayouts(self):
+        """ Create Layouts"""
         # setup the main layout.
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(0)
 
-        save_load_jnt_layout = QtWidgets.QHBoxLayout()
-        save_load_jnt_layout.setContentsMargins(0, 0, 0, 0)
-        save_load_jnt_layout.setSpacing(4)
-        save_load_jnt_layout.addWidget(self.load_jnt_pos_btn)
-        save_load_jnt_layout.addWidget(self.save_jnt_pos_btn)
+        saveLoadJointLayout = QtWidgets.QHBoxLayout()
+        saveLoadJointLayout.setContentsMargins(0, 0, 0, 0)
+        saveLoadJointLayout.setSpacing(4)
+        saveLoadJointLayout.addWidget(self.loadJointPositionButton)
+        saveLoadJointLayout.addWidget(self.saveJointPositionButton)
 
         # setup the joint orientation Layout
-        jointOrientation_layout = QtWidgets.QHBoxLayout()
-        jointOrientation_layout.addWidget(self.jnt_to_rot_btn)
-        jointOrientation_layout.addWidget(self.jnt_to_ori_btn)
+        jointOrientationLayout = QtWidgets.QHBoxLayout()
+        jointOrientationLayout.addWidget(self.jointToRotationButton)
+        jointOrientationLayout.addWidget(self.jointToOrientationButton)
 
         # setup the main mirroe axis joint Layout
-        jointMirrorAxis_layout = QtWidgets.QHBoxLayout()
-        jointMirrorAxis_layout.addWidget(QtWidgets.QLabel("Axis: "))
-        jointMirrorAxis_layout.addWidget(self.jntAxisX_rb)
-        jointMirrorAxis_layout.addWidget(self.jntAxisY_rb)
-        jointMirrorAxis_layout.addWidget(self.jntAxisZ_rb)
+        jointMirrorAxisLayout = QtWidgets.QHBoxLayout()
+        jointMirrorAxisLayout.addWidget(QtWidgets.QLabel("Axis: "))
+        jointMirrorAxisLayout.addWidget(self.jointAxisXRadioButton)
+        jointMirrorAxisLayout.addWidget(self.jointAxisYRadioButton)
+        jointMirrorAxisLayout.addWidget(self.jointAxisZRadioButton)
 
         # setup the main mirrr joint Layout
-        mirrorJoint_layout = QtWidgets.QHBoxLayout()
-        mirrorJoint_layout.setSpacing(4)
-        mirrorJoint_layout.addLayout(jointMirrorAxis_layout)
-        mirrorJoint_layout.addWidget(self.mirrorJntMode_cbox)
-        mirrorJoint_layout.addWidget(self.mirrorJnt_btn)
+        mirrorJointLayout = QtWidgets.QHBoxLayout()
+        mirrorJointLayout.setSpacing(4)
+        mirrorJointLayout.addLayout(jointMirrorAxisLayout)
+        mirrorJointLayout.addWidget(self.mirrorJointModeCheckbox)
+        mirrorJointLayout.addWidget(self.mirrorJointsButton)
 
         # setup the pin joints layout
-        pinJoint_layout = QtWidgets.QHBoxLayout()
-        pinJoint_layout.addWidget(self.pin_jnt_btn)
-        pinJoint_layout.addWidget(self.unpin_jnt_btn)
-        pinJoint_layout.addWidget(self.unpinAll_jnt_btn)
+        pinJointsLayout = QtWidgets.QHBoxLayout()
+        pinJointsLayout.addWidget(self.pinJointsButton)
+        pinJointsLayout.addWidget(self.unpinJointsButton)
+        pinJointsLayout.addWidget(self.unpinAllJointsButton)
 
         # setup the insert joints layout
-        insertJoint_layout = QtWidgets.QHBoxLayout()
-        insertJoint_layout.addWidget(self.insert_jnts_amt_slider)
-        insertJoint_layout.addWidget(self.insert_jnts_btn)
+        insertJointLayout = QtWidgets.QHBoxLayout()
+        insertJointLayout.addWidget(self.insertJointsAmountSlider)
+        insertJointLayout.addWidget(self.insertJointsButton)
 
         # add widgets to the skeletonEdit widget.
-        self.skeletonEdit_wdgt.addWidget(self.clean_skeleton_btn)
-        self.skeletonEdit_wdgt.addLayout(jointOrientation_layout)
-        self.skeletonEdit_wdgt.addLayout(mirrorJoint_layout)
-        self.skeletonEdit_wdgt.addLayout(pinJoint_layout)
-        self.skeletonEdit_wdgt.addLayout(insertJoint_layout)
-        self.skeletonEdit_wdgt.addWidget(self.prep_jnts_btn)
-        self.skeletonEdit_wdgt.addSpacing(3)
+        self.skeletonEditWidget.addWidget(self.cleanSkeletonButton)
+        self.skeletonEditWidget.addLayout(jointOrientationLayout)
+        self.skeletonEditWidget.addLayout(mirrorJointLayout)
+        self.skeletonEditWidget.addLayout(pinJointsLayout)
+        self.skeletonEditWidget.addLayout(insertJointLayout)
+        self.skeletonEditWidget.addWidget(self.prepareJointsButton)
+        self.skeletonEditWidget.addSpacing(3)
 
         # add widgets to the main skeleton widget.
-        self.mainCollapseableWidget .addWidget(self.joint_pos_path_selector)
-        self.mainCollapseableWidget .addLayout(save_load_jnt_layout)
-        self.mainCollapseableWidget .addWidget(self.skeletonEdit_wdgt)
+        self.mainCollapseableWidget .addWidget(self.jointPositionPathSelector)
+        self.mainCollapseableWidget .addLayout(saveLoadJointLayout)
+        self.mainCollapseableWidget .addWidget(self.skeletonEditWidget)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.mainCollapseableWidget )
+        self.mainLayout.addWidget(self.mainCollapseableWidget)
 
     def createConnections(self):
-        self.load_jnt_pos_btn.clicked.connect(self.load_joint_positions)
-        self.save_jnt_pos_btn.clicked.connect(self.save_joint_positions)
-        self.jnt_to_rot_btn.clicked.connect(self.jnt_to_rotation)
-        self.jnt_to_ori_btn.clicked.connect(self.jnt_to_orientation)
-        self.mirrorJnt_btn.clicked.connect(self.mirror_joint)
-        self.pin_jnt_btn.clicked.connect(self.pin_joints)
-        self.unpin_jnt_btn.clicked.connect(self.unpin_joints)
-        self.unpinAll_jnt_btn.clicked.connect(self.unpinAll_joints)
-        self.insert_jnts_btn.clicked.connect(self.insert_joints)
-        self.prep_jnts_btn.clicked.connect(self.prep_skeleton)
+        """ Create Connections"""
+        self.loadJointPositionButton.clicked.connect(self.loadJointsPositions)
+        self.saveJointPositionButton.clicked.connect(self.saveJointPositions)
+        self.jointToRotationButton.clicked.connect(self.jointToRotation)
+        self.jointToOrientationButton.clicked.connect(self.jointToOrientation)
+        self.mirrorJointsButton.clicked.connect(self.mirrorJoint)
+        self.pinJointsButton.clicked.connect(self.pinJoints)
+        self.unpinJointsButton.clicked.connect(self.unpinJoints)
+        self.unpinAllJointsButton.clicked.connect(self.unpinAllJoints)
+        self.insertJointsButton.clicked.connect(self.insertJoints)
+        self.prepareJointsButton.clicked.connect(self.prepareSkeleton)
 
     def setBuilder(self, builder):
+        """ Set a builder for widget"""
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
-        self.joint_pos_path_selector.setRelativePath(rigEnv)
+        self.jointPositionPathSelector.setRelativePath(rigEnv)
 
         # update data within the rig
         jointFile = self.builder.getRigData(self.builder.getRigFile(), SKELETON_POS)
         if jointFile:
-            self.joint_pos_path_selector.setPath(jointFile)
+            self.jointPositionPathSelector.setPath(jointFile)
 
     def runWidget(self):
-        self.load_joint_positions()
+        """ Run this widget from the builder breakpoint runner"""
+        self.loadJointsPositions()
 
     @property
     def isChecked(self):
+        """ Check it the widget is checked"""
         return self.mainCollapseableWidget .isChecked()
 
     # CONNECTIONS
-    def load_joint_positions(self):
-        self.builder.loadJoints(self.joint_pos_path_selector.getPath())
+    def loadJointsPositions(self):
+        """ load joints and positions"""
+        self.builder.loadJoints(self.jointPositionPathSelector.getPath())
 
-    def save_joint_positions(self):
+    def saveJointPositions(self):
+        """ save the joint positions"""
         # TODO add a check about saving a blank scene.
-        self.builder.saveJoints(self.joint_pos_path_selector.getPath())
+        self.builder.saveJoints(self.jointPositionPathSelector.getPath())
 
-    def pin_joints(self):
+    def pinJoints(self):
+        """ Pin selected joints"""
         live.pin()
 
-    def unpin_joints(self):
+    def unpinJoints(self):
+        """ Unpin selected joints"""
         live.unpin()
 
-    def unpinAll_joints(self):
+    def unpinAllJoints(self):
+        """ Unpin all joints"""
         pinnedNodes = meta.getTagged("isPinned")
         live.unpin(pinnedNodes)
 
-    def insert_joints(self):
-        jnt_amt = self.insert_jnts_amt_slider.getValue()
+    def insertJoints(self):
+        """ insert joints between two selected joints"""
+        jointAmount = self.insertJointsAmountSlider.getValue()
         selection = cmds.ls(sl=True)
         assert len(selection) == 2, "Must select two joints!"
-        rigamajig2.maya.joint.insertJoints(selection[0], selection[-1], amount=jnt_amt)
+        rigamajig2.maya.joint.insertJoints(selection[0], selection[-1], amount=jointAmount)
 
-    def prep_skeleton(self):
+    def prepareSkeleton(self):
+        """
+        Prepare the skeleton for rig build.
+        This ensures channels are all visable and zero out the rotations
+        """
         joint.addJointOrientToChannelBox(cmds.ls(sl=True))
         rigamajig2.maya.joint.toOrientation(cmds.ls(sl=True))
 
-    def mirror_joint(self):
+    def mirrorJoint(self):
         """ mirror joint"""
         axis = 'x'
-        if self.jntAxisY_rb.isChecked():
+        if self.jointAxisYRadioButton.isChecked():
             axis = 'y'
-        if self.jntAxisZ_rb.isChecked():
+        if self.jointAxisZRadioButton.isChecked():
             axis = 'z'
 
-        mirrorMode = self.mirrorJntMode_cbox.currentText()
+        mirrorMode = self.mirrorJointModeCheckbox.currentText()
         for joint in cmds.ls(sl=True):
             joints = cmds.listRelatives(cmds.ls(sl=True, type='joint'), ad=True, type='joint') or []
             rigamajig2.maya.joint.mirror(joints + [joint], axis=axis, mode=mirrorMode)
 
-    def jnt_to_rotation(self):
+    def jointToRotation(self):
+        """ Convert joint transformation to rotation"""
         rigamajig2.maya.joint.toRotation(cmds.ls(sl=True, type='joint'))
 
-    def jnt_to_orientation(self):
+    def jointToOrientation(self):
+        """ Convert joint transformation to orientation"""
         rigamajig2.maya.joint.toOrientation(cmds.ls(sl=True, type='joint'))

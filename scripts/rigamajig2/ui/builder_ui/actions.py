@@ -29,156 +29,151 @@ import rigamajig2.maya.builder.builder as builder
 
 
 class Actions(object):
+    """ Setup the actions for the builder dialog"""
     def __init__(self, dialog):
         """
-        This class will setup the actions for the the builder Dialog. you must pass in the dialog as the self.dialog parameter
-        :param dialog:
+        This class will setup the actions for the the builder Dialog.
+        You must pass in the dialog as the self.dialog parameter
+
+        :param dialog: dialog to connect the actions to
         """
         self.dialog = dialog
-        self.create_actions()
+        self.createActions()
 
-    def create_actions(self):
+    def createActions(self):
+        """ Create the Actions"""
         # FILE
-        self.new_rig_file_action = QtWidgets.QAction("New Rig File", self.dialog)
-        self.new_rig_file_action.setIcon(QtGui.QIcon(":fileNew.png"))
-        self.new_rig_file_action.triggered.connect(self.create_rig_env)
+        self.newRigFileAction = QtWidgets.QAction("New Rig File", self.dialog)
+        self.newRigFileAction.setIcon(QtGui.QIcon(":fileNew.png"))
+        self.newRigFileAction.triggered.connect(self.createRigEnviornment)
 
-        self.load_rig_file_action = QtWidgets.QAction("Load Rig File", self.dialog)
-        self.load_rig_file_action.setIcon(QtGui.QIcon(":folder-open.png"))
-        self.load_rig_file_action.triggered.connect(self.load_rig_file)
+        self.loadRigFileAction = QtWidgets.QAction("Load Rig File", self.dialog)
+        self.loadRigFileAction.setIcon(QtGui.QIcon(":folder-open.png"))
+        self.loadRigFileAction.triggered.connect(self.loadRigFile)
 
-        self.save_rig_file_action = QtWidgets.QAction("Save Rig File", self.dialog)
-        self.save_rig_file_action.setIcon(QtGui.QIcon(":save.png"))
-        self.save_rig_file_action.triggered.connect(self.save_rig_file)
+        self.saveRigFileAction = QtWidgets.QAction("Save Rig File", self.dialog)
+        self.saveRigFileAction.setIcon(QtGui.QIcon(":save.png"))
+        self.saveRigFileAction.triggered.connect(self.saveRigFile)
 
-        self.reload_rig_file_action = QtWidgets.QAction("Reload Rig File", self.dialog)
-        self.reload_rig_file_action.setIcon(QtGui.QIcon(":refresh.png"))
-        self.reload_rig_file_action.triggered.connect(self.reload_rig_file)
+        self.reloadRigFileAction = QtWidgets.QAction("Reload Rig File", self.dialog)
+        self.reloadRigFileAction.setIcon(QtGui.QIcon(":refresh.png"))
+        self.reloadRigFileAction.triggered.connect(self.reloadRigFile)
 
         # UTILS
-        self.reload_rigamajig_modules_action = QtWidgets.QAction("Reload Rigamajig2 Modules", self.dialog)
-        self.reload_rigamajig_modules_action.triggered.connect(self.reload_rigamajig_modules)
+        self.reloadRigamajigModulesAction = QtWidgets.QAction("Reload Rigamajig2 Modules", self.dialog)
+        self.reloadRigamajigModulesAction.triggered.connect(self.reloadRigamajigModules)
 
         # TOOLS
-        self.run_performance_test_action = QtWidgets.QAction("Run Performance Test", self.dialog)
-        self.run_performance_test_action.triggered.connect(self.run_performace_test)
+        self.runPerformanceTestAction = QtWidgets.QAction("Run Performance Test", self.dialog)
+        self.runPerformanceTestAction.triggered.connect(self.runPerformanceTest)
 
-        self.generate_random_anim_action = QtWidgets.QAction("Generate Random Animation", self.dialog)
-        self.generate_random_anim_action.triggered.connect(self.generate_random_anmation)
+        self.generateRandomAnimationAction = QtWidgets.QAction("Generate Random Animation", self.dialog)
+        self.generateRandomAnimationAction.triggered.connect(self.generateRandomAnimation)
 
         # HELP
-        self.show_documentation_action = QtWidgets.QAction("Documentation", self.dialog)
-        self.show_documentation_action.triggered.connect(self.show_documentation)
+        self.showDocumentationAction = QtWidgets.QAction("Documentation", self.dialog)
+        self.showDocumentationAction.triggered.connect(self.showDocumentation)
 
-        self.show_about_action = QtWidgets.QAction("About", self.dialog)
-        self.show_about_action.triggered.connect(self.show_about)
+        self.showAboutAction = QtWidgets.QAction("About", self.dialog)
+        self.showAboutAction.triggered.connect(self.showAbout)
 
-    def create_rig_env(self):
-        create_dialog = CreateRigEnvDialog()
-        create_dialog.new_env_created.connect(self.dialog.setRigFile)
-        create_dialog.show_dialog()
+    def createRigEnviornment(self):
+        """ Create Rig Enviornment"""
+        createDialog = CreateRigEnvDialog()
+        createDialog.newRigEnviornmentCreated.connect(self.dialog.setRigFile)
+        createDialog.showDialog()
 
-    def load_rig_file(self):
-        file_dialog = QtWidgets.QFileDialog()
-        file_dialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
-        file_dialog.setNameFilters(["Rig Files (*.rig)"])
+    def loadRigFile(self):
+        """ Load a rig file"""
+        fileDialog = QtWidgets.QFileDialog()
+        fileDialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
+        fileDialog.setNameFilters(["Rig Files (*.rig)"])
 
-        fname = file_dialog.exec_()
-        # new_path = cmds.fileDialog2(ds=2,
-        #                             cap="Select a rig file",
-        #                             ff="Rig Files (*.rig)",
-        #                             fm=1,
-        #                             kc='Select'
-        #                             )
+        fileDialog.exec_()
 
-        if file_dialog.selectedFiles():
-            self.dialog.setRigFile(file_dialog.selectedFiles()[0])
+        if fileDialog.selectedFiles():
+            self.dialog.setRigFile(fileDialog.selectedFiles()[0])
 
-    def save_rig_file(self):
-        """
-        Save out a rig file
-        :return:
-        """
+    def saveRigFile(self):
+        """ Save out a rig file """
         data = abstract_data.AbstractData()
         data.read(self.dialog.rigFile)
-        new_data = data.getData()
+        newData = data.getData()
 
         # Save the main feilds
-        new_data[builder.RIG_NAME] = self.dialog.asset_name_le.text()
+        newData[builder.RIG_NAME] = self.dialog.assetNameLineEdit.text()
+        preScripts = self.dialog.modelWidget.preScriptRunner.getCurrentScriptList(relativePaths=True)
+        newData[builder.PRE_SCRIPT] = preScripts
 
-        preScripts = self.dialog.model_widget.preScript_scriptRunner.getCurrentScriptList(relativePaths=True)
-        new_data[builder.PRE_SCRIPT] = preScripts
+        postScripts = self.dialog.buildWidget.postScriptScriptRunner.getCurrentScriptList(relativePaths=True)
+        newData[builder.POST_SCRIPT] = postScripts
 
-        postScripts = self.dialog.build_widget.postScriptScriptRunner.getCurrentScriptList(relativePaths=True)
-        new_data[builder.POST_SCRIPT] = postScripts
-        # new_data[cmptBuilder.POST_SCRIPT] = self.postScript_scriptRunner.getCurrentScriptList(relative_paths=True)
-        pubScripts = self.dialog.publish_widget.publishScriptRunner.getCurrentScriptList(relativePaths=True)
-        new_data[builder.PUB_SCRIPT] = pubScripts
-        # new_data[cmptBuilder.PUB_SCRIPT] = self.publishScript_scriptRunner.getCurrentScriptList(relative_paths=True)
-        # new_data[cmptBuilder.MODEL_FILE] = self.model_path_selector.getPath()
-        new_data[builder.MODEL_FILE] = self.dialog.model_widget.model_path_selector.getPath()
-        # new_data[cmptBuilder.SKELETON_POS] = self.joint_pos_path_selector.getPath()
-        new_data[builder.SKELETON_POS] = self.dialog.joint_widget.joint_pos_path_selector.getPath()
-        # new_data[cmptBuilder.GUIDES] = self.guide_path_selector.getPath()
-        new_data[builder.GUIDES] = self.dialog.initialize_widget.guidePathSelector.getPath()
-        # new_data[cmptBuilder.COMPONENTS] = self.cmpt_path_selector.getPath()
-        new_data[builder.COMPONENTS] = self.dialog.initialize_widget.componentsPathSelector.getPath()
-        # new_data[cmptBuilder.CONTROL_SHAPES] = self.ctl_path_selector.getPath()
-        new_data[builder.CONTROL_SHAPES] = self.dialog.controls_widget.controlPathSelector.getPath()
-        # new_data[cmptBuilder.SKINS] = self.skin_path_selector.getPath()
-        new_data[builder.SKINS] = self.dialog.deformation_widget.skin_path_selector.getPath()
-        # new_data[cmptBuilder.PSD] = self.psd_path_selector.getPath()
-        new_data[builder.PSD] = self.dialog.deformation_widget.psd_path_selector.getPath()
-        # new_data[cmptBuilder.OUTPUT_RIG] = self.out_path_selector.getPath()
-        new_data[builder.OUTPUT_RIG] = self.dialog.publish_widget.outPathSelector.getPath()
-        # new_data[cmptBuilder.OUTPUT_RIG_FILE_TYPE] = self.out_file_type_cb.currentText()
-        new_data[builder.OUTPUT_RIG_FILE_TYPE] = self.dialog.publish_widget.outFileTypeComboBox.currentText()
+        pubScripts = self.dialog.publishWidget.publishScriptRunner.getCurrentScriptList(relativePaths=True)
+        newData[builder.PUB_SCRIPT] = pubScripts
 
-        data.setData(new_data)
+        newData[builder.MODEL_FILE] = self.dialog.modelWidget.modelPathSelector.getPath()
+        newData[builder.SKELETON_POS] = self.dialog.jointWidget.jointPositionPathSelector.getPath()
+        newData[builder.GUIDES] = self.dialog.intalizeWidget.guidePathSelector.getPath()
+        newData[builder.COMPONENTS] = self.dialog.intalizeWidget.componentsPathSelector.getPath()
+        newData[builder.CONTROL_SHAPES] = self.dialog.controlsWidget.controlPathSelector.getPath()
+        newData[builder.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath()
+        newData[builder.PSD] = self.dialog.deformationWidget.psdPathSelector.getPath()
+        newData[builder.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath()
+        newData[builder.OUTPUT_RIG_FILE_TYPE] = self.dialog.publishWidget.outFileTypeComboBox.currentText()
+
+        data.setData(newData)
         data.write(self.dialog.rigFile)
         builder.logger.info("data saved to : {}".format(self.dialog.rigFile))
 
-
-    def reload_rig_file(self):
+    def reloadRigFile(self):
+        """ Reload rig file"""
         self.dialog.setRigFile(self.dialog.rigFile)
 
     # TOOLS MENU
-    def run_performace_test(self):
+    def runPerformanceTest(self):
+        """ Run Performance tests"""
         qc.runPerformanceTest()
 
-    def generate_random_anmation(self):
+    def generateRandomAnimation(self):
+        """ Generate Random animation"""
         qc.generateRandomAnim()
 
-    def reload_rigamajig_modules(self):
+    def reloadRigamajigModules(self):
+        """ Reload riamajig modules"""
         import rigamajig2
         rigamajig2.reloadModule(log=True)
 
     # SHOW HELP
-    def show_documentation(self):
+    def showDocumentation(self):
+        """ Open Documentation"""
         pass
 
-    def show_about(self):
+    def showAbout(self):
+        """ Show about"""
         pass
 
 
 class CreateRigEnvDialog(QtWidgets.QDialog):
+    """ Create new rig environment dialog"""
     WINDOW_TITLE = "Create Rig Enviornment"
 
-    new_env_created = QtCore.Signal(str)
+    newRigEnviornmentCreated = QtCore.Signal(str)
 
-    rig_file_result = None
+    rigFileResult = None
 
-    def show_dialog(self):
+    def showDialog(self):
+        """ Show the dialog"""
         self.exec_()
 
     def __init__(self):
+        """ Constructor for the rig file creation"""
         if sys.version_info.major < 3:
-            maya_main_window = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+            mayaMainWindow = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
         else:
-            maya_main_window = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+            mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
-        super(CreateRigEnvDialog, self).__init__(maya_main_window)
-        self.rig_env = None
+        super(CreateRigEnvDialog, self).__init__(mayaMainWindow)
+        self.rigEnviornment = None
 
         self.setWindowTitle(self.WINDOW_TITLE)
         if cmds.about(ntOS=True):
@@ -191,94 +186,103 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         self.createWidgets()
         self.createLayouts()
         self.createConnections()
-        self.update_create_method()
+        self.updateCreateMethod()
 
     def createWidgets(self):
+        """ Create Widgets"""
+        self.fromArchetypeRadioButton = QtWidgets.QRadioButton("New From Archetype")
+        self.fromExistingRadioButton = QtWidgets.QRadioButton("Clone Existing")
+        self.fromArchetypeRadioButton.setChecked(True)
 
-        self.from_archetype_rb = QtWidgets.QRadioButton("New From Archetype")
-        self.from_existing_rb = QtWidgets.QRadioButton("Clone Existing")
-        self.from_archetype_rb.setChecked(True)
-
-        self.archetype_cb_widget = QtWidgets.QWidget()
-        self.archetype_cb_widget.setFixedHeight(25)
-        self.archetype_cb = QtWidgets.QComboBox()
+        self.archetypeRadioButtonWidget = QtWidgets.QWidget()
+        self.archetypeRadioButtonWidget.setFixedHeight(25)
+        self.archetypeComboBox = QtWidgets.QComboBox()
         for archetype in rigamajig2.maya.builder.core.getAvailableArchetypes():
-            self.archetype_cb.addItem(archetype)
+            self.archetypeComboBox.addItem(archetype)
 
-        self.src_path = pathSelector.PathSelector("Source:", fileMode=2)
-        self.dst_path = pathSelector.PathSelector("New Env:", fileMode=2)
-        self.rig_name_le = QtWidgets.QLineEdit()
-        self.rig_name_le.setPlaceholderText("rig_name")
+        self.sourcePath = pathSelector.PathSelector("Source:", fileMode=2)
+        self.destinationPath = pathSelector.PathSelector("New Env:", fileMode=2)
+        self.rigNameLineEdit = QtWidgets.QLineEdit()
+        self.rigNameLineEdit.setPlaceholderText("rig_name")
 
-        self.create_btn = QtWidgets.QPushButton("Create")
-        self.cancel_btn = QtWidgets.QPushButton("Cancel")
+        self.createButton = QtWidgets.QPushButton("Create")
+        self.cancelButton = QtWidgets.QPushButton("Cancel")
 
     def createLayouts(self):
-        main_layout = QtWidgets.QVBoxLayout(self)
-        main_layout.setContentsMargins(6, 6, 6, 6)
-        main_layout.setSpacing(4)
+        """ Create Layouts"""
+        mainLayout = QtWidgets.QVBoxLayout(self)
+        mainLayout.setContentsMargins(6, 6, 6, 6)
+        mainLayout.setSpacing(4)
 
-        radio_button_layout = QtWidgets.QHBoxLayout()
-        radio_button_layout.addSpacing(15)
-        radio_button_layout.addWidget(self.from_archetype_rb)
-        radio_button_layout.addWidget(self.from_existing_rb)
+        radioButtonLayout = QtWidgets.QHBoxLayout()
+        radioButtonLayout.addSpacing(15)
+        radioButtonLayout.addWidget(self.fromArchetypeRadioButton)
+        radioButtonLayout.addWidget(self.fromExistingRadioButton)
 
-        archetype_cb_layout = QtWidgets.QHBoxLayout(self.archetype_cb_widget)
-        archetype_cb_layout.setContentsMargins(0, 0, 0, 0)
+        archetypeRadioButtonLayout = QtWidgets.QHBoxLayout(self.archetypeRadioButtonWidget)
+        archetypeRadioButtonLayout.setContentsMargins(0, 0, 0, 0)
         label = QtWidgets.QLabel("Archetype:")
         label.setFixedWidth(60)
-        archetype_cb_layout.addWidget(label)
-        archetype_cb_layout.addWidget(self.archetype_cb)
+        archetypeRadioButtonLayout.addWidget(label)
+        archetypeRadioButtonLayout.addWidget(self.archetypeComboBox)
 
-        rig_name_layout = QtWidgets.QHBoxLayout()
+        rigNameLayout = QtWidgets.QHBoxLayout()
         label = QtWidgets.QLabel("Rig Name:")
         label.setFixedWidth(60)
-        rig_name_layout.addWidget(label)
-        rig_name_layout.addWidget(self.rig_name_le)
+        rigNameLayout.addWidget(label)
+        rigNameLayout.addWidget(self.rigNameLineEdit)
 
-        button_layout = QtWidgets.QHBoxLayout()
-        button_layout.addStretch()
-        button_layout.addWidget(self.cancel_btn)
-        button_layout.addWidget(self.create_btn)
+        buttonLayout = QtWidgets.QHBoxLayout()
+        buttonLayout.addStretch()
+        buttonLayout.addWidget(self.cancelButton)
+        buttonLayout.addWidget(self.createButton)
 
-        main_layout.addLayout(radio_button_layout)
-        main_layout.addWidget(self.archetype_cb_widget)
-        main_layout.addWidget(self.src_path)
-        main_layout.addWidget(self.dst_path)
-        main_layout.addLayout(rig_name_layout)
-        main_layout.addLayout(button_layout)
+        mainLayout.addLayout(radioButtonLayout)
+        mainLayout.addWidget(self.archetypeRadioButtonWidget)
+        mainLayout.addWidget(self.sourcePath)
+        mainLayout.addWidget(self.destinationPath)
+        mainLayout.addLayout(rigNameLayout)
+        mainLayout.addLayout(buttonLayout)
 
     def createConnections(self):
-        self.from_archetype_rb.toggled.connect(self.update_create_method)
-        self.from_existing_rb.toggled.connect(self.update_create_method)
+        """ Create Connections"""
+        self.fromArchetypeRadioButton.toggled.connect(self.updateCreateMethod)
+        self.fromExistingRadioButton.toggled.connect(self.updateCreateMethod)
 
-        self.cancel_btn.clicked.connect(self.close)
-        self.create_btn.clicked.connect(self.create_new_rig_env)
+        self.cancelButton.clicked.connect(self.close)
+        self.createButton.clicked.connect(self.createNewRigEnviornment)
 
-    def update_create_method(self):
-        if self.from_archetype_rb.isChecked():
-            self.archetype_cb_widget.setVisible(True)
-            self.src_path.setVisible(False)
+    def updateCreateMethod(self):
+        """
+        Update the UI creation method
+        :return:
+        """
+        if self.fromArchetypeRadioButton.isChecked():
+            self.archetypeRadioButtonWidget.setVisible(True)
+            self.sourcePath.setVisible(False)
         else:
-            self.archetype_cb_widget.setVisible(False)
-            self.src_path.setVisible(True)
+            self.archetypeRadioButtonWidget.setVisible(False)
+            self.sourcePath.setVisible(True)
 
-    def create_new_rig_env(self):
+    def createNewRigEnviornment(self):
+        """
+        Create a new rig enviornment
+        """
 
-        dest_rig_env = self.dst_path.getPath()
-        rig_name = self.rig_name_le.text()
-        if self.from_archetype_rb.isChecked():
-            archetype = self.archetype_cb.currentText()
-            rig_file = rigamajig2.maya.builder.core.newRigEnviornmentFromArchetype(
-                newEnv=dest_rig_env,
+        destinationRigEnviornment = self.destinationPath.getPath()
+        rigName = self.rigNameLineEdit.text()
+        if self.fromArchetypeRadioButton.isChecked():
+            archetype = self.archetypeComboBox.currentText()
+            rigFile = rigamajig2.maya.builder.core.newRigEnviornmentFromArchetype(
+                newEnv=destinationRigEnviornment,
                 archetype=archetype,
-                rigName=rig_name)
+                rigName=rigName)
         else:
-            src_env = self.src_path.getPath()
-            rig_file = rigamajig2.maya.builder.core.createRigEnviornment(
-                sourceEnviornment=src_env,
-                targetEnviornment=dest_rig_env,
-                rigName=rig_name)
-        self.new_env_created.emit(rig_file)
+            sourceEnviornment = self.sourcePath.getPath()
+            rigFile = rigamajig2.maya.builder.core.createRigEnviornment(
+                sourceEnviornment=sourceEnviornment,
+                targetEnviornment=destinationRigEnviornment,
+                rigName=rigName)
+        self.newRigEnviornmentCreated.emit(rigFile)
 
         self.close()

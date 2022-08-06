@@ -21,8 +21,13 @@ from rigamajig2.maya.builder.builder import PSD, SKINS
 
 
 class DeformationWidget(QtWidgets.QWidget):
+    """ Deformation layout for the builder UI """
 
     def __init__(self, builder=None):
+        """
+       Constructor for the deformation widget
+       :param builder: builder to connect to the ui
+       """
         super(DeformationWidget, self).__init__()
 
         self.builder = builder
@@ -32,123 +37,135 @@ class DeformationWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
+        """ Create Widgets"""
         self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
 
-        self.skin_path_selector = pathSelector.PathSelector(
+        self.skinPathSelector = pathSelector.PathSelector(
             "skin:",
             caption="Select the skin weight folder",
             fileFilter=constants.JSON_FILTER,
             fileMode=2)
-        self.load_all_skin_btn = QtWidgets.QPushButton("Load All Skins")
-        self.load_single_skin_btn = QtWidgets.QPushButton("Load Skin")
-        self.save_skin_btn = QtWidgets.QPushButton("Save Skin")
+        self.loadAllSkinButton = QtWidgets.QPushButton("Load All Skins")
+        self.loadSingleSkinButton = QtWidgets.QPushButton("Load Skin")
+        self.saveSkinsButton = QtWidgets.QPushButton("Save Skin")
 
-        self.skinEdit_wgt = collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
-        self.skinEdit_wgt.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
-        self.skinEdit_wgt.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
+        self.skinEditWidget = collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
+        self.skinEditWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
+        self.skinEditWidget.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
 
-        self.copySkinWeights_btn = QtWidgets.QPushButton("Copy Skin Weights and Influences")
-        self.copySkinWeights_btn.setIcon(QtGui.QIcon(":copySkinWeight"))
+        self.copySkinWeightsButton = QtWidgets.QPushButton("Copy Skin Weights and Influences")
+        self.copySkinWeightsButton.setIcon(QtGui.QIcon(":copySkinWeight"))
 
-        self.psd_path_selector = pathSelector.PathSelector(
+        self.psdPathSelector = pathSelector.PathSelector(
             "psd:",
             caption="Select a Pose Reader File",
             fileFilter=constants.JSON_FILTER,
             fileMode=1)
-        self.load_psd_btn = QtWidgets.QPushButton("Load Pose Readers")
-        self.save_psd_btn = QtWidgets.QPushButton("Save Pose Readers")
+        self.loadPsdButton = QtWidgets.QPushButton("Load Pose Readers")
+        self.savePsdButton = QtWidgets.QPushButton("Save Pose Readers")
 
-        self.load_psd_mode_cbox = QtWidgets.QComboBox()
-        self.load_psd_mode_cbox.setFixedHeight(24)
-        self.load_psd_mode_cbox.addItem("append")
-        self.load_psd_mode_cbox.addItem("replace")
+        self.loadPsdModeCheckbox = QtWidgets.QComboBox()
+        self.loadPsdModeCheckbox.setFixedHeight(24)
+        self.loadPsdModeCheckbox.addItem("append")
+        self.loadPsdModeCheckbox.addItem("replace")
 
     def createLayouts(self):
+        """ Create Layouts"""
         # setup the main layout.
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(0)
 
-        skin_btn_layout = QtWidgets.QHBoxLayout()
-        skin_btn_layout.setContentsMargins(0, 0, 0, 0)
-        skin_btn_layout.setSpacing(4)
-        skin_btn_layout.addWidget(self.load_all_skin_btn)
-        skin_btn_layout.addWidget(self.load_single_skin_btn)
-        skin_btn_layout.addWidget(self.save_skin_btn)
+        skinButtonLayout = QtWidgets.QHBoxLayout()
+        skinButtonLayout.setContentsMargins(0, 0, 0, 0)
+        skinButtonLayout.setSpacing(4)
+        skinButtonLayout.addWidget(self.loadAllSkinButton)
+        skinButtonLayout.addWidget(self.loadSingleSkinButton)
+        skinButtonLayout.addWidget(self.saveSkinsButton)
 
-        self.mainCollapseableWidget .addWidget(self.skin_path_selector)
-        self.mainCollapseableWidget .addLayout(skin_btn_layout)
+        self.mainCollapseableWidget .addWidget(self.skinPathSelector)
+        self.mainCollapseableWidget .addLayout(skinButtonLayout)
 
-        self.mainCollapseableWidget .addWidget(self.skinEdit_wgt)
-        self.skinEdit_wgt.addWidget(self.copySkinWeights_btn)
-        self.skinEdit_wgt.addSpacing(4)
+        self.mainCollapseableWidget .addWidget(self.skinEditWidget)
+        self.skinEditWidget.addWidget(self.copySkinWeightsButton)
+        self.skinEditWidget.addSpacing(4)
 
-        psd_btn_layout = QtWidgets.QHBoxLayout()
-        psd_btn_layout.setContentsMargins(0, 0, 0, 0)
-        psd_btn_layout.setSpacing(4)
-        psd_btn_layout.addWidget(self.load_psd_btn)
-        psd_btn_layout.addWidget(self.save_psd_btn)
-        psd_btn_layout.addWidget(self.load_psd_mode_cbox)
+        psdButtonLayout = QtWidgets.QHBoxLayout()
+        psdButtonLayout.setContentsMargins(0, 0, 0, 0)
+        psdButtonLayout.setSpacing(4)
+        psdButtonLayout.addWidget(self.loadPsdButton)
+        psdButtonLayout.addWidget(self.savePsdButton)
+        psdButtonLayout.addWidget(self.loadPsdModeCheckbox)
 
         # add widgets to the collapsable widget.
-        self.mainCollapseableWidget .addWidget(self.psd_path_selector)
-        self.mainCollapseableWidget .addLayout(psd_btn_layout)
+        self.mainCollapseableWidget .addWidget(self.psdPathSelector)
+        self.mainCollapseableWidget .addLayout(psdButtonLayout)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.mainCollapseableWidget )
+        self.mainLayout.addWidget(self.mainCollapseableWidget)
 
     def createConnections(self):
-        self.load_all_skin_btn.clicked.connect(self.load_all_skins)
-        self.load_single_skin_btn.clicked.connect(self.load_single_skin)
-        self.save_skin_btn.clicked.connect(self.save_skin)
-        self.copySkinWeights_btn.clicked.connect(self.copySkinWeights)
-        self.load_psd_btn.clicked.connect(self.load_posereaders)
-        self.save_psd_btn.clicked.connect(self.save_posereaders)
+        """ Create Connections"""
+        self.loadAllSkinButton.clicked.connect(self.loadAllSkins)
+        self.loadSingleSkinButton.clicked.connect(self.loadSingleSkin)
+        self.saveSkinsButton.clicked.connect(self.saveSkin)
+        self.copySkinWeightsButton.clicked.connect(self.copySkinWeights)
+        self.loadPsdButton.clicked.connect(self.loadPoseReaders)
+        self.savePsdButton.clicked.connect(self.savePoseReaders)
 
     def setBuilder(self, builder):
+        """ Set a builder for intialize widget"""
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
-        self.skin_path_selector.setRelativePath(rigEnv)
-        self.psd_path_selector.setRelativePath(rigEnv)
+        self.skinPathSelector.setRelativePath(rigEnv)
+        self.psdPathSelector.setRelativePath(rigEnv)
 
         # update data within the rig
         skinFile = self.builder.getRigData(self.builder.getRigFile(), SKINS)
         if skinFile:
-            self.skin_path_selector.setPath(skinFile)
+            self.skinPathSelector.setPath(skinFile)
 
         psdFile = self.builder.getRigData(self.builder.getRigFile(), PSD)
         if psdFile:
-            self.psd_path_selector.setPath(psdFile)
+            self.psdPathSelector.setPath(psdFile)
 
     def runWidget(self):
-        self.load_posereaders()
-        self.load_all_skins()
+        """ Run this widget from the builder breakpoint runner"""
+        self.loadPoseReaders()
+        self.loadAllSkins()
 
     @property
     def isChecked(self):
+        """ Check it the widget is checked"""
         return self.mainCollapseableWidget .isChecked()
 
     # CONNECTIONS
-    def load_all_skins(self):
-        self.builder.loadSkinWeights(self.skin_path_selector.getPath())
+    def loadAllSkins(self):
+        """Load all skin weights in the given folder"""
+        self.builder.loadSkinWeights(self.skinPathSelector.getPath())
 
-    def load_single_skin(self):
+    def loadSingleSkin(self):
+        """Load a single skin file"""
         path = cmds.fileDialog2(ds=2, cap="Select a skin file", ff=JSON_FILTER, okc="Select",
-                                dir=self.skin_path_selector.getPath())
+                                dir=self.skinPathSelector.getPath())
         if path:
             deform.loadSingleSkin(path[0])
 
-    def save_skin(self):
-        self.builder.saveSkinWeights(path=self.skin_path_selector.getPath())
+    def saveSkin(self):
+        """Save the skin weights"""
+        self.builder.saveSkinWeights(path=self.skinPathSelector.getPath())
 
-    def load_posereaders(self):
-        self.builder.loadPoseReaders(self.psd_path_selector.getPath(),
-                                     replace=self.load_psd_mode_cbox.currentIndex())
+    def loadPoseReaders(self):
+        """ Save load pose reader setup from json using the builder """
+        self.builder.loadPoseReaders(self.psdPathSelector.getPath(),
+                                     replace=self.loadPsdModeCheckbox.currentIndex())
 
-    def save_posereaders(self):
-        self.builder.savePoseReaders(self.psd_path_selector.getPath())
+    def savePoseReaders(self):
+        """ Save pose reader setup to json using the builder """
+        self.builder.savePoseReaders(self.psdPathSelector.getPath())
 
     def copySkinWeights(self):
+        """ Copy Skin weights"""
         import rigamajig2.maya.skinCluster as rig_skinCluster
         src = cmds.ls(sl=True)[0]
         dst = cmds.ls(sl=True)[1:]

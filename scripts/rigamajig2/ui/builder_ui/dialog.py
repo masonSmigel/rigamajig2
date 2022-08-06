@@ -50,29 +50,34 @@ LARGE_BTN_HEIGHT = 35
 EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 
 
+# this is a long function allow more instance attributes for the widgets
+# pylint: disable = too-many-instance-attributes
 class BuilderDialog(QtWidgets.QDialog):
+    """ Builder dialog"""
     WINDOW_TITLE = "Rigamajig2 Builder"
 
-    dlg_instance = None
+    dialogInstance = None
 
     @classmethod
-    def show_dialog(cls):
-        if not cls.dlg_instance:
-            cls.dlg_instance = BuilderDialog()
+    def showDialog(cls):
+        """ Show the Builder Dialog """
+        if not cls.dialogInstance:
+            cls.dialogInstance = BuilderDialog()
 
-        if cls.dlg_instance.isHidden():
-            cls.dlg_instance.show()
+        if cls.dialogInstance.isHidden():
+            cls.dialogInstance.show()
         else:
-            cls.dlg_instance.raise_()
-            cls.dlg_instance.activateWindow()
+            cls.dialogInstance.raise_()
+            cls.dialogInstance.activateWindow()
 
     def __init__(self):
+        """ Constructor for the builder dialog"""
         if sys.version_info.major < 3:
-            maya_main_window = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+            mayaMainWindow = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
         else:
-            maya_main_window = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+            mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
-        super(BuilderDialog, self).__init__(maya_main_window)
+        super(BuilderDialog, self).__init__(mayaMainWindow)
         self.rigEnviornment = None
         self.rigBuilder = None
 
@@ -84,157 +89,172 @@ class BuilderDialog(QtWidgets.QDialog):
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
         self.setMinimumSize(380, 825)
 
-        self.create_menus()
+        self.createMenus()
         self.createWidgets()
         self.createLayouts()
         self.createConnections()
 
-    def create_menus(self):
+    def createMenus(self):
         """create menu actions"""
-        self.main_menu = QtWidgets.QMenuBar()
+        self.mainMenu = QtWidgets.QMenuBar()
 
-        file_menu = self.main_menu.addMenu("File")
+        fileMenu = self.mainMenu.addMenu("File")
         self.actions = actions.Actions(self)
-        file_menu.addAction(self.actions.new_rig_file_action)
-        file_menu.addAction(self.actions.load_rig_file_action)
-        file_menu.addAction(self.actions.save_rig_file_action)
-        file_menu.addSeparator()
-        file_menu.addAction(self.actions.reload_rig_file_action)
+        fileMenu.addAction(self.actions.newRigFileAction)
+        fileMenu.addAction(self.actions.loadRigFileAction)
+        fileMenu.addAction(self.actions.saveRigFileAction)
+        fileMenu.addSeparator()
+        fileMenu.addAction(self.actions.reloadRigFileAction)
 
-        utils_menu = self.main_menu.addMenu("Utils")
-        utils_menu.addAction(self.actions.reload_rigamajig_modules_action)
+        utilsMenu = self.mainMenu.addMenu("Utils")
+        utilsMenu.addAction(self.actions.reloadRigamajigModulesAction)
 
-        qc_menu = self.main_menu.addMenu("QC")
-        qc_menu.addAction(self.actions.run_performance_test_action)
-        qc_menu.addAction(self.actions.generate_random_anim_action)
+        qcMenu = self.mainMenu.addMenu("QC")
+        qcMenu.addAction(self.actions.runPerformanceTestAction)
+        qcMenu.addAction(self.actions.generateRandomAnimationAction)
 
-        help_menu = self.main_menu.addMenu("Help")
-        help_menu.addAction(self.actions.show_documentation_action)
-        help_menu.addAction(self.actions.show_about_action)
+        helpmenu = self.mainMenu.addMenu("Help")
+        helpmenu.addAction(self.actions.showDocumentationAction)
+        helpmenu.addAction(self.actions.showAboutAction)
 
     def createWidgets(self):
-        self.rig_path_selector = pathSelector.PathSelector(caption='Select a Rig File', fileFilter="Rig Files (*.rig)", fileMode=1)
+        """ Create Widgets"""
+        self.rigPathSelector = pathSelector.PathSelector(caption='Select a Rig File', fileFilter="Rig Files (*.rig)",
+                                                         fileMode=1)
 
-        self.create_new_rigenv = QtWidgets.QPushButton("New Rig Env")
-        self.create_new_rigenv.setToolTip("Create a new rig enviornment")
+        self.createNewRigEnviornmentButton = QtWidgets.QPushButton("New Rig Env")
+        self.createNewRigEnviornmentButton.setToolTip("Create a new rig enviornment")
 
-        self.asset_name_le = QtWidgets.QLineEdit()
-        self.asset_name_le.setPlaceholderText("asset_name")
+        self.assetNameLineEdit = QtWidgets.QLineEdit()
+        self.assetNameLineEdit.setPlaceholderText("asset_name")
 
-        self.main_widgets = list()
+        self.mainWidgets = list()
 
-        self.model_widget = model_widget.ModelWidget(self.rigBuilder)
-        self.joint_widget = joint_widget.JointWidget(self.rigBuilder)
-        self.controls_widget = controls_widget.ControlsWidget(self.rigBuilder)
-        self.initialize_widget = initalize_widget.InitializeWidget(self.rigBuilder)
-        self.build_widget = build_widget.BuildWidget(self.rigBuilder)
-        self.deformation_widget = deformation_widget.DeformationWidget(self.rigBuilder)
-        self.publish_widget = publish_widget.PublishWidget(self.rigBuilder)
+        self.modelWidget = model_widget.ModelWidget(self.rigBuilder)
+        self.jointWidget = joint_widget.JointWidget(self.rigBuilder)
+        self.controlsWidget = controls_widget.ControlsWidget(self.rigBuilder)
+        self.intalizeWidget = initalize_widget.InitializeWidget(self.rigBuilder)
+        self.buildWidget = build_widget.BuildWidget(self.rigBuilder)
+        self.deformationWidget = deformation_widget.DeformationWidget(self.rigBuilder)
+        self.publishWidget = publish_widget.PublishWidget(self.rigBuilder)
 
-        self.main_widgets = [self.model_widget,
-                             self.joint_widget,
-                             self.initialize_widget,
-                             self.build_widget,
-                             self.controls_widget,
-                             self.deformation_widget,
-                             self.publish_widget]
+        self.mainWidgets = [self.modelWidget,
+                            self.jointWidget,
+                            self.intalizeWidget,
+                            self.buildWidget,
+                            self.controlsWidget,
+                            self.deformationWidget,
+                            self.publishWidget]
 
-        self.run_selected_btn = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
-        self.run_btn = QtWidgets.QPushButton(QtGui.QIcon(":executeAll.png"), "Run")
-        self.run_btn.setFixedWidth(80)
+        self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
+        self.runButton = QtWidgets.QPushButton(QtGui.QIcon(":executeAll.png"), "Run")
+        self.runButton.setFixedWidth(80)
 
-        self.close_btn = QtWidgets.QPushButton("Close")
+        self.closeButton = QtWidgets.QPushButton("Close")
 
     def createLayouts(self):
+        """ Create Layouts"""
+        rigNameLayout = QtWidgets.QHBoxLayout()
+        rigNameLayout.addWidget(QtWidgets.QLabel("Rig Name:"))
+        rigNameLayout.addWidget(self.assetNameLineEdit)
+        rigNameLayout.addWidget(self.createNewRigEnviornmentButton)
 
-        rig_char_name_layout = QtWidgets.QHBoxLayout()
-        rig_char_name_layout.addWidget(QtWidgets.QLabel("Rig Name:"))
-        rig_char_name_layout.addWidget(self.asset_name_le)
-        rig_char_name_layout.addWidget(self.create_new_rigenv)
-
-        rig_env_layout = QtWidgets.QVBoxLayout()
-        rig_env_layout.addWidget(self.rig_path_selector)
-        rig_env_layout.addLayout(rig_char_name_layout)
+        rigEnviornmentLayout = QtWidgets.QVBoxLayout()
+        rigEnviornmentLayout.addWidget(self.rigPathSelector)
+        rigEnviornmentLayout.addLayout(rigNameLayout)
 
         # add the collapseable widgets
-        build_layout = QtWidgets.QVBoxLayout()
-        build_layout.addWidget(self.model_widget)
-        build_layout.addWidget(self.joint_widget)
-        build_layout.addWidget(self.initialize_widget)
-        build_layout.addWidget(self.build_widget)
-        build_layout.addWidget(self.controls_widget)
-        build_layout.addWidget(self.deformation_widget)
-        build_layout.addWidget(self.publish_widget)
-        build_layout.addStretch()
+        buildLayout = QtWidgets.QVBoxLayout()
+        buildLayout.addWidget(self.modelWidget)
+        buildLayout.addWidget(self.jointWidget)
+        buildLayout.addWidget(self.intalizeWidget)
+        buildLayout.addWidget(self.buildWidget)
+        buildLayout.addWidget(self.controlsWidget)
+        buildLayout.addWidget(self.deformationWidget)
+        buildLayout.addWidget(self.publishWidget)
+        buildLayout.addStretch()
 
         # groups
-        rig_env_grp = QtWidgets.QGroupBox('Rig Enviornment')
-        rig_env_grp.setLayout(rig_env_layout)
+        rigEnvornmentGroup = QtWidgets.QGroupBox('Rig Enviornment')
+        rigEnvornmentGroup.setLayout(rigEnviornmentLayout)
 
-        build_grp = QtWidgets.QGroupBox('Build')
-        build_grp.setLayout(build_layout)
+        buildGroup = QtWidgets.QGroupBox('Build')
+        buildGroup.setLayout(buildLayout)
 
         # lower persistant buttons (AKA close)
-        low_buttons_layout = QtWidgets.QVBoxLayout()
-        run_buttons_layout = QtWidgets.QHBoxLayout()
-        run_buttons_layout.addWidget(self.run_selected_btn)
-        run_buttons_layout.addWidget(self.run_btn)
+        lowButtonsLayout = QtWidgets.QVBoxLayout()
+        runButtonLayout = QtWidgets.QHBoxLayout()
+        runButtonLayout.addWidget(self.runSelectedButton)
+        runButtonLayout.addWidget(self.runButton)
 
-        low_buttons_layout.addLayout(run_buttons_layout)
-        low_buttons_layout.addWidget(self.close_btn)
+        lowButtonsLayout.addLayout(runButtonLayout)
+        lowButtonsLayout.addWidget(self.closeButton)
 
         # scrollable area
-        body_wdg = QtWidgets.QWidget()
-        body_layout = QtWidgets.QVBoxLayout(body_wdg)
-        body_layout.setContentsMargins(0, 0, 0, 0)
-        body_layout.addWidget(rig_env_grp)
-        body_layout.addWidget(build_grp)
+        bodyWidget = QtWidgets.QWidget()
+        bodyLayout = QtWidgets.QVBoxLayout(bodyWidget)
+        bodyLayout.setContentsMargins(0, 0, 0, 0)
+        bodyLayout.addWidget(rigEnvornmentGroup)
+        bodyLayout.addWidget(buildGroup)
 
-        body_scroll_area = QtWidgets.QScrollArea()
-        body_scroll_area.setFrameShape(QtWidgets.QFrame.NoFrame)
-        body_scroll_area.setWidgetResizable(True)
-        body_scroll_area.setWidget(body_wdg)
+        bodyScrollArea = QtWidgets.QScrollArea()
+        bodyScrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
+        bodyScrollArea.setWidgetResizable(True)
+        bodyScrollArea.setWidget(bodyWidget)
 
         # main layout
-        main_layout = QtWidgets.QVBoxLayout(self)
-        main_layout.setContentsMargins(4, 4, 4, 4)
-        main_layout.setSpacing(4)
-        main_layout.setMenuBar(self.main_menu)
-        main_layout.addWidget(body_scroll_area)
-        main_layout.addLayout(low_buttons_layout)
+        mainLayout = QtWidgets.QVBoxLayout(self)
+        mainLayout.setContentsMargins(4, 4, 4, 4)
+        mainLayout.setSpacing(4)
+        mainLayout.setMenuBar(self.mainMenu)
+        mainLayout.addWidget(bodyScrollArea)
+        mainLayout.addLayout(lowButtonsLayout)
 
     def createConnections(self):
+        """ Create Connections"""
 
         # setup each widget with a connection to uncheck all over widgets when one is checked.
         # This ensures all setups until a breakpoint are run
-        self.model_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.model_widget))
-        self.joint_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.joint_widget))
-        self.initialize_widget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.initialize_widget))
-        self.build_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.build_widget))
-        self.controls_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.controls_widget))
-        self.deformation_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.deformation_widget))
-        self.publish_widget.mainCollapseableWidget .headerWidget.checkbox.clicked.connect(lambda x:self.update_widget_checks(self.publish_widget))
+        self.modelWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.updateWidgetChecks(self.modelWidget))
+        self.jointWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.updateWidgetChecks(self.jointWidget))
+        self.intalizeWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.updateWidgetChecks(self.intalizeWidget))
+        self.buildWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.updateWidgetChecks(self.buildWidget))
+        self.controlsWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.updateWidgetChecks(self.controlsWidget))
+        self.deformationWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.updateWidgetChecks(self.deformationWidget))
+        self.publishWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.updateWidgetChecks(self.publishWidget))
 
-        self.rig_path_selector.selectPathButton.clicked.connect(self.path_selector_load_rig_file)
-        self.create_new_rigenv.clicked.connect(self.actions.create_rig_env)
-        self.run_selected_btn.clicked.connect(self.run_selected)
-        self.run_btn.clicked.connect(self.run_all)
-        self.close_btn.clicked.connect(self.close)
+        self.rigPathSelector.selectPathButton.clicked.connect(self.pathSelectorLoadRigFile)
+        self.createNewRigEnviornmentButton.clicked.connect(self.actions.createRigEnviornment)
+        self.runSelectedButton.clicked.connect(self.runSelected)
+        self.runButton.clicked.connect(self.runAll)
+        self.closeButton.clicked.connect(self.close)
 
     # --------------------------------------------------------------------------------
     # Connections
     # --------------------------------------------------------------------------------
 
-    def path_selector_load_rig_file(self):
-        new_path = self.rig_path_selector.getPath()
-        if new_path:
-            self.setRigFile(new_path)
+    def pathSelectorLoadRigFile(self):
+        """ Load a rig file from the path selector """
+        newPath = self.rigPathSelector.getPath()
+        if newPath:
+            self.setRigFile(newPath)
 
     def setRigFile(self, path=None):
-        self.rig_path_selector.selectPath(path=path)
-        file_info = QtCore.QFileInfo(self.rig_path_selector.getPath())
-        self.rigEnviornment = file_info.path()
-        self.rigFile = file_info.filePath()
+        """
+        Set the rig file to the given path
+        :param path: rig file to set
+        """
+        self.rigPathSelector.selectPath(path=path)
+        fileInfo = QtCore.QFileInfo(self.rigPathSelector.getPath())
+        self.rigEnviornment = fileInfo.path()
+        self.rigFile = fileInfo.filePath()
 
         self.rigBuilder = rigamajig2.maya.builder.builder.Builder(self.rigFile)
 
@@ -243,25 +263,25 @@ class BuilderDialog(QtWidgets.QDialog):
 
         # setup ui Data
         rigName = rigamajig2.maya.builder.builder.RIG_NAME
-        self.asset_name_le.setText(self.rigBuilder.getRigData(self.rigFile, rigName))
+        self.assetNameLineEdit.setText(self.rigBuilder.getRigData(self.rigFile, rigName))
 
         # set paths and widgets relative to the rig env
-        for widget in self.main_widgets:
+        for widget in self.mainWidgets:
             widget.setBuilder(builder=self.rigBuilder)
 
     # BULDER FUNCTIONS
-    def update_widget_checks(self, selectedWidget):
+    def updateWidgetChecks(self, selectedWidget):
         """ This function ensures only one build step is selected at a time. it is run whenever a checkbox is toggled."""
-        for widget in self.main_widgets:
+        for widget in self.mainWidgets:
             if widget is not selectedWidget:
                 widget.mainCollapseableWidget.setChecked(False)
 
-    def run_selected(self):
+    def runSelected(self):
         """run selected steps"""
 
         # ensure at least one breakpoint is selected
         breakpointSelected = False
-        for widget in self.main_widgets:
+        for widget in self.mainWidgets:
             if widget.mainCollapseableWidget.isChecked():
                 breakpointSelected = True
 
@@ -273,7 +293,7 @@ class BuilderDialog(QtWidgets.QDialog):
 
         # because widgets are added to the ui and the list in oder they can be run sequenctially.
         # when we hit a widget that is checked then the loop stops.
-        for widget in self.main_widgets:
+        for widget in self.mainWidgets:
             widget.runWidget()
 
             if widget.isChecked:
@@ -282,25 +302,27 @@ class BuilderDialog(QtWidgets.QDialog):
         runTime = time.time() - startTime
         print("Time Elapsed: {}".format(str(runTime)))
 
-    def run_all(self):
+    def runAll(self):
+        """ Run builder and update the component manager"""
         self.rigBuilder.run()
-        self.initialize_widget.componentManager.loadFromScene()
+        self.intalizeWidget.componentManager.loadFromScene()
 
     def closeEvent(self, e):
+        """ Override the close event in order to disable the component manager script node"""
         super(BuilderDialog, self).closeEvent(e)
-        self.initialize_widget.componentManager.setScriptJobEnabled(False)
+        self.intalizeWidget.componentManager.setScriptJobEnabled(False)
 
 
 if __name__ == '__main__':
 
     try:
-        rigamajig_builder_dialog.close()
-        rigamajig_builder_dialog.deleteLater()
+        dialog.close()
+        dialog.deleteLater()
     except:
         pass
+    # pylint: disable = invalid-name
+    dialog = BuilderDialog()
+    dialog.show()
 
-    rigamajig_builder_dialog = BuilderDialog()
-    rigamajig_builder_dialog.show()
-
-    rigamajig_builder_dialog.setRigFile(
+    dialog.setRigFile(
         path='/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/biped.rig')

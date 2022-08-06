@@ -20,6 +20,7 @@ from rigamajig2.maya.builder.builder import MODEL_FILE, PRE_SCRIPT
 
 
 class ModelWidget(QtWidgets.QWidget):
+    """ Model layout for the builder UI """
 
     def __init__(self, builder=None):
         super(ModelWidget, self).__init__()
@@ -31,77 +32,85 @@ class ModelWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
+        """ Create Widgets"""
         self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Model/ Setup Scene', addCheckbox=True)
-        self.model_path_selector = pathSelector.PathSelector(
+        self.modelPathSelector = pathSelector.PathSelector(
             "model:",
             caption="Select a Model file",
             fileFilter=constants.MAYA_FILTER,
             fileMode=1
             )
-        self.import_model_btn = QtWidgets.QPushButton('Import Model')
-        self.open_model_btn = QtWidgets.QPushButton('Open Model')
-        self.open_model_btn.setFixedWidth(100)
+        self.importModelButton = QtWidgets.QPushButton('Import Model')
+        self.openModelButton = QtWidgets.QPushButton('Open Model')
+        self.openModelButton.setFixedWidth(100)
 
         # pre script
-        self.preScript_scriptRunner = scriptRunner.ScriptRunner(title="Pre-Scripts:")
+        self.preScriptRunner = scriptRunner.ScriptRunner(title="Pre-Scripts:")
 
     def createLayouts(self):
+        """ Create Layouts"""
         # setup the main layout.
-        self.main_layout = QtWidgets.QVBoxLayout(self)
-        self.main_layout.setContentsMargins(0, 0, 0, 0)
-        self.main_layout.setSpacing(0)
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(0)
 
-        self.mainCollapseableWidget .addWidget(self.preScript_scriptRunner)
+        self.mainCollapseableWidget .addWidget(self.preScriptRunner)
 
         # setup the button layout
-        model_btn_layout = QtWidgets.QHBoxLayout()
-        model_btn_layout.setContentsMargins(0, 0, 0, 0)
-        model_btn_layout.setSpacing(4)
-        model_btn_layout.addWidget(self.import_model_btn)
-        model_btn_layout.addWidget(self.open_model_btn)
+        modelButtonLayout = QtWidgets.QHBoxLayout()
+        modelButtonLayout.setContentsMargins(0, 0, 0, 0)
+        modelButtonLayout.setSpacing(4)
+        modelButtonLayout.addWidget(self.importModelButton)
+        modelButtonLayout.addWidget(self.openModelButton)
 
         # add widgets to the collapsable widget.
         self.mainCollapseableWidget .addSpacing(10)
-        self.mainCollapseableWidget .addWidget(self.model_path_selector)
-        self.mainCollapseableWidget .addLayout(model_btn_layout)
+        self.mainCollapseableWidget .addWidget(self.modelPathSelector)
+        self.mainCollapseableWidget .addLayout(modelButtonLayout)
 
         # add the widget to the main layout
-        self.main_layout.addWidget(self.mainCollapseableWidget )
+        self.mainLayout.addWidget(self.mainCollapseableWidget)
 
     def createConnections(self):
-        self.import_model_btn.clicked.connect(self.import_model)
-        self.open_model_btn.clicked.connect(self.open_model)
+        """ Create Connections """
+        self.importModelButton.clicked.connect(self.importModel)
+        self.openModelButton.clicked.connect(self.openModel)
 
     def setBuilder(self, builder):
+        """ Set a builder for model widget"""
         rigEnv = builder.getRigEnviornment()
         rigFile = builder.getRigFile()
         self.builder = builder
-        self.model_path_selector.setRelativePath(rigEnv)
+        self.modelPathSelector.setRelativePath(rigEnv)
 
         # clear the ui
-        self.preScript_scriptRunner.clearScript()
+        self.preScriptRunner.clearScript()
 
         # update data within the rig
         modelFile = self.builder.getRigData(self.builder.getRigFile(), MODEL_FILE)
         if modelFile:
-            self.model_path_selector.setPath(modelFile)
+            self.modelPathSelector.setPath(modelFile)
 
         # update the script runner
-        self.preScript_scriptRunner.setRelativeDirectory(rigEnv)
+        self.preScriptRunner.setRelativeDirectory(rigEnv)
         for path in self.builder.getRigData(rigFile, PRE_SCRIPT):
-            self.preScript_scriptRunner.addScripts(self.builder.getAbsoultePath(path))
+            self.preScriptRunner.addScripts(self.builder.getAbsoultePath(path))
 
     def runWidget(self):
-        self.preScript_scriptRunner.executeAllScripts()
-        self.import_model()
+        """ Run this widget from the builder breakpoint runner"""
+        self.preScriptRunner.executeAllScripts()
+        self.importModel()
 
     @property
     def isChecked(self):
+        """ Check it the widget is checked"""
         return self.mainCollapseableWidget .isChecked()
 
     # CONNECTIONS
-    def import_model(self):
-        self.builder.importModel(self.model_path_selector.getPath())
+    def importModel(self):
+        """Import model from builder"""
+        self.builder.importModel(self.modelPathSelector.getPath())
 
-    def open_model(self):
-        cmds.file(self.model_path_selector.getPath(), o=True, f=True)
+    def openModel(self):
+        """ Open the model file """
+        cmds.file(self.modelPathSelector.getPath(), o=True, f=True)

@@ -1,5 +1,20 @@
 # Change Log 
 
+## 1.0.3
+
+
+### Added: 
+* Implemented archetype layering system. Shared data can be stacked via the 
+pre_script, post_script, and pub_scripts. Rigs will inherit all scripts from all 
+previous archetypes. 
+  * Note: all archetypes inherit from base. Core rig functionaly should be stored here. 
+* Added `joint.createInterpJoint` to the joint module. This will create a joint that blends 
+transformation between the given joint and a parent. 
+An attribute is provided on the new joint for to control the interpolation. 
+
+### Changed: 
+* refactored the name of `rig_builder` to `builder`
+* refactored `builder.utils` to `builder.core`
 
 ## 1.0.2
 
@@ -18,6 +33,8 @@ Data includes:
 ### Changed: 
 * Changed the name of `meta.addMessageConnection` to `meta.createMessageConnection`. 
 * Changed the name of `container.listNodes` to `container.getNodesInContainer`
+
+
 ## 1.0.1
 
 ### Added: 

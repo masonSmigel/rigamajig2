@@ -61,6 +61,7 @@ def matchRotate(source, target):
     cmds.xform(target, ws=True, rotation=angles)
 
 
+# pylint: disable = too-many-statements
 def createAtSelection(selection=None, mode='single', type='locator'):
     """
     create a locator at the current selection.
@@ -163,8 +164,3 @@ def createAtSelection(selection=None, mode='single', type='locator'):
                 locators.append(loc)
 
     return locators
-
-
-if __name__ == '__main__':
-    selection = cmds.ls(sl=True)
-    createAtSelection(selection, mode='single')

@@ -21,7 +21,7 @@ from PySide2 import QtCore
 from shiboken2 import wrapInstance
 
 # RIGAMJIG
-import rigamajig2.maya.builder.constants
+from rigamajig2.maya.builder import constants
 import rigamajig2.maya.qc as qc
 import rigamajig2.maya.data.abstract_data as abstract_data
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
@@ -102,29 +102,25 @@ class Actions(object):
         newData = data.getData()
 
         # Save the main feilds
-        newData[rigamajig2.maya.builder.constants.RIG_NAME] = self.dialog.assetNameLineEdit.text()
+        newData[constants.RIG_NAME] = self.dialog.assetNameLineEdit.text()
         preScripts = self.dialog.modelWidget.preScriptRunner.getCurrentScriptList(relativePaths=True)
-        newData[rigamajig2.maya.builder.constants.PRE_SCRIPT] = preScripts
+        newData[constants.PRE_SCRIPT] = preScripts
 
         postScripts = self.dialog.buildWidget.postScriptScriptRunner.getCurrentScriptList(relativePaths=True)
-        newData[rigamajig2.maya.builder.constants.POST_SCRIPT] = postScripts
+        newData[constants.POST_SCRIPT] = postScripts
 
         pubScripts = self.dialog.publishWidget.publishScriptRunner.getCurrentScriptList(relativePaths=True)
-        newData[rigamajig2.maya.builder.constants.PUB_SCRIPT] = pubScripts
+        newData[constants.PUB_SCRIPT] = pubScripts
 
-        newData[rigamajig2.maya.builder.constants.MODEL_FILE] = self.dialog.modelWidget.modelPathSelector.getPath()
-        newData[
-            rigamajig2.maya.builder.constants.SKELETON_POS] = self.dialog.jointWidget.jointPositionPathSelector.getPath()
-        newData[rigamajig2.maya.builder.constants.GUIDES] = self.dialog.intalizeWidget.guidePathSelector.getPath()
-        newData[
-            rigamajig2.maya.builder.constants.COMPONENTS] = self.dialog.intalizeWidget.componentsPathSelector.getPath()
-        newData[
-            rigamajig2.maya.builder.constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlPathSelector.getPath()
-        newData[rigamajig2.maya.builder.constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath()
-        newData[rigamajig2.maya.builder.constants.PSD] = self.dialog.deformationWidget.psdPathSelector.getPath()
-        newData[rigamajig2.maya.builder.constants.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath()
-        newData[
-            rigamajig2.maya.builder.constants.OUTPUT_RIG_FILE_TYPE] = self.dialog.publishWidget.outFileTypeComboBox.currentText()
+        newData[constants.MODEL_FILE] = self.dialog.modelWidget.modelPathSelector.getPath()
+        newData[constants.SKELETON_POS] = self.dialog.jointWidget.jointPositionPathSelector.getPath()
+        newData[constants.GUIDES] = self.dialog.intalizeWidget.guidePathSelector.getPath()
+        newData[constants.COMPONENTS] = self.dialog.intalizeWidget.componentsPathSelector.getPath()
+        newData[constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlPathSelector.getPath()
+        newData[constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath()
+        newData[constants.PSD] = self.dialog.deformationWidget.psdPathSelector.getPath()
+        newData[constants.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath()
+        newData[constants.OUTPUT_RIG_FILE_TYPE] = self.dialog.publishWidget.outFileTypeComboBox.currentText()
 
         data.setData(newData)
         data.write(self.dialog.rigFile)

@@ -8,6 +8,9 @@ from rigamajig2.maya.test.mayaunittest import TestCase
 class TestCurveData(TestCase):
 
     def test_save_and_load_data(self):
+        """
+        Test the import and export of curve data
+        """
         file_path = self.getTempFilename("test_curve_data.json")
         cmds.circle(n='testCircle')
 

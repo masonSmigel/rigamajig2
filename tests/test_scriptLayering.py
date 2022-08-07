@@ -25,7 +25,9 @@ class TestBuilderScriptLayering(TestCase):
     """ Test the builder script layering functionality"""
 
     def test_builderlayering(self):
-        """ Run a test to ensure the script layering is resulting in two lists of equal length"""
+        """
+        Ensure the script layering is resulting in two lists of equal length
+        """
         with logger.DisableLogger():
             tempDir = mayaunittest.Settings.temp_dir
             rigFile = core.newRigEnviornmentFromArchetype(tempDir, "biped", "tempRig")

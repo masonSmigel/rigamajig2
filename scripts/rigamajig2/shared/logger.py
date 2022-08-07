@@ -12,10 +12,11 @@ import logging
 
 
 class DisableLogger():
+    """ Context manager to disable all logger messages from any logger."""
     def __enter__(self):
         logging.disable(logging.CRITICAL)
 
-    def __exit__(self, exit_type, exit_value, exit_traceback):
+    def __exit__(self, exitType, exitValue, traceback):
         logging.disable(logging.NOTSET)
 
 

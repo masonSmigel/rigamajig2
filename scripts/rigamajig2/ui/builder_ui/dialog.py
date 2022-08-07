@@ -24,10 +24,9 @@ from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
 # RIGAMAJIG
-import rigamajig2.maya.builder.builder
-import rigamajig2.maya.builder.constants
-import rigamajig2.maya.builder.core
-import rigamajig2.shared.common as common
+from rigamajig2.maya.builder import builder
+from rigamajig2.maya.builder import constants
+from rigamajig2.shared import common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
 from rigamajig2.ui.builder_ui import model_widget
 from rigamajig2.ui.builder_ui import joint_widget
@@ -129,6 +128,8 @@ class BuilderDialog(QtWidgets.QDialog):
         self.assetNameLineEdit = QtWidgets.QLineEdit()
         self.assetNameLineEdit.setPlaceholderText("asset_name")
 
+        self.archetypeBaseLabel = QtWidgets.QLabel("None")
+
         self.mainWidgets = list()
 
         self.modelWidget = model_widget.ModelWidget(self.rigBuilder)
@@ -158,7 +159,10 @@ class BuilderDialog(QtWidgets.QDialog):
         rigNameLayout = QtWidgets.QHBoxLayout()
         rigNameLayout.addWidget(QtWidgets.QLabel("Rig Name:"))
         rigNameLayout.addWidget(self.assetNameLineEdit)
-        rigNameLayout.addWidget(self.createNewRigEnviornmentButton)
+
+        rigNameLayout.addSpacing(10)
+        rigNameLayout.addWidget(QtWidgets.QLabel("rig archetype:"))
+        rigNameLayout.addWidget(self.archetypeBaseLabel)
 
         rigEnviornmentLayout = QtWidgets.QVBoxLayout()
         rigEnviornmentLayout.addWidget(self.rigPathSelector)
@@ -232,7 +236,6 @@ class BuilderDialog(QtWidgets.QDialog):
             lambda x: self.updateWidgetChecks(self.publishWidget))
 
         self.rigPathSelector.selectPathButton.clicked.connect(self.pathSelectorLoadRigFile)
-        self.createNewRigEnviornmentButton.clicked.connect(self.actions.createRigEnviornment)
         self.runSelectedButton.clicked.connect(self.runSelected)
         self.runButton.clicked.connect(self.runAll)
         self.closeButton.clicked.connect(self.close)
@@ -257,14 +260,14 @@ class BuilderDialog(QtWidgets.QDialog):
         self.rigEnviornment = fileInfo.path()
         self.rigFile = fileInfo.filePath()
 
-        self.rigBuilder = rigamajig2.maya.builder.builder.Builder(self.rigFile)
+        self.rigBuilder = builder.Builder(self.rigFile)
 
         if not self.rigFile:
             return
 
         # setup ui Data
-        rigName = rigamajig2.maya.builder.constants.RIG_NAME
-        self.assetNameLineEdit.setText(self.rigBuilder.getRigData(self.rigFile, rigName))
+        self.assetNameLineEdit.setText(self.rigBuilder.getRigData(self.rigFile, constants.RIG_NAME))
+        self.archetypeBaseLabel.setText(self.rigBuilder.getRigData(self.rigFile, constants.BASE_ARCHETYPE))
 
         # set paths and widgets relative to the rig env
         for widget in self.mainWidgets:

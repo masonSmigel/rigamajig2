@@ -1,0 +1,127 @@
+{
+    "type": "JointData", 
+    "user": "masonsmigel", 
+    "time": "2022-07-17 22:27:15", 
+    "data": {
+        "root": {
+            "dagPath": "|root", 
+            "translate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": null, 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }, 
+        "root_end": {
+            "dagPath": "|root|root_end", 
+            "translate": [
+                0.0, 
+                10.0, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                0.0, 
+                10.0, 
+                0.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "root", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0
+        }
+    }
+}

@@ -1,0 +1,14 @@
+{
+    "type": "AbstractData", 
+    "user": "masonsmigel", 
+    "time": "2022-07-17 22:26:13", 
+    "data": {
+        "main": {
+            "input": [], 
+            "rigParent": "", 
+            "type": "main.main", 
+            "name": "main", 
+            "size": 4
+        }
+    }
+}

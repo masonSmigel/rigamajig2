@@ -1,0 +1,27 @@
+{
+    "type": "AbstractData", 
+    "user": "masonsmigel", 
+    "time": "2022-07-17 22:18:33", 
+    "data": {
+        "rig_name": "", 
+        "model_file": "../../../mod/publish/skeleton_mod.ma", 
+        "skeleton_file": "skeleton.ma", 
+        "skeleton_pos": "skeleton_pos.json", 
+        "pre_script": [
+            "pre_scripts"
+        ], 
+        "post_script": [
+            "post_scripts"
+        ], 
+        "pub_script": [
+            "pub_scripts"
+        ], 
+        "control_shapes": "controlShapes.json", 
+        "guides": "guides.json", 
+        "components": "components.json", 
+        "skins": "skin_weights/", 
+        "psd": "", 
+        "output_file": "../out/", 
+        "output_file_type": "mb"
+    }
+}

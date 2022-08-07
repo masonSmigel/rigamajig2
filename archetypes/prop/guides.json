@@ -1,0 +1,857 @@
+{
+    "type": "NodeData", 
+    "user": "masonsmigel", 
+    "time": "2022-03-20 14:49:36", 
+    "data": {
+        "leg_r_toe": {
+            "dagPath": "|leg_r_guide|leg_r_toe", 
+            "translate": [
+                -6.5443, 
+                0.7892, 
+                7.7421
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.5443, 
+                0.7892, 
+                7.7421
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_r_out": {
+            "dagPath": "|leg_r_guide|leg_r_out", 
+            "translate": [
+                -9.0, 
+                0.0, 
+                4.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -9.0, 
+                0.0, 
+                4.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_r_inn": {
+            "dagPath": "|leg_r_guide|leg_r_inn", 
+            "translate": [
+                -4.0, 
+                0.0, 
+                4.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -4.0, 
+                0.0, 
+                4.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_r_heel": {
+            "dagPath": "|leg_r_guide|leg_r_heel", 
+            "translate": [
+                -6.5443, 
+                0.0, 
+                -6.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.5443, 
+                0.0, 
+                -6.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_r_ball": {
+            "dagPath": "|leg_r_guide|leg_r_ball", 
+            "translate": [
+                -6.5443, 
+                0.7892, 
+                3.9701
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.5443, 
+                0.7892, 
+                3.9701
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_l_toe": {
+            "dagPath": "|leg_l_guide|leg_l_toe", 
+            "translate": [
+                6.5443, 
+                0.7892, 
+                7.7421
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                6.5443, 
+                0.7892, 
+                7.7421
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_l_out": {
+            "dagPath": "|leg_l_guide|leg_l_out", 
+            "translate": [
+                9.0, 
+                0.0, 
+                4.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                9.0, 
+                0.0, 
+                4.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_l_inn": {
+            "dagPath": "|leg_l_guide|leg_l_inn", 
+            "translate": [
+                4.0, 
+                0.0, 
+                4.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                4.0, 
+                0.0, 
+                4.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_l_heel": {
+            "dagPath": "|leg_l_guide|leg_l_heel", 
+            "translate": [
+                6.5443, 
+                0.0, 
+                -6.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                6.5443, 
+                0.0, 
+                -6.0
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "leg_l_ball": {
+            "dagPath": "|leg_l_guide|leg_l_ball", 
+            "translate": [
+                6.5443, 
+                0.7892, 
+                3.9701
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                6.5443, 
+                0.7892, 
+                3.9701
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "knee_r_bind_pvPos_tgt": {
+            "dagPath": "|leg_r_guide|knee_r_bind_pvPos_tgt", 
+            "translate": [
+                -6.5443, 
+                39.067, 
+                72.5375
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.544300079345703, 
+                39.06700134277344, 
+                72.5374984741211
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "knee_l_bind_pvPos_tgt": {
+            "dagPath": "|leg_l_guide|knee_l_bind_pvPos_tgt", 
+            "translate": [
+                6.5443, 
+                39.067, 
+                72.5375
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                6.544300079345703, 
+                39.06700134277344, 
+                72.5374984741211
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "eyes_lookAtTgt": {
+            "dagPath": "|eyes_guide|eyes_lookAtTgt", 
+            "translate": [
+                -0.0002, 
+                147.957, 
+                41.7086
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -0.0002, 
+                147.957, 
+                41.7086
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "eye_r_bind_lookAtTgt": {
+            "dagPath": "|eyes_guide|eye_r_bind_lookAtTgt", 
+            "translate": [
+                -2.678, 
+                152.9259, 
+                -0.0873
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -2.678, 
+                152.9259, 
+                -0.0873
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "eye_l_bind_lookAtTgt": {
+            "dagPath": "|eyes_guide|eye_l_bind_lookAtTgt", 
+            "translate": [
+                2.6777, 
+                152.9259, 
+                -0.0873
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.6777, 
+                152.9259, 
+                -0.0873
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "elbow_r_bind_pvPos_tgt": {
+            "dagPath": "|arm_r_guide|elbow_r_bind_pvPos_tgt", 
+            "translate": [
+                -38.7403, 
+                124.0182, 
+                -66.5003
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -38.74028396606445, 
+                124.01820373535156, 
+                -66.50028991699219
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }, 
+        "elbow_l_bind_pvPos_tgt": {
+            "dagPath": "|arm_l_guide|elbow_l_bind_pvPos_tgt", 
+            "translate": [
+                38.6041, 
+                124.0182, 
+                -46.5008
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                38.604061126708984, 
+                124.01820373535156, 
+                -46.500755310058594
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 28
+        }
+    }
+}

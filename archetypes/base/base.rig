@@ -1,0 +1,27 @@
+{
+    "type": "AbstractData", 
+    "user": "masonsmigel", 
+    "time": "2022-08-07 09:07:55", 
+    "data": {
+        "archetype" : "base",
+        "rig_name": "", 
+        "model_file": null, 
+        "skeleton_pos": null, 
+        "pre_script": [
+            "pre_scripts"
+        ], 
+        "post_script": [
+            "post_scripts"
+        ], 
+        "pub_script": [
+            "pub_scripts"
+        ], 
+        "control_shapes": null, 
+        "guides": null, 
+        "components": "/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/base/components.json", 
+        "skins": null, 
+        "psd": null, 
+        "output_file": "/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/out", 
+        "output_file_type": "mb"
+    }
+}

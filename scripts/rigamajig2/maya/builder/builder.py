@@ -12,7 +12,6 @@
 # PYTHON
 import os
 import time
-import inspect
 import logging
 from collections import OrderedDict
 
@@ -33,31 +32,9 @@ from rigamajig2.maya.builder import guides
 from rigamajig2.maya.builder import controlShapes
 from rigamajig2.maya.builder import deform
 from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import constants
 
 logger = logging.getLogger(__name__)
-
-CMPT_PATH = os.path.abspath(os.path.join(__file__, '../../cmpts'))
-
-_EXCLUDED_FOLDERS = ['face']
-_EXCLUDED_FILES = ['__init__.py', 'base.py']
-
-# BUILD ENVIORNMENT GLOBLALS
-PRE_SCRIPT = 'pre_script'
-POST_SCRIPT = 'post_script'
-PUB_SCRIPT = 'pub_script'
-
-# RIG FILE KEYS
-RIG_NAME = 'rig_name'
-MODEL_FILE = "model_file"
-SKELETON_FILE = "skeleton_file"
-SKELETON_POS = "skeleton_pos"
-CONTROL_SHAPES = "control_shapes"
-GUIDES = "guides"
-COMPONENTS = "components"
-SKINS = 'skins'
-PSD = 'psd'
-OUTPUT_RIG = 'output_file'
-OUTPUT_RIG_FILE_TYPE = 'output_file_type'
 
 
 # pylint:disable=too-many-public-methods
@@ -65,6 +42,7 @@ class Builder(object):
     """
     The builder is the foundational class used to construct rigs with Rigamajig2.
     """
+
     def __init__(self, rigFile=None, log=True):
         """
         Initalize the builder
@@ -74,8 +52,11 @@ class Builder(object):
         self.setRigFile(rigFile)
         self.componentList = list()
 
-        self._availableComponents = core._lookForComponents(CMPT_PATH, _EXCLUDED_FOLDERS, _EXCLUDED_FILES)
-        # self.__lookForComponents(CMPT_PATH)
+        self._availableComponents = core._lookForComponents(
+            constants.CMPT_PATH,
+            constants._EXCLUDED_FOLDERS,
+            constants._EXCLUDED_FILES
+            )
 
         # varibles we need
         self.topSkeletonNodes = list()
@@ -94,7 +75,7 @@ class Builder(object):
         Get the component reference dictionary
         :return:
         """
-        return core._lookForComponents(CMPT_PATH, _EXCLUDED_FOLDERS, _EXCLUDED_FILES)
+        return core._lookForComponents(constants.CMPT_PATH, constants._EXCLUDED_FOLDERS, constants._EXCLUDED_FILES)
 
     def getAbsoultePath(self, path):
         """
@@ -114,7 +95,7 @@ class Builder(object):
         Import the model file
         :param path: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, MODEL_FILE))
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.MODEL_FILE))
         model.importModel(path)
         logger.info("Model loaded")
 
@@ -124,7 +105,7 @@ class Builder(object):
         :param path: Path to the json file. if none is provided use the data from the rigFile
         :return:
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, SKELETON_POS))
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKELETON_POS))
         guides.loadJoints(path)
         logger.info("Joints loaded")
 
@@ -134,7 +115,7 @@ class Builder(object):
         :param path: Path to the json file. if none is provided use the data from the rigFile
         :return:
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, SKELETON_POS))
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKELETON_POS))
         guides.saveJoints(path)
         logger.info("Joint positions saved to: {}".format(path))
 
@@ -222,7 +203,7 @@ class Builder(object):
         :return:
         """
         if not path:
-            path = self.getAbsoultePath(self.getRigData(self.rigFile, COMPONENTS))
+            path = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
 
         componentData = OrderedDict()
         componentDataObj = abstract_data.AbstractData()
@@ -240,7 +221,7 @@ class Builder(object):
         :return:
         """
         if not path:
-            path = self.getAbsoultePath(self.getRigData(self.rigFile, COMPONENTS))
+            path = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
         componentDataObje = abstract_data.AbstractData()
         componentDataObje.read(path)
         componentData = componentDataObje.getData()
@@ -278,7 +259,7 @@ class Builder(object):
         :return:
         """
         if not path:
-            path = self.getAbsoultePath(self.getRigData(self.rigFile, COMPONENTS))
+            path = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
 
         if self.loadComponentsFromFile:
             componentDataObj = abstract_data.AbstractData()
@@ -302,7 +283,7 @@ class Builder(object):
         :param applyColor: Apply the control colors.
         :return:
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, CONTROL_SHAPES))
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES))
         controlShapes.loadControlShapes(path, applyColor=applyColor)
         logger.info("control shapes -- complete")
 
@@ -312,7 +293,7 @@ class Builder(object):
         :param path: Path to the json file. if none is provided use the data from the rigFile
         :return:
 """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, CONTROL_SHAPES))
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES))
         controlShapes.saveControlShapes(path)
         logger.info("control shapes saved to: {}".format(path))
 
@@ -321,7 +302,7 @@ class Builder(object):
         Load guide data
         :return:
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, GUIDES))
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES))
         if guides.loadGuideData(path):
             logger.info("guides loaded")
 
@@ -331,7 +312,7 @@ class Builder(object):
         :param path: Path to the json file. if none is provided use the data from the rigFile
         :return:
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, GUIDES))
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES))
         guides.saveGuideData(path)
         logger.info("guides saved to: {}".format(path))
 
@@ -342,7 +323,7 @@ class Builder(object):
         :param replace: Replace existing pose readers.
         """
 
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, PSD)) or ''
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD)) or ''
         if deform.loadPoseReaders(path, replace=replace):
             logger.info("pose readers loaded")
 
@@ -351,7 +332,7 @@ class Builder(object):
         Save out pose readers
         :param path: Path to the json file. if none is provided use the data from the rigFile.
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, PSD))
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
         deform.savePoseReaders(path)
         logger.info("pose readers saved to: {}".format(path))
 
@@ -368,7 +349,7 @@ class Builder(object):
         Load the skin weights
         :param path: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, SKINS)) or ''
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
         if deform.loadSkinWeights(path):
             logger.info("skin weights loaded")
 
@@ -377,7 +358,7 @@ class Builder(object):
         Save the skin weights
         :param path: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, SKINS)) or ''
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
         deform.saveSkinWeights(path)
 
     def deleteComponents(self, clearList=True):
@@ -428,17 +409,24 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     def preScript(self):
         """ Run pre scripts. use  through the PRE SCRIPT path"""
-        core.runAllScripts(self.getAbsoultePath(self.getRigData(self.rigFile, PRE_SCRIPT)))
+        # scriptPath = self.getAbsoultePath(self.getRigData(self.rigFile, constants.PRE_SCRIPT))
+        # baseArchetype = self.getRigData(self.rigFile, constants.BASE_ARCHETYPE)
+
+        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PRE_SCRIPT)
+        core.runAllScripts(scripts)
+
         logger.info("pre scripts -- complete")
 
     def postScript(self):
         """ Run pre scripts. use  through the POST SCRIPT path"""
-        core.runAllScripts(self.getAbsoultePath(self.getRigData(self.rigFile, POST_SCRIPT)))
+        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.POST_SCRIPT)
+        core.runAllScripts(scripts)
         logger.info("post scripts -- complete")
 
     def publishScript(self):
         """ Run pre scripts. use  through the PUB SCRIPT path"""
-        core.runAllScripts(self.getAbsoultePath(self.getRigData(self.rigFile, PUB_SCRIPT)))
+        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PUB_SCRIPT)
+        core.runAllScripts(scripts)
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
@@ -500,10 +488,9 @@ class Builder(object):
                            This allows the user to keep a log of files approved to be published.
         :return:
         """
-
-        outputfile = outputfile or self.getAbsoultePath(self.getRigData(self.rigFile, OUTPUT_RIG))
-        assetName = assetName or self.getAbsoultePath(self.getRigData(self.rigFile, RIG_NAME))
-        fileType = fileType or self.getAbsoultePath(self.getRigData(self.rigFile, OUTPUT_RIG_FILE_TYPE))
+        outputfile = outputfile or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_RIG))
+        assetName = assetName or self.getAbsoultePath(self.getRigData(self.rigFile, constants.RIG_NAME))
+        fileType = fileType or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_RIG_FILE_TYPE))
 
         # check if the provided path is a file path.
         # if so use the file naming and extension from the provided path
@@ -515,7 +502,7 @@ class Builder(object):
         else:
             dirName = outputfile
             if assetName:
-                rigName = self.getRigData(self.rigFile, RIG_NAME)
+                rigName = self.getRigData(self.rigFile, constants.RIG_NAME)
                 fileName = "{}_{}.{}".format(rigName, 'rig', fileType)
             else:
                 raise RuntimeError("Must select an output path or character name to publish a rig")
@@ -623,7 +610,6 @@ class Builder(object):
             return
 
         if not os.path.exists(rigFile):
-            # TODO: give the user the option to create a rig file somewhere
             raise RuntimeError("'{0}' does not exist".format(rigFile))
         self.rigFile = rigFile
 
@@ -645,14 +631,4 @@ class Builder(object):
         :param key:
         :return:
         """
-        if not rigFile:
-            return None
-
-        if not os.path.exists(rigFile):
-            raise RuntimeError('rig file at {} does not exist'.format(rigFile))
-
-        data = abstract_data.AbstractData()
-        data.read(rigFile)
-        if key in data.getData():
-            return data.getData()[key]
-        return None
+        return core.getRigData(rigFile=rigFile, key=key)

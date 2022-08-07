@@ -15,8 +15,9 @@ from PySide2 import QtWidgets
 
 # RIGAMAJIG2
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
-from rigamajig2.ui.builder_ui import constants
-from rigamajig2.maya.builder.builder import OUTPUT_RIG, OUTPUT_RIG_FILE_TYPE, PUB_SCRIPT
+from rigamajig2.ui.builder_ui import constants as ui_constants
+from rigamajig2.maya.builder import constants
+from rigamajig2.maya.builder import core
 
 
 class PublishWidget(QtWidgets.QWidget):
@@ -38,11 +39,11 @@ class PublishWidget(QtWidgets.QWidget):
         self.outPathSelector = pathSelector.PathSelector(
             "out file:",
             caption="Select a location to save",
-            fileFilter=constants.MAYA_FILTER,
+            fileFilter=ui_constants.MAYA_FILTER,
             fileMode=2
             )
         self.publishButton = QtWidgets.QPushButton("Publish Rig")
-        self.publishButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.publishButton.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
 
         self.outFileTypeComboBox = QtWidgets.QComboBox()
         self.outFileTypeComboBox.addItem('ma')
@@ -86,17 +87,16 @@ class PublishWidget(QtWidgets.QWidget):
         self.publishScriptRunner.clearScript()
 
         # update data within the rig
-        outFile = self.builder.getRigData(self.builder.getRigFile(), OUTPUT_RIG)
+        outFile = self.builder.getRigData(self.builder.getRigFile(), constants.OUTPUT_RIG)
         if outFile:
             self.outPathSelector.setPath(outFile)
 
         # update the script runner
-        self.publishScriptRunner.setRelativeDirectory(rigEnv)
-        for path in self.builder.getRigData(rigFile, PUB_SCRIPT):
-            self.publishScriptRunner.addScripts(self.builder.getAbsoultePath(path))
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PUB_SCRIPT)
+        self.publishScriptRunner.addScripts(scripts)
 
         # set the default output file type
-        fileTypeText = self.builder.getRigData(rigFile, OUTPUT_RIG_FILE_TYPE)
+        fileTypeText = self.builder.getRigData(rigFile, constants.OUTPUT_RIG_FILE_TYPE)
         index = self.outFileTypeComboBox.findText(fileTypeText, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.outFileTypeComboBox.setCurrentIndex(index)

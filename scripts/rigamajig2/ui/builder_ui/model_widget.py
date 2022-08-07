@@ -15,8 +15,9 @@ from PySide2 import QtWidgets
 
 # RIGAMAJIG2
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
-from rigamajig2.ui.builder_ui import constants
-from rigamajig2.maya.builder.builder import MODEL_FILE, PRE_SCRIPT
+from rigamajig2.ui.builder_ui import constants as ui_constants
+from rigamajig2.maya.builder import constants
+from rigamajig2.maya.builder import core
 
 
 class ModelWidget(QtWidgets.QWidget):
@@ -37,7 +38,7 @@ class ModelWidget(QtWidgets.QWidget):
         self.modelPathSelector = pathSelector.PathSelector(
             "model:",
             caption="Select a Model file",
-            fileFilter=constants.MAYA_FILTER,
+            fileFilter=ui_constants.MAYA_FILTER,
             fileMode=1
             )
         self.importModelButton = QtWidgets.QPushButton('Import Model')
@@ -87,14 +88,13 @@ class ModelWidget(QtWidgets.QWidget):
         self.preScriptRunner.clearScript()
 
         # update data within the rig
-        modelFile = self.builder.getRigData(self.builder.getRigFile(), MODEL_FILE)
+        modelFile = self.builder.getRigData(self.builder.getRigFile(), constants.MODEL_FILE)
         if modelFile:
             self.modelPathSelector.setPath(modelFile)
 
         # update the script runner
-        self.preScriptRunner.setRelativeDirectory(rigEnv)
-        for path in self.builder.getRigData(rigFile, PRE_SCRIPT):
-            self.preScriptRunner.addScripts(self.builder.getAbsoultePath(path))
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PRE_SCRIPT)
+        self.preScriptRunner.addScripts(scripts)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""

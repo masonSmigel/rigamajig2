@@ -25,6 +25,7 @@ from shiboken2 import wrapInstance
 
 # RIGAMAJIG
 import rigamajig2.maya.builder.builder
+import rigamajig2.maya.builder.constants
 import rigamajig2.maya.builder.core
 import rigamajig2.shared.common as common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
@@ -122,8 +123,8 @@ class BuilderDialog(QtWidgets.QDialog):
         self.rigPathSelector = pathSelector.PathSelector(caption='Select a Rig File', fileFilter="Rig Files (*.rig)",
                                                          fileMode=1)
 
-        self.createNewRigEnviornmentButton = QtWidgets.QPushButton("New Rig Env")
-        self.createNewRigEnviornmentButton.setToolTip("Create a new rig enviornment")
+        # self.createNewRigEnviornmentButton = QtWidgets.QPushButton("New Rig Env")
+        # self.createNewRigEnviornmentButton.setToolTip("Create a new rig enviornment")
 
         self.assetNameLineEdit = QtWidgets.QLineEdit()
         self.assetNameLineEdit.setPlaceholderText("asset_name")
@@ -262,7 +263,7 @@ class BuilderDialog(QtWidgets.QDialog):
             return
 
         # setup ui Data
-        rigName = rigamajig2.maya.builder.builder.RIG_NAME
+        rigName = rigamajig2.maya.builder.constants.RIG_NAME
         self.assetNameLineEdit.setText(self.rigBuilder.getRigData(self.rigFile, rigName))
 
         # set paths and widgets relative to the rig env

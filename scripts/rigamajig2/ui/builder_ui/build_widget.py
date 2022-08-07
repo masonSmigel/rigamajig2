@@ -15,9 +15,10 @@ from PySide2 import QtWidgets
 
 # RIGAMAJIG2
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
-from rigamajig2.ui.builder_ui import constants
-from rigamajig2.maya.builder.builder import POST_SCRIPT
+from rigamajig2.maya.builder import constants
 from rigamajig2.ui.builder_ui import controls_widget
+from rigamajig2.maya.builder import core
+
 
 
 class BuildWidget(QtWidgets.QWidget):
@@ -85,9 +86,9 @@ class BuildWidget(QtWidgets.QWidget):
         # clear the ui
         self.postScriptScriptRunner.clearScript()
 
-        self.postScriptScriptRunner.setRelativeDirectory(rigEnv)
-        for path in self.builder.getRigData(rigFile, POST_SCRIPT):
-            self.postScriptScriptRunner.addScripts(self.builder.getAbsoultePath(path))
+        # self.postScriptScriptRunner.setRelativeDirectory(rigEnv)
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.POST_SCRIPT)
+        self.postScriptScriptRunner.addScripts(scripts)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""

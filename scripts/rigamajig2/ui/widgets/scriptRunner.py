@@ -129,8 +129,8 @@ class ScriptRunner(QtWidgets.QWidget):
         menu .addSeparator()
         menu .addAction(self.showInFolderAction)
         menu .addAction(self.newScriptAction)
-        menu .addSeparator()
-        menu .addAction(self.deleteScriptAction)
+        # menu .addSeparator()
+        # menu .addAction(self.deleteScriptAction)
 
         menu.exec_(self.scriptList.mapToGlobal(position))
 
@@ -139,8 +139,10 @@ class ScriptRunner(QtWidgets.QWidget):
         item = QtWidgets.QListWidgetItem(name)
         if data:
             item.setData(QtCore.Qt.UserRole, data)
+            item.setToolTip(data)
         if icon:
             item.setIcon(icon)
+
 
         self.scriptList.addItem(item)
 
@@ -174,10 +176,7 @@ class ScriptRunner(QtWidgets.QWidget):
         """private method to add scripts to the list """
         fileInfo = QtCore.QFileInfo(script)
         if fileInfo.exists():
-            if self.rootDirectory:
-                fileName = relpath(fileInfo.filePath(), self.rootDirectory)
-            else:
-                fileName = fileInfo.fileName()
+            fileName = fileInfo.fileName()
             self._addItem(fileName, data=fileInfo.filePath(), icon=QtGui.QIcon(":fileNew.png"))
 
     def addScriptBrowser(self):
@@ -247,13 +246,13 @@ class ScriptRunner(QtWidgets.QWidget):
             filePath = item.data(QtCore.Qt.UserRole)
             showInFolder.showInFolder(filePath=filePath)
 
-    def setRelativeDirectory(self, value):
-        """
-        Make all scripts in the UI relative to this path
-        :param value: path to make scripts relative to
-        :return:
-        """
-        self.rootDirectory = value
+    # def setRelativeDirectory(self, value):
+    #     """
+    #     Make all scripts in the UI relative to this path
+    #     :param value: path to make scripts relative to
+    #     :return:
+    #     """
+    #     self.rootDirectory = value
 
 
 class TestDialog(QtWidgets.QDialog):

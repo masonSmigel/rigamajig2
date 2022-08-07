@@ -20,7 +20,7 @@ import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, overrideColorer
 from rigamajig2.ui.builder_ui import constants
-from rigamajig2.maya.builder.builder import CONTROL_SHAPES
+from rigamajig2.maya.builder.constants import CONTROL_SHAPES
 
 
 # For this UI its important to have alot of instance attributes

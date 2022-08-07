@@ -173,14 +173,16 @@ class Builder(object):
         # parent the bind joints to the bind group. if one exists
         if cmds.objExists('bind'):
             topSkeletonNodes = meta.getTagged('skeleton_root')
-            if not cmds.listRelatives(topSkeletonNodes, p=True):
-                cmds.parent(topSkeletonNodes, 'bind')
+            if topSkeletonNodes:
+                if not cmds.listRelatives(topSkeletonNodes, p=True):
+                    cmds.parent(topSkeletonNodes, 'bind')
 
         # if the model group exists. parent the model
         if cmds.objExists('model'):
             topModelNodes = meta.getTagged('model_root')
-            if not cmds.listRelatives(topModelNodes, p=True):
-                cmds.parent(topModelNodes, 'model')
+            if topModelNodes:
+                if not cmds.listRelatives(topModelNodes, p=True):
+                    cmds.parent(topModelNodes, 'model')
 
         logger.info("build -- complete")
 

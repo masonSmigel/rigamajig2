@@ -25,7 +25,10 @@ def loadControlShapes(path=None, applyColor=True):
     :param applyColor: Apply the control colors.
     :return:
     """
-    if path and not os.path.exists(path):
+    if not path:
+        return
+
+    if not os.path.exists(path):
         raise Exception("Path does no exist {}".format(path))
 
     curveDataObj = curve_data.CurveData()

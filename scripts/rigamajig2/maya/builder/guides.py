@@ -29,7 +29,10 @@ def loadJoints(path=None):
     :param path: path to joint file
     :return:
     """
-    if path and not os.path.exists(path):
+    if not path:
+        return
+
+    if not os.path.exists(path):
         return
 
     dataObj = joint_data.JointData()

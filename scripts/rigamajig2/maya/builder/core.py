@@ -10,6 +10,7 @@
 """
 # PYTHON
 import os
+import glob
 import shutil
 import logging
 import inspect
@@ -131,13 +132,22 @@ def getAvailableArchetypes():
 
 
 class GetCompleteScriptList():
+    """
+    This class will get a list of all scripts for a given rigfile
+    Including any upstream archetype parents script contents.
+    """
     scriptList = list()
 
     @classmethod
     def getScriptList(cls, rigFile, scriptType=None):
         """
         This function will get a list of all scripts for a given rigfile including any upstream archetype parents.
-        :return:
+
+        The list is reversed to provide scripts at the lowest level of inheritance first.
+
+        :param rigFile: rig file to get scripts for
+        :param scriptType: key of scripts to get. Typical values are pre_script, post_script or pub_script.
+        :return: list of scripts
         """
         cls.scriptList = list()
         cls.findScripts(rigFile=rigFile, scriptType=scriptType)
@@ -201,7 +211,25 @@ def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
         raise RuntimeError("{} is not a valid archetype".format(archetype))
 
     archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
-    return createRigEnviornment(sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName)
+    rigFile = createRigEnviornment(sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName)
+
+    data = abstract_data.AbstractData()
+    data.read(rigFile)
+
+    newData = data.getData()
+    newData[constants.BASE_ARCHETYPE] = archetype
+    data.setData(newData)
+    data.write(rigFile)
+
+    # delete the contents of the scripts folders as they should be constructed from
+    # previous inheritance. Keeping them here will duplicate the execution.
+    for scriptType in [constants.PRE_SCRIPT, constants.POST_SCRIPT, constants.PUB_SCRIPT]:
+        path = os.sep.join([newEnv, rigName, data.getData()[scriptType][0]])
+        files = glob.glob('{}/*'.format(path))
+        for f in files:
+            os.remove(f)
+
+    return rigFile
 
 
 def createRigEnviornment(sourceEnviornment, targetEnviornment, rigName):
@@ -226,7 +254,7 @@ def createRigEnviornment(sourceEnviornment, targetEnviornment, rigName):
     data.read(rigFile)
 
     newData = data.getData()
-    newData['rig_name'] = rigName
+    newData[constants.RIG_NAME] = rigName
     data.setData(newData)
     data.write(rigFile)
 

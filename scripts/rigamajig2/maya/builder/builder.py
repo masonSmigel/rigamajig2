@@ -409,9 +409,6 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     def preScript(self):
         """ Run pre scripts. use  through the PRE SCRIPT path"""
-        # scriptPath = self.getAbsoultePath(self.getRigData(self.rigFile, constants.PRE_SCRIPT))
-        # baseArchetype = self.getRigData(self.rigFile, constants.BASE_ARCHETYPE)
-
         scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PRE_SCRIPT)
         core.runAllScripts(scripts)
 

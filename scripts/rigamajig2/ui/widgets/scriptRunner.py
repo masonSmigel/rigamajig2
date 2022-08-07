@@ -247,8 +247,6 @@ class ScriptRunner(QtWidgets.QWidget):
             filePath = item.data(QtCore.Qt.UserRole)
             showInFolder.showInFolder(filePath=filePath)
 
-
-
     def setRelativeDirectory(self, value):
         """
         Make all scripts in the UI relative to this path

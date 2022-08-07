@@ -3,6 +3,7 @@
     "user": "masonsmigel", 
     "time": "2022-07-26 23:13:24", 
     "data": {
+        "archetype" : "biped",
         "rig_name": "", 
         "model_file": "", 
         "skeleton_file": "skeleton.ma", 

@@ -34,6 +34,7 @@ class ScriptRunner(QtWidgets.QWidget):
     """
     Ui element to run a list of scripts in a folder
     """
+
     def __init__(self, rootDirectory=None, title='Scripts', *args, **kwargs):
         """
         Script runner widget class.
@@ -89,32 +90,18 @@ class ScriptRunner(QtWidgets.QWidget):
         self.scriptList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.scriptList.customContextMenuRequested.connect(self._createContextMenu)
 
-
-
-        # self.addScriptButton = QtWidgets.QPushButton(QtGui.QIcon(":fileNew.png"), "Add Script")
-        # self.createNewScriptButton = QtWidgets.QPushButton(QtGui.QIcon(":cmdWndIcon.png"), "New Script")
-        # self.saveScriptButton = QtWidgets.QPushButton(QtGui.QIcon(":save.png"), "Save All")
-        # self.executeScriptButton = QtWidgets.QPushButton(QtGui.QIcon(":play_S_100.png"), "Execute All")
-
     def createLayouts(self):
         """ Create layouts """
-        # buttonLayout = QtWidgets.QHBoxLayout()
-        # buttonLayout.setContentsMargins(0, 0, 0, 0)
-        # buttonLayout.addStretch()
-        # buttonLayout.addWidget(self.addScriptButton)
-        # buttonLayout.addWidget(self.createNewScriptButton)
-        # buttonLayout.addWidget(self.executeScriptButton)
-
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self.mainLayout.minimumSize()
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(4)
         self.mainLayout.addWidget(self.titleLabel)
         self.mainLayout.addWidget(self.scriptList)
-        # self.mainLayout.addLayout(buttonLayout)
 
     def createConnections(self):
         """ Create connections"""
+        pass
         # self.addScriptButton.clicked.connect(self.addScriptBrowser)
         # self.reload_scripts_btn.clicked.connect(self.reload_scripts)
         # self.createNewScriptButton.clicked.connect(self.createNewScript)
@@ -125,10 +112,10 @@ class ScriptRunner(QtWidgets.QWidget):
 
         menu = QtWidgets.QMenu(self.scriptList)
         menu.addAction(self.executeAllAction)
-        menu .addAction(self.executeSelectedAction)
-        menu .addSeparator()
-        menu .addAction(self.showInFolderAction)
-        menu .addAction(self.newScriptAction)
+        menu.addAction(self.executeSelectedAction)
+        menu.addSeparator()
+        menu.addAction(self.showInFolderAction)
+        menu.addAction(self.newScriptAction)
         # menu .addSeparator()
         # menu .addAction(self.deleteScriptAction)
 
@@ -142,7 +129,6 @@ class ScriptRunner(QtWidgets.QWidget):
             item.setToolTip(data)
         if icon:
             item.setIcon(icon)
-
 
         self.scriptList.addItem(item)
 

@@ -170,14 +170,3 @@ def checkForSDK(control):
         controlObj = rig_control.Control(control)
         return controlObj.sdk
     return control
-
-
-if __name__ == '__main__':
-    setupSpreadSdk(['indexMeta_fk', 'middleMeta_fk', 'ringMeta_fk', 'pinkyMeta_fk'], 'Hand_poses', 'spread',
-                   multiplier=0.7)
-    setupSpreadSdk(['indexMeta_fk_1', 'middleMeta_fk_1', 'ringMeta_fk_1', 'pinkyMeta_fk_1'], 'Hand_poses', 'spread',
-                   multiplier=0.3)
-
-    # meta Spread
-    setupSpreadSdk(['indexMeta_fk', 'middleMeta_fk', 'ringMeta_fk', 'pinkyMeta_fk'], 'Hand_poses', 'metaSpread',
-                   multiplier=1)

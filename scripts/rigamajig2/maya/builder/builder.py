@@ -52,7 +52,7 @@ class Builder(object):
         self.setRigFile(rigFile)
         self.componentList = list()
 
-        self._availableComponents = core._lookForComponents(
+        self._availableComponents = core.findComponents(
             constants.CMPT_PATH,
             constants._EXCLUDED_FOLDERS,
             constants._EXCLUDED_FILES
@@ -75,7 +75,7 @@ class Builder(object):
         Get the component reference dictionary
         :return:
         """
-        return core._lookForComponents(constants.CMPT_PATH, constants._EXCLUDED_FOLDERS, constants._EXCLUDED_FILES)
+        return core.findComponents(constants.CMPT_PATH, constants._EXCLUDED_FOLDERS, constants._EXCLUDED_FILES)
 
     def getAbsoultePath(self, path):
         """

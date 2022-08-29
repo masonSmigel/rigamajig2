@@ -10,6 +10,7 @@
 """
 # PYTHON
 import os
+import sys
 import glob
 import shutil
 import logging
@@ -31,34 +32,117 @@ logger = logging.getLogger(__name__)
 CMPT_ROOT_MODULE = 'cmpts'
 
 
-def _lookForComponents(path, excludedFolders, excludedFiles):
-    res = os.listdir(path)
+# def _lookForComponents(path, excludedFolders, excludedFiles):
+#     res = os.listdir(path)
+#     toReturn = dict()
+#     for r in res:
+#         fullList = os.path.join(path, r)
+#         if r not in excludedFolders and os.path.isdir(path + '/' + r):
+#             subDict = _lookForComponents(fullList, excludedFolders, excludedFiles)
+#             toReturn.update(subDict)
+#         if r.find('.py') != -1 and r.find('.pyc') == -1 and r not in excludedFiles:
+#             if r.find('reload') == -1:
+#
+#                 # find classes in the file path
+#                 moduleFile = r.split('.')[0]
+#                 pathSplit = fullList.split('/')[:-1]
+#                 cmptsIndex = pathSplit.index(CMPT_ROOT_MODULE)
+#
+#                 localPath = '.'.join(pathSplit[cmptsIndex:])
+#                 componentName = '{}.{}'.format(localPath, moduleFile)
+#
+#                 moduleName = 'rigamajig2.maya.{}'.format(componentName)
+#
+#                 # module_name = modulesPath.format(module_file)
+#                 moduleObject = __import__(moduleName, globals(), locals(), ["*"], 0)
+#                 for cls in inspect.getmembers(moduleObject, inspect.isclass):
+#                     component = '.'.join(componentName.rsplit('.')[1:])
+#                     toReturn[component] = [moduleName, cls[0]]
+#
+#     return toReturn
+
+
+def findComponents(path, excludedFolders, excludedFiles):
+    """
+    Find all valid components within a folder
+    :param path: path to search for components
+    :param excludedFolders: names of folders to exclude from the search
+    :param excludedFiles: names of files to exclude from the search
+    :return:
+    """
+    path = rig_path.cleanPath(path)
+    items = os.listdir(path)
+
     toReturn = dict()
-    for r in res:
-        fullList = os.path.join(path, r)
-        if r not in excludedFolders and os.path.isdir(path + '/' + r):
-            subDict = _lookForComponents(fullList, excludedFolders, excludedFiles)
-            toReturn.update(subDict)
-        if r.find('.py') != -1 and r.find('.pyc') == -1 and r not in excludedFiles:
-            if r.find('reload') == -1:
+    for item in items:
+        itemPath = os.path.join(path, item)
 
-                # find classes in the file path
-                moduleFile = r.split('.')[0]
-                pathSplit = fullList.split('/')[:-1]
-                cmptsIndex = pathSplit.index(CMPT_ROOT_MODULE)
+        # ensure the item should not be excluded
+        if item not in excludedFolders and os.path.isdir(itemPath):
+            res = findComponents(itemPath, excludedFolders, excludedFiles)
+            toReturn.update(res)
 
-                localPath = '.'.join(pathSplit[cmptsIndex:])
-                componentName = '{}.{}'.format(localPath, moduleFile)
-
-                moduleName = 'rigamajig2.maya.{}'.format(componentName)
-
-                # module_name = modulesPath.format(module_file)
-                moduleObject = __import__(moduleName, globals(), locals(), ["*"], 0)
-                for cls in inspect.getmembers(moduleObject, inspect.isclass):
-                    component = '.'.join(componentName.rsplit('.')[1:])
-                    toReturn[component] = [moduleName, cls[0]]
+        # check if the item is a python file
+        if item.find('.py') != -1 and item.find('.pyc') == -1 and item not in excludedFiles:
+            singleComponentDict = validateComponent(itemPath)
+            if singleComponentDict:
+                toReturn.update(singleComponentDict)
 
     return toReturn
+
+
+def validateComponent(filePath):
+    """
+    Check if a file is a valid rigamajig component
+    :param filePath: file path to check
+    :return tuple: component class name, instance of the class
+    """
+    # first check to make sure the filepath exists
+    if not os.path.exists(filePath):
+        return False
+
+    if not rig_path.isFile(filePath):
+        return False
+
+    # add the path to sys.path
+    pathName = os.path.dirname(filePath)
+    fileName = os.path.basename(filePath)
+
+    # find the system path that is imported into python
+    pythonPaths = list()
+    for sysPath in sys.path:
+        if sysPath in pathName:
+            pythonPaths.append(sysPath)
+
+    # Get the longest found python path.
+    # We should never add a path closer than the python root, so it should always be the longest in the file.
+    pythonPath = max(pythonPaths, key=len)
+
+    # convert the path into a python module path (separated by ".")
+    # ie: path/to/module --> path.to.module
+    pythonPathName = pathName.replace(pythonPath, "")
+    pythonModulesSplit = pythonPathName.split(os.path.sep)
+
+    moduleName = fileName.split(".")[0]
+    modulePath = ".".join(pythonModulesSplit[1:])
+
+    fullModulename = ".".join([modulePath, moduleName])
+
+    # import the module object to verify it is a component.
+    moduleObject = __import__(fullModulename, globals(), locals(), ["*"], 0)
+    classesInModule = inspect.getmembers(moduleObject, inspect.isclass)
+
+    for class_ in classesInModule:
+        # component name must be a PascalCase version of the modulename.
+        predictedName = moduleName[0].upper() + moduleName[1:]
+        componentClassName = class_[0]
+        if componentClassName == predictedName:
+            resultDict = dict()
+            componentName = '.'.join([modulePath.rsplit('.')[-1], moduleName])
+            resultDict[componentName] = [fullModulename, componentClassName]
+            return resultDict
+
+    return False
 
 
 def loadRequiredPlugins():

@@ -204,6 +204,7 @@ def getComponentObject(componentType=None):
     return classInstance
 
 
+# pylint: disable=too-many-public-methods
 class ComponentManager(QtWidgets.QWidget):
     """
     Component manager wiget used within the intialize Widget
@@ -237,11 +238,13 @@ class ComponentManager(QtWidgets.QWidget):
         self.editComponentSettingsAction.setIcon(QtGui.QIcon(":toolSettings.png"))
         self.editComponentSettingsAction.triggered.connect(self.editComponentParameters)
 
-        self.createSymetricalComponent = QtWidgets.QAction("Create Mirroed Component")
+        self.createSymetricalComponent = QtWidgets.QAction("Create Mirrored Component")
         self.createSymetricalComponent.setIcon(QtGui.QIcon(":kinMirrorJoint_S.png"))
+        self.createSymetricalComponent.triggered.connect(self.createMirroredComponent)
 
         self.mirrorComponentSettingsAction = QtWidgets.QAction("Mirror Component Parameters")
         self.mirrorComponentSettingsAction.setIcon(QtGui.QIcon(":QR_mirrorGuidesRightToLeft.png"))
+        self.mirrorComponentSettingsAction.triggered.connect(self.mirrorComponentParameters)
 
         self.reloadComponentAction = QtWidgets.QAction("Reload Cmpts from Scene", self)
         self.reloadComponentAction.setIcon(QtGui.QIcon(":refresh.png"))
@@ -335,6 +338,7 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.addComponent(name=name, componentType=componentType, buildStep='unbuilt', container=None)
         self.builder.appendComponents([cmpt])
+        return cmpt
 
     def loadFromScene(self):
         """ Load exisiting components from the scene"""
@@ -405,6 +409,103 @@ class ComponentManager(QtWidgets.QWidget):
     def resetComponentDialogInstance(self):
         """ Set the instance of the component dialog back to None. This way we know when it must be re-created"""
         self.editComponentDialog = None
+
+    def createMirroredComponent(self):
+        """ Create a mirrored component"""
+        selectedComponent = self.getComponentObj()
+
+        guessMirrorName = common.getMirrorName(selectedComponent.name)
+        componentType = selectedComponent.componentType
+
+        # mirror the input
+        mirroredInput = list()
+        for x in selectedComponent.input:
+            value = common.getMirrorName(x) if common.getMirrorName(x) else x
+            mirroredInput.append(value)
+
+        # get a mirrored rigParent
+        sourceRigParent = selectedComponent.rigParent
+        mirroredRigParent = common.getMirrorName(sourceRigParent) if common.getMirrorName(
+            sourceRigParent) else sourceRigParent
+
+        mirroredComponent = self.createComponent(guessMirrorName, componentType, mirroredInput, mirroredRigParent)
+
+        # We need to force the component to intialize so we can mirror stuff
+        mirroredComponent._initalizeComponent()
+        self.mirrorComponentParameters(selectedComponent)
+
+        # update the ui
+        self.loadFromScene()
+
+    def mirrorComponentParameters(self, sourceComponent=None):
+        """
+        Mirror the component parameters for the selected parameter
+
+        NOTE: the mirror script does not support nested lists or dictonaries.
+        """
+        if not sourceComponent:
+            sourceComponent = self.getComponentObj()
+
+        # find the mirrored component
+        guessMirrorName = common.getMirrorName(sourceComponent.name)
+        componentType = sourceComponent.componentType
+        mirrorComponent = self.builder.findComponent(guessMirrorName, componentType)
+
+        if not mirrorComponent:
+            cmds.warning("No mirror found for: {}".format(sourceComponent.name))
+            return
+
+        # get the original data. We will use this to create the mirrored data.
+        sourceMetaNode = meta.MetaNode(sourceComponent.getContainer())
+        sourceData = sourceMetaNode.getAllData()
+
+        mirrorMetaNode = meta.MetaNode(mirrorComponent.getContainer())
+        for parameter in list(sourceData.keys()):
+            # there are some keys we dont need to mirror. we can skip them
+            if parameter in ['type', 'name', 'build_step', "__component__", "__version__", "component_side"]:
+                continue
+
+            sourceValue = sourceData[parameter]
+            # check if the source value is a string. if it is try to mirror it.
+            if isinstance(sourceValue, str):
+                # use the mirror name if one exists. otherwise revert back to the source value
+                mirroredValue = common.getMirrorName(sourceValue) if common.getMirrorName(sourceValue) else sourceValue
+
+            elif isinstance(sourceValue, list):
+                # for each item in the list use the mirror name if one exists.
+                # otherwise revert back to the source value
+                mirroredValue = list()
+                for x in sourceValue:
+                    value = common.getMirrorName(x) if common.getMirrorName(x) else x
+                    mirroredValue.append(value)
+
+            elif isinstance(sourceValue, dict):
+                mirroredValue = dict()
+                # for each dictionary key try to get a mirror name for the key and each value.
+                for key in list(sourceValue.keys()):
+                    mirroredKeyName = common.getMirrorName(key) if common.getMirrorName(key) else key
+
+                    # if the value is a list then try to mirror the list.
+                    if isinstance(sourceValue[key], list):
+                        mirroredKeyValue = list()
+                        for x in sourceValue:
+                            value = common.getMirrorName(x) if common.getMirrorName(x) else x
+                            mirroredKeyValue.append(value)
+                    # otherwise we can try a regular mirror
+                    else:
+                        mirroredKeyValue = common.getMirrorName(sourceValue[key])
+
+                    # finally if no mirror name is generate just use the source value
+                    if not mirroredKeyValue:
+                        mirroredValue = sourceValue[key]
+
+                    mirroredValue[mirroredKeyName] = mirroredKeyValue
+
+            else:
+                mirroredValue = sourceValue
+
+            # apply the mirrored values
+            mirrorMetaNode.setData(attr=parameter, value=mirroredValue)
 
     def buildComponent(self):
         """ Build a single component"""
@@ -675,4 +776,3 @@ class CreateComponentDialog(QtWidgets.QDialog):
         """Apply and close the Ui"""
         self.apply()
         self.close()
-

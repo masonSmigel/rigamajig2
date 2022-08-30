@@ -161,8 +161,8 @@ class MayaList(QtWidgets.QWidget):
 
     def addName(self):
         """Add a new specific name"""
-        text, ok = QtWidgets.QInputDialog.getText(self, "Add Name", "Enter Name:")
-        if ok:
+        text, accept = QtWidgets.QInputDialog.getText(self, "Add Name", "Enter Name:")
+        if accept:
             self.addMayaObject(text)
 
     def loadMayaSelection(self):

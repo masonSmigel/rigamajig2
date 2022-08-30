@@ -102,10 +102,10 @@ def validateComponent(filePath):
     moduleObject = __import__(fullModulename, globals(), locals(), ["*"], 0)
     classesInModule = inspect.getmembers(moduleObject, inspect.isclass)
 
-    for class_ in classesInModule:
+    for cls in classesInModule:
         # component name must be a PascalCase version of the modulename.
         predictedName = moduleName[0].upper() + moduleName[1:]
-        componentClassName = class_[0]
+        componentClassName = cls[0]
         if componentClassName == predictedName:
             resultDict = dict()
             componentName = '.'.join([modulePath.rsplit('.')[-1], moduleName])

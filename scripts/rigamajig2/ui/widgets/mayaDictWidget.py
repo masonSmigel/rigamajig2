@@ -35,7 +35,10 @@ def mayaMainWindow():
 
 
 class InputDialog(QtWidgets.QDialog):
+    """ Simple two feild input dialog"""
+
     def __init__(self, parent=None):
+        """ InputDialog constructor """
         super(InputDialog, self).__init__()
 
         self.setWindowTitle("Add New Item")
@@ -53,6 +56,7 @@ class InputDialog(QtWidgets.QDialog):
         buttonBox.rejected.connect(self.reject)
 
     def getInputs(self):
+        """ return the user inputs"""
         return self.first.text(), self.second.text()
 
 
@@ -211,8 +215,8 @@ class MayaDict(QtWidgets.QWidget):
         selection = om2.MGlobal.getActiveSelectionList()
         if selection.length() > 0:
 
-            text, ok = QtWidgets.QInputDialog.getText(self, "Add Name", "Enter Label Name:")
-            if not ok:
+            text, accept = QtWidgets.QInputDialog.getText(self, "Add Name", "Enter Label Name:")
+            if not accept:
                 return
 
             for i in range(selection.length()):

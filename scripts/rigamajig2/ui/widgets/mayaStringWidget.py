@@ -103,6 +103,7 @@ class MayaString(QtWidgets.QWidget):
 
 
     def setHeight(self, height):
+        """Set the height of the widget"""
         self.label.setMinimumHeight(height)
         self.mayaObject.setMinimumHeight(height)
 

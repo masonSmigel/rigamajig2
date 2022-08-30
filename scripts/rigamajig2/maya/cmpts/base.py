@@ -97,6 +97,9 @@ class Base(object):
                 self.createJoints()
                 self.createBuildGuides()
             self.setStep(1)
+
+            # load all parameters back to the class so theyre always there
+            self._loadComponentParametersToClass()
         else:
             logger.debug('component {} already initalized.'.format(self.name))
 

@@ -28,7 +28,6 @@ from shiboken2 import wrapInstance
 from rigamajig2.ui.widgets import mayaListWidget
 from rigamajig2.ui.widgets import mayaDictWidget
 from rigamajig2.ui.widgets import mayaStringWidget
-from rigamajig2.ui.widgets import messageWidget
 
 from rigamajig2.maya import meta
 
@@ -79,10 +78,6 @@ class EditComponentDialog(QtWidgets.QDialog):
         self.inputMayaList.setHeight(120)
         self.rigParentMayaString = mayaStringWidget.MayaString()
 
-        # create a warning widget
-        self.warningWidget = messageWidget.MessageWidget("warn", "Component not Intialized or out of Date")
-        self.warningWidget.setMessageEnabled(False)
-
         self.applyButton = QtWidgets.QPushButton("Apply Parameters")
         self.applyButton.setFixedHeight(35)
         self.closeButton = QtWidgets.QPushButton("Close")
@@ -103,7 +98,6 @@ class EditComponentDialog(QtWidgets.QDialog):
         commonFormLayout.addRow(QtWidgets.QLabel("inputs:"), self.inputMayaList)
         commonFormLayout.addRow(QtWidgets.QLabel("rigParent:"), self.rigParentMayaString)
         commonLayout.addLayout(commonFormLayout)
-        commonLayout.addWidget(self.warningWidget)
         # add a tiny space at the bottom
         commonLayout.addSpacing(4)
 
@@ -189,7 +183,7 @@ class EditComponentDialog(QtWidgets.QDialog):
 
         # add all the new widgets
         for item in self.currentComponent.cmptSettings:
-            if item not in ['name', 'input', 'rigParent', 'type']:
+            if item not in ['name', 'input', 'rigParent', 'type', 'component_side']:
                 self.addWidgetFromParameter(
                     item,
                     self.currentComponent.getContainer(),
@@ -247,7 +241,8 @@ class EditComponentDialog(QtWidgets.QDialog):
         metaNode = meta.MetaNode(container)
 
         # insert our common parameters into the top of the list
-        allComponentWidgets = [["input", self.inputMayaList], ["rigParent", self.rigParentMayaString]] + self.componentWidgets
+        commonWidgets = [["input", self.inputMayaList], ["rigParent", self.rigParentMayaString]]
+        allComponentWidgets = commonWidgets + self.componentWidgets
 
         for parameter, widget in allComponentWidgets:
             if isinstance(widget, mayaDictWidget.MayaDict):

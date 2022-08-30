@@ -246,7 +246,11 @@ class Builder(object):
             moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
 
             componentClass = getattr(moduleObject, className)
-            instance = componentClass(componentData[cmpt]['name'], componentData[cmpt]['input'])
+            instance = componentClass(
+                name=componentData[cmpt]['name'],
+                input=componentData[cmpt]['input'],
+                rigParent=componentData[cmpt]['rigParent']
+                )
             self.appendComponents(instance)
             self.loadComponentsFromFile = True
 
@@ -571,7 +575,7 @@ class Builder(object):
             if name == _name:
                 if type == _type:
                     return cmpt
-        logger.warning("No component: {} with type: {} found within current build".format(name, cmpt_type))
+        logger.warning("No component: {} with type: {} found within current build".format(name, type))
         return None
 
     # --------------------------------------------------------------------------------

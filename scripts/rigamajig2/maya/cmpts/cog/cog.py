@@ -30,7 +30,7 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, bindToInput=False):
+    def __init__(self, name, input, size=1, bindToInput=False, rigParent=str()):
         """
         :param str name: name of the components
         :param list input: list of one joint. typically the hips.
@@ -39,7 +39,7 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
         :param bool bindToInput: connect the output position of the COG cmpt to the input.
                             This should be False in most rigs as the hips will be controlled by the spine.
         """
-        super(Cog, self).__init__(name, input=input, size=size)
+        super(Cog, self).__init__(name, input=input, size=size, rigParent=rigParent)
 
         self.cmptSettings['bind_to_input'] = bindToInput
         self.cmptSettings['cog_control_shape'] = 'cube'

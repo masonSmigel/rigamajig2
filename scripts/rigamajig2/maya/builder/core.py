@@ -32,36 +32,6 @@ logger = logging.getLogger(__name__)
 CMPT_ROOT_MODULE = 'cmpts'
 
 
-# def _lookForComponents(path, excludedFolders, excludedFiles):
-#     res = os.listdir(path)
-#     toReturn = dict()
-#     for r in res:
-#         fullList = os.path.join(path, r)
-#         if r not in excludedFolders and os.path.isdir(path + '/' + r):
-#             subDict = _lookForComponents(fullList, excludedFolders, excludedFiles)
-#             toReturn.update(subDict)
-#         if r.find('.py') != -1 and r.find('.pyc') == -1 and r not in excludedFiles:
-#             if r.find('reload') == -1:
-#
-#                 # find classes in the file path
-#                 moduleFile = r.split('.')[0]
-#                 pathSplit = fullList.split('/')[:-1]
-#                 cmptsIndex = pathSplit.index(CMPT_ROOT_MODULE)
-#
-#                 localPath = '.'.join(pathSplit[cmptsIndex:])
-#                 componentName = '{}.{}'.format(localPath, moduleFile)
-#
-#                 moduleName = 'rigamajig2.maya.{}'.format(componentName)
-#
-#                 # module_name = modulesPath.format(module_file)
-#                 moduleObject = __import__(moduleName, globals(), locals(), ["*"], 0)
-#                 for cls in inspect.getmembers(moduleObject, inspect.isclass):
-#                     component = '.'.join(componentName.rsplit('.')[1:])
-#                     toReturn[component] = [moduleName, cls[0]]
-#
-#     return toReturn
-
-
 def findComponents(path, excludedFolders, excludedFiles):
     """
     Find all valid components within a folder

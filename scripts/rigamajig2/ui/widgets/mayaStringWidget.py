@@ -36,17 +36,16 @@ def mayaMainWindow():
 
 # ignore too many public methods to UI classes.
 # pylint: disable = too-many-public-methods
-class MayaObjectLine(QtWidgets.QWidget):
+class MayaString(QtWidgets.QWidget):
     """
     Ui to set a maya object as the selection and clear and retreive the object
     """
 
-    def __init__(self, label=None):
+    def __init__(self):
         """
 
         """
-        super(MayaObjectLine, self).__init__()
-        self.labelText = label
+        super(MayaString, self).__init__()
         self._fullDagPath = None
 
         self.createActions()
@@ -57,7 +56,7 @@ class MayaObjectLine(QtWidgets.QWidget):
     def createActions(self):
         """ Create actions"""
         self.addMayaSelectionAction = QtWidgets.QAction("Add Maya Selection", self)
-        self.addMayaSelectionAction.setIcon(QtGui.QIcon(":absolute.png"))
+        self.addMayaSelectionAction.setIcon(QtGui.QIcon(":addCreateGeneric.png"))
         self.addMayaSelectionAction.triggered.connect(self.loadMayaSelection)
 
         self.selectInMayaAction = QtWidgets.QAction("Select in Maya", self)
@@ -70,9 +69,8 @@ class MayaObjectLine(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.label = QtWidgets.QLabel(self.labelText)
         self.mayaObject = QtWidgets.QLineEdit()
-        self.mayaObject.setReadOnly(True)
+        self.mayaObject.setReadOnly(False)
 
         self.mayaObject.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.mayaObject.customContextMenuRequested.connect(self._createContextMenu)
@@ -81,10 +79,7 @@ class MayaObjectLine(QtWidgets.QWidget):
         """ Create layouts """
 
         self.mainLayout = QtWidgets.QHBoxLayout(self)
-
-        # If we have a label add the label widget.
-        if self.labelText:
-            self.mainLayout.addWidget(self.label)
+        self.mainLayout.setContentsMargins(0,0,0,0)
         self.mainLayout.addWidget(self.mayaObject)
 
     def createConnections(self):
@@ -102,6 +97,10 @@ class MayaObjectLine(QtWidgets.QWidget):
 
         menu.exec_(self.mayaObject.mapToGlobal(position))
 
+    def setText(self, text):
+        """Set the text of the mayaObject line edit"""
+        self.mayaObject.setText(text)
+
     def setHeight(self, height):
         self.label.setMinimumHeight(height)
         self.mayaObject.setMinimumHeight(height)
@@ -118,8 +117,10 @@ class MayaObjectLine(QtWidgets.QWidget):
             dagPath = om2.MFnDagNode(mob)
             self.mayaObject.setText(dagPath.name())
             self._fullDagPath = dagPath.fullPathName()
+            # set the tool tip to the dag path so we can hover over and see the path.
+            self.mayaObject.setToolTip(self._fullDagPath)
         else:
-            raise Exception("Nothing is selected")
+            om2.MGlobal.displayError("Nothing is selected")
 
     def selectInMaya(self):
         """ Select Current Object in maya"""
@@ -130,51 +131,3 @@ class MayaObjectLine(QtWidgets.QWidget):
         """ Clear the active selection"""
         self._fullDagPath = None
         self.mayaObject.clear()
-
-
-class TestDialog(QtWidgets.QDialog):
-    """
-    Test dialog for the script executer
-    """
-    WINDOW_TITLE = "Test Dialog"
-
-    def __init__(self, parent=mayaMainWindow()):
-        super(TestDialog, self).__init__(parent)
-
-        self.setWindowTitle(self.WINDOW_TITLE)
-        if cmds.about(ntOS=True):
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        elif cmds.about(macOS=True):
-            self.setProperty("saveWindowPref", True)
-            self.setWindowFlags(QtCore.Qt.Tool)
-
-        self.setMinimumSize(250, 200)
-
-        self.createWidgets()
-        self.createLayouts()
-
-    def createWidgets(self):
-        """ Create widgets """
-        self.mayaObjectLine = MayaObjectLine("Maya Object:")
-        self.mayaObjectLine.setHeight(20)
-
-    def createLayouts(self):
-        """ Create layouts"""
-        mainLayout = QtWidgets.QVBoxLayout(self)
-
-        mainLayout.addWidget(self.mayaObjectLine)
-
-        mainLayout = QtWidgets.QVBoxLayout(self)
-        mainLayout.setContentsMargins(0, 0, 0, 0)
-
-
-if __name__ == "__main__":
-
-    try:
-        testDialog.close()  # pylint: disable=E0601
-        testDialog.deleteLater()
-    except:
-        pass
-    # pylint: disable=invalid-name
-    testDialog = TestDialog()
-    testDialog.show()

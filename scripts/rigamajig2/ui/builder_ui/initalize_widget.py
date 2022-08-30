@@ -179,26 +179,25 @@ def _getComponentIcon(cmpt):
     return QtGui.QIcon(os.path.join(ICON_PATH, "{}.png".format(cmpt.split('.')[0])))
 
 
-# TODO: find a way to merge this with existing code... its written somewhere else
-def getComponentObject(moduleName=None):
+def getComponentObject(componentType=None):
     """
     Get an instance of the component object based on the componentType
-    :param moduleName:
+    :param componentType: type of the component to get the class instance from.
     :return:
     """
     tempBuilder = builder.Builder()
-
     cmptDict = tempBuilder.getComponentRefDict()
-    if moduleName not in list(cmptDict.keys()):
-        # this is a work around to account for the fact that some old .rig files use the cammel cased components
-        module, cls = moduleName.split('.')
+
+    if componentType not in list(cmptDict.keys()):
+        # HACK: this is a work around to account for the fact that some old .rig files use the cammel cased components
+        module, cls = componentType.split('.')
         newClass = cls[0].lower() + cls[1:]
         tempModuleName = module + "." + newClass
         if tempModuleName in list(cmptDict.keys()):
-            moduleName = tempModuleName
+            componentType = tempModuleName
 
-    modulePath = cmptDict[moduleName][0]
-    className = cmptDict[moduleName][1]
+    modulePath = cmptDict[componentType][0]
+    className = cmptDict[componentType][1]
     moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
     classInstance = getattr(moduleObject, className)
 
@@ -214,8 +213,13 @@ class ComponentManager(QtWidgets.QWidget):
     def __init__(self, builder=None, *args, **kwargs):
         super(ComponentManager, self).__init__(*args, **kwargs)
 
+        # keep a reference to the current builder
         self.builder = builder
 
+        # store an open edit component dialog in a varriable
+        self.editComponentDialog = None
+
+        # keep track of the script node ID
         self.scriptJobID = -1
 
         self.createActions()
@@ -229,8 +233,9 @@ class ComponentManager(QtWidgets.QWidget):
         self.selectContainerAction.setIcon(QtGui.QIcon(":out_container.png"))
         self.selectContainerAction.triggered.connect(self.selectContainer)
 
-        self.editComponentSettingsAction = QtWidgets.QAction("Edit Componet Parameters")
+        self.editComponentSettingsAction = QtWidgets.QAction("Edit Component Parameters")
         self.editComponentSettingsAction.setIcon(QtGui.QIcon(":toolSettings.png"))
+        self.editComponentSettingsAction.triggered.connect(self.editComponentParameters)
 
         self.createSymetricalComponent = QtWidgets.QAction("Create Mirroed Component")
         self.createSymetricalComponent.setIcon(QtGui.QIcon(":kinMirrorJoint_S.png"))
@@ -381,6 +386,25 @@ class ComponentManager(QtWidgets.QWidget):
         for item in self.getSelectedItem():
             itemDict = self.parseData(item)
             cmds.select(itemDict['container'], add=True)
+
+    def editComponentParameters(self):
+        """ Open the Edit component parameters dialog"""
+        from rigamajig2.ui.builder_ui import editComponentDialog
+
+        if not self.editComponentDialog:
+            self.editComponentDialog = editComponentDialog.EditComponentDialog()
+            self.editComponentDialog.windowClosedSignal.connect(self.resetComponentDialogInstance)
+            self.editComponentDialog.show()
+        else:
+            self.editComponentDialog.raise_()
+            self.editComponentDialog.activateWindow()
+
+        # set dialog to the current item
+        self.editComponentDialog.setComponent(self.getComponentObj())
+
+    def resetComponentDialogInstance(self):
+        """ Set the instance of the component dialog back to None. This way we know when it must be re-created"""
+        self.editComponentDialog = None
 
     def buildComponent(self):
         """ Build a single component"""
@@ -651,3 +675,4 @@ class CreateComponentDialog(QtWidgets.QDialog):
         """Apply and close the Ui"""
         self.apply()
         self.close()
+

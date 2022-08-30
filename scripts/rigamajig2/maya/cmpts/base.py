@@ -53,6 +53,7 @@ class Base(object):
         self.name = name
         self.componentType = self.__module__.split('cmpts.')[-1]
         self.input = input
+        self.rigParent = rigParent
         self.container = self.name + '_container'
         self.metaNode = None
 

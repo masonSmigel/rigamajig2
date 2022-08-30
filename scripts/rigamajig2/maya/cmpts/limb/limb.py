@@ -81,9 +81,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['joint1_fkName'] = inputBaseNames[1] + "_fk"
         self.cmptSettings['joint2_fkName'] = inputBaseNames[2] + "_fk"
         self.cmptSettings['joint3_fkName'] = inputBaseNames[3] + "_fk"
-        self.cmptSettings['joint3Gimble_fkName'] = inputBaseNames[3] + "Gimble_fk"
+        self.cmptSettings['gimble_fkName'] = inputBaseNames[3] + "Gimble_fk"
         self.cmptSettings['limb_ikName'] = self.name.split("_")[0] + "_ik"
-        self.cmptSettings['limbGimble_ikName'] = self.name.split("_")[0] + "Gimble_ik"
+        self.cmptSettings['gimble_ikName'] = self.name.split("_")[0] + "Gimble_ik"
         self.cmptSettings['limb_pvName'] = self.name.split("_")[0] + "_pv"
 
         self.cmptSettings['bend1Name'] = self.name.split("_")[0] + "_1_bend"
@@ -172,7 +172,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             xformObj=self.input[3]
             )
         self.joint3GimbleFk = rig_control.createAtObject(
-            self.joint3Gimble_fkName,
+            self.gimble_fkName,
             self.side,
             orig=True,
             hideAttrs=['v', 't', 's'],
@@ -198,7 +198,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             )
 
         self.limbGimbleIk = rig_control.create(
-            self.limbGimble_ikName,
+            self.gimble_ikName,
             self.side,
             orig=True,
             hideAttrs=['v', 's'],

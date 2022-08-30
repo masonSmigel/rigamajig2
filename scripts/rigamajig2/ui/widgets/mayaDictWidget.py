@@ -34,6 +34,28 @@ def mayaMainWindow():
         return wrapInstance(long(mainWindowPointer), QtWidgets.QWidget)
 
 
+class InputDialog(QtWidgets.QDialog):
+    def __init__(self, parent=None):
+        super(InputDialog, self).__init__()
+
+        self.setWindowTitle("Add New Item")
+
+        self.first = QtWidgets.QLineEdit(self)
+        self.second = QtWidgets.QLineEdit(self)
+        buttonBox = QtWidgets.QDialogButtonBox(QtWidgets.QDialogButtonBox.Ok | QtWidgets.QDialogButtonBox.Cancel, self);
+
+        layout = QtWidgets.QFormLayout(self)
+        layout.addRow("Label:", self.first)
+        layout.addRow("Maya Object:", self.second)
+        layout.addWidget(buttonBox)
+
+        buttonBox.accepted.connect(self.accept)
+        buttonBox.rejected.connect(self.reject)
+
+    def getInputs(self):
+        return self.first.text(), self.second.text()
+
+
 # ignore too many public methods to UI classes.
 # pylint: disable = too-many-public-methods
 class MayaDict(QtWidgets.QWidget):
@@ -55,11 +77,11 @@ class MayaDict(QtWidgets.QWidget):
 
     def createActions(self):
         """ Create actions"""
-        self.addNameAction = QtWidgets.QAction("Add Name", self)
+        self.addNameAction = QtWidgets.QAction("Add New Item", self)
         self.addNameAction.setIcon(QtGui.QIcon(":addCreateGeneric.png"))
         self.addNameAction.triggered.connect(self.addName)
 
-        self.addMayaSelectionAction = QtWidgets.QAction("Add Maya Selection", self)
+        self.addMayaSelectionAction = QtWidgets.QAction("Add Item from Maya", self)
         self.addMayaSelectionAction.setIcon(QtGui.QIcon(":addCreateGeneric.png"))
         self.addMayaSelectionAction.triggered.connect(self.loadMayaSelection)
 
@@ -83,11 +105,13 @@ class MayaDict(QtWidgets.QWidget):
         """ Create Widgets """
         self.mayaObjectDict = QtWidgets.QTreeWidget()
         self.mayaObjectDict.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        self.mayaObjectDict.setHeaderHidden(True)
+        self.mayaObjectDict.setHeaderHidden(False)
+        self.mayaObjectDict.setHeaderLabels(["Label", "Maya Object"])
         self.mayaObjectDict.setAlternatingRowColors(True)
 
         self.mayaObjectDict.setIndentation(5)
         self.mayaObjectDict.setColumnCount(2)
+        self.mayaObjectDict.setColumnWidth(0, 80)
 
         self.mayaObjectDict.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.mayaObjectDict.customContextMenuRequested.connect(self._createContextMenu)
@@ -97,14 +121,25 @@ class MayaDict(QtWidgets.QWidget):
 
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self.mainLayout.addWidget(self.mayaObjectDict)
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
 
     def createConnections(self):
         """ Create connections"""
-        pass
 
     def setHeight(self, height):
         """ Set the list widget height"""
         self.mayaObjectDict.setFixedHeight(height)
+
+    def getData(self, fullDagPath=False):
+        """ Return a dictionary of all items. ie. {label: maya Object}"""
+        returnDict = dict()
+
+        for item in self.getAllItems():
+            label = item.text(0)
+            obj = item.data(QtCore.Qt.UserRole, 1) if fullDagPath else item.text(1)
+            returnDict[label] = obj
+
+        return returnDict
 
     def _createContextMenu(self, position):
         """Create the right click context menu"""
@@ -156,7 +191,7 @@ class MayaDict(QtWidgets.QWidget):
 
     def getAllItems(self):
         """ get all components in the component tree"""
-        return [self.mayaObjectDict.item(i) for i in range(self.mayaObjectDict.count())]
+        return [self.mayaObjectDict.topLevelItem(i) for i in range(self.mayaObjectDict.topLevelItemCount())]
 
     def getSelectedItem(self):
         """ get the selected items in the component tree"""
@@ -164,41 +199,49 @@ class MayaDict(QtWidgets.QWidget):
 
     def addName(self):
         """Add a new specific name"""
-        text, ok = QtWidgets.QInputDialog.getText(self, "Add Name", "Enter Name:")
-        if ok:
-            self.addMayaObject(text)
+
+        dialog = InputDialog()
+        if dialog.exec_():
+            label, obj = dialog.getInputs()
+            self.addMayaObject(label, obj)
 
     def loadMayaSelection(self):
         """ Load Maya selection action"""
+
         selection = om2.MGlobal.getActiveSelectionList()
-        if selection:
+        if selection.length() > 0:
+
+            text, ok = QtWidgets.QInputDialog.getText(self, "Add Name", "Enter Label Name:")
+            if not ok:
+                return
+
             for i in range(selection.length()):
                 mob = selection.getDependNode(i)
                 dagPath = om2.MFnDagNode(mob)
-                self.addMayaObject(dagPath.name())
+                self.addMayaObject(text, dagPath.name())
         else:
-            raise Exception("Nothing is selected")
+            om2.MGlobal.displayError("Nothing is selected")
 
     def selectInMaya(self):
         """ Select Current Object in maya"""
         cmds.select(clear=True)
         for item in self.getSelectedItem():
-            dagPath = item.data(QtCore.Qt.UserRole)
+            dagPath = item.data(QtCore.Qt.UserRole, 1)
             cmds.select(dagPath, add=True)
 
     def selectAllInMaya(self):
         """ Select all Items in maya"""
         cmds.select(clear=True)
         for item in self.getAllItems():
-            dagPath = item.data(QtCore.Qt.UserRole)
+            dagPath = item.data(QtCore.Qt.UserRole, 1)
             cmds.select(dagPath, add=True)
 
     def clearSelection(self):
         """ Clear the active selection"""
         selectedItems = self.getSelectedItem()
         for item in selectedItems:
-            index = self.mayaObjectDict.row(item)
-            self.mayaObjectDict.takeItem(index)
+            index = self.mayaObjectDict.indexOfTopLevelItem(item)
+            self.mayaObjectDict.takeTopLevelItem(index)
 
     def clearAll(self):
         """ Clear the whole widget"""
@@ -243,7 +286,6 @@ class TestDialog(QtWidgets.QDialog):
 
 
 if __name__ == "__main__":
-
     try:
         testDialog.close()  # pylint: disable=E0601
         testDialog.deleteLater()

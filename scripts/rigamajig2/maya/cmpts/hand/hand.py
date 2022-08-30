@@ -62,6 +62,9 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['addFKSpace'] = addFKSpace
         self.cmptSettings['useSubMeta'] = useSubMeta
 
+        # initalize some other variables we need
+        self.fingerComponentList = list()
+
     def createBuildGuides(self):
         """Show Advanced Proxy"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))

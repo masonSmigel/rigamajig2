@@ -101,6 +101,7 @@ class MayaString(QtWidgets.QWidget):
         """Set the text of the mayaObject line edit"""
         self.mayaObject.setText(text)
 
+
     def setHeight(self, height):
         self.label.setMinimumHeight(height)
         self.mayaObject.setMinimumHeight(height)
@@ -108,6 +109,10 @@ class MayaString(QtWidgets.QWidget):
     def getSelection(self):
         """ Get the full dag path of the selected object"""
         return self._fullDagPath
+
+    def getText(self):
+        """ Return only the text of the selected object (AKA the dag name)"""
+        return self.mayaObject.text()
 
     def loadMayaSelection(self):
         """ Load Maya selection action"""

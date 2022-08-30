@@ -17,6 +17,7 @@ from collections import OrderedDict
 
 # MAYA
 import maya.cmds as cmds
+import maya.api.OpenMaya as om2
 import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -27,6 +28,7 @@ from shiboken2 import wrapInstance
 from rigamajig2.ui.widgets import mayaListWidget
 from rigamajig2.ui.widgets import mayaDictWidget
 from rigamajig2.ui.widgets import mayaStringWidget
+from rigamajig2.ui.widgets import messageWidget
 
 from rigamajig2.maya import meta
 
@@ -56,8 +58,13 @@ class EditComponentDialog(QtWidgets.QDialog):
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
         self.setMinimumSize(280, 600)
 
-        # store a list of all component level widgets
+        # store a list of all component level widgets.
+        # The list stores items in a tuple of (parameter name, QWidget)
+        # This allows us to keep track of what widget goes to which parameter so they can be re-applied.
         self.componentWidgets = list()
+
+        # store the current component python instance
+        self.currentComponent = None
 
         self.createWidgets()
         self.createLayouts()
@@ -71,6 +78,10 @@ class EditComponentDialog(QtWidgets.QDialog):
         self.inputMayaList = mayaListWidget.MayaList()
         self.inputMayaList.setHeight(120)
         self.rigParentMayaString = mayaStringWidget.MayaString()
+
+        # create a warning widget
+        self.warningWidget = messageWidget.MessageWidget("warn", "Component not Intialized or out of Date")
+        self.warningWidget.setMessageEnabled(False)
 
         self.applyButton = QtWidgets.QPushButton("Apply Parameters")
         self.applyButton.setFixedHeight(35)
@@ -87,11 +98,12 @@ class EditComponentDialog(QtWidgets.QDialog):
 
         # setup the form layout
         commonFormLayout = QtWidgets.QFormLayout()
-        commonFormLayout.addRow(QtWidgets.QLabel("name"), self.nameLineEdit)
-        commonFormLayout.addRow(QtWidgets.QLabel("type"), self.typeLineEdit)
-        commonFormLayout.addRow(QtWidgets.QLabel("inputs"), self.inputMayaList)
-        commonFormLayout.addRow(QtWidgets.QLabel("rigParent"), self.rigParentMayaString)
+        commonFormLayout.addRow(QtWidgets.QLabel("name:"), self.nameLineEdit)
+        commonFormLayout.addRow(QtWidgets.QLabel("type:"), self.typeLineEdit)
+        commonFormLayout.addRow(QtWidgets.QLabel("inputs:"), self.inputMayaList)
+        commonFormLayout.addRow(QtWidgets.QLabel("rigParent:"), self.rigParentMayaString)
         commonLayout.addLayout(commonFormLayout)
+        commonLayout.addWidget(self.warningWidget)
         # add a tiny space at the bottom
         commonLayout.addSpacing(4)
 
@@ -145,40 +157,49 @@ class EditComponentDialog(QtWidgets.QDialog):
 
     def createConnections(self):
         """ Create Connections"""
+        self.applyButton.clicked.connect(self.applyParameters)
         self.closeButton.clicked.connect(self.close)
 
     def setComponent(self, component):
         """ Set the widget to the given component """
 
+        self.currentComponent = component
+
+        # check to make sure the container exists
+        if not self.currentComponent.getContainer() or not cmds.objExists(self.currentComponent.getContainer()):
+            raise RuntimeError("Component is not initalized. Please initalize the component to continue.")
+
         # ensure all maya component level changes are loaded onto the class
-        component._loadComponentParametersToClass()
+        self.currentComponent._loadComponentParametersToClass()
 
         # set the title of the window to reflect the active component
-        title = self.WINDOW_TITLE + " " + component.name
+        title = self.WINDOW_TITLE + " " + self.currentComponent.name
         self.setWindowTitle(title)
 
-        # # set the commmon parameters
-        self.nameLineEdit.setText(component.name)
-        self.typeLineEdit.setText(component.componentType)
-        self.inputMayaList.setItems(component.input)
-        self.rigParentMayaString.setText(component.rigParent)
+        # set the commmon parameters
+        self.nameLineEdit.setText(self.currentComponent.name)
+        self.typeLineEdit.setText(self.currentComponent.componentType)
+        self.inputMayaList.setItems(self.currentComponent.input)
+        self.rigParentMayaString.setText(self.currentComponent.rigParent)
 
-        # clear the old parameters
+        # clear the old parameter widgets
+        self.componentWidgets = list()
         for i in reversed(range(self.componentFormLayout.count())):
             self.componentFormLayout.itemAt(i).widget().deleteLater()
 
-        for item in component.cmptSettings:
+        # add all the new widgets
+        for item in self.currentComponent.cmptSettings:
             if item not in ['name', 'input', 'rigParent', 'type']:
-                self.addWidgetFromParameter(item, component.container, parameterType=type(component.cmptSettings[item]))
+                self.addWidgetFromParameter(
+                    item,
+                    self.currentComponent.getContainer(),
+                    parameterType=type(component.cmptSettings[item])
+                    )
 
-    # TODO: finish this
     def addWidgetFromParameter(self, parameter, container, parameterType):
         """
         :return:
         """
-
-        label = QtWidgets.QLabel(parameter)
-        print parameterType
 
         if parameterType == int:
             # add an int widget
@@ -212,9 +233,42 @@ class EditComponentDialog(QtWidgets.QDialog):
             widget.setText(value)
 
         # add the widget to the component layout
-        self.componentFormLayout.addRow(label, widget)
+        self.componentFormLayout.addRow("{}:".format(parameter), widget)
+        self.componentWidgets.append([parameter, widget])
 
-        self.componentWidgets.append([label, widget])
+    def applyParameters(self):
+        """ Apply the parameters back to the component"""
+
+        container = self.currentComponent.getContainer()
+
+        # select the container so we can instanly see the data applied
+        cmds.select(container, r=True)
+
+        metaNode = meta.MetaNode(container)
+
+        # insert our common parameters into the top of the list
+        allComponentWidgets = [["input", self.inputMayaList], ["rigParent", self.rigParentMayaString]] + self.componentWidgets
+
+        for parameter, widget in allComponentWidgets:
+            if isinstance(widget, mayaDictWidget.MayaDict):
+                data = widget.getData()
+            elif isinstance(widget, mayaListWidget.MayaList):
+                data = widget.getData()
+            elif isinstance(widget, mayaStringWidget.MayaString):
+                data = widget.getText()
+            elif isinstance(widget, QtWidgets.QCheckBox):
+                data = widget.isChecked()
+            elif isinstance(widget, QtWidgets.QLineEdit):
+                data = widget.text()
+            else:
+                data = None
+
+            # try to set the data
+            try:
+                metaNode.setData(attr=parameter, value=data)
+                print("Set data {}.{}: {}".format(container, parameter, data))
+            except:
+                om2.MGlobal.displayWarning("Failed to set data on {}.{}".format(container, parameter))
 
     def closeEvent(self, *args, **kwargs):
         """ Add a close event to emit the signal whenever the window is closed"""

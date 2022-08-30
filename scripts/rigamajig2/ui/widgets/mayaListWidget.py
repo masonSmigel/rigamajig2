@@ -82,6 +82,9 @@ class MayaList(QtWidgets.QWidget):
         """ Create Widgets """
         self.mayaObjectList = QtWidgets.QListWidget()
 
+        self.mayaObjectList.setDragDropMode(QtWidgets.QAbstractItemView.InternalMove)
+        self.mayaObjectList.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
+
         self.mayaObjectList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.mayaObjectList.customContextMenuRequested.connect(self._createContextMenu)
 
@@ -99,6 +102,15 @@ class MayaList(QtWidgets.QWidget):
     def createConnections(self):
         """ Create connections"""
         pass
+
+    def getData(self, fullDagPath=False):
+        """return all data in the lsit"""
+        returnList = list()
+        for item in self.getAllItems():
+            obj = item.data(QtCore.Qt.UserRole) if fullDagPath else item.text()
+            returnList.append(obj)
+
+        return returnList
 
     def _createContextMenu(self, position):
         """Create the right click context menu"""
@@ -162,7 +174,7 @@ class MayaList(QtWidgets.QWidget):
                 dagPath = om2.MFnDagNode(mob)
                 self.addMayaObject(dagPath.name())
         else:
-            raise Exception("Nothing is selected")
+            om2.MGlobal.displayError("Nothing is selected")
 
     def selectInMaya(self):
         """ Select Current Object in maya"""

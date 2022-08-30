@@ -1,5 +1,21 @@
 # Change Log 
 
+
+## 1.0.4
+
+
+### Added: 
+* Added `editComponentParameters` dialog to the component manager. 
+This dialog allows the user to edit the parameters without diving into the attribute editor
+* Added `mirrorComponentParameters` and `createMirroredComponent` options to the component manager. 
+These funcitons aide in managing and creating new components. 
+  * `mirrorComponentParameters` will attempt to process and create a mirror name for all appropriate parameters in a component. 
+  * `createMirroredComponent` will create a new mirrored compponent and mirror the parameters. 
+
+### Changed: 
+* refactored `_lookForComponents` and changed name to `findComponents`
+
+
 ## 1.0.3
 
 

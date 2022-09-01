@@ -121,12 +121,20 @@ class Builder(object):
 
     def initalize(self):
         """Initalize rig (this is where the user can make changes)"""
+        for cmpt in self.componentList:
+            logger.info('Initalizing: {}'.format(cmpt.name))
+            cmpt._initalizeComponent()
+
+        logger.info("initalize -- complete")
+
+    def guide(self):
+        """ guide the rig"""
         if not cmds.objExists("guides"):
             cmds.createNode("transform", name="guides")
 
         for cmpt in self.componentList:
-            logger.info('Initalizing: {}'.format(cmpt.name))
-            cmpt._initalizeComponent()
+            logger.info('Guiding: {}'.format(cmpt.name))
+            cmpt._guideComponent()
             if hasattr(cmpt, "guidesHierarchy") and cmpt.guidesHierarchy:
                 parent = cmds.listRelatives(cmpt.guidesHierarchy, p=True)
                 if parent and parent[0] == 'guides':
@@ -135,7 +143,7 @@ class Builder(object):
             self.updateMaya()
 
         self.loadGuideData()
-        logger.info("initalize -- complete")
+        logger.info("guide -- complete")
 
     def build(self):
         """build rig"""
@@ -459,6 +467,7 @@ class Builder(object):
         self.loadComponents()
         self.initalize()
         self.loadComponentSettings()
+        self.guide()
         self.build()
         self.connect()
         self.finalize()

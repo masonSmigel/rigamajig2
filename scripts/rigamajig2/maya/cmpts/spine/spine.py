@@ -18,6 +18,7 @@ import rigamajig2.maya.joint as joint
 import rigamajig2.maya.meta as meta
 
 HIPS_PERCENT = 0.33
+SPINE_PERCENT = 0.5
 TORSO_PERCENT = 0.15
 
 
@@ -35,7 +36,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), addSpineMid=False):
         """
         :param str name: name of the component
         :param list input: list of input joints. Starting with the base of the neck and ending with the head.
@@ -46,38 +47,59 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         super(Spine, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
+        self.cmptSettings['addSpineMid'] = addSpineMid
         self.cmptSettings['hipsSwing_name'] = 'hip_swing'
         self.cmptSettings['torso_name'] = 'torso'
+        self.cmptSettings['spineMid_name'] = 'spineMid'
         self.cmptSettings['chest_name'] = 'chest'
         self.cmptSettings['chestTop_name'] = 'chestTop'
         self.cmptSettings['hipTanget_name'] = 'hipTan'
         self.cmptSettings['chestTanget_name'] = 'chestTan'
-        # self.cmptSettings['hipSwivel_percent'] = 0.333
-        # self.cmptSettings['torso_percent'] = 0.15
+
+        # HACK: We need to force the addSpineMid to be set here
+        self.addSpineMid = addSpineMid
 
     def createBuildGuides(self):
         """Create the build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
-        self.hipsSwivelGuide = rig_control.createGuide(self.name + "_hipSwivel",
-                                                       side=self.side,
-                                                       parent=self.guidesHierarchy)
+        self.hipsSwivelGuide = rig_control.createGuide(
+            self.name + "_hipSwivel",
+            side=self.side,
+            parent=self.guidesHierarchy)
         live.slideBetweenTransforms(self.hipsSwivelGuide, self.input[1], self.input[-2], defaultValue=HIPS_PERCENT)
 
-        self.torsoGuide = rig_control.createGuide(self.name + "_torso", side=self.side, parent=self.guidesHierarchy)
+        self.torsoGuide = rig_control.createGuide(
+            self.name + "_torso",
+            side=self.side,
+            parent=self.guidesHierarchy)
 
         # setup the slider for the guide
         live.slideBetweenTransforms(self.torsoGuide, self.input[1], self.input[-2], defaultValue=TORSO_PERCENT)
 
-        self.chestGuide = rig_control.createGuide(self.name + "_chest",
-                                                  side=self.side,
-                                                  parent=self.guidesHierarchy,
-                                                  position=cmds.xform(self.input[-2], q=True, ws=True, t=True))
+        self.chestGuide = rig_control.createGuide(
+            self.name + "_chest",
+            side=self.side,
+            parent=self.guidesHierarchy,
+            position=cmds.xform(self.input[-2], q=True, ws=True, t=True))
 
-        self.chestTopGuide = rig_control.createGuide(self.name + "_chestTop",
-                                                     side=self.side,
-                                                     parent=self.guidesHierarchy,
-                                                     position=cmds.xform(self.input[-1], q=True, ws=True, t=True))
+        self.chestTopGuide = rig_control.createGuide(
+            self.name + "_chestTop",
+            side=self.side,
+            parent=self.guidesHierarchy,
+            position=cmds.xform(self.input[-1], q=True, ws=True, t=True))
+
+        print "add spine mid", self.addSpineMid
+
+        if self.addSpineMid:
+            self.spineMidGuide = rig_control.createGuide(
+                self.name + "_spineMid",
+                side=self.side,
+                parent=self.guidesHierarchy,
+                position=cmds.xform(self.input[-2], q=True, ws=True, t=True)
+                )
+
+            live.slideBetweenTransforms(self.spineMidGuide, self.input[1], self.input[-2], defaultValue=SPINE_PERCENT)
 
         for guide in [self.hipsSwivelGuide, self.torsoGuide, self.chestGuide]:
             rig_attr.lock(guide, rig_attr.TRANSLATE)
@@ -90,39 +112,95 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
         # build the hips swivel control
         hipPos = cmds.xform(self.input[0], q=True, ws=True, t=True)
-        self.hipSwing = rig_control.createAtObject(self.hipsSwing_name, self.side,
-                                                   hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                                   parent=self.controlHierarchy, shape='cube', shapeAim='x',
-                                                   xformObj=self.hipsSwivelGuide)
+        self.hipSwing = rig_control.createAtObject(
+            self.hipsSwing_name, self.side,
+            hideAttrs=['s', 'v'],
+            size=self.size,
+            color='yellow',
+            parent=self.controlHierarchy,
+            shape='cube',
+            shapeAim='x',
+            xformObj=self.hipsSwivelGuide
+            )
+
         # build the torso control
-        self.torso = rig_control.createAtObject(self.torso_name, self.side,
-                                                hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                                parent=self.controlHierarchy, shape='cube', shapeAim='x',
-                                                xformObj=self.torsoGuide)
+        self.torso = rig_control.createAtObject(
+            name=self.torso_name,
+            side=self.side,
+            hideAttrs=['s', 'v'],
+            size=self.size,
+            color='yellow',
+            parent=self.controlHierarchy,
+            shape='cube',
+            shapeAim='x',
+            xformObj=self.torsoGuide
+            )
+
+        # if we want to add a spineMid then add it between the chest and torso
+        if self.addSpineMid:
+            self.spineMid = rig_control.createAtObject(
+                name=self.spineMid_name,
+                side=self.side,
+                hideAttrs=['s', 'v'],
+                size=self.size,
+                color='yellow',
+                parent=self.torso.name,
+                shape='cube',
+                shapeAim='x',
+                xformObj=self.spineMidGuide
+                )
 
         # build the chest control
-        self.chest = rig_control.createAtObject(self.chest_name, self.side,
-                                                hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                                parent=self.torso.name, shape='cube', shapeAim='x',
-                                                xformObj=self.chestGuide)
+        self.chest = rig_control.createAtObject(
+            name=self.chest_name,
+            side=self.side,
+            hideAttrs=['s', 'v'],
+            size=self.size,
+            color='yellow',
+            parent=self.spineMid.name if self.addSpineMid else self.torso.name,
+            shape='cube',
+            shapeAim='x',
+            xformObj=self.chestGuide
+            )
         self.chest.addTrs("neg")
 
         chestPos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
-        self.chestTop = rig_control.createAtObject(self.chestTop_name, self.side,
-                                                   hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                                   parent=self.chest.name, shape='cube', shapeAim='x',
-                                                   xformObj=self.chestTopGuide)
+        self.chestTop = rig_control.createAtObject(
+            name=self.chestTop_name,
+            side=self.side,
+            hideAttrs=['s', 'v'],
+            size=self.size,
+            color='yellow',
+            parent=self.chest.name,
+            shape='cube',
+            shapeAim='x',
+            xformObj=self.chestTopGuide
+            )
         self.chest.addTrs("len")
 
-        self.hipTanget = rig_control.create(self.hipTanget_name, self.side,
-                                            hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
-                                            parent=self.hipSwing.name, shape='diamond', shapeAim='x',
-                                            position=hipPos)
+        self.hipTanget = rig_control.create(
+            name=self.hipTanget_name,
+            side=self.side,
+            hideAttrs=['r', 's', 'v'],
+            size=self.size,
+            color='yellow',
+            parent=self.hipSwing.name,
+            shape='diamond',
+            shapeAim='x',
+            position=hipPos
+            )
 
-        self.chestTanget = rig_control.create(self.chestTanget_name, self.side,
-                                              hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
-                                              parent=self.chest.name, shape='diamond', shapeAim='x',
-                                              position=chestPos)
+        self.chestTanget = rig_control.create(
+            name=self.chestTanget_name,
+            side=self.side,
+            hideAttrs=['r', 's', 'v'],
+            size=self.size,
+            color='yellow',
+            parent=self.chest.name,
+            shape='diamond',
+            shapeAim='x',
+            position=chestPos
+            )
 
     def rigSetup(self):
         """Add the rig setup"""

@@ -65,7 +65,7 @@ class InitializeWidget(QtWidgets.QWidget):
         self.addComponentsButton.setIcon(QtGui.QIcon(":freeformOff.png"))
         self.componentManager = ComponentManager()
 
-        self.initalizeBuildButton = QtWidgets.QPushButton("Initalize Components")
+        self.initalizeBuildButton = QtWidgets.QPushButton("Guide Components")
         self.initalizeBuildButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
         self.guidePathSelector = pathSelector.PathSelector("guides:",
                                                            caption="Select a guide file",
@@ -149,7 +149,10 @@ class InitializeWidget(QtWidgets.QWidget):
     def loadComponents(self):
         """ Load component setup from json using the builder """
         self.builder.setComponents(list())
+        # load the compoonents from the file. then initialize them
         self.builder.loadComponents(self.componentsPathSelector.getPath())
+        self.builder.initalize()
+        # load the component settings from the file.
         self.builder.loadComponentSettings(self.componentsPathSelector.getPath())
         self.componentManager.loadListFromBuilder()
 
@@ -169,7 +172,7 @@ class InitializeWidget(QtWidgets.QWidget):
 
     def initalizeRig(self):
         """Run the comppnent intialize on the builder and update the UI """
-        self.builder.initalize()
+        self.builder.guide()
         self.builder.loadComponentSettings()
         self.componentManager.loadFromScene()
 

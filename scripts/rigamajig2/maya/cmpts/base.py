@@ -77,7 +77,6 @@ class Base(object):
 
         process order:
             self.createContainer
-            self.preScript
         """
         if self.getStep() < 1:
             # fullDict = dict(self.metaData, **self.cmptSettings)
@@ -91,17 +90,31 @@ class Base(object):
 
             rigamajig2.maya.attr.lock(self.container, ["name", "type"])
 
+            self.setStep(1)
+
+        else:
+            logger.debug('component {} already initalized.'.format(self.name))
+
+    def _guideComponent(self):
+        """
+        setup the component guides
+        process order:
+            self.preScript
+            self.createJoints
+            self.createBuildGuides
+        """
+        self._loadComponentParametersToClass()
+
+        if self.getStep() < 2:
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.preScript()  # run any pre-build scripts
                 self.createJoints()
                 self.createBuildGuides()
-            self.setStep(1)
+            self.setStep(2)
 
-            # load all parameters back to the class so theyre always there
-            self._loadComponentParametersToClass()
         else:
-            logger.debug('component {} already initalized.'.format(self.name))
+            logger.debug('component {} already guided.'.format(self.name))
 
     def _buildComponent(self):
         """
@@ -115,7 +128,7 @@ class Base(object):
         """
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 2:
+        if self.getStep() < 3:
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -124,7 +137,7 @@ class Base(object):
                 self.rigSetup()
                 self.postRigSetup()
                 self.setupAnimAttrs()
-            self.setStep(2)
+            self.setStep(3)
         else:
             logger.debug('component {} already built.'.format(self.name))
 
@@ -132,12 +145,12 @@ class Base(object):
         """ connect components within the rig"""
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 3:
+        if self.getStep() < 4:
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.initConnect()
                 self.connect()
                 self.postConnect()
-            self.setStep(3)
+            self.setStep(4)
         else:
             logger.debug('component {} already connected.'.format(self.name))
 
@@ -153,14 +166,14 @@ class Base(object):
         """
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 4:
+        if self.getStep() < 5:
             self.publishNodes()
             self.publishAttributes()
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.finalize()
                 self.setAttrs()
                 self.postScript()
-            self.setStep(4)
+            self.setStep(5)
         else:
             logger.debug('component {} already finalized.'.format(self.name))
 
@@ -168,9 +181,9 @@ class Base(object):
         """"""
         self._loadComponentParametersToClass()
 
-        if self.getStep() != 5:
+        if self.getStep() != 6:
             self.optimize()
-            self.setStep(5)
+            self.setStep(6)
         else:
             logger.debug('component {} already optimized.'.format(self.name))
 
@@ -298,7 +311,8 @@ class Base(object):
         """
         if not cmds.objExists("{}.{}".format(self.container, 'build_step')):
             rigamajig2.maya.attr.createEnum(self.container, 'build_step', value=0,
-                                            enum=['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize'],
+                                            enum=['unbuilt', 'initalize', 'guide', 'build', 'connect', 'finalize',
+                                                  'optimize'],
                                             keyable=False, channelBox=False)
 
         cmds.setAttr("{}.{}".format(self.container, 'build_step'), step)

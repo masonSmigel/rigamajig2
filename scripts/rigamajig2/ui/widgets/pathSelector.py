@@ -14,6 +14,7 @@ from rigamajig2.ui import showInFolder
 
 class PathSelector(QtWidgets.QWidget):
     """ Widget to select valid file or folder paths """
+
     def __init__(self,
                  label=None,
                  caption='Select a file or Folder',
@@ -82,13 +83,15 @@ class PathSelector(QtWidgets.QWidget):
                 okc='Select',
                 dir=currentPath
                 )
-            if newPath: newPath = newPath[0]
+            if newPath:
+                newPath = newPath[0]
+
         else:
             newPath = path
 
         if newPath and os.path.exists(newPath):
             if self.relativePath:
-                newPath = os.path.relpath(path, self.relativePath)
+                newPath = os.path.relpath(newPath, self.relativePath)
             self.pathLineEdit.setText(newPath)
 
     def showInFolder(self):

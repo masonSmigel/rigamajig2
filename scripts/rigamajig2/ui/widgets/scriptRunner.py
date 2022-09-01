@@ -220,6 +220,7 @@ class ScriptRunner(QtWidgets.QWidget):
         scriptList = list()
         if relativePaths:
             for script in self.currentScriptsList:
+                print script, self.rootDirectory
                 scriptList.append(relpath(script, self.rootDirectory))
             return scriptList
         return self.currentScriptsList

@@ -92,6 +92,11 @@ class CurveData(node_data.NodeData):
                             if not cmds.objExists(node):
                                 cmds.createNode('transform', n=node)
 
+                            # check if the shape exists but there is a mismatch in the number of cvs
+                            numSourceCvs = len(self._data[node]['shapes'][shape][attribute])
+                            if cmds.objExists(shape) and len(curve.getCvs(shape)) != numSourceCvs:
+                                cmds.delete(shape)
+
                             if not cmds.objExists(shape):
                                 if 'form' in self._data[node]['shapes'][shape]:
                                     form = self._data[node]['shapes'][shape]['form']

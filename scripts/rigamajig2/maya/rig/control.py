@@ -201,14 +201,12 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     """
 
     if position is None:
-        position = [0,0,0]
+        position = [0, 0, 0]
 
     if rotation is None:
         rotation = [0, 0, 0]
     if hideAttrs is None:
         hideAttrs = ['v']
-
-
 
     if side:
         name = rigamajig2.maya.naming.getUniqueName("{}_{}".format(name, side))

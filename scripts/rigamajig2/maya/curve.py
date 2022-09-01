@@ -24,7 +24,7 @@ def createCurve(points, degree=3, name='curve', transformType="transform", form=
     :param transformType: transfrom type to create on.
     :type transformType: str
 
-    :param form: The form of the curve. ex. (Open, Closed)
+    :param form: The form of the curve. ex. (Open, Closed, Periodic)
     :type form: str
 
     :return: name of the curve created

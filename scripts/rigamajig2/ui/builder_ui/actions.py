@@ -103,14 +103,6 @@ class Actions(object):
 
         # Save the main feilds
         newData[constants.RIG_NAME] = self.dialog.assetNameLineEdit.text()
-        preScripts = self.dialog.modelWidget.preScriptRunner.getCurrentScriptList(relativePaths=True)
-        newData[constants.PRE_SCRIPT] = preScripts
-
-        postScripts = self.dialog.buildWidget.postScriptScriptRunner.getCurrentScriptList(relativePaths=True)
-        newData[constants.POST_SCRIPT] = postScripts
-
-        pubScripts = self.dialog.publishWidget.publishScriptRunner.getCurrentScriptList(relativePaths=True)
-        newData[constants.PUB_SCRIPT] = pubScripts
 
         newData[constants.MODEL_FILE] = self.dialog.modelWidget.modelPathSelector.getPath()
         newData[constants.SKELETON_POS] = self.dialog.jointWidget.jointPositionPathSelector.getPath()

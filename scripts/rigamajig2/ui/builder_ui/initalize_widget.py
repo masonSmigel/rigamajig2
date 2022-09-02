@@ -129,11 +129,11 @@ class InitializeWidget(QtWidgets.QWidget):
         # update data within the rig
         cmptsFile = self.builder.getRigData(self.builder.getRigFile(), COMPONENTS)
         if cmptsFile:
-            self.componentsPathSelector.setPath(cmptsFile)
+            self.componentsPathSelector.selectPath(cmptsFile)
 
         guidesFile = self.builder.getRigData(self.builder.getRigFile(), GUIDES)
         if guidesFile:
-            self.guidePathSelector.setPath(guidesFile)
+            self.guidePathSelector.selectPath(guidesFile)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
@@ -341,6 +341,7 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.addComponent(name=name, componentType=componentType, buildStep='unbuilt', container=None)
         self.builder.appendComponents([cmpt])
+        cmpt._initalizeComponent()
         return cmpt
 
     def loadFromScene(self):

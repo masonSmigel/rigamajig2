@@ -13,6 +13,9 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
+# MAYA
+import maya.cmds as cmds
+
 # RIGAMAJIG2
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
 from rigamajig2.ui.builder_ui import constants as ui_constants
@@ -90,7 +93,7 @@ class ModelWidget(QtWidgets.QWidget):
         # update data within the rig
         modelFile = self.builder.getRigData(self.builder.getRigFile(), constants.MODEL_FILE)
         if modelFile:
-            self.modelPathSelector.setPath(modelFile)
+            self.modelPathSelector.selectPath(modelFile)
 
         # update the script runner
         scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PRE_SCRIPT)

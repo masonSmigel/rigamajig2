@@ -104,14 +104,14 @@ class Actions(object):
         # Save the main feilds
         newData[constants.RIG_NAME] = self.dialog.assetNameLineEdit.text()
 
-        newData[constants.MODEL_FILE] = self.dialog.modelWidget.modelPathSelector.getPath()
-        newData[constants.SKELETON_POS] = self.dialog.jointWidget.jointPositionPathSelector.getPath()
-        newData[constants.GUIDES] = self.dialog.intalizeWidget.guidePathSelector.getPath()
-        newData[constants.COMPONENTS] = self.dialog.intalizeWidget.componentsPathSelector.getPath()
-        newData[constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlPathSelector.getPath()
-        newData[constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath()
-        newData[constants.PSD] = self.dialog.deformationWidget.psdPathSelector.getPath()
-        newData[constants.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath()
+        newData[constants.MODEL_FILE] = self.dialog.modelWidget.modelPathSelector.getPath(absoultePath=False)
+        newData[constants.SKELETON_POS] = self.dialog.jointWidget.jointPositionPathSelector.getPath(absoultePath=False)
+        newData[constants.GUIDES] = self.dialog.intalizeWidget.guidePathSelector.getPath(absoultePath=False)
+        newData[constants.COMPONENTS] = self.dialog.intalizeWidget.componentsPathSelector.getPath(absoultePath=False)
+        newData[constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlPathSelector.getPath(absoultePath=False)
+        newData[constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath(absoultePath=False)
+        newData[constants.PSD] = self.dialog.deformationWidget.psdPathSelector.getPath(absoultePath=False)
+        newData[constants.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath(absoultePath=False)
         newData[constants.OUTPUT_RIG_FILE_TYPE] = self.dialog.publishWidget.outFileTypeComboBox.currentText()
 
         data.setData(newData)

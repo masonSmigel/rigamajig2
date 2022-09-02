@@ -89,7 +89,7 @@ class PublishWidget(QtWidgets.QWidget):
         # update data within the rig
         outFile = self.builder.getRigData(self.builder.getRigFile(), constants.OUTPUT_RIG)
         if outFile:
-            self.outPathSelector.setPath(outFile)
+            self.outPathSelector.selectPath(outFile)
 
         # update the script runner
         scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PUB_SCRIPT)

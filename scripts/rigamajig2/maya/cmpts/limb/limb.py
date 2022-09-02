@@ -426,18 +426,17 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             cmds.connectAttr(volumePlug, "{}.{}".format(lowSpline.getGroup(), "volumeFactor"))
 
             # re-create a smoother interpolation:
-            setScaleList = list(uppSpline._ikJointList)
-            for i in range(len(setScaleList)):
-                percent = i / float(len(setScaleList) - 1)
+            scaleList = list(uppSpline._ikJointList)
+            for i in range(len(scaleList)):
+                percent = i / float(len(scaleList) - 1)
                 value = mathUtils.lerp(0, 1, percent)
-                cmds.setAttr("{}.scale_{}".format(uppSpline._group, uppSpline._ikJointList.index(setScaleList[i])),
-                             value)
+                cmds.setAttr("{}.scale_{}".format(uppSpline._group, uppSpline._ikJointList.index(scaleList[i])), value)
 
-            setScaleList = list(lowSpline._ikJointList)
-            for i in range(len(setScaleList)):
-                percent = i / float(len(setScaleList) - 1)
+            scaleList = list(lowSpline._ikJointList)
+            for i in range(len(scaleList)):
+                percent = i / float(len(scaleList) - 1)
                 value = mathUtils.lerp(1, 0, percent)
-                cmds.setAttr("{}.scale_{}".format(lowSpline._group, lowSpline._ikJointList.index(setScaleList[i])),
+                cmds.setAttr("{}.scale_{}".format(lowSpline._group, lowSpline._ikJointList.index(scaleList[i])),
                              value)
 
             # if the module is using the twisty bendy controls then we need to create a visibly control

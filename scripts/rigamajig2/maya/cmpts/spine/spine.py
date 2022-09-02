@@ -36,13 +36,16 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, rigParent=str(), addSpineMid=False):
+    def __init__(self, name, input, size=1, rigParent=str(), addSpineMid=False, chestSpaces=None):
         """
         :param str name: name of the component
         :param list input: list of input joints. Starting with the base of the neck and ending with the head.
         :param float int size: default size of the controls.
         :param str rigParent: connect the component to a rigParent.
         """
+
+        if chestSpaces is None:
+            chestSpaces = dict()
 
         super(Spine, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
@@ -56,8 +59,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['hipTanget_name'] = 'hipTan'
         self.cmptSettings['chestTanget_name'] = 'chestTan'
 
-        # HACK: We need to force the addSpineMid to be set here
-        self.addSpineMid = addSpineMid
+        self.cmptSettings['chestSpaces'] = chestSpaces
 
     def createBuildGuides(self):
         """Create the build guides"""
@@ -89,8 +91,6 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
             parent=self.guidesHierarchy,
             position=cmds.xform(self.input[-1], q=True, ws=True, t=True))
 
-        print "add spine mid", self.addSpineMid
-
         if self.addSpineMid:
             self.spineMidGuide = rig_control.createGuide(
                 self.name + "_spineMid",
@@ -113,7 +113,9 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         # build the hips swivel control
         hipPos = cmds.xform(self.input[0], q=True, ws=True, t=True)
         self.hipSwing = rig_control.createAtObject(
-            self.hipsSwing_name, self.side,
+            name=self.hipsSwing_name,
+            side=self.side,
+            spaces=True,
             hideAttrs=['s', 'v'],
             size=self.size,
             color='yellow',
@@ -127,6 +129,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         self.torso = rig_control.createAtObject(
             name=self.torso_name,
             side=self.side,
+            spaces=True,
             hideAttrs=['s', 'v'],
             size=self.size,
             color='yellow',
@@ -154,6 +157,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         self.chest = rig_control.createAtObject(
             name=self.chest_name,
             side=self.side,
+            spaces=True,
             hideAttrs=['s', 'v'],
             size=self.size,
             color='yellow',
@@ -264,6 +268,21 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
     def connect(self):
         """Create the connection"""
+
+        # add world space switches
+        if cmds.objExists('trs_motion'):
+            # setup the spaces
+            spaces.create(self.hipSwing.spaces, self.hipSwing.name, parent=self.spacesHierarchy, defaultName='local')
+            spaces.create(self.torso.spaces, self.torso.name, parent=self.spacesHierarchy, defaultName='local')
+            spaces.create(self.chest.spaces, self.chest.name, parent=self.spacesHierarchy, defaultName='local')
+
+            spaces.addSpace(self.hipSwing.spaces, ['trs_motion'], nameList=['world'], constraintType='orient')
+            spaces.addSpace(self.torso.spaces, ['trs_motion'], nameList=['world'], constraintType='orient')
+            spaces.addSpace(self.chest.spaces, ['trs_motion'], nameList=['world'], constraintType='parent')
+
+        if self.chestSpaces:
+            ikspaceValues = [self.chestSpaces[k] for k in self.chestSpaces.keys()]
+            spaces.addSpace(self.chest.spaces, ikspaceValues, self.chestSpaces.keys(), 'parent')
 
         if cmds.objExists(self.rigParent):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.hipSwing.orig, mo=True)

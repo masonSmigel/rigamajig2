@@ -293,7 +293,8 @@ class Base(object):
         mel.eval("doDelete;")
 
         for input in self.input:
-            rigamajig2.maya.attr.unlock(input, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+            if cmds.objExists(input):
+                rigamajig2.maya.attr.unlock(input, rigamajig2.maya.attr.TRANSFORMS + ['v'])
 
     def setStep(self, step=0):
         """

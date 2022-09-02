@@ -78,7 +78,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         ovrmod = rigamajig2.maya.attr.createEnum(self.trsShot.name,
                                                  longName='modDisplay',
                                                  enum=['normal', 'template', 'reference'],
-                                                 value=2,
+                                                 value=0,
                                                  keyable=False,
                                                  channelBox=True)
 

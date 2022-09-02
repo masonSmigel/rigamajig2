@@ -173,7 +173,7 @@ class JointWidget(QtWidgets.QWidget):
         # update data within the rig
         jointFile = self.builder.getRigData(self.builder.getRigFile(), SKELETON_POS)
         if jointFile:
-            self.jointPositionPathSelector.setPath(jointFile)
+            self.jointPositionPathSelector.selectPath(jointFile)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""

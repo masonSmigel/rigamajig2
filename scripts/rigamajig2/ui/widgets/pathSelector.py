@@ -89,8 +89,10 @@ class PathSelector(QtWidgets.QWidget):
         else:
             newPath = path
 
-        if newPath and os.path.exists(newPath):
-            if self.relativePath:
+        if newPath:
+            # here we can check if there is a set relative path and set it properly.
+            # if the newPath is not absoulte we can skip this
+            if self.relativePath and os.path.isabs(newPath):
                 newPath = os.path.relpath(newPath, self.relativePath)
             self.pathLineEdit.setText(newPath)
 
@@ -99,13 +101,14 @@ class PathSelector(QtWidgets.QWidget):
         filePath = self.getPath()
         showInFolder.showInFolder(filePath=filePath)
 
-    def getPath(self):
+    def getPath(self, absoultePath=True):
         """
         Get the path of the widget.
         if a relative path is set get the absoulte path
         """
+
         if self.pathLineEdit.text():
-            if self.relativePath:
+            if self.relativePath and absoultePath:
                 return os.path.abspath(os.path.join(self.relativePath, self.pathLineEdit.text()))
             else:
                 return self.pathLineEdit.text()

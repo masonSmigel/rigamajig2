@@ -138,23 +138,23 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
                                       heelPivot=self.heelGuide, innPivot=self.innGuide, outPivot=self.outGuide)
         self.footikfk.setGroup(self.ikfk.getGroup())
         self.footikfk.create(params=self.paramsHierarchy)
-        ikfk.IkFkFoot.createFootRoll(self.footikfk.getPivotList(), self.footikfk.getGroup(), params=self.paramsHierarchy)
+        ikfk.IkFkFoot.createFootRoll(self.footikfk.getPivotDict(), self.footikfk.getGroup(), params=self.paramsHierarchy)
 
         # connect the Foot IKFK to the ankle IK
-        cmds.parent(self._ikEndTgt, self.footikfk.getPivotList()[6])
-        cmds.parent(self.footikfk.getPivotList()[0], self.limbGimbleIk.name)
+        cmds.parent(self._ikEndTgt, self.footikfk.getPivotDict()['ankle'])
+        cmds.parent(self.footikfk.getPivotDict()['root'], self.limbGimbleIk.name)
         cmds.delete(cmds.listRelatives(self._ikEndTgt, ad=True, type='pointConstraint'))
 
         # add in the foot roll controllers
-        cmds.parent(self.heelIk.orig, self.footikfk.getPivotList()[1])
-        cmds.parent(self.footikfk.getPivotList()[2], self.heelIk.name)
+        cmds.parent(self.heelIk.orig, self.footikfk.getPivotDict()['heel'])
+        cmds.parent(self.footikfk.getPivotDict()['ballSwivel'], self.heelIk.name)
 
-        cmds.parent(self.toesIk.orig, self.footikfk.getPivotList()[4])
-        cmds.parent(self.footikfk.getPivotList()[5], self.toesIk.name)
-        cmds.parent(self.footikfk.getPivotList()[7], self.toesIk.name)
+        cmds.parent(self.toesIk.orig, self.footikfk.getPivotDict()['end'])
+        cmds.parent(self.footikfk.getPivotDict()['ball'], self.toesIk.name)
+        cmds.parent(self.footikfk.getPivotDict()['toe'], self.toesIk.name)
 
-        cmds.parent(self.ballIk.orig, self.footikfk.getPivotList()[5])
-        cmds.parent(self.footikfk.getPivotList()[6], self.ballIk.name)
+        cmds.parent(self.ballIk.orig, self.footikfk.getPivotDict()['ball'])
+        cmds.parent(self.footikfk.getPivotDict()['ankle'], self.ballIk.name)
 
         # setup the toes
         rig_transform.connectOffsetParentMatrix(self.footikfk.getBlendJointList()[2], self.toesFk.orig, mo=True)
@@ -182,6 +182,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         rigamajig2.maya.attr.addSeparator(self.limbIk.name, '----')
         rigamajig2.maya.attr.driveAttribute('roll', self.paramsHierarchy, self.limbIk.name)
         rigamajig2.maya.attr.driveAttribute('bank', self.paramsHierarchy, self.limbIk.name)
+        rigamajig2.maya.attr.driveAttribute('ballSwivel', self.paramsHierarchy, self.limbIk.name)
         rigamajig2.maya.attr.driveAttribute('ballAngle', self.paramsHierarchy, self.limbIk.name)
         rigamajig2.maya.attr.driveAttribute('toeStraightAngle', self.paramsHierarchy, self.limbIk.name)
 

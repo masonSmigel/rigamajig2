@@ -3,6 +3,8 @@ Module for Ik/Fk stuff
 """
 
 import sys
+from collections import OrderedDict
+
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 from maya.api.OpenMaya import MVector
@@ -550,6 +552,7 @@ class IkFkLimb(IkFkBase):
 
 class IkFkFoot(IkFkBase):
     """Build the Ik pivot heirarchy for an IK foot"""
+
     def __init__(self, jointList, heelPivot=None, innPivot=None, outPivot=None):
         """
         class to create an ikFk foot rig given several piviots.
@@ -563,27 +566,30 @@ class IkFkFoot(IkFkBase):
         self.setJointList(jointList)
         self._handles = list()
         self.ankleHandle = str()
-        self._pivotList = list()
+        self._pivotDict = dict()
 
         # additional pivots
         self._heelPivot = heelPivot
         self._innPiviot = innPivot
-        self._ouPiviot = outPivot
+        self._outPiviot = outPivot
 
     def getHandles(self):
         """get the ikHandles"""
         return self._handles
 
-    def setPiviotList(self, value):
+    def setPiviotDict(self, value):
         """set the pivot list"""
-        if len(value) != 8:
-            raise RuntimeError("Piviot list be have a length of 8")
+        if len(value) != 9:
+            raise RuntimeError("Piviot list be have a length of 9")
 
-        self._pivotList = value
+        self._pivotDict = value
 
-    def getPivotList(self):
+    def getPivotDict(self, key=None):
         """get the pivot list"""
-        return self._pivotList
+        if key:
+            return self._pivotDict[key]
+        else:
+            return self._pivotDict
 
     def setJointList(self, value):
         """
@@ -610,7 +616,7 @@ class IkFkFoot(IkFkBase):
             if effectors:
                 self.ankleHandle = cmds.listConnections("{}.handlePath[0]".format(effectors[0]))[0]
 
-        if not self._pivotList:
+        if not self._pivotDict:
             self.createPiviots()
 
         if not self._handles:
@@ -625,25 +631,25 @@ class IkFkFoot(IkFkBase):
             cmds.setAttr(self.ankleHandle + '.tz', l=0)
 
             # parent stuff
-            cmds.parent(self._handles[1], self._pivotList[-1])
+            cmds.parent(self._handles[1], self._pivotDict['toe'])
             if cmds.objExists(self.ankleHandle):
-                cmds.parent(self.ankleHandle, self._pivotList[-2])
-            cmds.parent(self._handles[0], self._pivotList[-2])
+                cmds.parent(self.ankleHandle, self._pivotDict['ankle'])
+            cmds.parent(self._handles[0], self._pivotDict['ankle'])
 
             for handle in self._handles:
                 cmds.setAttr("{}.v".format(handle), 0)
 
     @staticmethod
-    def createFootRoll(pivotList, grp=None, params=None):
+    def createFootRoll(pivotDict, grp=None, params=None):
         """
         Create our advanced footroll setup
-        :param pivotList: list of foot pivots
+        :param pivotDict: dict of foot pivots
         :param grp: Optional-group to hold attributes and calculate scale
         :param params:
         :return:
         """
-        if len(pivotList) != 8:
-            raise RuntimeError("Pivot list must have a length of 8")
+        if len(pivotDict) != 9:
+            raise RuntimeError("Pivot list must have a length of 9")
 
         if not grp or not cmds.objExists(grp):
             grp = cmds.createNode("transform", name='ikfk_foot_hrc')
@@ -653,6 +659,7 @@ class IkFkFoot(IkFkBase):
 
         cmds.addAttr(params, ln='roll', at='double', dv=0, min=-90, max=180, k=True)
         cmds.addAttr(params, ln='bank', at='double', dv=0, k=True)
+        cmds.addAttr(params, ln='ballSwivel', at='double', dv=0, k=True)
         cmds.addAttr(params, ln='ballAngle', at='double', dv=45, min=0, k=True)
         cmds.addAttr(params, ln='toeStraightAngle', at='double', dv=70, min=0, k=True)
         rollAttr = '{}.roll'.format(params)
@@ -660,27 +667,31 @@ class IkFkFoot(IkFkBase):
         toeStraightAngleAttr = '{}.toeStraightAngle'.format(params)
         bankAttr = '{}.bank'.format(params)
 
+        # setup the ballSwivel
+        cmds.connectAttr("{}.ballSwivel".format(params), "{}.ry".format(pivotDict['ballSwivel']))
+
         # Setup the bank
         bankCond = node.condition(bankAttr, 0, ifTrue=[bankAttr, 0, 0], ifFalse=[0, bankAttr, 0], operation='>',
                                   name="{}_bank".format(grp))
-        cmds.connectAttr("{}.outColorR".format(bankCond), "{}.rz".format(pivotList[2]))
-        cmds.connectAttr("{}.outColorG".format(bankCond), "{}.rz".format(pivotList[3]))
+        cmds.connectAttr("{}.outColorR".format(bankCond), "{}.rz".format(pivotDict['inn']))
+        cmds.connectAttr("{}.outColorG".format(bankCond), "{}.rz".format(pivotDict['out']))
 
         # check to see if its on the right side.
-        innPos = cmds.xform(pivotList[2], q=True, ws=True, t=True)
-        outPos = cmds.xform(pivotList[3], q=True, ws=True, t=True)
+        innPos = cmds.xform(pivotDict['inn'], q=True, ws=True, t=True)
+        outPos = cmds.xform(pivotDict['out'], q=True, ws=True, t=True)
         if outPos < innPos:
             cmds.setAttr("{}.operation".format(bankCond), 4)
 
         # Setup the foot roll
-        heelClamp = node.clamp(rollAttr, inMin=-180, inMax=0, output="{}.rx".format(pivotList[1]),
+        heelClamp = node.clamp(rollAttr, inMin=-180, inMax=0, output="{}.rx".format(pivotDict['heel']),
                                name="{}_heel".format(grp))
         ballClamp = node.clamp(rollAttr, inMin=0, inMax=ballAngleAttr, name="{}_ball".format(grp))
         toeClamp = node.clamp(rollAttr, inMin=ballAngleAttr, inMax=toeStraightAngleAttr, name="{}_toe".format(grp))
 
         toeRemap = node.remapValue("{}.outputR".format(toeClamp), inMin=ballAngleAttr, inMax=toeStraightAngleAttr,
                                    outMin=0, outMax=1, name="{}_toe".format(grp))
-        toeRotate = node.multDoubleLinear("{}.outValue".format(toeRemap), rollAttr, output="{}.rx".format(pivotList[4]),
+        toeRotate = node.multDoubleLinear("{}.outValue".format(toeRemap), rollAttr,
+                                          output="{}.rx".format(pivotDict['end']),
                                           name="{}_toeRotate".format(grp))
 
         ballRemap = node.remapValue("{}.outputR".format(ballClamp), inMin=0, inMax=ballAngleAttr, outMin=0, outMax=1,
@@ -689,8 +700,8 @@ class IkFkFoot(IkFkBase):
                                                    name='{}_ballInvert'.format(grp))
         ballRotateMult = node.multDoubleLinear("{}.output1D".format(ballRotateInvert), "{}.outValue".format(ballRemap),
                                                name='{}_ballMult'.format(grp))
-        toeRotate = node.multDoubleLinear("{}.output".format(ballRotateMult), rollAttr,
-                                          output="{}.rx".format(pivotList[5]), name="{}_ballRotate".format(grp))
+        ballRotate = node.multDoubleLinear("{}.output".format(ballRotateMult), rollAttr,
+                                           output="{}.rx".format(pivotDict['ball']), name="{}_ballRotate".format(grp))
 
     def createPiviots(self):
         """
@@ -699,22 +710,26 @@ class IkFkFoot(IkFkBase):
         Piviot indecies are as follows:
             0 - root
             1 - heel
-            2 - inn
-            3 - out
-            4 - end (toes)
-            5 - ball
-            6 - ankle
-            7 - toe tap
+            2 - ballSwivel
+            3 - inn
+            4 - out
+            5 - end (toes)
+            6 - ball
+            7 - ankle
+            8 - toe tap
         """
 
         pivotDict = {
             'root': {
                 'heel': {
-                    'inn': {
-                        'out': {
-                            'end': {
-                                'ball': {'ankle': None},
-                                'toe': None}
+                    'ballSwivel': {
+                        'inn': {
+                            'out': {
+                                'end': {
+                                    'ball': {'ankle': None},
+                                    'toe': None
+                                    }
+                                }
                             }
                         }
                     }
@@ -722,20 +737,37 @@ class IkFkFoot(IkFkBase):
             }
 
         pivHierarchy = rig_hierarchy.DictHierarchy(pivotDict, parent=self._group, prefix=self._group + "_",
-                                                    suffix='_piv')
+                                                   suffix='_piv')
         pivHierarchy.create()
-        self._pivotList = pivHierarchy.getNodes()
+        tempPiviotList = pivHierarchy.getNodes()
+
+        self.__pivotDict = OrderedDict(root=tempPiviotList[0],
+                                       heel=tempPiviotList[1],
+                                       ballSwivel=tempPiviotList[2],
+                                       inn=tempPiviotList[3],
+                                       out=tempPiviotList[4],
+                                       end=tempPiviotList[5],
+                                       ball=tempPiviotList[6],
+                                       ankle=tempPiviotList[7],
+                                       toe=tempPiviotList[8])
+
+        self.setPiviotDict(self.__pivotDict)
 
         if not cmds.objExists(self._heelPivot) or not cmds.objExists(self._innPiviot) or not cmds.objExists(
-                self._ouPiviot):
+                self._outPiviot):
             raise RuntimeError("missing required addional piviots. Please supply a heel, inn and out piviot")
 
+        ankleJoint = self._ikJointList[0]
+        ballJoint = self._ikJointList[1]
+        toeJoint = self._ikJointList[2]
+
         # matchup the piviots to their correct spots
-        transform.matchTranslate(self._ikJointList[0], self._pivotList[0])
-        transform.matchTranslate(self._heelPivot, self._pivotList[1])
-        transform.matchTranslate(self._innPiviot, self._pivotList[2])
-        transform.matchTranslate(self._ouPiviot, self._pivotList[3])
-        transform.matchTranslate(self._ikJointList[2], self._pivotList[4])
-        transform.matchTranslate(self._ikJointList[1], self._pivotList[5])
-        transform.matchTranslate(self._ikJointList[0], self._pivotList[6])
-        transform.matchTranslate(self._ikJointList[1], self._pivotList[7])
+        transform.matchTranslate(ankleJoint, self.__pivotDict['root'])
+        transform.matchTranslate(self._heelPivot, self.__pivotDict['heel'])
+        transform.matchTranslate(ballJoint, self.__pivotDict['ballSwivel'])
+        transform.matchTranslate(self._innPiviot, self.__pivotDict['inn'])
+        transform.matchTranslate(self._outPiviot, self.__pivotDict['out'])
+        transform.matchTranslate(toeJoint, self.__pivotDict['end'])
+        transform.matchTranslate(ballJoint, self.__pivotDict['ball'])
+        transform.matchTranslate(ankleJoint, self.__pivotDict['ankle'])
+        transform.matchTranslate(ballJoint, self.__pivotDict['toe'])

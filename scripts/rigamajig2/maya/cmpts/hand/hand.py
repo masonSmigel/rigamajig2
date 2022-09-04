@@ -38,8 +38,8 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, useProxyAttrs=True, useScale=False, addFKSpace=False, useSubMeta=True,
-                 rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(),
+                 useProxyAttrs=True, useScale=False, addFKSpace=False, useSubMeta=True, useFirstAsThumb=True):
         """
         :param name: name of the components
         :type name: str
@@ -53,6 +53,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         :param addFKSpace: add an FK space switch:
         :type addFKSpace: bool
         :param bool useSubMeta: use th subMeta controls between the meta and the first finger joint
+        :param bool useFirstAsThumb: use the first input as a thumb. (it has special rules)
         """
         super(Hand, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
@@ -61,6 +62,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['useScale'] = useScale
         self.cmptSettings['addFKSpace'] = addFKSpace
         self.cmptSettings['useSubMeta'] = useSubMeta
+        self.cmptSettings['useFirstAsThumb'] = useFirstAsThumb
 
         # initalize some other variables we need
         self.fingerComponentList = list()
@@ -113,44 +115,47 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
             self.fingerComponentList.append(fingerComponent)
 
     def rigSetup(self):
-        self.cupTransforms = list()
+        self.cupControls = list()
         for i, cmpt in enumerate(self.fingerComponentList):
             cmpt._buildComponent()
             cmds.parent(cmpt.controlHierarchy, self.controlHierarchy)
             cmds.parent(cmpt.spacesHierarchy, self.spacesHierarchy)
 
             # setup the cup controls
+            if i == 0 and self.useFirstAsThumb:
 
-            if i == 0:
-                cupTrs = cmds.createNode('transform', name=cmpt.name + "_cupTrs", parent=self.wrist.name)
-                thumbOffset = hierarchy.create(cupTrs, hierarchy=[cmpt.name + '_cupOrig'], above=True)[0]
-                rig_transform.matchTransform(self.thumbCupGuide, thumbOffset)
+                cupControl = rig_control.createAtObject(cmpt.name + "Cup", shape='cube', orig=True, trs=True,
+                                                        parent=self.wrist.name, xformObj=self.thumbCupGuide)
                 baseOffset = rig_control.Control(cmpt.controlers[0]).orig
-                cmds.parent(baseOffset, cupTrs)
-                self.cupTransforms.append(cupTrs)
+                cmds.parent(baseOffset, cupControl.name)
 
-            elif i == 1:
-                cupTrs = cmds.createNode('transform', name=cmpt.name + "_cupTrs", parent=self.wrist.name)
-                offset = hierarchy.create(cupTrs, hierarchy=[cmpt.name + '_cupOrig'], above=True)[0]
-                rig_transform.matchTransform(self.input[i + 1], offset)
+                self.cupControls.append(cupControl)
+
+            elif i == 1 or not self.useFirstAsThumb:
+
+                cupControl = rig_control.createAtObject(cmpt.name + "Cup", shape='cube', orig=True, trs=True,
+                                                        parent=self.wrist.name, xformObj=self.input[i + 1])
                 baseOffset = rig_control.Control(cmpt.controlers[0]).orig
-                cmds.parent(baseOffset, thumbOffset, cupTrs)
-                self.cupTransforms.append(cupTrs)
+
+                if i == 1:
+                    cmds.parent(baseOffset, self.cupControls[0].orig, cupControl.name)
+                else:
+                    cmds.parent(baseOffset, cupControl.name)
+                self.cupControls.append(cupControl)
 
             elif i == 2:
                 baseOffset = rig_control.Control(cmpt.controlers[0]).orig
                 cmds.parent(baseOffset, self.wrist.name)
 
             elif i > 2:
-                parent = self.wrist.name if i < 4 else self.cupTransforms[-1]
+                parent = self.wrist.name if i < 4 else self.cupControls[-1]
 
-                cupTrs = cmds.createNode('transform', name=cmpt.name + "_cupTrs", parent=parent)
-                offset = hierarchy.create(cupTrs, hierarchy=[cmpt.name + '_cupOrig'], above=True)[0]
-                rig_transform.matchTransform(self.input[i - 1], offset)
+                cupControl = rig_control.createAtObject(cmpt.name + "Cup", shape='cube', orig=True, trs=True,
+                                                        parent=parent, xformObj=self.input[i - 1])
                 baseOffset = rig_control.Control(cmpt.controlers[0]).orig
-                cmds.parent(baseOffset, cupTrs)
+                cmds.parent(baseOffset, cupControl.name)
 
-                self.cupTransforms.append(cupTrs)
+                self.cupControls.append(cupControl)
 
             # delete the root hrc from the finger component and re-assign the hand to be the componet root
             cmds.delete(cmpt.rootHierarchy)
@@ -194,18 +199,18 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         # more or less then 4 fingers.
         offset = 0.25
         for i, cmpt in enumerate(self.fingerComponentList[1:]):
-            value = offset  * (i + 1)
+            value = offset * (i + 1)
             gestureUtils.setupCurlSdk(cmpt.controlers, self.wrist.name, "relax", multiplier=value,
                                       metaControls=metaControlsNum)
 
         # setup the cupping control
         rig_attr.addSeparator(self.wrist.name, 'cup')
-        for i in range(len(self.cupTransforms)):
-            fingerName = self.cupTransforms[i].split("_")[0]
+        for i in range(len(self.cupControls)):
+            fingerName = self.cupControls[i].trs.split("_")[0]
             if i < 2:
-                gestureUtils.setupSimple(self.cupTransforms[i], self.wrist.name, fingerName + 'Cup', multplier=1)
+                gestureUtils.setupSimple(self.cupControls[i].trs, self.wrist.name, fingerName + 'Cup', multplier=1)
             else:
-                gestureUtils.setupSimple(self.cupTransforms[i], self.wrist.name, fingerName + 'Cup', multplier=-1)
+                gestureUtils.setupSimple(self.cupControls[i].trs, self.wrist.name, fingerName + 'Cup', multplier=-1)
 
     def connect(self):
         if cmds.objExists(self.rigParent):

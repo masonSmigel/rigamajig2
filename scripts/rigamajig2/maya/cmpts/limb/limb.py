@@ -496,12 +496,14 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         # setup the spaces
         spaces.create(self.limbSwing.spaces, self.limbSwing.name, parent=self.spacesHierarchy)
+        spaces.create(self.joint1Fk.spaces, self.joint1Fk.name, parent=self.spacesHierarchy)
         spaces.create(self.limbIk.spaces, self.limbIk.name, parent=self.spacesHierarchy, defaultName='world')
         spaces.create(self.limbPv.spaces, self.limbPv.name, parent=self.spacesHierarchy, defaultName='world')
 
         # if the main control exists connect the world space
         if cmds.objExists('trs_motion'):
             spaces.addSpace(self.limbSwing.spaces, ['trs_motion'], nameList=['world'], constraintType='orient')
+            spaces.addSpace(self.joint1Fk.spaces, ['trs_motion'], nameList=['world'], constraintType='orient')
 
         if self.ikSpaces:
             ikspaceValues = [self.ikSpaces[k] for k in self.ikSpaces.keys()]

@@ -17,7 +17,7 @@ from PySide2 import QtWidgets
 # RIGAMAJIG2
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget
 from rigamajig2.ui.builder_ui import constants
-from rigamajig2.maya.builder.constants import SKINS, PSD
+from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES
 
 
 class DeformationWidget(QtWidgets.QWidget):
@@ -64,6 +64,13 @@ class DeformationWidget(QtWidgets.QWidget):
         self.loadPsdButton = QtWidgets.QPushButton("Load Pose Readers")
         self.savePsdButton = QtWidgets.QPushButton("Save Pose Readers")
 
+        self.SHAPESPathSelector = pathSelector.PathSelector(
+            "SHAPES:",
+            caption="Select a SHAPES Node Setup",
+            fileFilter=constants.MEL_FILTER,
+            fileMode=1)
+        self.loadSHAPESButton = QtWidgets.QPushButton("Load SHAPES Setup")
+
         self.loadPsdModeCheckbox = QtWidgets.QComboBox()
         self.loadPsdModeCheckbox.setFixedHeight(24)
         self.loadPsdModeCheckbox.addItem("append")
@@ -83,6 +90,7 @@ class DeformationWidget(QtWidgets.QWidget):
         skinButtonLayout.addWidget(self.loadSingleSkinButton)
         skinButtonLayout.addWidget(self.saveSkinsButton)
 
+        # add the skin layers back to the collapseable widget
         self.mainCollapseableWidget .addWidget(self.skinPathSelector)
         self.mainCollapseableWidget .addLayout(skinButtonLayout)
 
@@ -98,8 +106,13 @@ class DeformationWidget(QtWidgets.QWidget):
         psdButtonLayout.addWidget(self.loadPsdModeCheckbox)
 
         # add widgets to the collapsable widget.
-        self.mainCollapseableWidget .addWidget(self.psdPathSelector)
-        self.mainCollapseableWidget .addLayout(psdButtonLayout)
+        self.mainCollapseableWidget.addSpacing(5)
+        self.mainCollapseableWidget.addWidget(self.psdPathSelector)
+        self.mainCollapseableWidget.addLayout(psdButtonLayout)
+
+        self.mainCollapseableWidget.addSpacing(5)
+        self.mainCollapseableWidget.addWidget(self.SHAPESPathSelector)
+        self.mainCollapseableWidget.addWidget(self.loadSHAPESButton)
 
         # add the widget to the main layout
         self.mainLayout.addWidget(self.mainCollapseableWidget)
@@ -112,6 +125,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.copySkinWeightsButton.clicked.connect(self.copySkinWeights)
         self.loadPsdButton.clicked.connect(self.loadPoseReaders)
         self.savePsdButton.clicked.connect(self.savePoseReaders)
+        self.loadSHAPESButton.clicked.connect(self.loadSHAPESData)
 
     def setBuilder(self, builder):
         """ Set a builder for intialize widget"""
@@ -119,6 +133,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.builder = builder
         self.skinPathSelector.setRelativePath(rigEnv)
         self.psdPathSelector.setRelativePath(rigEnv)
+        self.SHAPESPathSelector.setRelativePath(rigEnv)
 
         # update data within the rig
         skinFile = self.builder.getRigData(self.builder.getRigFile(), SKINS)
@@ -129,10 +144,15 @@ class DeformationWidget(QtWidgets.QWidget):
         if psdFile:
             self.psdPathSelector.selectPath(psdFile)
 
+        SHAPESFile = self.builder.getRigData(self.builder.getRigFile(), SHAPES)
+        if SHAPESFile:
+            self.SHAPESPathSelector.selectPath(SHAPESFile)
+
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.loadPoseReaders()
         self.loadAllSkins()
+        self.loadSHAPESData()
 
     @property
     def isChecked(self):
@@ -170,3 +190,7 @@ class DeformationWidget(QtWidgets.QWidget):
         src = cmds.ls(sl=True)[0]
         dst = cmds.ls(sl=True)[1:]
         rig_skinCluster.copySkinClusterAndInfluences(src, dst)
+
+    def loadSHAPESData(self):
+        self.builder.loadSHAPESData(self.SHAPESPathSelector.getPath())
+

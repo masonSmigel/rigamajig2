@@ -14,6 +14,7 @@ import logging
 
 # MAYA
 import maya.cmds as cmds
+import maya.mel as mel
 
 # RIGAMAJIG
 import rigamajig2.shared.path as rig_path
@@ -112,3 +113,18 @@ def saveSkinWeights(path=None):
             dataObj.gatherData(geo)
             dataObj.write("{}/{}.json".format(path, geo))
             logging.info("skin weights for: {} saved to:{}.json".format(path, geo))
+
+
+def loadSHAPESData(path=None):
+    if rig_path.isFile(path):
+
+        try:
+            if not cmds.pluginInfo("SHAPESTools", q=True, l=True):
+                cmds.loadPlugin("SHAPESTools")
+        except:
+            raise Exception("Failed to load SHAPES plugin. Unable to load SHAPES data")
+
+        # try to load the shapes plugin
+        mel.eval('source SHAPES_utilities.mel;')
+        mel.eval('shapesUtil_performImportShapeSetup "{path}";'.format(path=path))
+        return True

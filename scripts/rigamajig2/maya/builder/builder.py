@@ -354,6 +354,7 @@ class Builder(object):
         :return:
         """
         self.loadSkinWeights()
+        self.loadSHAPESData()
         logger.info("data loading -- complete")
 
     def loadSkinWeights(self, path=None):
@@ -372,6 +373,12 @@ class Builder(object):
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
         deform.saveSkinWeights(path)
+
+    def loadSHAPESData(self, path=None):
+        """ Load data from SHAPES file"""
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
+        if deform.loadSHAPESData(path):
+            logger.info("SHAPES data loaded")
 
     def deleteComponents(self, clearList=True):
         """

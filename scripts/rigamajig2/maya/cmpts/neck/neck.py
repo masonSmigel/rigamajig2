@@ -174,8 +174,8 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         # connect the skull to the head joint
         self.skullTrs = hierarchy.create(self.skull.name, ['{}_trs'.format(self.input[-1])], above=False)[0]
         rig_transform.matchTransform(self.input[-1], self.skullTrs)
-        cmds.delete(cmds.ls(cmds.listConnections("{}.tx".format(self.input[-1])),
-                            type='parentConstraint'))  # delete exising parent constraint
+        # delete exising parent constraint
+        cmds.delete(cmds.ls(cmds.listConnections("{}.tx".format(self.input[-1])), type='parentConstraint'))
         rig_joint.connectChains(self.skullTrs, self.input[-1])
 
         # connect the orient constraint to the twist controls

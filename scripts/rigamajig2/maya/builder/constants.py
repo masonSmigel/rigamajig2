@@ -30,5 +30,6 @@ GUIDES = "guides"
 COMPONENTS = "components"
 SKINS = 'skins'
 PSD = 'psd'
+SHAPES = 'SHAPES'
 OUTPUT_RIG = 'output_file'
 OUTPUT_RIG_FILE_TYPE = 'output_file_type'

@@ -13,6 +13,7 @@ from PySide2 import QtGui
 
 MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
 JSON_FILTER = "Json Files (*.json)"
+MEL_FILTER = "Mel Files (*.mel)"
 
 LARGE_BTN_HEIGHT = 35
 

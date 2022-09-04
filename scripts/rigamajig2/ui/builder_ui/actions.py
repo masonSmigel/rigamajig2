@@ -111,6 +111,7 @@ class Actions(object):
         newData[constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlPathSelector.getPath(absoultePath=False)
         newData[constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath(absoultePath=False)
         newData[constants.PSD] = self.dialog.deformationWidget.psdPathSelector.getPath(absoultePath=False)
+        newData[constants.SHAPES] = self.dialog.deformationWidget.SHAPESPathSelector.getPath(absoultePath=False)
         newData[constants.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath(absoultePath=False)
         newData[constants.OUTPUT_RIG_FILE_TYPE] = self.dialog.publishWidget.outFileTypeComboBox.currentText()
 

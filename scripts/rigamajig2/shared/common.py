@@ -124,17 +124,17 @@ FILE_VERSION_DELIMINATOR = '_v'
 L_TOKENS = ['left_', '_left', 'Left_', '_Left',
             '_l_', 'lf_', '_lf', 'Lt_', '_Lt',
             'lft_', '_lft', 'Lft_', '_Lft',
-            'Lf_', '_Lf', '_l', 'L_', '_L', '_L_',]
+            'Lf_', '_Lf', '_l', 'L_', '_L', '_L_', ]
 
 R_TOKENS = ['right_', '_right', 'Right_', '_Right',
-            '_r_',  'rt_', '_rt', 'Rt_', '_Rt',
+            '_r_', 'rt_', '_rt', 'Rt_', '_Rt',
             'rgt_', '_rgt', 'Rgt_', '_Rgt',
-            'Rt_',  '_Rt', '_r', 'R_', '_R', '_R_']
+            'Rt_', '_Rt', '_r', 'R_', '_R', '_R_']
 
 C_TOKENS = ['center_', '_center', 'Center_', '_Center',
             '_c_', 'cr_', '_cr', 'Cr_', '_Cr',
             'ctr_', '_ctr', 'Ctr_', '_Ctr',
-            'Ct_','_Ct', '_c', 'C_', '_C', '_C_']
+            'Ct_', '_Ct', '_c', 'C_', '_C', '_C_']
 
 
 def toList(values):
@@ -276,9 +276,18 @@ def fillList(values, fillName, amount):
     """
     result = list()
     for i in range(amount):
-        if i <= len(values)-1:
+        if i <= len(values) - 1:
             result.append(values[i])
         else:
-            name = fillName + str(i-len(values))
+            name = fillName + str(i - len(values))
             result.append(name)
     return result
+
+
+def getIcon(icon):
+    """
+    Get the icon path from the name
+    :param icon: name of the icon
+    """
+    iconPath = ICONS_PATH + "/" + icon
+    return iconPath

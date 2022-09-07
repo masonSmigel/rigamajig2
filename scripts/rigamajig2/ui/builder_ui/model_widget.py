@@ -17,6 +17,7 @@ from PySide2 import QtWidgets
 import maya.cmds as cmds
 
 # RIGAMAJIG2
+from rigamajig2.shared import common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
 from rigamajig2.ui.builder_ui import constants as ui_constants
 from rigamajig2.maya.builder import constants
@@ -37,7 +38,7 @@ class ModelWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Model/ Setup Scene', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Model/ Setup Scene', addCheckbox=True)
         self.modelPathSelector = pathSelector.PathSelector(
             "model:",
             caption="Select a Model file",
@@ -45,8 +46,15 @@ class ModelWidget(QtWidgets.QWidget):
             fileMode=1
             )
         self.importModelButton = QtWidgets.QPushButton('Import Model')
+        self.importModelButton.setIcon(QtGui.QIcon(common.getIcon('importCharacter.png')))
         self.openModelButton = QtWidgets.QPushButton('Open Model')
+        self.openModelButton.setIcon(QtGui.QIcon(common.getIcon('openCharacter.png')))
         self.openModelButton.setFixedWidth(100)
+
+        self.importModelButton.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
+        self.importModelButton.setIconSize(ui_constants.LARGE_BTN_ICON_SIZE)
+        self.openModelButton.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
+        self.openModelButton.setIconSize(ui_constants.LARGE_BTN_ICON_SIZE)
 
         # pre script
         self.preScriptRunner = scriptRunner.ScriptRunner(title="Pre-Scripts:")
@@ -58,7 +66,7 @@ class ModelWidget(QtWidgets.QWidget):
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(0)
 
-        self.mainCollapseableWidget .addWidget(self.preScriptRunner)
+        self.mainCollapseableWidget.addWidget(self.preScriptRunner)
 
         # setup the button layout
         modelButtonLayout = QtWidgets.QHBoxLayout()
@@ -68,9 +76,9 @@ class ModelWidget(QtWidgets.QWidget):
         modelButtonLayout.addWidget(self.openModelButton)
 
         # add widgets to the collapsable widget.
-        self.mainCollapseableWidget .addSpacing(10)
-        self.mainCollapseableWidget .addWidget(self.modelPathSelector)
-        self.mainCollapseableWidget .addLayout(modelButtonLayout)
+        self.mainCollapseableWidget.addSpacing(10)
+        self.mainCollapseableWidget.addWidget(self.modelPathSelector)
+        self.mainCollapseableWidget.addLayout(modelButtonLayout)
 
         # add the widget to the main layout
         self.mainLayout.addWidget(self.mainCollapseableWidget)
@@ -107,7 +115,7 @@ class ModelWidget(QtWidgets.QWidget):
     @property
     def isChecked(self):
         """ Check it the widget is checked"""
-        return self.mainCollapseableWidget .isChecked()
+        return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
     def importModel(self):

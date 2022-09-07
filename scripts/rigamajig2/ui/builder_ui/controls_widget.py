@@ -14,8 +14,8 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-
 # RIGAMAJIG2
+from rigamajig2.shared import common
 import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, overrideColorer
@@ -39,7 +39,7 @@ class ControlsWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Controls', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Controls', addCheckbox=True)
         self.controlPathSelector = pathSelector.PathSelector(
             "Controls:",
             caption="Select a Control Shape file",
@@ -50,7 +50,14 @@ class ControlsWidget(QtWidgets.QWidget):
         self.loadColorCheckBox.setChecked(True)
         self.loadColorCheckBox.setFixedWidth(25)
         self.loadControlsButton = QtWidgets.QPushButton("Load Controls")
+        self.loadControlsButton.setIcon(QtGui.QIcon(common.getIcon("loadControls.png")))
+        self.loadControlsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadControlsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+
         self.saveControlsButton = QtWidgets.QPushButton("Save Controls")
+        self.saveControlsButton.setIcon(QtGui.QIcon(common.getIcon("saveControls.png")))
+        self.saveControlsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.saveControlsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
 
         self.editControlsWidget = collapseableWidget.CollapsibleWidget('Edit Controls')
         self.editControlsWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
@@ -65,6 +72,7 @@ class ControlsWidget(QtWidgets.QWidget):
         self.mirrorControlModeComboBox.addItem("replace")
         self.mirrorControlModeComboBox.addItem("match")
         self.mirrorControlButton = QtWidgets.QPushButton("Mirror")
+        self.mirrorControlButton.setIcon(QtGui.QIcon(common.getIcon("mirrorControls.png")))
 
         self.controlColorOverrideColor = overrideColorer.OverrideColorer()
 
@@ -83,7 +91,7 @@ class ControlsWidget(QtWidgets.QWidget):
         self.mainLayout.setSpacing(0)
 
         # MAIN CONTROL LAYOUT
-        self.mainCollapseableWidget .addWidget(self.controlPathSelector)
+        self.mainCollapseableWidget.addWidget(self.controlPathSelector)
 
         # create the load color checkbox
         loadColorLabel = QtWidgets.QLabel("Load Color:")
@@ -96,10 +104,10 @@ class ControlsWidget(QtWidgets.QWidget):
         controlButtonLayout.addWidget(self.loadColorCheckBox)
         controlButtonLayout.addWidget(self.loadControlsButton)
         controlButtonLayout.addWidget(self.saveControlsButton)
-        self.mainCollapseableWidget .addLayout(controlButtonLayout)
+        self.mainCollapseableWidget.addLayout(controlButtonLayout)
 
         # EDIT CONTROL LAYOUT
-        self.mainCollapseableWidget .addWidget(self.editControlsWidget)
+        self.mainCollapseableWidget.addWidget(self.editControlsWidget)
 
         # setup the mirror axis layout
         controlMirrorAxisLayout = QtWidgets.QHBoxLayout()
@@ -158,7 +166,7 @@ class ControlsWidget(QtWidgets.QWidget):
     @property
     def isChecked(self):
         """ Check it the widget is checked"""
-        return self.mainCollapseableWidget .isChecked()
+        return self.mainCollapseableWidget.isChecked()
 
     def setAvailableControlShapes(self):
         """ Set control shape items"""

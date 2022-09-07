@@ -15,6 +15,7 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 # RIGAMAJIG2
+from rigamajig2.shared import common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES
@@ -38,7 +39,7 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
 
         self.skinPathSelector = pathSelector.PathSelector(
             "skin:",
@@ -46,8 +47,18 @@ class DeformationWidget(QtWidgets.QWidget):
             fileFilter=constants.JSON_FILTER,
             fileMode=2)
         self.loadAllSkinButton = QtWidgets.QPushButton("Load All Skins")
+        self.loadAllSkinButton.setIcon(QtGui.QIcon(common.getIcon("loadSkincluster.png")))
         self.loadSingleSkinButton = QtWidgets.QPushButton("Load Skin")
+        self.loadSingleSkinButton.setIcon(QtGui.QIcon(common.getIcon("loadSkincluster.png")))
         self.saveSkinsButton = QtWidgets.QPushButton("Save Skin")
+        self.saveSkinsButton.setIcon(QtGui.QIcon(common.getIcon("saveSkincluster.png")))
+
+        self.loadAllSkinButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadSingleSkinButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.saveSkinsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadAllSkinButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.loadSingleSkinButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.saveSkinsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
 
         self.skinEditWidget = collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
         self.skinEditWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
@@ -61,8 +72,16 @@ class DeformationWidget(QtWidgets.QWidget):
             caption="Select a Pose Reader File",
             fileFilter=constants.JSON_FILTER,
             fileMode=1)
+
         self.loadPsdButton = QtWidgets.QPushButton("Load Pose Readers")
+        self.loadPsdButton.setIcon(QtGui.QIcon(common.getIcon("loadPsd.png")))
         self.savePsdButton = QtWidgets.QPushButton("Save Pose Readers")
+        self.savePsdButton.setIcon(QtGui.QIcon(common.getIcon("loadPsd.png")))
+
+        self.loadPsdButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.savePsdButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadPsdButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.savePsdButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
 
         self.SHAPESPathSelector = pathSelector.PathSelector(
             "SHAPES:",
@@ -70,9 +89,12 @@ class DeformationWidget(QtWidgets.QWidget):
             fileFilter=constants.MEL_FILTER,
             fileMode=1)
         self.loadSHAPESButton = QtWidgets.QPushButton("Load SHAPES Setup")
+        self.loadSHAPESButton.setIcon(QtGui.QIcon(common.getIcon("loadShapesSetup.png")))
+        self.loadSHAPESButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadSHAPESButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
 
         self.loadPsdModeCheckbox = QtWidgets.QComboBox()
-        self.loadPsdModeCheckbox.setFixedHeight(24)
+        self.loadPsdModeCheckbox.setFixedHeight(constants.LARGE_BTN_HEIGHT)
         self.loadPsdModeCheckbox.addItem("append")
         self.loadPsdModeCheckbox.addItem("replace")
 
@@ -91,10 +113,10 @@ class DeformationWidget(QtWidgets.QWidget):
         skinButtonLayout.addWidget(self.saveSkinsButton)
 
         # add the skin layers back to the collapseable widget
-        self.mainCollapseableWidget .addWidget(self.skinPathSelector)
-        self.mainCollapseableWidget .addLayout(skinButtonLayout)
+        self.mainCollapseableWidget.addWidget(self.skinPathSelector)
+        self.mainCollapseableWidget.addLayout(skinButtonLayout)
 
-        self.mainCollapseableWidget .addWidget(self.skinEditWidget)
+        self.mainCollapseableWidget.addWidget(self.skinEditWidget)
         self.skinEditWidget.addWidget(self.copySkinWeightsButton)
         self.skinEditWidget.addSpacing(4)
 
@@ -157,7 +179,7 @@ class DeformationWidget(QtWidgets.QWidget):
     @property
     def isChecked(self):
         """ Check it the widget is checked"""
-        return self.mainCollapseableWidget .isChecked()
+        return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
     def loadAllSkins(self):
@@ -193,4 +215,3 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def loadSHAPESData(self):
         self.builder.loadSHAPESData(self.SHAPESPathSelector.getPath())
-

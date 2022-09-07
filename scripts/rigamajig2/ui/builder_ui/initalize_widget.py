@@ -58,11 +58,20 @@ class InitializeWidget(QtWidgets.QWidget):
                                                                 fileFilter=constants.JSON_FILTER,
                                                                 fileMode=1)
         self.loadComponentsButton = QtWidgets.QPushButton("Load Cmpts")
+        self.loadComponentsButton.setIcon(QtGui.QIcon(common.getIcon("loadComponents.png")))
         self.appendComponentsButton = QtWidgets.QPushButton("Append Cmpts")
         self.saveComponentsButton = QtWidgets.QPushButton("Save Cmpts")
-        self.saveComponentsButton.setIcon(QtGui.QIcon(":save.png"))
+        self.saveComponentsButton.setIcon(QtGui.QIcon(common.getIcon("saveComponents.png")))
         self.addComponentsButton = QtWidgets.QPushButton("Add Components")
         self.addComponentsButton.setIcon(QtGui.QIcon(":freeformOff.png"))
+
+        self.loadComponentsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.saveComponentsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.addComponentsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadComponentsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.saveComponentsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.addComponentsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+
         self.componentManager = ComponentManager()
 
         self.initalizeBuildButton = QtWidgets.QPushButton("Guide Components")
@@ -73,6 +82,14 @@ class InitializeWidget(QtWidgets.QWidget):
                                                            fileMode=1)
         self.loadGuidesButton = QtWidgets.QPushButton("Load Guides")
         self.saveGuidesButton = QtWidgets.QPushButton("Save Guides")
+
+        self.loadGuidesButton.setIcon(QtGui.QIcon(common.getIcon("loadGuides.png")))
+        self.saveGuidesButton.setIcon(QtGui.QIcon(common.getIcon("saveGuides.png")))
+
+        self.loadGuidesButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.saveGuidesButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadGuidesButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.saveGuidesButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -267,7 +284,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.componentTree.setIndentation(5)
         self.componentTree.setColumnCount(3)
         self.componentTree.setUniformRowHeights(True)
-        self.componentTree.setColumnWidth(0, 130)
+        self.componentTree.setColumnWidth(0, 160)
         self.componentTree.setColumnWidth(1, 120)
         self.componentTree.setColumnWidth(2, 60)
 

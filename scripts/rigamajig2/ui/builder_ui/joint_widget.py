@@ -19,6 +19,7 @@ from PySide2 import QtWidgets
 import maya.cmds as cmds
 
 # RIGAMAJIG2
+from rigamajig2.shared import common
 import rigamajig2.maya.joint
 import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.meta as meta
@@ -55,7 +56,14 @@ class JointWidget(QtWidgets.QWidget):
             fileMode=1
             )
         self.loadJointPositionButton = QtWidgets.QPushButton("Load joints")
-        self.saveJointPositionButton = QtWidgets.QPushButton("Save joints")
+        self.loadJointPositionButton.setIcon(QtGui.QIcon(common.getIcon("loadJoints.png")))
+        self.saveJointPositionButton = QtWidgets.QPushButton(QtGui.QIcon(common.getIcon("saveJoints.png")), "Save joints")
+        self.saveJointPositionButton.setIcon(QtGui.QIcon(common.getIcon("saveJoints.png")))
+
+        self.loadJointPositionButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.saveJointPositionButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadJointPositionButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.saveJointPositionButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
 
         self.skeletonEditWidget = collapseableWidget.CollapsibleWidget('Edit Skeleton')
         self.skeletonEditWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)

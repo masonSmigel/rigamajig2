@@ -87,7 +87,7 @@ class BuilderDialog(QtWidgets.QDialog):
         elif cmds.about(macOS=True):
             self.setProperty("saveWindowPref", True)
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        self.setMinimumSize(380, 825)
+        self.setMinimumSize(420, 825)
 
         self.createMenus()
         self.createWidgets()

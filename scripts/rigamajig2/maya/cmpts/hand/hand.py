@@ -148,7 +148,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
                 cmds.parent(baseOffset, self.wrist.name)
 
             elif i > 2:
-                parent = self.wrist.name if i < 4 else self.cupControls[-1]
+                parent = self.wrist.name if i < 4 else self.cupControls[-1].name
 
                 cupControl = rig_control.createAtObject(cmpt.name + "Cup", shape='cube', orig=True, trs=True,
                                                         parent=parent, xformObj=self.input[i - 1])

@@ -142,7 +142,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             self.joint1_fkName,
             self.side,
             orig=True, spaces=True,
-            hideAttrs=['v', 't'] + hideAttrs,
+            hideAttrs=['v'] + hideAttrs,
             size=self.size, color='blue',
             parent=self.controlHierarchy,
             shape='circle',
@@ -152,7 +152,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.joint2Fk = rig_control.createAtObject(
             self.joint2_fkName, self.side,
             orig=True,
-            hideAttrs=['v', 't'] + hideAttrs,
+            hideAttrs=['v'] + hideAttrs,
             size=self.size,
             color='blue',
             parent=self.joint1Fk.name,
@@ -163,7 +163,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.joint3Fk = rig_control.createAtObject(
             self.joint3_fkName, self.side,
             orig=True,
-            hideAttrs=['v', 't'] + hideAttrs,
+            hideAttrs=['v'] + hideAttrs,
             size=self.size,
             color='blue',
             parent=self.joint2Fk.name,

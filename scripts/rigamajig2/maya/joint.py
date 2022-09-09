@@ -493,7 +493,7 @@ def hideJoints(joints):
             cmds.setAttr("{}.drawStyle".format(joint), 2)
 
 
-def createInterpJoint(joint, parentJoint=None, t=False, r=True, s=False, sh=False, bind=True):
+def createInterpJoint(joint, parentJoint=None, value=0.5, t=False, r=True, s=False, sh=False, bind=True):
     """
     Add an interpolation rotation joint on the given joint. We will
     also add an attribute to the joint to blend between the joint and
@@ -506,6 +506,7 @@ def createInterpJoint(joint, parentJoint=None, t=False, r=True, s=False, sh=Fals
 
     :param joint: joint to add the interpolation joint on
     :param parentJoint: parentjoint to blend the rotation between
+    :param value: default interpolation value
     :param t: Apply translation transformations
     :param r: Apply rotation transformations
     :param s: Apply scale transformations
@@ -516,12 +517,12 @@ def createInterpJoint(joint, parentJoint=None, t=False, r=True, s=False, sh=Fals
 
     if parentJoint is None:
         parentJoint = cmds.listRelatives(joint, parent=True, type='joint')
-        parentJoint = parentJoint[0]  if parentJoint else  None
+        parentJoint = parentJoint[0] if parentJoint else None
 
     if not parentJoint:
         raise Exception("Please provide a valid parent joint or set a hierarchy parent. ")
 
-    interpJointName = '{}_interp'.format(joint)
+    interpJointName = naming.getUniqueName('{}_interp'.format(joint))
 
     interpJoint = cmds.createNode('joint', name=interpJointName)
 
@@ -535,10 +536,11 @@ def createInterpJoint(joint, parentJoint=None, t=False, r=True, s=False, sh=Fals
     cmds.parent(interpJoint, joint)
 
     # create an attribute to control the blending
-    blendAttr = attr.createAttr(interpJoint, 'interpBlend', 'float', value=0.5, minValue=0, maxValue=1.0)
+    blendAttr = attr.createAttr(interpJoint, 'interpBlend', 'float', value=value, minValue=0, maxValue=1.0)
 
     # blend the rotation between the two joints
-    multMatrix, pickMatrix = transform.connectOffsetParentMatrix(parentJoint, interpJoint, mo=True, t=t, r=r, s=s, sh=sh)
+    multMatrix, pickMatrix = transform.connectOffsetParentMatrix(parentJoint, interpJoint, mo=True, t=t, r=r, s=s,
+                                                                 sh=sh)
     blendMatrix = cmds.createNode("blendMatrix", n="{}_{}_blendMatrix".format(parentJoint, joint))
     cmds.connectAttr("{}.matrixSum".format(multMatrix), "{}.target[0].targetMatrix".format(blendMatrix))
     cmds.connectAttr(blendAttr, "{}.envelope".format(blendMatrix))
@@ -549,5 +551,3 @@ def createInterpJoint(joint, parentJoint=None, t=False, r=True, s=False, sh=Fals
     if bind:
         meta.tag(interpJoint, "bind")
     return interpJoint
-
-

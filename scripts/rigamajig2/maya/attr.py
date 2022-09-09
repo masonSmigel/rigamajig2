@@ -36,6 +36,7 @@ def isAttr(plug):
         return True
     return False
 
+
 # We need alot of arguments here
 # pylint:disable=too-many-arguments
 def createAttr(node, longName, attributeType, value=None, niceName=None, shortName=None, minValue=None, maxValue=None,

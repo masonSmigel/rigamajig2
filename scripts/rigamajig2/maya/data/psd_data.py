@@ -43,9 +43,7 @@ class PSDData(maya_data.MayaData):
 
         outputAttrs = cmds.listAttr(outputNode, ud=True)
         data['useTwist'] = True if True in [True if 'twist' in x else False for x in outputAttrs] else False
-        data['useSwing'] = True if True in [True if 'twist' in x else False for x in outputAttrs] else False
-
-        # TODO: get output connections for pose readers and store them here too.
+        data['useSwing'] = True if True in [True if 'swing' in x else False for x in outputAttrs] else False
 
         self._data[node].update(data)
 

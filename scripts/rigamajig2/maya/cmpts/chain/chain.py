@@ -102,7 +102,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.fkControlList[0].orig, mo=True)
 
         if self.addFKSpace:
-            spaces.create(self.fkControlList[0][1], self.fkControlList[0].name, parent=self.spacesHierarchy)
+            spaces.create(self.fkControlList[0].spaces, self.fkControlList[0].name, parent=self.spacesHierarchy)
 
             # if the main control exists connect the world space
             if cmds.objExists('trs_motion'):

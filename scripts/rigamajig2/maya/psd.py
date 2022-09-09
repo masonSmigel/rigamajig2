@@ -116,18 +116,25 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     if twist:
         if not cmds.objExists("{}.twist_{}".format(output, aimAxis)):
             cmds.addAttr(output, longName='twist_{}'.format(aimAxis), k=True)
-        twistAttr = "{}.{}".format(output, 'twist_{}'.format(aimAxis))
-        createTwistPsdReader(joint, aimAxis=aimAxis, outputAttr=twistAttr)
+        twistPlug = "{}.{}".format(output, 'twist_{}'.format(aimAxis))
+        createTwistPsdReader(joint, aimAxis=aimAxis, outputAttr=twistPlug)
+        attr.lock(output, "twist_{}".format(aimAxis))
 
     if swing:
         if not cmds.objExists("{}.{}".format(joint, "swingPsdReaderNurbs")):
-            outputAttrsList = list()
+            outputPlugsList = list()
             # build the attributes and add them to a list!
             for axis in [a for a in 'xyz' if a != aimAxis]:
                 if not cmds.objExists("{}.swing_{}".format(output, axis)):
                     cmds.addAttr(output, longName='swing_{}'.format(axis), k=True)
-                outputAttrsList.append("{}.{}".format(output, 'swing_{}'.format(axis)))
-            createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputAttrsList)
+                outputPlugsList.append("{}.{}".format(output, 'swing_{}'.format(axis)))
+
+            createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputPlugsList)
+
+            for plug in outputPlugsList:
+                attrName = plug.split(".")[-1]
+                attr.lock(output, attrName)
+
         else:
             cmds.warning("Pose reader already exists on the joint '{}'".format(joint))
 
@@ -135,6 +142,22 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
         hierarchyParent = cmds.listRelatives(hrc, p=True) or ['']
         if hierarchyParent[0] != parent:
             cmds.parent(hrc, parent)
+
+    # to create the swing and twist combos do those here
+    if twist and swing:
+        attr.addSeparator(output, "combos")
+        twistInput = cmds.listConnections(twistPlug, s=True, d=False, p=True)
+        for swingPlug in outputPlugsList:
+            swingInput = cmds.listConnections(swingPlug, s=True, d=False, p=True)
+            swingAttrName = swingPlug.split(".")[-1]
+            twistAttrName = twistPlug.split(".")[-1]
+            cmds.addAttr(output, longName="{}_{}_combo".format(swingAttrName, twistAttrName), k=True)
+            comboOutputAttr = "{}_{}_combo".format(swingAttrName, twistAttrName)
+            comboOutputPlug = "{}.{}".format(output, comboOutputAttr)
+
+            mdlName = "{}_{}_{}_combo".format(joint, swingAttrName, twistAttrName)
+            node.multDoubleLinear(swingInput[0], twistInput[0], comboOutputPlug, name=mdlName)
+            attr.lock(output, comboOutputAttr)
 
     logger.info("Created pose reader on joint '{}'".format(joint, twist, swing))
 
@@ -279,7 +302,7 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outputA
         cmds.setAttr("{}.{}".format(cond, "operation"), 2)
         cmds.connectAttr("{}.{}".format(negativeZone, 'output'), "{}.{}".format(cond, "colorIfFalseR"))
         cmds.connectAttr("{}.{}".format(positiveZone, 'output'), "{}.{}".format(cond, "colorIfTrueR"))
-        cmds.connectAttr("{}.{}".format(cond, "outColorR"), outputAttrs[i])
+        cmds.connectAttr("{}.{}".format(cond, "outColorR"), outputAttrs[i], f=True)
 
         rig_transform.matchTranslate(joint, poseReader)
 
@@ -289,11 +312,12 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outputA
     if jointParents:
         parentJoint = jointParents[0]
         rotateMultMatrix, rotatePick = rig_transform.connectOffsetParentMatrix(parentJoint, poseReader, mo=True,
-                                                                               t=False, r=True, s=False,sh=False)
+                                                                               t=False, r=True, s=False, sh=False)
         multMatrix = cmds.createNode("multMatrix", n='{}_mergeMat'.format(joint))
         cmds.connectAttr("{}.{}".format(transformPick, "outputMatrix"), "{}.{}".format(multMatrix, 'matrixIn[1]'))
         cmds.connectAttr("{}.{}".format(rotatePick, "outputMatrix"), "{}.{}".format(multMatrix, 'matrixIn[0]'))
-        cmds.connectAttr("{}.{}".format(multMatrix, 'matrixSum'), "{}.{}".format(poseReader, 'offsetParentMatrix'),f=True)
+        cmds.connectAttr("{}.{}".format(multMatrix, 'matrixSum'), "{}.{}".format(poseReader, 'offsetParentMatrix'),
+                         f=True)
 
     # cleanup the setup
     attr.lockAndHide(poseReader, attr.TRANSFORMS)

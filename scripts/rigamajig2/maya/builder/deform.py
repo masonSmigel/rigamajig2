@@ -116,15 +116,12 @@ def saveSkinWeights(path=None):
 
 
 def loadSHAPESData(path=None):
+    """
+    Import blendshape and connection data from the SHAPES plugin.
+    The super cool thing about importing the shapes data is that we dont need to load the plugin!
+    The data is applied by sourcing a mel file
+    """
     if rig_path.isFile(path):
-
-        try:
-            if not cmds.pluginInfo("SHAPESTools", q=True, l=True):
-                cmds.loadPlugin("SHAPESTools")
-        except:
-            raise Exception("Failed to load SHAPES plugin. Unable to load SHAPES data")
-
-        # try to load the shapes plugin
-        mel.eval('source SHAPES_utilities.mel;')
-        mel.eval('shapesUtil_performImportShapeSetup "{path}";'.format(path=path))
+        mel.eval('source "{path}";'.format(path=path))
         return True
+

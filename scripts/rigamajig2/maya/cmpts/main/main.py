@@ -100,8 +100,16 @@ class Main(rigamajig2.maya.cmpts.base.Base):
                                                      keyable=True,
                                                      channelBox=True)
 
+        bindVisAttr = rigamajig2.maya.attr.createAttr(self.rootHierarchy,
+                                                      longName="bind",
+                                                      attributeType='bool',
+                                                      value=True,
+                                                      keyable=True,
+                                                      channelBox=True)
+
         cmds.connectAttr(modVisAttr, "{}.v".format(self.modelHierarchy))
         cmds.connectAttr(rigVisAttr, "{}.v".format(self.rigHierarchy))
+        cmds.connectAttr(bindVisAttr, "{}.v".format(self.bindHierarchy))
 
     def finalize(self):
         rigamajig2.maya.attr.lockAndHide(self.rootHierarchy, rigamajig2.maya.attr.TRANSFORMS + ['v'])

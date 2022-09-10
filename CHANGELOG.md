@@ -1,6 +1,29 @@
 # Change Log 
 
 
+## 1.0.5
+
+
+### Added: 
+* Added `guide` step to builder. This step is split off from `initialize` which 
+now is just the creation of the container while `guide` creates the guides and additional setup.
+* Added space switch the the FK limb instead of just the swing control. 
+* Added physical cup controls to the `hand` component.
+* Added "ballSwivel" attribute to the `leg` component.
+* Added "import SHAPES Data" to builder.
+* Added icons to the builder UI. 
+* Added value parameter to the `interpJoint` function
+* Added Swing and twist combo values to the Psd Reader. 
+
+### Changed: 
+* updated `curve_data` to replace existing shapes if cvs dont match 
+* Unlocked the translate on the FK limbs for finer control. 
+* Moved the visability for the "bind" group to the "main" control. 
+
+### Fixed: 
+* Bug with relative paths not being generated from `pathSelector`
+* Bug in the `savePsdData` that caused only twist to be saved. 
+
 ## 1.0.4
 
 

@@ -11,7 +11,11 @@ def cleanPath(path):
     :returns: cleanup up path
     :rtype: str
     """
-    rPath = path.replace('\\', '/')
+
+    rawString = str(path)
+    absPath = os.path.abspath(rawString)
+
+    rPath = absPath.replace('\\', '/')
     rPath = rPath.replace('//', '/')
     return rPath
 

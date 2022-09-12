@@ -2,6 +2,7 @@
 This module contains path utilities
 """
 import os
+import pathlib
 
 
 def cleanPath(path):
@@ -12,12 +13,14 @@ def cleanPath(path):
     :rtype: str
     """
 
-    rawString = r'{}'.format(path)
-    absPath = os.path.abspath(rawString)
+    myPath = pathlib.Path(path)
+    resolvedPath = myPath.absolute()
 
-    rPath = absPath.replace('\\', '/')
-    rPath = rPath.replace('//', '/')
-    return rPath
+    # absPath = os.path.abspath(myPath)
+
+    # rPath = absPath.replace('\\', '/')
+    # rPath = rPath.replace('//', '/')
+    return str(resolvedPath)
 
 
 def isFile(path):

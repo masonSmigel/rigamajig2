@@ -12,7 +12,7 @@ def cleanPath(path):
     :rtype: str
     """
 
-    rawString = str(path)
+    rawString = r'{}'.format(path)
     absPath = os.path.abspath(rawString)
 
     rPath = absPath.replace('\\', '/')

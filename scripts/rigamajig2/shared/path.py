@@ -16,10 +16,6 @@ def cleanPath(path):
     myPath = pathlib.Path(path)
     resolvedPath = myPath.absolute()
 
-    # absPath = os.path.abspath(myPath)
-
-    # rPath = absPath.replace('\\', '/')
-    # rPath = rPath.replace('//', '/')
     return str(resolvedPath)
 
 

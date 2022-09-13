@@ -121,6 +121,9 @@ def loadSHAPESData(path=None):
     The super cool thing about importing the shapes data is that we dont need to load the plugin!
     The data is applied by sourcing a mel file
     """
+
+    path = rig_path.cleanPath(path)
+
     if rig_path.isFile(path):
         mel.eval('source "{path}";'.format(path=path))
         return True

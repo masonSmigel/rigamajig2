@@ -122,9 +122,11 @@ def loadSHAPESData(path=None):
     The data is applied by sourcing a mel file
     """
 
-    myPath = rig_path.cleanPath(path)
+    path = rig_path.cleanPath(path)
 
-    if rig_path.isFile(myPath):
-        mel.eval('source "{path}";'.format(path=myPath))
+    if rig_path.isFile(path):
+        print path
+
+        mel.eval('source "{path}";'.format(path=path))
         return True
 

@@ -125,8 +125,9 @@ def loadSHAPESData(path=None):
     path = rig_path.cleanPath(path)
 
     if rig_path.isFile(path):
-        print path
 
-        mel.eval('source "{path}";'.format(path=path))
+        melFormmatedPath = path.replace("\\", "/")
+
+        mel.eval('source "{path}";'.format(path=melFormmatedPath))
         return True
 

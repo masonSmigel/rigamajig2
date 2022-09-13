@@ -15,12 +15,8 @@ def cleanPath(path):
 
     myPath = pathlib.Path(path)
     resolvedPath = myPath.absolute()
-    stringPath = str(resolvedPath)
 
-    rPath = stringPath.replace('\\', '/')
-    rPath = rPath.replace('//', '/')
-
-    return rPath
+    return str(resolvedPath)
 
 
 def isFile(path):

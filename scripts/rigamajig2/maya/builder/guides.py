@@ -61,7 +61,12 @@ def saveJoints(path=None):
 
     # find all skeleton roots and get the positions of their children
     skeletonRoots = common.toList(meta.getTagged('skeleton_root'))
-    if len(skeletonRoots) > 0:
+
+    if not skeletonRoots:
+        selection = cmds.ls(sl=True)
+        skeletonRoots = selection[0] if len(selection) > 0 else None
+
+    if skeletonRoots:
         dataObj = joint_data.JointData()
         for root in skeletonRoots:
             dataObj.gatherData(root)

@@ -640,7 +640,6 @@ class CreateComponentDialog(QtWidgets.QDialog):
 
         self.componentTypeComboBox = QtWidgets.QComboBox()
         self.componentTypeComboBox.setMinimumHeight(30)
-        self.componentTypeComboBox.setMaxVisibleItems(15)
         self.componentTypeComboBox.setMaxVisibleItems(30)
 
         self.numJointsSlider = sliderGrp.SliderGroup(min=0, max=10, value=4)

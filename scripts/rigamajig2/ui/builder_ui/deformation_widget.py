@@ -159,16 +159,13 @@ class DeformationWidget(QtWidgets.QWidget):
 
         # update data within the rig
         skinFile = self.builder.getRigData(self.builder.getRigFile(), SKINS)
-        if skinFile:
-            self.skinPathSelector.selectPath(skinFile)
+        self.skinPathSelector.selectPath(skinFile)
 
         psdFile = self.builder.getRigData(self.builder.getRigFile(), PSD)
-        if psdFile:
-            self.psdPathSelector.selectPath(psdFile)
+        self.psdPathSelector.selectPath(psdFile)
 
         SHAPESFile = self.builder.getRigData(self.builder.getRigFile(), SHAPES)
-        if SHAPESFile:
-            self.SHAPESPathSelector.selectPath(SHAPESFile)
+        self.SHAPESPathSelector.selectPath(SHAPESFile)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""

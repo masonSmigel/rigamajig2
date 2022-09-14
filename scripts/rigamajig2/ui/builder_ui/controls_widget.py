@@ -156,8 +156,7 @@ class ControlsWidget(QtWidgets.QWidget):
 
         # update data within the rig
         controlFile = self.builder.getRigData(self.builder.getRigFile(), CONTROL_SHAPES)
-        if controlFile:
-            self.controlPathSelector.selectPath(controlFile)
+        self.controlPathSelector.selectPath(controlFile)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""

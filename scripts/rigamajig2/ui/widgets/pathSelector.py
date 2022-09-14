@@ -71,6 +71,10 @@ class PathSelector(QtWidgets.QWidget):
             currentPath = self.pathLineEdit.placeholderText()
 
         if not path:
+            self.pathLineEdit.setText('')
+            return
+
+        if not path:
             fileInfo = QtCore.QFileInfo(currentPath)
             if not fileInfo.exists():
                 currentPath = cmds.workspace(q=True, dir=True)

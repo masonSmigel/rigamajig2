@@ -100,8 +100,7 @@ class ModelWidget(QtWidgets.QWidget):
 
         # update data within the rig
         modelFile = self.builder.getRigData(self.builder.getRigFile(), constants.MODEL_FILE)
-        if modelFile:
-            self.modelPathSelector.selectPath(modelFile)
+        self.modelPathSelector.selectPath(modelFile)
 
         # update the script runner
         scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PRE_SCRIPT)

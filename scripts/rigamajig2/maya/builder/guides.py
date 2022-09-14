@@ -63,8 +63,7 @@ def saveJoints(path=None):
     skeletonRoots = common.toList(meta.getTagged('skeleton_root'))
 
     if not skeletonRoots:
-        selection = cmds.ls(sl=True)
-        skeletonRoots = selection[0] if len(selection) > 0 else None
+        skeletonRoots = cmds.ls(sl=True)
 
     if skeletonRoots:
         dataObj = joint_data.JointData()
@@ -73,7 +72,7 @@ def saveJoints(path=None):
             dataObj.gatherDataIterate(cmds.listRelatives(root, allDescendents=True, type='joint'))
         dataObj.write(path)
     else:
-        raise RuntimeError("the rootHierarchy joint {} does not exists".format(skeletonRoots))
+        raise RuntimeError("the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))
 
 
 def loadGuideData(path=None):

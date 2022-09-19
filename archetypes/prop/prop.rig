@@ -3,7 +3,7 @@
     "user": "masonsmigel", 
     "time": "2022-07-17 22:18:33", 
     "data": {
-        "archetype" : "prop",
+        "archetype" : "base",
         "rig_name": null,
         "model_file": null,
         "skeleton_pos": "skeleton_pos.json",

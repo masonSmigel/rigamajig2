@@ -4,8 +4,8 @@
     "time": "2022-07-17 22:18:33", 
     "data": {
         "archetype" : "prop",
-        "rig_name": "", 
-        "model_file": "../../../mod/publish/skeleton_mod.ma", 
+        "rig_name": null,
+        "model_file": null,
         "skeleton_pos": "skeleton_pos.json",
         "pre_script": [
             "pre_scripts"

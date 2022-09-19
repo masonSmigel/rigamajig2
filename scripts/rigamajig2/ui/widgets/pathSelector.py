@@ -105,7 +105,7 @@ class PathSelector(QtWidgets.QWidget):
             # here we can check if there is a set relative path and set it properly.
             # if the newPath is not absoulte we can skip this
             if self.relativePath and os.path.isabs(path):
-                newPath = os.path.relpath(path, self.relativePath)
+                path = os.path.relpath(path, self.relativePath)
             self.pathLineEdit.setText(path)
 
     def showInFolder(self):

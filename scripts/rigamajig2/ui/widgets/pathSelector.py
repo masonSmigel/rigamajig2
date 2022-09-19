@@ -67,8 +67,6 @@ class PathSelector(QtWidgets.QWidget):
         :return:
         """
         currentPath = self.getPath(absoultePath=True)
-        if not currentPath:
-            currentPath = self.pathLineEdit.placeholderText()
 
         if not path:
             fileInfo = QtCore.QFileInfo(currentPath)

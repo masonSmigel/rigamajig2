@@ -3,7 +3,7 @@
     "user": "masonsmigel", 
     "time": "2022-08-07 09:07:55", 
     "data": {
-        "archetype" : "base",
+        "archetype_parent" :  null,
         "rig_name": "", 
         "model_file": null, 
         "skeleton_pos": null, 

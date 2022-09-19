@@ -37,7 +37,7 @@ class PathSelector(QtWidgets.QWidget):
         self.selectPathButton = QtWidgets.QPushButton("...")
         self.selectPathButton.setFixedSize(24, 19)
         self.selectPathButton.setToolTip(self.caption)
-        self.selectPathButton.clicked.connect(self.selectPath)
+        self.selectPathButton.clicked.connect(self.pickPath)
 
         self.showInFolderButton = QtWidgets.QPushButton(QtGui.QIcon(":fileOpen.png"), "")
         self.showInFolderButton.setFixedSize(24, 19)
@@ -60,19 +60,15 @@ class PathSelector(QtWidgets.QWidget):
         """ Set the widgets path"""
         self.pathLineEdit.setText(path)
 
-    def selectPath(self, path=None):
+    def pickPath(self, path=None):
         """
-        Select an existing path. this is smarter than set path because it will create a dailog and check if the path exists.
+        Pick a path from the file selector
         :param path:
         :return:
         """
         currentPath = self.pathLineEdit.text()
         if not currentPath:
             currentPath = self.pathLineEdit.placeholderText()
-
-        if not path:
-            self.pathLineEdit.setText('')
-            return
 
         if not path:
             fileInfo = QtCore.QFileInfo(currentPath)
@@ -89,16 +85,28 @@ class PathSelector(QtWidgets.QWidget):
                 )
             if newPath:
                 newPath = newPath[0]
+            else:
+                # if we dont select a new path cancel the action by returning.
+                return
+            # next select the new path.
+            self.selectPath(newPath)
 
-        else:
-            newPath = path
+    def selectPath(self, path=None):
+        """
+        Select an existing path. this is smarter than set path because it will create a dailog and check if the path exists.
+        :param path:
+        :return:
+        """
+        if not path:
+            self.pathLineEdit.setText('')
+            return
 
-        if newPath:
+        if path:
             # here we can check if there is a set relative path and set it properly.
             # if the newPath is not absoulte we can skip this
-            if self.relativePath and os.path.isabs(newPath):
-                newPath = os.path.relpath(newPath, self.relativePath)
-            self.pathLineEdit.setText(newPath)
+            if self.relativePath and os.path.isabs(path):
+                newPath = os.path.relpath(path, self.relativePath)
+            self.pathLineEdit.setText(path)
 
     def showInFolder(self):
         """ show the given file in the enclosing folder"""

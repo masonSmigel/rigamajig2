@@ -66,7 +66,7 @@ class PathSelector(QtWidgets.QWidget):
         :param path:
         :return:
         """
-        currentPath = self.pathLineEdit.text()
+        currentPath = self.getPath(absoultePath=True)
         if not currentPath:
             currentPath = self.pathLineEdit.placeholderText()
 

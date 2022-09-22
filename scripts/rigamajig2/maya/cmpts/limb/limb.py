@@ -188,7 +188,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.limbIk = rig_control.create(
             self.limb_ikName,
             self.side,
-            orig=True, spaces=True,
+            orig=True,
+            spaces=True,
             hideAttrs=['v'] + hideAttrs,
             size=self.size,
             color='blue',
@@ -441,10 +442,12 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
             # if the module is using the twisty bendy controls then we need to create a visibly control
             rig_attr.createAttr(self.paramsHierarchy, "bendies", "bool", value=1, keyable=True, channelBox=True)
+
             for bendieCtl in self.bendControls:
-                shapes = cmds.listRelatives(bendieCtl, s=True)
-                for shape in shapes:
-                    cmds.connectAttr("{}.{}".format(self.paramsHierarchy, 'bendies'), "{}.{}".format(shape, 'v'))
+                rig_control.connectControlVisiblity(self.paramsHierarchy, "bendies", bendieCtl)
+            #     shapes = cmds.listRelatives(bendieCtl, s=True)
+            #     for shape in shapes:
+            #         cmds.connectAttr("{}.{}".format(self.paramsHierarchy, 'bendies'), "{}.{}".format(shape, 'v'))
 
         self.createIkFkMatchSetup()
 

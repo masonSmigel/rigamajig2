@@ -79,6 +79,10 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         if cmds.objExists(self.rigParent):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.control.orig, mo=True)
 
+        if self.addSpaces:
+            spaces.create(self.control.spaces, self.control.name, parent=self.spacesHierarchy)
+            spaces.addSpace(self.control.spaces, ['trs_motion'], nameList=['world'], constraintType='orient')
+
     @staticmethod
     def createInputJoints(name=None, side=None, numJoints=4):
         import rigamajig2.maya.naming as naming

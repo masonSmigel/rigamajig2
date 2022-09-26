@@ -150,12 +150,12 @@ class Main(rigamajig2.maya.cmpts.base.Base):
                                         keyable=False,
                                         locked=True
                                         )
-        rigamajig2.maya.attr.createAttr(self.rootHierarchy, "__createdBy__", "string",
+        rigamajig2.maya.attr.createAttr(self.rootHierarchy, "__creationUser__", "string",
                                         value=getpass.getuser(),
                                         keyable=False,
                                         locked=True
                                         )
-        rigamajig2.maya.attr.createAttr(self.rootHierarchy, "__createdAt__", "string",
+        rigamajig2.maya.attr.createAttr(self.rootHierarchy, "__creationDate__", "string",
                                         value=strftime("%Y-%m-%d %H:%M:%S", gmtime()),
                                         keyable=False,
                                         locked=True

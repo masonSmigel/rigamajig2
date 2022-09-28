@@ -1,7 +1,9 @@
 """
 functions to connect mocap to character rig
 """
-import sys, os
+import sys
+import os
+import logging
 import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 from PySide2 import QtCore
@@ -13,6 +15,8 @@ import rigamajig2.maya.decorators
 import rigamajig2.maya.transform
 import rigamajig2.maya.data.abstract_data as abstract_data
 from rigamajig2.ui.widgets import pathSelector
+
+logger = logging.getLogger(__name__)
 
 
 def prepSkeleton(mocapData, namespace=None):
@@ -33,6 +37,8 @@ def prepSkeleton(mocapData, namespace=None):
             control = attr
 
         cmds.setAttr(control, mocapData['prepAttrs'][attr])
+
+    logger.info(" Rig {} preped for mocap import".format(namespace))
 
 
 @rigamajig2.maya.decorators.oneUndo
@@ -90,6 +96,8 @@ def connectMocapData(mocapData, namespace=None, applyToLayer=False):
                      removeBakedAnimFromLayer=True,
                      bakeOnOverrideLayer=applyToLayer,
                      shape=False)
+
+    logger.info("Mocap data applied to rig: {}".format(namespace))
 
 
 class MocapImportDialog(QtWidgets.QDialog):
@@ -192,7 +200,7 @@ class MocapImportDialog(QtWidgets.QDialog):
         self.namespaceComboBox.clear()
         toExclude = ('UI', 'shared')
         for namespacesFound in (x for x in cmds.namespaceInfo(':', listOnlyNamespaces=True, recurse=True, fn=True) if
-                        x not in toExclude):
+                                x not in toExclude):
             self.namespaceComboBox.addItem(namespacesFound)
 
     def importFbx(self):
@@ -222,7 +230,7 @@ class MocapImportDialog(QtWidgets.QDialog):
         connect the mocap data to the rig
         """
 
-        path = self.mocapTemplatePathselector.getPath()
+        path = self.mocapTemplatePathselector.getPath(absoultePath=True)
         namespace = self.namespaceComboBox.currentText()
         applyToLayer = self.applyToLayerCheckbox.isChecked()
 
@@ -233,19 +241,19 @@ class MocapImportDialog(QtWidgets.QDialog):
         d.read(path)
         data = d.getData()
 
-        prepSkeleton(namespace, data)
-        connectMocapData(namespace, data, applyToLayer=applyToLayer)
+        prepSkeleton(data, namespace, )
+        connectMocapData(data, namespace, applyToLayer=applyToLayer)
 
     def prepareRig(self):
         """Set attributes to prepare the rig to ingest mocap data"""
-        path = self.mocapTemplatePathselector.getPath()
+        path = self.mocapTemplatePathselector.getPath(absoultePath=True)
         namespace = self.namespaceComboBox.currentText()
-        
+
         d = abstract_data.AbstractData()
         d.read(path)
         data = d.getData()
 
-        prepSkeleton(namespace, data)
+        prepSkeleton(data, namespace)
 
     def cleanupNamespaces(self):
         """
@@ -255,7 +263,7 @@ class MocapImportDialog(QtWidgets.QDialog):
         toExclude = ('UI', 'shared')
         namespaceDict = {}
         for namespacesFound in (x for x in cmds.namespaceInfo(':', listOnlyNamespaces=True, recurse=True, fn=True) if
-                        x not in toExclude):
+                                x not in toExclude):
             namespaceDict.setdefault(len(namespacesFound.split(":")), []).append(namespacesFound)
 
         for i, lvl in enumerate(reversed(namespaceDict.keys())):

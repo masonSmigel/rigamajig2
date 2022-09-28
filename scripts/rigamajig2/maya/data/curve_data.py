@@ -87,6 +87,7 @@ class CurveData(node_data.NodeData):
                         continue
                     for shape in self._data[node]['shapes'].keys():
                         created = False
+                        connections = None
                         if create:
                             # if the node does not exist in the scene. Create it.
                             if not cmds.objExists(node):
@@ -95,6 +96,9 @@ class CurveData(node_data.NodeData):
                             # check if the shape exists but there is a mismatch in the number of cvs
                             numSourceCvs = len(self._data[node]['shapes'][shape][attribute])
                             if cmds.objExists(shape) and len(curve.getCvs(shape)) != numSourceCvs:
+                                # get the input connections to the shape
+                                shapeVisiable = "{}.v".format(shape)
+                                connections = cmds.listConnections(shapeVisiable, d=False, s=True, p=True)
                                 cmds.delete(shape)
 
                             if not cmds.objExists(shape):
@@ -109,6 +113,12 @@ class CurveData(node_data.NodeData):
                                 cmds.rename(shapeNode, shape)
                                 cmds.parent(shape, node, r=True, s=True)
                                 cmds.delete(curveTrs)
+
+                                # rebuild the connections if the original node had any
+                                if connections:
+                                    for connection in connections:
+                                        cmds.connectAttr(connection, "{}.v".format(shape), f=True)
+
                                 created = True
 
                         if not created and cmds.objExists(shape):

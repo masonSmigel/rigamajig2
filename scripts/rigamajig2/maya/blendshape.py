@@ -10,10 +10,14 @@
 
 # MAYA
 import maya.cmds as cmds
+import maya.api.OpenMayaAnim as oma
+import maya.api.OpenMaya as om
 
 # RIGAMAJIG
-import rigamajig2.shared.common as common
 import rigamajig2.maya.shape
+import rigamajig2.maya.openMayaUtils as omu
+from rigamajig2.shared import common
+from rigamajig2.maya import deformer
 
 
 def isBlendshape(blendshape):
@@ -27,15 +31,93 @@ def isBlendshape(blendshape):
     return True
 
 
-def create(base, targets=None, origin='local', prefix=None):
+def create(base, targets=None, origin='local', deformOrder='before', prefix=''):
     """
     Create a blendshape deformer on the specified geometry
     :param base: base shape of the blendshape
     :param targets: target shapes to add
     :param origin: Optional - create the blendshape with a local or world origin
+    :param deformOrder: set the deformation oder
     :param prefix:
     :return:
     """
+    targets = targets or list()
+
+    if not cmds.objExists(base):
+        raise Exception("base mesh {} does not exist".format(base))
+
+    blendshapeName = "{}{}_bshp".format(prefix, base)
+
+    kwargs = dict()
+    if deformOrder == 'after':
+        kwargs['after'] = True
+    if deformOrder == 'before':
+        kwargs['before'] = True
+    if deformOrder == 'parallel':
+        kwargs['parallel'] = True
+    if deformOrder == 'split':
+        kwargs['split'] = True
+    if deformOrder == 'foc':
+        kwargs['foc'] = True
+
+    blendshape = cmds.blendShape(base, name=blendshapeName, origin=origin, **kwargs)[0]
+
+    # add the blendshape targets
+    for target in targets:
+        addTarget(blendshape=blendshape, target=target, base=base)
+
+
+def addTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, topologyCheck=False):
+    """
+    Add a new blendshape target to an existing blendshape node
+    :param blendshape: name of the blendshape nnode
+    :param target: name of the target geometry to add
+    :param base: base geometry of the blendshape
+    :param targetIndex: specified target index of the blendshape
+    :param targetWeight: set the target weight
+    :param topologyCheck: check the topology of the model before adding the blendshape
+    :return:
+    """
+
+    if not isBlendshape(blendshape):
+        raise Exception("{} is not a blendshape".format(blendshape))
+
+    if not cmds.objExists(target):
+        raise Exception("The target geometry {} doesnt exist".format(target))
+
+    if not base:
+        base = getBaseGeometry(blendshape)
+
+    if targetIndex < 0:
+        targetIndex = getNextTargetIndex(blendshape)
+
+    cmds.blendShape(blendshape, e=True, t=(base, targetIndex, target, 1.0), topologyCheck=topologyCheck)
+
+    targetName = getTargetName(blendshape, target)
+
+    if targetWeight:
+        cmds.setAttr("{}.{}".format(blendshape, targetName), targetWeight)
+
+    return "{}.{}".format(blendshape, targetName)
+
+
+def getBaseGeometry(blendshape):
+    """
+    Get a list of blendshape geometry
+    :param blendshape: blendshape name to get the base geometry from
+    """
+    if not isBlendshape(blendshape):
+        raise Exception("{} is not a blendshape".format(blendshape))
+
+    deformerObj = omu.getMObject(blendshape)
+    deformFn = oma.MFnGeometryFilter(deformerObj)
+
+    baseObject = deformFn.getOutputGeometry()
+
+    print baseObject
+    outputNode = om.MFnDagNode(baseObject[0])
+
+    return outputNode.partialPathName()
 
 
 def getTargetList(blendshape):
@@ -74,6 +156,56 @@ def getTargetIndex(blendshape, target):
             n += 1
         i += 1
     return -1
+
+
+def getTargetName(blendshape, targetGeometry):
+    """
+    Get the target alias for the specified target geometry
+    :param blendshape: blendshape node to get the target name from
+    :param targetGeometry: blendshape target to get the alais name for
+    :return:
+    """
+
+    if not isBlendshape(blendshape):
+        raise Exception("{} is not a valid blendshape node".format(blendshape))
+
+    targetShape = rigamajig2.maya.shape.getShapes(targetGeometry)
+    if not targetShape:
+        raise Exception("invalid shape on target geometry {}".format(targetGeometry))
+
+    targetConnections = cmds.listConnections(targetShape, sh=True, d=True, s=False, p=False, c=True)
+
+    if not targetConnections.count(blendshape):
+        raise Exception("Target geometry {} is not connected to blnedshape {}".format(targetShape, blendshape))
+
+    targetConnectionIndex = targetConnections.index(blendshape)
+    targetConnectionAttr = targetConnections[targetConnectionIndex-1]
+    targetConnectionPlug = cmds.listConnections(targetConnectionAttr, sh=True, p=True, d=True, s=False)[0]
+    print targetConnectionPlug
+
+    targetIndex = int(targetConnectionPlug.split(".")[2].split("[")[1].split("]")[0])
+    targetAlias = cmds.aliasAttr("{}.weight[{}]".format(blendshape, targetIndex), q=True)
+
+    return targetAlias
+
+
+
+def getNextTargetIndex(blendshape):
+    """
+    Get the next available index for a blendshape
+    :param blendshape: name of the blendshape to get the next available target for
+    """
+    if not isBlendshape(blendshape):
+        raise Exception("{} is not a valid blendshape node".format(blendshape))
+
+    targetList = getTargetList(blendshape)
+    if not targetList:
+        return 0
+
+    lastIndex = getTargetIndex(blendshape, targetList[-1])
+    nextIndex = lastIndex + 1
+
+    return nextIndex
 
 
 def getWeights(blendshape, targets=None, geometry=None):

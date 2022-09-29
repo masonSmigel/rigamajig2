@@ -113,8 +113,6 @@ def getBaseGeometry(blendshape):
     deformFn = oma.MFnGeometryFilter(deformerObj)
 
     baseObject = deformFn.getOutputGeometry()
-
-    print baseObject
     outputNode = om.MFnDagNode(baseObject[0])
 
     return outputNode.partialPathName()
@@ -181,7 +179,6 @@ def getTargetName(blendshape, targetGeometry):
     targetConnectionIndex = targetConnections.index(blendshape)
     targetConnectionAttr = targetConnections[targetConnectionIndex-1]
     targetConnectionPlug = cmds.listConnections(targetConnectionAttr, sh=True, p=True, d=True, s=False)[0]
-    print targetConnectionPlug
 
     targetIndex = int(targetConnectionPlug.split(".")[2].split("[")[1].split("]")[0])
     targetAlias = cmds.aliasAttr("{}.weight[{}]".format(blendshape, targetIndex), q=True)

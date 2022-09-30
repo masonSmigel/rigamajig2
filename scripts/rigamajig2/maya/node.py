@@ -761,13 +761,13 @@ def remapValue(input, inMin=None, inMax=None, outMin=None, outMax=None, interp='
         cmds.setAttr(node + '.value[{}].value_FloatValue'.format(i), interpDict[i][1])
         cmds.setAttr(node + '.value[{}].value_Interp'.format(i), interpDict[i][2])
 
-    if inMin:
+    if inMin is not None:
         setConnection(node + '.inputMin', inMin)
-    if inMax:
+    if inMax is not None:
         setConnection(node + '.inputMax', inMax)
-    if outMin:
+    if outMin is not None:
         setConnection(node + '.outputMin', outMin)
-    if outMax:
+    if outMax is not None:
         setConnection(node + '.outputMax', outMax)
 
     if output:

@@ -265,8 +265,12 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     # aim the control shape
     if shapeAim == 'x':
         rotateVector = (0, 0, 90)
+    if shapeAim == '-x':
+        rotateVector = (0, 0, -90)
     elif shapeAim == 'z':
         rotateVector = (90, 0, 0)
+    elif shapeAim == '-z':
+        rotateVector = (-90, 0, 0)
     else:
         rotateVector = (0, 0, 0)
     rotateShapes(control, rotateVector)

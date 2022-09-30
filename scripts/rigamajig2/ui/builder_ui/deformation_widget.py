@@ -61,6 +61,7 @@ class DeformationWidget(QtWidgets.QWidget):
         for item in deformLayer.CONNECTION_METHOD_LIST:
             self.combineMthodComboBox.addItem(item)
         self.addDeformLayerButton = QtWidgets.QPushButton("Add Deform Layer")
+        self.connectToMainMeshButton = QtWidgets.QPushButton("Connect to Model")
 
         self.skinPathSelector = pathSelector.PathSelector(
             "skin:",
@@ -148,6 +149,7 @@ class DeformationWidget(QtWidgets.QWidget):
         addDeformLayersLayout.addWidget(self.addDeformLayerButton)
 
         self.addDeformLayersWidget.addLayout(addDeformLayersLayout)
+        self.addDeformLayersWidget.addWidget(self.connectToMainMeshButton)
 
         self.mainCollapseableWidget.addSpacing(4)
 
@@ -190,6 +192,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.loadDeformLayersButton.clicked.connect(self.loadDeformLayers)
         self.saveDeformLayersButton.clicked.connect(self.saveDeformLayers)
         self.addDeformLayerButton.clicked.connect(self.addDeformLayer)
+        self.connectToMainMeshButton.clicked.connect(self.connectDeformMesh)
 
         self.loadAllSkinButton.clicked.connect(self.loadAllSkins)
         self.loadSingleSkinButton.clicked.connect(self.loadSingleSkin)
@@ -288,3 +291,12 @@ class DeformationWidget(QtWidgets.QWidget):
         for node in cmds.ls(sl=True):
             layers = deformLayer.DeformLayer(node)
             layers.createDeformLayer(suffix=suffix, connectionMethod=connectionMethod)
+
+    def connectDeformMesh(self):
+        """
+        Connect deformation layers to the main deform layer
+        :return:
+        """
+        for s in cmds.ls(sl=True):
+            layer = deformLayer.DeformLayer(s)
+            layer.connectToModel()

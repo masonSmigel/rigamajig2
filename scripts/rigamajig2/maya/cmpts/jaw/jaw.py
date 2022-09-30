@@ -51,6 +51,8 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['lipsBotName'] = inputBaseNames[3]
         self.cmptSettings['lips_lName'] = inputBaseNames[4] + "_l"
         self.cmptSettings['lips_rName'] = inputBaseNames[5] + "_r"
+        self.cmptSettings['jawOpenTyOffset'] = -0.2
+        self.cmptSettings['jawOpenTzOffset'] = -0.4
 
     def initalHierachy(self):
         """Build the inital rig hierarchy"""
@@ -67,8 +69,8 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
             )
 
         # Add a group under this to work out the jaw open.
-        transformNameList = ["{}_openTrs".format(self.jawControl.name)]
-        self.jawOpenTrs = hierarchy.create(self.jawControl.name, hierarchy=transformNameList, above=False)[0]
+        # transformNameList = ["{}_openTrs".format(self.jawControl.name)]
+        # self.jawOpenTrs = hierarchy.create(self.jawControl.name, hierarchy=transformNameList, above=False)[0]
 
         self.muppetControl = control.createAtObject(
             name=self.muppetName,
@@ -83,7 +85,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
             name=self.lipsTopName,
             side=self.side,
             color='lightyellow',
-            parent=self.jawOpenTrs,
+            parent=self.jawControl.name,
             shape='square',
             shapeAim='z',
             xformObj=self.input[2]
@@ -93,7 +95,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
             name=self.lipsBotName,
             side=self.side,
             color='lightyellow',
-            parent=self.jawOpenTrs,
+            parent=self.jawControl.name,
             shape='square',
             shapeAim='z',
             xformObj=self.input[3]
@@ -103,7 +105,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
             name=self.lips_lName,
             side=self.side,
             color='lightyellow',
-            parent=self.jawOpenTrs,
+            parent=self.jawControl.name,
             shape='triangle',
             shapeAim='-x',
             xformObj=self.input[4]
@@ -113,7 +115,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
             name=self.lips_rName,
             side=self.side,
             color='lightyellow',
-            parent=self.jawOpenTrs,
+            parent=self.jawControl.name,
             shape='triangle',
             shapeAim='-x',
             xformObj=self.input[5]
@@ -126,8 +128,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
         """ Create the rig setup"""
 
         # bind all the contols to the joints
-        jawControls = [self.jawOpenTrs, self.muppetControl.name] + [x.name for x in self.lipsControls]
-        joint.connectChains(jawControls, self.input)
+        joint.connectChains([x.name for x in self.allControls], self.input)
 
         defaultValues = [0, 1, 0.5, 0.5]
         # add interpolations between the jaw and muppet to all the lips
@@ -208,14 +209,19 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
                               output=lipTopFollowAttr, name=topChewMdlName)
 
         # setup the jaw translate stuff
-        jawOpenTy = attr.createAttr(self.paramsHierarchy, longName='jawOpenTy', attributeType='float', value=-0.2)
-        jawOpenTz = attr.createAttr(self.paramsHierarchy, longName='jawOpenTz', attributeType='float', value=-0.5)
 
+        # HACK: for some reason the metaNode doesnt handle the negative floats well so we'll store them as strings
+        # and make sure to convert them back to floats before we apply them
+        jawOpenTy = attr.createAttr(self.paramsHierarchy, longName='jawOpenTy',
+                                    attributeType='float', value=float(self.jawOpenTyOffset))
+        jawOpenTz = attr.createAttr(self.paramsHierarchy, longName='jawOpenTz',
+                                    attributeType='float', value=float(self.jawOpenTzOffset))
 
-        node.remapValue(jawRotateAttr, inMin=0, inMax=20, outMin=0, outMax=jawOpenTy,
-                        output="{}.ty".format(self.jawOpenTrs), name="{}_jawOpenTy".format(self.name))
-        node.remapValue(jawRotateAttr, inMin=0, inMax=20, outMin=0, outMax=jawOpenTz,
-                        output="{}.tz".format(self.jawOpenTrs), name="{}_jawOpenTz".format(self.name))
+        jawControlRotate = jawRotateAttr = "{}.rx".format(self.jawControl.name)
+        node.remapValue(jawControlRotate, inMin=0, inMax=20, outMin=0, outMax=jawOpenTy,
+                        output="{}.ty".format(self.jawControl.trs), name="{}_jawOpenTy".format(self.name))
+        node.remapValue(jawControlRotate, inMin=0, inMax=20, outMin=0, outMax=jawOpenTz,
+                        output="{}.tz".format(self.jawControl.trs), name="{}_jawOpenTz".format(self.name))
 
     def connect(self):
         """ connect the rig to its rigparent"""

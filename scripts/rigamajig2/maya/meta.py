@@ -257,14 +257,14 @@ class MetaNode(object):
         """
 
         dataTypeDict = {'string': {'dt': 'string'},
-                          'unicode': {'dt': 'string'},
-                          'int': {'at': 'long'},
-                          'long': {'at': 'long'},
-                          'bool': {'at': 'bool'},
-                          'float': {'at': 'double'},
-                          'double': {'at': 'double'},
-                          'enum': {'at': 'enum'},
-                          'complex': {'dt': 'string'}}
+                        'unicode': {'dt': 'string'},
+                        'int': {'at': 'long'},
+                        'long': {'at': 'long'},
+                        'bool': {'at': 'bool'},
+                        'float': {'at': 'double'},
+                        'double': {'at': 'double'},
+                        'enum': {'at': 'enum'},
+                        'complex': {'dt': 'string'}}
 
         attrType = validateDataType(value)
         if attrType is None:

@@ -353,9 +353,28 @@ class Builder(object):
         Load other data, this is stuff like skinweights, blendshapes, clusters etc.
         :return:
         """
+        self.loadDeformationLayers()
         self.loadSkinWeights()
         self.loadSHAPESData()
         logger.info("data loading -- complete")
+
+    def loadDeformationLayers(self, path=None):
+        """
+        Load the deformation layers
+        :param path:
+        """
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
+        if deform.loadDeformLayers(path):
+            logger.info("deformation layers loaded")
+
+    def saveDeformationLayers(self, path=None):
+        """
+        Load the deformation layers
+        :param path:
+        """
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
+        deform.saveDeformLayers(path)
+        logger.info("deformation layers saved to: {}".format(path))
 
     def loadSkinWeights(self, path=None):
         """

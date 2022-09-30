@@ -31,14 +31,14 @@ def isBlendshape(blendshape):
     return True
 
 
-def create(base, targets=None, origin='local', deformOrder='before', prefix=''):
+def create(base, targets=None, origin='local', deformOrder=None, name=None):
     """
     Create a blendshape deformer on the specified geometry
     :param base: base shape of the blendshape
     :param targets: target shapes to add
     :param origin: Optional - create the blendshape with a local or world origin
     :param deformOrder: set the deformation oder
-    :param prefix:
+    :param name: Optional - specify a name
     :return:
     """
     targets = targets or list()
@@ -46,25 +46,28 @@ def create(base, targets=None, origin='local', deformOrder='before', prefix=''):
     if not cmds.objExists(base):
         raise Exception("base mesh {} does not exist".format(base))
 
-    blendshapeName = "{}{}_bshp".format(prefix, base)
+    name = name or base
+    blendshapeName = "{}_bshp".format(name)
 
-    kwargs = dict()
+    data = dict()
     if deformOrder == 'after':
-        kwargs['after'] = True
-    if deformOrder == 'before':
-        kwargs['before'] = True
-    if deformOrder == 'parallel':
-        kwargs['parallel'] = True
-    if deformOrder == 'split':
-        kwargs['split'] = True
-    if deformOrder == 'foc':
-        kwargs['foc'] = True
+        data['after'] = True
+    elif deformOrder == 'before':
+        data['before'] = True
+    elif deformOrder == 'parallel':
+        data['parallel'] = True
+    elif deformOrder == 'split':
+        data['split'] = True
+    elif deformOrder == 'foc':
+        data['foc'] = True
 
-    blendshape = cmds.blendShape(base, name=blendshapeName, origin=origin, **kwargs)[0]
+    blendshapeNode = cmds.blendShape(base, name=blendshapeName, origin=origin, **data)[0]
 
     # add the blendshape targets
     for target in targets:
         addTarget(blendshape=blendshape, target=target, base=base)
+
+    return blendshapeNode
 
 
 def addTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, topologyCheck=False):
@@ -177,14 +180,13 @@ def getTargetName(blendshape, targetGeometry):
         raise Exception("Target geometry {} is not connected to blnedshape {}".format(targetShape, blendshape))
 
     targetConnectionIndex = targetConnections.index(blendshape)
-    targetConnectionAttr = targetConnections[targetConnectionIndex-1]
+    targetConnectionAttr = targetConnections[targetConnectionIndex - 1]
     targetConnectionPlug = cmds.listConnections(targetConnectionAttr, sh=True, p=True, d=True, s=False)[0]
 
     targetIndex = int(targetConnectionPlug.split(".")[2].split("[")[1].split("]")[0])
     targetAlias = cmds.aliasAttr("{}.weight[{}]".format(blendshape, targetIndex), q=True)
 
     return targetAlias
-
 
 
 def getNextTargetIndex(blendshape):

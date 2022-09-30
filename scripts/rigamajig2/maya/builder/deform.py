@@ -21,6 +21,7 @@ import rigamajig2.shared.path as rig_path
 from rigamajig2.maya import meta
 from rigamajig2.maya.data import psd_data
 from rigamajig2.maya.data import skin_data
+from rigamajig2.maya.data import deformLayer_data
 from rigamajig2.maya import skinCluster
 
 
@@ -133,3 +134,33 @@ def loadSHAPESData(path=None):
         mel.eval('source "{path}";'.format(path=melFormmatedPath))
         return True
 
+
+def saveDeformLayers(path=None):
+    """
+    Save the deformation layers
+    :param path: path to the deformation layers file
+    :return:
+    """
+    dataObj = deformLayer_data.DeformLayerData()
+
+    dataObj.read(path)
+
+    dataObj.gatherDataIterate(cmds.ls(sl=True))
+    dataObj.write(path)
+
+
+def loadDeformLayers(path=None):
+    """
+    Load the deformation layers
+    :param path: path to the deformation layers file
+    :return:
+    """
+    if not path:
+        return
+    if not os.path.exists(path):
+        return
+    if path:
+        dataObj = deformLayer_data.DeformLayerData()
+        dataObj.read(path)
+        dataObj.applyData(nodes=dataObj.getData().keys())
+        return True

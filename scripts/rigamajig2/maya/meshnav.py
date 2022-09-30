@@ -43,6 +43,8 @@ def getClosestVertex(mesh, point, returnDistance=False):
     :return: name of the closest vertex
     :rtype: str
     """
+    if isinstance(point, str):
+        point = cmds.xform(point, q=True, ws=True, t=True)
     pos = om2.MPoint(point[0], point[1], point[2])
     mfnMesh = rigamajig2.maya.mesh.getMeshFn(mesh)
 

@@ -28,6 +28,7 @@ SKELETON_POS = "skeleton_pos"
 CONTROL_SHAPES = "control_shapes"
 GUIDES = "guides"
 COMPONENTS = "components"
+DEFORM_LAYERS = "deform_layers"
 SKINS = 'skins'
 PSD = 'psd'
 SHAPES = 'SHAPES'

@@ -56,8 +56,6 @@ class DeformLayer(object):
         self.model = model
         self.deformShape = deformer.getDeformShape(self.model)
 
-        self._intialzeLayersSetup()
-
     def _intialzeLayersSetup(self):
         """
         setup the required dag hierarchy for the deformation layer setup
@@ -89,6 +87,8 @@ class DeformLayer(object):
                                  optimized setup.
         :return:
         """
+        self._intialzeLayersSetup()
+
         index = self.getNumberOfDeformationLayers()
 
         deformLayerName = "deformLayer_{}".format(index)

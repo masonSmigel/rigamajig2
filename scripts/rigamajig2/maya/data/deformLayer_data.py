@@ -35,11 +35,12 @@ class DeformLayerData(maya_data.MayaData):
 
         layers = deformLayerObj.getDeformationLayers()
 
-        for layer in layers:
-            data[layer] = OrderedDict()
-            data[layer]['suffix'] = cmds.getAttr("{}.suffix".format(layer))
-            connectionMethodIndex = cmds.getAttr("{}.connectionMethod".format(layer))
-            data[layer]['connectionMethod'] = deformLayer.CONNECTION_METHOD_LIST[connectionMethodIndex]
+        if layers:
+            for layer in layers:
+                data[layer] = OrderedDict()
+                data[layer]['suffix'] = cmds.getAttr("{}.suffix".format(layer))
+                connectionMethodIndex = cmds.getAttr("{}.connectionMethod".format(layer))
+                data[layer]['connectionMethod'] = deformLayer.CONNECTION_METHOD_LIST[connectionMethodIndex]
 
         self._data[node].update(data)
 

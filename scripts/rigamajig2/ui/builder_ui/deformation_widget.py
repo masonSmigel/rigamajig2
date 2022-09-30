@@ -18,7 +18,7 @@ from PySide2 import QtWidgets
 from rigamajig2.shared import common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget
 from rigamajig2.ui.builder_ui import constants
-from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES
+from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES, DEFORM_LAYERS
 
 
 class DeformationWidget(QtWidgets.QWidget):
@@ -41,6 +41,17 @@ class DeformationWidget(QtWidgets.QWidget):
         """ Create Widgets"""
         self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
 
+        self.deformLayerPathSelector = pathSelector.PathSelector(
+            "layers:",
+            caption='Select a deformationLayer file',
+            fileFilter=constants.JSON_FILTER,
+            fileMode=1)
+
+        self.loadDeformLayersButton = QtWidgets.QPushButton("Load Deform Layers")
+        self.loadDeformLayersButton.setIcon(QtGui.QIcon(common.getIcon("loadDeformLayers.png")))
+        self.saveDeformLayersButton = QtWidgets.QPushButton("Save Deform Layers")
+        self.saveDeformLayersButton.setIcon(QtGui.QIcon(common.getIcon("saveDeformLayers.png")))
+
         self.skinPathSelector = pathSelector.PathSelector(
             "skin:",
             caption="Select the skin weight folder",
@@ -53,12 +64,17 @@ class DeformationWidget(QtWidgets.QWidget):
         self.saveSkinsButton = QtWidgets.QPushButton("Save Skin")
         self.saveSkinsButton.setIcon(QtGui.QIcon(common.getIcon("saveSkincluster.png")))
 
+        self.loadDeformLayersButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.saveDeformLayersButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
         self.loadAllSkinButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
         self.loadSingleSkinButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
         self.saveSkinsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+
         self.loadAllSkinButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
         self.loadSingleSkinButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
         self.saveSkinsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.loadDeformLayersButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.saveDeformLayersButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
 
         self.skinEditWidget = collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
         self.skinEditWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
@@ -105,6 +121,18 @@ class DeformationWidget(QtWidgets.QWidget):
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(0)
 
+        deformLayerLayout = QtWidgets.QHBoxLayout()
+        deformLayerLayout.setContentsMargins(0, 0, 0, 0)
+        deformLayerLayout.setSpacing(4)
+        deformLayerLayout.addWidget(self.loadDeformLayersButton)
+        deformLayerLayout.addWidget(self.saveDeformLayersButton)
+
+        # add the deformation layers back to the collapseable widget
+        self.mainCollapseableWidget.addWidget(self.deformLayerPathSelector)
+        self.mainCollapseableWidget.addLayout(deformLayerLayout)
+
+        self.mainCollapseableWidget.addSpacing(4)
+
         skinButtonLayout = QtWidgets.QHBoxLayout()
         skinButtonLayout.setContentsMargins(0, 0, 0, 0)
         skinButtonLayout.setSpacing(4)
@@ -141,6 +169,8 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def createConnections(self):
         """ Create Connections"""
+        self.loadDeformLayersButton.clicked.connect(self.loadDeformLayers)
+        self.saveDeformLayersButton.clicked.connect(self.saveDeformLayers)
         self.loadAllSkinButton.clicked.connect(self.loadAllSkins)
         self.loadSingleSkinButton.clicked.connect(self.loadSingleSkin)
         self.saveSkinsButton.clicked.connect(self.saveSkin)
@@ -153,11 +183,15 @@ class DeformationWidget(QtWidgets.QWidget):
         """ Set a builder for intialize widget"""
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
+        self.deformLayerPathSelector.setRelativePath(rigEnv)
         self.skinPathSelector.setRelativePath(rigEnv)
         self.psdPathSelector.setRelativePath(rigEnv)
         self.SHAPESPathSelector.setRelativePath(rigEnv)
 
         # update data within the rig
+        deformLayerFile = self.builder.getRigData(self.builder.getRigFile(), DEFORM_LAYERS)
+        self.deformLayerPathSelector.selectPath(deformLayerFile)
+
         skinFile = self.builder.getRigData(self.builder.getRigFile(), SKINS)
         self.skinPathSelector.selectPath(skinFile)
 
@@ -169,6 +203,7 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
+        self.loadDeformLayers()
         self.loadPoseReaders()
         self.loadAllSkins()
         self.loadSHAPESData()
@@ -179,6 +214,14 @@ class DeformationWidget(QtWidgets.QWidget):
         return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
+    def loadDeformLayers(self):
+        """ Save load pose reader setup from json using the builder """
+        self.builder.loadDeformationLayers(self.deformLayerPathSelector.getPath())
+
+    def saveDeformLayers(self):
+        """ Save pose reader setup to json using the builder """
+        self.builder.saveDeformationLayers(self.deformLayerPathSelector.getPath())
+
     def loadAllSkins(self):
         """Load all skin weights in the given folder"""
         self.builder.loadSkinWeights(self.skinPathSelector.getPath())

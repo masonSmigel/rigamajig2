@@ -19,6 +19,7 @@ from rigamajig2.shared import common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES, DEFORM_LAYERS
+from rigamajig2.maya.rig import deformLayer
 
 
 class DeformationWidget(QtWidgets.QWidget):
@@ -51,6 +52,15 @@ class DeformationWidget(QtWidgets.QWidget):
         self.loadDeformLayersButton.setIcon(QtGui.QIcon(common.getIcon("loadDeformLayers.png")))
         self.saveDeformLayersButton = QtWidgets.QPushButton("Save Deform Layers")
         self.saveDeformLayersButton.setIcon(QtGui.QIcon(common.getIcon("saveDeformLayers.png")))
+
+        self.addDeformLayersWidget = collapseableWidget.CollapsibleWidget('Add deformation Layers')
+        self.suffixLineEdit = QtWidgets.QLineEdit()
+        self.suffixLineEdit.setPlaceholderText("suffix")
+
+        self.combineMthodComboBox = QtWidgets.QComboBox()
+        for item in deformLayer.CONNECTION_METHOD_LIST:
+            self.combineMthodComboBox.addItem(item)
+        self.addDeformLayerButton = QtWidgets.QPushButton("Add Deform Layer")
 
         self.skinPathSelector = pathSelector.PathSelector(
             "skin:",
@@ -130,6 +140,14 @@ class DeformationWidget(QtWidgets.QWidget):
         # add the deformation layers back to the collapseable widget
         self.mainCollapseableWidget.addWidget(self.deformLayerPathSelector)
         self.mainCollapseableWidget.addLayout(deformLayerLayout)
+        self.mainCollapseableWidget.addWidget(self.addDeformLayersWidget)
+
+        addDeformLayersLayout = QtWidgets.QHBoxLayout()
+        addDeformLayersLayout.addWidget(self.suffixLineEdit)
+        addDeformLayersLayout.addWidget(self.combineMthodComboBox)
+        addDeformLayersLayout.addWidget(self.addDeformLayerButton)
+
+        self.addDeformLayersWidget.addLayout(addDeformLayersLayout)
 
         self.mainCollapseableWidget.addSpacing(4)
 
@@ -171,6 +189,8 @@ class DeformationWidget(QtWidgets.QWidget):
         """ Create Connections"""
         self.loadDeformLayersButton.clicked.connect(self.loadDeformLayers)
         self.saveDeformLayersButton.clicked.connect(self.saveDeformLayers)
+        self.addDeformLayerButton.clicked.connect(self.addDeformLayer)
+
         self.loadAllSkinButton.clicked.connect(self.loadAllSkins)
         self.loadSingleSkinButton.clicked.connect(self.loadSingleSkin)
         self.saveSkinsButton.clicked.connect(self.saveSkin)
@@ -255,3 +275,16 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def loadSHAPESData(self):
         self.builder.loadSHAPESData(self.SHAPESPathSelector.getPath())
+
+    def addDeformLayer(self):
+        """
+        add a new deformation layer to the selected object
+        :return:
+        """
+        suffix = self.suffixLineEdit.text()
+        connectionMethod = self.combineMthodComboBox.currentText()
+
+        # create a new deformation layer
+        for node in cmds.ls(sl=True):
+            layers = deformLayer.DeformLayer(node)
+            layers.createDeformLayer(suffix=suffix, connectionMethod=connectionMethod)

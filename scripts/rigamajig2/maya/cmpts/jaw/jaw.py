@@ -160,36 +160,56 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
 
         # setup the corner pinning
         for cornerControl in [self.lipsLControl, self.lipsRControl]:
-            pinAttr = attr.createAttr(cornerControl.name, longName='pin', attributeType='float', minValue=-1,
-                                      maxValue=1)
+            attr.addSeparator(cornerControl.name, "----")
+            pinAttr = attr.createAttr(cornerControl.name, longName='pin', attributeType='float', minValue=-1, maxValue=1)
 
             lipFollowAttr = "{}.{}Follow".format(self.paramsHierarchy, cornerControl.name)
             node.remapValue(pinAttr, inMin=-1, inMax=1, outMin=0, outMax=1, output=lipFollowAttr,
                             name=cornerControl.name)
 
         # setup the lip push stuff
-        chewAttr = attr.createAttr(self.jawControl.name, longName='chew', attributeType='float', minValue=0, maxValue=1)
-        chewHeight = attr.createAttr(self.jawControl.name, longName='chewHeight', attributeType='float', minValue=-1,
-                                     maxValue=1)
+        attr.addSeparator(self.jawControl.name, "----")
+        chewAttr = attr.createAttr(self.jawControl.name, longName='chew', attributeType='float',
+                                   value=0, minValue=0, maxValue=1)
+        chewHeight = attr.createAttr(self.jawControl.name, longName='chewHeight', attributeType='float',
+                                     value=0, minValue=-1,maxValue=1)
+        autoPushAttr = attr.createAttr(self.jawControl.name, longName='autoPush', attributeType='float',
+                                       value=1, minValue=0, maxValue=1)
 
         lipsPushMinAttr = attr.createAttr(self.jawControl.name, longName='lipPushAngle', attributeType="float",
                                           value=-10, maxValue=0)
 
         jawRotateAttr = "{}.rx".format(self.input[0])
-        pushBlendRemap = node.remapValue(jawRotateAttr, inMin=lipsPushMinAttr, inMax=0.0,
-                                         outMin=1.0, outMax=0.0, name='{}_pushBlend'.format(self.name))
+        pushBlendRemap = node.remapValue(jawRotateAttr,
+                                         inMin=lipsPushMinAttr, inMax=0.0,
+                                         outMin=1.0, outMax=0.0,
+                                         name='{}_pushBlend'.format(self.name))
 
-        chewTriggerCond = node.condition(chewAttr, 1, ifTrue=chewAttr, ifFalse="{}.outValue".format(pushBlendRemap),
-                                         name="{}_chewTrigger".format(self.name), operation='==')
+        autoSwitch = node.multDoubleLinear("{}.outValue".format(pushBlendRemap),
+                                           autoPushAttr,
+                                           name='{}_autoSwitch'.format(self.name))
 
-        lipPushCond = node.condition(jawRotateAttr, 0, operation="<", ifTrue="{}.outColorR".format(chewTriggerCond),
-                                     ifFalse=chewAttr, name="{}_lipPush".format(self.name))
+        chewTriggerCond = node.condition(chewAttr, 0,
+                                         ifTrue=[chewAttr, chewHeight, 0],
+                                         ifFalse=["{}.output".format(autoSwitch), -1, 0],
+                                         name="{}_chewTrigger".format(self.name),
+                                         operation='>')
+
+        lipPushCond = node.condition(jawRotateAttr, 0,
+                                     operation="<",
+                                     ifTrue="{}.outColorR".format(chewTriggerCond),
+                                     ifFalse=chewAttr,
+                                     name="{}_lipPush".format(self.name))
 
         # setup the chew stuff
         lipTopFollowAttr = "{}.{}Follow".format(self.paramsHierarchy, self.lipsTopControl.name)
         lipBotFollowAttr = "{}.{}Follow".format(self.paramsHierarchy, self.lipsBotControl.name)
+
+        chewHeightBlend = node.blendTwoAttrs(chewHeight, -1, weight="{}.outColorR".format(lipPushCond),
+                                             name="{}_autoPush".format(self.name))
+
         chewHeightName = "{}_chewHeight".format(self.name)
-        chewHeightRemaped = node.remapValue(chewHeight, inMin=-1, inMax=1, outMin=0, outMax=1, name=chewHeightName)
+        chewHeightRemaped = node.remapValue("{}.outColorG".format(chewTriggerCond), inMin=-1, inMax=1, outMin=0, outMax=1, name=chewHeightName)
 
         # setup the bottom control chew
         botMdlName = "{}_chew".format(self.lipsBotControl.name)
@@ -218,10 +238,15 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
                                     attributeType='float', value=float(self.jawOpenTzOffset))
 
         jawControlRotate = jawRotateAttr = "{}.rx".format(self.jawControl.name)
-        node.remapValue(jawControlRotate, inMin=0, inMax=20, outMin=0, outMax=jawOpenTy,
-                        output="{}.ty".format(self.jawControl.trs), name="{}_jawOpenTy".format(self.name))
-        node.remapValue(jawControlRotate, inMin=0, inMax=20, outMin=0, outMax=jawOpenTz,
-                        output="{}.tz".format(self.jawControl.trs), name="{}_jawOpenTz".format(self.name))
+        node.remapValue(jawControlRotate,
+                        inMin=0, inMax=20, outMin=0, outMax=jawOpenTy,
+                        output="{}.ty".format(self.jawControl.trs),
+                        name="{}_jawOpenTy".format(self.name))
+
+        node.remapValue(jawControlRotate,
+                        inMin=0, inMax=20, outMin=0, outMax=jawOpenTz,
+                        output="{}.tz".format(self.jawControl.trs),
+                        name="{}_jawOpenTz".format(self.name))
 
     def connect(self):
         """ connect the rig to its rigparent"""

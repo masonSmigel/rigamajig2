@@ -251,7 +251,8 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def loadSingleSkin(self):
         """Load a single skin file"""
-        path = cmds.fileDialog2(ds=2, cap="Select a skin file", ff=JSON_FILTER, okc="Select",
+        from rigamajig2.maya.builder import deform
+        path = cmds.fileDialog2(ds=2, cap="Select a skin file", ff=constants.JSON_FILTER, okc="Select",
                                 dir=self.skinPathSelector.getPath())
         if path:
             deform.loadSingleSkin(path[0])

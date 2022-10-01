@@ -15,6 +15,7 @@ import logging
 # MAYA
 import maya.cmds as cmds
 import maya.mel as mel
+import maya.api.OpenMaya as om2
 
 # RIGAMAJIG
 import rigamajig2.shared.path as rig_path
@@ -91,7 +92,10 @@ def loadSingleSkin(path):
     if path:
         dataObj = skin_data.SkinData()
         dataObj.read(path)
-        dataObj.applyData(nodes=dataObj.getData().keys())
+        try:
+            dataObj.applyData(nodes=dataObj.getData().keys())
+        except:
+            om2.MGlobal.displayWarning("Failed to load skin weights for {}".format(path))
 
 
 def saveSkinWeights(path=None):

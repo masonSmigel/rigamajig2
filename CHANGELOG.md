@@ -1,5 +1,19 @@
 # Change Log 
 
+## 1.0.6
+
+### Added: 
+* Simple jaw component with auto jaw push. 
+* A proper prop archetype
+* Space switches to the basic component. 
+* Added deform layer setup to the builder dialog. This allows the user to setup a chain of deformations.
+
+### Changed: 
+* Fixed bug with paths preventing the tool from being loaded properly on windows computers. 
+* Added the option to save the selected joints if there is no `skeleton_root`. 
+* Fixed issue with the paths preventing the user from setting a new path or setting a path to None
+* Moved the old jaw component to the sandbox. 
+* Fixed an issue with loading skinweights where non-existant skinweights would cause the step to stop. 
 
 ## 1.0.5
 

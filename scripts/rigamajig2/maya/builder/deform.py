@@ -95,7 +95,8 @@ def loadSingleSkin(path):
         try:
             dataObj.applyData(nodes=dataObj.getData().keys())
         except:
-            om2.MGlobal.displayWarning("Failed to load skin weights for {}".format(path))
+            fileName = os.path.basename(path)
+            om2.MGlobal.displayWarning("Failed to load skin weights for {}".format(fileName))
 
 
 def saveSkinWeights(path=None):

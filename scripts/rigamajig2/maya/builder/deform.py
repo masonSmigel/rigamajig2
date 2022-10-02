@@ -147,8 +147,8 @@ def saveDeformLayers(path=None):
     :return:
     """
     dataObj = deformLayer_data.DeformLayerData()
-
-    dataObj.read(path)
+    if os.path.exists(path):
+        dataObj.read(path)
 
     dataObj.gatherDataIterate(cmds.ls(sl=True))
     dataObj.write(path)

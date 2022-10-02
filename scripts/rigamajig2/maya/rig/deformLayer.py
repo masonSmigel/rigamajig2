@@ -113,6 +113,10 @@ class DeformLayer(object):
         cmds.rename(tmpDup, meshDup)
         cmds.parent(meshDup, deformLayerName)
 
+        # hide the model.
+        cmds.setAttr("{}.v".format(self.model), 0)
+        cmds.setAttr("{}.v".format(meshDup), 1)
+
         # cleanup the new mesh
         mesh.cleanShapes(meshDup)
         attr.unlock(meshDup, attr.TRANSFORMS)
@@ -127,8 +131,7 @@ class DeformLayer(object):
 
         # add the connection method to the target
         if connectionMethod not in CONNECTION_METHOD_LIST:
-            raise KeyError(
-                "{} is not a valid connection type. Please use {}".format(connectionMethod, CONNECTION_METHOD_LIST))
+            raise KeyError("{} is not a valid connection type. Use: {}".format(connectionMethod, CONNECTION_METHOD_LIST))
 
         defaultConnectionMethod = CONNECTION_METHOD_LIST.index(connectionMethod)
         attr.createEnum(meshDup, longName='connectionMethod', enum=CONNECTION_METHOD_LIST,
@@ -142,6 +145,9 @@ class DeformLayer(object):
             blendshapeNode = blendshape.create(base=meshDup, targets=None, name=blendshapeName)
 
             blendshape.addTarget(blendshape=blendshapeNode, target=previousLayer, targetWeight=1.0)
+
+            # hide the previous layer
+            cmds.setAttr("{}.v".format(previousLayer), 0)
 
     def getDeformationLayers(self):
         """ return the names of all the deformation layers on a given model"""
@@ -184,12 +190,16 @@ class DeformLayer(object):
 
         blendshape.addTarget(blendshape=blendshapeNode, target=lastLayer, targetWeight=1.0)
         # force the blendshape node to be on the bottom of the deformer stack
-        deformer.reorderToBottom(self.model, blendshapeNode)
+        numberDeformers = deformer.getDeformerStack(self.model)
+        if len(numberDeformers) > 1:
+            deformer.reorderToBottom(self.model, blendshapeNode)
 
         # finally hide all the previous layers
 
         for layer in layers:
             cmds.setAttr("{}.v".format(layer), 0)
+
+        cmds.setAttr("{}.v".format(self.model), 1)
 
 
 

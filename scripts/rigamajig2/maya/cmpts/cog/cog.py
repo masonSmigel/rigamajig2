@@ -72,6 +72,11 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
 
     def rigSetup(self):
         # create the pivot negate
+
+        negateOffsetName = self.cogGimble.trs + '_trs'
+        negativeTrs = hierarchy.create(self.cogGimble.trs, [negateOffsetName], above=True, matchTransform=True)[0]
+        constrain.parentConstraint(driver=self.cogPivot.name, driven=negativeTrs)
+
         constrain.negate(self.cogPivot.name, self.cogGimble.trs, t=True)
         if self.bind_to_input and len(self.input) >= 1:
             self.inputTrs = hierarchy.create(self.cogGimble.name, ['{}_trs'.format(self.input[0])], above=False)[0]

@@ -106,21 +106,22 @@ def _createSimpleMatrixConstraintNetwork(driver, driven):
 
 def negate(driver, driven, t=False, r=False, s=False):
     """
-    :param driver:
-    :param driven:
-    :param t: negate the translate
-    :param r: negate the rotation
-    :param s: negate the scale
-    :return:
+    Negating a transform will add the inverse of any values to the driver to each of its driven objects.
+
+    This becomes useful for things like facial rivet controls where the movement should be handled in a blendshape not
+    the translation of the contorl
+    :param str driver: transform to drive the negation. This will have its transfrom values inverted
+    :param str list driven: transforms to have their transfroms negated.
+        Its transforms will be populated with the inverse of the driver.
+    :param bool t: negate the translation
+    :param bool r: negate the rotation
+    :param bool s: negate the scale
+    :return: None
     """
     driver = common.getFirstIndex(driver)
     drivens = common.toList(driven)
 
     for driven in drivens:
-        if driven not in cmds.listRelatives(driver, ad=True):
-            negativeTrs = hierarchy.create(driven, [driven + '_trs'], above=True, matchTransform=True)[0]
-            parentConstraint(driver=driver, driven=negativeTrs)
-
         if t:
             node.unitConversion('{}.{}'.format(driver, 't'), '{}.{}'.format(driven, 't'), -1, name=driven + '_t_neg')
 

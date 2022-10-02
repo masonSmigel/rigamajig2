@@ -7,6 +7,7 @@ import rigamajig2.shared.common as common
 import rigamajig2.maya.node as node
 import rigamajig2.maya.hierarchy as hierarchy
 import rigamajig2.maya.meta as meta
+import rigamajig2.maya.naming as naming
 import maya.cmds as cmds
 
 from rigamajig2.maya import deformer, uv, attr
@@ -160,17 +161,18 @@ def uvPin(meshVertex):
 
     # check if the deform shape is connected to a UV Pin node
     uvPinNode = None
-    connections = cmds.listConnections("{}.worldMesh".format(deformShape), d=True, s=False, p=False) or []
-    for node in connections:
-        if cmds.nodeType(node) == 'uvPin':
-            uvPinNode = node
+    # connections = cmds.listConnections("{}.worldMesh".format(deformShape), d=True, s=False, p=False) or []
+    # for node in connections:
+    #     if cmds.nodeType(node) == 'uvPin':
+    #         uvPinNode = node
 
     # if we dont have one then we can create one
-    if not uvPinNode:
-        uvPinNode = cmds.createNode("uvPin", name="{}_uvPin".format(meshName))
-        cmds.connectAttr("{}.worldMesh[0]".format(deformShape), "{}.deformedGeometry".format(uvPinNode), f=True)
-        cmds.connectAttr("{}.outMesh".format(origShape), "{}.originalGeometry".format(uvPinNode), f=True)
-        print uvPinNode
+    # if not uvPinNode:
+    name = naming.getUniqueName("{}_uvPin".format(meshName))
+    uvPinNode = cmds.createNode("uvPin", name=name)
+    cmds.connectAttr("{}.worldMesh[0]".format(deformShape), "{}.deformedGeometry".format(uvPinNode), f=True)
+    cmds.connectAttr("{}.outMesh".format(origShape), "{}.originalGeometry".format(uvPinNode), f=True)
+    print uvPinNode
 
     # now we can finally add in the coordinates for the selected vertex.
     vertexId = meshVertex.split(".")[-1].split("[")[-1].split("]")[0]
@@ -184,7 +186,7 @@ def uvPin(meshVertex):
     cmds.setAttr("{}.coordinateV".format(nextIndex), uvCoords[1])
 
     # determine the plug to return. This shoudl be the number of elements -1 (since its a 0 based list)
-    plug = attr._getPlug("{}.coordinate".format(uvPinNode))
-    index = plug.evaluateNumElements() -1
+    # plug = attr._getPlug("{}.coordinate".format(uvPinNode))
+    # index = plug.evaluateNumElements() -1
 
-    return "{}.outputMatrix[{}]".format(uvPinNode, index)
+    return "{}.outputMatrix[{}]".format(uvPinNode, 0)

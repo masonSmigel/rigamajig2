@@ -6,6 +6,8 @@ import rigamajig2.shared.common as common
 import rigamajig2.maya.node as node
 import rigamajig2.maya.hierarchy as hierarchy
 import rigamajig2.maya.meta as meta
+from rigamajig2.maya import decorators
+from rigamajig2.maya import naming
 import maya.cmds as cmds
 
 
@@ -129,3 +131,47 @@ def negate(driver, driven, t=False, r=False, s=False):
         if s:
             node.multiplyDivide([1, 1, 1], '{}.{}'.format(driver, 's'), operation='div',
                                 output='{}.{}'.format(driven, 's'), name=driven + '_s_neg')
+
+@decorators.preserveSelection
+def uvPin(meshVertex):
+    """
+    Create a mesh Rivet from the current vertex. This command uses the UvPin node.
+
+    :param meshVertex: vertex to create the rivet on
+    :return: uv pin node or output transform
+    """
+    if not cmds.objExists(meshVertex):
+        raise Exception("the vertex {} does not exist".format(meshVertex))
+
+    # import the command
+    import maya.internal.nodes.uvpin.cmd_create as create_uvPin
+
+    # select the vertex. this is required by the stupid maya command.
+    # however we can get around this alittle by using our preserve selection decorator
+
+    cmds.select(meshVertex, replace=True)
+
+    if output == 'transform':
+        outputConnect = 2
+    elif output == 'locator':
+        outputConnect = 3
+    else:
+        outputConnect = 1
+
+    # try to supress restults when running this.
+    cmds.scriptEditorInfo(sr=True)
+    uvPinNode = create_uvPin.Command().execute(setupMode=0, outputConnect=outputConnect, allowCreateWithoutInputs=False)
+    cmds.scriptEditorInfo(sr=False)
+
+    # generate a name for the uvPin node
+    meshName = meshVertex.split(".")[0]
+
+    # rename the uv pin node
+    name = naming.getUniqueName("{}_0_UVPin".format(meshName))
+    cmds.rename(uvPinNode[0], name)
+    uvPinNode[0] = name
+
+    # if we add a transform or locator to the output then we can output a list otherwise just output the node
+    if output != 'matrix':
+        return uvPinNode
+    return uvPinNode[0]

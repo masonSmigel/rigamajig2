@@ -17,6 +17,9 @@ import rigamajig2.maya.meta as meta
 import rigamajig2.maya.shape
 import rigamajig2.maya.attr
 import rigamajig2.maya.joint
+import rigamajig2.maya.uv
+import rigamajig2.maya.meshnav as meshnav
+import rigamajig2.maya.constrain
 
 CONTROLSHAPES = os.path.join(os.path.dirname(__file__), "controlShapes.data").replace("\\", "/")
 
@@ -176,7 +179,8 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
            position=None, rotation=None, size=1, hideAttrs=None, color='blue', type=None, rotateOrder='xyz',
            trasformType='transform', shapeAim='y'):
     """
-    Create a control. It will also create a hierarchy above the control based on the hierarchy list.
+    Create a control. This will return an instance of the Control class.
+    The Control class allows you to manage and add transforms into the hierarchy above.
 
     :param str name: Name of the control.
     :param str side: Optional name of the side
@@ -196,8 +200,8 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     :param str trasformType: Type of transform to use as a control. "transform", "joint"
     :param str shapeAim: Set the direction to aim the control
 
-    :return: list of hierarchy created above the control plus the control:
-    :rtype: list | tuple
+    :return: control object
+    :rtype: Control
     """
 
     if position is None:
@@ -228,14 +232,6 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
         controlObj.addTrs()
     if sdk:
         controlObj.addSdk()
-
-    # hierarchyList = list()
-    # if hierarchy:
-    #     for suffix in hierarchy:
-    #         node = rigamajig2.maya.naming.getUniqueName(control + "_" + suffix)
-    #         hierarchyList.append(node)
-    #     rigamajig2.maya.hierarchy.create(control, hierarchy=hierarchyList)
-    #     topNode = hierarchyList[0]
 
     if trasformType == 'joint':
         cmds.setAttr("{}.drawStyle".format(control), 2)
@@ -286,6 +282,8 @@ def createAtObject(name, side=None, shape='circle', orig=True, spaces=False, trs
                    trasformType='transform', shapeAim='y'):
     """
     Wrapper to create a control at the position of a node.
+    This will return an instance of the Control class.
+    The Control class allows you to manage and add transforms into the hierarchy above.
 
     :param str name: Name of the control.
     :param str side: Optional name of the side
@@ -304,8 +302,8 @@ def createAtObject(name, side=None, shape='circle', orig=True, spaces=False, trs
     :param str trasformType: Type of transform to use as a control. "transform", "joint"
     :param str shapeAim: Set the direction to aim the control
 
-    :return: list of hierarchy created above the control plus the control:
-    :rtype: list | tuple
+    :return: control object
+    :rtype: Control
     """
     if not xformObj:
         cmds.error("You must pass an xform object to create a control at. Otherwise use control.create")
@@ -323,6 +321,122 @@ def createAtObject(name, side=None, shape='circle', orig=True, spaces=False, trs
                         parent=parent, position=position, size=size, rotation=[0, 0, 0],
                         hideAttrs=hideAttrs, color=color, type=type, rotateOrder=rotateOrder,
                         trasformType=trasformType, shapeAim=shapeAim)
+    orig = controlObj.getNode(common.ORIG)
+    rigamajig2.maya.transform.matchRotate(xformObj, orig)
+    return controlObj
+
+
+def createMeshRivet(name, mesh, side=None, shape='circle', orig=True, spaces=False, neg=True, sdk=False, parent=None,
+                    position=None, rotation=None, size=1, hideAttrs=None, color='blue', type=None, rotateOrder='xyz',
+                    trasformType='transform', shapeAim='y'):
+    """
+    Create a mesh rivet control. The rivet control will snap to the vertex nearest to the control.
+    This control will transform along with a deforming mesh.
+
+    :param str name: Name of the control.
+    :param str mesh: mesh to connect the control to.
+    :param str side: Optional name of the side
+    :param str shape: Shape of the control.
+    :param bool orig: add an orig node
+    :param bool spaces: add spaces node
+    :param bool neg: negate the transformation of the control. This will use a trs node on the controller
+    :param bool sdk: add an sdk node
+    :param str parent: Optional- Parent the control under this node in the hierarchy
+    :param list tuple position: point to position the contol, it will be snapped to the nearest vertex
+    :param list tuple rotation: Optional- Rotation in world space to rotate the control.
+    :param int float size: Optional- Size of the control
+    :param list hideAttrs: Optional- list of attributes to lock and hide. Default is ['v']
+    :param str int color: Optional- Color of the control
+    :param str type: Optional- Specifiy a control type.
+    :param str rotateOrder: Specify a rotation order. Default is 'xyz'
+    :param str trasformType: Type of transform to use as a control. "transform", "joint"
+    :param str shapeAim: Set the direction to aim the control
+
+    :return: control object
+    :rtype: Control
+    """
+
+    closestVertex = meshnav.getClosestVertex(mesh=mesh, point=position, returnDistance=False)
+
+    # For now I'm going to use the new UV pin nodes. After doing a couple tests heres what I found:
+    # If the Uv pin turns out to be less reliable than the folicle I think the difference may be negligable as most
+    # facial rigs shouldnt need more then 40-50 rivet controls.
+
+    # Evaluations run on a mesh with 1851 verticies.
+    # Evaluation times:
+    #   Follicles:
+    #       DG: 16.667 fps
+    #       Parralell: 53.1915 fps
+    #       More nodes to evaluate lead to slightly slower evaluation
+    #   UVPin Nodes:
+    #       DG: 8.08625 fps
+    #       Paralell: 84.269 fps
+    #       Evaluated as a ton of small clusters, lead to super fast evaluation in paralell.
+
+    # UPDATE: maya has terrible documentation and there is no documentation for the UVPin command.
+
+    controlObj = create(name=name, side=side, shape=shape, orig=orig, spaces=spaces, trs=neg, sdk=sdk,
+                        parent=parent, position=[0,0,0], size=size, rotation=[0, 0, 0],
+                        hideAttrs=hideAttrs, color=color, type=type, rotateOrder=rotateOrder,
+                        trasformType=trasformType, shapeAim=shapeAim)
+
+    # create a uv pin node and connect ONLY the translate into the controls orig
+    uvPinNode = rigamajig2.maya.constrain.uvPin(closestVertex, output='matrix')
+
+    pickMatrix = cmds.createNode("pickMatrix", n="{}_uvPin_pickMatrix".format(name))
+    cmds.setAttr("{}.useRotate".format(pickMatrix), 0)
+    cmds.setAttr("{}.useScale".format(pickMatrix), 0)
+    cmds.setAttr("{}.useShear".format(pickMatrix), 0)
+    cmds.connectAttr("{}.outputMatrix[0]".format(uvPinNode), "{}.inputMatrix".format(pickMatrix))
+    cmds.connectAttr("{}.outputMatrix".format(pickMatrix), "{}.offsetParentMatrix".format(controlObj.orig))
+
+    return controlObj
+
+
+def createMeshRivetAtObject(name, mesh, side=None, shape='circle', orig=True, spaces=False, neg=True, sdk=False,
+                            parent=None, xformObj=None, size=1, hideAttrs=None, color='blue', type=None,
+                            rotateOrder='xyz', trasformType='transform', shapeAim='y'):
+    """
+    Create a mesh rivet control from a provided xform object. This becomes most usefull for setting up facial controls.
+    so the user can only worry about the postion and allow the tool to find the appropriate vertex.
+
+   :param str name: Name of the control.
+   :param str mesh: mesh to connect the control to.
+   :param str side: Optional name of the side
+   :param str shape: Shape of the control.
+   :param bool orig: add an orig node
+   :param bool spaces: add spaces node
+   :param bool neg: negate the transformation of the control. This will use a trs node on the controller
+   :param bool sdk: add an sdk node
+   :param str parent: Optional- Parent the control under this node in the hierarchy
+   :param str list  xformObj: object to snap the control to. The control will be snapped to the nearest vertex.
+   :param int float size: Optional- Size of the control
+   :param list hideAttrs: Optional- list of attributes to lock and hide. Default is ['v']
+   :param str int color: Optional- Color of the control
+   :param str type: Optional- Specifiy a control type.
+   :param str rotateOrder: Specify a rotation order. Default is 'xyz'
+   :param str trasformType: Type of transform to use as a control. "transform", "joint"
+   :param str shapeAim: Set the direction to aim the control
+
+   :return: control object
+   :rtype: Control
+   """
+
+    if not xformObj:
+        cmds.error("You must pass an xform object to create a control at. Otherwise use control.createMeshRivet")
+        return
+
+    if not cmds.objExists(xformObj):
+        cmds.error(
+            "Object {} does not exist. cannot create a control at a transform that doesnt exist".format(xformObj))
+        return
+
+    xformObj = common.getFirstIndex(xformObj)
+    position = cmds.xform(xformObj, q=True, ws=True, translation=True)
+    controlObj = createMeshRivet(name=name, mesh=mesh, side=side, shape=shape, orig=orig, spaces=spaces, neg=neg,
+                                 sdk=sdk, parent=parent, position=position, size=size, rotation=[0, 0, 0],
+                                 hideAttrs=hideAttrs, color=color, type=type, rotateOrder=rotateOrder,
+                                 trasformType=trasformType, shapeAim=shapeAim)
     orig = controlObj.getNode(common.ORIG)
     rigamajig2.maya.transform.matchRotate(xformObj, orig)
     return controlObj

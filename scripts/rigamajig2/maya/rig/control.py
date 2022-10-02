@@ -390,8 +390,8 @@ def createMeshRivet(name, mesh, side=None, shape='circle', orig=True, spaces=Fal
 
     # add the negate stuff
     if neg:
-        controlObj.addTrs("neg")
-        rigamajig2.maya.constrain.negate(controlObj.control, driven=controlObj.trs, t=True)
+        # controlObj.addTrs("neg")
+        rigamajig2.maya.constrain.negate(controlObj.control, driven=controlObj.control, t=True)
 
     return controlObj
 

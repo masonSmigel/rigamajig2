@@ -1,14 +1,15 @@
 """
 Constraint functions
 """
+from maya import cmds as cmds
 
 import rigamajig2.shared.common as common
 import rigamajig2.maya.node as node
 import rigamajig2.maya.hierarchy as hierarchy
 import rigamajig2.maya.meta as meta
-from rigamajig2.maya import decorators
-from rigamajig2.maya import naming
 import maya.cmds as cmds
+
+from rigamajig2.maya import deformer, uv, attr
 
 
 def parentConstraint(driver, driven):
@@ -132,46 +133,58 @@ def negate(driver, driven, t=False, r=False, s=False):
             node.multiplyDivide([1, 1, 1], '{}.{}'.format(driver, 's'), operation='div',
                                 output='{}.{}'.format(driven, 's'), name=driven + '_s_neg')
 
-@decorators.preserveSelection
+
 def uvPin(meshVertex):
     """
     Create a mesh Rivet from the current vertex. This command uses the UvPin node.
 
     :param meshVertex: vertex to create the rivet on
-    :return: uv pin node or output transform
+    :return: the out matrix plug for the current vertex.
     """
     if not cmds.objExists(meshVertex):
         raise Exception("the vertex {} does not exist".format(meshVertex))
 
-    # import the command
-    import maya.internal.nodes.uvpin.cmd_create as create_uvPin
+    if ".vtx[" not in meshVertex:
+        raise Exception("{} is not a vertex.".format(meshVertex))
 
-    # select the vertex. this is required by the stupid maya command.
-    # however we can get around this alittle by using our preserve selection decorator
-
-    cmds.select(meshVertex, replace=True)
-
-    if output == 'transform':
-        outputConnect = 2
-    elif output == 'locator':
-        outputConnect = 3
-    else:
-        outputConnect = 1
-
-    # try to supress restults when running this.
-    cmds.scriptEditorInfo(sr=True)
-    uvPinNode = create_uvPin.Command().execute(setupMode=0, outputConnect=outputConnect, allowCreateWithoutInputs=False)
-    cmds.scriptEditorInfo(sr=False)
-
-    # generate a name for the uvPin node
     meshName = meshVertex.split(".")[0]
 
-    # rename the uv pin node
-    name = naming.getUniqueName("{}_0_UVPin".format(meshName))
-    cmds.rename(uvPinNode[0], name)
-    uvPinNode[0] = name
+    # get the orig shape node or create one if it doesnt exist
+    origShape = cmds.deformableShape(meshName, og=True)[0]
+    if not origShape:
+        origShape = cmds.deformableShape(meshName, createOriginalGeometry=True)[0]
+    origShape = origShape.split(".")[0]
 
-    # if we add a transform or locator to the output then we can output a list otherwise just output the node
-    if output != 'matrix':
-        return uvPinNode
-    return uvPinNode[0]
+    # get the deformable shape.
+    deformShape = deformer.getDeformShape(meshName)
+
+    # check if the deform shape is connected to a UV Pin node
+    uvPinNode = None
+    connections = cmds.listConnections("{}.worldMesh".format(deformShape), d=True, s=False, p=False) or []
+    for node in connections:
+        if cmds.nodeType(node) == 'uvPin':
+            uvPinNode = node
+
+    # if we dont have one then we can create one
+    if not uvPinNode:
+        uvPinNode = cmds.createNode("uvPin", name="{}_uvPin".format(meshName))
+        cmds.connectAttr("{}.worldMesh[0]".format(deformShape), "{}.deformedGeometry".format(uvPinNode), f=True)
+        cmds.connectAttr("{}.outMesh".format(origShape), "{}.originalGeometry".format(uvPinNode), f=True)
+        print uvPinNode
+
+    # now we can finally add in the coordinates for the selected vertex.
+    vertexId = meshVertex.split(".")[-1].split("[")[-1].split("]")[0]
+    uvCoords = uv.getUvCoordsFromVertex(meshName, vertexId)
+
+    # get the next available index on the coordinate plug
+    nextIndex = attr.getNextAvailableElement("{}.coordinate".format(uvPinNode))
+
+    # set the coortinate attributes
+    cmds.setAttr("{}.coordinateU".format(nextIndex), uvCoords[0])
+    cmds.setAttr("{}.coordinateV".format(nextIndex), uvCoords[1])
+
+    # determine the plug to return. This shoudl be the number of elements -1 (since its a 0 based list)
+    plug = attr._getPlug("{}.coordinate".format(uvPinNode))
+    index = plug.evaluateNumElements() -1
+
+    return "{}.outputMatrix[{}]".format(uvPinNode, index)

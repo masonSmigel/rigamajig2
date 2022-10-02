@@ -371,24 +371,27 @@ def createMeshRivet(name, mesh, side=None, shape='circle', orig=True, spaces=Fal
     #   UVPin Nodes:
     #       DG: 8.08625 fps
     #       Paralell: 84.269 fps
-    #       Evaluated as a ton of small clusters, lead to super fast evaluation in paralell.
+    #       Multiple outputs can be connected to the uvPin node, which allows it to only evaluate ONCE!
 
-    # UPDATE: maya has terrible documentation and there is no documentation for the UVPin command.
-
-    controlObj = create(name=name, side=side, shape=shape, orig=orig, spaces=spaces, trs=neg, sdk=sdk,
+    controlObj = create(name=name, side=side, shape=shape, orig=orig, spaces=spaces, trs=False, sdk=sdk,
                         parent=parent, position=[0,0,0], size=size, rotation=[0, 0, 0],
                         hideAttrs=hideAttrs, color=color, type=type, rotateOrder=rotateOrder,
                         trasformType=trasformType, shapeAim=shapeAim)
 
     # create a uv pin node and connect ONLY the translate into the controls orig
-    uvPinNode = rigamajig2.maya.constrain.uvPin(closestVertex, output='matrix')
+    uvPinNodeOutput = rigamajig2.maya.constrain.uvPin(closestVertex)
 
     pickMatrix = cmds.createNode("pickMatrix", n="{}_uvPin_pickMatrix".format(name))
     cmds.setAttr("{}.useRotate".format(pickMatrix), 0)
     cmds.setAttr("{}.useScale".format(pickMatrix), 0)
     cmds.setAttr("{}.useShear".format(pickMatrix), 0)
-    cmds.connectAttr("{}.outputMatrix[0]".format(uvPinNode), "{}.inputMatrix".format(pickMatrix))
+    cmds.connectAttr(uvPinNodeOutput, "{}.inputMatrix".format(pickMatrix))
     cmds.connectAttr("{}.outputMatrix".format(pickMatrix), "{}.offsetParentMatrix".format(controlObj.orig))
+
+    # add the negate stuff
+    if neg:
+        controlObj.addTrs("neg")
+        rigamajig2.maya.constrain.negate(controlObj.control, driven=controlObj.trs, t=True)
 
     return controlObj
 

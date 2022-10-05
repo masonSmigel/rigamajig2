@@ -76,7 +76,7 @@ def createAttr(node, longName, attributeType, value=None, niceName=None, shortNa
     :rtype: str
     """
     if hasAttr(node, longName):
-        cmds.warrning("Attribute {1}, already exists on {0}".format(node, longName))
+        cmds.warning("Attribute {1}, already exists on {0}".format(node, longName))
         return
     data = dict()
     if shortName is not None: data["shortName"] = shortName

@@ -65,7 +65,7 @@ def create(base, targets=None, origin='local', deformOrder=None, name=None):
 
     # add the blendshape targets
     for target in targets:
-        addTarget(blendshape=blendshape, target=target, base=base)
+        addTarget(blendshape=blendshapeNode, target=target, base=base)
 
     return blendshapeNode
 
@@ -257,7 +257,7 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
     If no target or geometry are provided all targets are gathered, and the first geometry.
     :param blendshape: blendshape node to get
     :param weights: dictionary of weights
-    :param targets: Optional - influences to set. If None all are set from the weight.
+    :param targets: Optional - influences to set. If None all are set from the weight. optionally use "baseWeights" to set the base
     :param geometry: Optional - Name of geometry to set weights on
     :return:
     """
@@ -271,9 +271,9 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
 
     for target in targets:
         if target == 'baseWeights':
-            attr = '{}.it[0].baseWeights[0:{}]'.format(blendshape, pointCount)
+            attr = '{}.inputTarget[0].baseWeights[0:{}]'.format(blendshape, pointCount)
             cmds.setAttr(attr, *weights[target])
         else:
             targetIndex = getTargetIndex(blendshape, target)
-            attr = '{}.it[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, pointCount)
+            attr = '{}.inputTarget[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, pointCount)
             cmds.setAttr(attr, *weights[target])

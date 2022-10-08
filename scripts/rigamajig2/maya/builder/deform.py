@@ -25,7 +25,6 @@ from rigamajig2.maya.data import skin_data
 from rigamajig2.maya.data import deformLayer_data
 from rigamajig2.maya import skinCluster
 
-
 logger = logging.getLogger(__name__)
 
 
@@ -131,12 +130,17 @@ def loadSHAPESData(path=None):
     path = rig_path.cleanPath(path)
 
     if rig_path.isFile(path):
-
         # mel wont source the file if the slashes match windows slashes
         # so we need to search for them and replace them with mel freindly slashes
         melFormmatedPath = path.replace("\\", "/")
-
         mel.eval('source "{path}";'.format(path=melFormmatedPath))
+        return True
+    if rig_path.isDir(path):
+        for f in os.listdir(path):
+            name, ext = os.path.splitext(f)
+            if ext == 'mel':
+                melFormmatedPath = f.replace("\\", "/")
+                mel.eval('source "{path}";'.format(path=melFormmatedPath))
         return True
 
 

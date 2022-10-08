@@ -220,7 +220,7 @@ def mirror(trs=None, axis='x', leftToken=None, rightToken=None, mode='rotate'):
 
 
     :param str list trs: transforms to mirror:
-    :param str axis: axis to mirror across. ['XY', 'YZ', 'XZ']:
+    :param str axis: axis to mirror across. ['x', 'y', 'z']:
     :param str leftToken: token for the left side
     :param str rightToken: token for the right side
     :param str mode: mirror mode. 'rotate' mirrors the rotation behaviour

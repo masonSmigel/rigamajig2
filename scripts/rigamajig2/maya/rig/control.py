@@ -3,6 +3,7 @@ Controller functions
 """
 import os
 import maya.cmds as cmds
+import maya.api.OpenMaya as om2
 
 import rigamajig2.maya.decorators
 import rigamajig2.shared.common as common
@@ -385,8 +386,21 @@ def createMeshRivet(name, mesh, side=None, shape='circle', orig=True, spaces=Fal
     cmds.setAttr("{}.useRotate".format(pickMatrix), 0)
     cmds.setAttr("{}.useScale".format(pickMatrix), 0)
     cmds.setAttr("{}.useShear".format(pickMatrix), 0)
-    cmds.connectAttr(uvPinNodeOutput, "{}.inputMatrix".format(pickMatrix))
-    cmds.connectAttr("{}.outputMatrix".format(pickMatrix), "{}.offsetParentMatrix".format(controlObj.orig))
+
+    # if the node as a parent we need to compensate for the parentInverse matrix.
+    if parent:
+        multMatrix = cmds.createNode("multMatrix", name="{}_{}_uvPin_mm".format(controlObj.name, parent))
+
+        cmds.connectAttr(uvPinNodeOutput, "{}.matrixIn[1]".format(multMatrix))
+        cmds.connectAttr("{}.{}".format(parent, "worldInverseMatrix"), "{}.matrixIn[2]".format(multMatrix))
+        cmds.connectAttr("{}.{}".format(multMatrix, "matrixSum"), "{}.inputMatrix".format(pickMatrix))
+        cmds.connectAttr("{}.outputMatrix".format(pickMatrix), "{}.offsetParentMatrix".format(controlObj.orig))
+
+        rigamajig2.maya.transform.resetTransformations(controlObj.orig)
+
+    else:
+        cmds.connectAttr(uvPinNodeOutput, "{}.inputMatrix".format(pickMatrix))
+        cmds.connectAttr("{}.outputMatrix".format(pickMatrix), "{}.offsetParentMatrix".format(controlObj.orig))
 
     # add the negate stuff
     if neg:
@@ -409,7 +423,7 @@ def createMeshRivetAtObject(name, mesh, side=None, shape='circle', orig=True, sp
     so the user can only worry about the postion and allow the tool to find the appropriate vertex.
 
    :param str name: Name of the control.
-   :param str mesh: mesh to connect the control to.
+   :param str list mesh: mesh to connect the control to.
    :param str side: Optional name of the side
    :param str shape: Shape of the control.
    :param bool orig: add an orig node

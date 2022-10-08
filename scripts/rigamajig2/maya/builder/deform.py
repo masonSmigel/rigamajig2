@@ -138,8 +138,9 @@ def loadSHAPESData(path=None):
     if rig_path.isDir(path):
         for f in os.listdir(path):
             name, ext = os.path.splitext(f)
-            if ext == 'mel':
-                melFormmatedPath = f.replace("\\", "/")
+            if ext == '.mel':
+                fullPath = os.path.join(path, f)
+                melFormmatedPath = fullPath.replace("\\", "/")
                 mel.eval('source "{path}";'.format(path=melFormmatedPath))
         return True
 

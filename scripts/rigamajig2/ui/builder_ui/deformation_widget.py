@@ -114,7 +114,7 @@ class DeformationWidget(QtWidgets.QWidget):
             "SHAPES:",
             caption="Select a SHAPES Node Setup",
             fileFilter=constants.MEL_FILTER,
-            fileMode=1)
+            fileMode=2)
         self.loadSHAPESButton = QtWidgets.QPushButton("Load SHAPES Setup")
         self.loadSHAPESButton.setIcon(QtGui.QIcon(common.getIcon("loadShapesSetup.png")))
         self.loadSHAPESButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)

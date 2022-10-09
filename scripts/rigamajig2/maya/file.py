@@ -157,11 +157,11 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
 # Disable the name error here, we want to keep the name as import,
 # so we add an underscore to the end to avoid conflicting with pythin builtin
 # pylint: disable=invalid-name
-def import_(path=None, namespace=False, force=False):
+def import_(path=None, useNamespace=False, namespace=None, force=False):
     """
     import a file
     :param path: path to the file to import
-    :param namespace: import with a namespace
+    :param useNamespace: import with a namespace
     :param force: force the opperation to occur
     :return: path of the file imported
     """
@@ -169,8 +169,8 @@ def import_(path=None, namespace=False, force=False):
         path = _pathDialog(cap='Import', acceptCaption='Import', fileMode=0, fileFilter=IMPORT_FILE_FILTER)
 
     kwargs = {"i": True, "f": force, "rnn": True}
-    if namespace:
-        namespace = os.path.basename(path).split('.')[0]
+    if namespace or useNamespace:
+        namespace = namespace or os.path.basename(path).split('.')[0]
         kwargs["ns"] = namespace
 
     file = cmds.file(path, **kwargs)

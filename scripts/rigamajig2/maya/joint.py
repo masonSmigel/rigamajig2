@@ -109,7 +109,7 @@ def duplicateChain(jointList, parent=None, names=None):
         if not cmds.objExists(joint):
             continue
         newJoint = cmds.createNode('joint', name=name)
-        newJointList.append(joint)
+        newJointList.append(newJoint)
         if parent:
             cmds.parent(newJoint, parent)
         cmds.delete(cmds.parentConstraint(joint, newJoint))

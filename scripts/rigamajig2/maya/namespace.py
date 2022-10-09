@@ -36,6 +36,22 @@ def addToNamespace(nodes, namespace):
         cmds.rename(node, ":{namespace}:{node}".format(namespace=namespace, node=node))
 
 
+def removeNamespace(nodes, namespace):
+    """
+    Remove the given namespace from ndodes
+    :param nodes: nodes to add to the namespace
+    :param namespace: namespace to remove from nodes
+    """
+    if not isinstance(nodes, (tuple, list)):
+        nodes = [nodes]
+    for node in nodes:
+        if namespace in node.split(":"):
+            namespaceList = node.split(":")
+            namespaceList.remove(namespace)
+            newName = ":".join(namespaceList)
+            cmds.rename(node, newName)
+
+
 def getNamespace(node):
     """
     Get the namespace of the node

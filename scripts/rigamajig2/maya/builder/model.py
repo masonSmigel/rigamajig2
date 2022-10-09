@@ -26,7 +26,7 @@ def importModel(path=None):
     """
     nodes = list()
     if path and os.path.exists(path):
-        nodes = file.import_(path, namespace=None)
+        nodes = file.import_(path, useNamespace=False)
 
     # get top level nodes in the skeleton
     if nodes:

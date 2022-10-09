@@ -164,7 +164,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
             pinAttr = attr.createAttr(cornerControl.name, longName='pin', attributeType='float', minValue=-1, maxValue=1)
 
             lipFollowAttr = "{}.{}Follow".format(self.paramsHierarchy, cornerControl.name)
-            node.remapValue(pinAttr, inMin=-1, inMax=1, outMin=0, outMax=1, output=lipFollowAttr,
+            node.remapValue(pinAttr, inMin=-1, inMax=1, outMin=1, outMax=0, output=lipFollowAttr,
                             name=cornerControl.name)
 
         # setup the lip push stuff

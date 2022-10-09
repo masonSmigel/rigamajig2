@@ -113,6 +113,10 @@ class DeformLayer(object):
         cmds.rename(tmpDup, meshDup)
         cmds.parent(meshDup, deformLayerName)
 
+        # rename the shapes
+        shape = deformer.getDeformShape(meshDup)
+        cmds.rename(shape, "{}Shape".format(meshDup))
+
         # hide the model.
         cmds.setAttr("{}.v".format(self.model), 0)
         cmds.setAttr("{}.v".format(meshDup), 1)

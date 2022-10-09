@@ -320,6 +320,29 @@ def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestP
         logger.info("weights copied: {}({}) -> {}({})".format(sourceMesh, srcSkinCluster, tgtMesh, tgtSkinCluster))
 
 
+def connectExistingBPMs(skinCluster, influences=None):
+    """
+    Look for existist bpm nodes and connect them to the appropriate slot of the skincluster.
+
+    you can pass specific influences to connect or connect to all available bmps.
+
+    :param skinCluster: skin cluster to connect the Bpm nodes to
+    :param influences: list of influences to connect
+    """
+
+    if not influences:
+        influences = getInfluenceJoints(skinCluster)
+
+    for influence in influences:
+        index = getInfluenceIndex(skinCluster, influence)
+
+        bpmInfluence = influence.replace("bind", "bpm")
+        if cmds.objExists(bpmInfluence):
+            cmds.connectAttr("{}.worldInverseMatrix".format(bpmInfluence),
+                             "{}.bindPreMatrix[{}]".format(skinCluster, index), f=True)
+
+
+
 def localize(skinclusters, transform):
     """
     Localize skincluster to given transform

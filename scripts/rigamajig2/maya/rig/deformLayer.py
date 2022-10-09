@@ -103,6 +103,11 @@ class DeformLayer(object):
             cmds.createNode("joint", name=dummyJoint)
             cmds.parent(dummyJoint, deformLayerName)
 
+            # create a dummy_bpm
+            bpmJoint = "d{}_dummy_bpm".format(index)
+            cmds.createNode("joint", name=bpmJoint)
+            cmds.parent(bpmJoint, deformLayerName)
+
         if suffix:
             meshDup = "d{index}_{model}_{suffix}".format(index=index, model=self.model, suffix=suffix)
         else:

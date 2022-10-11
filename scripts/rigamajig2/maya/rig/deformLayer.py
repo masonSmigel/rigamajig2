@@ -20,6 +20,7 @@ from rigamajig2.maya import mesh
 from rigamajig2.maya import deformer
 from rigamajig2.maya import meta
 from rigamajig2.maya import attr
+from rigamajig2.maya import joint
 from rigamajig2.maya import blendshape
 
 LAYER_HRC = 'deformLayers'
@@ -107,6 +108,9 @@ class DeformLayer(object):
             bpmJoint = "d{}_dummy_bpm".format(index)
             cmds.createNode("joint", name=bpmJoint)
             cmds.parent(bpmJoint, deformLayerName)
+
+            joint.hideJoints([dummyJoint, bpm])
+
 
         if suffix:
             meshDup = "d{index}_{model}_{suffix}".format(index=index, model=self.model, suffix=suffix)

@@ -127,6 +127,8 @@ class SplineSquash(rigamajig2.maya.cmpts.base.Base):
             jointNameList = [x.rsplit("_", 1)[0] + "_bpm" for x in fullJointList]
             self.bpmJointList = joint.duplicateChain(fullJointList, parent=self.bpmHierarchy, names=jointNameList)
 
+            joint.hideJoints(self.bpmJointList)
+
     def connect(self):
         """
         Connect the spline to the rig parent

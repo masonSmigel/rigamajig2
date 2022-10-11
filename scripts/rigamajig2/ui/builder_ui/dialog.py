@@ -22,6 +22,7 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
+from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
 # RIGAMAJIG
 from rigamajig2.maya.builder import builder
@@ -50,9 +51,11 @@ LARGE_BTN_HEIGHT = 35
 EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 
 
-# this is a long function allow more instance attributes for the widgets
+# this module uses multiple inheritance to add docking functionality to an existing widget.
+
+# this is a long function allow more instance attributes for the widgets.
 # pylint: disable = too-many-instance-attributes
-class BuilderDialog(QtWidgets.QDialog):
+class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
     """ Builder dialog"""
     WINDOW_TITLE = "Rigamajig2 Builder"
 
@@ -65,7 +68,7 @@ class BuilderDialog(QtWidgets.QDialog):
             cls.dialogInstance = BuilderDialog()
 
         if cls.dialogInstance.isHidden():
-            cls.dialogInstance.show()
+            cls.dialogInstance.show(dockable=True, uiScript="pass")
         else:
             cls.dialogInstance.raise_()
             cls.dialogInstance.activateWindow()
@@ -78,6 +81,8 @@ class BuilderDialog(QtWidgets.QDialog):
             mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
         super(BuilderDialog, self).__init__(mayaMainWindow)
+
+        # Store a rig enviornment and rig builder variables.
         self.rigEnviornment = None
         self.rigBuilder = None
 
@@ -87,7 +92,10 @@ class BuilderDialog(QtWidgets.QDialog):
         elif cmds.about(macOS=True):
             self.setProperty("saveWindowPref", True)
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        self.setMinimumSize(420, 825)
+        self.setMinimumSize(420, 600)
+
+        # with the maya mixin stuff the window comes in at a weird size. This ensures its not a weird size.
+        self.resize(420,800)
 
         self.createMenus()
         self.createWidgets()
@@ -121,9 +129,6 @@ class BuilderDialog(QtWidgets.QDialog):
         """ Create Widgets"""
         self.rigPathSelector = pathSelector.PathSelector(caption='Select a Rig File', fileFilter="Rig Files (*.rig)",
                                                          fileMode=1)
-
-        # self.createNewRigEnviornmentButton = QtWidgets.QPushButton("New Rig Env")
-        # self.createNewRigEnviornmentButton.setToolTip("Create a new rig enviornment")
 
         self.assetNameLineEdit = QtWidgets.QLineEdit()
         self.assetNameLineEdit.setPlaceholderText("asset_name")

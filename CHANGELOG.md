@@ -1,5 +1,27 @@
 # Change Log 
 
+
+## 1.0.7
+
+### Added:
+* UvPin rivet to `rigamjig2.maya.constrain`. This uses a single Uv pin node to output 
+multiple matricies for a mesh based on UV coords. it can be used as a more opitmal folicle system.
+* Added the `basic.basicArray` to create multiple basic components with a similar rig parent from 
+within a single rig component.
+* Added a `squash.splineSquash` component for usage on the head squash and stretch. 
+This also includes the implementation of a bpm setup for stacking skin clusters.  
+
+
+### Changed: 
+* the `rigamajgi2.maya.constrain.negate` no longer creates a parent relationship between the driver and driven. 
+This was changed to make the funciton more adaptable. 
+* load SHAPEs can now accept a file or a directory. Selecting a directory loads all `.mel` files in that directory.
+* using mayaMixin made the main builder dialog dockable. 
+
+
+### Fixed: 
+* issue loading single skin from the builder dialog. 
+
 ## 1.0.6
 
 ### Added: 

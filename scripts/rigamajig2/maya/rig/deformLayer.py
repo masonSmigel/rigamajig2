@@ -109,8 +109,7 @@ class DeformLayer(object):
             cmds.createNode("joint", name=bpmJoint)
             cmds.parent(bpmJoint, deformLayerName)
 
-            joint.hideJoints([dummyJoint, bpm])
-
+            joint.hideJoints([dummyJoint, bpmJoint])
 
         if suffix:
             meshDup = "d{index}_{model}_{suffix}".format(index=index, model=self.model, suffix=suffix)
@@ -212,7 +211,11 @@ class DeformLayer(object):
         for layer in layers:
             cmds.setAttr("{}.v".format(layer), 0)
 
-        cmds.setAttr("{}.v".format(self.model), 1)
+        # Use a try exept block just incase the render mesh is connected to something.
+        try:
+            cmds.setAttr("{}.v".format(self.model), 1)
+        except:
+            pass
 
 
 

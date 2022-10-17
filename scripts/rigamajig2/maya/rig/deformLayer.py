@@ -34,6 +34,19 @@ CONNECTION_METHOD_LIST = ['bshp', 'inmesh', 'skin']
 DUMMY_JOINT = 'world_dummy_bind'
 
 
+def _safeSetVisablity(node, value):
+    """
+    Utility to safely set the visability of a node since alot of places rely on this we want to avoid raising an exeption.
+    :param node: node to set the visability on
+    :param value: value to set the visabily to.
+    :return:
+    """
+    try:
+        cmds.setAttr("{}.v".format(node), value)
+    except:
+        pass
+
+
 class DeformLayer(object):
     """
     This class is a manager for deformation layers.
@@ -126,7 +139,7 @@ class DeformLayer(object):
         cmds.rename(shape, "{}Shape".format(meshDup))
 
         # hide the model.
-        cmds.setAttr("{}.v".format(self.model), 0)
+        _safeSetVisablity(self.model, 0)
         cmds.setAttr("{}.v".format(meshDup), 1)
 
         # cleanup the new mesh
@@ -143,7 +156,8 @@ class DeformLayer(object):
 
         # add the connection method to the target
         if connectionMethod not in CONNECTION_METHOD_LIST:
-            raise KeyError("{} is not a valid connection type. Use: {}".format(connectionMethod, CONNECTION_METHOD_LIST))
+            raise KeyError(
+                "{} is not a valid connection type. Use: {}".format(connectionMethod, CONNECTION_METHOD_LIST))
 
         defaultConnectionMethod = CONNECTION_METHOD_LIST.index(connectionMethod)
         attr.createEnum(meshDup, longName='connectionMethod', enum=CONNECTION_METHOD_LIST,
@@ -212,11 +226,4 @@ class DeformLayer(object):
             cmds.setAttr("{}.v".format(layer), 0)
 
         # Use a try exept block just incase the render mesh is connected to something.
-        try:
-            cmds.setAttr("{}.v".format(self.model), 1)
-        except:
-            pass
-
-
-
-
+        _safeSetVisablity(self.model, 1)

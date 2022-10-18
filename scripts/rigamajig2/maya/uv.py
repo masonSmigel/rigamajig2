@@ -96,7 +96,8 @@ def transferUVs(sourceMesh, targetMesh, checkVertCount=True, constructionHistory
     # finally after all the checks we can do the transfer. This command used units instead of bools...
     # its probaly to account for any future additions.
     # Just to be super safe I'm using units even though True and False return 1 and 0.
-    cmds.transferAttributes(source, target,
+    cmds.transferAttributes(sourceMesh,
+                            targetMesh,
                             transferUVs=1,
                             transferColors=0,
                             transferNormals=0,
@@ -104,12 +105,12 @@ def transferUVs(sourceMesh, targetMesh, checkVertCount=True, constructionHistory
                             searchMethod=3)
 
     # next we need to delete the extra color sets that seem to always transfer anyway
-    colorSets = cmds.polyColorSet(target, q=True, allColorSets=True) or []
+    colorSets = cmds.polyColorSet(targetMesh, q=True, allColorSets=True) or []
     for colorSet in colorSets:
-        cmds.polyColorSet(target, delete=True, colorSet=colorSet)
+        cmds.polyColorSet(targetMesh, delete=True, colorSet=colorSet)
 
-    if constructionHistory:
+    if not constructionHistory:
         cmds.delete(targetMesh, constructionHistory=True)
 
-    print "transfered UVs from {}  to {}".format(source, target)
+    print "transfered UVs from {}  to {}".format(sourceMesh, targetMesh)
 

@@ -4,6 +4,7 @@ uv functions
 import maya.cmds as cmds
 import maya.mel as mel
 import rigamajig2.maya.shape
+import rigamajig2.maya.mesh
 import rigamajig2.shared.common as common
 
 
@@ -68,4 +69,43 @@ def transferUvsToRigged(source, targets):
         cmds.setAttr("{}.intermediateObject".format(orig), 1)
         print("\tsuccessfully transfered Uvs from '{}' to '{}'".format(source, orig))
 
+
+def transferUVs(sourceMesh, targetMesh, checkVertCount=True):
+    """
+    Transfer the uvs from one mesh to another. This will also check to ensure the models have a compatable vertex count.
+    :param sourceMesh: mesh with the source UVs
+    :param targetMesh: mesh to tranfer the UVs to.
+    :param checkVertCount: check if the vertex counts match. If they dont then no transfer will take place
+    :return:
+    """
+
+    if not rigamajig2.maya.mesh.isMesh(sourceMesh):
+        raise Exception("{} is not a mesh object. Cannot transfer UVs on non-mesh objects.".format(sourceMesh))
+
+    if not rigamajig2.maya.mesh.isMesh(targetMesh):
+        raise Exception("{} is not a mesh object. Cannot transfer UVs on non-mesh objects.".format(targetMesh))
+
+    if checkVertCount:
+        sourceVertCount = len(rigamajig2.maya.mesh.getVerts(sourceMesh))
+        targetVertCount = len(rigamajig2.maya.mesh.getVerts(targetMesh))
+
+        if sourceVertCount != targetVertCount:
+            raise Exception("vertex count of target {} does not match source {}".format(targetMesh, sourceMesh))
+
+    # finally after all the checks we can do the transfer. This command used units instead of bools...
+    # its probaly to account for any future additions.
+    # Just to be super safe I'm using units even though True and False return 1 and 0.
+    cmds.transferAttributes(source, target,
+                            transferUVs=1,
+                            transferColors=0,
+                            transferNormals=0,
+                            transferPositions=0,
+                            searchMethod=3)
+
+    # next we need to delete the extra color sets that seem to always transfer anyway
+    colorSets = cmds.polyColorSet(target, q=True, allColorSets=True) or []
+    for colorSet in colorSets:
+        cmds.polyColorSet(target, delete=True, colorSet=colorSet)
+
+    print "transfered UVs from {}  to {}".format(source, target)
 

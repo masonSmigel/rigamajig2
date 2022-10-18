@@ -70,12 +70,13 @@ def transferUvsToRigged(source, targets):
         print("\tsuccessfully transfered Uvs from '{}' to '{}'".format(source, orig))
 
 
-def transferUVs(sourceMesh, targetMesh, checkVertCount=True):
+def transferUVs(sourceMesh, targetMesh, checkVertCount=True, constructionHistory=False):
     """
     Transfer the uvs from one mesh to another. This will also check to ensure the models have a compatable vertex count.
     :param sourceMesh: mesh with the source UVs
     :param targetMesh: mesh to tranfer the UVs to.
     :param checkVertCount: check if the vertex counts match. If they dont then no transfer will take place
+    :param constructionHistory: if True keep history at the end of the transfer. Default is False
     :return:
     """
 
@@ -106,6 +107,9 @@ def transferUVs(sourceMesh, targetMesh, checkVertCount=True):
     colorSets = cmds.polyColorSet(target, q=True, allColorSets=True) or []
     for colorSet in colorSets:
         cmds.polyColorSet(target, delete=True, colorSet=colorSet)
+
+    if constructionHistory:
+        cmds.delete(targetMesh, constructionHistory=True)
 
     print "transfered UVs from {}  to {}".format(source, target)
 

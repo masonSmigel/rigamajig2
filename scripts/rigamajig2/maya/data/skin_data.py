@@ -50,9 +50,17 @@ class SkinData(maya_data.MayaData):
         data['objects'] = cmds.skinCluster(skinCls, q=True, g=True)
 
         skinClsPreBindAttr = "{}.bindPreMatrix".format(skinCls)
-        preBindInputs = common.toList(cmds.listConnections(skinClsPreBindAttr, plugs=True, s=True, d=False))
-        data['preBindInputs'] = preBindInputs if preBindInputs else None
 
+        # get the preBind joints in the order they are listed on the skinCluster node
+
+        preBindInputs = dict()
+        for influence in skinCluster.getInfluenceJoints(skinCls):
+            influenceIndex = skinCluster.getInfluenceIndex(skinCls, influence)
+            preBindAttr = "{}[{}]".format(skinClsPreBindAttr, influenceIndex)
+            preBindJoint = cmds.listConnections(preBindAttr, plugs=True, s=True, d=False)
+            preBindInputs[influence] = preBindJoint[0] if preBindJoint else None
+
+        data['preBindInputs'] = preBindInputs
         weights, vertexCount = skinCluster.getWeights(node)
         data['vertexCount'] = vertexCount
         data['weights'] = weights
@@ -86,15 +94,28 @@ class SkinData(maya_data.MayaData):
                 meshSkin = cmds.skinCluster(tsb=True, mi=3, dr=1.0, wd=1,  n=mesh + "_skinCluster")[0]
 
             # connect the prebind inputs
-            for index, bindInput in zip(range(len(influenceObjects)), self._data[node]['preBindInputs']):
-                if bindInput:
-                    cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, index), f=True)
+            # Here I have a check because in the inital implementation the preBindInputs were stored in a list.
+            # however maya doesnt do a good job re-creating the skin cluster in a predicable order so I switched to a
+            # dictionary where the index is re-found every time weights are loaded.
+            if isinstance(self._data[node]['preBindInputs'], dict):
+                for influence, bindInput in self._data[node]['preBindInputs'].items():
+                    influenceIndex = skinCluster.getInfluenceIndex(skinCluster=meshSkin, influence=influence)
+                    cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, influenceIndex), f=True)
+
+            else:
+                # # for complete ness this includes a depreciated workflow for a preBind inputs stored as a list.
+                # TODO: this should be depreiciated.
+                cmds.warning("This file is using a depreciated workflow. Please save the skin file again to update!")
+                for index, bindInput in zip(range(len(influenceObjects)), self._data[node]['preBindInputs']):
+                    if bindInput:
+                        cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, index), f=True)
 
             # set the skinweights
             skinCluster.setWeights(mesh, meshSkin, self._data[node]['weights'])
 
             # set other the attributes
             cmds.setAttr("{}.{}".format(meshSkin, "normalizeWeights"), self._data[node]['normalizeWeights'])
+            cmds.skinCluster(meshSkin, edit=True, recacheBindMatrices=True)
 
             skinningMethodNames = cmds.attributeQuery("skinningMethod", node=meshSkin, le=True)[0].split(":")
             skinningMethod = skinningMethodNames.index(self._data[node]['skinningMethod'])

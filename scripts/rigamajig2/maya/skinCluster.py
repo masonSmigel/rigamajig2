@@ -336,10 +336,13 @@ def connectExistingBPMs(skinCluster, influences=None):
     for influence in influences:
         index = getInfluenceIndex(skinCluster, influence)
 
+        print influence
         bpmInfluence = influence.replace("bind", "bpm")
         if cmds.objExists(bpmInfluence):
             cmds.connectAttr("{}.worldInverseMatrix".format(bpmInfluence),
                              "{}.bindPreMatrix[{}]".format(skinCluster, index), f=True)
+        else:
+            raise Exception("No Bpm exists for {}".format(influence))
 
 
 

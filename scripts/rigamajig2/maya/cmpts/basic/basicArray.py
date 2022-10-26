@@ -28,7 +28,7 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
     __version__ = version
 
     def __init__(self, name, input, size=1, rigParent=str(),
-                 addSpaces=False, addTrs=False, addSdk=False,
+                 addSpaces=False, addTrs=False, addSdk=False, addBpm=False,
                  controlShape='cube', worldOrient=False):
         """
        :param name: Component name. To add a side use a side token
@@ -37,6 +37,7 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
        :param spacesGrp: add a spaces group
        :param trsGrp: add a trs group
        :param sdkGrp: add an sdk group
+       :param addBpm: add an associated bind pre matrix joint to the components skin joint.
        :param rigParent:  Connect the component to a rigParent.
        :param controlShape: Control shape to apply. Default: "cube"
        :param worldOrient: Orient the control to the world. Default: False
@@ -50,6 +51,7 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['addSpaces'] = addSpaces
         self.cmptSettings['addTrs'] = addTrs
         self.cmptSettings['addSdk'] = addSdk
+        self.cmptSettings['addBpm'] = addBpm
 
     def setInitalData(self):
         """ Build the joint name attributes"""
@@ -80,7 +82,8 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
                 worldOrient=self.worldOrient,
                 addSpaces=self.addSpaces,
                 addTrs=self.addTrs,
-                addSdk=self.addSdk)
+                addSdk=self.addSdk,
+                addBpm=self.addBpm)
 
             component._initalizeComponent()
             cmds.container(self.container, e=True, f=True, addNode=component.getContainer())
@@ -95,6 +98,11 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
             cmds.parent(cmpt.paramsHierarchy, self.paramsHierarchy)
             cmds.parent(cmpt.control.orig, self.controlHierarchy)
             cmds.parent(cmpt.spacesHierarchy, self.spacesHierarchy)
+
+            if self.addBpm:
+                self.bpmHierarchy = cmds.createNode("transform", name="{}_bpm_hrc".format(self.name),
+                                                    parent=self.rootHierarchy)
+                cmds.parent(cmpt.bpmHierarchy, self.bpmHierarchy)
 
             cmds.delete(cmpt.rootHierarchy)
 

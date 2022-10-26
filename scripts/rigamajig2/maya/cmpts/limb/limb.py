@@ -383,6 +383,15 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             twistMultMatrix, twistDecompose = rigamajig2.maya.node.multMatrix(
                 ["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(
                     self.input[0])], outputs=[""], name="{}_invStartTist".format(uppSpline._startTwist))
+            # add in a blendMatrix to allow us to
+            cmds.addAttr(self.paramsHierarchy, ln='uppCounterTwist', at='float', k=True, dv=1, min=0, max=1)
+
+            blendMatrix = cmds.createNode("blendMatrix", name="{}_conterTwist".format(uppSpline._startTwist))
+            cmds.connectAttr("{}.matrixSum".format(twistMultMatrix),"{}.target[0].targetMatrix".format(blendMatrix))
+            cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.inputMatrix".format(twistDecompose), f=True)
+
+            cmds.connectAttr("{}.uppCounterTwist".format(self.paramsHierarchy), "{}.envelope".format(blendMatrix))
+
             if "-" not in rig_transform.getAimAxis(self.input[1]):
                 rigamajig2.maya.node.unitConversion("{}.outputRotate".format(twistDecompose),
                                                     output="{}.r".format(uppSpline._startTwist),
@@ -475,7 +484,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'stretchBot'), self.limbIk.name)
             rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'softStretch'), self.limbIk.name)
             rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'pvPin'), [self.limbIk.name, self.limbPv.name])
-            rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'twist'), self.limbIk.name)
+            rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'twist'), self.controlers)
+            rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'uppCounterTwist'), self.limbIk.name)
             if self.addTwistJoints and self.addBendies:
                 rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'volumeFactor'), self.limbIk.name)
                 rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'bendies'), self.limbIk.name)
@@ -486,6 +496,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             rig_attr.driveAttribute('stretchBot', self.paramsHierarchy, self.ikfkControl.name)
             rig_attr.driveAttribute('softStretch', self.paramsHierarchy, self.ikfkControl.name)
             rig_attr.driveAttribute('pvPin', self.paramsHierarchy, self.ikfkControl.name)
+            rig_attr.driveAttribute('uppCounterTwist', self.paramsHierarchy, self.ikfkControl.name)
             if self.addTwistJoints and self.addBendies:
                 rig_attr.driveAttribute('volumeFactor', self.paramsHierarchy, self.ikfkControl.name)
                 rig_attr.driveAttribute('bendies', self.paramsHierarchy, self.ikfkControl.name)

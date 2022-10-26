@@ -47,9 +47,10 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
                 continue
 
             aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(input))
-            self.cmptSettings['{}Name'.format(input)] = '_'.join(input.split("_")[:-1])
-            self.cmptSettings['{}_aimVector'.format(input)] = aimVector
-            self.cmptSettings['{}_upVector'.format(input)] = (0, 1, 0)
+            if cmds.objExists(input):
+                self.cmptSettings['{}Name'.format(input)] = '_'.join(input.split("_")[:-1])
+                self.cmptSettings['{}_aimVector'.format(input)] = aimVector
+                self.cmptSettings['{}_upVector'.format(input)] = (0, 1, 0)
 
     def createBuildGuides(self):
         """ create build guides_hrc """

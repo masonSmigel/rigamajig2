@@ -29,7 +29,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
     __version__ = version
 
     def __init__(self, name, input, size=1, rigParent=str(),
-                 addSpaces=False,  addTrs=False, addSdk=False,
+                 addSpaces=False,  addTrs=False, addSdk=False, addBpm=False,
                  controlShape='cube', worldOrient=False):
         """
         :param name: Component name. To add a side use a side token
@@ -38,6 +38,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         :param spacesGrp: add a spaces group
         :param trsGrp: add a trs group
         :param sdkGrp: add an sdk group
+        :param addBpm: add an associated bind pre matrix joint to the components skin joint.
         :param rigParent:  Connect the component to a rigParent.
         :param controlShape: Control shape to apply. Default: "cube"
         :param worldOrient: Orient the control to the world. Default: False
@@ -52,6 +53,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['addSpaces'] = addSpaces
         self.cmptSettings['addTrs'] = addTrs
         self.cmptSettings['addSdk'] = addSdk
+        self.cmptSettings['addBpm'] = addBpm
 
     def initalHierachy(self):
         super(Basic, self).initalHierachy()
@@ -73,6 +75,16 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         else:
             joint.connectChains(self.control.name, self.input[0])
 
+        if self.addBpm:
+            # if needed we will add a bind pre matrix joint.
+            self.bpmHierarchy = cmds.createNode("transform", name="{}_bpm_hrc".format(self.name),
+                                                parent=self.rootHierarchy)
+
+            bpmJointName = [x.rsplit("_", 1)[0] + "_bpm" for x in self.input]
+            self.bpmJointList = joint.duplicateChain(self.input, parent=self.bpmHierarchy, names=bpmJointName)
+
+            joint.hideJoints(self.bpmJointList)
+
     def connect(self):
         """Create the connection"""
         # connect the rig to is rigParent
@@ -82,6 +94,9 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         if self.addSpaces:
             spaces.create(self.control.spaces, self.control.name, parent=self.spacesHierarchy)
             spaces.addSpace(self.control.spaces, ['trs_motion'], nameList=['world'], constraintType='orient')
+
+        if self.addBpm:
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
 
     @staticmethod
     def createInputJoints(name=None, side=None, numJoints=4):

@@ -39,6 +39,7 @@ class JointData(node_data.NodeData):
         data['jointOrient'] = [round(value, 4) for value in cmds.getAttr("{0}.jo".format(node))[0]]
         data['preferredAngle'] = [round(value, 4) for value in cmds.getAttr("{0}.preferredAngle".format(node))[0]]
         data['drawStyle'] = cmds.getAttr("{0}.drawStyle".format(node))
+        data['radius'] = cmds.getAttr("{0}.radius".format(node))
 
         self._data[node].update(data)
 

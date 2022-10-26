@@ -122,7 +122,7 @@ class SplineSquash(rigamajig2.maya.cmpts.base.Base):
         cmds.connectAttr("{}.volumeFactor".format(self.topControl.name), "{}.volumeFactor".format(self.paramsHierarchy))
 
         if self.createBpm:
-            self.bpmHierarchy = cmds.createNode("transform", name="{}_bmp_hrc".format(self.name), parent=self.rootHierarchy)
+            self.bpmHierarchy = cmds.createNode("transform", name="{}_bpm_hrc".format(self.name), parent=self.rootHierarchy)
 
             jointNameList = [x.rsplit("_", 1)[0] + "_bpm" for x in fullJointList]
             self.bpmJointList = joint.duplicateChain(fullJointList, parent=self.bpmHierarchy, names=jointNameList)
@@ -140,7 +140,6 @@ class SplineSquash(rigamajig2.maya.cmpts.base.Base):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.topControl.orig, mo=True)
 
             if self.createBpm:
-                print self.bpmJointList
                 rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
 
 

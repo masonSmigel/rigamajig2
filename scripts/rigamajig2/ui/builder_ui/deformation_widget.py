@@ -20,6 +20,7 @@ from rigamajig2.ui.widgets import pathSelector, collapseableWidget
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES, DEFORM_LAYERS
 from rigamajig2.maya.rig import deformLayer
+from rigamajig2.maya import skinCluster
 
 
 class DeformationWidget(QtWidgets.QWidget):
@@ -93,6 +94,7 @@ class DeformationWidget(QtWidgets.QWidget):
 
         self.copySkinWeightsButton = QtWidgets.QPushButton("Copy Skin Weights and Influences")
         self.copySkinWeightsButton.setIcon(QtGui.QIcon(":copySkinWeight"))
+        self.connectBpmsButton = QtWidgets.QPushButton("Connect BPMs on Skins")
 
         self.psdPathSelector = pathSelector.PathSelector(
             "psd:",
@@ -198,6 +200,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.loadSingleSkinButton.clicked.connect(self.loadSingleSkin)
         self.saveSkinsButton.clicked.connect(self.saveSkin)
         self.copySkinWeightsButton.clicked.connect(self.copySkinWeights)
+        self.connectBpmsButton.clicked.connect(self.copySkinWeights)
         self.loadPsdButton.clicked.connect(self.loadPoseReaders)
         self.savePsdButton.clicked.connect(self.savePoseReaders)
         self.loadSHAPESButton.clicked.connect(self.loadSHAPESData)
@@ -272,10 +275,17 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def copySkinWeights(self):
         """ Copy Skin weights"""
-        import rigamajig2.maya.skinCluster as rig_skinCluster
         src = cmds.ls(sl=True)[0]
         dst = cmds.ls(sl=True)[1:]
-        rig_skinCluster.copySkinClusterAndInfluences(src, dst)
+        skinCluster.copySkinClusterAndInfluences(src, dst)
+
+    def connectBindPreMatrix(self):
+        """
+        Connect influence joints to their respective bindPreMatrix
+        """
+        for mesh in cmds.ls(sl=True):
+            sc = skinCluster.getSkinCluster(mesh)
+            skinCluster.connectExistingBPMs(sc)
 
     def loadSHAPESData(self):
         self.builder.loadSHAPESData(self.SHAPESPathSelector.getPath())

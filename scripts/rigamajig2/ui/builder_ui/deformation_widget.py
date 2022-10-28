@@ -168,6 +168,7 @@ class DeformationWidget(QtWidgets.QWidget):
 
         self.mainCollapseableWidget.addWidget(self.skinEditWidget)
         self.skinEditWidget.addWidget(self.copySkinWeightsButton)
+        self.skinEditWidget.addWidget(self.connectBpmsButton)
         self.skinEditWidget.addSpacing(4)
 
         psdButtonLayout = QtWidgets.QHBoxLayout()
@@ -200,7 +201,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.loadSingleSkinButton.clicked.connect(self.loadSingleSkin)
         self.saveSkinsButton.clicked.connect(self.saveSkin)
         self.copySkinWeightsButton.clicked.connect(self.copySkinWeights)
-        self.connectBpmsButton.clicked.connect(self.copySkinWeights)
+        self.connectBpmsButton.clicked.connect(self.connectBindPreMatrix)
         self.loadPsdButton.clicked.connect(self.loadPoseReaders)
         self.savePsdButton.clicked.connect(self.savePoseReaders)
         self.loadSHAPESButton.clicked.connect(self.loadSHAPESData)

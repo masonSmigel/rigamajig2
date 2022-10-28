@@ -93,16 +93,20 @@ class SkinData(maya_data.MayaData):
                 cmds.select(influenceObjects, mesh, r=True)
                 meshSkin = cmds.skinCluster(tsb=True, mi=3, dr=1.0, wd=1,  n=mesh + "_skinCluster")[0]
 
+            # set the skinweights
+            skinCluster.setWeights(mesh, meshSkin, self._data[node]['weights'])
+
             # connect the prebind inputs
             # Here I have a check because in the inital implementation the preBindInputs were stored in a list.
             # however maya doesnt do a good job re-creating the skin cluster in a predicable order so I switched to a
             # dictionary where the index is re-found every time weights are loaded.
-            if isinstance(self._data[node]['preBindInputs'], dict):
+            if isinstance(self._data[node]['preBindInputs'], OrderedDict):
                 for influence, bindInput in self._data[node]['preBindInputs'].items():
-                    influenceIndex = skinCluster.getInfluenceIndex(skinCluster=meshSkin, influence=influence)
-                    cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, influenceIndex), f=True)
+                    if bindInput:
+                        influenceIndex = skinCluster.getInfluenceIndex(skinCluster=meshSkin, influence=influence)
+                        cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, influenceIndex), f=True)
 
-            else:
+            elif isinstance(self._data[node]['preBindInputs'], list):
                 # # for complete ness this includes a depreciated workflow for a preBind inputs stored as a list.
                 # TODO: this should be depreiciated.
                 cmds.warning("This file is using a depreciated workflow. Please save the skin file again to update!")
@@ -110,12 +114,9 @@ class SkinData(maya_data.MayaData):
                     if bindInput:
                         cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, index), f=True)
 
-            # set the skinweights
-            skinCluster.setWeights(mesh, meshSkin, self._data[node]['weights'])
-
             # set other the attributes
             cmds.setAttr("{}.{}".format(meshSkin, "normalizeWeights"), self._data[node]['normalizeWeights'])
-            cmds.skinCluster(meshSkin, edit=True, recacheBindMatrices=True)
+            # cmds.skinCluster(meshSkin, edit=True, recacheBindMatrices=True)
 
             skinningMethodNames = cmds.attributeQuery("skinningMethod", node=meshSkin, le=True)[0].split(":")
             skinningMethod = skinningMethodNames.index(self._data[node]['skinningMethod'])
@@ -123,7 +124,7 @@ class SkinData(maya_data.MayaData):
             if skinningMethod > 0:
                 cmds.setAttr("{}.{}".format(meshSkin, "dqsSupportNonRigid"), self._data[node]['dqsSupportNonRigid'])
 
-            if skinningMethod ==2:
+            if skinningMethod == 2:
                 skinCluster.setBlendWeights(mesh, meshSkin, self._data[node]['dqBlendWeights'])
 
             logger.info("Loaded skinweights for '{}'".format(mesh))

@@ -70,6 +70,16 @@ class SkinData(maya_data.MayaData):
 
         self._data[node].update(data)
 
+    def getInfluences(self, nodes):
+        """ get all the influence joints"""
+        nodes = common.toList(nodes)
+        for node in nodes:
+            weights = self._data[node]['weights']
+
+            influences = list(weights.keys())
+
+        return influences
+
     def applyData(self, nodes, rebind=True):
         nodes = common.toList(nodes)
 
@@ -109,7 +119,7 @@ class SkinData(maya_data.MayaData):
             elif isinstance(self._data[node]['preBindInputs'], list):
                 # # for complete ness this includes a depreciated workflow for a preBind inputs stored as a list.
                 # TODO: this should be depreiciated.
-                cmds.warning("This file is using a depreciated workflow. Please save the skin file again to update!")
+                cmds.warning("{} is using a depreciated workflow. Please save the skin file again to update!".format(node))
                 for index, bindInput in zip(range(len(influenceObjects)), self._data[node]['preBindInputs']):
                     if bindInput:
                         cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, index), f=True)

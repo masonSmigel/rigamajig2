@@ -13,12 +13,14 @@ import maya.cmds as cmds
 from rigamajig2.shared import common
 
 from rigamajig2.maya import skinCluster
+from rigamajig2.maya.data import skin_data
+
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import attr
 from rigamajig2.maya import shape
 
 
-def createSplitBlendshapes(targets, splitJoints, splitMesh, base=None):
+def createSplitBlendshapes(targets, splitJoints, splitMesh, skinFile=None, base=None):
     """
     Create a collection of blendshapes split based on various input joints.
     This function will create new blendshape targets based on the influence weight of the provided skin cluster.
@@ -28,6 +30,7 @@ def createSplitBlendshapes(targets, splitJoints, splitMesh, base=None):
     :param targets: list of meshes to add as targets. They will be split!
     :param splitJoints: list of joints to use in the split. They must all be bound to the split mesh
     :param splitMesh: the mesh with the split weights painted on it.
+    :param skinFile: Skinweight file to load the weights from. if none is provided we will grab the weights from the splitmesh.
     :param base: the base mesh to use as to create the splits
     :return: a list of newly created blendshapeTargets
     """
@@ -37,12 +40,23 @@ def createSplitBlendshapes(targets, splitJoints, splitMesh, base=None):
     splitJoints = common.toList(splitJoints)
     splitMesh = common.getFirstIndex(splitMesh)
 
-    skinClusterNode = skinCluster.getSkinCluster(splitMesh)
+    if skinFile:
+        skinData = skin_data.SkinData()
+        skinData.read(skinFile)
 
-    if not skinClusterNode:
-        raise Exception("Your split mesh ({}) MUST have a skinCluster".format(splitMesh))
+        data = skinData.getData()
+        keys = list(data.keys())
+        # wen loading skinwaths from tthe file it should always be the first one.
+        skinWeights = data[keys[0]]['weights']
+        vertexCount = data[keys[0]]['vertexCount']
 
-    skinWeights, vertexCount = skinCluster.getWeights(splitMesh)
+    else:
+        skinClusterNode = skinCluster.getSkinCluster(splitMesh)
+
+        if not skinClusterNode:
+            raise Exception("Your split mesh ({}) MUST have a skinCluster".format(splitMesh))
+
+        skinWeights, vertexCount = skinCluster.getWeights(splitMesh)
 
     # create a temp group to put everything in
     split_hrc = cmds.createNode("transform", name="tmp_split_hrc")

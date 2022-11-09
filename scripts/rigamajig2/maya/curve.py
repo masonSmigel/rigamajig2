@@ -65,25 +65,26 @@ def createCurve(points, degree=3, name='curve', transformType="transform", form=
     return curve
 
 
-def createCurveFromTransform(transforms, degree=3, name='curve', transformType='transform'):
+def createCurveFromTransform(transforms, degree=3, name='curve', transformType='transform', form="Open"):
     """
     Wrapper to create a curve from given transforms
-    :param transforms:
+    :param list transforms: list of transforms to use to create the curve from.
 
-    :param degree: degree of the curve
-    :type degree: int
+    :param int degree: degree of the curve
 
-    :param name: name of the curve
-    :type name: str
-
-    :param transformType: transfrom type to create on.
-    :type transformType: str
+    :param str name: name of the curve
+    :param str transformType: transfrom type to create on.
+    :param str form: The form of the curve. ex. (Open, Closed, Periodic). If closed an additional point will be added.
 
     :return: name of the curve created
     :rtype: str
     """
     points = [cmds.xform(transform, q=True, ws=True, t=True) for transform in transforms]
-    return createCurve(points, degree, name, transformType)
+
+    if form == "Closed":
+        points.append(cmds.xform(transforms[0], q=True, ws=True, t=True))
+
+    return createCurve(points, degree, name, transformType, form)
 
 
 def getCvs(curve):
@@ -133,6 +134,26 @@ def getArcLen(curve):
     :return: length of the given curve
     """
     return cmds.arclen(curve, ch=False)
+
+
+def getClosestParameter(curve, position):
+    """
+    Get the closest parameter on a curve
+    :param curve: curve to get the closest parameter on
+    :param list tuple str position: postion to get the closest parameter from.
+        If a transform is passed  get the postion from the tranform
+    """
+    if not isinstance(position, (list, tuple)):
+        position = cmds.xform(position, q=True, ws=True, t=True)
+
+    cmds.loadPlugin("closestPointOnCurve", qt=True)
+    closestPointOnCurveNode = cmds.closestPointOnCurve(curve, inPosition=position, paramU=True)
+    uParamater = cmds.getAttr("{}.paramU".format(closestPointOnCurveNode))
+    cmds.delete(closestPointOnCurveNode)
+
+    # cmds.unloadPlugin("closestPointOnCurve")
+
+    return uParamater
 
 
 def setCvPositions(curve, cvList, world=True):

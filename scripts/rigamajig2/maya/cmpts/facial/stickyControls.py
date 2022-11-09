@@ -10,6 +10,8 @@
 """
 import maya.cmds as cmds
 import rigamajig2.maya.cmpts.base
+from collections import OrderedDict
+from rigamajig2.maya import meta
 from rigamajig2.shared import common
 from rigamajig2.maya.rig import control
 from rigamajig2.maya import mesh
@@ -59,19 +61,35 @@ class StickyControls(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['negateTranslate'] = negateTranslate
         self.cmptSettings['mirrorAxis'] = mirrorAxis
 
-    def setInitalData(self):
+    def loadSettings(self, data):
         """
-        Set the intial component data.
+       Overwrite the loadSettings function in order to add more data when we set the data.
         For this we need to  add some attributes for each controller we want to create.
+        :param data: The loadSettings function takes in a data varrable. We will passs this into the super.
         :return:
         """
+        super(StickyControls, self).loadSettings(data)
+        
+        # store the number of controls before loading stuff from the class.
+        numberofControls = self.cmptSettings['numControls']
         self._loadComponentParametersToClass()
         self.controlIndecies = list()
+
         for i in range(self.numControls):
-            self.cmptSettings[CONTROLLER_NAME_ATTR.format(i)] = "control_{}".format(i)
-            self.cmptSettings[CONTROLLER_SIZE_ATTR.format(i)] = self.size
-            self.cmptSettings[CONTROLLER_MIRROR_ATTR.format(i)] = False
+            newDict = OrderedDict()
+            newDict[CONTROLLER_NAME_ATTR.format(i)] = "control_{}".format(i)
+            newDict[CONTROLLER_SIZE_ATTR.format(i)] = self.size
+            newDict[CONTROLLER_MIRROR_ATTR.format(i)] = False
+
+            # here we need to manually re-add new attributes to the metanode
+            self.metaNode.setDataDict(data=newDict, hide=True)
             self.controlIndecies.append(i)
+            self.cmptSettings.update(newDict)
+
+        # TODO: optimize
+        # This is alittle slopy but we essentially need to load twice. Once to get the number of controls to add.
+        # then a second tme to get the data for the new attributes we add
+        super(StickyControls, self).loadSettings(data)
 
     def initalHierachy(self):
         """Setup the inital Hirarchy. implement in subclass"""
@@ -96,6 +114,8 @@ class StickyControls(rigamajig2.maya.cmpts.base.Base):
 
             guide = control.createGuide(controlName, parent=self.guidesHierarchy)
             self.guidesList.append(guide)
+
+        self._loadComponentParametersToClass()
 
     def rigSetup(self):
         """

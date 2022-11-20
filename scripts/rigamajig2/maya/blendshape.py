@@ -23,8 +23,10 @@ from rigamajig2.maya import deformer
 def isBlendshape(blendshape):
     """
     check if the blendshape is a valid belndshape
+
     :param blendshape: name of deformer to check
     :return: True if Valid. False is invalid.
+    :rtype: bool
     """
     blendshape = common.getFirstIndex(blendshape)
     if not cmds.objExists(blendshape) or not cmds.nodeType(blendshape) == 'blendShape': return False
@@ -34,12 +36,14 @@ def isBlendshape(blendshape):
 def create(base, targets=None, origin='local', deformOrder=None, name=None):
     """
     Create a blendshape deformer on the specified geometry
-    :param base: base shape of the blendshape
-    :param targets: target shapes to add
-    :param origin: Optional - create the blendshape with a local or world origin
-    :param deformOrder: set the deformation oder
-    :param name: Optional - specify a name
-    :return:
+
+    :param str base: base shape of the blendshape
+    :param str list targets: target shapes to add
+    :param str origin: Optional - create the blendshape with a local or world origin
+    :param str deformOrder: set the deformation oder
+    :param str name: Optional - specify a name
+    :return: name fo the blendshape node created
+    :rtype: str
     """
     targets = targets or list()
 
@@ -47,7 +51,10 @@ def create(base, targets=None, origin='local', deformOrder=None, name=None):
         raise Exception("base mesh {} does not exist".format(base))
 
     name = name or base
-    blendshapeName = "{}_bshp".format(name)
+    if not name.endswith("_bshp"):
+        blendshapeName = "{}_bshp".format(name)
+    else:
+        blendshapeName = name
 
     data = dict()
     if deformOrder == 'after':
@@ -73,13 +80,15 @@ def create(base, targets=None, origin='local', deformOrder=None, name=None):
 def addTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, topologyCheck=False):
     """
     Add a new blendshape target to an existing blendshape node
-    :param blendshape: name of the blendshape nnode
-    :param target: name of the target geometry to add
-    :param base: base geometry of the blendshape
-    :param targetIndex: specified target index of the blendshape
-    :param targetWeight: set the target weight
-    :param topologyCheck: check the topology of the model before adding the blendshape
-    :return:
+
+    :param str blendshape: name of the blendshape nnode
+    :param str  target: name of the target geometry to add
+    :param str base: base geometry of the blendshape
+    :param int targetIndex: specified target index of the blendshape
+    :param int float targetWeight: set the target weight
+    :param  bool topologyCheck: check the topology of the model before adding the blendshape
+    :return: plug of the new target added
+    :rtype: str
     """
 
     if not isBlendshape(blendshape):
@@ -107,7 +116,8 @@ def addTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, t
 def getBaseGeometry(blendshape):
     """
     Get a list of blendshape geometry
-    :param blendshape: blendshape name to get the base geometry from
+
+    :param str blendshape: blendshape name to get the base geometry from
     """
     if not isBlendshape(blendshape):
         raise Exception("{} is not a blendshape".format(blendshape))
@@ -121,11 +131,24 @@ def getBaseGeometry(blendshape):
     return outputNode.partialPathName()
 
 
+def getBlendshapeNodes(geometry):
+    """
+    Get the blendshape nodes
+    :param geometry:
+    :return: blendshape node attatched to the geometry
+    :rtype: str
+    """
+    history = cmds.listHistory(geometry)
+    blendshapeNodes = cmds.ls(history, type='blendShape')
+    return blendshapeNodes
+
+
 def getTargetList(blendshape):
     """
     Get the list of connected targets
-    :param blendshape: Blendshape node to get the target list geometry from
+    :param str blendshape: Blendshape node to get the target list geometry from
     :return: list of targe indicies
+    :rtype: list
     """
     if not isBlendshape(blendshape):
         raise Exception("{} is not a valid blendshape node".format(blendshape))
@@ -134,12 +157,68 @@ def getTargetList(blendshape):
     return targetList
 
 
+def hasTargetGeo(blendShape, target, base=None):
+    """
+    Check if the specified blendShape target has live target geometry.
+
+    :param blendShape: Name of blendShape to query
+    :param str target: BlendShape target to query
+    :param str base: The base geometry index to check for live target geometry.
+    """
+    # Check blendShape
+    if not isBlendshape(blendShape):
+        raise Exception('Object "' + blendShape + '" is not a valid blendShape node!')
+
+    # Check target
+    if not target in getTargetList(blendShape):
+        raise Exception('BlendShape "' + blendShape + '" has no target "' + target + '"!')
+
+    # Check Target Geometry
+    targetGeo = getTargetGeo(blendShape, target, base=base)
+
+    # Return Result
+    return bool(targetGeo)
+
+
+def getTargetGeo(blendShape, target, base=None):
+    """
+    Get the connected target geometry given a blendShape and specified target.
+
+    :param str blendShape: BlendShape node to get target geometry from
+    :param str target: BlendShape target to get source geometry from
+    :param str base: The base geometry of the blendshape to get the target geometry for. If empty, use base geometry at geomIndex 0.
+    """
+    # Get Target Index
+    targetIndex = getTargetIndex(blendShape, target)
+
+    # Get Geometry Index
+    geomIndex = 0
+    if base: geomIndex = deformer.getGeoIndex(baseGeo, blendShape)
+
+    # Get Weight Index
+    # !!! Hardcoded to check "inputTargetItem" index 6000. This could be more robust by check all existing multi indexes.
+    wtIndex = 6000
+
+    # Get Connected Target Geometry
+    targetGeoAttr = blendShape + '.inputTarget[' + str(geomIndex) + '].inputTargetGroup[' + str(
+        targetIndex) + '].inputTargetItem[' + str(wtIndex) + '].inputGeomTarget'
+    targetGeoConn = cmds.listConnections(targetGeoAttr, s=True, d=False)
+
+    # Check Target Geometry
+    if not targetGeoConn: targetGeoConn = ['']
+
+    # Return Result
+    return targetGeoConn[0]
+
+
 def getTargetIndex(blendshape, target):
     """
     Get the index of a blendshape target
-    :param blendshape: blendshape
+
+    :param str blendshape: blendshape
     :param target: target name to find an index of
     :return: index
+    :rtype: int
     """
     if not isBlendshape(blendshape):
         raise Exception("{} is not a valid blendshape node".format(blendshape))
@@ -164,7 +243,8 @@ def getTargetName(blendshape, targetGeometry):
     Get the target alias for the specified target geometry
     :param blendshape: blendshape node to get the target name from
     :param targetGeometry: blendshape target to get the alais name for
-    :return:
+    :return: name of the blendshape target
+    :rtype: str
     """
 
     if not isBlendshape(blendshape):
@@ -192,7 +272,8 @@ def getTargetName(blendshape, targetGeometry):
 def getNextTargetIndex(blendshape):
     """
     Get the next available index for a blendshape
-    :param blendshape: name of the blendshape to get the next available target for
+
+    :param str blendshape: name of the blendshape to get the next available target for
     """
     if not isBlendshape(blendshape):
         raise Exception("{} is not a valid blendshape node".format(blendshape))
@@ -211,10 +292,13 @@ def getWeights(blendshape, targets=None, geometry=None):
     """
     Get blendshape target weights as well as the baseWeights.
     If no target or geometry are provided all targets are gathered, and the first geometry.
-    :param blendshape: blendshape node to get
-    :param targets:
-    :param geometry:
-    :return:
+
+    :param str blendshape: blendshape node to get
+    :param str list targets: list of targets to get the blendshape weifs from
+    :param str geometry: Optional name of the geometry to get the targets from.
+                         By default it will find the first geometry attatched to the node.
+    :return: dictionary of blendshape weights {"baseweights":[], "target":[]}
+    :rtype: dict
     """
     weightList = dict()
     if not isBlendshape(blendshape):
@@ -255,11 +339,11 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
     """
     Set blendshape target weights as well as the baseWeights.
     If no target or geometry are provided all targets are gathered, and the first geometry.
-    :param blendshape: blendshape node to get
-    :param weights: dictionary of weights
-    :param targets: Optional - influences to set. If None all are set from the weight. optionally use "baseWeights" to set the base
-    :param geometry: Optional - Name of geometry to set weights on
-    :return:
+
+    :param str blendshape: blendshape node to get
+    :param str weights: dictionary of weights
+    :param str targets: Optional - influences to set. If None all are set from the weight. optionally use "baseWeights" to set the base
+    :param str geometry: Optional - Name of geometry to set weights on
     """
     if not isBlendshape(blendshape):
         raise Exception("{} is not a valid blendshape target".format(blendshape))

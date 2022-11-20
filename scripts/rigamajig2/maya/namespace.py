@@ -25,9 +25,13 @@ def deleteAllNamespace():
 def addToNamespace(nodes, namespace):
     """
     Add nodes to a namespace
-    :param nodes: nodes to add to the namespace
+
+    :param list nodes: nodes to add to the namespace
     :param namespace: namespace to add nodes to
     """
+    if not isinstance(nodes, (tuple, list)):
+        nodes = [nodes]
+
     if not cmds.namespace(exists=namespace):
         cmds.error("namespace {} does not exist".format(namespace))
         return
@@ -38,7 +42,8 @@ def addToNamespace(nodes, namespace):
 
 def removeNamespace(nodes, namespace):
     """
-    Remove the given namespace from ndodes
+    Remove the given namespace from nodes
+
     :param nodes: nodes to add to the namespace
     :param namespace: namespace to remove from nodes
     """
@@ -55,8 +60,10 @@ def removeNamespace(nodes, namespace):
 def getNamespace(node):
     """
     Get the namespace of the node
+
     :param node: node to get the namespace from
     :return: namespace of the current node
+    :rtype: str
     """
     namespaces = node.split(":")[:-1]
 

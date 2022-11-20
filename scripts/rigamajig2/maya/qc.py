@@ -1,4 +1,4 @@
-"""This module contains performance Utils """
+"""This module contains performance Utils for quality control"""
 import maya.cmds as cmds
 
 import random
@@ -13,10 +13,12 @@ SCALE_TOKENS = ["Mult", "Thickness", "Scale", "Factor"]
 
 def hasScaleToken(node, attr):
     """
-    Check if an attribute has a scale token
-    :param node: node to check on
-    :param attr: attribute to check
-    :return: bool if the attribute has a
+    Check if an attribute has a scale token.
+    Scale tokens are specified within the SCALE_TOKENS constant.
+
+    :param str node: node to check on
+    :param str attr: attribute to check
+    :return: bool if the attribute has a scale token
     """
     attr = cmds.attributeName("{}.{}".format(node, attr), l=True)
     for token in SCALE_TOKENS:
@@ -29,11 +31,11 @@ def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
     """
     Generate random animation channels for nodes.
     If no nodes are provided use all controls in the scne
-    :param nodes: nodes to animate
-    :param start: Start time for random animation
-    :param end: End time for random animation
-    :param keysIncriment: incriment for how often keyframes are generated
-    :return:
+
+    :param list nodes: nodes to animate
+    :param int start: Start time for random animation
+    :param int end: End time for random animation
+    :param int keysIncriment: incriment for how often keyframes are generated
     """
     start = start or cmds.playbackOptions(q=True, ast=True)
     end = end or cmds.playbackOptions(q=True, aet=True)
@@ -73,7 +75,6 @@ def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
 def runPerformanceTest():
     """
     wrapper to run the performace test within the maya evaluation toolkit.
-    :return:
     """
     import maya.app.evaluationToolkit.evaluationToolkit as et
     # query the playback speed, so we can set it back to default after the performace test.

@@ -6,13 +6,21 @@ from collections import OrderedDict
 
 
 def rgbToPercent(color):
-    """Returns the RGB color between a value of 0 - 1"""
+    """
+    Returns the RGB color between a value of 0 - 1
+
+    :param list tuple color: RGB color in 0-255 space
+    """
     return [float(x) / 255 for x in color]
 
 
-def rgbToHex(self):
-    """Returns color in hex format"""
-    return '#{:02X}{:02X}{:02X}'.format(self.red, self.green, self.blue)
+def rgbToHex(color):
+    """
+    Returns color in hex format
+
+    :param list tuple color: RGB color in 0-255 space
+    """
+    return '#{:02X}{:02X}{:02X}'.format(color.red, color.green, color.blue)
 
 
 COLORS = OrderedDict(
@@ -79,7 +87,9 @@ def getAvailableColors():
     """
     Get a list of all available colors.
     The color string can be used to set the override or outliner color.
-    :return:
+
+    :return: a list of all available colors
+    :rtype: list
     """
     return COLORS.keys()
 
@@ -87,11 +97,10 @@ def getAvailableColors():
 def setOverrideColor(nodes, color):
     """
     Sets the color of shapes in the viewport.
-    :param nodes: nodes to set the override color to
-    :type nodes: str | list
-    :param color: Color to set on the nodes. Use either an RGB value, or index.
+
+    :param str list nodes: nodes to set the override color to
+    :param int list tuple str color: Color to set on the nodes. Use either an RGB value, or index.
                     you can also use a string name. use color.getAvailableColors() to get a list of all colors
-    :type color: int | list | tuple | str
     """
     useIndex = True
     strColor = None
@@ -122,10 +131,9 @@ def setOverrideColor(nodes, color):
 def setOutlinerColor(nodes, color):
     """
     Sets the color of nodes in the outliner
-    :param nodes: nodes to set the override color to
-    :param color: Color to set on the nodes. Used as an RGB value.
+    :param list nodes: nodes to set the override color to
+    :param tuple list str color: Color to set on the nodes. Used as an RGB value.
                   You can also use constants like color.RED, color.BLUE or color.LIGHT_YELLOW
-    :return:
     """
     if not isinstance(nodes, (list, tuple)):
         nodes = [nodes]

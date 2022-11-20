@@ -16,9 +16,11 @@ def buildMatrix():
 def matrixMult(matrix1, matrix2):
     """
     Multiply two matrices
-    :param matrix1:
-    :param matrix2:
-    :return:
+
+    :param matrix1: first matrix to multiply
+    :param matrix2: Second matrix to multiply
+    :return: sum of the two multiplied matricies
+    :rtype: tuple
     """
 
     matrix1 = om2.MMatrix(matrix1)
@@ -29,9 +31,11 @@ def matrixMult(matrix1, matrix2):
 
 def getTranslation(matrix):
     """
-    Get the translation of a matrix
-    :param matrix:
+    Get the translation values of a matrix
+
+    :param matrix: matrix to decompose
     :return: list of translate values
+    :rtype: list
     """
     return decompMatrix(matrix)[0]
 
@@ -39,9 +43,11 @@ def getTranslation(matrix):
 def getRotation(matrix, rotateOrder='xyz'):
     """
     Get the rotation of a matrix. Must provide a rotate order for accurate Euler values
+
     :param matrix: matrix to get the rotation of
     :param rotateOrder: rotate order of the matrix. Default is 'xyz'
     :return: list of angles
+    :rtype: list
     """
     return decompMatrix(matrix, rotateOrder)[1]
 
@@ -49,19 +55,23 @@ def getRotation(matrix, rotateOrder='xyz'):
 def getScale(matrix):
     """
     Get the scale of a matrix
+
     :param matrix: matrix to get the scale of
     :return: list of scale values
+    :rtype: list
     """
     return decompMatrix(matrix)[2]
 
 
 def decompMatrix(matrix, rotateOrder='xyz'):
     """
-    Decomposes a MMatrix in new api. Returns an list of translation,rotation,scale in world space.
+    Decomposes a MMatrix. Returns an list of translation,rotation and scale in world space.
+
     :param matrix: input matrix
     :param rotateOrder: rotate order used to calculate Euler angles
     :return: list of [translate, rotate, scale] tuples
-            ex: [()]
+            ex: [(0, 0, 0), (0, 0, 0), (1, 1, 1)]
+    :rtype: list
     """
     if not isinstance(matrix, om2.MMatrix):
         matrix = om2.MMatrix(matrix)

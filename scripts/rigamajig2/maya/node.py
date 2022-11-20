@@ -11,6 +11,7 @@ def setConnection(plug, value):
     Set a connection to a given value.
 
     Depending on the type of the value it will either connect the attribute or set the value
+
     :param plug: plug to be connected to
     :param value: value to set the plug to
     :return: None
@@ -29,6 +30,7 @@ def setCompoundConnection(plug, value):
     Set a compound connection to a given value.
 
     Depending on the type of the value it will either connect the attribute or set the value
+
     :param plug: plug to be connected to
     :param value: value to set the plug to
     :return: None
@@ -51,8 +53,8 @@ def setCompoundConnection(plug, value):
 def connectOutput(source, destination, f=True):
     """
     Connect a source plug to a destination plug.
-
     This function checks to ensure the attribute is connected to any compound children if they exist.
+
     :param source: source plug to connect
     :param destination: desitnation plug to be connectected to
     :param f: force the connection
@@ -79,14 +81,11 @@ def connectOutput(source, destination, f=True):
 def addDoubleLinear(input1=None, input2=None, output=None, name=None):
     """
     Create an addDoubleLinear node:
-    :param input1: first input. Can be a value or a plug (as a string)
-    :type input1: float | str
-    :param input2: second input. Can be a value or a plug (as a string)
-    :type input2: float | str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
-    :param output: Node plug to connect the output of the node to.
-    :type output: str
+
+    :param str float input1: first input. Can be a value or a plug (as a string)
+    :param str float input2: second input. Can be a value or a plug (as a string)
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
+    :param str output: Node plug to connect the output of the node to.
     :return: name of the node created
     :rtype: str
     """
@@ -108,14 +107,11 @@ def addDoubleLinear(input1=None, input2=None, output=None, name=None):
 def multDoubleLinear(input1=None, input2=None, output=None, name=None):
     """
     Create an MultDoubleLinear node:
-    :param input1: first input. Can be a value or a plug (as a string)
-    :type input1: float | str
-    :param input2: second input. Can be a value or a plug (as a string)
-    :type input2: float | str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
-    :param output: Node plug to connect the output of the node to.
-    :type output: str
+
+    :param str float input1: first input. Can be a value or a plug (as a string)
+    :param str float input2: second input. Can be a value or a plug (as a string)
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
+    :param str output: Node plug to connect the output of the node to.
     :return: name of the node created
     :rtype: str
     """
@@ -137,16 +133,12 @@ def multDoubleLinear(input1=None, input2=None, output=None, name=None):
 def multiplyDivide(input1=None, input2=None, operation='mult', output=None, name=None):
     """
     Create a MultiplyDivide node. You can either pass a compound attribute,
-    :param input1: first input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input1: list | str | float
-    :param input2: second input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input1: list | str | float
-    :param operation: Set the operation to perform. Valid values are: 'mult', 'div' and 'pow'. Default: 'mult'
-    :type operation: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
-    :param output:  Node plug to connect the output of the node to.
-    :type output: str
+
+    :param  list str float input1: first input. Can be a list of 3 values or a multi-plug (as a string)
+    :param list str float input2: second input. Can be a list of 3 values or a multi-plug (as a string)
+    :param str  operation: Set the operation to perform. Valid values are: 'mult', 'div' and 'pow'. Default: 'mult'
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
+    :param str output:  Node plug to connect the output of the node to.
     :return: name of the node created
     :rtype: str
     """
@@ -171,11 +163,11 @@ def multiplyDivide(input1=None, input2=None, operation='mult', output=None, name
 def unitConversion(input=None, output=None, conversionFactor=None, name=None):
     """
     Create a unit conversion node
-    :param input: input node
-    :param output: output node
-    :param conversionFactor: conversion factor
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param int float str input: input node
+    :param int float str output: output node
+    :param float conversionFactor: conversion factor
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created
     """
     if name:
@@ -197,14 +189,11 @@ def unitConversion(input=None, output=None, conversionFactor=None, name=None):
 def plusMinusAverage1D(inputs, operation='sum', output=None, name=None):
     """
     Create a PlusMinusAverage node using the input 1D connections.
-    :param inputs: list of inputs to perform the opperation on
-    :type inputs: list
-    :param operation: Set the operation to perform. Valid values are: 'sum', 'sub' and 'ave'. Default: 'sum'
-    :type operation: str
-    :param output:  Node plug to connect the output of the node to.
-    :type output: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param list inputs: list of inputs to perform the opperation on
+    :param str operation: Set the operation to perform. Valid values are: 'sum', 'sub' and 'ave'. Default: 'sum'
+    :param str output:  Node plug to connect the output of the node to.
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created. (use node.output1D)
     :rtype: str
     """
@@ -228,14 +217,11 @@ def plusMinusAverage1D(inputs, operation='sum', output=None, name=None):
 def plusMinusAverage3D(inputs, operation='sum', output=None, name=None):
     """
     Create a PlusMinusAverage node using the input 3D connections.
-    :param inputs: list of inputs to perform the opperation on. Can be a list of 3 values or a multi-plug (as a string)
-    :type inputs: list
-    :param operation: Set the operation to perform. Valid values are: 'sum', 'sub' and 'ave'. Default: 'sum'
-    :type operation: str
-    :param output:  Node plug to connect the output of the node to.
-    :type output: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param list inputs: list of inputs to perform the opperation on. Can be a list of 3 values or a multi-plug (as a string)
+    :param str operation: Set the operation to perform. Valid values are: 'sum', 'sub' and 'ave'. Default: 'sum'
+    :param str output:  Node plug to connect the output of the node to.
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created. (use node.output1D)
     :rtype: str
     """
@@ -259,15 +245,13 @@ def plusMinusAverage3D(inputs, operation='sum', output=None, name=None):
 def choice(selector=None, choices=None, output=None, name=None):
     """
     Create a choice node
-    :param selector: selctor value. Can be a list of 3 values or a plug (as a string)
-    :type selector: str | float
-    :param choices: list of values to choose between
-    :type choices: list | tuple
-    :param output: Node plug to connect the output of the node to.
-    :type output: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param str float selector: selctor value. Can be a list of 3 values or a plug (as a string)
+    :param list tuple choices: list of values to choose between
+    :param str output: Node plug to connect the output of the node to.
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created. (use node.output)
+    :rtype: str
     """
     choices = choices or list()
 
@@ -294,21 +278,16 @@ def choice(selector=None, choices=None, output=None, name=None):
 def condition(firstTerm=None, secondTerm=None, ifTrue=None, ifFalse=None, operation='==', output=None, name=None):
     """
     Create a condition Node.
-    :param firstTerm: first term. Can be a list of 3 values or a multi-plug (as a string)
-    :type firstTerm: str | float
-    :param secondTerm: first term. Can be a list of 3 values or a multi-plug (as a string)
-    :type secondTerm: str | float
-    :param ifTrue: result to return if statement is true. Can be a list of 3 values or a compound plug (as a string)
-    :type ifTrue: str | float  | list
-    :param ifFalse:result to return if statement is False. Can be a list of 3 values or a compound plug (as a string)
-    :type ifFalse: str | float  | list
-    :param operation: operation to evaluate. valid values are: '==', '!=', '>', '>=', '<', '<='
-    :type operation: str | float  | list
-    :param output: Node plug to connect the output of the node to.
-    :type output: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param str float firstTerm: first term. Can be a list of 3 values or a multi-plug (as a string)
+    :param str float secondTerm: first term. Can be a list of 3 values or a multi-plug (as a string)
+    :param str float list ifTrue: result to return if statement is true. Can be a list of 3 values or a compound plug (as a string)
+    :param str float list ifFalse:result to return if statement is False. Can be a list of 3 values or a compound plug (as a string)
+    :param str  operation: operation to evaluate. valid values are: '==', '!=', '>', '>=', '<', '<='
+    :param str output: Node plug to connect the output of the node to.
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created. (use node.outColor)
+    :rtype: str
     """
     if name:
         node = cmds.createNode('condition', name=name + '_' + common.CONDITION)
@@ -335,10 +314,10 @@ def condition(firstTerm=None, secondTerm=None, ifTrue=None, ifFalse=None, operat
 def reverse(input1=None, output=None, name=None):
     """
     Create a reverse node
-    :param input1: input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input1: str | float | list
-    :param output: Node plug to connect the output of the node to.
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
+
+    :param str float list input1: input. Can be a list of 3 values or a multi-plug (as a string)
+    :param str output: Node plug to connect the output of the node to.
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created.
     :rtype: str
     """
@@ -360,21 +339,15 @@ def pairBlend(input1=None, input2=None, weight=None, output=None, outputRot=True
               name=None):
     """
     Create a pair blend node.
-    :param input1: input transform node.  (use a node name. not a plug)
-    :type input1: str
-    :param input2: input transform node.  (use a node name. not a plug)
-    :type input2: str
-    :param weight: weight of the blend. 1 = input2; 0 = input1.
-    :type weight: float | int | str
-    :param output: node to connect output to. (use a node name. not a plug)
-    :type output: str
-    :param outputRot: output the rotation to the output node
-    :type outputRot: bool
-    :param outputPos: output the translation to the output node
-    :type outputPos: bool
-    :param rotInterp: Method of rotation interperlation. Valid values are: 'euler', 'quat'. Default 'euler'
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param str float list input1: input transform node.  (use a node name. not a plug)
+    :param str float list input2: input transform node.  (use a node name. not a plug)
+    :param float int str weight: weight of the blend. 1 = input2; 0 = input1.
+    :param str output: node to connect output to. (use a node name. not a plug)
+    :param bool outputRot: output the rotation to the output node
+    :param bool outputPos: output the translation to the output node
+    :param str rotInterp: Method of rotation interperlation. Valid values are: 'euler', 'quat'. Default 'euler'
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created.
     :rtype: str
     """
@@ -406,16 +379,12 @@ def pairBlend(input1=None, input2=None, weight=None, output=None, outputRot=True
 def blendColors(input1=None, input2=None, weight=None, output=None, name=None):
     """
     Create a blend colors node.
-    :param input1: input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input1: str | float | list
-    :param input2: input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input2: str | float | list
-    :param weight: 1 = input2; 0 = input1.
-    :type weight: float | int | str
-    :param output: Node plug to connect the output of the node to.
-    :type output: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param str float list input1: input. Can be a list of 3 values or a multi-plug (as a string)
+    :param str float list input2: input. Can be a list of 3 values or a multi-plug (as a string)
+    :param float int str weight: 1 = input2; 0 = input1.
+    :param str output: Node plug to connect the output of the node to.
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created.
     :rtype: str
     """
@@ -438,16 +407,12 @@ def blendColors(input1=None, input2=None, weight=None, output=None, name=None):
 def blendTwoAttrs(input1=None, input2=None, weight=None, output=None, name=None):
     """
     Create a blend two attrs node.
-    :param input1: input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input1: str | float | list
-    :param input2: input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input2: str | float | list
-    :param weight: 1 = input2; 0 = input1.
-    :type weight: float | int | str
-    :param output: Node plug to connect the output of the node to.
-    :type output: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param str float list input1: input. Can be a list of 3 values or a multi-plug (as a string)
+    :param str float list input2: input. Can be a list of 3 values or a multi-plug (as a string)
+    :param float int str weight: 1 = input2; 0 = input1.
+    :param str output: Node plug to connect the output of the node to.
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created.
     :rtype: str
     """
@@ -471,14 +436,11 @@ def blendTwoAttrs(input1=None, input2=None, weight=None, output=None, name=None)
 def distance(input1, input2, output=None, name=None):
     """
     Create a distance between node.
-    :param input1: input transform node.  (use a node name. not a plug)
-    :type input1: str
-    :param input2: input transform node.  (use a node name. not a plug)
-    :type input2: str
-    :param output: Node plug to connect the output of the node to.
-    :type output: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param str list input1: input transform node.  (use a node name. not a plug)
+    :param str list input2: input transform node.  (use a node name. not a plug)
+    :param str output: Node plug to connect the output of the node to.
+    :param st name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created.
     :rtype: str
     """
@@ -509,15 +471,13 @@ def distance(input1, input2, output=None, name=None):
 def multMatrix(inputs=None, outputs=None, t=False, r=False, s=False, name=None):
     """
     create a mult matrix node.
-    :param inputs: list of input matrix's
-    :type
-    :param outputs: list of nodes to connect the output of the multMatrix to.
-    :type outputs: str | list
-    :param t: Connect to the translation
-    :param r: Connect to the rotation
-    :param s: Connect to the scale
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param list inputs: list of input matrix's
+    :param str list outputs: list of nodes to connect the output of the multMatrix to.
+    :param bool t: Connect to the translation
+    :param bool r: Connect to the rotation
+    :param bool s: Connect to the scale
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created
     :rtype: str
     """
@@ -555,15 +515,13 @@ def multMatrix(inputs=None, outputs=None, t=False, r=False, s=False, name=None):
 def decomposeMatrix(matrix=None, outputs=None, t=True, r=True, s=False, name=None):
     """
     Creates a decompose matrix node.
-    :param matrix: matrix attribute to decompose
-    :type matrix: str
-    :param outputs: node to output decompose matrix to.
-    :type outputs: str | list
-    :param t: Connect to the translation
-    :param r: Connect to the rotation
-    :param s: Connect to the scale
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param str matrix: matrix attribute to decompose
+    :param str list outputs: node to output decompose matrix to.
+    :param bool t: Connect to the translation
+    :param bool r: Connect to the rotation
+    :param bool s: Connect to the scale
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created
     :rtype: str
     """
@@ -592,17 +550,18 @@ def composeMatrix(inputTranslate=None, inputRotate=None, inputScale=None, inputQ
                   rotateOrder='xyz', eulerRotation=True, outputs=None, t=False, r=False, s=False, name=None):
     """
     Creates a composeMatrix Node
-    :param inputTranslate: input translate values
-    :param inputRotate: input rotate values
-    :param inputScale: input scale calues
-    :param inputQuat: input quat values
-    :param rotateOrder: Rotation order to set
-    :param eulerRotation: use Euler rotation
-    :param outputs: Optional- connect the node to a given output
-    :param t: connect the output tranlation
-    :param r: connect the output rotation
-    :param s: connect the output scale
-    :param name:  Optional - give the created node a name. (a suffix is added from the common module)
+
+    :param list str inputTranslate: input translate values
+    :param list str inputRotate: input rotate values
+    :param list str inputScale: input scale calues
+    :param list str inputQuat: input quat values
+    :param str rotateOrder: Rotation order to set
+    :param bool eulerRotation: use Euler rotation
+    :param str outputs: Optional- connect the node to a given output
+    :param bool t: connect the output tranlation
+    :param bool r: connect the output rotation
+    :param bool s: connect the output scale
+    :param str name:  Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created
     """
     inputTranslate = inputTranslate or [0, 0, 0]
@@ -644,14 +603,16 @@ def composeMatrix(inputTranslate=None, inputRotate=None, inputScale=None, inputQ
 def pickMatrix(inputMatrix=None, outputs=None, t=True, r=True, s=True, sh=True, name=None):
     """
     Create a pick matrix node
-    :param inputMatrix: input matrix to use
-    :param outputs:  Optional- connect the node to a given plug
-    :param t: use translate in the picked matrix
-    :param r: use rotate in the picked matrix
-    :param s: use scale in the picked matrix
-    :param sh: use shear in the picked matrix
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
+
+    :param list str inputMatrix: input matrix to use
+    :param str outputs:  Optional- connect the node to a given plug
+    :param bool t: use translate in the picked matrix
+    :param bool r: use rotate in the picked matrix
+    :param bool s: use scale in the picked matrix
+    :param bool sh: use shear in the picked matrix
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created
+    :rtype: str
     """
 
     if name:
@@ -678,16 +639,12 @@ def pickMatrix(inputMatrix=None, outputs=None, t=True, r=True, s=True, sh=True, 
 def clamp(input, inMin=None, inMax=None, output=None, name=None):
     """
     Creates a clamp node.
-    :param input:  Input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input: str | float | list
-    :param inMin: Minimum value
-    :type inMin: str | float | list
-    :param inMax:  Maximum value
-    :type inMax: str | float | list
-    :param output: Node plug to connect the output of the node to.
-    :type output: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param str float list input:  Input. Can be a list of 3 values or a multi-plug (as a string)
+    :param str float list inMin: Minimum value
+    :param str float list inMax:  Maximum value
+    :param str output: Node plug to connect the output of the node to.
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created
     :rtype: str
     """
@@ -712,21 +669,15 @@ def clamp(input, inMin=None, inMax=None, output=None, name=None):
 def remapValue(input, inMin=None, inMax=None, outMin=None, outMax=None, interp='linear', output=None, name=None):
     """
     Creates a remap value node.
-    :param input:  Input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input: str | float | list
-    :param inMin: Minimum value
-    :type inMin: str | float | list
-    :param inMax:  Maximum value
-    :type inMax: str | float | list
-    :param outMin: Minimum value to output
-    :type outMin: float | str
-    :param outMax: Maximum value to output
-    :type outMax: float | str
-    :param interp: Sets the interpolation. Valid values are: 'linear', 'slow', 'fast', 'smooth'. Default 'linear'
-    :param output: Node plug to connect the output of the node to.
-    :type output: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+
+    :param str float list input:  Input. Can be a list of 3 values or a multi-plug (as a string)
+    :param str float inMin: Minimum value
+    :param str float inMax:  Maximum value
+    :param str float outMin: Minimum value to output
+    :param str float outMax: Maximum value to output
+    :param str interp: Sets the interpolation. Valid values are: 'linear', 'slow', 'fast', 'smooth'. Default 'linear'
+    :param str output: Node plug to connect the output of the node to.
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created
     :rtype: str
     """
@@ -778,17 +729,14 @@ def remapValue(input, inMin=None, inMax=None, outMin=None, outMax=None, interp='
 
 def vectorProduct(input1=None, input2=None, output=None, operation='dot', normalize=False, name=None):
     """
-    :param input1: input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input1: str | float | list
-    :param input2: input. Can be a list of 3 values or a multi-plug (as a string)
-    :type input2: str | float | list
-    :param operation: Set the opperation to perform. Valid Values are: 'dot' , 'cross', 'none'. Default = 'dot'
-    :param normalize: normalize the output
-    :type normalize: bool
-    :param output: Node plug to connect the output of the node to.
-    :type output: str
-    :param name: Optional - give the created node a name. (a suffix is added from the common module)
-    :type name: str
+    Create a vector product node
+
+    :param str float list input1: input. Can be a list of 3 values or a multi-plug (as a string)
+    :param str float list input2: input. Can be a list of 3 values or a multi-plug (as a string)
+    :param str operation: Set the opperation to perform. Valid Values are: 'dot' , 'cross', 'none'. Default = 'dot'
+    :param bool normalize: normalize the output
+    :param str output: Node plug to connect the output of the node to.
+    :param str name: Optional - give the created node a name. (a suffix is added from the common module)
     :return: name of the node created.
     :rtype: str
     """
@@ -816,9 +764,10 @@ def vectorProduct(input1=None, input2=None, output=None, operation='dot', normal
 def sin(input, output=None, name=None):
     """
     Create a simple DG graph for sine fuctions.
-    :param input: input connection or value
-    :param output: Node plug to connect the output of the node to.
-    :param name: name of the nodes created
+
+    :param str float input: input connection or value
+    :param str output: Node plug to connect the output of the node to.
+    :param str name: name of the nodes created
     :return: attribute with the output of the sin operation
     """
     if name:
@@ -841,10 +790,12 @@ def sin(input, output=None, name=None):
 def cos(input, output=None, name=None):
     """
     Create a simple DG graph for cos fuctions.
+
     :param input: input connection or value
     :param output: Node plug to connect the output of the node to.
     :param name: name of the nodes created
     :return: attribute with the output of the sin operation
+    :rtype: str
     """
     if name:
         mdl = cmds.createNode('multDoubleLinear', name=name + '_cos_' + common.MULTDOUBLELINEAR)
@@ -866,10 +817,12 @@ def cos(input, output=None, name=None):
 def tan(input, output=None, name=None):
     """
     Create a simple DG graph for tan fuctions.
-    :param input: input connection or value
-    :param output: Node plug to connect the output of the node to.
-    :param name: name of the nodes created
+
+    :param str float input: input connection or value
+    :param str output: Node plug to connect the output of the node to.
+    :param str name: name of the nodes created
     :return: attribute with the output of the sin operation
+    :rtype: str
     """
     halfPi = 3.14159265359 * 0.5
     if name:

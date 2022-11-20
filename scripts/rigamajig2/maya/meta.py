@@ -1,5 +1,5 @@
 """
-Functions to add metadata to nodes
+Functions to add and manage metadata to nodes
 """
 import json
 import sys
@@ -22,12 +22,10 @@ if sys.version_info.major >= 3:
 def tag(nodes, tag, type=None):
     """
     Tag the specified nodes with the proper type
-    :param nodes: nodes to add the tag to
-    :type nodes: str | list
-    :param tag: tag to add
-    :type tag: str
-    :param type: type of tag
-    :type type: str
+
+    :param str list nodes: nodes to add the tag to
+    :param str tag: tag to add
+    :param str type: type of tag
     """
     nodes = common.toList(nodes)
     for node in nodes:
@@ -42,10 +40,9 @@ def tag(nodes, tag, type=None):
 def untag(nodes, tag):
     """
     Remove the tag from the nodes
-    :param nodes: nodes to remove the tag to
-    :type nodes: str | list
-    :param tag: tag to remove
-    :type tag: str
+
+    :param str list nodes: nodes to remove the tag to
+    :param str tag: tag to remove
     """
     nodes = common.toList(nodes)
     for node in nodes:
@@ -59,13 +56,15 @@ def untag(nodes, tag):
 
 def getTagged(tag, type=None, namespace=None):
     """
-    Get a list of all the objects with a tag in a scene.
-    :param tag: tag to get
-    :type tag: str
+    Get a list of all objects with a given tag in the scene.
+    If there are namespaces in your scene and you wish to get tagged nodes that belong to a namespace you must also provide the namespace.
+    This is to allow users to get tagged nodes specific to a character.
+
+    :param str tag: tag to get
     :param type: specify a tag type to get
-    :param namespace: Get controls found within a specific namespace
-    :type namespace: str
-    :return:
+    :param str namespace: Get controls found within a specific namespace
+    :return: nodes with a given tag
+    :rtype: list
     """
     if type:
         tag = "{}_{}".format(type, tag)
@@ -77,9 +76,10 @@ def getTagged(tag, type=None, namespace=None):
 
 def hasTag(node, tag):
     """
-    Check if a node has a given tag
-    :param node: nodes to check tag
-    :param tag: tag to check for
+    Check if a specified node has a given tag
+
+    :param str node: nodes to check tag
+    :param str tag: tag to check for
     :return: True if node has tag. false if it doesnt.
     :rtype: bool
     """
@@ -133,6 +133,7 @@ def createMessageConnection(sourceNode, destNode, sourceAttr, destAttr=None):
 def addMessageListConnection(sourceNode, dataList, sourceAttr, dataAttr=None):
     """
     Add a message connection between a source and list of data nodes
+
     :param sourceNode: source node of the message connection
     :param dataList: destination of the message connection
     :param sourceAttr: name of the source attribute
@@ -155,6 +156,7 @@ def addMessageListConnection(sourceNode, dataList, sourceAttr, dataAttr=None):
 def getMessageConnection(dataPlug, silent=True):
     """
     Get the data connected to the given plug.
+
     :param dataPlug: plug to get the message for
     :param silent: if the function fails return None instead of erroring
     :return: nodes connected to the message attribute. if the attribute has multiconnections return a list.
@@ -178,7 +180,11 @@ def getMessageConnection(dataPlug, silent=True):
 # pylint:disable = too-many-return-statements
 def validateDataType(val):
     """
-    Validate the attribute type for all the  handling
+    Validate the attribute type for all the value handling. This function will return a string describing the type of the value.
+
+    :param val: value to check the type of
+    :return: value type as a string
+    :rtype: str
     """
     if issubclass(type(val), str):
         try:
@@ -203,6 +209,7 @@ class MetaNode(object):
         """
         Constructor for mayaJson.
         Alot of this is derived from Red9, but simplified.
+
         :param node: node to hold json data
         """
         self.node = node
@@ -210,7 +217,8 @@ class MetaNode(object):
     def getData(self, attr):
         """
         Retrieve  data of a specific attribute. deserialized data from json.
-        :param attr:
+
+        :param attr: name of the attribute to get the associated data for
         :return: value of the attribute. as the serialized type.
         :rtype: str | float | list | dict
         """
@@ -234,6 +242,7 @@ class MetaNode(object):
     def getAllData(self, excludedAttrs=None):
         """
         Retrieve all data from the maya node.
+
         :param excludedAttrs: Optoinal - list of attributes to data collection from.
         :return: dictionary of data on the node
         :rtype: OrderedDict
@@ -250,6 +259,7 @@ class MetaNode(object):
     def setData(self, attr, value, hide=True, lock=False):
         """
         Add data to a node. Stored as serialized json data
+
         :param attr: attribute to hold the data
         :param value: value to store
         :param hide: hide the attributes from the channelbox. Note string attributes cannot be keyable!!
@@ -290,6 +300,7 @@ class MetaNode(object):
     def setDataDict(self, data, hide=True, lock=False):
         """
         Store a dictionary into custom attributes on a maya node
+
         :param data: dictonary to set data to.
         :param hide: hide the attributes from the channelbox. Note string attributes cannot be keyable!!
         :param lock: lock the attributes from the channelbox.
@@ -302,6 +313,7 @@ class MetaNode(object):
         """
         Serialize data into a string for use in maya.
         Also check to see if the string is longer than the length maya will allow before trunicating it.
+
         :param data: data to serialize
         :return: serialized data
         """
@@ -312,6 +324,7 @@ class MetaNode(object):
     def deserializeComplex(self, data):
         """
         Deserialize data into a string for use with json.
+
         :param data: data to deserialize
         :return: deserialized data
         """

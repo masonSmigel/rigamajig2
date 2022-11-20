@@ -18,13 +18,17 @@ import rigamajig2.maya.deformer
 import rigamajig2.maya.openMayaUtils
 import rigamajig2.maya.shape
 
+
 logger = logging.getLogger(__name__)
+
 
 def isSkinCluster(skinCluster):
     """
     Check if the skincluster is a valid skincluster
+
     :param skinCluster:  name of skincluster to check
     :return: True if Valid. False is invalid.
+    :rtype: bool
     """
     if not cmds.objExists(skinCluster): return False
     if cmds.nodeType(skinCluster) != 'skinCluster': return False
@@ -34,8 +38,10 @@ def isSkinCluster(skinCluster):
 def getSkinCluster(obj):
     """
     Get the skincluster connected to this node
+
     :param obj: object to get connected skin cluster
     :return: Skin cluster node
+    :rtype: str
     """
     shape = rigamajig2.maya.deformer.getDeformShape(obj)
     deformers = rigamajig2.maya.deformer.getDeformersForShape(shape)
@@ -55,8 +61,10 @@ def getSkinCluster(obj):
 def getMfnSkin(skinCluster):
     """
     Get a skin cluster function set from the skin cluster name
-    :param skinCluster:
-    :return:
+
+    :param skinCluster: name of the skin cluster node
+    :return: an om2.MFnSkinCluster object
+    :rtype MfnSkinCluster
     """
     if not isSkinCluster(skinCluster):
         raise Exception("{} is not a skinCluster".format(skinCluster))
@@ -67,6 +75,7 @@ def getMfnSkin(skinCluster):
 
 def getMfnMesh(mesh):
     """
+
     :param mesh: name of the mesh to get the Mfn mesh object from
     :return:
     """

@@ -21,11 +21,14 @@ TANGENT_TYPE_DICT = {"linear": oma.MFnAnimCurve.kTangentLinear,
 
 def getSdkNode(driver, driven, type=None):
     """
-    Get all SDK nodes between the driver and
-    :param driver: sdk driver node
-    :param driven: sdk driven node
+    Get all SDK nodes between the driver and driven node.
+    This is useful especially for things like rotations where the conncection may be fed through
+    a UnitConversion node before going to the driven node.
+
+    :param str driver: sdk driver node
+    :param str driven: sdk driven node
     :param type: Optional - specifiy a type of animCurve to return.
-    :return:
+    :return: list of sdk nodes between a driver and driven.
     """
     if type is None:
         type = SDKNODETYPES
@@ -48,8 +51,10 @@ def getSdkNode(driver, driven, type=None):
 def getSdkDriver(sdk):
     """
     get the driver of an sdk node
-    :param sdk:
-    :return:
+
+    :param str sdk: name of an SDK node
+    :return: driver of an SDK node
+    :rtype: str
     """
     if not cmds.ls(sdk, type=SDKNODETYPES):
         cmds.error('{} is not an SDK node'.format(sdk))
@@ -64,8 +69,10 @@ def getSdkDriver(sdk):
 def getSdkDriven(sdk):
     """
     Get the nodes driven by a set driven key (anim curve) node
+
     :param sdk: Set driven key animation curve node. must be a valid rigamaig sdk curve type.
     :return: nodes driven by the sdk
+    :rtype: str
     """
     if not cmds.ls(sdk, type=SDKNODETYPES):
         cmds.error('{} is not an SDK node'.format(sdk))
@@ -85,6 +92,7 @@ def getSdkDriven(sdk):
 def createSdk(driverPlug, drivenPlug, values, preInfinity=False, postInfinity=False, tangent='linear'):
     """
     Create an SDK connection
+
     :param str driverPlug: driver plug
     :param str drivenPlug: driven plug
     :param list tupple values: list of values as tuples. in the format of: [(driver, driven), ...]
@@ -158,8 +166,10 @@ def createSdk(driverPlug, drivenPlug, values, preInfinity=False, postInfinity=Fa
 def createBlendWeightedNode(drivenPlug):
     """
     create a blend weighted node on the driven plug
+
     :param drivenPlug: plug to add the blend weighted node to
     :return: blend weighted node created
+    :rtype: str
     """
     drivenNode, drivenAttr = drivenPlug.split(".")
     # get the connected node. dont skip the conversion nodes in the case of connection to a rotation.
@@ -182,14 +192,3 @@ def createBlendWeightedNode(drivenPlug):
     cmds.connectAttr("{}.output".format(blendWeightedNode), drivenPlug, f=True)
 
     return blendWeightedNode
-
-
-# TODO:
-def setSdk(sdk, keyList):
-    """
-    Set sdk keyframes
-    :param sdk:
-    :param keyList:
-    :return:
-    """
-    pass

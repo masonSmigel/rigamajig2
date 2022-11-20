@@ -28,9 +28,9 @@ def _pathDialog(cap='Select a file',
 
 def new(f=False):
     """
-    Create a new file
+    Create a new file and run the container sanity check
+
     :param f: force the opperation to occur
-    :return:
     """
     cmds.file(new=True, f=f)
     # run the container sainity check
@@ -45,9 +45,9 @@ def new(f=False):
 def open_(path=None, f=False):
     """
     Open a maya file
+
     :param path: path to maya file
     :param f: force the opperation to occur
-    :return:
     """
     if not path:
         path = _pathDialog(cap='Open', acceptCaption='Open', )
@@ -57,7 +57,9 @@ def open_(path=None, f=False):
 def save(log=True):
     """
     save the current scene
-    :return:
+
+    :return: the path to the file saved
+    :rtype: str
     """
     sceneName = cmds.file(q=True, sn=True)
     extension = sceneName.split('.')[-1]
@@ -77,9 +79,11 @@ def save(log=True):
 def saveAs(path=None, log=True):
     """
     Save the current scene as
+
     :param path: path to save the file
     :param log: log the output
-    :return:
+    :return: path to the file saved
+    :rtype: str
     """
     if not path:
         path = _pathDialog(cap='Save As', acceptCaption='Save As', fileMode=0)
@@ -94,11 +98,13 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
     Incrimental save with a better naming convention.
     Naming convention is made as follows:
         baseName_v001.warble.ext
+
     :param path: path to the file to save
     :param padding: Amount of padding to add to the index
     :param indexPosition: Optional - Index position, default will be -1
     :param log: log the output
-    :return:
+    :return: path to the file saved
+    :rtype: str
     """
     if not path:
         path = cmds.file(q=True, loc=True)
@@ -160,10 +166,12 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
 def import_(path=None, useNamespace=False, namespace=None, force=False):
     """
     import a file
+
     :param path: path to the file to import
     :param useNamespace: import with a namespace
     :param force: force the opperation to occur
     :return: path of the file imported
+    :rtype: str
     """
     if not path:
         path = _pathDialog(cap='Import', acceptCaption='Import', fileMode=0, fileFilter=IMPORT_FILE_FILTER)
@@ -180,8 +188,10 @@ def import_(path=None, useNamespace=False, namespace=None, force=False):
 def reference(path=None):
     """
     Reference a file
-    :param path:
-    :return:
+
+    :param path: path to the file to reference
+    :return: name of the file path imported
+    :rtype: str
     """
     if not path:
         path = _pathDialog(cap='Reference', acceptCaption='Reference', fileMode=0, fileFilter=MAYA_FILE_FILTER)
@@ -191,20 +201,18 @@ def reference(path=None):
 
 def isUniqueFile(path):
     """
-    Check if file is unique
-    :param path: file to test
-    :type path: str
-    :return: if the name is unique
+    Check if file is unique. A file is unique if no other files with the same name exist in the directory
+
+    :param str path: file to test
+    :return: True if the name is unique
     :rtype: bool
     """
-
     return False if os.path.exists(path) else True
 
 
 def getEnvironment():
     """
     print out a bunch of enviornment variables for maya
-    :return:
     """
     import platform
 

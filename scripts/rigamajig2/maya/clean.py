@@ -59,9 +59,9 @@ def cleanPlugins():
 def cleanScriptNodes(excludedScriptNodes=None, excludePrefix='rigamajig2'):
     """
     Clean all scriptnodes in the scene
-    :param excludedScriptNodes: list of script nodes to be kept
-    :param excludePrefix: prefix used to filter script nodes. All nodes with the prefix are kept.
-    :return:
+
+    :param list excludedScriptNodes: list of script nodes to be kept
+    :param str excludePrefix: prefix used to filter script nodes. All nodes with the prefix are kept.
     """
     excludedScriptNodes = excludedScriptNodes or list()
 
@@ -114,8 +114,9 @@ def cleanRougePanels(panels=None):
 
 def cleanScene():
     """
-    Cleanup maya scene
-    :return:
+    Cleanup maya scene.
+
+    This will run cleanNodes(), cleanPlugins() and cleanRougePanels()
     """
     print('\n{}\n \tCLEAN MAYA SCENE'.format('-' * 80))
 

@@ -26,9 +26,11 @@ if __name__ == '__main__':
 
 def isScriptNode(name):
     """
-    Check if a node is a script Node
-    :param name:
-    :return:
+    Check if a node is a script Node.
+
+    :param name: name of the node to check if it is a script node
+    :return: return True if the node is a script node. False if not
+    :rtype: bool
     """
     if not cmds.objExists(name): return False
     if 'script' not in cmds.nodeType(name, i=True): return False
@@ -38,14 +40,14 @@ def isScriptNode(name):
 def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None, afterScript=None):
     """
     Create a new script node.
-    :param name: Name of the script node
-    :param sourceType: Source type. Valid values are 'mel' and 'python'
-    :param scriptType: Specified when the script is executed.
-    :param beforeScript: The script executed during file load. Use a string or a python function.
-    :type beforeScript: str | function
-    :param afterScript: The script executed when the script node is deleted. Use a string or a python function.
-    :type afterScript: str | function
-    :return:
+
+    :param str name: Name of the script node
+    :param str sourceType: Source type. Valid values are 'mel' and 'python'
+    :param str scriptType: Specified when the script is executed.
+    :param str function beforeScript: The script executed during file load. Use a string or a python function.
+    :param str function afterScript: The script executed when the script node is deleted. Use a string or a python function.
+    :return: the name of the script node created
+    :rtype: str
     """
     if sourceType != 'mel':
         sourceType = 'python'
@@ -79,12 +81,13 @@ def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None
 def createFromFile(name, scriptType='Open/Close', beforeScript=None, afterScript=None):
     """
     Wrapper to create a script node from a file. Use either a mel or python file to create a scriptNode from a file.
-    :param name: Name of the script node
-    :param scriptType: Specified when the script is executed.
-    :param beforeScript: The script executed during file load. Use a path to a file.
-    :type beforeScript: str
-    :param afterScript: The script executed when the script node is deleted. Use a path to a file.
-    :type afterScript: str
+
+    :param str name: Name of the script node
+    :param str scriptType: Specified when the script is executed.
+    :param str beforeScript: The script executed during file load. Use a path to a file.
+    :param str afterScript: The script executed when the script node is deleted. Use a path to a file.
+    :return: the name of the script node created
+    :rtype: str
     """
     beforeExt = afterExt = None
     if afterScript and os.path.exists(afterScript):
@@ -110,7 +113,9 @@ def createFromFile(name, scriptType='Open/Close', beforeScript=None, afterScript
 def getScriptNodes():
     """
     Return a list of all script nodes in the scene
-    :return:
+
+    :return: a list of all script nodes in the scene
+    :rtype: list
     """
     return cmds.ls(type='script')
 
@@ -118,7 +123,6 @@ def getScriptNodes():
 def removeAllScriptNodes():
     """
     Remove all script nodes from the scene
-    :return:
     """
     cmds.delete(cmds.ls(type='script'))
 
@@ -126,9 +130,11 @@ def removeAllScriptNodes():
 def validateScriptString(script, defaultImports=''):
     """
     Validate a script. This will turn a function or file into a string
-    :param script:  callable script to run
+
+    :param str script:  callable script to run
     :param defaultImports: Imports to add to the begining of the file.
-    :return:
+    :return: script converted to a string
+    :rtype: str
     """
     if inspect.isfunction(script):
         functionSource = inspect.getsource(script)

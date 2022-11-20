@@ -16,8 +16,10 @@ from rigamajig2.maya import meta
 def isJoint(joint):
     """
     Check if the joint is a valud joint
-    :param joint: name of the joint to check
+
+    :param str list joint: name of the joint to check
     :return: True if Valid. False is invalid.
+    :rtype: bool
     """
     joint = common.getFirstIndex(joint)
     if not cmds.objExists(joint) or not cmds.nodeType(joint) == 'joint': return False
@@ -27,8 +29,10 @@ def isJoint(joint):
 def isEndJoint(joint):
     """
     Check if a joint is an end joint
-    :param joint:
-    :return:
+
+    :param str list joint: name of a joint
+    :return: True if the joint is an end joint
+    :rtype: bool
     """
     joint = common.getFirstIndex(joint)
     if not isJoint(joint):
@@ -42,8 +46,10 @@ def isClean(joint):
     """
     Check if a list of joints have clean orientation.
     We assume joints are clean when there are no transform values exept a single translate channel
-    :param joint:
-    :return:
+
+    :param str list joint: name of a joint to check if the transforms are clean
+    :return: True if the tranforms are clean
+    :rtype: bool
     """
     joint = common.getFirstIndex(joint)
     dirtyChannels = list()
@@ -58,9 +64,10 @@ def isClean(joint):
 
 def addJointOrientToChannelBox(joints):
     """
-    Add the joint orient information to the channel box
-    :param joints:
-    :return:
+    Add the joint orient information to the channel box.
+    This can be super handy to make sure its easy to check and edit the joint orientations
+
+    :param str list joints: name of the joint to add the joint
     """
     joints = common.toList(joints)
     for jnt in joints:
@@ -74,8 +81,10 @@ def addJointOrientToChannelBox(joints):
 def length(joint):
     """
     Get the length of a joint
-    :param joint: joint to get the length of
+
+    :param str joint: joint to get the length of
     :return: length of the joint
+    :rtype: float
     """
     if not isJoint(joint):
         cmds.error('{} is not a joint'.format(joint))
@@ -93,14 +102,14 @@ def length(joint):
 
 def duplicateChain(jointList, parent=None, names=None):
     """
-    Duplicate the joint chain without clashing names
-    :param jointList: joints to duplicate
-    :type jointList: list
-    :param parent: Optional- reparent the new hirarchy under this
-    :type parent: str
-    :param names: Optional - add a prefix to th created joints
-    :type names: list
-    :return:
+    Duplicate the joint chain without clashing names.
+    Optionally you can pass in a list of names to rename the new joints
+
+    :param list jointList: joints to duplicate
+    :param str parent: Optional- reparent the new hirarchy under this
+    :param list names: Optional - add a prefix to th created joints
+    :return: list of joints created
+    :rtype: list
     """
     newJointList = list()
     if not names:
@@ -123,12 +132,13 @@ def duplicateChain(jointList, parent=None, names=None):
 def insertJoints(startJoint, endJoint, amount=1, name=None):
     """
     Insert more joints between a start and end joint
-    :param startJoint: joint to start from
-    :param endJoint: joint to end inbetweens at
-    :param amount: amount of joints to insert
-    :type amount: int
-    :param name: name of new joints
-    :return:
+
+    :param str list startJoint: joint to start from
+    :param str list endJoint: joint to end inbetweens at
+    :param int amount: amount of joints to insert
+    :param str name: name of new joints
+    :return: list if new joints inserted between the start and end joints
+    :rtype: list
     """
     jointList = list()
     multiplier = float(1.0 / (amount + 1.0))
@@ -162,9 +172,11 @@ def insertJoints(startJoint, endJoint, amount=1, name=None):
 def getInbetweenJoints(start, end):
     """
     Return a list of joints between the start and end joints
-    :param start: start joint
-    :param end: end joint
+
+    :param str start: start joint
+    :param str end: end joint
     :return: list of joints from start to end including inbetween joints
+    :rtype: list
     """
     btwnJoints = list()
     children = cmds.listRelatives(start, ad=True, type='joint')
@@ -180,8 +192,8 @@ def getInbetweenJoints(start, end):
 def toOrientation(joints):
     """
     Remove all values from our rotation channels and add them to the Joint orient
-    :param joints:
-    :return:
+
+    :param list joints: list of joints to convert to joint orientation
     """
     if not isinstance(joints, (list, tuple)):
         joints = [joints]
@@ -215,8 +227,8 @@ def toOrientation(joints):
 def toRotation(joints):
     """
     Remove all values from our joint orient channels and add them to the rotation
-    :param joints:
-    :return:
+
+    :param joints: list of joints to convert to rotation
     """
     if not isinstance(joints, (list, tuple)):
         joints = [joints]
@@ -238,18 +250,11 @@ def mirror(joints, axis='x', mode='rotate', zeroRotation=True):
     Mirrors of one joint to its mirror across a given axis.
     The node "shouler_l_trs" mirror its position to "shouler_r_trs"
 
-    :param joints: joints to mirror
-    :type joints: str | list
-
-    :param axis: axis to mirror across. ['x', 'y', 'z']
-    :type axis: str
-
-    :param mode: mirror mode. 'rotate' mirrors the rotation behaviour where 'translate' mirrors translation behavior as well.
+    :param str list joints: joints to mirror
+    :param str axis: axis to mirror across. ['x', 'y', 'z']
+    :param str mode: mirror mode. 'rotate' mirrors the rotation behaviour where 'translate' mirrors translation behavior as well.
                 'translate' more is used more often in the face, 'rotate' in the body.
-    :type mode:
-
-    :param zeroRotation: Zero out rotation after mirroring
-    :type zeroRotation: bool
+    :param bool zeroRotation: Zero out rotation after mirroring
     """
 
     if not isinstance(joints, list):
@@ -330,12 +335,11 @@ def orientJoints(joints, aimAxis='x', upAxis='y', worldUpVector=(0, 1, 0), autoU
     ie. if you select the shoulder, elbow and wrist the up vector will keep all three oriented together. however if you
     select the calvical, shoulder, elbow and wrist then the chain will blend between two up vectors for each set of joints.
 
-    :param joints: joints to orient
-    :param aimAxis: aim axis of the joints. Default 'x'
-    :param upAxis: up axis of the joint. Default 'y'
-    :param worldUpVector: world up vector of the aim Constraint
-    :param autoUpVector: Auto guess the up vector using the vector pependicular to the joints.
-    :return:
+    :param list joints: joints to orient
+    :param str aimAxis: aim axis of the joints. Default 'x'
+    :param str upAxis: up axis of the joint. Default 'y'
+    :param list tuple worldUpVector: world up vector of the aim Constraint
+    :param bool autoUpVector: Auto guess the up vector using the vector pependicular to the joints.
     """
     joints = common.toList(joints)
 
@@ -423,11 +427,13 @@ def orientJoints(joints, aimAxis='x', upAxis='y', worldUpVector=(0, 1, 0), autoU
 
 def getCrossUpVector(trs0, trs1, trs2):
     """
-    Get a mathUtils perpendicular to the plane drawn between three points
-    :param trs0: first transform
-    :param trs1: second transform
-    :param trs2: third transform
-    :return: up mathUtils
+    Get a vector perpendicular to the plane drawn between three points
+
+    :param str trs0: first transform
+    :param str trs1: second transform
+    :param str trs2: third transform
+    :return: up vector
+    :rtype: list tuple
     """
     A = om2.MPoint(cmds.xform(trs0, q=True, ws=True, t=True))
     B = om2.MPoint(cmds.xform(trs1, q=True, ws=True, t=True))
@@ -450,7 +456,12 @@ def getCrossUpVector(trs0, trs1, trs2):
 
 def connectChains(source, destination):
     """
-    Connect two skeletons
+    Connect two skeletons.
+
+    This will connect all elements of the source list to the matching item in the destination list
+
+    :param list source: list of source joints to connect to the matching item in the destination list
+    :param list destination: list of destination joints to connect to the matching item in the source list
     """
     source = common.toList(source)
     destination = common.toList(destination)
@@ -481,9 +492,10 @@ def connectChains(source, destination):
 
 def hideJoints(joints):
     """
-    Hide joints from the outliner
-    :param joints:
-    :return:
+    Hide joints from the viewport by setting the draw style to None.
+    This way you dont have to deal with the visability channel.
+
+    :param list joints: list of joints to hide
     """
 
     joints = common.toList(joints)
@@ -504,15 +516,16 @@ def createInterpJoint(joint, parentJoint=None, value=0.5, t=False, r=True, s=Fal
     If a parentJoint is provided it will be added as the parent.
     Otherwise it will get the parent of the joint.
 
-    :param joint: joint to add the interpolation joint on
-    :param parentJoint: parentjoint to blend the rotation between
-    :param value: default interpolation value
-    :param t: Apply translation transformations
-    :param r: Apply rotation transformations
-    :param s: Apply scale transformations
-    :param sh: Apply shear transformations
-    :param bind: Tag the created joint as a bind joint
+    :param str joint: joint to add the interpolation joint on
+    :param str parentJoint: parentjoint to blend the rotation between
+    :param int float value: default interpolation value
+    :param bool t: Apply translation transformations
+    :param bool r: Apply rotation transformations
+    :param bool s: Apply scale transformations
+    :param bool sh: Apply shear transformations
+    :param bool bind: Tag the created joint as a bind joint
     :return: name of the interpolation joint
+    :rtype: str
     """
 
     if parentJoint is None:

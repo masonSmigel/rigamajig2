@@ -10,8 +10,10 @@ import rigamajig2.shared.common as common
 def getType(node):
     """
     Get the type from a transform. If the node is a tranform it gets the type based on the shape nodes.
+
     :param node: object to get the type for
-    :return:
+    :return: node type of the given node
+    :rtype: str
     """
 
     nodeType = cmds.nodeType(node)
@@ -31,8 +33,10 @@ def getType(node):
 def getShapes(node):
     """
     Get the shapes of an object. If the node is a tranform it gets the shape node.
+
     :param node: object to get shapes from
-    :return:
+    :return: list of shape nodes for a given node
+    :rtype: str
     """
     shapeTypes = ['mesh', 'nurbsSurface', 'nurbsCurve', 'subdiv']
     nodeType = cmds.nodeType(node)
@@ -48,8 +52,9 @@ def getShapes(node):
 def getPointCount(shape):
     """
     Get the point count of a nurbsCurve or mesh
-    :param shape:
-    :return:
+
+    :param shape: name of the shape node
+    :return: number of points within the shape node
     """
     if cmds.nodeType(shape) == 'transform':
         shape = cmds.listRelatives(shape, s=True, ni=True)[0]
@@ -61,7 +66,3 @@ def getPointCount(shape):
         pointCount = int(cmds.ls("{}.cv[*]".format(shapeType))[0].split(":")[1][:-1])
         pointCount += 1
     return pointCount
-
-
-if __name__ == '__main__':
-    print(getDeformShape('head_Cluster_geo'))

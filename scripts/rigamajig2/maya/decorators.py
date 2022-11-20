@@ -15,8 +15,8 @@ from maya import cmds as cmds
 def preserveSelection(func):
     """
     Decorator to preserve the selection before running a function
+
     :param func: funtion to wrap
-    :return:
     """
 
     # pylint:disable=missing-docstring
@@ -40,8 +40,8 @@ def preserveSelection(func):
 def oneUndo(func):
     """
     Wrap the function with an open and close undo chunk.
+
     :param func:
-    :return:
     """
     # pylint:disable=missing-docstring
     @wraps(func)

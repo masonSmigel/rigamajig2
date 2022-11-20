@@ -12,8 +12,7 @@ import rigamajig2.maya.transform as rig_transform
 def showLocalRotationAxis(nodes):
     """
     Show the local rotation axis for the given nodes
-    :param nodes: list of nodes to display local rotation axis
-    :return: None
+    :param list nodes: list of nodes to display local rotation axis
     """
     if not common.DEBUG:
         return
@@ -27,8 +26,7 @@ def showLocalRotationAxis(nodes):
 def hide(nodes):
     """
     Hide nodes if we are not in debug mode
-    :param nodes: nodes to hide
-    :return:
+    :param list nodes: nodes to hide
     """
     if not common.DEBUG:
         cmds.hide(nodes)
@@ -37,8 +35,7 @@ def hide(nodes):
 def createProxyGeo(joints):
     """
     Joints to use to create proxy geometry for
-    :param joints:
-    :return:
+    :param list joints: list of joints to add prxy geometry on.
     """
     import rigamajig2.maya.joint as joint
 
@@ -63,9 +60,10 @@ def createProxyGeo(joints):
 def createAxisMarker(nodes=None):
     """
     Create an axis marker geometry on the given nodes.
-    his can be helpful over LRA's since the geometry will show scale as well as orientation
-    :param nodes: nodes to add markers to
-    :return:
+
+    This can be helpful over LRA's since the geometry will show scale as well as orientation
+
+    :param list nodes: nodes to add markers to
     """
     if not isinstance(nodes, (list, tuple)):
         nodes = [nodes]

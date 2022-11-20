@@ -10,9 +10,12 @@ import rigamajig2.maya.shape as shape
 
 def isMesh(node):
     """
-    check if the node is a mesh
+    check if the node is a mesh.
+    The function will return True for both transforms with a mesh Shape node or for a mesh Shapenode
+
     :param node: node to check
-    :return:
+    :return: If the provided node is a mesh
+    :rtype: bool
     """
     if not cmds.objExists(node): return False
 
@@ -28,8 +31,10 @@ def isMesh(node):
 def getMeshFn(mesh):
     """
     Get the MFn mesh object for a given mesh
+
     :param mesh: mesh name
-    :return: mesh function set
+    :return: Open Maya API mesh function set object.
+    :rtype: MFnMesh
     """
     selList = om2.MSelectionList()
     selList.add(mesh)
@@ -41,9 +46,10 @@ def getMeshFn(mesh):
 
 def getVertPositions(mesh, world=True):
     """
-    get a list of all mesh vertex positions.
-    :param mesh: mesh to get positions of
-    :param world: Get the vertex position in world space. False is local position
+    Get a list of vertex positions for a single mesh.
+
+    :param str mesh: mesh to get positions of
+    :param bool world: Get the vertex position in world space. False is local position
     :return: List of vertex positions
     :rtype: list
     """
@@ -74,10 +80,10 @@ def setVertPositions(mesh, vertList, world=False):
     """
     Using a list of vertex positions set the vertex positions of the provided mesh.
     This function uses the maya commands. it is slower than the API version but undoable if run from the script editor.
-    :param mesh: mesh to set the vertices of
-    :param vertList: list of vertex positions:
-    :param world: Space to set the vertex positions
-    :return:
+
+    :param str mesh: mesh to set the vertices of
+    :param list vertList: list of vertex positions:
+    :param bool world: Space to set the vertex positions
     """
     for i, vtx in enumerate(getVerts(mesh)):
         if world:
@@ -89,9 +95,8 @@ def setVertPositions(mesh, vertList, world=False):
 def getVerts(mesh):
     """
     get a list of all verticies in a mesh
-    :param mesh: mesh to get verticies of
-    :type mesh: str
 
+    :param str mesh: mesh to get verticies of
     :return: list of verticies. ie ('pCube1.vtx[0]', 'pCube1.vtx[1]'...)
     :rtype: list
 
@@ -105,9 +110,9 @@ def getVerts(mesh):
 
 def cleanShapes(nodes):
     """
-    Cleanup a shape nodes. removes intermediate
-    :param nodes:
-    :return:
+    Cleanup a shape nodes. removes all intermediate shapes on the given nodes
+
+    :param list nodes: a list of nodes to clean
     """
     nodes = common.toList(nodes)
     for node in nodes:
@@ -125,7 +130,13 @@ def cleanShapes(nodes):
 
 def cleanModel(nodes=None):
     """
-    Clean up model
+    Clean up a model. This is especially useful to prep a model for rigging.
+    It will:
+    - delete the construction history
+    - freeze the transformations
+    - set the mesh pivot to the origin
+    - clean the mesh shapes. (delete intermediete shapes)
+
     :param nodes: meshes to clean
     """
     if not nodes:

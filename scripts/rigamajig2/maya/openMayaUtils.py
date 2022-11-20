@@ -12,6 +12,7 @@ from maya.api import OpenMaya as om2
 def getOldMObject(name):
     """
     Get an MObject for the specifiec object (using api1)
+
     :param name: object to get the MObject for
     :return: MObject
     """
@@ -24,7 +25,8 @@ def getOldMObject(name):
 
 def getMObject(name):
     """
-    Get an MObject for the specifiec object (For maya api 2 )
+    Get an MObject for the specifiec object (For maya api 2)
+
     :param name: object to get the MObject for
     :return: MObject
     """
@@ -39,7 +41,9 @@ def getMObject(name):
 def getDagPath(name):
     """
     Get the DAG path of a node (For maya api 2 )
+
     :param name: name of the node to get the dag path from
+    :return: MDagPath
     """
     sel = om2.MGlobal.getSelectionListByName(name)
     return sel.getDagPath(0)

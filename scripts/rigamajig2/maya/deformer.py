@@ -13,8 +13,10 @@ import rigamajig2.maya.shape
 def isDeformer(deformer):
     """
     Check if the deformer is a valid deformer
-    :param deformer: name of deformer to check
+
+    :param str deformer: name of deformer to check
     :return: True if Valid. False is invalid.
+    :rtype: bool
     """
     deformer = common.getFirstIndex(deformer)
     if not cmds.objExists(deformer): return False
@@ -25,9 +27,11 @@ def isDeformer(deformer):
 def isSetMember(deformer, geo):
     """
     Check if the specified geo is a member of the deformer
-    :param deformer:
-    :param geo:
-    :return:
+
+    :param str deformer: name of the deformer to check
+    :param str geo: name of the geometry to compare against
+    :return: True if the the given deformer a set member of the deformer
+    :rtype: bool
     """
     shape = geo
     if cmds.nodeType(geo) == 'transform':
@@ -42,8 +46,8 @@ def isSetMember(deformer, geo):
 def getDeformShape(node):
     """
     Get the visible geo regardless of deformations applied
-    :param node: Node to retreive shape of
-    :return:
+
+    :param str node: Name of the node to retreive shape node from
     """
 
     if cmds.nodeType(node) in ['nurbsSurface', 'mesh', 'nurbsCurve']:
@@ -60,10 +64,9 @@ def getDeformShape(node):
 def reorderToTop(geometry, deformer):
     """
     Reorder the deformer stack so the specifed deformer is at the top of the deformer stack for the geometries
-    :param geometry: geometries to act on
-    :type geometry: list | str
-    :param deformer: deformer to reorder
-    :type deformer: str
+
+    :param str list geometry: geometries to act on
+    :param str deformer: deformer to reorder
     """
     geometry = common.toList(geometry)
     for geo in geometry:
@@ -89,10 +92,9 @@ def reorderToTop(geometry, deformer):
 def reorderToBottom(geometry, deformer):
     """
     Reorder the deformer stack so the specifed deformer is at the bottom of the deformer stack for the geometries
-    :param geometry: geometries to act on
-    :type geometry: list | str
-    :param deformer: deformer to reorder
-    :type deformer: str
+
+    :param str list geometry: geometries to act on
+    :param str deformer: deformer to reorder
     """
     geometry = common.toList(geometry)
     for geo in geometry:
@@ -116,8 +118,8 @@ def reorderToBottom(geometry, deformer):
 def reorderSlide(geometry, deformer, up=True):
     """
     Reorder the deformer stack so the specifed deformer up or down in the deformer stack.
-    :param geometry: geometries to act on
-    :type geometry: list | str
+
+    :param list str geometry: geometries to act on
     :param str deformer: deformer to reorder
     :param bool up: if True move the deformer up in the deformer stack, false is down
     """
@@ -149,9 +151,11 @@ def reorderSlide(geometry, deformer, up=True):
 def getDeformerStack(geo, ignoreTypes=None):
     """
     Return the whole deformer stack as a list
-    :param geo: geometry object
-    :param ignoreTypes: types of deformers to exclude from the list
+
+    :param str geo: geometry object
+    :param list ignoreTypes: types of deformers to exclude from the list
     :return: list of deformers affecting the specified geo
+    :rtype: list
     """
 
     ignoreTypes = ignoreTypes or ['tweak']
@@ -165,10 +169,12 @@ def getDeformerStack(geo, ignoreTypes=None):
 def getDeformersForShape(geo, ignoreTypes=None, ignoreTweaks=True):
     """
     Return the whole deformer stack as a list
-    :param geo: geometry object
+
+    :param str geo: geometry object
     :param list ignoreTypes: types of deformers to exclude from the list
     :param bool ignoreTweaks: Ignore tweak nodes from the deformer list
     :return: list of deformers affecting the specified geo
+    :rtype: list
     """
     ignoreTypes = ignoreTypes or list()
 
@@ -196,9 +202,10 @@ def getDeformersForShape(geo, ignoreTypes=None, ignoreTweaks=True):
 def setDeformerOrder(geo, order, top=True):
     """
     Set the deformer order from bottom to top. Unspecified deformers appear at the top
-    :param geo: geometry object name
-    :param order: list of deformers in the desired order
-    :param top: whether to start at the top of the list or bottom
+
+    :param str geo: geometry object name
+    :param list order: list of deformers in the desired order
+    :param bool top: whether to start at the top of the list or bottom
     """
     if top:
         order.reverse()
@@ -212,8 +219,10 @@ def setDeformerOrder(geo, order, top=True):
 def getAffectedGeo(deformer):
     """
     Get all geometry affected by the specified deformer
-    :param deformer: name of the deformer to get shapes from
+
+    :param str deformer: name of the deformer to get shapes from
     :return: list of mObjects a
+    :rtype: list
     """
     if not isDeformer(deformer):
         cmds.error("object '{}' is not a deformer".format(deformer))
@@ -237,7 +246,8 @@ def getAffectedGeo(deformer):
 def getGeoIndex(deformer, geo):
     """
     Get the index of specifed geo in the deformer
-    :param deformer:
+
+    :param deformer: name of the deformer to
     :param geo:
     :return:
     """
@@ -268,9 +278,11 @@ def getWeights(deformer, geometry=None):
     """
     Get weights for the specified geometry.
     Optionally pass a geometry to get weights for specific geometry.
-    :param deformer:
-    :param geometry:
-    :return:
+
+    :param str deformer: deformer to get the geometry weights for
+    :param str geometry: name fo the geometry to get the weights for
+    :return: a dictionary of geometry indices and a list of deformer weights ie {0: [1, 1, 1, 0, ...]
+    :rtype: dict
     """
     weightList = dict()
     if not isDeformer(deformer):
@@ -300,6 +312,7 @@ def setWeights(deformer, weights, geometry=None):
     """
     Set the specified deformer weights.
     Optionally pass a geometry to set weights for specific geometry.
+
     :param deformer: deformer to set the weights of
     :param weights: list of weights to set
     :param geometry: Optional- geometry to set the attributes of.
@@ -322,8 +335,9 @@ def setWeights(deformer, weights, geometry=None):
 def addGeoToDeformer(deformer, geo):
     """
     Add a geometry to an existing deformer
-    :param deformer: deformer to add the new geo to
-    :param geo: geo to add to the deformer
+
+    :param str deformer: deformer to add the new geo to
+    :param str geo: geo to add to the deformer
     """
     if not isDeformer(deformer):
         cmds.error("object '{}' is not a deformer".format(deformer))
@@ -338,9 +352,9 @@ def addGeoToDeformer(deformer, geo):
 def removeGeoFromDeformer(deformer, geo):
     """
     Remove the specifed geometry from the deformer
-    :param deformer:
-    :param geo:
-    :return:
+
+    :param str deformer: name of the deformer to remove from the geometry
+    :param str geo: name of the geometry to remove the deformer from
     """
     if not isDeformer(deformer):
         cmds.error("object '{}' is not a deformer".format(deformer))

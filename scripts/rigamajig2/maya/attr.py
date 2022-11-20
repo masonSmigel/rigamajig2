@@ -24,8 +24,8 @@ TRANSFORMS = TRANSLATE + ROTATE + SCALE
 def isAttr(plug):
     """
     Check if the node is a valid Container
-    :param plug: Node to check
-    :type plug: str
+
+    :param str plug: Node to check
     :return: True if Valid. False is invalid.
     :rtype: bool
     """
@@ -44,33 +44,20 @@ def createAttr(node, longName, attributeType, value=None, niceName=None, shortNa
     """
     Add a new attribute to the provided node.
 
-    :param node: Node to add the attribute to
-    :type node: str | list
-    :param longName: Long name of the attribute
-    :type longName: str
-    :param attributeType: Attribute Type. ['string', 'bool', 'float', 'int', 'double3', matrix]
-    :type attributeType: str
-    :param value: (Optional) Default value of the attribute
-    :type value: int | float | str
-    :param niceName: (Optional) Nice name of the attribute
-    :type niceName: str
-    :param shortName: (Optional) Short name of the attribute
-    :type shortName: str
-    :param minValue: (Optional) Minimum value
-    :type minValue: int | float
-    :param maxValue: (Optional) Maximum value
-    :type maxValue: int | float
-    :param keyable: (Optional) If the attribute is keyable. Default True.
-    :type keyable: bool
-    :param readable: (Optional) If the attribute can have outgoing connections. Default True.
-    :type readable: bool
-    :param writable: (Optional) If the attribute can have incoming connections. Default True.
-    :type keyable: bool
-    :param storable: (Optional) If the attribute can be stored to a file. Default True.
-    :type storable: bool
-    :param channelBox: (Optional) If the attribute is non-keyable should it be in the channel box.
-    :type channelBox:
-    :param locked: (Optional) Lock the the attribute on creation
+    :param str list node: Node to add the attribute to
+    :param str longName: Long name of the attribute
+    :param str attributeType: Attribute Type. ['string', 'bool', 'float', 'int', 'double3', matrix]
+    :param int float str value: (Optional) Default value of the attribute
+    :param str niceName: (Optional) Nice name of the attribute
+    :param str shortName: (Optional) Short name of the attribute
+    :param int float minValue: (Optional) Minimum value
+    :param int float maxValue: (Optional) Maximum value
+    :param bool keyable: (Optional) If the attribute is keyable. Default True.
+    :param bool readable: (Optional) If the attribute can have outgoing connections. Default True.
+    :param bool writable: (Optional) If the attribute can have incoming connections. Default True.
+    :param bool storable: (Optional) If the attribute can be stored to a file. Default True.
+    :param bool channelBox: (Optional) If the attribute is non-keyable should it be in the channel box.
+    :param bool locked: (Optional) Lock the the attribute on creation
 
     :return: Attribute Added
     :rtype: str
@@ -121,28 +108,17 @@ def createEnum(node, longName, enum, value=None, niceName=None, shortName=None,
     """
     Add an Enum attribute
 
-    :param node: Node to add the attribute to
-    :type node: str | list
-    :param longName: Long name of the attribute
-    :type longName: str
-    :param enum: enum values to add
-    :type enum: list
-    :param value: (Optional) Default value of the attribute
-    :type value: int | float
-    :param niceName: (Optional) Nice name of the attribute
-    :type niceName: str
-    :param shortName: (Optional) Short name of the attribute
-    :type shortName: str
-    :param keyable: (Optional) If the attribute is keyable. Default True.
-    :type keyable: bool
-    :param readable: (Optional) If the attribute can have outgoing connections. Default True.
-    :type readable: bool
-    :param writable: (Optional) If the attribute can have incoming connections. Default True.
-    :type keyable: bool
-    :param storable: (Optional) If the attribute can be stored to a file. Default True.
-    :type storable: bool
-    :param channelBox: (Optional) If the attribute is non-keyable should it be in the channel box.
-    :type channelBox: bool
+    :param str list node: Node to add the attribute to
+    :param str longName: Long name of the attribute
+    :param list enum: enum values to add
+    :param int float value: (Optional) Default value of the attribute
+    :param str niceName: (Optional) Nice name of the attribute
+    :param str shortName: (Optional) Short name of the attribute
+    :param bool keyable: (Optional) If the attribute is keyable. Default True.
+    :param bool readable: (Optional) If the attribute can have outgoing connections. Default True.
+    :param bool writable: (Optional) If the attribute can have incoming connections. Default True.
+    :param bool storable: (Optional) If the attribute can be stored to a file. Default True.
+    :param bool channelBox: (Optional) If the attribute is non-keyable should it be in the channel box.
 
     :return: newly added attribute
     :rtype: str
@@ -174,10 +150,12 @@ def addSeparator(node, label, repeat=4):
     """
     Add a separator attribute to visually separate groups of attributes.
     Separator is an enum
-    :param node: Node to add the separator too
-    :param label: Label of the separator
-    :param repeat: Number of times to repeat the "-" character. default is 16
-    :return:
+
+    :param str node: Node to add the separator too
+    :param str label: Label of the separator
+    :param int repeat: Number of times to repeat the "-" character. default is 16
+    :return: The plug of the separator added
+    :rtype: str
     """
     existing = [str(i) for i in cmds.listAttr(node, ud=True) or [] if i.startswith('sep')]
     sep = "sep" + str(len(existing))
@@ -192,10 +170,9 @@ def addSeparator(node, label, repeat=4):
 def createProxy(sources, targets):
     """
     Add a proxy attribute to the list of target nodes.
-    :param sources: source attributes to add to the proxy attributes
-    :type sources: str | list
-    :param targets: list of target nodes to add the proxy attribute
-    :type targets: str | list
+
+    :param str list sources: source attributes to add to the proxy attributes
+    :param str list targets: list of target nodes to add the proxy attribute
     """
     sources = common.toList(sources)
     targets = common.toList(targets)
@@ -221,30 +198,19 @@ def createColorAttr(node, longName, value=False, niceName=None, shortName=None,
     """
     Add a new attribute to the provided node.
 
-    :param node: Node to add the attribute to
-    :type node: str | list
-    :param longName: Long name of the attribute
-    :type longName: str
-    :param value: (Optional) Default color of the attribute. Set in RGB values from 0-1. Unless channelboxType is 'hsv'
-    :type value: list | tuple
-    :param niceName: (Optional) Nice name of the attribute
-    :type niceName: str
-    :param shortName: (Optional) Short name of the attribute
-    :type shortName: str
-    :param keyable: (Optional) If the attribute is keyable. Default True.
-    :type keyable: bool
-    :param readable: (Optional) If the attribute can have outgoing connections. Default True.
-    :type readable: bool
-    :param writable: (Optional) If the attribute can have incoming connections. Default True.
-    :type keyable: bool
-    :param storable: (Optional) If the attribute can be stored to a file. Default True.
-    :type storable: bool
-    :param channelBox: (Optional) If the attribute is non-keyable should it be in the channel box.
-    :type channelBox: bool
-    :param channelBoxType: (Optional) how to add the color attribute to the channel box. types are 'rgb' or 'hsv'
-    :type channelBoxType: str
+    :param str list node: Node to add the attribute to
+    :param str longName: Long name of the attribute
+    :param list tuple value: (Optional) Default color of the attribute. Set in RGB values from 0-1. Unless channelboxType is 'hsv'
+    :param str niceName: (Optional) Nice name of the attribute
+    :param str shortName: (Optional) Short name of the attribute
+    :param bool keyable: (Optional) If the attribute is keyable. Default True.
+    :param bool readable: (Optional) If the attribute can have outgoing connections. Default True.
+    :param bool writable: (Optional) If the attribute can have incoming connections. Default True.
+    :param bool storable: (Optional) If the attribute can be stored to a file. Default True.
+    :param bool channelBox: (Optional) If the attribute is non-keyable should it be in the channel box.
+    :param str channelBoxType: (Optional) how to add the color attribute to the channel box. types are 'rgb' or 'hsv'
 
-    :return: Attribute Added
+    :return: Plug of the  Attribute Added
     :rtype: str
     """
     if hasAttr(node, longName):
@@ -312,12 +278,10 @@ def createColorAttr(node, longName, value=False, niceName=None, shortName=None,
 def copyAttribute(attr, source, target):
     """
     Create a copy of an attribute on a new target node
-    :param attr: attribute to move
-    :type attr: str
-    :param source: source node of the attribute
-    :type source: str
-    :param target: node to move the attribute to
-    :type target: str
+
+    :param str attr: name of the  attribute to move
+    :param str source: name of the source node of the attribute
+    :param str target:name of the node to move the attribute to
     """
     if not cmds.objExists("{}.{}".format(source, attr)):
         raise RuntimeError("Source attribute does not exist")
@@ -348,13 +312,11 @@ def copyAttribute(attr, source, target):
 
 def moveAttribute(attr, source, target):
     """
-    Move an attribute keeping the connections intact
-    :param attr: attribute to move
-    :type attr: str
-    :param source: source node of the attribute
-    :type source: str
-    :param target: node to move the attribute to
-    :type target: str
+    Move an attribute from one node to another node while  keeping the connections intact.
+
+    :param str attr: attribute to move
+    :param str source: source node of the attribute
+    :param str target: node to move the attribute to
     """
     copyAttribute(attr=attr, source=source, target=target)
 
@@ -368,14 +330,13 @@ def moveAttribute(attr, source, target):
 
 def driveAttribute(attr, source, target, forceVisable=False):
     """
-    Create an identical attribute on a target node and drive the source
-    :param attr: attribute to move
-    :type attr: str
-    :param source: source node of the attribute
-    :type source: str
-    :param target: node to move the attribute to
-    :type target: str
-    :param forceVisable: force the target attribute to be visable in the channel box
+    Create an identical attribute on a target node and connect it to the source.
+    Essnetially this is like moving an attribute, but it still keeps the final output on the source node.
+
+    :param str attr: attribute to move
+    :param str source: source node of the attribute
+    :param str target: node to move the attribute to
+    :param bool forceVisable: force the target attribute to be visable in the channel box
     """
     copyAttribute(attr=attr, source=source, target=target)
 
@@ -388,11 +349,9 @@ def driveAttribute(attr, source, target, forceVisable=False):
 def unlock(nodes, attrs):
     """
     Unlock Attributes on a node
-    :param nodes: Node with attributes to act on
-    :type nodes: str | list
 
-    :param attrs: Attributes to act on
-    :type attrs: str | list
+    :param  str list nodes: Node with attributes to act on
+    :param str list attrs: Attributes to act on
     """
     _editAttrParams(nodes, attrs, lock=False)
 
@@ -400,11 +359,9 @@ def unlock(nodes, attrs):
 def lock(nodes, attrs):
     """
     Lock attributes on a node
-    :param nodes: Nodes with attributes to act on
-    :type nodes: str | list
 
-    :param attrs: Attributes to act on
-    :type nodes: str | list
+    :param  str list nodes: Node with attributes to act on
+    :param str list attrs: Attributes to act on
     """
     _editAttrParams(nodes, attrs, lock=True)
 
@@ -412,10 +369,9 @@ def lock(nodes, attrs):
 def hide(nodes, attrs):
     """
     hide attributes on a node
-    :param nodes: Nodes with attributes to act on
-    :type nodes: str | list
-    :param attrs: Attributes to act on
-    :type nodes: str | list
+
+    :param str list nodes: Node with attributes to act on
+    :param str list attrs: Attributes to act on
     """
     _editAttrParams(nodes, attrs, channelBox=False, keyable=False)
 
@@ -423,11 +379,9 @@ def hide(nodes, attrs):
 def unhide(nodes, attrs):
     """
     Unlock attributes on a node
-    :param nodes: Nodes with attributes to act on
-    :type nodes: str | list
 
-    :param attrs: Attributes to act on
-    :type nodes: str | list
+    :param str list nodes: Node with attributes to act on
+    :param str list attrs: Attributes to act on
     """
     _editAttrParams(nodes, attrs, keyable=False, channelBox=True)
     _editAttrParams(nodes, attrs, keyable=True)
@@ -436,11 +390,9 @@ def unhide(nodes, attrs):
 def lockAndHide(nodes, attrs):
     """
     Lock and hide attributes on a node
-    :param nodes: Nodes with attrs to act on
-    :type nodes: str | list
 
-    :param attrs: Attributes to act on
-    :type nodes: str | list
+    :param str list nodes: Node with attributes to act on
+    :param str list attrs: Attributes to act on
     """
     lock(nodes, attrs)
     hide(nodes, attrs)
@@ -449,11 +401,9 @@ def lockAndHide(nodes, attrs):
 def unlockAndUnhide(nodes, attrs):
     """
     Unlock and unhide attributes on a node
-    :param nodes: Nodes with attributes to act on
-    :type nodes: str | list
 
-    :param attrs: Attributes to act on
-    :type nodes: str | list
+    :param str list nodes: Node with attributes to act on
+    :param str list attrs: Attributes to act on
     """
     unhide(nodes, attrs)
     unlock(nodes, attrs)
@@ -462,11 +412,9 @@ def unlockAndUnhide(nodes, attrs):
 def nonKeyable(nodes, attrs):
     """
     Makes attributes display only in the channel box
-    :param nodes: Nodes with attributes to act on
-    :type nodes: str | list
 
-    :param attrs: Attributes to act on
-    :type nodes: str | list
+    :param str list nodes: Node with attributes to act on
+    :param str list attrs: Attributes to act on
     """
     _editAttrParams(nodes, attrs, keyable=False, channelBox=True)
 
@@ -474,11 +422,9 @@ def nonKeyable(nodes, attrs):
 def keyable(nodes, attrs):
     """
     Makes attributes keyable in the channel box
-    :param nodes: Nodes with attributes to act on
-    :type nodes: str | list
 
-    :param attrs: Attributes to act on
-    :type nodes: str | list
+    :param str list nodes: Node with attributes to act on
+    :param str list attrs: Attributes to act on
     """
     _editAttrParams(nodes, attrs, keyable=True, lock=False)
 
@@ -487,14 +433,9 @@ def setAttr(nodes, attrs, value):
     """
     Set the value of given nodes and attributes to a given value
 
-    :param nodes: Nodes with attributes to set the value of
-    :type nodes: str | list
-
-    :param attrs: Attributes to set the value of
-    :type nodes: str | list
-
+    :param str list nodes: Nodes with attributes to set the value of
+    :param str list  attrs: Attributes to set the value of
     :param value: Value to set the attributes to
-    :return:
     """
     if not isinstance(nodes, list):
         nodes = [nodes]
@@ -515,11 +456,9 @@ def resetDefault(nodes, attrs):
     For User defined attributes its their default value if one is provided. Otherwise it defaults to 0.
     Note: attributes of type bool, string and matrix do not have a default value and therefore cannot be reset.
 
-    :param nodes:
-    :type nodes: str | list
+    :param str list nodes:
 
-    :param attrs:
-    :type attrs: str | list
+    :param str list attrs:
     """
 
     if not isinstance(nodes, list):
@@ -543,11 +482,11 @@ def resetDefault(nodes, attrs):
 def disconnectAttrs(node, source=True, destination=True, skipAttrs=None):
     """
     disconnect all  connections between a source and node.
-    :param node: node to disconnect attributes from
-    :param source: node with the input connections to disconnect
-    :param destination:
-    :param skipAttrs: list of attributes we dont want to skip
-    :return:
+
+    :param str node: node to disconnect attributes from
+    :param bool source: Disconnect all attributes on the source side of the connection
+    :param bool destination:Disconnect all attributes on the destination side of the connection
+    :param list skipAttrs: list of attributes we dont want to skip
     """
     if skipAttrs is None:
         skipAttrs = list()
@@ -577,12 +516,9 @@ def disconnectAttrs(node, source=True, destination=True, skipAttrs=None):
 def hasAttr(node, attr):
     """
     Check if a node has an attribute
-    :param node: Node to check for attribute
-    :type node: str
 
-    :param attr: Attribute to check for
-    :type attr: str
-
+    :param str node: Node to check for attribute
+    :param str attr: Attribute to check for
     :return: If the attribute exists on the node
     :rtype: bool
     """
@@ -594,8 +530,8 @@ def hasAttr(node, attr):
 def USER(node):
     """
     Get user defined attributes of a node
-    :param node: Node to retreive attributes from
-    :type node: str
+
+    :param str node: Node to retreive attributes from
     """
     return list([str(a) for a in cmds.listAttr(node, ud=True) or [] if '.' not in a])
 
@@ -605,8 +541,8 @@ def USER(node):
 def KEYABLE(node):
     """
     Get keyable attributes of a node
-    :param node: Node to retreive attributes from
-    :type node: str
+
+    :param str node: Node to retreive attributes from
     """
     return list([str(a) for a in cmds.listAttr(node, k=True) or [] if '.' not in a])
 
@@ -616,8 +552,8 @@ def KEYABLE(node):
 def NONKEYABLE(node):
     """
     Get non keyable attributes of a node
-    :param node: Node to retreive attributes from
-    :type node: str
+
+    :param str node: Node to retreive attributes from
     """
     return list([str(a) for a in cmds.listAttr(node, cb=True) or [] if '.' not in a])
 
@@ -627,8 +563,8 @@ def NONKEYABLE(node):
 def CHANNELBOX(node):
     """
     Get attributes in the channelbox of a node
-    :param node: Node to retreive attributes from
-    :type node: str
+
+    :param str node: Node to retreive attributes from
     """
     return KEYABLE(node) + NONKEYABLE(node)
 
@@ -638,8 +574,8 @@ def CHANNELBOX(node):
 def ALL(node):
     """
     Get all attribues of a node
-    :param node: Node to retreive attributes from
-    :type node: str
+
+    :param str node: Node to retreive attributes from
     """
     return list([str(a) for a in cmds.listAttr(node) or [] if '.' not in a])
 
@@ -667,10 +603,9 @@ def _editAttrParams(nodes, attrs, channelBox=-1, lock=-1, keyable=-1):
 def reorderToBottom(node, attr):
     """
     Move attribute to the bottom of channel box.
-    :param node: Node to modify attributes on
-    :type node: str
-    :param attr: attribute
-    :type attr: str
+
+    :param str node: Node to modify attributes on
+    :param str attr: attribute
     """
     cmds.deleteAttr(node, attribute=attr)
     cmds.undo()
@@ -679,11 +614,9 @@ def reorderToBottom(node, attr):
 def reorderAttr(plug, pos='bottom'):
     """
     Reorder attributes
-    :param plug: Attribute to reorder
-    :type plug: str
-    :param pos: Reorder position. ["up", "down", "top" and "bottom"]
-    :type pos: str
-    :return:
+
+    :param str plug: Attribute to reorder
+    :param str pos: Reorder position. ["up", "down", "top" and "bottom"]
     """
     if not cmds.objExists(plug):
         raise RuntimeError('Attribute "' + plug + '" does not exist!')
@@ -725,9 +658,12 @@ def reorderAttr(plug, pos='bottom'):
 
 def getNextAvailableElement(plug):
     """
-    Get the next available index of a multi or array attribute
-    :param plug: plug to get the next available element of
-    :return:
+    Get the next available index of a multi or array attribute.
+    ie.  `node.exampleAttray[0]` has a connection it will return `node.exampleAttray[1]`
+
+    :param str plug: plug to get the next available element of
+    :return: The name of the next available plug
+    :rtype: bool
     """
     if not isinstance(plug, om2.MPlug):
         plug = _getPlug(plug)
@@ -741,9 +677,10 @@ def getNextAvailableElement(plug):
 def isCompound(plug):
     """
     Check if the attribute is a multi attribute
-    :param plug: plug to check
-    :type plug: str
-    :return:
+
+    :param str plug: plug to check
+    :return: True if the plug is a compound attribute
+    :rtype: bool
     """
     if not isinstance(plug, om2.MPlug):
         plug = _getPlug(plug)
@@ -764,8 +701,8 @@ def getCompoundChildren(plug):
     """
     Get the children of a compound plug.
     ie: 'pCube.t' will return ['pCube.tx', 'pCube.ty', 'pCube.tz']
-    :param plug: plug to get children of
-    :type plug: om2.MPlug | str
+
+    :param om2.MPlug str plug: plug to get children of
     :return: list of child plugs
     :rtype: list
     """
@@ -789,8 +726,8 @@ def getCompoundChildren(plug):
 def _getPlug(plug):
     """
     Return the MPlug object for the specified attribute
-    :param attr: The attribute to return the MPlug for
-    :type attr: str
+
+    :param str attr: The attribute to return the MPlug for
     """
     # Check attribute
     parts = plug.split('.')
@@ -861,8 +798,7 @@ def getPlugValue(plug):
     """
     Gets the value of the given plug.
     
-    :param plug:The node plug.
-    :type plug: MPlug
+    :param MPlug plug:The node plug.
 
     :return: The value of the passed in node plug.
     """
@@ -934,11 +870,8 @@ def setPlugValue(plug, value):
     """
     Sets the given plug's value to the passed in value.
 
-    :parm plug: The node plug.
-    :type plug: _MPlug_
-    
+    :param MPlug plug: The node plug.
     :param value: Any value of any data type.
-    :type value:
     """
     if not isinstance(plug, om2.MPlug):
         plug = _getPlug(plug)

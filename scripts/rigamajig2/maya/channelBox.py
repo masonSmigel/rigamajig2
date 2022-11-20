@@ -32,10 +32,12 @@ def getFocusNode(input=False, shape=False, output=False):
     Get the name of the node with focus in the channel box.
     You can either specify a section of the channelbox or not.
      If none is specifed look for an input, then an outout and finally a shape
-    :param input: get only nodes with focus in the inputs section
-    :param shape: get only nodes with focus in the shapes section
-    :param output: get only nodes with focus in the output section
-    :return:
+
+    :param bool input: get only nodes with focus in the inputs section
+    :param bool shape: get only nodes with focus in the shapes section
+    :param bool output: get only nodes with focus in the output section
+    :return: Returns the selected node in the channel box
+    :rtype: str
     """
     selectedInput = cmds.channelBox('mainChannelBox', q=True, hol=True)
     selectedOutput = cmds.channelBox('mainChannelBox', q=True, ool=True)

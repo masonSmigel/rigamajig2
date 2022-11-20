@@ -1,5 +1,5 @@
 """
-This Module contains
+This Module contains functions for working wist Pose Space Readers (PSDs)
 """
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
@@ -17,8 +17,9 @@ logger = logging.getLogger(__name__)
 def getAssociateJoint(node):
     """
     returns the joint associated with the pose reader node
-    :param node: node to get pose reader from.
-    :return:
+
+    :param node: node to get pose reader joint from
+    :return: str
     """
     # first check what node we got. it should be the joint.
     if not cmds.objExists("{}.poseReaderRoot".format(node)):
@@ -33,8 +34,8 @@ def getAssociateJoint(node):
 def deletePsdReader(joints):
     """
     Delete the pose reader associated with a given joint
+
     :param joints: joints to delete the pose readers on
-    :return:
     """
     joints = common.toList(joints)
 
@@ -64,6 +65,7 @@ def initalizePsds():
 def getAllPoseReaders():
     """
     Get all pose readers in the scene
+
     :return: a list of pose readers
     """
     return meta.getTagged('poseReader')
@@ -72,11 +74,11 @@ def getAllPoseReaders():
 def createPsdReader(joint, twist=False, swing=True, parent=False):
     """
     Create a Pose space reader on the given joint
-    :param joint: joint to create the pose reader on
-    :param twist: Add the twist attribute to the pose reader
-    :param swing: Add swing attributes to the pose reader
-    :param parent: Parent in the rig for the pose reader
-    :return:
+
+    :param str joint: joint to create the pose reader on
+    :param bool  twist: Add the twist attribute to the pose reader
+    :param bool swing: Add swing attributes to the pose reader
+    :param bool parent: Parent in the rig for the pose reader
     """
     # initalize an envornment for our Psds to go to
     initalizePsds()
@@ -163,7 +165,10 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
 
 
 def createTwistPsdReader(joint, aimAxis='x', outputAttr=None):
-    """create a twist pose reader"""
+    """
+    Function to create a twist pose reader.
+    For actual use Please use createPsdReader() instead. This function is used within the createPsdReader().
+    """
 
     parentList = cmds.listRelatives(joint, parent=True, path=True)
     parentTrs = parentList[0] if parentList else None
@@ -209,7 +214,10 @@ def createTwistPsdReader(joint, aimAxis='x', outputAttr=None):
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
 def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outputAttrs=None):
-    """ create a swing pose reader """
+    """
+    Create a swing pose reader
+    For actual use Please use createPsdReader() instead. This function is used within the createPsdReader().
+    """
 
     outputAttrs = outputAttrs or list()
     if not aimJoint:

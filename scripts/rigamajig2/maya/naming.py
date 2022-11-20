@@ -10,7 +10,12 @@ DELIMINATOR = '_'
 
 def normalize(string):
     """
-    Normalize a string
+    Normalize a string.
+    Normallizing a string will prepare it to use in maya.
+    Any not alphanumeric characters or underscores will be replaced will be removed.
+    Strings begining with an number will have an underscore added to the front.
+
+
     :param string:
     :type string: str
     :return: a normalized string
@@ -25,9 +30,7 @@ def getLongName(obj):
     """
     Returns the full name of a given object
     
-    :param obj: object path
-    :type obj: str
-    
+    :param str obj: object path
     :returns: long
     :rtype: str | None
     """
@@ -41,9 +44,7 @@ def getShortName(obj):
     """
     Returns the short name of a given object
     
-    :param obj: object path
-    :type obj: str
-    
+    :param str obj: object path
     :returns: long
     :rtype: str | None
     """
@@ -55,9 +56,10 @@ def getShortName(obj):
 
 def isUniqueName(name):
     """
-    Check if name is unique
-    :param name: string to test
-    :type name: str
+    Check if name is unique within the scene.
+    A node is unique when no other nodes exist with the same name.
+
+    :param str name: string to test
     :return: if the name is unique
     :rtype: bool
     """
@@ -67,10 +69,12 @@ def isUniqueName(name):
 
 def getUniqueName(name, side=None, indexPosition=-1):
     """
+    Generate a unique name for the given string.
     Add an index to the given name. The last interger found in the string will be used as the index.
-    :param name: name to check
-    :param side: side to add to the name
-    :param indexPosition: where to add the index if one is not found. default is -2 (after the suffix)
+
+    :param str name: name to check
+    :param side side: side to add to the name
+    :param int indexPosition: where to add the index if one is not found. default is -2 (after the suffix)
     :return: returns a new unique name
     """
     name = common.getFirstIndex(name)

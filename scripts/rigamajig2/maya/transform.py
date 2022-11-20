@@ -115,7 +115,7 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
     :param r: Apply rotation transformations
     :param s: Apply scale transformations
     :param sh: Apply shear transformations
-    :return:
+    :return: multmatrix,  pickmatrix
     """
     if cmds.about(api=True) < 20200000:
         raise RuntimeError("OffsetParentMatrix is only available in Maya 2020 and beyond")

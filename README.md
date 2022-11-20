@@ -94,6 +94,21 @@ class TestSomething(TestCase):
         pass
 ```
 
+### Generating Documentation 
+Documentation can be auto-generated using sphinx. 
+
+
+when new modules are added please cd into `rigamajig2/docs` and run the following to generate `.rst` files for all modules
+```commandline
+sphinx-apidoc -o source scripts
+```
+
+To build the HTML Documentatino run: 
+```commandline
+make html
+```
+
+
 ## More info
 Rigamajig2 development blog: 
 https://www.masonsmigel.com/blog

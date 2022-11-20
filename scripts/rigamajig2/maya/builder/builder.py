@@ -73,15 +73,14 @@ class Builder(object):
     def getComponentRefDict(self):
         """
         Get the component reference dictionary
-        :return:
         """
         return core.findComponents(constants.CMPT_PATH, constants._EXCLUDED_FOLDERS, constants._EXCLUDED_FILES)
 
     def getAbsoultePath(self, path):
         """
         Get the absoulte path of the given path relative to the rigEnviornment
-        :param path:
-        :return:
+
+        :param str path: Path to get relative to the rig enviornment
         """
         if path:
             path = common.getFirstIndex(path)
@@ -93,7 +92,8 @@ class Builder(object):
     def importModel(self, path=None):
         """
         Import the model file
-        :param path: Path to the json file. if none is provided use the data from the rigFile
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.MODEL_FILE))
         model.importModel(path)
@@ -102,8 +102,8 @@ class Builder(object):
     def loadJoints(self, path=None):
         """
          Load the joint Data to a json file
-        :param path: Path to the json file. if none is provided use the data from the rigFile
-        :return:
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKELETON_POS))
         guides.loadJoints(path)
@@ -112,15 +112,18 @@ class Builder(object):
     def saveJoints(self, path=None):
         """
         Save the joint Data to a json file
-        :param path: Path to the json file. if none is provided use the data from the rigFile
-        :return:
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKELETON_POS))
         guides.saveJoints(path)
         logger.info("Joint positions saved to: {}".format(path))
 
     def initalize(self):
-        """Initalize rig (this is where the user can make changes)"""
+        """
+        Initalize rig (this is where the user can make changes)
+        """
+
         for cmpt in self.componentList:
             logger.info('Initalizing: {}'.format(cmpt.name))
             cmpt._initalizeComponent()
@@ -128,7 +131,10 @@ class Builder(object):
         logger.info("initalize -- complete")
 
     def guide(self):
-        """ guide the rig"""
+        """
+        guide the rig
+        """
+
         if not cmds.objExists("guides"):
             cmds.createNode("transform", name="guides")
 
@@ -146,7 +152,10 @@ class Builder(object):
         logger.info("guide -- complete")
 
     def build(self):
-        """build rig"""
+        """
+        build rig
+        """
+
         for cmpt in self.componentList:
             logger.info('Building: {}'.format(cmpt.name))
             cmpt._buildComponent()
@@ -176,7 +185,9 @@ class Builder(object):
         logger.info("build -- complete")
 
     def connect(self):
-        """connect rig"""
+        """
+        connect rig
+        """
         for cmpt in self.componentList:
             logger.info('Connecting: {}'.format(cmpt.name))
             cmpt._connectComponent()
@@ -184,7 +195,9 @@ class Builder(object):
         logger.info("connect -- complete")
 
     def finalize(self):
-        """finalize rig"""
+        """
+        finalize rig
+        """
         for cmpt in self.componentList:
             logger.info('Finalizing: {}'.format(cmpt.name))
             cmpt._finalizeComponent()
@@ -196,7 +209,9 @@ class Builder(object):
         logger.info("finalize -- complete")
 
     def optimize(self):
-        """optimize rig"""
+        """
+        optimize rig
+        """
         for cmpt in self.componentList:
             logger.info('Optimizing {}'.format(cmpt.name))
             cmpt._optimizeComponent()
@@ -207,8 +222,8 @@ class Builder(object):
         """
         Save out components to a file.
         This only saves compoonent settings such as name, inputs, spaces and names.
-        :param path: path to the component data file
-        :return:
+
+        :param str path: path to the component data file
         """
         if not path:
             path = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
@@ -225,8 +240,8 @@ class Builder(object):
     def loadComponents(self, path=None):
         """
         Load components from a json file. This will only load the component settings and objects.
-        :param path: Path to the json file. if none is provided use the data from the rigFile
-        :return:
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         if not path:
             path = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
@@ -267,8 +282,8 @@ class Builder(object):
     def loadComponentSettings(self, path=None):
         """
         loadSettings component settings from the rig builder
-        :param path: Path to the json file. if none is provided use the data from the rigFile
-        :return:
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         if not path:
             path = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
@@ -283,7 +298,6 @@ class Builder(object):
     def loadMetadataToComponentSettings(self):
         """
         Load the metadata stored on the container attributes to the component objects.
-        :return:
         """
         for cmpt in self.componentList:
             cmpt._loadComponentParametersToClass()
@@ -291,9 +305,9 @@ class Builder(object):
     def loadControlShapes(self, path=None, applyColor=True):
         """
         Load the control shapes
-        :param path: Path to the json file. if none is provided use the data from the rigFile
-        :param applyColor: Apply the control colors.
-        :return:
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param bool applyColor: Apply the control colors.
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES))
         controlShapes.loadControlShapes(path, applyColor=applyColor)
@@ -302,9 +316,9 @@ class Builder(object):
     def saveControlShapes(self, path=None):
         """
         Save the control shapes
-        :param path: Path to the json file. if none is provided use the data from the rigFile
-        :return:
-"""
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES))
         controlShapes.saveControlShapes(path)
         logger.info("control shapes saved to: {}".format(path))
@@ -312,7 +326,8 @@ class Builder(object):
     def loadGuideData(self, path=None):
         """
         Load guide data
-        :return:
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES))
         if guides.loadGuideData(path):
@@ -321,8 +336,8 @@ class Builder(object):
     def saveGuideData(self, path=None):
         """
         Save guides data
-        :param path: Path to the json file. if none is provided use the data from the rigFile
-        :return:
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES))
         guides.saveGuideData(path)
@@ -331,7 +346,8 @@ class Builder(object):
     def loadPoseReaders(self, path=None, replace=True):
         """
         Load pose readers
-        :param path: Path to the json file. if none is provided use the data from the rigFile
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         :param replace: Replace existing pose readers.
         """
 
@@ -342,7 +358,8 @@ class Builder(object):
     def savePoseReaders(self, path=None):
         """
         Save out pose readers
-        :param path: Path to the json file. if none is provided use the data from the rigFile.
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile.
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
         deform.savePoseReaders(path)
@@ -351,7 +368,6 @@ class Builder(object):
     def loadDeformationData(self):
         """
         Load other data, this is stuff like skinweights, blendshapes, clusters etc.
-        :return:
         """
         self.loadDeformationLayers()
         self.loadSkinWeights()
@@ -361,7 +377,8 @@ class Builder(object):
     def loadDeformationLayers(self, path=None):
         """
         Load the deformation layers
-        :param path:
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
         if deform.loadDeformLayers(path):
@@ -370,7 +387,8 @@ class Builder(object):
     def saveDeformationLayers(self, path=None):
         """
         Load the deformation layers
-        :param path:
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
         deform.saveDeformLayers(path)
@@ -379,7 +397,8 @@ class Builder(object):
     def loadSkinWeights(self, path=None):
         """
         Load the skin weights
-        :param path: Path to the json file. if none is provided use the data from the rigFile
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
         if deform.loadSkinWeights(path):
@@ -388,7 +407,8 @@ class Builder(object):
     def saveSkinWeights(self, path=None):
         """
         Save the skin weights
-        :param path: Path to the json file. if none is provided use the data from the rigFile
+
+        :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
         deform.saveSkinWeights(path)
@@ -402,6 +422,7 @@ class Builder(object):
     def deleteComponents(self, clearList=True):
         """
         Delete all components
+
         :param bool clearList: clear the builder component list
         """
         mainComponent = None
@@ -421,8 +442,8 @@ class Builder(object):
         Build a single component based on the name and component type.
         If a component with the given name and type exists within the self.cmpt_list build that component.
 
-        Warning: Building a single component without nesseary connection nodes in the scene may lead to
-                 unpredicable results. ONLY USE THIS FOR RND!
+        Warning: Building a single component without nesseary connection nodes in the scene may lead to unpredicable results. ONLY USE THIS FOR RND!
+
         :param name: name of the component to build
         :param type: type of the component to build
         :return:
@@ -478,7 +499,6 @@ class Builder(object):
         :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
                            and store a new version each time the publish file is overwritten.
                            This allows the user to keep a log of files approved to be published.
-        :return:
         """
         if not self.path:
             logger.error('you must provide a build enviornment path. Use Bulder.setRigFile()')
@@ -522,7 +542,6 @@ class Builder(object):
         :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
                            and store a new version each time the publish file is overwritten.
                            This allows the user to keep a log of files approved to be published.
-        :return:
         """
         outputfile = outputfile or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_RIG))
         assetName = assetName or self.getAbsoultePath(self.getRigData(self.rigFile, constants.RIG_NAME))
@@ -619,6 +638,7 @@ class Builder(object):
     def setComponents(self, cmpts):
         """
         Set the self.cmpt_list
+
         :param cmpts: list of components to set
         """
         cmpts = common.toList(cmpts)
@@ -627,8 +647,8 @@ class Builder(object):
     def appendComponents(self, cmpts):
         """
         append a component
+
         :param cmpts: list of components to append
-        :return:
         """
         cmpts = common.toList(cmpts)
         for cmpt in cmpts:
@@ -638,8 +658,8 @@ class Builder(object):
         """
         Set the rig file.
         This will update the self.rigFile and self.path variables
+
         :param rigFile: Path of the rig file to set.
-        :return:
         """
         if not rigFile:
             self.rigFile = None
@@ -663,8 +683,9 @@ class Builder(object):
     def getRigData(rigFile, key):
         """
         read the data from the self.rig_file
-        :param rigFile:
-        :param key:
+
+        :param rigFile: path to thr rig file to get date from
+        :param key: name of the dictionary key to get the data from
         :return:
         """
         return core.getRigData(rigFile=rigFile, key=key)

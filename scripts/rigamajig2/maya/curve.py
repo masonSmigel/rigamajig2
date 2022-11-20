@@ -12,21 +12,12 @@ import rigamajig2.maya.mathUtils as mathUtils
 def createCurve(points, degree=3, name='curve', transformType="transform", form="Open"):
     """
     Create a curve
-    :param points: points used to create the curve
-    :type points: list
 
-    :param degree: degree of the curve
-    :type degree: int
-
-    :param name: name of the curve
-    :type name: str
-
-    :param transformType: transfrom type to create on.
-    :type transformType: str
-
-    :param form: The form of the curve. ex. (Open, Closed, Periodic)
-    :type form: str
-
+    :param list  points: points used to create the curve
+    :param int degree: degree of the curve
+    :param str name: name of the curve
+    :param str transformType: transfrom type to create on.
+    :param str form: The form of the curve. ex. (Open, Closed, Periodic)
     :return: name of the curve created
     :rtype: str
     """
@@ -68,10 +59,9 @@ def createCurve(points, degree=3, name='curve', transformType="transform", form=
 def createCurveFromTransform(transforms, degree=3, name='curve', transformType='transform', form="Open"):
     """
     Wrapper to create a curve from given transforms
+
     :param list transforms: list of transforms to use to create the curve from.
-
     :param int degree: degree of the curve
-
     :param str name: name of the curve
     :param str transformType: transfrom type to create on.
     :param str form: The form of the curve. ex. (Open, Closed, Periodic). If closed an additional point will be added.
@@ -90,9 +80,8 @@ def createCurveFromTransform(transforms, degree=3, name='curve', transformType='
 def getCvs(curve):
     """
     get a list of all Cvs in a curve
-    :param curve: curve to get CVs of
-    :type curve: str
 
+    :param str curve: curve to get CVs of
     :return: list of Cvs. ie ('curve.cv[0]', 'curve.cv[1]'...)
     :rtype: list
     """
@@ -106,10 +95,11 @@ def getCvs(curve):
 def getCvPositions(curve, world=True):
     """
     Get the positions of all cvs in a curve
-    :param curve: curve to get cvs from
-    :param world: Get the Cv position in world space. False is local position
+
+    :param str curve: curve to get cvs from
+    :param bool world: Get the Cv position in world space. False is local position
     :return: list of Cv positions
-    :rtype: list
+    :rtype:  list
     """
 
     if isinstance(curve, (list, tuple)):
@@ -130,8 +120,10 @@ def getCvPositions(curve, world=True):
 def getArcLen(curve):
     """
     Get the arc length of a curve. This is a simple wrapper
-    :param curve: curve to get the length of
+
+    :param str curve: curve to get the length of
     :return: length of the given curve
+    :rtype: float
     """
     return cmds.arclen(curve, ch=False)
 
@@ -139,7 +131,8 @@ def getArcLen(curve):
 def getClosestParameter(curve, position):
     """
     Get the closest parameter on a curve
-    :param curve: curve to get the closest parameter on
+
+    :param str curve: curve to get the closest parameter on
     :param list tuple str position: postion to get the closest parameter from.
         If a transform is passed  get the postion from the tranform
     """
@@ -159,9 +152,10 @@ def getClosestParameter(curve, position):
 def setCvPositions(curve, cvList, world=True):
     """
     Using a list of positions set the positions of each Cv in a curve
-    :param curve: curve to get cvs from
-    :param cvList: list of positions to set
-    :param world: apply the positions in world or local space.
+
+    :param str curve: curve to get cvs from
+    :param list cvList: list of positions to set
+    :param bool world: apply the positions in world or local space.
     :return: list of Cv positions
     :rtype: list
     """
@@ -193,11 +187,9 @@ def wipeCurveShape(curve):
 def copyShape(source, destinations):
     """
     copy the shapes on the shapes nodes of the source to the desination nodes
-    :param source: curve to copy from
-    :type source: str
-    :param destinations: destination of the copied shape
-    :type source: str
-    :return:
+
+    :param str source: curve to copy from
+    :param str destinations: destination of the copied shape
     """
     if isinstance(source, (list, tuple)):
         source = source[0]
@@ -242,13 +234,11 @@ def copyShape(source, destinations):
 @rigamajig2.maya.decorators.preserveSelection
 def mirror(curves, axis='x', mode='replace'):
     """
-    :param curves: curve to mirror
-    :type curves: str | list
+    Mirror the curve shape from one node to an existionf transform with a matching name.
 
-    :param axis: axis to mirror across
-    :type axis: str
-
-    :param mode: Sets the mode options for mirroring. 'match' will match the positions of existing cvs.
+    :param str list curves: curve to mirror
+    :param str axis: axis to mirror across
+    :param str mode: Sets the mode options for mirroring. 'match' will match the positions of existing cvs.
                 'replace' will replace the existing curve with a new one, or create one if it does not exist. 
     """
 

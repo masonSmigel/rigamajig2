@@ -9,8 +9,8 @@ from functools import wraps
 def isContainer(name):
     """
     Check if the node is a valid Container
-    :param name: Node to check
-    :type name: str
+
+    :param str name: Node to check
     :return: True if Valid. False is invalid.
     :rtype: bool
     """
@@ -22,10 +22,12 @@ def isContainer(name):
 def create(name, nodes=None, dagContainer=False):
     """
     Create a new container
-    :param name:
-    :param nodes:
-    :param dagContainer: create a DAG container or a DG container
-    :return:
+
+    :param str name: name of the new container to create
+    :param list str nodes: nodes to put in the newly created container
+    :param bool dagContainer: create a DAG container if True else create  a DG container
+    :return: name of the container created
+    :rtype: str
     """
     if cmds.objExists(name):
         raise RuntimeError("Object {} already exists. Cannot create a container with that name".format(name))
@@ -46,11 +48,13 @@ def create(name, nodes=None, dagContainer=False):
 
 def addNodes(nodes, container, addShape=True):
     """
-    Add nodes to a container. If t
-    :param nodes:
-    :param container:
-    :param addShape: add the shapes to the containter too
-    :return:
+    Add nodes to a container.
+
+    :param list nodes: nodes to add to the container
+    :param str container: name of the container
+    :param bool addShape: add the shapes to the containter too
+    :return: nodes added to the container
+    :rtype: list
     """
     if not isContainer(container):
         raise Exception("{} is not a container.".format(container))
@@ -69,10 +73,12 @@ def addNodes(nodes, container, addShape=True):
 def removeNodes(nodes, container, removeShapes=True):
     """
     remove nodes from the given container
-    :param nodes:
-    :param container:
-    :param removeShapes: 
-    :return:
+
+    :param list nodes: nodes to remove from the container
+    :param str container: name of the container
+    :param bool removeShapes: remove the shapes from the containter too
+    :return: nodes removed from the container
+    :rtype: list
     """
     if not isContainer(container):
         raise Exception("{} is not a container.".format(container))
@@ -89,8 +95,10 @@ def removeNodes(nodes, container, removeShapes=True):
 def getNodesInContainer(container):
     """
     get the nodes within a container
-    :param container: container
+
+    :param str container: container
     :return: list of nodes within the container
+    :rtype: list
     """
     if not isContainer(container):
         raise RuntimeError("{} is not a container.".format(container))
@@ -101,8 +109,10 @@ def getNodesInContainer(container):
 def getContainerFromNode(node):
     """
     Get the parent container from a node
-    :param node:
-    :return:
+
+    :param str node: Name of the node
+    :return : The container that holds the given node
+    :rtype: list
     """
     node = common.getFirstIndex(node)
     containerNode = cmds.container(q=True, findContainer=node)
@@ -112,12 +122,10 @@ def getContainerFromNode(node):
 def addPublishAttr(attr, assetAttrName=None, bind=True):
     """
     Publish an attribute
-    :param attr: contained node attribute to publish. Attribute should be listed as a plug:
-    :type attr: str
-    :param assetAttrName: Name used on the container. if node it will be auto generated from the node and attr name
-    :type assetAttrName: str
-    :param bind: bind the publish node to the container
-    :type bind: bool
+
+    :param str attr: contained node attribute to publish. Attribute should be listed as a plug:
+    :param str assetAttrName: Name used on the container. if node it will be auto generated from the node and attr name
+    :param bool bind: bind the publish node to the container
     """
     if not cmds.objExists(attr):
         raise RuntimeError("Attribute {} does not exist. Cannot publish attribute".format(attr))
@@ -136,12 +144,10 @@ def addPublishAttr(attr, assetAttrName=None, bind=True):
 def addPublishNodes(nodes, container=None, bind=True):
     """
     Publish a node.
-    :param nodes: contained node to publish.
-    :type nodes: str | list
-    :param container: Optional- specify a container to add nodes to if nodes are not in a container
-    :type container: str
-    :param bind: bind the publish node to the container
-    :type bind: bool
+
+    :param str list nodes: contained node to publish.
+    :param str container: Optional- specify a container to add nodes to if nodes are not in a container
+    :param bool bind: bind the publish node to the container
     """
     nodes = common.toList(nodes)
     for node in nodes:
@@ -167,11 +173,10 @@ def addPublishNodes(nodes, container=None, bind=True):
 def addParentAnchor(node, container=None, assetNodeName=None):
     """
     Publish a node as the parent Anchor
-    :param node:
-    :param container: Optional- specify a container to add nodes to if nodes are not in a container
-    :type container: str
-    :param assetNodeName:
-    :return:
+
+    :param node: nodes to make an anchor parent
+    :param str container: (Optional)- specify a container to add nodes to if nodes are not in a container
+    :param str assetNodeName: (Optional)- alias name for the node attribute in the container
     """
     node = common.getFirstIndex(node)
     if not cmds.objExists(node):
@@ -191,10 +196,10 @@ def addParentAnchor(node, container=None, assetNodeName=None):
 def addChildAnchor(node, container=None, assetNodeName=None):
     """
     Publish a node as the child Anchor
-    :param node:
+
+    :param node: nodes to make an anchor child
     :param container: Optional- specify a container to add nodes to if nodes are not in a container
-    :param assetNodeName:
-    :return:
+    :param assetNodeName: (Optional)- alias name for the node attribute in the container
     """
     node = common.getFirstIndex(node)
     if not cmds.objExists(node):
@@ -215,8 +220,8 @@ def safeDeleteContainer(container):
     """
     Safely delete the container.
     This will delete the container without deleting any contained nodes.
-    :param container: container to delete
-    :return:
+
+    :param str container: container to delete
     """
     nodes = getNodesInContainer(container)
     removeNodes(nodes, container, removeShapes=False)
@@ -227,6 +232,12 @@ def sainityCheck():
     """
     Run several checks to make sure maya is setup to work with containers.
     There are a couple 'gotcha's' to look out for
+
+    First of all it will set 'use assets' OFF in the node editor
+
+    set 'show at top' OFF in the channel box editor
+
+    set asset display is to 'under parent'
     """
 
     # set 'use assets' OFF in the node editor
@@ -252,7 +263,8 @@ class ActiveContainer(object):
     def __init__(self, container):
         """
         Set the current container to active
-        :param container:
+
+        :param str ontainer: name of the container
         """
         self.container = container
 

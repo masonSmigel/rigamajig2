@@ -9,9 +9,8 @@ import rigamajig2.maya.attr as attr
 def getPlugInput(plug):
     """
     Returns the input of a plug
-    :param plug: Plug to get the input of
-    :type plug: str
 
+    :param str plug: Plug to get the input of
     :return: The input connection of the plug
     :rtype: str
     """
@@ -24,9 +23,8 @@ def getPlugInput(plug):
 def getPlugOutput(plug):
     """
     Returns the output of a plug
-    :param plug: Plug to get the output of
-    :type plug: str
 
+    :param str plug: Plug to get the output of
     :return: The output connection of the plug
     :rtype: str
     """
@@ -39,9 +37,9 @@ def getPlugOutput(plug):
 def connectPlugs(source, destination):
     """
     Connect input plug to output plug using maya API
-    :param source: plug on the source end of the connection
-    :param destination: plug on the destination end of the connection
-    :return:
+
+    :param str source: plug on the source end of the connection
+    :param str destination: plug on the destination end of the connection
     """
     sourcePlug = attr._getPlug(source)
     destPlug = attr._getPlug(destination)
@@ -54,9 +52,8 @@ def connectPlugs(source, destination):
 def connectPlugs2(source, destination):
     """
     Connect input plug to output plug using maya.cmds
-    :param source:
-    :param destination:
-    :return:
+    :param str source: name of the source plug
+    :param str destination: nme of the desination plug
     """
     if attr.isCompound(source) == attr.isCompound(destination):
         cmds.connectAttr(source, destination, f=True)

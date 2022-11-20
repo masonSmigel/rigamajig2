@@ -11,8 +11,9 @@ import rigamajig2.maya.mesh
 def getClosestFace(mesh, point):
     """
     Return closest face on mesh to the point.
-    :param mesh: mesh name
-    :param point: world space coordinate
+
+    :param str mesh: mesh name
+    :param list point: world space coordinate
     :return: tuple of vertex id and distance to point
     :rtype: tuple
     """
@@ -23,8 +24,9 @@ def getClosestFace(mesh, point):
 def getClosestFacePoint(mesh, point):
     """
     Return closest facePoint on mesh to the point.
-    :param mesh: mesh name
-    :param point: world space coordinate
+
+    :param str mesh: mesh name
+    :param list point: world space coordinate
     :return: tuple of vertex id and distance to point
     :rtype: tuple
     """
@@ -37,10 +39,12 @@ def getClosestFacePoint(mesh, point):
 def getClosestVertex(mesh, point, returnDistance=False):
     """
     Return closest vertex on mesh to the point.
-    :param mesh: mesh to get the closest vertex of
-    :param point: world space coordinate
-    :param returnDistance: if true returns a tuple of vertex id and distance to vertex
-    :return: name of the closest vertex
+
+    :param str mesh: mesh to get the closest vertex of
+    :param list point: world space coordinate
+    :param bool returnDistance: if true returns a tuple of vertex id and distance to vertex
+    :return: name of the closest vertex.
+            If return Distance is True it will also return the distance between the point and vertex.
     :rtype: str
     """
     if isinstance(point, str):
@@ -61,8 +65,9 @@ def getClosestVertex(mesh, point, returnDistance=False):
 def getClosestUV(mesh, point):
     """
     Return closest UV on mesh to the point.
-    :param mesh: mesh name
-    :param point: world space coordinate
+
+    :param str mesh: mesh name
+    :param list point: world space coordinate
     :return: Uv coordinates
     :rtype: tuple
     """
@@ -79,8 +84,10 @@ def getClosestUV(mesh, point):
 def getBboxCenter(obj):
     """
     Get the bounding box center of a mesh object
+
     :param obj: object name
-    :return:
+    :return: the bounding box size
+    :rtype: list
     """
     bbox = cmds.exactWorldBoundingBox(obj)
     bboxMin = bbox[:3]

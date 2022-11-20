@@ -16,8 +16,9 @@ from rigamajig2.maya import deformer, uv, attr
 def parentConstraint(driver, driven):
     """
     Create a matrix based 'parent constraint'
-    :param driver: node to drive the parent constraint
-    :param driven: node driven by the parent constraint
+
+    :param str driver: node to drive the parent constraint
+    :param str driven: node driven by the parent constraint
     :return: mult matrix and decompose matrix used in the constraint
     """
     multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
@@ -32,8 +33,9 @@ def parentConstraint(driver, driven):
 def pointConstraint(driver, driven):
     """
     Create a matrix based 'point constraint'
-    :param driver: node to drive the point constraint
-    :param driven: node driven by the point constraint
+
+    :param str driver: node to drive the point constraint
+    :param str driven: node driven by the point constraint
     :return: mult matrix and decompose matrix used in the constraint
     """
     multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
@@ -47,10 +49,10 @@ def pointConstraint(driver, driven):
 def orientConstraint(driver, driven):
     """
     Create a matrix based 'orient constraint'
-    :param driver: node to drive the orient constraint
-    :param driven: node driven by the orient constraint
+
+    :param str driver: node to drive the orient constraint
+    :param str driven: node driven by the orient constraint
     :return: mult matrix and decompose matrix used in the constraint
-    :return:
     """
     multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
 
@@ -63,8 +65,9 @@ def orientConstraint(driver, driven):
 def scaleConstraint(driver, driven):
     """
     Create a matrix based 'scale constraint'
-    :param driver: node to drive the scale constraint
-    :param driven: node driven by the scale constraint
+
+    :param str driver: node to drive the scale constraint
+    :param str driven: node driven by the scale constraint
     :return: mult matrix and decompose matrix used in the constraint
     """
     multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
@@ -77,8 +80,9 @@ def scaleConstraint(driver, driven):
 def _createSimpleMatrixConstraintNetwork(driver, driven):
     """
     This private function is used to check if a matrix constraint network exists and if not create it
-    :param driver: driver node
-    :param driven: driven node
+
+    :param str driver: driver node
+    :param str driven: driven node
     :return: mult matrix, decompose matrix
     """
     driven = common.getFirstIndex(driven)
@@ -110,13 +114,13 @@ def negate(driver, driven, t=False, r=False, s=False):
 
     This becomes useful for things like facial rivet controls where the movement should be handled in a blendshape not
     the translation of the contorl
+
     :param str driver: transform to drive the negation. This will have its transfrom values inverted
     :param str list driven: transforms to have their transfroms negated.
         Its transforms will be populated with the inverse of the driver.
     :param bool t: negate the translation
     :param bool r: negate the rotation
     :param bool s: negate the scale
-    :return: None
     """
     driver = common.getFirstIndex(driver)
     drivens = common.toList(driven)
@@ -140,7 +144,7 @@ def uvPin(meshVertex):
     """
     Create a mesh Rivet from the current vertex. This command uses the UvPin node.
 
-    :param meshVertex: vertex to create the rivet on
+    :param str meshVertex: vertex to create the rivet on ("model.vtx[0]")
     :return: the out matrix plug for the current vertex.
     """
     if not cmds.objExists(meshVertex):

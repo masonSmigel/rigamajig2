@@ -9,8 +9,10 @@ import rigamajig2.shared.common as common
 def isCluster(cluster):
     """
     check if the cluster is a valid cluster
-    :param cluster: name of cluster to check
+
+    :param str cluster: name of cluster to check
     :return: True if Valid. False is invalid.
+    :rtype: bool
     """
     cluster = common.getFirstIndex(cluster)
     if not cmds.objExists(cluster) or not cmds.nodeType(cluster) == 'cluster': return False
@@ -20,18 +22,18 @@ def isCluster(cluster):
 def create():
     """
     Create a cluster
-    :return:
     """
     pass
 
 
 def localize(cluster, transform, modelTransform, weightedCompensation=False):
     """
-    :param cluster:
-    :param transform:
-    :param modelTransform:
-    :param weightedCompensation:
-    :return:
+    Localize a cluster deformation to another transform
+
+    :param str cluster: name of the cluster node to localize
+    :param str transform: name of the transorm to localize the cluster to
+    :param modelTransform: name of the node to use as the model transform
+    :param bool weightedCompensation: Turn on the weigh compensation. Default is false.
     """
     for i, geometry in enumerate(cmds.cluster(cluster, q=True, geometry=True)):
         parentTransform = cmds.listRelatives(geometry, p=True) or list()

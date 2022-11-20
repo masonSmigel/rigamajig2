@@ -22,6 +22,7 @@ logger = logging.getLogger(__name__)
 def prepSkeleton(mocapData, namespace=None):
     """
     prepare the skeleton for mocap import
+
     :param mocapData: dictionary of mocap data
     :param namespace: namespace of the character
     """
@@ -45,6 +46,7 @@ def prepSkeleton(mocapData, namespace=None):
 def connectMocapData(mocapData, namespace=None, applyToLayer=False):
     """
     connect the mocap data to the rig
+
     :param mocapData: dictionary of mocap data
     :param namespace: namespace of the character
     :param applyToLayer: bake the animation onto an animaton layer

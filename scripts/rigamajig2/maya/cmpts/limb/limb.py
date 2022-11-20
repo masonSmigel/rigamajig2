@@ -454,9 +454,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
             for bendieCtl in self.bendControls:
                 rig_control.connectControlVisiblity(self.paramsHierarchy, "bendies", bendieCtl)
-            #     shapes = cmds.listRelatives(bendieCtl, s=True)
-            #     for shape in shapes:
-            #         cmds.connectAttr("{}.{}".format(self.paramsHierarchy, 'bendies'), "{}.{}".format(shape, 'v'))
+
 
         self.createIkFkMatchSetup()
 
@@ -465,7 +463,6 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rigamajig2.maya.joint.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
         ikfk.IkFkBase.connectVisibility(self.paramsHierarchy, 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
 
-        # hide the upper  and middle joints if were using twisty bendy controls
         if self.addTwistJoints:
             for jnt in [self.input[1], self.input[2]]:
                 cmds.setAttr("{}.{}".format(jnt, "drawStyle"), 2)
@@ -500,6 +497,13 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             if self.addTwistJoints and self.addBendies:
                 rig_attr.driveAttribute('volumeFactor', self.paramsHierarchy, self.ikfkControl.name)
                 rig_attr.driveAttribute('bendies', self.paramsHierarchy, self.ikfkControl.name)
+
+        # create a visability control for the ikGimble control
+        rig_attr.createAttr(self.limbIk.name, "gimble", attributeType='bool', value=0, keyable=False, channelBox=True)
+        rig_control.connectControlVisiblity(self.limbIk.name, "gimble", controls=self.limbGimbleIk.name)
+
+        rig_attr.createAttr(self.joint3Fk.name, "gimble", attributeType='bool', value=0, keyable=False, channelBox=True)
+        rig_control.connectControlVisiblity(self.joint3Fk.name, "gimble", controls=self.joint3GimbleFk.name)
 
     def connect(self):
         """Create the connection"""

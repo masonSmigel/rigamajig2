@@ -8,11 +8,13 @@ import maya.api.OpenMaya as om2
 import rigamajig2.maya.decorators
 import rigamajig2.shared.common as common
 import rigamajig2.shared.path
+import rigamajig2.maya.connection
 import rigamajig2.maya.naming
 import rigamajig2.maya.hierarchy
 import rigamajig2.maya.data.curve_data
 import rigamajig2.maya.curve
 import rigamajig2.maya.color
+from rigamajig2.maya import node
 import rigamajig2.maya.transform
 import rigamajig2.maya.meta as meta
 import rigamajig2.maya.shape
@@ -375,7 +377,7 @@ def createMeshRivet(name, mesh, side=None, shape='circle', orig=True, spaces=Fal
     #       Multiple outputs can be connected to the uvPin node, which allows it to only evaluate ONCE!
 
     controlObj = create(name=name, side=side, shape=shape, orig=orig, spaces=spaces, trs=False, sdk=sdk,
-                        parent=parent, position=[0,0,0], size=size, rotation=[0, 0, 0],
+                        parent=parent, position=[0, 0, 0], size=size, rotation=[0, 0, 0],
                         hideAttrs=hideAttrs, color=color, type=type, rotateOrder=rotateOrder,
                         trasformType=trasformType, shapeAim=shapeAim)
 
@@ -546,19 +548,30 @@ def createDisplayLine(point1, point2, name=None, parent=None, displayType='temp'
     cmds.connectAttr(dcmp2 + '.outputTranslate', displayLineShape[0] + '.controlPoints[1]', f=True)
 
 
-def connectControlVisiblity(driverNode, driverAttr, controls):
+def connectControlVisiblity(driverNode, driverAttr, controls, force=True):
     """
-    connect to the control visiblity
+    Connect to the control visiblity.
+    If the control already has something driving the visability then multiply the existing driver with the new driver.
+
     :param driverNode: name of the node to drive the control visibility
     :param driverAttr: name of the attribute on the node to drive the control visibility
     :param controls: list of the controls to drive their visibility of
+    :param force: force the visability connection
     """
     controls = common.toList(controls)
 
     for control in controls:
         shapes = cmds.listRelatives(control, s=True) or []
-        for shape in shapes:
-            cmds.connectAttr("{}.{}".format(driverNode, driverAttr), "{}.{}".format(shape, 'v'))
+        existingConnections = rigamajig2.maya.connection.getPlugInput("{}.v".format(shapes[0]))
+        if len(existingConnections) > 0:
+            existingDriver = existingConnections[0]
+            mdlName = "{}_{}_visability".format(driverNode, existingDriver.split(".")[0])
+            multipliedVis = node.multDoubleLinear(existingDriver,"{}.{}".format(driverNode, driverAttr), name=mdlName)
+            for shape in shapes:
+                cmds.connectAttr("{}.{}".format(multipliedVis, 'output'), "{}.{}".format(shape, 'v'), f=force)
+        else:
+            for shape in shapes:
+                cmds.connectAttr("{}.{}".format(driverNode, driverAttr), "{}.{}".format(shape, 'v'), f=force)
 
 
 @rigamajig2.maya.decorators.oneUndo

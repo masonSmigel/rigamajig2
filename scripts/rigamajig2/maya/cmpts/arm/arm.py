@@ -103,11 +103,13 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
 
         # connect the node to the control
         cmds.connectAttr("{}.{}".format(self.paramsHierarchy, "autoWrist"), "{}.envelope".format(blendMatrix))
-
+        
+    def setupAnimAttrs(self):
         # specific controls not affected by userProxy
         rig_attr.addSeparator(self.limbIk.name, '----')
         rig_attr.driveAttribute('autoWrist', self.paramsHierarchy, self.limbIk.name)
-
+        super(Arm, self).setupAnimAttrs()
+    
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
         super(Arm, self).postRigSetup()

@@ -155,6 +155,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         cmds.parent(self.ikspline.getGroup(), self.rootHierarchy)
 
         # connect the volume factor and tangents visability attributes
+        rig_attr.addSeparator(self.head.name, "----")
         rig_attr.createAttr(self.head.name, 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
         cmds.connectAttr("{}.volumeFactor".format(self.head.name), "{}.volumeFactor".format(self.paramsHierarchy))
 
@@ -183,6 +184,11 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.headGimble.name, self.ikspline._endTwist, mo=True)
 
         rig_transform.connectOffsetParentMatrix(self.neck.name, self.ikspline.getGroup(), mo=True)
+
+    def setupAnimAttrs(self):
+        # create a visability control for the ikGimble control
+        rig_attr.createAttr(self.head.name, "gimble", attributeType='bool', value=0, keyable=False, channelBox=True)
+        rig_control.connectControlVisiblity(self.head.name, "gimble", controls=self.headGimble.name)
 
     def connect(self):
         """Create the connection"""

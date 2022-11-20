@@ -177,7 +177,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
 
     def setupAnimAttrs(self):
         """ setup animation attributes"""
-        super(Leg, self).setupAnimAttrs()
+
         # connect the fook ik attributes to the foot control
         rigamajig2.maya.attr.addSeparator(self.limbIk.name, '----')
         rigamajig2.maya.attr.driveAttribute('roll', self.paramsHierarchy, self.limbIk.name)
@@ -185,6 +185,8 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         rigamajig2.maya.attr.driveAttribute('ballSwivel', self.paramsHierarchy, self.limbIk.name)
         rigamajig2.maya.attr.driveAttribute('ballAngle', self.paramsHierarchy, self.limbIk.name)
         rigamajig2.maya.attr.driveAttribute('toeStraightAngle', self.paramsHierarchy, self.limbIk.name)
+
+        super(Leg, self).setupAnimAttrs()
 
     def connect(self):
         """Create the connection"""

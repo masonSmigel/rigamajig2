@@ -15,7 +15,7 @@ def getPlugInput(plug):
     :rtype: str
     """
     plugList = list()
-    for sourcePlug in cmds.listConnections(plug, source=True, plugs=True):
+    for sourcePlug in cmds.listConnections(plug, source=True, plugs=True) or []:
         plugList.append(str(sourcePlug))
     return plugList
 

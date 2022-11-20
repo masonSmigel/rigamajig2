@@ -16,9 +16,9 @@ ROTATEORDER = ['xyz', 'yzx', 'zxy', 'xzy', 'yxz', 'zyx']
 def matchTransform(source, target):
     """
     Match the translation and Rotation of the source to the target object
-    :param source: source transfrom
-    :param target: transform to snap
-    :return:
+
+    :param str source: source transfrom
+    :param str target: transform to snap
     """
     matchTranslate(source, target)
     matchRotate(source, target)
@@ -27,10 +27,9 @@ def matchTransform(source, target):
 def matchTranslate(source, target):
     """
     Match the translation of one object to another.
-    :param source: Source transfrom
-    :type source: str
-    :param target:  Target transform to match
-    :type target: str
+
+    :param str source: Source transfrom
+    :param str target:  Target transform to match
     """
     pos = getAveragePoint(source)
     cmds.xform(target, ws=True, t=pos)
@@ -41,10 +40,9 @@ def matchRotate(source, target):
     Match the rotation of one object to another rotation.
     This matching method is awesome. It works across regardless of mismatched rotation orders or transforms who's
     parents have different rotation orders.
-    :param source: Source transfrom
-    :type source: str
-    :param target:  Target transform to match
-    :type target: str
+
+    :param str source: Source transfrom
+    :param str target:  Target transform to match
     """
     rotOrder = cmds.getAttr('{}.rotateOrder'.format(source))
     matrixList = cmds.getAttr('{}.worldMatrix'.format(source))
@@ -61,19 +59,11 @@ def matchRotate(source, target):
     cmds.xform(target, ws=True, rotation=angles)
 
 
-def getDagPath(name):
-    """
-    Get the DAG path of a node (For maya api 2 )
-    :param name: name of the node to get the dag path from
-    """
-    sel = om2.MGlobal.getSelectionListByName(name)
-    return sel.getDagPath(0)
-
-
 def freezeToParentOffset(nodes):
     """
     Freeze the given transform nodes by adding their values to the offsetParentMatrix
-    :param nodes: transform nodes to freeze
+
+    :param list nodes: transform nodes to freeze
     """
     nodes = common.toList(nodes)
 
@@ -88,8 +78,8 @@ def freezeToParentOffset(nodes):
 def unfreezeToTransform(nodes):
     """
     remove postional information from the offset parent matrix and add it to the main transformation
-    :param nodes: nodes to match mostions
-    :return:
+
+    :param list nodes: nodes to match mostions
     """
     nodes = common.toList(nodes)
     identityMatrix = [1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 1.0]
@@ -108,14 +98,15 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
     the maintain offset option creates a transform node to store the offset.
     the t, r, s, sh attributes can be used to select only some transformations to affect the driven using a pickMatrix node.
 
-    :param driver: driver node
-    :param driven: driven node(s)
-    :param mo: add a transform node to store the offset between the driver and driven nodes
-    :param t: Apply translation transformations
-    :param r: Apply rotation transformations
-    :param s: Apply scale transformations
-    :param sh: Apply shear transformations
+    :param str driver: driver node
+    :param str driven: driven node(s)
+    :param bool mo: add a transform node to store the offset between the driver and driven nodes
+    :param bool t: Apply translation transformations
+    :param bool r: Apply rotation transformations
+    :param bool s: Apply scale transformations
+    :param bool sh: Apply shear transformations
     :return: multmatrix,  pickmatrix
+    :rtype: list
     """
     if cmds.about(api=True) < 20200000:
         raise RuntimeError("OffsetParentMatrix is only available in Maya 2020 and beyond")
@@ -164,9 +155,11 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
 
 def localOffset(node):
     """
-    Get the local offset matrix of a node relative to its parent
-    :param node: node name
-    :return: MMatrix
+    Get the local offset matrix of a node relative to its parent.
+
+    :param node: name of the node
+    :return: offset matrix between the given node and its parent
+    :rtype: MMatrix
     """
     offset = om2.MMatrix(cmds.getAttr('{}.{}'.format(node, 'worldMatrix')))
     parent = cmds.listRelatives(node, parent=True, path=True) or None
@@ -180,9 +173,11 @@ def offsetMatrix(node1, node2):
     """
     Calculate an offset matrix between two nodes. 
     Returns the matrix of node2 relative to node 1
-    :param node1:
-    :param node2:
-    :return:
+
+    :param node1: first node
+    :param node2: second node
+    :return: relative offset matrix between node1 and node2
+    :rtype: MMatrix
     """
     node1Matrix = om2.MMatrix(cmds.getAttr("{}.{}".format(node1, 'worldMatrix')))
     node2Matrix = om2.MMatrix(cmds.getAttr("{}.{}".format(node2, 'worldMatrix')))
@@ -196,9 +191,11 @@ def offsetMatrix(node1, node2):
 
 def getAveragePoint(transforms):
     """
-    get the average point between a list of transforms.
+    Get the average point between a list of transforms.
+
     :param transforms: list of transforms to average
-    :return:
+    :return: average postion between a list of transforms
+    :rtype: list
     """
     transforms = common.toList(transforms)
 
@@ -217,7 +214,6 @@ def mirror(trs=None, axis='x', leftToken=None, rightToken=None, mode='rotate'):
     """
     Mirrors transform axis vector. Searches for a destination node to mirror.
     The node "shouler_l_trs" mirror its position to "shouler_r_trs"
-
 
     :param str list trs: transforms to mirror:
     :param str axis: axis to mirror across. ['x', 'y', 'z']:
@@ -289,6 +285,7 @@ def getAimAxis(transform, allowNegative=True, asVector=False):
     :param bool allowNegative: if true allow negative axis returns.
     :param bool asVector: if true return the aim axis as a vector
     :return: aim axis
+    :rtype: str
     """
     child = cmds.listRelatives(transform, type='transform')
     if not child:
@@ -314,7 +311,8 @@ def getClosestAxis(transform, target, allowNegative=True):
     :param transform: transform to get the axis from
     :param target: target to get the axis from
     :param allowNegative: if true allow negative axis returns.
-    :return str: closest axis
+    :return: closest axis
+    :rtype: str
     """
     offset = offsetMatrix(transform, target)
 
@@ -341,9 +339,9 @@ def getClosestAxis(transform, target, allowNegative=True):
 def decomposeRotation(node, twistAxis='x'):
     """
     decompose the swing and twist of a transform.
-    :param node: tranform to get the swing and twist from
-    :param twistAxis: local axis of the transform.
-    :return:
+    :param str node: tranform to get the swing and twist from
+    :param str twistAxis: local axis of the transform.
+    :return: Decompose the rotation into separate XYZ rotations
     """
     node = common.getFirstIndex(node)
 
@@ -456,8 +454,8 @@ def aimChain(chain, aimVector, upVector, worldUpObject=None, worldUpType='object
 def resetTransformations(nodes):
     """
     Reset the channel box transformations of a given node.
-    :param nodes:
-    :return:
+
+    :param nodes: list of nodes to reset the transformations
     """
     nodes = common.toList(nodes)
     for node in nodes:
@@ -482,6 +480,7 @@ def resetTransformations(nodes):
 def getVectorFromAxis(axis):
     """
     Return a vector based on the given axis string
+
     :param axis: Axis name. Valid values are ['x', 'y', 'z', '-x', '-y', '-z']
     :return list tuple: Axis
     """
@@ -504,7 +503,11 @@ def getVectorFromAxis(axis):
 
 def getRotateOrder(order):
     """
-    Get the proper rotate order index
+    Get the proper rotate order index.
+    This is used to convert the index of a rotate order attribute to its respective string value.
+
+    for example: getRotateOrder(0) returns "xyz"
+
     :param order: rotate order
     :type order: str
     :return:

@@ -11,8 +11,10 @@ import rigamajig2.shared.common as common
 def hasUvs(obj):
     """
     Check if an object has Uvs
+
     :param obj: Object to check for Uvs
-    :return:
+    :return: True if an object has UVs
+    :rtype: uvs
     """
 
     if isinstance(obj, (list, tuple)):
@@ -24,6 +26,7 @@ def hasUvs(obj):
 def getUvCoordsFromVertex(geometry, vertexId):
     """
     Get U and V coordinates from vertex id
+
     :param geometry: geometry to get Uv position from
     :param vertexId: Vertex Id to get UV of.
     :return: U and V coordiates
@@ -42,9 +45,15 @@ def getUvCoordsFromVertex(geometry, vertexId):
 def transferUvsToRigged(source, targets):
     """
     transfer Uvs to a rigged model.
-    :param source: mesh with the uvs to transfer to targets
-    :param targets: mesh(s) to transfer the Uvs to
-    :return:
+    This is really usefull when a model has updates but a rigamajig2 rig was not used to construct the rig,
+    therefore making uv changes more difficult.
+
+    The tool works by temporarily turning off the orig shape allowing us to transfer the UVs
+    and delete history without damaging the deformation stack
+
+
+    :param str source: mesh with the uvs to transfer to targets
+    :param str targets: mesh(s) to transfer the Uvs to
     """
     source = common.getFirstIndex(source)
     targets = common.toList(targets)
@@ -73,10 +82,11 @@ def transferUvsToRigged(source, targets):
 def transferUVs(sourceMesh, targetMesh, checkVertCount=True, constructionHistory=False):
     """
     Transfer the uvs from one mesh to another. This will also check to ensure the models have a compatable vertex count.
-    :param sourceMesh: mesh with the source UVs
-    :param targetMesh: mesh to tranfer the UVs to.
-    :param checkVertCount: check if the vertex counts match. If they dont then no transfer will take place
-    :param constructionHistory: if True keep history at the end of the transfer. Default is False
+
+    :param str  sourceMesh: mesh with the source UVs
+    :param str targetMesh: mesh to tranfer the UVs to.
+    :param bool checkVertCount: check if the vertex counts match. If they dont then no transfer will take place
+    :param bool constructionHistory: if True keep history at the end of the transfer. Default is False
     :return:
     """
 

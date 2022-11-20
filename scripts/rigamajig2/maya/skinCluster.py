@@ -75,9 +75,10 @@ def getMfnSkin(skinCluster):
 
 def getMfnMesh(mesh):
     """
+     Get a mesh function set from the skin cluster name
 
-    :param mesh: name of the mesh to get the Mfn mesh object from
-    :return:
+    :param str mesh: name of the mesh to get the Mfn mesh object from
+    :return: MFnMesh
     """
     mesh = rigamajig2.maya.openMayaUtils.getMObject(mesh)
     return om2.MFnMesh(mesh)
@@ -86,8 +87,9 @@ def getMfnMesh(mesh):
 def getCompleteComponents(mesh):
     """
     Wrapper to get the complete component data from a mesh
-    :param mesh: mesh to get the component data from
-    :return:
+
+    :param str mesh: mesh to get the component data from
+    :return: complete component data
     """
     if not isinstance(mesh, om2.MFnMesh):
         mesh = getMfnMesh(mesh)
@@ -116,8 +118,10 @@ def tryMatrixConnect(plug, target):
 def getWeights(mesh):
     """
     Return a list of all skincluster weights on a mesh
+
     :param mesh: mesh to get the weights on
-    :return:
+    :return: weight dictionary and vertex count. {"influence":[]}
+    :rtype: list
     """
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
     mesh = cmds.listRelatives(meshShape, p=True)[0]
@@ -161,7 +165,6 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
     :param skincluster: skin cluster node to hold the weights
     :param weightDict: skin cluster dict holding weight values for each influence
     :param compressed: if the weights are compressed or not
-    :return:
     """
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
 
@@ -201,8 +204,10 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
 def getBlendWeights(mesh):
     """
     Get the DQ blended weights
+
     :param mesh: mesh to get weights on
-    :return:
+    :return: list of blendede weights
+    :rtype: list
     """
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
     mesh = cmds.listRelatives(meshShape, p=True)[0]
@@ -230,10 +235,11 @@ def getBlendWeights(mesh):
 def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
     """
     Set the Blended weights
-    :param mesh:
-    :param skincluster:
-    :param weightDict:
-    :param compressed:
+
+    :param mesh: name of the mesh to set the blended weights on
+    :param skincluster: name of the skincluster to set the blended weights on
+    :param weightDict: input weight dictionary
+    :param bool compressed: if the data is compressed
     :return:
     """
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
@@ -260,8 +266,9 @@ def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
 def getInfluenceJoints(skinCluster):
     """
     Get the influences of a skin cluster
+
     :param skinCluster: skinCluster to get influences from
-    :return:
+    :return: list of influences for a given skincluster
     """
     if not isinstance(skinCluster, oma2.MFnSkinCluster):
         skinCluster = getMfnSkin(skinCluster)
@@ -275,6 +282,7 @@ def getInfluenceJoints(skinCluster):
 def getInfluenceIndex(skinCluster, influence):
     """
     Get the index of an influence for a specified skin cluster
+
     :param skinCluster: Skincluster to get the index from
     :param influence: influcence of a skin cluster to get index of
     :return: index of a given influence
@@ -292,6 +300,7 @@ def getInfluenceIndex(skinCluster, influence):
 def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestPoint', influenceMode='closestJoint'):
     """
     Copy skin cluster and all influences to a target mesh
+
     :param str sourceMesh: source mesh to copy the skin cluster from
     :param list tuple targetMeshes: target mesh to copy the skin clustes to
     :param str surfaceMode: surface association method for copy skin weights
@@ -354,7 +363,6 @@ def connectExistingBPMs(skinCluster, influences=None):
             raise Exception("No Bpm exists for {}".format(influence))
 
 
-
 def localize(skinclusters, transform):
     """
     Localize skincluster to given transform
@@ -378,6 +386,7 @@ def breakLocalization(skinClusters):
 def stackSkinCluster(source, target):
     """
     create stacked skinclusters
+
     :param source: mesh to copy skincluster from
     :param target: mesh to add new skin cluster too
     """

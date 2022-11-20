@@ -405,6 +405,7 @@ class Base(object):
         :return:
         """
         cmpt._initalizeComponent()
+        cmpt._guideComponent()
         cmpt._buildComponent()
         cmpt._connectComponent()
         cmpt._finalizeComponent()

@@ -9,6 +9,7 @@ https://github.com/chadmv/cmt
 from argparse import ArgumentParser
 import errno
 import os
+import sys
 import platform
 import shutil
 import stat
@@ -98,6 +99,11 @@ def main():
     maya_app_dir = create_clean_maya_app_dir(app_directory)
     if app_directory:
         return
+
+    # add the lib to the python PAth
+    libPath = os.path.join(RIGAMJIG_ROOT_DIR, 'scripts', 'lib')
+    os.environ['PYTHONPATH'] = "{}:{}".format(libPath, os.environ['PYTHONPATH'])
+
     # Create clean prefs
     os.environ['MAYA_APP_DIR'] = maya_app_dir
     # Clear out any MAYA_SCRIPT_PATH value so we know we're in a clean env.

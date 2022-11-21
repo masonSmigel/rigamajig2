@@ -24,13 +24,15 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, rigParent=str(), lookAtSpaces=None):
+    def __init__(self, name, input, size=1, rigParent=str(), lookAtSpaces=None, rigParentList=None):
         """
         :param str name: name of the components
         :param list input: list of input joints to aim at a target. the aim axis is determined by the direction of the child
         :param float int size: default size of the controls:
         :param str rigParent: node to parent to connect the component to in the heirarchy
         :param dict lookAtSpaces: list of space connections for the aim control. formated as {"attrName": object}
+        :param list rigParentList: Optional - list of rig parents that overrides the default rig parent.
+                                   This can be useful for things like eyes where each input should have a different rig parent.
         """
 
         super(LookAt, self).__init__(name, input=input, size=size, rigParent=rigParent)
@@ -41,16 +43,12 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
 
         self.cmptSettings['aimTargetName'] = self.name + "_aim"
         self.cmptSettings['lookAtSpaces'] = lookAtSpaces
+        self.cmptSettings['rigParentList'] = rigParentList or list()
+        self.cmptSettings['upAxis'] = "y"
 
         for input in self.input:
-            if not cmds.objExists(input):
-                continue
-
-            aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(input))
             if cmds.objExists(input):
                 self.cmptSettings['{}Name'.format(input)] = '_'.join(input.split("_")[:-1])
-                self.cmptSettings['{}_aimVector'.format(input)] = aimVector
-                self.cmptSettings['{}_upVector'.format(input)] = (0, 1, 0)
 
     def createBuildGuides(self):
         """ create build guides_hrc """
@@ -98,8 +96,8 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         for input, lookatControl in zip(self.input, self.lookAtCtlList):
 
             # gather component settings from the container
-            aimVector = getattr(self, "{}_aimVector".format(input))
-            upVector = getattr(self, "{}_upVector".format(input))
+            aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(input))
+            upVector = rig_transform.getVectorFromAxis(self.upAxis)
             upVectorGuide = getattr(self, "_{}_upVecTgt".format(input))
 
             # create an upvector and aim contraint
@@ -121,8 +119,14 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         """
         connect to the rig parent
         """
-        # connect the controls to the rig parent
-        if cmds.objExists(self.rigParent):
+        # connect the controls to the rig parent. Check if we have a rigParentList to override the default rig parent.
+        if len(self.rigParentList) > 0:
+            for ctl, rigParent in zip(self.lookAtCtlList, self.rigParentList):
+                rig_transform.connectOffsetParentMatrix(rigParent, ctl.orig, mo=True)
+            for upVec, rigParent in zip(self.upVecObjList, self.rigParentList):
+                rig_transform.connectOffsetParentMatrix(rigParent, upVec, mo=True)
+
+        elif cmds.objExists(self.rigParent):
             for ctl in self.lookAtCtlList:
                 rig_transform.connectOffsetParentMatrix(self.rigParent, ctl.orig, mo=True)
             for upVec in self.upVecObjList:

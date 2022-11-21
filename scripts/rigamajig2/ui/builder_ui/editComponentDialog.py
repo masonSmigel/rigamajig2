@@ -185,8 +185,8 @@ class EditComponentDialog(QtWidgets.QDialog):
         for item in self.currentComponent.cmptSettings:
             if item not in ['name', 'input', 'rigParent', 'type', 'component_side']:
                 self.addWidgetFromParameter(
-                    item,
-                    self.currentComponent.getContainer(),
+                    parameter=item,
+                    container=self.currentComponent.getContainer(),
                     parameterType=type(component.cmptSettings[item])
                     )
 
@@ -217,6 +217,10 @@ class EditComponentDialog(QtWidgets.QDialog):
         elif parameterType == list:
             # add a maya list widget
             widget = mayaListWidget.MayaList()
+
+            metaNode = meta.MetaNode(container)
+            data = metaNode.getData(parameter)
+            widget.setItems(data)
         elif parameterType == bool:
             widget = QtWidgets.QCheckBox()
             value = cmds.getAttr("{}.{}".format(container, parameter))

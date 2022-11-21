@@ -212,6 +212,19 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
             else:
                 gestureUtils.setupSimple(self.cupControls[i].trs, self.wrist.name, fingerName + 'Cup', multplier=-1)
 
+    def setupAnimAttrs(self):
+        """ setup animation attributes"""
+
+        rigamajig2.maya.attr.addSeparator(self.wrist.name, "visability")
+        # add an attribute to hide the finger controls
+        rigamajig2.maya.attr.createAttr(self.wrist.name, "cupPivots", "bool", value=0, keyable=False, channelBox=True)
+        cupControls = [x.name for x in self.cupControls]
+        rig_control.connectControlVisiblity(self.wrist.name, "cupPivots", cupControls)
+
+        rigamajig2.maya.attr.createAttr(self.wrist.name, "fingers", "bool", value=1, keyable=False, channelBox=True)
+        fingerControls = [x.controlers for x in self.fingerComponentList]
+        rig_control.connectControlVisiblity(self.wrist.name, "fingers", fingerControls)
+
     def connect(self):
         if cmds.objExists(self.rigParent):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.wrist.orig, mo=True)

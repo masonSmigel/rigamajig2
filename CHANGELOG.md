@@ -1,5 +1,31 @@
 # Change Log 
 
+## 1.0.8
+
+### Added: 
+* Transfer UVs to rigged utility function to `uv.transferUvsToRigged()`. This can be used to transfer uvs 
+from an updated model to a rigged model without affecting the deformers.   
+* Added a bind pre matrix joint to the `basic.basic` component. This can be used to create deformation layers. 
+* Added 'connect bind pre matrix' button to the builder dialog
+* Added the ability to split blendshapes based on a skin weight file not an exisiting skin cluster 
+* Added the `chain.chainSpline` component. This is useful for things like belts and necklaces. 
+* Added the option to create a closed curve to `rigamajig2.maya.curve.createCurveFromTransform`. 
+This can be set through the `form` parameter.
+* Added `geometryVisability.addGeometrySwitch()` to add geometry visability switches to the rig. 
+* Added `skin_data.SkinData.getInfluences()` to retreive influcnces from a skin file. 
+* Added Gimble control visability attributes to `arm.arm`, `limb.limb`, `leg.leg`, `cog.cog`, `neck.neck`. 
+* Added attribute to hide the foot pivots on the `leg.leg` component. It exists on the IkLimb control. 
+* Added attribute to hide the cup pivots and fingers to the `hand.hand` component. it exists on the 'poses' control. 
+
+### Changed: 
+* Turned off bendies by default in the biped template.
+* Removed the per-input aim vector and upvector from the `lookAt.lookAt` component.
+This also replaces the upVector with an upAxis attribute which works better with the builderUI
+
+### Fixed: 
+* Fixed an issue with the control size and name dictionary
+* Fixed a bug with the skinData loading incorectly. 
+* Added import of the `rigamajig2/scripts/lib` to unittests. 
 
 ## 1.0.7
 

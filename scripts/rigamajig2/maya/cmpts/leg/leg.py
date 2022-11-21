@@ -127,8 +127,8 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
             shapeAim='x',
             xformObj=self.toeGuide
             )
-
-        self.ikControls += [self.heelIk.name, self.ballIk.name, self.toesIk.name]
+        self.footPivotControls = [self.heelIk.name, self.ballIk.name, self.toesIk.name]
+        self.ikControls += self.footPivotControls
 
     def rigSetup(self):
         """Add the rig setup"""
@@ -185,6 +185,9 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         rigamajig2.maya.attr.driveAttribute('ballSwivel', self.paramsHierarchy, self.limbIk.name)
         rigamajig2.maya.attr.driveAttribute('ballAngle', self.paramsHierarchy, self.limbIk.name)
         rigamajig2.maya.attr.driveAttribute('toeStraightAngle', self.paramsHierarchy, self.limbIk.name)
+
+        rigamajig2.maya.attr.createAttr(self.limbIk.name, "footPivots", "bool", value=0, keyable=False, channelBox=True)
+        rig_control.connectControlVisiblity(self.limbIk.name, "footPivots", self.footPivotControls)
 
         super(Leg, self).setupAnimAttrs()
 

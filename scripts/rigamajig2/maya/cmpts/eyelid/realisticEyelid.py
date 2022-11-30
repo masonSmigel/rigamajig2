@@ -324,14 +324,14 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         # add the inbetweens
         # # to build a better blink system we will make a nuteral blink curve to use as a base.
         tempBlinkCurve = cmds.duplicate(self.uppDriverCurve, name="tmpBlinkCurve")[0]
-        tempBshp = blendshape.create(tempBlinkCurve, targets=[self.uppDriverCurve, self.lowDriverCurve])
+        cmds.rebuildCurve(tempBlinkCurve, kcp=True, degree=3)
+        tempBshp = blendshape.create(tempBlinkCurve, targets=[self.uppBlinkCurve, self.lowBlinkCurve])
 
         for target in blendshape.getTargetList(tempBshp):
             cmds.setAttr("{}.{}".format(tempBshp, target), 0.5)
-        cmds.delete(tempBlinkCurve, ch=True)
-        cmds.rebuildCurve(tempBlinkCurve, kcp=True, degree=3)
+        # cmds.delete(tempBlinkCurve, ch=True)
         # smooth out this curve. we can use it add an inbetween to the blendshape targets!
-        cmds.smoothCurve("{}.cv[*]".format(tempBlinkCurve), smoothness=15)
+        cmds.smoothCurve("{}.cv[*]".format(tempBlinkCurve), smoothness=15, ch=True)
 
         # setup the blink wires
         cmds.wire(self.uppDriverCurve, wire=self.uppControlCurve, name="{}_wire".format(self.uppDriverCurve))
@@ -349,10 +349,10 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
             blendshape.addTarget(bshp, self.uppBlinkCurve)
             blendshape.addTarget(bshp, self.lowBlinkCurve)
             # blendshape.addInbetween(bshp, tempBlinkCurve, self.uppBlinkCurve)
-            # blendshape.addInbetween(bshp, tempBlinkCurve, self.lowBlinkCurve)
+            blendshape.addInbetween(bshp, tempBlinkCurve, self.lowBlinkCurve)
 
         # once we have created out inbetweens we can delete the inbetween curve.
-        cmds.delete(tempBlinkCurve)
+        # cmds.delete(tempBlinkCurve)
 
         # Finally we can build the blink system. the
         blinkAttr = attr.createAttr(self.paramsHierarchy, "blink", "float", value=0, minValue=0, maxValue=1)

@@ -222,10 +222,6 @@ class Base(object):
         """run a prescript"""
         pass
 
-    def setupAnimAttrs(self):
-        """Setup animation attributes. implement in subclass"""
-        pass
-
     def initalHierachy(self):
         """Setup the inital Hirarchy. implement in subclass"""
         self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
@@ -246,6 +242,10 @@ class Base(object):
 
     def postRigSetup(self):
         """Add the post setup. implement in subclass"""
+        pass
+
+    def setupAnimAttrs(self):
+        """Setup animation attributes. implement in subclass"""
         pass
 
     def initConnect(self):

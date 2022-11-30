@@ -46,6 +46,7 @@ def create(base, targets=None, origin='local', deformOrder=None, name=None):
     :rtype: str
     """
     targets = targets or list()
+    targets = common.toList(targets)
 
     if not cmds.objExists(base):
         raise Exception("base mesh {} does not exist".format(base))
@@ -83,7 +84,7 @@ def addTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, t
 
     :param str blendshape: name of the blendshape nnode
     :param str  target: name of the target geometry to add
-    :param str base: base geometry of the blendshape
+    :param str base: base geometry of the blendshape. If Ommited use the first connected base
     :param int targetIndex: specified target index of the blendshape
     :param int float targetWeight: set the target weight
     :param  bool topologyCheck: check the topology of the model before adding the blendshape
@@ -109,6 +110,36 @@ def addTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, t
 
     if targetWeight:
         cmds.setAttr("{}.{}".format(blendshape, targetName), targetWeight)
+
+    return "{}.{}".format(blendshape, targetName)
+
+
+def addInbetween(blendshape, targetGeo, targetName, base=None, targetWeight=0.5):
+    """
+    Add a new target inbetween to the specified blendShape target
+
+    :param str blendshape: Name of the blendshape node
+    :param targetGeo: New target geo to add as an ibetween target
+    :param targetName: Name of the blendshape target to add the inbetween to
+    :param str base: base geometry of the blendshape. If Ommited use the first connected base
+    :param float targetWeight: Set the weight of the target inbetween shape
+    """
+    if not isBlendshape(blendshape):
+        raise Exception("{} is not a blendshape".format(blendshape))
+
+    if not cmds.objExists(targetGeo):
+        raise Exception("The target geometry {} doesnt exist".format(target))
+
+    if base and not mc.objExists(base):
+        raise Exception('Base geometry "{}" does not exist!'.format(base))
+
+    if not base:
+        base = getBaseGeometry(blendshape)
+
+    targetIndex = getTargetIndex(blendshape, targetName)
+
+    # add the blendshape target
+    cmds.blendShape(blendshape, e=True, t=(base, targetIndex, targetGeo, targetWeight))
 
     return "{}.{}".format(blendshape, targetName)
 
@@ -154,7 +185,7 @@ def getTargetList(blendshape):
         raise Exception("{} is not a valid blendshape node".format(blendshape))
 
     targetList = cmds.listAttr(blendshape + ".w", m=True) or []
-    return targetList
+    return common.toList(targetList)
 
 
 def hasTargetGeo(blendShape, target, base=None):
@@ -261,7 +292,7 @@ def getTargetName(blendshape, targetGeometry):
 
     targetConnectionIndex = targetConnections.index(blendshape)
     targetConnectionAttr = targetConnections[targetConnectionIndex - 1]
-    targetConnectionPlug = cmds.listConnections(targetConnectionAttr, sh=True, p=True, d=True, s=False)[0]
+    targetConnectionPlug = cmds.listConnections(targetConnectionAttr, sh=True, p=True, d=True, s=False, t='blendShape')[0]
 
     targetIndex = int(targetConnectionPlug.split(".")[2].split("[")[1].split("]")[0])
     targetAlias = cmds.aliasAttr("{}.weight[{}]".format(blendshape, targetIndex), q=True)

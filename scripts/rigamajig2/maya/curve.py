@@ -9,7 +9,7 @@ import rigamajig2.maya.shape as shape
 import rigamajig2.maya.mathUtils as mathUtils
 
 
-def createCurve(points, degree=3, name='curve', transformType="transform", form="Open"):
+def createCurve(points, degree=3, name='curve', transformType="transform", form="Open", parent=None):
     """
     Create a curve
 
@@ -18,6 +18,7 @@ def createCurve(points, degree=3, name='curve', transformType="transform", form=
     :param str name: name of the curve
     :param str transformType: transfrom type to create on.
     :param str form: The form of the curve. ex. (Open, Closed, Periodic)
+    :param str parent: Optional- Parent the curve under this node in the hierarchy
     :return: name of the curve created
     :rtype: str
     """
@@ -46,17 +47,20 @@ def createCurve(points, degree=3, name='curve', transformType="transform", form=
     # only be one.
     for shape in cmds.listRelatives(curve, c=True, type="shape"):
         if transformType == "joint":
-            trsTypeName = cmds.createNode("joint", name="{}_jtn".format(name))
+            trsTypeName = cmds.createNode("joint", name="{}_jnt".format(name))
             cmds.parent(shape, trsTypeName, r=True, shape=True)
             cmds.delete(curve)
             cmds.rename(trsTypeName, curve)
             cmds.setAttr("{}.drawStyle".format(curve), 2)
         cmds.rename(shape, "{}Shape".format(curve))
 
+    if parent:
+        cmds.parent(curve, parent)
+
     return curve
 
 
-def createCurveFromTransform(transforms, degree=3, name='curve', transformType='transform', form="Open"):
+def createCurveFromTransform(transforms, degree=3, name='curve', transformType='transform', form="Open", parent=None, ep=False):
     """
     Wrapper to create a curve from given transforms
 
@@ -65,7 +69,8 @@ def createCurveFromTransform(transforms, degree=3, name='curve', transformType='
     :param str name: name of the curve
     :param str transformType: transfrom type to create on.
     :param str form: The form of the curve. ex. (Open, Closed, Periodic). If closed an additional point will be added.
-
+    :param str parent: Optional- Parent the curve under this node in the hierarchy
+    :param bool ep: use transforms as Edit points instead of Curve points
     :return: name of the curve created
     :rtype: str
     """
@@ -74,7 +79,38 @@ def createCurveFromTransform(transforms, degree=3, name='curve', transformType='
     if form == "Closed":
         points.append(cmds.xform(transforms[0], q=True, ws=True, t=True))
 
-    return createCurve(points, degree, name, transformType, form)
+    if ep:
+        return createCurveFromEP(points, degree=degree, name=name, transformType=transformType, form=form, parent=parent)
+
+    return createCurve(points, degree=degree, name=name, transformType=transformType, form=form, parent=parent)
+
+
+def createCurveFromEP(epList, degree=3, name='curve', transformType='transform', form='Open', parent=None):
+    """
+    Create an EP curve from a list of
+
+    :param epList: List of edit points
+   :param int degree: degree of the curve
+    :param str name: name of the curve
+    :param str transformType: transfrom type to create on.
+    :param str form: The form of the curve. ex. (Open, Closed, Periodic). If closed an additional point will be added.
+    :param str parent: Optional- Parent the curve under this node in the hierarchy
+    :return:
+    """
+
+    # create a linear curve from the EP list
+    curve = createCurve(epList, degree=1, name=name, transformType=transformType, form=form)
+
+    # create a new fit spline
+    fitCurve = cmds.fitBspline(curve,ch=0,tol=0.01)
+
+    # Delete original curve
+    cmds.delete(curve)
+    # Rename fit curve
+    curve = cmds.rename(fitCurve[0], curve)
+    # Return curve
+    return curve
+
 
 
 def getCvs(curve):
@@ -147,6 +183,50 @@ def getClosestParameter(curve, position):
     # cmds.unloadPlugin("closestPointOnCurve")
 
     return uParamater
+
+
+def getRange(curve):
+    """
+    Get the range of a given curve
+
+    :param curve: name of the curve to get the range of
+    :return: min, max
+    :rtype list
+    """
+    curveShape = cmds.listRelatives(curve, s=True) or []
+
+    minParam, maxParam = cmds.getAttr("{}.minMaxValue".format(curveShape[0]))[0]
+    return minParam, maxParam
+
+
+def attatchToCurve(transform, curve, toClosestParam=True,  parameter=0.0):
+    """
+    Connect a transform to a given parameter of a curve
+
+    :param transform: name of transform to attatch to a curve
+    :param curve: name of the curve to attatch the transform to
+    :param toClosestParam: If true attatch to the closest parameter on the curve
+    :param parameter: if not toClosestParam then use this parameter
+    :return: the new point on curve info node
+    :rtype: str
+    """
+
+    if not cmds.objExists(transform):
+        raise Exception("The transform {} does not exist".format(transform))
+
+    if toClosestParam:
+        trsPosition = cmds.xform(transform, q=True, ws=True, t=True)
+        parameter  = getClosestParameter(curve, position=trsPosition)
+
+    # create the point on curve info node and connect stuff
+    curveShape = cmds.listRelatives(curve, s=True)[0]
+
+    pointOnCurveInfo = cmds.createNode("pointOnCurveInfo", name="{}_pointOnCurveInfo".format(transform))
+    cmds.connectAttr("{}.{}".format(curveShape, "worldSpace[0]"), "{}.{}".format(pointOnCurveInfo, "inputCurve"))
+    cmds.connectAttr("{}.{}".format(pointOnCurveInfo, "result.position"), "{}.{}".format(transform, "translate"))
+    cmds.setAttr("{}.parameter".format(pointOnCurveInfo), parameter)
+
+    return pointOnCurveInfo
 
 
 def setCvPositions(curve, cvList, world=True):

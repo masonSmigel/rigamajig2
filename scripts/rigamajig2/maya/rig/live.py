@@ -8,6 +8,7 @@ import rigamajig2.maya.decorators
 import rigamajig2.shared.common as common
 import rigamajig2.maya.rig.ikfk as ikfk
 import rigamajig2.maya.node as node
+import rigamajig2.maya.curve as curve
 import rigamajig2.maya.transform as transform
 import rigamajig2.maya.attr as rig_attr
 import rigamajig2.maya.meta as meta
@@ -361,3 +362,37 @@ def slideBetweenTransforms(target, start, end, attrHolder=None, attrName='positi
     revOutputNode = "{}.{}".format(const, "target[0].targetWeight")
     node.reverse(revInputAttr, output=revOutputNode, name="{}_reverse".format(target))
     return const
+
+
+def createLiveCurve(transforms, degree=3, form="Open", curveName='curve', parent=None, displayType='temp'):
+    """
+    Create a curve through a list of transforms and connect each transforms to a coresponsing CV of the curve.
+
+    :param list transforms: list of transforms to create a curve between
+    :param int degree: degree of the curve to create
+    :param str form: The form of the curve. ex. (Open, Closed, Periodic)
+    :param str curveName: name of the curve to create
+    :param str parent: Optional- Parent the curve under this node in the hierarchy
+    :param displayType: Set the display type. Valid values are: 'norm', 'temp', 'ref'
+    :return: name of the curve created
+    """
+    crv = curve.createCurveFromTransform(transforms, degree=degree, form=form, parent=parent, name=curveName)
+    curveShape = cmds.listRelatives(crv, s=True) or []
+
+    for i, transform in enumerate(transforms):
+        mm = cmds.createNode('multMatrix', n=curveName + "_0_mm")
+        dcmp = cmds.createNode('decomposeMatrix', n=curveName + "_0_dcmp")
+
+        # connect the attributes
+        cmds.connectAttr(transform + '.worldMatrix', mm + ".matrixIn[0]", f=True)
+        cmds.connectAttr(crv + '.worldInverseMatrix', mm + ".matrixIn[1]", f=True)
+        cmds.connectAttr(mm + '.matrixSum', dcmp + '.inputMatrix')
+        cmds.connectAttr(dcmp + '.outputTranslate',  '{}.controlPoints[{}]'.format(curveShape[0], i), f=True)
+
+    # set the curve display type
+    displayTypeDict = {'norm': 0, 'temp': 1, 'ref': 2}
+
+    cmds.setAttr(crv + '.overrideEnabled', 1)
+    cmds.setAttr(crv + '.overrideDisplayType', displayTypeDict[displayType])
+
+    return crv

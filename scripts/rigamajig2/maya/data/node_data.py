@@ -54,7 +54,7 @@ class NodeData(maya_data.MayaData):
         for item in items:
             self.gatherData(item)
 
-    def applyData(self, nodes, attributes=None, worldSpace=False):
+    def applyData(self, nodes, attributes=None, worldSpace=False, applyColorOverrides=True):
         """
         Applies the data for given nodes.
         :param nodes: Array of nodes to apply the data to
@@ -64,6 +64,9 @@ class NodeData(maya_data.MayaData):
         :type attributes: list | tuple
 
         :param worldSpace: If True apply translate and rotate in world space.
+
+        :param applyColorOverrides: If True color overrides will be applied. otherwise this is false.
+
         :return:
         """
         gatherAttrsFromFile = False
@@ -92,6 +95,10 @@ class NodeData(maya_data.MayaData):
                     attributes.remove('offsetParentMatrix')
 
             for attribute in attributes:
+                if not applyColorOverrides:
+                    if attribute in ['overrideEnabled', 'overrideRGBColors', 'overrideColorRGB','overrideColor']:
+                        continue
+
                 if attribute in self._data[node] and attribute in cmds.listAttr(node):
                     setAttr = True
                     for attr in cmds.listAttr("{0}.{1}".format(node, attribute)):

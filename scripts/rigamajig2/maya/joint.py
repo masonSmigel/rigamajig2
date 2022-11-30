@@ -100,6 +100,18 @@ def length(joint):
         return mathUtils.distance(startPos, endPos)
 
 
+def setRadius(joints, radius=1):
+    """
+    Set the radius for a list of joints
+    :param list joints: list of joint to set the radius of
+    :param float radius: radius to set on a list of joints
+    """
+    joints = common.toList(joints)
+    for j in joints:
+        if isJoint(j):
+            cmds.setAttr("{}.radius".format(j), radius)
+
+
 def duplicateChain(jointList, parent=None, names=None):
     """
     Duplicate the joint chain without clashing names.

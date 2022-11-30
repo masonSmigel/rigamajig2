@@ -43,3 +43,6 @@ class GuideData(node_data.NodeData):
             data[attr] = rigamajig2.maya.attr .getPlugValue("{}.{}".format(node, attr))
 
         self._data[node].update(data)
+
+    def applyData(self, nodes, attributes=None, worldSpace=False):
+        super(GuideData, self).applyData(nodes, attributes, worldSpace, applyColorOverrides=False)

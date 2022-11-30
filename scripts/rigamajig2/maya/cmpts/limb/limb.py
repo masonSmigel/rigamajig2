@@ -455,7 +455,6 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             for bendieCtl in self.bendControls:
                 rig_control.connectControlVisiblity(self.paramsHierarchy, "bendies", bendieCtl)
 
-
         self.createIkFkMatchSetup()
 
     def postRigSetup(self):

@@ -1,7 +1,7 @@
 {
     "type": "AbstractData", 
     "user": "masonsmigel", 
-    "time": "2022-07-17 22:26:13", 
+    "time": "2022-11-21 22:37:36", 
     "data": {
         "main": {
             "input": [], 
@@ -9,6 +9,47 @@
             "type": "main.main", 
             "name": "main", 
             "size": 4
+        }, 
+        "eyeballs": {
+            "input": [
+                "eyeball_l_bind", 
+                "eyeball_r_bind"
+            ], 
+            "rigParent": "", 
+            "type": "lookAt.lookAt", 
+            "name": "eyeballs", 
+            "size": 1, 
+            "aimTargetName": "eyeballs_aim", 
+            "lookAtSpaces": {}, 
+            "rigParentList": [
+                "eyeSocket_l_bind", 
+                "eyeSocket_r_bind"
+            ], 
+            "upAxis": "y", 
+            "eyeball_l_bindName": "eyeball_l", 
+            "eyeball_r_bindName": "eyeball_r"
+        }, 
+        "eyelid_l": {
+            "input": [
+                "eyeSocket_l_bind"
+            ], 
+            "rigParent": "", 
+            "type": "eyelid.realisticEyelid", 
+            "name": "eyelid_l", 
+            "size": 1, 
+            "eyelidSpans": 13, 
+            "addCrease": true
+        }, 
+        "eyelid_r": {
+            "input": [
+                "eyeSocket_r_bind"
+            ], 
+            "rigParent": "", 
+            "type": "eyelid.realisticEyelid", 
+            "name": "eyelid_r", 
+            "size": 1, 
+            "eyelidSpans": 13, 
+            "addCrease": true
         }
     }
 }

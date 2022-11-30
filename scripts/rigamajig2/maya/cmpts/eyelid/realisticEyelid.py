@@ -248,6 +248,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         lowerControlCurveName = "{}_lowerLid_low".format(self.name)
 
         blinkLowCurveName = "{}_blink_low".format(self.name)
+        blinkInbetweenName = "{}_blinkInbetween_low".format(self.name)
         upperBlinkCurveName = "{}_upperLid_blink".format(self.name)
         lowerBlinkCurveName = "{}_lowerLid_blink".format(self.name)
 
@@ -271,19 +272,27 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
 
         # create the blink curves
 
+        # add the inbetweens
+        # # to build a better blink system we will make a nuteral blink curve to use as a base.
+        tempBlinkCurve = cmds.duplicate(self.uppDriverCurve, name="self.tmpBlinkCurve")[0]
+        tempBshp = blendshape.create(tempBlinkCurve, targets=[self.uppDriverCurve, self.lowDriverCurve])
+        for target in blendshape.getTargetList(tempBshp):
+            cmds.setAttr("{}.{}".format(tempBshp, target), 0.5)
+        cmds.delete(tempBlinkCurve, ch=True)
+        cmds.rebuildCurve(tempBlinkCurve, kcp=True, degree=3)
 
+        # we need to create the blink inbetween before we smooth it so we can keep the live smoothing in the
+        self.blinkInbetween = cmds.rebuildCurve(tempBlinkCurve, spans=4, degree=3, rpo=False,name=blinkInbetweenName)[0]
+
+        # smooth out this curve. we can use it ad an inbetween to the blendshape targets!
+        cmds.smoothCurve("{}.cv[*]".format(tempBlinkCurve), smoothness=10)
         # create the upper and lower blink curves then parent them
-        # self.blinkControlCurve = cmds.rebuildCurve(tempBlinkCurve, spans=4, degree=3, rpo=False, name=blinkLowCurveName)[0]
-        # self.uppBlinkTgtCurve = cmds.rebuildCurve(tempBlinkCurve, kcp=True, degree=1, rpo=False, name=upperBlinkCurveName)[0]
-        # self.lowBlinkTgtCurve = cmds.rebuildCurve(tempBlinkCurve, kcp=True, degree=1, rpo=False, name=lowerBlinkCurveName)[0]
-        # cmds.parent(self.blinkControlCurve, self.uppBlinkCurve, self.lowBlinkCurve, self.curvesHierarchy)
+        self.blinkControlCurve = cmds.rebuildCurve(tempBlinkCurve, spans=4, degree=3, rpo=False, name=blinkLowCurveName)[0]
+        self.uppBlinkCurve = cmds.rebuildCurve(tempBlinkCurve, kcp=True, degree=1, rpo=False, name=upperBlinkCurveName)[0]
+        self.lowBlinkCurve = cmds.rebuildCurve(tempBlinkCurve, kcp=True, degree=1, rpo=False, name=lowerBlinkCurveName)[0]
+        cmds.parent(self.blinkControlCurve, self.uppBlinkCurve, self.lowBlinkCurve, self.blinkInbetween, self.curvesHierarchy)
 
-        # at this point we no longer need to tempBlinkCurve
-        # cmds.delete(tempBlinkCurve)
-
-        # self.blinkControlCurve = cmds.duplicate(self.uppControlCurve, name=blinkLowCurveName)[0]
-        self.uppBlinkCurve = cmds.duplicate(self.lowDriverCurve, name=upperBlinkCurveName)[0]
-        self.lowBlinkCurve = cmds.duplicate(self.uppDriverCurve, name=lowerBlinkCurveName)[0]
+        cmds.delete(tempBlinkCurve)
 
         # When using the point on curve info node to drive the translation of transforms
         # its easier to ensure they dont inherit any transforms than to negate the parent transform.
@@ -321,65 +330,57 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
 
     def rigSetup(self):
         """ create the main rig setup """
-        # add the inbetweens
-        # # to build a better blink system we will make a nuteral blink curve to use as a base.
-        tempBlinkCurve = cmds.duplicate(self.uppDriverCurve, name="tmpBlinkCurve")[0]
-        cmds.rebuildCurve(tempBlinkCurve, kcp=True, degree=3)
-        tempBshp = blendshape.create(tempBlinkCurve, targets=[self.uppBlinkCurve, self.lowBlinkCurve])
 
-        for target in blendshape.getTargetList(tempBshp):
-            cmds.setAttr("{}.{}".format(tempBshp, target), 0.5)
-        # cmds.delete(tempBlinkCurve, ch=True)
-        # smooth out this curve. we can use it add an inbetween to the blendshape targets!
-        cmds.smoothCurve("{}.cv[*]".format(tempBlinkCurve), smoothness=15, ch=True)
-
-        # setup the blink wires
+        # setup the blink wires.
         cmds.wire(self.uppDriverCurve, wire=self.uppControlCurve, name="{}_wire".format(self.uppDriverCurve))
         cmds.wire(self.lowDriverCurve, wire=self.lowControlCurve, name="{}_wire".format(self.lowDriverCurve))
+        cmds.wire(self.uppBlinkCurve, wire=self.blinkControlCurve, name="{}_wire".format(self.uppBlinkCurve))
+        cmds.wire(self.lowBlinkCurve, wire=self.blinkControlCurve, name="{}_wire".format(self.lowBlinkCurve))
 
-        cmds.wire(self.uppBlinkCurve, wire=self.lowControlCurve, name="{}_wire".format(self.uppDriverCurve))
-        cmds.wire(self.lowBlinkCurve, wire=self.uppControlCurve, name="{}_wire".format(self.lowDriverCurve))
+        # create a blendshape for the control curve and add the blinkInbetween as an inbetween target
+        self.blinkBlendshape = blendshape.create(self.blinkControlCurve, name='{}_blink'.format(self.blinkControlCurve))
+        blendshape.addTarget(self.blinkBlendshape, target=self.lowControlCurve, targetWeight=1)
+        blendshape.addTarget(self.blinkBlendshape, target=self.uppControlCurve, targetWeight=1)
+        blendshape.addInbetween(self.blinkBlendshape, self.blinkInbetween, targetName=self.uppControlCurve, targetWeight=0.5)
+        blendshape.addInbetween(self.blinkBlendshape, self.blinkInbetween, targetName=self.lowControlCurve, targetWeight=0.5)
 
-        # create the upper and lower blink blendshapes
-        self.uppBlinkBshp = blendshape.create(self.uppDriverCurve, name="{}_blink".format(self.uppDriverCurve))
-        self.lowBlinkBshp = blendshape.create(self.lowDriverCurve, name="{}_blink".format(self.lowDriverCurve))
+        # We add an inbetween curve so there is a nice smooth middle group between the upper and lower curve, this
+        # greatly improves the deformation of the blink. By keeping the connection live we avoid having a stable
+        # middle positon while still leveraging the benifits of the smooth. To do this we need to position this at the
+        # middle between the two driver curves.
+        blinkInbetweenBshp = blendshape.create(self.blinkInbetween,targets=[self.uppControlCurve, self.lowControlCurve])
+        for tgt in blendshape.getTargetList(blinkInbetweenBshp):
+            cmds.setAttr("{}.{}".format(blinkInbetweenBshp, tgt), 0.5)
 
-        # in order to get a proper blend between the two curves we need both blink curves to drive the blendshape.
-        for bshp in [self.uppBlinkBshp, self.lowBlinkBshp]:
-            blendshape.addTarget(bshp, self.uppBlinkCurve)
-            blendshape.addTarget(bshp, self.lowBlinkCurve)
-            # blendshape.addInbetween(bshp, tempBlinkCurve, self.uppBlinkCurve)
-            blendshape.addInbetween(bshp, tempBlinkCurve, self.lowBlinkCurve)
+        # This is where the real magic happens by turning on the construciton history the curve will always
+        # be smoothed after it is put in the middle postion between the upper and lower curves.
+        smoothCurveNode = cmds.smoothCurve("{}.cv[*]".format(self.blinkInbetween), s=15, ch=True)[-1]
+        cmds.rename(smoothCurveNode, "{}_smooth".format(self.blinkInbetween))
 
-        # once we have created out inbetweens we can delete the inbetween curve.
-        # cmds.delete(tempBlinkCurve)
-
-        # Finally we can build the blink system. the
+        # Do the blink setup. Here we neeed to drive the upper and lower curves by the blink height and its inverse.
+        bshpTargets = blendshape.getTargetList(self.blinkBlendshape)
         blinkAttr = attr.createAttr(self.paramsHierarchy, "blink", "float", value=0, minValue=0, maxValue=1)
         blinkHeightAttr = attr.createAttr(self.paramsHierarchy, "blinkHeight", "float", value=0.15, minValue=0, maxValue=1)
 
-        # create the nodes needed for the blink setup
         lowBlinkMdl = node.multDoubleLinear(blinkHeightAttr, -1, name="{}_blinkHeightReverse".format(self.name))
         lowBlinkAdl = node.addDoubleLinear("{}.{}".format(lowBlinkMdl, "output"), 1, name="{}_lowHeight".format(self.name))
 
-        # connect the blink height into the targets of the blendshape curve
-        for bshp in [self.uppBlinkBshp, self.lowBlinkBshp]:
-            upperLidAdlAttr = "{}.{}".format(lowBlinkAdl, "output")
-            cmds.connectAttr(upperLidAdlAttr, "{}.{}".format(bshp, blendshape.getTargetList(bshp)[0]))
-            cmds.connectAttr(blinkHeightAttr, "{}.{}".format(bshp, blendshape.getTargetList(bshp)[1]))
+        cmds.connectAttr("{}.{}".format(lowBlinkAdl, "output"), "{}.{}".format(self.blinkBlendshape, bshpTargets[0]))
+        cmds.connectAttr(blinkHeightAttr, "{}.{}".format(self.blinkBlendshape, bshpTargets[1]))
 
+        # create the blendshapes to trigger the blinks
+        uppBlinkBshp = blendshape.create(self.uppDriverCurve, targets=self.uppBlinkCurve, name="{}_blink".format(self.uppDriverCurve))
+        lowBlinkBshp = blendshape.create(self.lowDriverCurve, targets=self.lowBlinkCurve, name="{}_blink".format(self.lowDriverCurve))
 
-
-        # connect the blink amount into the evelope for both targets
-        cmds.connectAttr(blinkAttr, "{}.{}".format(self.uppBlinkBshp, "envelope"))
-        cmds.connectAttr(blinkAttr, "{}.{}".format(self.lowBlinkBshp, "envelope"))
+        # finally connect the blink the envelope of the blendshape to control when the eyes blink.
+        cmds.connectAttr(blinkAttr, "{}.{}".format(uppBlinkBshp, blendshape.getTargetList(uppBlinkBshp)[0]))
+        cmds.connectAttr(blinkAttr, "{}.{}".format(lowBlinkBshp, blendshape.getTargetList(lowBlinkBshp)[0]))
 
     def setupAnimAttrs(self):
         """Setup animation attributes."""
         attr.addSeparator(self.eyeSocket.name, "----")
         attr.driveAttribute("blink", self.paramsHierarchy, self.eyeSocket.name)
         attr.driveAttribute("blinkHeight", self.paramsHierarchy, self.eyeSocket.name)
-
 
     def connect(self):
         """connect to the rig parent"""
@@ -388,3 +389,9 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         # connect the up vector
 
         pass
+
+    def finalize(self):
+        """ Finalize the rig setup """
+
+        # hide the curves group
+        cmds.setAttr("{}.v".format(self.curvesHierarchy), 0)

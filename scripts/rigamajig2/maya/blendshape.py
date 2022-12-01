@@ -114,7 +114,7 @@ def addTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, t
     return "{}.{}".format(blendshape, targetName)
 
 
-def addInbetween(blendshape, targetGeo, targetName, base=None, targetWeight=0.5):
+def addInbetween(blendshape, targetGeo, targetName, base=None, weight=0.5, absolute=True):
     """
     Add a new target inbetween to the specified blendShape target
 
@@ -122,7 +122,9 @@ def addInbetween(blendshape, targetGeo, targetName, base=None, targetWeight=0.5)
     :param targetGeo: New target geo to add as an ibetween target
     :param targetName: Name of the blendshape target to add the inbetween to
     :param str base: base geometry of the blendshape. If Ommited use the first connected base
-    :param float targetWeight: Set the weight of the target inbetween shape
+    :param float weight: Set the weight of the target inbetween shape
+    :param bool absolute: Add the inbtween as an absoutle target
+
     """
     if not isBlendshape(blendshape):
         raise Exception("{} is not a blendshape".format(blendshape))
@@ -139,7 +141,8 @@ def addInbetween(blendshape, targetGeo, targetName, base=None, targetWeight=0.5)
     targetIndex = getTargetIndex(blendshape, targetName)
 
     # add the blendshape target
-    cmds.blendShape(blendshape, e=True, t=(base, targetIndex, targetGeo, targetWeight))
+    inbetweenType = 'absolute' if absolute else 'relative'
+    cmds.blendShape(blendshape, e=True, t=(base, targetIndex, targetGeo, weight),ib=True, ibt=inbetweenType)
 
     return "{}.{}".format(blendshape, targetName)
 

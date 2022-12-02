@@ -408,6 +408,7 @@ class ComponentManager(QtWidgets.QWidget):
         cmds.select(cl=True)
         for item in self.getSelectedItem():
             itemDict = self.parseData(item)
+            print itemDict
             cmds.select(itemDict['container'], add=True)
 
     def editComponentParameters(self):
@@ -568,7 +569,7 @@ class ComponentManager(QtWidgets.QWidget):
         for cmpt in self.builder.getComponentList():
             name = cmpt.name
             componentType = cmpt.componentType
-            buildStepString = ['unbuilt', 'initalize', 'build', 'connect', 'finalize', 'optimize']
+            buildStepString = ['unbuilt', 'initalize', 'guide', 'build', 'connect', 'finalize', 'optimize']
             buildStep = buildStepString[cmpt.getStep()]
 
             self.addComponent(name=name, componentType=componentType, buildStep=buildStep)

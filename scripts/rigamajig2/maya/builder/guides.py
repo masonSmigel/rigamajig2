@@ -89,8 +89,9 @@ def loadGuideData(path=None):
         dataObj.read(path)
         dataObj.applyData(nodes=dataObj.getKeys())
         return True
-    except:
-        return False
+    except Exception as e:
+        raise e
+        # return False
 
 
 def saveGuideData(path=None):

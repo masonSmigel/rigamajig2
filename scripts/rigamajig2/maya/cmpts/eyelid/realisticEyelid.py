@@ -206,7 +206,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
             attr.lock(guide, attr.TRANSLATE)
             # also if the joint is on the right side we should mirror the translation
             if self.side == 'r':
-                cmds.setAttr("{}.jointOrientY".format(guide), 180)
+                cmds.setAttr("{}.rotateY".format(guide), 180)
 
             returnList.append(guide)
         return returnList
@@ -252,7 +252,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
                                              size=GUIDE_SCALE,
                                              color='indigo',
                                              hideAttrs=['s', 'v'])
-                self.lidControls.append(ctl)
+                self.creaseControls.append(ctl)
 
     def preRigSetup(self):
         """ Setup the joints and curves neeeded for this eyelid setup"""
@@ -263,9 +263,6 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         # setup the base curves
         self.curvesHierarchy = cmds.createNode("transform", name="{}_curves".format(self.name), p=self.rootHierarchy)
 
-        upperCurveTrsList = self.uppLidGuideList
-        lowerCurveTrsList = self.lowLidGuideList
-
         topHighCurve = "{}_upperLid_high".format(self.name)
         botLowCurve = "{}_lowerLid_high".format(self.name)
         topControlCurveName = "{}_upperLid_low".format(self.name)
@@ -275,12 +272,12 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         botBlinkCurveName = "{}_lowerLid_blink".format(self.name)
 
         self.topDriverCruve = curve.createCurveFromTransform(
-            upperCurveTrsList,
+            self.uppLidGuideList,
             degree=1,
             name=topHighCurve,
             parent=self.curvesHierarchy)
         self.botDriverCurve = curve.createCurveFromTransform(
-            lowerCurveTrsList,
+            self.lowLidGuideList,
             degree=1,
             name=botLowCurve,
             parent=self.curvesHierarchy)
@@ -348,6 +345,56 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
             cmds.aimConstraint(aimLoc, baseJoint, aimVector=(1, 0, 0), upVector=(0, 1, 0),
                                worldUpType='object', worldUpObject=self.upVector)
 
+
+
+        if self.addCrease:
+            # build the crease curve and driver curve
+
+            topCreaseHighCurve = "{}_upperCreaseLid_high".format(self.name)
+            botCreaseLowCurve = "{}_lowerCreaseLid_high".format(self.name)
+            topCreaseControlCurveName = "{}_upperCreaseLid_low".format(self.name)
+            botCreaseControlCurveName = "{}_lowerCreaseLid_low".format(self.name)
+
+            self.topCreaseDriverCruve = curve.createCurveFromTransform(
+                self.uppCreaseGuideList,
+                degree=1,
+                name=topCreaseHighCurve,
+                parent=self.curvesHierarchy)
+            self.botCreaseDriverCurve = curve.createCurveFromTransform(
+                self.lowCreaseGuideList,
+                degree=1,
+                name=botCreaseLowCurve,
+                parent=self.curvesHierarchy)
+
+            # create the low-res curves
+            self.topCreaseLowCurve = cmds.duplicate(self.topCreaseDriverCruve,
+                                                    name=topCreaseControlCurveName)[0]
+            cmds.rebuildCurve(self.topCreaseLowCurve, spans=4, degree=3, fitRebuild=True)
+
+            self.botCreaseLowCurve = cmds.duplicate(self.botCreaseDriverCurve,
+                                                    name=botCreaseControlCurveName)[0]
+            cmds.rebuildCurve(self.botCreaseLowCurve, spans=4, degree=3, fitRebuild=True)
+
+            # if using crease create joints for that
+            for guide in self.uppCreaseGuideList + self.lowCreaseGuideList[1:-1]:
+                guideName = guide.split("_guide")[0]
+
+                # create joints... they need to be parented into the bind hierarchy.
+                endJoint = cmds.createNode("joint", name="{}_bind".format(guideName), p=self.input[0])
+                transform.matchTranslate(guide, endJoint)
+                joint.setRadius([baseJoint, endJoint], GUIDE_SCALE)
+                meta.tag(endJoint, "bind")
+
+                # much like the eyelid we need an offset. Instead of aiming here we will just connect the translate
+                targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.aimLocHierarchy)
+                transform.matchTranslate(guide, targetLoc)
+
+                targetCurve = self.botCreaseDriverCurve if 'lower' in guideName else self.topCreaseDriverCruve
+                curve.attatchToCurve(targetLoc, curve=targetCurve, toClosestParam=True)
+                constrain.orientConstraint(self.eyeSocket.name, targetLoc)
+
+                joint.connectChains([targetLoc], [endJoint])
+
     def rigSetup(self):
         """ create the main rig setup """
         # connect the eyesocket control to the eyesocket joint
@@ -357,23 +404,49 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         self.setupBlink()
 
         # setup eyelidControls
-        self.setupEyelidControls()
+        self.jointsHierarchy = cmds.createNode("transform", name="{}_joints".format(self.name),
+                                               parent=self.rootHierarchy)
+
+        self._setupDriverCurve(
+            controls=self.lidControls,
+            uppCurve=self.topLowCurve,
+            lowCurve=self.botLowCurve,
+            prefix='Lid')
+        # self.setupEyelidControls()
 
         if self.addFleshyEye:
             self.setupFleshyEye()
+
+        # if add crease
+        if self.addCrease:
+            wire1, _ = cmds.wire(self.topCreaseDriverCruve, wire=self.topCreaseLowCurve,
+                                 dds=[0, 5], name="{}_wire".format(self.topDriverCruve))
+            wire2, _ = cmds.wire(self.botCreaseDriverCurve, wire=self.botCreaseLowCurve,
+                                 dds=[0, 5], name="{}_wire".format(self.botDriverCurve))
+
+            # now we need to set the scale for all the wires. This prevents them from scaling weirdly.
+            # it will slightly alter the shape of the curves, but since we do it before the bind it wont affect the model!
+            for wire in [wire1, wire2]:
+                cmds.setAttr("{}.scale[0]".format(wire), 0)
+
+            self._setupDriverCurve(
+                controls=self.creaseControls,
+                uppCurve=self.topCreaseLowCurve,
+                lowCurve=self.botCreaseLowCurve,
+                prefix="Crease")
 
     def setupBlink(self):
         """ Setup the blink"""
 
         # setup the blink wires.
-        wire1, _ = cmds.wire(self.topDriverCruve, wire=self.topLowCurve, dds=[0, 5],
-                             name="{}_wire".format(self.topDriverCruve))
-        wire2, _ = cmds.wire(self.botDriverCurve, wire=self.botLowCurve, dds=[0, 5],
-                             name="{}_wire".format(self.botDriverCurve))
-        wire3, _ = cmds.wire(self.uppBlinkCurve, wire=self.blinkCurve, dds=[0, 5],
-                             name="{}_wire".format(self.uppBlinkCurve))
-        wire4, _ = cmds.wire(self.lowBlinkCurve, wire=self.blinkCurve, dds=[0, 5],
-                             name="{}_wire".format(self.lowBlinkCurve))
+        wire1, _ = cmds.wire(self.topDriverCruve, wire=self.topLowCurve,
+                             dds=[0, 5], name="{}_wire".format(self.topDriverCruve))
+        wire2, _ = cmds.wire(self.botDriverCurve, wire=self.botLowCurve,
+                             dds=[0, 5], name="{}_wire".format(self.botDriverCurve))
+        wire3, _ = cmds.wire(self.uppBlinkCurve, wire=self.blinkCurve,
+                             dds=[0, 5], name="{}_wire".format(self.uppBlinkCurve))
+        wire4, _ = cmds.wire(self.lowBlinkCurve, wire=self.blinkCurve,
+                             dds=[0, 5], name="{}_wire".format(self.lowBlinkCurve))
 
         # now we need to set the scale for all the wires. This prevents them from scaling weirdly.
         # it will slightly alter the shape of the curves, but since we do it before the bind it wont affect the model!
@@ -435,44 +508,47 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         # turn off inherit transform on all curves. This will prevent any double transforms when moving the global control.
         cmds.setAttr("{}.inheritsTransform".format(self.curvesHierarchy), False)
 
-    def setupEyelidControls(self):
-        """ Setup the eyelid controls """
-
-        self.jointsHierarchy = cmds.createNode("transform", name="{}_joints".format(self.name),
-                                               parent=self.rootHierarchy)
-        self.driverJoints = list()
-        for ctl in self.lidControls:
+    def _setupDriverCurve(self, controls, uppCurve, lowCurve, prefix=''):
+        """
+        Setup the driver curve system. This can be used on both the eyelid and creases
+        :param controls:
+        :param uppCurve:
+        :param lowCurve:
+        :return:
+        """
+        driverJoints = list()
+        for ctl in controls:
             jnt = cmds.createNode("joint", name=ctl.name + "_driver", parent=self.jointsHierarchy)
             transform.matchTransform(ctl.name, jnt)
             transform.connectOffsetParentMatrix(ctl.name, jnt)
 
-            self.driverJoints.append(jnt)
+            driverJoints.append(jnt)
 
         # bind the top lid
-        uppLidJoints = self.driverJoints[:5]
-        lowLidJoints = [self.driverJoints[0]] + self.driverJoints[5:] + [self.driverJoints[4]]
+        uppLidJoints = driverJoints[:5]
+        lowLidJoints = [driverJoints[0]] + driverJoints[5:] + [driverJoints[4]]
 
-        cmds.skinCluster(uppLidJoints, self.topLowCurve, dr=1, mi=2, bm=0,
-                         name="{}_skinCluster".format(self.topLowCurve))
-        cmds.skinCluster(lowLidJoints, self.botLowCurve, dr=1, mi=2, bm=0,
-                         name="{}_skinCluster".format(self.botLowCurve))
+        cmds.skinCluster(uppLidJoints, uppCurve, dr=1, mi=2, bm=0, name="{}_skinCluster".format(uppCurve))
+        cmds.skinCluster(lowLidJoints, lowCurve, dr=1, mi=2, bm=0, name="{}_skinCluster".format(lowCurve))
 
         # hide the joints
-        joint.hideJoints(self.driverJoints)
+        joint.hideJoints(driverJoints)
 
         # setup the constraint relationship between the eyelid and
 
-        uppLidFollow = attr.createAttr(self.paramsHierarchy, "uppLidFollow", "float", minValue=0, maxValue=1, value=0.8)
-        lowLidFollow = attr.createAttr(self.paramsHierarchy, "lowLidFollow", "float", minValue=0, maxValue=1, value=0.8)
+        uppLidFollow = attr.createAttr(self.paramsHierarchy, "upp{}Follow".format(prefix), "float", minValue=0,
+                                       maxValue=1, value=0.8)
+        lowLidFollow = attr.createAttr(self.paramsHierarchy, "low{}Follow".format(prefix), "float", minValue=0,
+                                       maxValue=1, value=0.8)
 
         uppLidReverse = node.reverse(uppLidFollow, name="{}_uppLidFollow".format(self.name))
         lowLidReverse = node.reverse(lowLidFollow, name="{}_uppLidFollow".format(self.name))
 
         # create some parent constraints for the eyelid controls
-        const1 = cmds.parentConstraint(self.lidControls[2].name, self.lidControls[0].name, self.lidControls[1].orig, mo=True)
-        const2 = cmds.parentConstraint(self.lidControls[2].name, self.lidControls[4].name, self.lidControls[3].orig, mo=True)
-        const3 = cmds.parentConstraint(self.lidControls[6].name, self.lidControls[0].name, self.lidControls[5].orig, mo=True)
-        const4 = cmds.parentConstraint(self.lidControls[6].name, self.lidControls[4].name, self.lidControls[7].orig,mo=True)
+        const1 = cmds.parentConstraint(controls[2].name, controls[0].name, controls[1].orig, mo=True)
+        const2 = cmds.parentConstraint(controls[2].name, controls[4].name, controls[3].orig, mo=True)
+        const3 = cmds.parentConstraint(controls[6].name, controls[0].name, controls[5].orig, mo=True)
+        const4 = cmds.parentConstraint(controls[6].name, controls[4].name, controls[7].orig, mo=True)
 
         # setup the target weight inputs and reverse nodes.
         for const in [const1, const2]:
@@ -538,6 +614,18 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         # setup the lower lid
         attr.addSeparator(self.lidControls[6].name, "----")
         attr.driveAttribute("lowLidFollow", self.paramsHierarchy, self.lidControls[6].name)
+
+        # setup the upper lid
+        attr.addSeparator(self.creaseControls[2].name, "----")
+        attr.driveAttribute("uppCreaseFollow", self.paramsHierarchy, self.creaseControls[2].name)
+
+        # setup the lower lid
+        attr.addSeparator(self.creaseControls[6].name, "----")
+        attr.driveAttribute("lowCreaseFollow", self.paramsHierarchy, self.creaseControls[6].name)
+
+        # setup controlVisabilities
+        attr.createAttr(self.eyeSocket.name, "crease", attributeType='bool', value=1, keyable=False, channelBox=True)
+        control.connectControlVisiblity(self.eyeSocket.name, "crease", controls=[ctl.name for ctl in self.creaseControls])
 
     def connect(self):
         """connect to the rig parent"""

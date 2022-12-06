@@ -321,14 +321,18 @@ def unpin(nodes=None):
 
         # retreive color information and set it back
         metaNode = meta.MetaNode(pinTrs)
-        colorData = metaNode.getAllData()
+        # colorData = metaNode.getAllData()
 
-        for key in list(colorData.keys()):
-            attribute = key.split("_")[-1]
-            if isinstance(colorData[key], (list, tuple)):
-                cmds.setAttr("{0}.{1}".format(node, attribute), *colorData[key])
-            else:
-                cmds.setAttr("{0}.{1}".format(node, attribute), colorData[key])
+        cmds.setAttr("{0}.{1}".format(node, "overrideEnabled"), True)
+        cmds.setAttr("{0}.{1}".format(node, "overrideRGBColors"), 0)
+        cmds.setAttr("{0}.{1}".format(node, "overrideColor"), 0)
+
+        # for key in list(colorData.keys()):
+        #     attribute = key.split("_")[-1]
+        #     if isinstance(colorData[key], (list, tuple)):
+        #         cmds.setAttr("{0}.{1}".format(node, attribute), *colorData[key])
+        #     else:
+        #         cmds.setAttr("{0}.{1}".format(node, attribute), colorData[key])
 
         # Remove the pinned tag so this node can be re-pined in the future.
         cmds.deleteAttr("{}.__isPinned__".format(node))

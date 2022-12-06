@@ -316,6 +316,13 @@ class ComponentManager(QtWidgets.QWidget):
 
     def addComponent(self, name, componentType, buildStep='unbuilt', container=None):
         """ append a new component to the ui """
+        # Here we fall into a common pyside pitfall.
+        # if an object falls out of the scope of python it will get delted.
+
+        # to avoid this we will only add the component if the component tree is visable.
+        if not self.componentTree.isVisible():
+            return None
+
         rowcount = self.componentTree.topLevelItemCount()
         item = QtWidgets.QTreeWidgetItem(rowcount)
         item.setSizeHint(0, QtCore.QSize(item.sizeHint(0).width(), 24))  # set height

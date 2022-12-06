@@ -121,6 +121,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
             cmds.parent(cmpt.controlHierarchy, self.controlHierarchy)
             cmds.parent(cmpt.spacesHierarchy, self.spacesHierarchy)
 
+            skipThumb = True
             # setup the cup controls
             if i == 0 and self.useFirstAsThumb:
 
@@ -130,8 +131,9 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
                 cmds.parent(baseOffset, cupControl.name)
 
                 self.cupControls.append(cupControl)
+                skipThumb = True
 
-            elif i == 1 or not self.useFirstAsThumb:
+            elif i == 1 or i == 0 and skipThumb:
 
                 cupControl = rig_control.createAtObject(cmpt.name + "Cup", shape='cube', orig=True, trs=True,
                                                         parent=self.wrist.name, xformObj=self.input[i + 1])

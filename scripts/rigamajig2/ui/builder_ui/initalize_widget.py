@@ -319,10 +319,6 @@ class ComponentManager(QtWidgets.QWidget):
         # Here we fall into a common pyside pitfall.
         # if an object falls out of the scope of python it will get delted.
 
-        # to avoid this we will only add the component if the component tree is visable.
-        if not self.componentTree.isVisible():
-            return None
-
         rowcount = self.componentTree.topLevelItemCount()
         item = QtWidgets.QTreeWidgetItem(rowcount)
         item.setSizeHint(0, QtCore.QSize(item.sizeHint(0).width(), 24))  # set height
@@ -378,7 +374,10 @@ class ComponentManager(QtWidgets.QWidget):
             buildStep = buildStepList[cmds.getAttr("{}.build_step".format(component))]
             isSubComponent = meta.hasTag(component, "subComponent")
             if not isSubComponent:
-                self.addComponent(name=name, componentType=componentType, buildStep=buildStep, container=component)
+                try:
+                    self.addComponent(name=name, componentType=componentType, buildStep=buildStep, container=component)
+                except:
+                    pass
 
     def parseData(self, item):
         """

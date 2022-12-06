@@ -5,7 +5,7 @@
     file: realisticEyelid.py.py
     author: masonsmigel
     date: 11/2022
-    discription: 
+    discription:  A realistic eyelid component module
 
 """
 import maya.cmds as cmds
@@ -407,7 +407,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         self.jointsHierarchy = cmds.createNode("transform", name="{}_joints".format(self.name),
                                                parent=self.rootHierarchy)
 
-        self._setupDriverCurve(
+        self.setupDriverCurve(
             controls=self.lidControls,
             uppCurve=self.topLowCurve,
             lowCurve=self.botLowCurve,
@@ -429,7 +429,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
             for wire in [wire1, wire2]:
                 cmds.setAttr("{}.scale[0]".format(wire), 0)
 
-            self._setupDriverCurve(
+            self.setupDriverCurve(
                 controls=self.creaseControls,
                 uppCurve=self.topCreaseLowCurve,
                 lowCurve=self.botCreaseLowCurve,
@@ -508,7 +508,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         # turn off inherit transform on all curves. This will prevent any double transforms when moving the global control.
         cmds.setAttr("{}.inheritsTransform".format(self.curvesHierarchy), False)
 
-    def _setupDriverCurve(self, controls, uppCurve, lowCurve, prefix=''):
+    def setupDriverCurve(self, controls, uppCurve, lowCurve, prefix=''):
         """
         Setup the driver curve system. This can be used on both the eyelid and creases
         :param controls:

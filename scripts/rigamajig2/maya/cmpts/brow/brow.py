@@ -31,6 +31,11 @@ GUIDE_SCALE = 0.2
 class Brow(rigamajig2.maya.cmpts.base.Base):
     """
     A brow component.
+
+    The brow setup is designed to mimic the muscles of the eyebrow.
+
+    When placing guides start from the inner brow and move to the outside.
+    Each brow should have a different eyebrow component.
     """
 
     VERSION_MAJOR = 1

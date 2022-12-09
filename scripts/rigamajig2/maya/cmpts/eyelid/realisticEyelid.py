@@ -145,12 +145,14 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         innCorner = control.createGuide(
             "{}_inn{}_corner".format(self.name, part),
             parent=parent,
+            hideAttrs=['r', 's'],
             position=mathUtils.addVector(((-midpoint - GUIDE_SCALE * offset) * sideMultipler, 0, 0), startPos),
             size=guideSize,
             color=color)
         outCorner = control.createGuide(
             "{}_out{}_corner".format(self.name, part),
             parent=parent,
+            hideAttrs=['r', 's'],
             position=mathUtils.addVector(((midpoint + GUIDE_SCALE * offset) * sideMultipler, 0, 0), startPos),
             size=guideSize,
             color=color)

@@ -52,8 +52,8 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         :param input: A single joint located at the center of the eyeball. This will become the eyeRoot.
         :param size: default size of the controls
         :param rigParent: connect the component to a rigParent
-        :param eyelidSpans: The number of spans from the inner corner to the outer corner.
-                            This will be used to create joints on each span of the lid
+        :param eyelidSpans: The number of spans from the inner corner to the outer corner. (including the corner verts)
+                            This will be used to create joints on each span of the lid.
         :param addCrease: if True a second set of joints around the crease of the eyelid will be created.
         :param addFleshyEye: If True an eyeballJoint must be provided and the rotation will drive the eye look
         :param eyeballJoint: Used when adding a fleshy eye setup to drive the fleshy eye
@@ -108,7 +108,9 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         """This creates a series of guides to be used for the eyelid or crease"""
 
         sideMultipler = -1 if self.side == 'r' else 1
-        midpoint = (float(self.eyelidSpans - 1) * 0.5) * GUIDE_SCALE
+        # Here we can caululcate the mid point
+        # zowever we eant to reduce the number of eyelid spans by two to remove the corners
+        midpoint = (float((self.eyelidSpans-2) - 1) * 0.5) * GUIDE_SCALE
         guideSize = self.size * GUIDE_SCALE
 
         parent = cmds.createNode("transform", name='{}_{}_guide'.format(self.name, part), parent=self.guidesHierarchy)
@@ -117,7 +119,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         lowerList = list()
 
         for section in ['upper', 'lower']:
-            for x in range(self.eyelidSpans):
+            for x in range(self.eyelidSpans-2):
                 # first we can caluclate the position of the guides at the origin
                 # then multiply them by the postion of the socket joint to position them around the eyeball.
                 translateX = float(-midpoint + (x * GUIDE_SCALE)) * sideMultipler
@@ -182,15 +184,14 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         eyelidControlNames = ['innCorner', 'uppInn', 'upp', 'uppOut', 'outCorner', 'lowInn', 'low', 'lowOut']
         eyelidControlParams = [0, 0.25, 0.5, 0.75, 1, 0.25, 0.5, 0.75]
 
-        self.lidControlsHierarchy = cmds.createNode("transform", name="{}_{}Controls".format(self.name, part),
-                                                    p=self.guidesHierarchy)
+        hierarchyName = "{}_{}Controls".format(self.name, part)
+        lidControlHierarchy = cmds.createNode("transform", name=hierarchyName, p=self.guidesHierarchy)
         for i in range(len(eyelidControlNames)):
             suffix = eyelidControlNames[i]
             guide = control.createGuide("{}_{}{}".format(self.name, suffix, part),
-                                        # side=self.side,
                                         shape='sphere',
                                         size=GUIDE_SCALE,
-                                        parent=self.lidControlsHierarchy,
+                                        parent=lidControlHierarchy,
                                         color='salmon')
 
             targetCurve = lowGuideCurve if i > 4 else uppGuideCurve
@@ -629,11 +630,15 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
 
     def connect(self):
         """connect to the rig parent"""
+        # connect the rig to is rigParent
+        if cmds.objExists(self.rigParent):
+            # connect the eyesocket
+            transform.connectOffsetParentMatrix(self.rigParent, self.eyeSocket.orig, mo=True)
 
-        # connect the eyesocket
-        # connect the up vector
+            # connect the up vector to the eyesocket control
+            transform.connectOffsetParentMatrix(self.eyeSocket.name, self.upVector, mo=True)
 
-        pass
+
 
     def finalize(self):
         """ Finalize the rig setup """

@@ -168,11 +168,3 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
             rig_attr.addSeparator(self.squashEnd.name, '----')
             rig_attr.driveAttribute('volumeFactor', self.paramsHierarchy, self.squashEnd.name)
 
-    @staticmethod
-    def createInputJoints(name=None, side=None, numJoints=4):
-        import rigamajig2.maya.naming as naming
-
-        name = name or 'squash'
-        jnt = cmds.createNode("joint", name=name)
-
-        return [jnt]

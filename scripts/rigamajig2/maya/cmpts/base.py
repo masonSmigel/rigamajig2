@@ -355,11 +355,6 @@ class Base(object):
 
         self.cmptSettings.update(newComponentData)
 
-    @staticmethod
-    def createInputJoints(name=None, side=None, numJoints=None):
-        """static method to create input joints"""
-        return list()
-
     # GET
     def getContainer(self):
         """

@@ -97,12 +97,3 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
 
         if self.addBpm:
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
-
-    @staticmethod
-    def createInputJoints(name=None, side=None, numJoints=4):
-        import rigamajig2.maya.naming as naming
-
-        name = name or 'basic'
-        jnt = cmds.createNode("joint", name=name + "_jnt")
-
-        return [jnt]

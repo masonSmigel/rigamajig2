@@ -153,27 +153,3 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
             # if the main control exists connect the world space
             if cmds.objExists('trs_motion'):
                 spaces.addSpace(self.fkControlList[0].spaces, ['trs_motion'], nameList=['world'], constraintType='orient')
-
-    @staticmethod
-    def createInputJoints(name=None, side=None, numJoints=4):
-        import rigamajig2.maya.naming as naming
-        import rigamajig2.maya.joint as joint
-        joints = list()
-
-        parent = None
-        for i in range(numJoints):
-            name = name or 'splineFk'
-            jointName  = naming.getUniqueName("{}_0".format(name))
-            jnt = cmds.createNode("joint", name=jointName)
-
-            if parent:
-                cmds.parent(jnt, parent)
-            if i > 0:
-                cmds.xform(jnt, objectSpace=True, t=(0, 5, 0))
-
-            joints.append(jnt)
-            parent = jnt
-
-        joint .orientJoints(joints, aimAxis='x', upAxis='y')
-        cmds.setAttr("{}.jox".format(joints[0]), -90)
-        return [joints[0], joints[-1]]

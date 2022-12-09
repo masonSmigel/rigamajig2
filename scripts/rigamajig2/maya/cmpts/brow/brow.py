@@ -270,6 +270,13 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
         cmds.connectAttr(furrowFollow, "{}.w0".format(const2[0]))
         cmds.connectAttr("{}.outputX".format(browFurrowReverse), "{}.w1".format(const2[0]))
 
+    def connect(self):
+        """connect to the rig parent"""
+
+        if cmds.objExists(self.rigParent):
+            # connect the browAll
+            transform.connectOffsetParentMatrix(self.rigParent, self.browAll.orig, mo=True)
+
 
     def finalize(self):
         """ Finalize the rig setup """

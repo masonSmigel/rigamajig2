@@ -139,21 +139,3 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
             spacesAttrs = self.lookAtSpaces.keys()
             spaces.addSpace(self.aimTarget.spaces, spaceValues, spacesAttrs, 'parent')
 
-    @staticmethod
-    def createInputJoints(name=None, side=None, numJoints=4):
-        import rigamajig2.maya.naming as naming
-        import rigamajig2.maya.joint as joint
-        joints = list()
-
-        for i in range(numJoints):
-            name = name or 'lookAt'
-            jointName  = naming.getUniqueName("{}_0".format(name))
-            jnt = cmds.createNode("joint", name=jointName + "_{}".format(i))
-
-            jntEnd = cmds.createNode("joint", name=jointName + "_{}".format(i) + "_1")
-            cmds.parent(jntEnd, jnt)
-            cmds.xform(jntEnd, objectSpace=True, t=(0, 0, 10))
-
-            joints.append(jnt)
-
-        return joints

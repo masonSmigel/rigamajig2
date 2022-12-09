@@ -34,7 +34,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), addLipControls=True):
         """
         :param name: Component Name
         :param input: specific list of joints. [jaw, muppet,  lipsTop, lipsBot, lips_l, lips_r]
@@ -43,6 +43,8 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
         """
         super(Jaw, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
+
+        self.cmptSettings["addLipControls"] = addLipControls
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['jawName'] = inputBaseNames[0]
@@ -86,7 +88,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
             side=self.side,
             color='lightyellow',
             parent=self.jawControl.name,
-            shape='square',
+            shape='square' if self.addLipControls else None,
             shapeAim='z',
             xformObj=self.input[2]
             )
@@ -96,7 +98,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
             side=self.side,
             color='lightyellow',
             parent=self.jawControl.name,
-            shape='square',
+            shape='square' if self.addLipControls else None,
             shapeAim='z',
             xformObj=self.input[3]
             )
@@ -106,7 +108,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
             side=self.side,
             color='lightyellow',
             parent=self.jawControl.name,
-            shape='triangle',
+            shape='triangle' if self.addLipControls else None,
             shapeAim='-x',
             xformObj=self.input[4]
             )
@@ -116,7 +118,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
             side=self.side,
             color='lightyellow',
             parent=self.jawControl.name,
-            shape='triangle',
+            shape='triangle' if self.addLipControls else None,
             shapeAim='-x',
             xformObj=self.input[5]
             )

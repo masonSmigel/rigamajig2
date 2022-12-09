@@ -648,10 +648,6 @@ class CreateComponentDialog(QtWidgets.QDialog):
         self.componentTypeComboBox.setMinimumHeight(30)
         self.componentTypeComboBox.setMaxVisibleItems(30)
 
-        self.numJointsSlider = sliderGrp.SliderGroup(min=0, max=10, value=4)
-        self.createInputJointsButton = QtWidgets.QPushButton("Create Input Joints")
-        self.createInputJointsButton.setMinimumWidth(180)
-
         self.inputLineEdit = QtWidgets.QLineEdit()
         self.inputLineEdit.setPlaceholderText("[]")
         self.loadSelectedAsInput = QtWidgets.QPushButton("<")
@@ -682,11 +678,6 @@ class CreateComponentDialog(QtWidgets.QDialog):
         nameLayout.addWidget(QtWidgets.QLabel("type:"))
         nameLayout.addWidget(self.componentTypeComboBox)
 
-        createJointsLayout = QtWidgets.QHBoxLayout()
-        createJointsLayout.addWidget(QtWidgets.QLabel("num joints:"))
-        createJointsLayout.addWidget(self.numJointsSlider)
-        createJointsLayout.addWidget(self.createInputJointsButton)
-
         inputLayout = QtWidgets.QHBoxLayout()
         inputLayout.addWidget(self.inputLineEdit)
         inputLayout.addWidget(self.loadSelectedAsInput)
@@ -705,7 +696,6 @@ class CreateComponentDialog(QtWidgets.QDialog):
         applyButtonLayout.addWidget(self.closeButton)
 
         mainLayout.addLayout(nameLayout)
-        mainLayout.addLayout(createJointsLayout)
         mainLayout.addLayout(widgetLayout)
         mainLayout.addSpacing(5)
         mainLayout.addWidget(self.discriptionTextEdit)
@@ -713,7 +703,6 @@ class CreateComponentDialog(QtWidgets.QDialog):
 
     def createConnections(self):
         """ Create Connections"""
-        self.createInputJointsButton.clicked.connect(self.createInputJoints)
         self.loadSelectedAsInput.clicked.connect(self.addSelectionAsInput)
         self.loadSelectedAsRigParent.clicked.connect(self.addSelectionAsRigParent)
         self.componentTypeComboBox.currentIndexChanged.connect(self.updateDiscription)
@@ -763,22 +752,6 @@ class CreateComponentDialog(QtWidgets.QDialog):
 
         if len(sel) > 0:
             self.rigParentLineEdit.setText(str(sel[0]))
-
-    def createInputJoints(self):
-        """ create an input joint list"""
-        componentType = self.componentTypeComboBox.currentText()
-        componentName = self.nameLineEdit.text()
-        numJoints = self.numJointsSlider.getValue()
-        side = common.getSide(componentName)
-
-        componentClassInstance = getComponentObject(componentType)
-        joints = componentClassInstance.createInputJoints(name=componentName, side=side, numJoints=numJoints)
-
-        stringList = list()
-        for s in joints:
-            stringList.append(str(s))
-
-        self.inputLineEdit.setText(str(stringList))
 
     def apply(self):
         """

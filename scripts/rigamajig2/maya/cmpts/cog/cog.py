@@ -99,11 +99,3 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
         if cmds.objExists(self.rigParent):
             cmds.parentConstraint(self.rigParent, self.cog[0], mo=True)
 
-    @staticmethod
-    def createInputJoints(name=None, side=None, numJoints=4):
-        import rigamajig2.maya.naming as naming
-
-        name = name or 'cog'
-        jnt = cmds.createNode("joint", name=name)
-
-        return [jnt]

@@ -219,38 +219,3 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
         rig_attr.lockAndHide(self.paramsHierarchy, rig_attr.TRANSFORMS + ['v'])
 
-    @staticmethod
-    def createInputJoints(name=None, side=None, numJoints=4):
-        import rigamajig2.maya.naming as naming
-        import rigamajig2.maya.joint as joint
-        guidePostions = {"neck": (0, 4, 0),
-                           "head": (0, 2, 0)}
-
-        joints = list()
-
-        parent = None
-        for i in range(numJoints):
-            neckName = naming.getUniqueName("neck_0")
-            neck = cmds.createNode("joint", name=neckName)
-
-            position = guidePostions['neck']
-            if parent:
-                cmds.parent(neck, parent)
-            if i > 0:
-                cmds.xform(neck, objectSpace=True, t=position)
-            else:
-                cmds.xform(neck, objectSpace=True, t=(0, 0, 0))
-            joints.append(neck)
-
-            parent = neck
-
-        headName = naming.getUniqueName("head")
-        head = cmds.createNode("joint", name=headName)
-
-        cmds.parent(head, parent)
-        cmds.xform(head, objectSpace=True, t=guidePostions['head'])
-        joints.append(head)
-
-        joint.orientJoints(joints, aimAxis='x', upAxis='y')
-        cmds.setAttr("{}.jox".format(joints[0]), -90)
-        return joints

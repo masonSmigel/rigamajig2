@@ -109,26 +109,3 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
                 spaces.addSpace(self.fkControlList[0].spaces, ['trs_motion'], nameList=['world'],
                                 constraintType='orient')
 
-    @staticmethod
-    def createInputJoints(name=None, side=None, numJoints=4):
-        import rigamajig2.maya.naming as naming
-        import rigamajig2.maya.joint as joint
-        joints = list()
-
-        parent = None
-        for i in range(numJoints):
-            name = name or 'chain'
-            jointName = naming.getUniqueName("{}_0".format(name))
-            jnt = cmds.createNode("joint", name=jointName)
-
-            if parent:
-                cmds.parent(jnt, parent)
-            if i > 0:
-                cmds.xform(jnt, objectSpace=True, t=(0, 5, 0))
-
-            joints.append(jnt)
-            parent = jnt
-
-        joint.orientJoints(joints, aimAxis='x', upAxis='y')
-        cmds.setAttr("{}.jox".format(joints[0]), -90)
-        return [joints[0], joints[-1]]

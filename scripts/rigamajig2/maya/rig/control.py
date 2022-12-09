@@ -223,7 +223,8 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     tagAsControl(control, type=type)
     topNode = control
 
-    setControlShape(control, shape)
+    if shape:
+        setControlShape(control, shape)
 
     controlObj = Control(control)
     if orig:

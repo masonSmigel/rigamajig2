@@ -88,7 +88,7 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
             guide = control.createGuide(
                 name="{}_{}".format(self.name, x),
                 parent=parent,
-                hideAttrs=['r', 's'],
+                hideAttrs=['s'],
                 position=guidePos,
                 size=guideSize)
 

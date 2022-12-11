@@ -112,6 +112,7 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
                                         shape='sphere',
                                         size=GUIDE_SCALE,
                                         parent=controlsParent,
+                                        hideAttrs=['s'],
                                         color='salmon')
 
             minParam, maxParam = curve.getRange(browGuideCurve)

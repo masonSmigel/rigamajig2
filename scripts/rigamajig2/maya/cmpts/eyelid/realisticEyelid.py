@@ -132,6 +132,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
                     parent=parent,
                     position=guidePos,
                     size=guideSize,
+                    hideAttrs=['s'],
                     color=color)
 
                 # add the guide to the upper or lower guide list
@@ -145,14 +146,14 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         innCorner = control.createGuide(
             "{}_inn{}_corner".format(self.name, part),
             parent=parent,
-            hideAttrs=['r', 's'],
+            hideAttrs=['s'],
             position=mathUtils.addVector(((-midpoint - GUIDE_SCALE * offset) * sideMultipler, 0, 0), startPos),
             size=guideSize,
             color=color)
         outCorner = control.createGuide(
             "{}_out{}_corner".format(self.name, part),
             parent=parent,
-            hideAttrs=['r', 's'],
+            hideAttrs=['s'],
             position=mathUtils.addVector(((midpoint + GUIDE_SCALE * offset) * sideMultipler, 0, 0), startPos),
             size=guideSize,
             color=color)
@@ -186,7 +187,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         eyelidControlNames = ['innCorner', 'uppInn', 'upp', 'uppOut', 'outCorner', 'lowInn', 'low', 'lowOut']
         eyelidControlParams = [0, 0.25, 0.5, 0.75, 1, 0.25, 0.5, 0.75]
 
-        hierarchyName = "{}_{}Controls".format(self.name, part)
+        hierarchyName = "{}_{}Controls_guides".format(self.name, part)
         lidControlHierarchy = cmds.createNode("transform", name=hierarchyName, p=self.guidesHierarchy)
         for i in range(len(eyelidControlNames)):
             suffix = eyelidControlNames[i]

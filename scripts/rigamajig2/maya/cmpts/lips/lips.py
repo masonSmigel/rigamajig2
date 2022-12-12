@@ -24,6 +24,9 @@ from rigamajig2.maya import hierarchy
 from rigamajig2.maya import mathUtils
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import constrain
+from rigamajig2.maya import skinCluster
+from rigamajig2.maya import sdk
+from rigamajig2.maya import connection
 
 GUIDE_SCALE = 0.2
 
@@ -76,17 +79,23 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         lipsPos = cmds.xform(self.input[0], q=True, ws=True, t=True)
 
+        # create the up vector
+        self.upVectorGuide = control.createGuide(
+            "{}_upVecTgt".format(self.name),
+            parent=self.guidesHierarchy,
+            position=lipsPos)
+
         self.upperLipGuide = control.createGuide(name="{}_uppLipAll".format(self.name),
                                                  parent=self.guidesHierarchy,
                                                  hideAttrs=['s'],
                                                  position=lipsPos,
-                                                 size=self.size * (GUIDE_SCALE *2),
+                                                 size=self.size * (GUIDE_SCALE * 2),
                                                  )
         self.lowerLipGuide = control.createGuide(name="{}_lowLipAll".format(self.name),
                                                  parent=self.guidesHierarchy,
                                                  hideAttrs=['s'],
                                                  position=lipsPos,
-                                                 size=self.size * (GUIDE_SCALE *2),
+                                                 size=self.size * (GUIDE_SCALE * 2),
                                                  )
 
         # build the lip guides
@@ -116,14 +125,21 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         hierarchyName = "{}_subControl_guides".format(self.name)
         subControlHierarchy = cmds.createNode("transform", name=hierarchyName, p=self.guidesHierarchy)
 
-        uppSubControlNames = ['r_uppCorner', 'r_uppOut', 'r_uppInn',
-                              'l_uppInn', 'l_uppOut', 'l_uppCorner', ]
+        #
+        # uppSubControlNames = ['r_uppCorner', 'r_uppOut', 'r_uppInn',
+        #                       'l_uppInn', 'l_uppOut', 'l_uppCorner', ]
+        #
+        # lowSubControlNames = ['r_lowCorner', 'r_lowOut', 'r_lowInn',
+        #                       'l_lowInn', 'l_lowOut', 'l_lowCorner']
+        #
+        # subControlParams = [0.08, 0.16, 0.375,
+        #                     0.625, 0.84, 0.92]
 
-        lowSubControlNames = ['r_lowCorner', 'r_lowOut', 'r_lowInn',
-                              'l_lowInn', 'l_lowOut', 'l_lowCorner']
+        uppSubControlNames = ['r_uppOut', 'r_uppInn', 'l_uppInn', 'l_uppOut']
 
-        subControlParams = [0.08, 0.16, 0.375,
-                            0.625, 0.84, 0.92]
+        lowSubControlNames = ['r_lowOut', 'r_lowInn', 'l_lowInn', 'l_lowOut']
+
+        subControlParams = [0.125, 0.375, 0.625, 0.875]
 
         # create the upperControlGuides
         upperSubControls = self.createControlGuides(uppGuideCurve, uppSubControlNames, subControlParams,
@@ -280,65 +296,77 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                                          hideAttrs=['s', 'v'])
             self.mainControls.append(ctl)
 
-        # # build the subControls
-        # self.subControls = list()
-        # for guide in self.subControlGuides:
-        #     guideName = guide.split("_guide")[0] + "Tweak"
-        #     ctl = control.createAtObject(name=guideName,
-        #                                  shape='triangle',
-        #                                  orig=True,
-        #                                  trs=True,
-        #                                  parent=self.lipsAll.name,
-        #                                  shapeAim='y',
-        #                                  xformObj=guide,
-        #                                  size=GUIDE_SCALE,
-        #                                  color='lightblue',
-        #                                  hideAttrs=['s', 'v'])
-        #     self.subControls.append(ctl)
+        # we will need to use the corners ALOT so lets store them to use later!
+        self.lCorner = self.mainControls[4]
+        self.rCorner = self.mainControls[0]
+
+        # parent the upper lip and lower lip joints to the upperLipAll and lowerLipAll
+        cmds.parent([x.orig for x in self.mainControls[1:4]], self.uppLips.name)
+        cmds.parent([x.orig for x in self.mainControls[5:]], self.lowLips.name)
+
+        # build the subControls
+        self.subControls = list()
+        for guide in self.subControlGuides:
+            guideName = guide.split("_guide")[0] + "Tweak"
+            ctl = control.createAtObject(name=guideName,
+                                         shape='triangle',
+                                         orig=True,
+                                         trs=True,
+                                         parent=self.lipsAll.name,
+                                         shapeAim='y',
+                                         xformObj=guide,
+                                         size=GUIDE_SCALE,
+                                         color='lightblue',
+                                         hideAttrs=['s', 'v'])
+            self.subControls.append(ctl)
 
     def preRigSetup(self):
         """ Setup the joints and curves needed for the setup"""
+        # create the upVector
+        self.upVector = cmds.createNode("transform", name="{}_upVec".format(self.name), p=self.spacesHierarchy)
+        transform.matchTranslate(self.upVectorGuide, self.upVector)
 
         self.curvesHierarchy = cmds.createNode("transform", name="{}_curves".format(self.name), p=self.rootHierarchy)
         cmds.setAttr("{}.inheritsTransform".format(self.curvesHierarchy), False)
 
-        topHighCurve = "{}_upperLip_high"
-        botHighCurve = "{}_lowerLip_high"
+        topHighCurve = "{}_upperLip_high".format(self.name)
+        botHighCurve = "{}_lowerLip_high".format(self.name)
 
-        topMidCurve = "{}_upperLip_low".format(self.name)
-        botMidName = "{}_lowerLip_low".format(self.name)
+        topLowCurve = "{}_upperLip_low".format(self.name)
+        botLowCurve = "{}_lowerLip_low".format(self.name)
 
-        topMidCurveName = "{}_upperLip_low".format(self.name)
-        botMidCurveName = "{}_lowerLip_low".format(self.name)
+        topMidCurve = "{}_upperLip_mid".format(self.name)
+        botMidCurve = "{}_lowerLip_mid".format(self.name)
 
-        self.topDriverCruve = curve.createCurveFromTransform(
-            self.upperGuideList,
-            degree=1,
-            name=topHighCurve,
-            parent=self.curvesHierarchy)
+        # Unlike the eyelids its super important that animators can rotate the lip controls.
+        # So to do that we will create out lip control From the CONTROls not the per span guides
 
-        self.botDriverCurve = curve.createCurveFromTransform(
-            self.lowerGuideList,
-            degree=1,
-            name=botHighCurve,
-            parent=self.curvesHierarchy)
+        # theese lists are comprised of the main and sub controls that would define the spans fo the lip.
+        uppLipPoints = [self.mainControlGuides[0], self.subControlGuides[1], self.mainControlGuides[1],
+                        self.subControlGuides[2], self.mainControlGuides[2], self.subControlGuides[3],
+                        self.mainControlGuides[3], self.subControlGuides[4], self.mainControlGuides[4]]
 
-        self.topLowCurve = cmds.duplicate(self.topDriverCruve, name=topMidCurve)[0]
-        cmds.rebuildCurve(self.topLowCurve, spans=4, degree=3, fitRebuild=True)
+        lowLipPoints = [self.mainControlGuides[0], self.subControlGuides[6], self.mainControlGuides[5],
+                        self.subControlGuides[7], self.mainControlGuides[6], self.subControlGuides[8],
+                        self.mainControlGuides[7], self.subControlGuides[9], self.mainControlGuides[4]]
 
-        self.botLowCurve = cmds.duplicate(self.botDriverCurve, name=botMidName)[0]
-        cmds.rebuildCurve(self.botLowCurve, spans=4, degree=3, fitRebuild=True)
+        # create the two driver curves. The jionts will be bound to this
+        self.topDriverCruve = curve.createCurveFromTransform(uppLipPoints, degree=3, name=topHighCurve,
+                                                             parent=self.curvesHierarchy)
+        self.botDriverCurve = curve.createCurveFromTransform(lowLipPoints, degree=3, name=botHighCurve,
+                                                             parent=self.curvesHierarchy)
 
-        # build the subControlCurves
+        # create the two low curves theese will be affected by the corners and upper/lower lips
+        self.topLowCurve = cmds.duplicate(self.topDriverCruve, name=topLowCurve)[0]
+        self.botLowCurve = cmds.duplicate(self.botDriverCurve, name=botLowCurve)[0]
 
-        # setup joints for each span of the lips
-        self.targetHierarchy = cmds.createNode("transform", name="{}_aimTgts".format(self.name), p=self.rootHierarchy)
-        cmds.setAttr("{}.inheritsTransform".format(self.targetHierarchy), False)
+        # create the two low curves theese will be affected by the corners and upper/lower lips
+        self.topMidCurve = cmds.duplicate(self.topDriverCruve, name=topMidCurve)[0]
+        self.botMidCurve = cmds.duplicate(self.botDriverCurve, name=botMidCurve)[0]
 
-        # setup the joints for the eyelid
-        # we can do this by looping through the upperGuide and lowerGuide lists
-        # (skipping the first and last index of the lower lid)
-        for guide in self.upperGuideList + self.lowerGuideList[1:-1]:
+        # create the bind joints for the component
+        # these joints will be the final bind joints that drive the skin
+        for guide in [self.subControlGuides[0], self.subControlGuides[5]] + uppLipPoints[1:-1] + lowLipPoints[1:-1]:
             guideName = guide.split("_guide")[0]
 
             endJoint = cmds.createNode("joint", name="{}_bind".format(guideName), p=self.input[0])
@@ -346,95 +374,261 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             joint.setRadius([endJoint], GUIDE_SCALE)
             meta.tag(endJoint, "bind")
 
-            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.targetHierarchy)
-            transform.matchTranslate(guide, targetLoc)
-
-            targetCurve = self.botDriverCurve if 'lower' in guideName else self.topDriverCruve
-            curve.attatchToCurve(targetLoc, curve=targetCurve, toClosestParam=True)
-            # cmds.tangentConstraint(self.driverCurve, targetLoc, aim=(1, 0, 0), u=(0,1,0))
-            constrain.orientConstraint(self.lipsAll.name, targetLoc)
-
-            joint.connectChains([targetLoc], [endJoint])
-
-
-
-
-
     def rigSetup(self):
         """ create the main rig setup """
-
         joint.connectChains([self.lipsAll.name], [self.input[0]])
 
-        # setup the main joint hierarchy
-        self.jointsHierarchy = cmds.createNode("transform", name="{}_joints".format(self.name),
-                                               parent=self.rootHierarchy)
+        # build the main control curve and its rig systems (this includes the mouthCorners)
+        self.setupLowCurve()
 
-        # build the main control curve
-        self.setupMainCurve()
+        # build the middle resolution curve
+        self.setupMidCurve()
 
         # TODO: remove this later. This is just temporary
-        wire1, _ = cmds.wire(self.topDriverCruve, wire=self.topLowCurve,
-                             dds=[0, 5], name="{}_wire".format(self.topDriverCruve))
-        wire2, _ = cmds.wire(self.botDriverCurve, wire=self.botLowCurve,
-                             dds=[0, 5], name="{}_wire".format(self.botDriverCurve))
-        for wire in [wire1, wire2]:
-            cmds.setAttr("{}.scale[0]".format(wire), 0)
+        # wire1, _ = cmds.wire(self.topDriverCruve, wire=self.topLowCurve,
+        #                      dds=[0, 5], name="{}_wire".format(self.topDriverCruve))
+        # wire2, _ = cmds.wire(self.botDriverCurve, wire=self.botLowCurve,
+        #                      dds=[0, 5], name="{}_wire".format(self.botDriverCurve))
+        # for wire in [wire1, wire2]:
+        #     cmds.setAttr("{}.scale[0]".format(wire), 0)
 
-    def setupMainCurve(self):
-        """ Setup a main curve"""
+    def setupMouthCorners(self):
+        """Setup the mouth corners"""
+        self.rCornerTrs = cmds.createNode("transform", name="{}_cornerTrs".format(self.mainControls[0].name),
+                                          parent=self.mainControls[0].name)
+        transform.matchTransform(self.mainControls[0].name, self.rCornerTrs)
 
-        # We need to create joints along each main control to influence the low Curve
-        driverJoints = list()
-        for ctl in self.mainControls:
-            jnt = cmds.createNode("joint", name=ctl.name + "_driver", parent=self.jointsHierarchy)
-            transform.matchTransform(ctl.name, jnt)
-            transform.connectOffsetParentMatrix(ctl.name, jnt)
+        self.lCornerTrs = cmds.createNode("transform", name="{}_cornerTrs".format(self.mainControls[4].name),
+                                          parent=self.mainControls[4].name)
+        transform.matchTransform(self.mainControls[4].name, self.lCornerTrs)
 
-            driverJoints.append(jnt)
+        # setup the set driven keys
+        sdk.createSdk("{}.tx".format(self.mainControls[4].name), drivenPlug="{}.tz".format(self.lCornerTrs),
+                      values=[(-3, -2), (0, 0), (10, -4)])
 
-        uppLidJoints = driverJoints[:5]
-        lowLidJoints = [driverJoints[0]] + driverJoints[5:] + [driverJoints[4]]
+    def setupLowCurve(self):
+        """
+        Build a rig setup for the low res curve.
+        (its actully not that low res but we need to set the skinweights in a particular way to make it work)
+        """
 
+        # setup the main joint hierarchy
+        self.jointsHierarchy = cmds.createNode("transform", name="{}_low_joints".format(self.name),
+                                               parent=self.rootHierarchy)
+
+        self.trsHierarchy = cmds.createNode("transform", name="{}_trs_joints".format(self.name),
+                                            parent=self.rootHierarchy)
+
+        # This is heavily influenced by "the art of moving points" to create a great shape for our lowres curve.
+        # we can do that by setting the skinweights using an equation!
+        # our equation will be y=-(x-1)^{2.4} +1
+
+        attr.addSeparator(self.paramsHierarchy, "corners")
+        wideLimit = attr.createAttr(self.paramsHierarchy, "rotLimitWide", "float", value=2)
+        narrowLimit = attr.createAttr(self.paramsHierarchy, "rotLimitNarrow", "float", value=-2)
+
+        dummyJoints = list()
+        self.cornerSetups = list()
+        # first lets build the lipCorner system
+        for side in 'lr':
+            ctl = self.rCorner if side == 'r' else self.lCorner
+
+            jawConnecter = cmds.createNode("transform", name="{}_setup".format(ctl.name), parent=self.trsHierarchy)
+            transform.matchTransform(ctl.name, jawConnecter)
+
+            aimTrsOffset = cmds.createNode("transform", name='{}_aimTrs_offset'.format(ctl.name),
+                                           parent=jawConnecter)
+            aimTrs = cmds.createNode("transform", name='{}_aimTrs'.format(ctl.name), parent=aimTrsOffset)
+            transform.matchTranslate(self.input[0], aimTrsOffset)
+
+            # create a duplicate of the corner contorl
+            aimDummy = cmds.createNode("transform", name="{}_dummy_trs".format(ctl.name), parent=jawConnecter)
+            transform.matchTransform(ctl.name, aimDummy)
+            hierarchy.create(aimDummy, hierarchy=["{}_offset".format(aimDummy)], matchTransform=True)
+
+            node.clamp("{}.tx".format(ctl.name), inMin=narrowLimit, inMax=wideLimit, output="{}.tx".format(aimDummy),
+                       name=aimDummy)
+
+            # create a temportary aim constraint to orient the offset
+            aimVector = (-1, 0, 0) if side == 'r' else (1, 0, 0)
+            const = cmds.aimConstraint(ctl.name, aimTrsOffset, aim=aimVector, u=(0, 1, 0), wut='object',
+                                       wuo=self.upVector)
+            cmds.delete(const)
+            cmds.aimConstraint(aimDummy, aimTrs, aim=aimVector, u=(0, 1, 0), wut='object',
+                               wuo=self.upVector, skip=['x', 'z'])
+
+            # next we need to make a dummy joint to constrain to
+            dummyJoint = cmds.createNode("joint", name="{}_dummy_joint".format(ctl.name), parent=jawConnecter)
+            transform.matchTransform(ctl.name, dummyJoint)
+            dummyJntOffset = hierarchy.create(dummyJoint, hierarchy=["{}_offset".format(dummyJoint)],
+                                              matchTransform=True)
+            cmds.parentConstraint(aimTrs, dummyJntOffset, mo=True)
+
+            # now we can build the setup to add translation to the joint
+            narrowWideCond = node.condition("{}.tx".format(ctl.name), 0,
+                                            ifTrue=[wideLimit, 2, 0],
+                                            ifFalse=[narrowLimit, 4, 0],
+                                            operation=">",
+                                            name="{}_narrowOrWide".format(ctl.name))
+            mdl = node.multDoubleLinear("{}.outColorR".format(narrowWideCond), -1, name="{}_neg".format(ctl.name))
+            adl = node.addDoubleLinear("{}.tx".format(ctl.name), "{}.output".format(mdl),
+                                       name="{}_offset".format(ctl.name))
+
+            translateCondition = node.condition("{}.tx".format(ctl.name), "{}.outColorR".format(narrowWideCond),
+                                                ifTrue=["{}.output".format(adl), 0, 0],
+                                                ifFalse=[0, 0, 0],
+                                                name="{}_translateAddition".format(ctl.name))
+            cmds.connectAttr("{}.outColorG".format(narrowWideCond), "{}.{}".format(translateCondition, "operation"))
+
+            # now we can connect to the driver joint
+            cmds.connectAttr("{}.outColorR".format(translateCondition), "{}.tx".format(dummyJoint))
+            cmds.connectAttr("{}.ty".format(ctl.name), "{}.ty".format(dummyJoint))
+            cmds.connectAttr("{}.tz".format(ctl.name), "{}.tz".format(dummyJoint))
+
+            # store important data here to re-use later
+            dummyJoints.append(dummyJoint)
+            self.cornerSetups.append(jawConnecter)
+
+        # create a bunch of driver joints
+        self.mainDriverJnts = list()
+        for ctl in [dummyJoints[-1], self.uppLips.name, dummyJoints[0], self.lowLips.name]:
+            jnt = cmds.createNode("joint", name=ctl + "_main_driver", parent=self.jointsHierarchy)
+            transform.matchTransform(ctl, jnt)
+            transform.connectOffsetParentMatrix(ctl, jnt)
+
+            self.mainDriverJnts.append(jnt)
+
+        # bind the driver joints to the curves
+        uppLidJoints = self.mainDriverJnts[:3]
+        lowLidJoints = [self.mainDriverJnts[0], self.mainDriverJnts[3], self.mainDriverJnts[2]]
+
+        # for theese controls we need to set the skinning method to dual quaternion
+        # so that we can get a nice rotationa around the teeth (skinningMethod=1 for DQ skinning)
         cmds.skinCluster(uppLidJoints, self.topLowCurve, dr=1, mi=2, bm=0,
-                         name="{}_skinCluster".format(self.topLowCurve))
+                         name="{}_skinCluster".format(self.topLowCurve), skinMethod=1)
         cmds.skinCluster(lowLidJoints, self.botLowCurve, dr=1, mi=2, bm=0,
-                         name="{}_skinCluster".format(self.botLowCurve))
+                         name="{}_skinCluster".format(self.botLowCurve), skinMethod=1)
 
         # hide the joints
-        joint.hideJoints(driverJoints)
+        joint.hideJoints(self.mainDriverJnts)
 
-        # setup the constraint relationship between the inner and outer mouth and
-        cornerFollow = attr.createAttr(self.paramsHierarchy, "cornerFollow", "float", minValue=0, maxValue=1, value=0.2)
+        # now we need to autoSkinWeight the curves
+        self.autoSkinLowCurve(self.topLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[1], self.mainDriverJnts[2])
+        self.autoSkinLowCurve(self.botLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[3], self.mainDriverJnts[2])
 
-        cornerFollowReverse = node.reverse(cornerFollow, name="{}_uppFollow".format(self.name))
+        # create joints to ride on the curve
+        # self.targetHierarchy = cmds.createNode("transform", name="{}_tgts".format(self.name), p=self.rootHierarchy)
+        # cmds.setAttr("{}.inheritsTransform".format(self.targetHierarchy), False)
 
-        # create a system of parent contraints for the lip controls
-        rCorner = self.mainControls[0]
-        lCorner = self.mainControls[4]
-        const1 = cmds.parentConstraint(self.uppLips.name, rCorner.name, self.mainControls[1].orig, mo=True)
-        const2 = cmds.parentConstraint(self.uppLips.name, lCorner.name, self.mainControls[3].orig, mo=True)
-        const3 = cmds.parentConstraint(self.lowLips.name, rCorner.name, self.mainControls[5].orig, mo=True)
-        const4 = cmds.parentConstraint(self.lowLips.name, lCorner.name, self.mainControls[7].orig, mo=True)
+        # now we can connect the upper and lower lip controls to this curve
+        # for ctl in self.mainControls[1:4] + self.mainControls[5:]:
+        #     targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(ctl.name), p=self.targetHierarchy)
+        #     transform.matchTranslate(ctl.name, targetLoc)
+        #
+        #     targetCurve = self.botLowCurve if "low" in ctl.name else self.topLowCurve
+        #     curve.attatchToCurve(targetLoc, targetCurve)
+        #     constrain.orientConstraint(self.lipsAll.name, targetLoc)
+        #
+        #     transform.connectOffsetParentMatrix(targetLoc, ctl.orig, mo=False, r=False, s=False, sh=False)
 
-        cmds.parentConstraint(self.uppLips.name, self.mainControls[2].orig, mo=True)
-        cmds.parentConstraint(self.lowLips.name, self.mainControls[6].orig, mo=True)
+    def setupMidCurve(self):
+        """ Setup the middle resolution curve """
+        # create joints to ride on the curve
+        self.targetHierarchy = cmds.createNode("transform", name="{}_tgts".format(self.name), p=self.rootHierarchy)
+        cmds.setAttr("{}.inheritsTransform".format(self.targetHierarchy), False)
 
-        # setup the target weight inputs and reverse nodes.
-        for const in [const1, const2, const3, const4]:
-            cmds.connectAttr(cornerFollow, "{}.w1".format(const[0]))
-            cmds.connectAttr("{}.outputX".format(cornerFollowReverse), "{}.w0".format(const[0]))
+        # now we can connect the upper and lower lip controls to this curve
+        for ctl in self.mainControls[1:4] + self.mainControls[5:]:
+            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(ctl.name), p=self.targetHierarchy)
+            transform.matchTranslate(ctl.name, targetLoc)
+
+            targetCurve = self.botLowCurve if "low" in ctl.name else self.topLowCurve
+            curve.attatchToCurve(targetLoc, targetCurve)
+            constrain.orientConstraint(self.lipsAll.name, targetLoc)
+
+            transform.connectOffsetParentMatrix(targetLoc, ctl.orig, mo=False, r=False, s=False, sh=False)
+
+
+
+
+
+
+
+        #
+        # # create a bunch of driver joints
+        # driverJoints = list()
+        # for ctl in self.mainControls[1:4] + self.mainControls[5:]:
+        #     jnt = cmds.createNode("joint", name=ctl.name + "_mid_driver", parent=self.jointsHierarchy)
+        #     transform.matchTransform(ctl.name, jnt)
+        #     transform.connectOffsetParentMatrix(ctl.name, jnt)
+        #
+        #     driverJoints.append(jnt)
+        #
+        # uppLidJoints = [self.mainDriverJnts[0]] + driverJoints[:3] + [self.mainDriverJnts[2]]
+        # lowLidJoints = [self.mainDriverJnts[0]] + driverJoints[3:] + [self.mainDriverJnts[2]]
+        #
+        # cmds.skinCluster(uppLidJoints, self.topMidCurve, dr=1.5, mi=2, bm=0,
+        #                  name="{}_skinCluster".format(self.topMidCurve))
+        # cmds.skinCluster(lowLidJoints, self.botMidCurve, dr=1.5, mi=2, bm=0,
+        #                  name="{}_skinCluster".format(self.botMidCurve))
+
+        # connect the secondary controls to this curve
+
+    @staticmethod
+    def autoSkinLowCurve(crv, min, mid, max):
+        """
+        Auto skinweight the main curves
+        :param crv:  the curve to weigh
+        :param min: the minimum influence (the right corner)
+        :param mid: the middle influence (the top or bottom lip)
+        :param max:  the maximum inlfluence (the left corner)
+        :return:
+        """
+        skin = skinCluster.getSkinCluster(crv)
+
+        cvs = curve.getCvs(crv)
+
+        midPoint = int(len(cvs) / 2)
+        maxParam = len(cvs)
+
+        for i, cv in enumerate(cvs):
+
+            # get the parameter of the current CV
+            x = float(i) / (maxParam - 1)
+
+            # here y is equal to the value of the middle control
+            y = (-((x * 2) - 1) ** 2) + 1
+
+            # to get the outer control use 1-y
+            outer = 1 - y
+
+            if i > midPoint:
+                transformValue = [(min, 0), (mid, y), (max, outer)]
+            else:
+                transformValue = [(min, outer), (mid, y), (max, 0)]
+
+            # finally set the skinweights for the given CV
+            cmds.skinPercent(skin, cv, transformValue=transformValue)
+
+    def setupAnimAttrs(self):
+        """ setup the animator parameters"""
+        # create a visability control for the ikGimble control
+        attr.addSeparator(self.lipsAll.name, "----")
+        attr.createAttr(self.lipsAll.name, "tweakers", attributeType='bool', value=0, keyable=False, channelBox=True)
+        subControls = [x.name for x in self.subControls]
+        control.connectControlVisiblity(self.lipsAll.name, "tweakers", controls=subControls)
 
     def connect(self):
         """Create the connection to other components """
-
         # If we have specified a new jaw then connection then connect it here. The goal here is to add the transform of
         # the jaw to the transform of the lipsAll so that both have full influence of the controls. To do this we will
         # create a simple hierarchy to combine transforms and a local rig to extract the movement of the jaw.
         if self.useJaw:
 
-            jawConnectControls = [self.uppLips, self.lowLips, self.mainControls[0], self.mainControls[4]]
+            jawConnectControls = [self.uppLips, self.lowLips, self.mainControls[4], self.mainControls[0]]
 
-            jawOffsetGroup = cmds.createNode("transform", name="{}_jaw_space".format(self.name), parent=self.spacesHierarchy)
+            jawOffsetGroup = cmds.createNode("transform", name="{}_jaw_space".format(self.name),
+                                             parent=self.spacesHierarchy)
 
             # if the rig parent exists connect it to the offset control
             if cmds.objExists(self.rigParent):
@@ -456,3 +650,5 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                 for channel in attr.TRANSLATE + attr.ROTATE:
                     cmds.connectAttr("{}.{}".format(jawTrs, channel), "{}.{}".format(ctl.trs, channel))
 
+            for cornerSetup, jawJoint in zip(self.cornerSetups, self.jawJoints[2:]):
+                transform.connectOffsetParentMatrix(jawJoint, cornerSetup, mo=True)

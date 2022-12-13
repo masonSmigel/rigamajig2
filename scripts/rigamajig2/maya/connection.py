@@ -49,6 +49,28 @@ def connectPlugs(source, destination):
     mdgModifier.doIt()
 
 
+def connectTransforms(source, destination, t=True, r=True, s=True):
+    """
+    Connect the transform plugs between two nodes.
+
+    :param str source: node on the source end of the connection
+    :param str destination: node on the destination end of the connection
+    :param bool t:
+    :param bool r:
+    :param bool s:
+    """
+    attrs = list()
+    if t:
+        attrs += ["tx", "ty", "tz"]
+    if r:
+        attrs += ["rx", "ry", "rz"]
+    if s:
+        attrs += ["sx", "sy", "sz"]
+
+    for attr in attrs:
+        connectPlugs("{}{}".format(source, attr), "{}{}".format(destination, attr))
+
+
 def connectPlugs2(source, destination):
     """
     Connect input plug to output plug using maya.cmds
@@ -58,4 +80,4 @@ def connectPlugs2(source, destination):
     if attr.isCompound(source) == attr.isCompound(destination):
         cmds.connectAttr(source, destination, f=True)
     else:
-        cmds.error('Cannot connect compound and non-compound attributes: {} to {}'.format(source, destination ))
+        cmds.error('Cannot connect compound and non-compound attributes: {} to {}'.format(source, destination))

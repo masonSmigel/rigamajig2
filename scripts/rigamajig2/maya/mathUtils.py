@@ -330,3 +330,19 @@ def parabolainterp(min, max, percent):
     # remap the 0 to 1 value of the parabola between the min and max ranges
     value = remapValue(parabola, nMin=min, nMax=max, oMin=0, oMax=1)
     return value
+
+
+def closestValue(inputList, value):
+    """
+    Get the closest value in a list to a value
+
+    :param list inputList: list of values to get the closest value from
+    :param value: value to sample against to find the closest
+    :return: closest value
+    :rtype: float int
+    """
+    inputList.sort()
+    difference = lambda input_list: abs(input_list - value)
+    res = min(inputList, key=difference)
+
+    return res

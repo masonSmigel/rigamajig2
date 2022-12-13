@@ -4,7 +4,7 @@ Unlike other components that are built from the base component, this is a system
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.cmpts.face.base as base
+import rigamajig2.sandbox.face.base as base
 import rigamajig2.maya.container
 import rigamajig2.shared.common as common
 

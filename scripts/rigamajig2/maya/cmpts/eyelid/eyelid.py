@@ -349,8 +349,6 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             cmds.aimConstraint(aimLoc, baseJoint, aimVector=(1, 0, 0), upVector=(0, 1, 0),
                                worldUpType='object', worldUpObject=self.upVector)
 
-
-
         if self.addCrease:
             # build the crease curve and driver curve
 

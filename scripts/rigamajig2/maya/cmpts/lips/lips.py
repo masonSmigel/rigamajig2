@@ -345,17 +345,17 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                         self.mainControlGuides[7], self.subControlGuides[9], self.mainControlGuides[4]]
 
         # create the two driver curves. The jionts will be bound to this
-        self.topDriverCruve = curve.createCurveFromTransform(uppLipPoints, degree=3, name=topHighCurve,
+        self.topDriverCurve = curve.createCurveFromTransform(uppLipPoints, degree=3, name=topHighCurve,
                                                              parent=self.curvesHierarchy)
         self.botDriverCurve = curve.createCurveFromTransform(lowLipPoints, degree=3, name=botHighCurve,
                                                              parent=self.curvesHierarchy)
 
         # create the two low curves theese will be affected by the corners and upper/lower lips
-        self.topLowCurve = cmds.duplicate(self.topDriverCruve, name=topLowCurve)[0]
+        self.topLowCurve = cmds.duplicate(self.topDriverCurve, name=topLowCurve)[0]
         self.botLowCurve = cmds.duplicate(self.botDriverCurve, name=botLowCurve)[0]
 
         # create the two low curves theese will be affected by the corners and upper/lower lips
-        self.topMidCurve = cmds.duplicate(self.topDriverCruve, name=topMidCurve)[0]
+        self.topMidCurve = cmds.duplicate(self.topDriverCurve, name=topMidCurve)[0]
         self.botMidCurve = cmds.duplicate(self.botDriverCurve, name=botMidCurve)[0]
 
         # setup joints for each span of the lips
@@ -378,7 +378,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.targetHierarchy)
             transform.matchTransform(guide, targetLoc)
 
-            targetCurve = self.botDriverCurve if 'lower' in guideName else self.topDriverCruve
+            targetCurve = self.botDriverCurve if 'lower' in guideName else self.topDriverCurve
             curve.attatchToCurve(targetLoc, curve=targetCurve, toClosestParam=True)
 
             # if not self.addZipperLips:
@@ -552,8 +552,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                         midDriverJoints[4], subDriverJoints[8], midDriverJoints[5], subDriverJoints[9],
                         subDriverJoints[5]]
 
-        cmds.skinCluster(uppSubJoints, self.topDriverCruve, dr=1.5, mi=1, bm=0,
-                         name="{}_skinCluster".format(self.topDriverCruve))
+        cmds.skinCluster(uppSubJoints, self.topDriverCurve, dr=1.5, mi=1, bm=0,
+                         name="{}_skinCluster".format(self.topDriverCurve))
         cmds.skinCluster(lowSubJoints, self.botDriverCurve, dr=1.5, mi=1, bm=0,
                          name="{}_skinCluster".format(self.botDriverCurve))
 
@@ -569,7 +569,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         # do the auto weighting for the lip controls
         lipsUtil.autoWeightOrientation(
-            sampleCurve=self.topDriverCruve,
+            sampleCurve=self.topDriverCurve,
             controlsList=uppOrtControls,
             jointsList=self.aimTgtList[:self.lipSpans],
             parent=self.targetHierarchy)
@@ -613,7 +613,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         """ Setup the zipperLips"""
         # if we want to do a zipper lips setup we need to create the curve here before we add the other setup to it
         zipCurve = "{}_zip".format(self.name)
-        self.zipperCurve = cmds.duplicate(self.topDriverCruve, name=zipCurve)[0]
+        self.zipperCurve = cmds.duplicate(self.topDriverCurve, name=zipCurve)[0]
 
         self.zipperHierarchy = cmds.createNode("transform", name="{}_zipper".format(self.name),
                                                parent=self.rootHierarchy)
@@ -640,7 +640,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         # setup the zipper blendshape
         self.zipperBlendshape = blendshape.create(self.zipperCurve, name='{}_zipper'.format(self.zipperCurve))
-        blendshape.addTarget(self.zipperBlendshape, target=self.topDriverCruve, targetWeight=0.5)
+        blendshape.addTarget(self.zipperBlendshape, target=self.topDriverCurve, targetWeight=0.5)
         blendshape.addTarget(self.zipperBlendshape, target=self.botDriverCurve, targetWeight=0.5)
 
         # we'll build a list to constrain the newly created target joints to

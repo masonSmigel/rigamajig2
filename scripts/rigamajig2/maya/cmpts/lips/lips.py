@@ -381,8 +381,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             targetCurve = self.botDriverCurve if 'lower' in guideName else self.topDriverCruve
             curve.attatchToCurve(targetLoc, curve=targetCurve, toClosestParam=True)
 
-            if not self.addZipperLips:
-                joint.connectChains([targetLoc], [endJoint])
+            # if not self.addZipperLips:
+            joint.connectChains([targetLoc], [endJoint])
             self.aimTgtList.append(targetLoc)
             self.lipJointsList.append(endJoint)
 
@@ -396,8 +396,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         # build the middle resolution curve
         self.setupMidCurve()
 
-        if self.addZipperLips:
-            self.setupZipperLips()
+        # if self.addZipperLips:
+            # self.setupZipperLips()
 
     def setupLowCurve(self):
         """
@@ -406,11 +406,11 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         """
 
         # setup the main joint hierarchy
-        self.jointsHierarchy = cmds.createNode("transform", name="{}_low_joints".format(self.name),
+        self.jointsHierarchy = cmds.createNode("transform", name="{}_joints".format(self.name),
                                                parent=self.rootHierarchy)
 
-        self.trsHierarchy = cmds.createNode("transform", name="{}_trs_joints".format(self.name),
-                                            parent=self.rootHierarchy)
+        self.cornersHierarchy = cmds.createNode("transform", name="{}_corners".format(self.name),
+                                                parent=self.rootHierarchy)
 
         # This is heavily influenced by "the art of moving points" to create a great shape for our lowres curve.
         # we can do that by setting the skinweights using an equation!
@@ -426,7 +426,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         for side in 'lr':
             ctl = self.rCorner if side == 'r' else self.lCorner
 
-            jawConnecter = cmds.createNode("transform", name="{}_setup".format(ctl.name), parent=self.trsHierarchy)
+            jawConnecter = cmds.createNode("transform", name="{}_setup".format(ctl.name), parent=self.cornersHierarchy)
             transform.matchTransform(ctl.name, jawConnecter)
             setupOffset = hierarchy.create(jawConnecter, hierarchy=["{}_offset".format(jawConnecter)],
                                            matchTransform=True)

@@ -27,6 +27,7 @@ from rigamajig2.maya import constrain
 from rigamajig2.maya import skinCluster
 from rigamajig2.maya import sdk
 from rigamajig2.maya import connection
+from rigamajig2.maya.cmpts.lips import lipsUtil
 
 GUIDE_SCALE = 0.2
 
@@ -52,7 +53,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, useJaw=False, jawJoints=None):
+    def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, useJaw=False, jawJoints=None,
+                 addZipperLips=True):
         """
         :param name: Component Name
         :param input: a single joint this will be the pivot where the lips rotate around
@@ -62,6 +64,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         :param useJaw: If true connect the setup to the jaw
         :param jawJoints:  If useJaw then provide the following joints to the jaw:
                             [lipsTop, lipsBot, lips_l, lips_r]
+        :param addZipperLips: add the setup to do zipper lips
         """
         super(Lips, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
@@ -69,6 +72,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['lipSpans'] = lipSpans
         self.cmptSettings['useJaw'] = useJaw
         self.cmptSettings['jawJoints'] = jawJoints or list()
+        self.cmptSettings['addZipperLips'] = addZipperLips
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['lipsAllName'] = inputBaseNames[0]
@@ -124,16 +128,6 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         # create the sub controls
         hierarchyName = "{}_subControl_guides".format(self.name)
         subControlHierarchy = cmds.createNode("transform", name=hierarchyName, p=self.guidesHierarchy)
-
-        #
-        # uppSubControlNames = ['r_uppCorner', 'r_uppOut', 'r_uppInn',
-        #                       'l_uppInn', 'l_uppOut', 'l_uppCorner', ]
-        #
-        # lowSubControlNames = ['r_lowCorner', 'r_lowOut', 'r_lowInn',
-        #                       'l_lowInn', 'l_lowOut', 'l_lowCorner']
-        #
-        # subControlParams = [0.08, 0.16, 0.375,
-        #                     0.625, 0.84, 0.92]
 
         uppSubControlNames = ['r_uppOut', 'r_uppInn', 'l_uppInn', 'l_uppOut']
 
@@ -339,7 +333,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         botMidCurve = "{}_lowerLip_mid".format(self.name)
 
         # Unlike the eyelids its super important that animators can rotate the lip controls.
-        # So to do that we will create out lip control From the CONTROls not the per span guides
+        # So to do that we will create our lip control From the CONTROls not the per span guides
 
         # theese lists are comprised of the main and sub controls that would define the spans fo the lip.
         uppLipPoints = [self.mainControlGuides[0], self.subControlGuides[1], self.mainControlGuides[1],
@@ -371,6 +365,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         # setup the joints for the eyelid
         # we can do this by looping through the upperGuide and lowerGuide lists
         # (skipping the first and last index of the lower lid)
+        self.aimTgtList = list()
+        self.lipJointsList = list()
         for guide in self.upperGuideList + self.lowerGuideList[1:-1]:
             guideName = guide.split("_guide")[0]
 
@@ -384,9 +380,11 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
             targetCurve = self.botDriverCurve if 'lower' in guideName else self.topDriverCruve
             curve.attatchToCurve(targetLoc, curve=targetCurve, toClosestParam=True)
-            cmds.orientConstraint(self.lipsAll.name, targetLoc, mo=True)
 
-            joint.connectChains([targetLoc], [endJoint])
+            if not self.addZipperLips:
+                joint.connectChains([targetLoc], [endJoint])
+            self.aimTgtList.append(targetLoc)
+            self.lipJointsList.append(endJoint)
 
     def rigSetup(self):
         """ create the main rig setup """
@@ -398,19 +396,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         # build the middle resolution curve
         self.setupMidCurve()
 
-    def setupMouthCorners(self):
-        """Setup the mouth corners"""
-        self.rCornerTrs = cmds.createNode("transform", name="{}_cornerTrs".format(self.mainControls[0].name),
-                                          parent=self.mainControls[0].name)
-        transform.matchTransform(self.mainControls[0].name, self.rCornerTrs)
-
-        self.lCornerTrs = cmds.createNode("transform", name="{}_cornerTrs".format(self.mainControls[4].name),
-                                          parent=self.mainControls[4].name)
-        transform.matchTransform(self.mainControls[4].name, self.lCornerTrs)
-
-        # setup the set driven keys
-        sdk.createSdk("{}.tx".format(self.mainControls[4].name), drivenPlug="{}.tz".format(self.lCornerTrs),
-                      values=[(-3, -2), (0, 0), (10, -4)])
+        if self.addZipperLips:
+            self.setupZipperLips()
 
     def setupLowCurve(self):
         """
@@ -515,8 +502,10 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                          name="{}_skinCluster".format(self.botLowCurve), skinMethod=1)
 
         # now we need to autoSkinWeight the curves
-        self.autoSkinLowCurve(self.topLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[1], self.mainDriverJnts[2])
-        self.autoSkinLowCurve(self.botLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[3], self.mainDriverJnts[2])
+        lipsUtil.autoSkinLowCurve(self.topLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[1],
+                                  self.mainDriverJnts[2])
+        lipsUtil.autoSkinLowCurve(self.botLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[3],
+                                  self.mainDriverJnts[2])
 
     def setupMidCurve(self):
         """ Setup the middle resolution curve """
@@ -540,6 +529,19 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         self.connectControlsToCurve(self.subControls[:5], self.topMidCurve)
         self.connectControlsToCurve(self.subControls[5:], self.botMidCurve)
 
+        # add in the orientation for the sub controls
+        cmds.parent(self.subControls[0].orig, self.mainControls[0].name)
+        lipsUtil.noFlipOrient(self.mainControls[0].name, self.mainControls[1].name, self.subControls[1].trs)
+        lipsUtil.noFlipOrient(self.mainControls[1].name, self.mainControls[2].name, self.subControls[2].trs)
+        lipsUtil.noFlipOrient(self.mainControls[2].name, self.mainControls[3].name, self.subControls[3].trs)
+        lipsUtil.noFlipOrient(self.mainControls[3].name, self.mainControls[4].name, self.subControls[4].trs)
+        cmds.parent(self.subControls[5].orig, self.mainControls[4].name)
+
+        lipsUtil.noFlipOrient(self.mainControls[0].name, self.mainControls[5].name, self.subControls[6].trs)
+        lipsUtil.noFlipOrient(self.mainControls[5].name, self.mainControls[6].name, self.subControls[7].trs)
+        lipsUtil.noFlipOrient(self.mainControls[6].name, self.mainControls[7].name, self.subControls[8].trs)
+        lipsUtil.noFlipOrient(self.mainControls[7].name, self.mainControls[4].name, self.subControls[9].trs)
+
         # create joints for the high curve
         subDriverJoints = self.createJointsForCurve(self.subControls, suffix='sub')
 
@@ -555,57 +557,28 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         cmds.skinCluster(lowSubJoints, self.botDriverCurve, dr=1.5, mi=1, bm=0,
                          name="{}_skinCluster".format(self.botDriverCurve))
 
-        # now we can setup the orient constraints for the subcontrols
-        # for part in ['upp', 'low']:
+        # finally we need to connect the joints rotation to the control orient
+        # here we will use the joint targetLocators to drive the rotation
 
+        uppOrtControls = [self.subControls[0], self.subControls[1], self.mainControls[1], self.subControls[2],
+                          self.mainControls[2], self.subControls[3], self.mainControls[3], self.subControls[4],
+                          self.subControls[5]]
+        lowOrtControls = [self.subControls[0], self.subControls[6], self.mainControls[5], self.subControls[7],
+                          self.mainControls[6], self.subControls[8], self.mainControls[7], self.subControls[9],
+                          self.subControls[5]]
 
-    def setupJointOrientation(self):
-        """ setup the orient constraints on the lips"""
+        # do the auto weighting for the lip controls
+        lipsUtil.autoWeightOrientation(
+            sampleCurve=self.topDriverCruve,
+            controlsList=uppOrtControls,
+            jointsList=self.aimTgtList[:self.lipSpans],
+            parent=self.targetHierarchy)
 
-        # ok so the way were going to do this is to measure the parameters of the various joints
-        # and compare them to the paramaters of the controls. we'll grab the two nearest controls
-        # and create an orient constraint between them.
-
-        # to make this alittle faster we'll make a list of parameters for the upper and lower lips!
-
-        # first we need
-
-
-    @staticmethod
-    def autoSkinLowCurve(crv, min, mid, max):
-        """
-        Auto skinweight the main curves
-        :param crv:  the curve to weigh
-        :param min: the minimum influence (the right corner)
-        :param mid: the middle influence (the top or bottom lip)
-        :param max:  the maximum inlfluence (the left corner)
-        :return:
-        """
-        skin = skinCluster.getSkinCluster(crv)
-
-        cvs = curve.getCvs(crv)
-
-        midPoint = int(len(cvs) / 2)
-        maxParam = len(cvs)
-
-        for i, cv in enumerate(cvs):
-
-            # get the parameter of the current CV
-            x = float(i) / (maxParam - 1)
-
-            # here y is equal to the value of the middle control
-            y = (-((x * 2) - 1) ** 2) + 1
-
-            # to get the outer control use 1-y
-            outer = 1 - y
-
-            if i > midPoint:
-                transformValue = [(min, 0), (mid, y), (max, outer)]
-            else:
-                transformValue = [(min, outer), (mid, y), (max, 0)]
-
-            # finally set the skinweights for the given CV
-            cmds.skinPercent(skin, cv, transformValue=transformValue)
+        lipsUtil.autoWeightOrientation(
+            sampleCurve=self.botDriverCurve,
+            controlsList=lowOrtControls,
+            jointsList=self.aimTgtList[self.lipSpans:],
+            parent=self.targetHierarchy)
 
     def connectControlsToCurve(self, controlsList, targetCurve):
         """ Connect the controls to the curve"""
@@ -636,6 +609,65 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         return driverJoints
 
+    def setupZipperLips(self):
+        """ Setup the zipperLips"""
+        # if we want to do a zipper lips setup we need to create the curve here before we add the other setup to it
+        zipCurve = "{}_zip".format(self.name)
+        self.zipperCurve = cmds.duplicate(self.topDriverCruve, name=zipCurve)[0]
+
+        self.zipperHierarchy = cmds.createNode("transform", name="{}_zipper".format(self.name),
+                                               parent=self.rootHierarchy)
+        cmds.setAttr("{}.inheritsTransform".format(self.zipperHierarchy), False)
+
+        # setuo attributes for the zipper
+        lZipper = attr.createAttr(self.paramsHierarchy, 'lZipper', "float", minValue=0, maxValue=10, value=0)
+        rZipper = attr.createAttr(self.paramsHierarchy, "rZipper", "float", minValue=0, maxValue=10, value=0)
+
+        lZipperFalloff = attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0, maxValue=10, value=4)
+        rZipperFalloff = attr.createAttr(self.paramsHierarchy, "rZipperFalloff", "float", minValue=0, maxValue=10, value=4)
+
+        # create zipperLocs
+        self.zipperTargets = list()
+        for guide in self.upperGuideList:
+            guideName = guide.split("_guide")[0] + "_zipper"
+            guideName = guideName.replace("_upper_", "_mid_")
+
+            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.zipperHierarchy)
+            transform.matchTransform(guide, targetLoc)
+
+            curve.attatchToCurve(targetLoc, curve=self.zipperCurve, toClosestParam=True)
+            self.zipperTargets.append(targetLoc)
+
+        # setup the zipper blendshape
+        self.zipperBlendshape = blendshape.create(self.zipperCurve, name='{}_zipper'.format(self.zipperCurve))
+        blendshape.addTarget(self.zipperBlendshape, target=self.topDriverCruve, targetWeight=0.5)
+        blendshape.addTarget(self.zipperBlendshape, target=self.botDriverCurve, targetWeight=0.5)
+
+        # we'll build a list to constrain the newly created target joints to
+        zipperParentList = self.zipperTargets + self.zipperTargets[1:-1]
+
+        # now we can create the zipper targets
+        zipperTargetList = list()
+        for i, guide in enumerate(self.upperGuideList + self.lowerGuideList[1:-1]):
+            guideName = guide.split("_guide")[0] + "_zipperTarget"
+
+            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.zipperHierarchy)
+            transform.matchTransform(guide, targetLoc)
+
+            cmds.parent(targetLoc, zipperParentList[i])
+            zipperTargetList.append(targetLoc)
+
+        parentConstraintList = list()
+        upperLipJionts = self.lipJointsList[:self.lipSpans]
+        lowerLipJionts = self.lipJointsList[self.lipSpans:]
+        for i in range(len(self.lipJointsList[:self.lipSpans])):
+            # setup  the parent constraint
+
+            constraint = cmds.parentConstraint(self.aimTgtList[i], self.lipJointsList[i], mo=False, w=1)[0]
+            cmds.parentConstraint(zipperTargetList[i], self.lipJointsList[i], mo=False, w=0)
+            cmds.setAttr("{}.interpType".format(constraint), 2)
+            parentConstraintList.append(constraint)
+
     def setupAnimAttrs(self):
         """ setup the animator parameters"""
         # create a visability control for the ikGimble control
@@ -646,11 +678,18 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
     def connect(self):
         """Create the connection to other components """
+
+        if cmds.objExists(self.rigParent):
+            # connect the lips all
+            transform.connectOffsetParentMatrix(self.rigParent, self.lipsAll.orig, mo=True)
+
+        # connect the up vector to the eyesocket control
+        transform.connectOffsetParentMatrix(self.lipsAll.name, self.upVector, mo=True)
+
         # If we have specified a new jaw then connection then connect it here. The goal here is to add the transform of
         # the jaw to the transform of the lipsAll so that both have full influence of the controls. To do this we will
         # create a simple hierarchy to combine transforms and a local rig to extract the movement of the jaw.
         if self.useJaw:
-
             jawConnectControls = [self.uppLips, self.lowLips, self.mainControls[4], self.mainControls[0]]
 
             jawOffsetGroup = cmds.createNode("transform", name="{}_jaw_space".format(self.name),
@@ -681,3 +720,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                         # we can use the index by subtracting 2 from the index
                         cmds.connectAttr("{}.{}".format(jawTrs, channel),
                                          "{}.{}".format(self.cornerSetups[i - 2], channel))
+
+    def finalize(self):
+        """ Finalize the rig setup """
+        # hide the curves group
+        cmds.setAttr("{}.v".format(self.curvesHierarchy), 0)
+        attr.lock(self.curvesHierarchy, attr.TRANSFORMS)

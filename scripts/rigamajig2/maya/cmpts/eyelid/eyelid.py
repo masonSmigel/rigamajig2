@@ -28,7 +28,7 @@ from rigamajig2.maya import constrain
 GUIDE_SCALE = 0.2
 
 
-class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
+class Eyelid(rigamajig2.maya.cmpts.base.Base):
     """
     A realistic eyelid component.
 
@@ -58,7 +58,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
         :param addFleshyEye: If True an eyeballJoint must be provided and the rotation will drive the eye look
         :param eyeballJoint: Used when adding a fleshy eye setup to drive the fleshy eye
         """
-        super(RealisticEyelid, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Eyelid, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
 
         self.cmptSettings['eyelidSpans'] = eyelidSpans
@@ -217,7 +217,7 @@ class RealisticEyelid(rigamajig2.maya.cmpts.base.Base):
 
     def initalHierachy(self):
         """Build the inital rig hierarchy"""
-        super(RealisticEyelid, self).initalHierachy()
+        super(Eyelid, self).initalHierachy()
 
         self.eyeSocket = control.createAtObject(name=self.eyeSocketName,
                                                 side=self.side,

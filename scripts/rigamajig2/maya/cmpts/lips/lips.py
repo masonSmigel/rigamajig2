@@ -364,15 +364,29 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         self.topMidCurve = cmds.duplicate(self.topDriverCruve, name=topMidCurve)[0]
         self.botMidCurve = cmds.duplicate(self.botDriverCurve, name=botMidCurve)[0]
 
-        # create the bind joints for the component
-        # these joints will be the final bind joints that drive the skin
-        for guide in [self.subControlGuides[0], self.subControlGuides[5]] + uppLipPoints[1:-1] + lowLipPoints[1:-1]:
+        # setup joints for each span of the lips
+        self.targetHierarchy = cmds.createNode("transform", name="{}_aimTgts".format(self.name), p=self.rootHierarchy)
+        cmds.setAttr("{}.inheritsTransform".format(self.targetHierarchy), False)
+
+        # setup the joints for the eyelid
+        # we can do this by looping through the upperGuide and lowerGuide lists
+        # (skipping the first and last index of the lower lid)
+        for guide in self.upperGuideList + self.lowerGuideList[1:-1]:
             guideName = guide.split("_guide")[0]
 
             endJoint = cmds.createNode("joint", name="{}_bind".format(guideName), p=self.input[0])
             transform.matchTranslate(guide, endJoint)
             joint.setRadius([endJoint], GUIDE_SCALE)
             meta.tag(endJoint, "bind")
+
+            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.targetHierarchy)
+            transform.matchTransform(guide, targetLoc)
+
+            targetCurve = self.botDriverCurve if 'lower' in guideName else self.topDriverCruve
+            curve.attatchToCurve(targetLoc, curve=targetCurve, toClosestParam=True)
+            cmds.orientConstraint(self.lipsAll.name, targetLoc, mo=True)
+
+            joint.connectChains([targetLoc], [endJoint])
 
     def rigSetup(self):
         """ create the main rig setup """
@@ -383,14 +397,6 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         # build the middle resolution curve
         self.setupMidCurve()
-
-        # TODO: remove this later. This is just temporary
-        # wire1, _ = cmds.wire(self.topDriverCruve, wire=self.topLowCurve,
-        #                      dds=[0, 5], name="{}_wire".format(self.topDriverCruve))
-        # wire2, _ = cmds.wire(self.botDriverCurve, wire=self.botLowCurve,
-        #                      dds=[0, 5], name="{}_wire".format(self.botDriverCurve))
-        # for wire in [wire1, wire2]:
-        #     cmds.setAttr("{}.scale[0]".format(wire), 0)
 
     def setupMouthCorners(self):
         """Setup the mouth corners"""
@@ -424,8 +430,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         # our equation will be y=-(x-1)^{2.4} +1
 
         attr.addSeparator(self.paramsHierarchy, "corners")
-        wideLimit = attr.createAttr(self.paramsHierarchy, "rotLimitWide", "float", value=2)
-        narrowLimit = attr.createAttr(self.paramsHierarchy, "rotLimitNarrow", "float", value=-2)
+        wideLimit = attr.createAttr(self.paramsHierarchy, "rotLimitWide", "float", value=2, minValue=0)
+        narrowLimit = attr.createAttr(self.paramsHierarchy, "rotLimitNarrow", "float", value=-2, maxValue=0)
 
         dummyJoints = list()
         self.cornerSetups = list()
@@ -435,6 +441,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
             jawConnecter = cmds.createNode("transform", name="{}_setup".format(ctl.name), parent=self.trsHierarchy)
             transform.matchTransform(ctl.name, jawConnecter)
+            setupOffset = hierarchy.create(jawConnecter, hierarchy=["{}_offset".format(jawConnecter)],
+                                           matchTransform=True)
 
             aimTrsOffset = cmds.createNode("transform", name='{}_aimTrs_offset'.format(ctl.name),
                                            parent=jawConnecter)
@@ -485,20 +493,17 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             cmds.connectAttr("{}.ty".format(ctl.name), "{}.ty".format(dummyJoint))
             cmds.connectAttr("{}.tz".format(ctl.name), "{}.tz".format(dummyJoint))
 
+            # constrain it to the lips group
+            transform.connectOffsetParentMatrix(self.lipsAll.name, setupOffset, mo=True)
+
             # store important data here to re-use later
             dummyJoints.append(dummyJoint)
             self.cornerSetups.append(jawConnecter)
 
-        # create a bunch of driver joints
-        self.mainDriverJnts = list()
-        for ctl in [dummyJoints[-1], self.uppLips.name, dummyJoints[0], self.lowLips.name]:
-            jnt = cmds.createNode("joint", name=ctl + "_main_driver", parent=self.jointsHierarchy)
-            transform.matchTransform(ctl, jnt)
-            transform.connectOffsetParentMatrix(ctl, jnt)
+        # create a a list of driver joints for the lowres curve
+        mainJointsList = [dummyJoints[-1], self.uppLips.name, dummyJoints[0], self.lowLips.name]
+        self.mainDriverJnts = self.createJointsForCurve(mainJointsList, suffix='main')
 
-            self.mainDriverJnts.append(jnt)
-
-        # bind the driver joints to the curves
         uppLidJoints = self.mainDriverJnts[:3]
         lowLidJoints = [self.mainDriverJnts[0], self.mainDriverJnts[3], self.mainDriverJnts[2]]
 
@@ -509,70 +514,62 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         cmds.skinCluster(lowLidJoints, self.botLowCurve, dr=1, mi=2, bm=0,
                          name="{}_skinCluster".format(self.botLowCurve), skinMethod=1)
 
-        # hide the joints
-        joint.hideJoints(self.mainDriverJnts)
-
         # now we need to autoSkinWeight the curves
         self.autoSkinLowCurve(self.topLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[1], self.mainDriverJnts[2])
         self.autoSkinLowCurve(self.botLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[3], self.mainDriverJnts[2])
 
-        # create joints to ride on the curve
-        # self.targetHierarchy = cmds.createNode("transform", name="{}_tgts".format(self.name), p=self.rootHierarchy)
-        # cmds.setAttr("{}.inheritsTransform".format(self.targetHierarchy), False)
-
-        # now we can connect the upper and lower lip controls to this curve
-        # for ctl in self.mainControls[1:4] + self.mainControls[5:]:
-        #     targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(ctl.name), p=self.targetHierarchy)
-        #     transform.matchTranslate(ctl.name, targetLoc)
-        #
-        #     targetCurve = self.botLowCurve if "low" in ctl.name else self.topLowCurve
-        #     curve.attatchToCurve(targetLoc, targetCurve)
-        #     constrain.orientConstraint(self.lipsAll.name, targetLoc)
-        #
-        #     transform.connectOffsetParentMatrix(targetLoc, ctl.orig, mo=False, r=False, s=False, sh=False)
-
     def setupMidCurve(self):
         """ Setup the middle resolution curve """
         # create joints to ride on the curve
-        self.targetHierarchy = cmds.createNode("transform", name="{}_tgts".format(self.name), p=self.rootHierarchy)
-        cmds.setAttr("{}.inheritsTransform".format(self.targetHierarchy), False)
+        self.connectControlsToCurve(self.mainControls[1:4], self.topLowCurve)
+        self.connectControlsToCurve(self.mainControls[5:], self.botLowCurve)
 
-        # now we can connect the upper and lower lip controls to this curve
-        for ctl in self.mainControls[1:4] + self.mainControls[5:]:
-            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(ctl.name), p=self.targetHierarchy)
-            transform.matchTranslate(ctl.name, targetLoc)
+        # create a bunch of driver joints
+        midDriverJoints = self.createJointsForCurve(self.mainControls[1:4] + self.mainControls[5:], suffix="mid")
 
-            targetCurve = self.botLowCurve if "low" in ctl.name else self.topLowCurve
-            curve.attatchToCurve(targetLoc, targetCurve)
-            constrain.orientConstraint(self.lipsAll.name, targetLoc)
+        # bind the joints to the curve
+        uppLidJoints = [self.mainDriverJnts[0]] + midDriverJoints[:3] + [self.mainDriverJnts[2]]
+        lowLidJoints = [self.mainDriverJnts[0]] + midDriverJoints[3:] + [self.mainDriverJnts[2]]
 
-            transform.connectOffsetParentMatrix(targetLoc, ctl.orig, mo=False, r=False, s=False, sh=False)
-
-
-
-
-
-
-
-        #
-        # # create a bunch of driver joints
-        # driverJoints = list()
-        # for ctl in self.mainControls[1:4] + self.mainControls[5:]:
-        #     jnt = cmds.createNode("joint", name=ctl.name + "_mid_driver", parent=self.jointsHierarchy)
-        #     transform.matchTransform(ctl.name, jnt)
-        #     transform.connectOffsetParentMatrix(ctl.name, jnt)
-        #
-        #     driverJoints.append(jnt)
-        #
-        # uppLidJoints = [self.mainDriverJnts[0]] + driverJoints[:3] + [self.mainDriverJnts[2]]
-        # lowLidJoints = [self.mainDriverJnts[0]] + driverJoints[3:] + [self.mainDriverJnts[2]]
-        #
-        # cmds.skinCluster(uppLidJoints, self.topMidCurve, dr=1.5, mi=2, bm=0,
-        #                  name="{}_skinCluster".format(self.topMidCurve))
-        # cmds.skinCluster(lowLidJoints, self.botMidCurve, dr=1.5, mi=2, bm=0,
-        #                  name="{}_skinCluster".format(self.botMidCurve))
+        cmds.skinCluster(uppLidJoints, self.topMidCurve, dr=1.5, mi=2, bm=0,
+                         name="{}_skinCluster".format(self.topMidCurve))
+        cmds.skinCluster(lowLidJoints, self.botMidCurve, dr=1.5, mi=2, bm=0,
+                         name="{}_skinCluster".format(self.botMidCurve))
 
         # connect the secondary controls to this curve
+        self.connectControlsToCurve(self.subControls[:5], self.topMidCurve)
+        self.connectControlsToCurve(self.subControls[5:], self.botMidCurve)
+
+        # create joints for the high curve
+        subDriverJoints = self.createJointsForCurve(self.subControls, suffix='sub')
+
+        uppSubJoints = [subDriverJoints[0], subDriverJoints[1], midDriverJoints[0], subDriverJoints[2],
+                        midDriverJoints[1], subDriverJoints[3], midDriverJoints[2], subDriverJoints[4],
+                        subDriverJoints[5]]
+        lowSubJoints = [subDriverJoints[0], subDriverJoints[6], midDriverJoints[3], subDriverJoints[7],
+                        midDriverJoints[4], subDriverJoints[8], midDriverJoints[5], subDriverJoints[9],
+                        subDriverJoints[5]]
+
+        cmds.skinCluster(uppSubJoints, self.topDriverCruve, dr=1.5, mi=1, bm=0,
+                         name="{}_skinCluster".format(self.topDriverCruve))
+        cmds.skinCluster(lowSubJoints, self.botDriverCurve, dr=1.5, mi=1, bm=0,
+                         name="{}_skinCluster".format(self.botDriverCurve))
+
+        # now we can setup the orient constraints for the subcontrols
+        # for part in ['upp', 'low']:
+
+
+    def setupJointOrientation(self):
+        """ setup the orient constraints on the lips"""
+
+        # ok so the way were going to do this is to measure the parameters of the various joints
+        # and compare them to the paramaters of the controls. we'll grab the two nearest controls
+        # and create an orient constraint between them.
+
+        # to make this alittle faster we'll make a list of parameters for the upper and lower lips!
+
+        # first we need
+
 
     @staticmethod
     def autoSkinLowCurve(crv, min, mid, max):
@@ -609,6 +606,35 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
             # finally set the skinweights for the given CV
             cmds.skinPercent(skin, cv, transformValue=transformValue)
+
+    def connectControlsToCurve(self, controlsList, targetCurve):
+        """ Connect the controls to the curve"""
+        for ctl in controlsList:
+            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(ctl.name), p=self.targetHierarchy)
+            transform.matchTranslate(ctl.name, targetLoc)
+
+            curve.attatchToCurve(targetLoc, targetCurve)
+            constrain.orientConstraint(self.lipsAll.name, targetLoc)
+
+            transform.connectOffsetParentMatrix(targetLoc, ctl.trs, mo=False, r=False, s=False, sh=False)
+
+    def createJointsForCurve(self, controlList, suffix=""):
+        """ Create a bunch of joints to use for a curve"""
+        driverJoints = list()
+        for ctl in controlList:
+            if isinstance(ctl, control.Control):
+                ctl = ctl.name
+
+            jnt = cmds.createNode("joint", name="{}_{}_driver".format(ctl, suffix), parent=self.jointsHierarchy)
+            transform.matchTransform(ctl, jnt)
+            transform.connectOffsetParentMatrix(ctl, jnt)
+
+            driverJoints.append(jnt)
+
+        # hide the joints
+        joint.hideJoints(driverJoints)
+
+        return driverJoints
 
     def setupAnimAttrs(self):
         """ setup the animator parameters"""
@@ -650,5 +676,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                 for channel in attr.TRANSLATE + attr.ROTATE:
                     cmds.connectAttr("{}.{}".format(jawTrs, channel), "{}.{}".format(ctl.trs, channel))
 
-            for cornerSetup, jawJoint in zip(self.cornerSetups, self.jawJoints[2:]):
-                transform.connectOffsetParentMatrix(jawJoint, cornerSetup, mo=True)
+                    # if we are on the corners then we need to connect the offsets as well to the jaw translation
+                    if i > 1:
+                        # we can use the index by subtracting 2 from the index
+                        cmds.connectAttr("{}.{}".format(jawTrs, channel),
+                                         "{}.{}".format(self.cornerSetups[i - 2], channel))

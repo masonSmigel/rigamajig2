@@ -232,8 +232,6 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
         tiltAttr = attr.createAttr(self.browControls[0].name, "tilt", "float")
         cmds.connectAttr(tiltAttr, "{}.rz".format(self.tiltTrs))
 
-
-
     def setupDriverCurve(self):
         """ Setup the driver curve"""
 

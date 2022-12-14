@@ -53,7 +53,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, useJaw=False, jawJoints=None):
+    def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, useJaw=False, jawJoints=None,
+                 addZipperLips=True):
         """
         :param name: Component Name
         :param input: a single joint this will be the pivot where the lips rotate around
@@ -71,7 +72,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['lipSpans'] = lipSpans
         self.cmptSettings['useJaw'] = useJaw
         self.cmptSettings['jawJoints'] = jawJoints or list()
-        # self.cmptSettings['addZipperLips'] = addZipperLips
+        self.cmptSettings['addZipperLips'] = addZipperLips
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['lipsAllName'] = inputBaseNames[0]
@@ -365,7 +366,6 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         # we can do this by looping through the upperGuide and lowerGuide lists
         # (skipping the first and last index of the lower lid)
         self.aimTgtList = list()
-        self.lipJointsList = list()
         for guide in self.upperGuideList + self.lowerGuideList[1:-1]:
             guideName = guide.split("_guide")[0]
 
@@ -383,7 +383,6 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             # if not self.addZipperLips:
             joint.connectChains([targetLoc], [endJoint])
             self.aimTgtList.append(targetLoc)
-            self.lipJointsList.append(endJoint)
 
     def rigSetup(self):
         """ create the main rig setup """
@@ -395,8 +394,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         # build the middle resolution curve
         self.setupMidCurve()
 
-        # if self.addZipperLips:
-            # self.setupZipperLips()
+        if self.addZipperLips:
+            self.setupZipperLips()
 
     def setupLowCurve(self):
         """
@@ -411,9 +410,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         self.cornersHierarchy = cmds.createNode("transform", name="{}_corners".format(self.name),
                                                 parent=self.rootHierarchy)
 
-        # This is heavily influenced by "the art of moving points" to create a great shape for our lowres curve.
-        # we can do that by setting the skinweights using an equation!
-        # our equation will be y=-(x-1)^{2.4} +1
+        # the first portion of this setup is to build a systemt to wrap the corner of the lips around the teeth.
+        # this is accomplished by created a separate hierarchy at the lips joint which aims at the mouth control (giving an expected rotation)
+        # however once the rotation reaches a limit the transformation instead becomes a translation
 
         attr.addSeparator(self.paramsHierarchy, "corners")
         wideLimit = attr.createAttr(self.paramsHierarchy, "rotLimitWide", "float", value=2, minValue=0)
@@ -500,7 +499,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         cmds.skinCluster(lowLidJoints, self.botLowCurve, dr=1, mi=2, bm=0,
                          name="{}_skinCluster".format(self.botLowCurve), skinMethod=1)
 
-        # now we need to autoSkinWeight the curves
+        # autoskin the curves! This idea comes from "the art of moving points" to create a great shape for our lowres curve.
+        # we can do that by setting the skinweights using the equation: y=-(x-1)^{2.4} +1
         lipsUtil.autoSkinLowCurve(self.topLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[1],
                                   self.mainDriverJnts[2])
         lipsUtil.autoSkinLowCurve(self.botLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[3],
@@ -542,40 +542,42 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         lipsUtil.noFlipOrient(self.mainControls[7].name, self.mainControls[4].name, self.subControls[9].trs)
 
         # create joints for the high curve
-        subDriverJoints = self.createJointsForCurve(self.subControls, suffix='sub')
+        uppControlsForJoints = [self.subControls[0], self.subControls[1], self.mainControls[1], self.subControls[2],
+                                self.mainControls[2], self.subControls[3], self.mainControls[3], self.subControls[4],
+                                self.subControls[5]]
+        lowControlsForJoints = [self.subControls[0], self.subControls[6], self.mainControls[5], self.subControls[7],
+                                self.mainControls[6], self.subControls[8], self.mainControls[7], self.subControls[9],
+                                self.subControls[5]]
 
-        uppSubJoints = [subDriverJoints[0], subDriverJoints[1], midDriverJoints[0], subDriverJoints[2],
-                        midDriverJoints[1], subDriverJoints[3], midDriverJoints[2], subDriverJoints[4],
-                        subDriverJoints[5]]
-        lowSubJoints = [subDriverJoints[0], subDriverJoints[6], midDriverJoints[3], subDriverJoints[7],
-                        midDriverJoints[4], subDriverJoints[8], midDriverJoints[5], subDriverJoints[9],
-                        subDriverJoints[5]]
+        self.uppSubJoints = self.createJointsForCurve(uppControlsForJoints, suffix='sub')
+        self.lowSubJoints = self.createJointsForCurve(lowControlsForJoints[1:-1], suffix='sub')
 
-        cmds.skinCluster(uppSubJoints, self.topDriverCurve, dr=1.5, mi=1, bm=0,
+        # skin the upper and lower driver curves. For the lower curve we'll use the corners from the upper curve to avoid
+        # duplicate connections
+        cmds.skinCluster(self.uppSubJoints, self.topDriverCurve, dr=1.5, mi=1, bm=0,
                          name="{}_skinCluster".format(self.topDriverCurve))
-        cmds.skinCluster(lowSubJoints, self.botDriverCurve, dr=1.5, mi=1, bm=0,
-                         name="{}_skinCluster".format(self.botDriverCurve))
+        cmds.skinCluster([self.uppSubJoints[0]] + self.lowSubJoints + [self.uppSubJoints[-1]], self.botDriverCurve,
+                         dr=1.5, mi=1, bm=0, name="{}_skinCluster".format(self.botDriverCurve))
 
         # finally we need to connect the joints rotation to the control orient
         # here we will use the joint targetLocators to drive the rotation
-
-        uppOrtControls = [self.subControls[0], self.subControls[1], self.mainControls[1], self.subControls[2],
-                          self.mainControls[2], self.subControls[3], self.mainControls[3], self.subControls[4],
-                          self.subControls[5]]
-        lowOrtControls = [self.subControls[0], self.subControls[6], self.mainControls[5], self.subControls[7],
-                          self.mainControls[6], self.subControls[8], self.mainControls[7], self.subControls[9],
-                          self.subControls[5]]
+        self.uppOrtControls = [self.subControls[0], self.subControls[1], self.mainControls[1], self.subControls[2],
+                               self.mainControls[2], self.subControls[3], self.mainControls[3], self.subControls[4],
+                               self.subControls[5]]
+        self.lowOrtControls = [self.subControls[0], self.subControls[6], self.mainControls[5], self.subControls[7],
+                               self.mainControls[6], self.subControls[8], self.mainControls[7], self.subControls[9],
+                               self.subControls[5]]
 
         # do the auto weighting for the lip controls
         lipsUtil.autoWeightOrientation(
             sampleCurve=self.topDriverCurve,
-            controlsList=uppOrtControls,
+            controlsList=self.uppOrtControls,
             jointsList=self.aimTgtList[:self.lipSpans],
             parent=self.targetHierarchy)
 
         lipsUtil.autoWeightOrientation(
             sampleCurve=self.botDriverCurve,
-            controlsList=lowOrtControls,
+            controlsList=self.lowOrtControls,
             jointsList=self.aimTgtList[self.lipSpans:],
             parent=self.targetHierarchy)
 
@@ -608,64 +610,152 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         return driverJoints
 
-    # def setupZipperLips(self):
-    #     """ Setup the zipperLips"""
-    #     # if we want to do a zipper lips setup we need to create the curve here before we add the other setup to it
-    #     zipCurve = "{}_zip".format(self.name)
-    #     self.zipperCurve = cmds.duplicate(self.topDriverCurve, name=zipCurve)[0]
-    #
-    #     self.zipperHierarchy = cmds.createNode("transform", name="{}_zipper".format(self.name),
-    #                                            parent=self.rootHierarchy)
-    #     cmds.setAttr("{}.inheritsTransform".format(self.zipperHierarchy), False)
-    #
-    #     # setuo attributes for the zipper
-    #     lZipper = attr.createAttr(self.paramsHierarchy, 'lZipper', "float", minValue=0, maxValue=10, value=0)
-    #     rZipper = attr.createAttr(self.paramsHierarchy, "rZipper", "float", minValue=0, maxValue=10, value=0)
-    #
-    #     lZipperFalloff = attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0, maxValue=10, value=4)
-    #     rZipperFalloff = attr.createAttr(self.paramsHierarchy, "rZipperFalloff", "float", minValue=0, maxValue=10, value=4)
-    #
-    #     # create zipperLocs
-    #     self.zipperTargets = list()
-    #     for guide in self.upperGuideList:
-    #         guideName = guide.split("_guide")[0] + "_zipper"
-    #         guideName = guideName.replace("_upper_", "_mid_")
-    #
-    #         targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.zipperHierarchy)
-    #         transform.matchTransform(guide, targetLoc)
-    #
-    #         curve.attatchToCurve(targetLoc, curve=self.zipperCurve, toClosestParam=True)
-    #         self.zipperTargets.append(targetLoc)
-    #
-    #     # setup the zipper blendshape
-    #     self.zipperBlendshape = blendshape.create(self.zipperCurve, name='{}_zipper'.format(self.zipperCurve))
-    #     blendshape.addTarget(self.zipperBlendshape, target=self.topDriverCurve, targetWeight=0.5)
-    #     blendshape.addTarget(self.zipperBlendshape, target=self.botDriverCurve, targetWeight=0.5)
-    #
-    #     # we'll build a list to constrain the newly created target joints to
-    #     zipperParentList = self.zipperTargets + self.zipperTargets[1:-1]
-    #
-    #     # now we can create the zipper targets
-    #     zipperTargetList = list()
-    #     for i, guide in enumerate(self.upperGuideList + self.lowerGuideList[1:-1]):
-    #         guideName = guide.split("_guide")[0] + "_zipperTarget"
-    #
-    #         targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.zipperHierarchy)
-    #         transform.matchTransform(guide, targetLoc)
-    #
-    #         cmds.parent(targetLoc, zipperParentList[i])
-    #         zipperTargetList.append(targetLoc)
-    #
-    #     parentConstraintList = list()
-    #     upperLipJionts = self.lipJointsList[:self.lipSpans]
-    #     lowerLipJionts = self.lipJointsList[self.lipSpans:]
-    #     for i in range(len(self.lipJointsList[:self.lipSpans])):
-    #         # setup  the parent constraint
-    #
-    #         constraint = cmds.parentConstraint(self.aimTgtList[i], self.lipJointsList[i], mo=False, w=1)[0]
-    #         cmds.parentConstraint(zipperTargetList[i], self.lipJointsList[i], mo=False, w=0)
-    #         cmds.setAttr("{}.interpType".format(constraint), 2)
-    #         parentConstraintList.append(constraint)
+    def setupZipperLips(self):
+        """ Setup the zipperLips"""
+        # if we want to do a zipper lips setup we need to create the curve here before we add the other setup to it
+        zipperUppCurveName = "{}_upper_zipper".format(self.name)
+        zipperLowCurveName = "{}_lower_zipper".format(self.name)
+        zipCurveName = "{}_mid_zipper".format(self.name)
+
+        zipperCurve = cmds.duplicate(self.topDriverCurve, name=zipCurveName)[0]
+        zipperUppCurve = cmds.duplicate(self.topDriverCurve, name=zipperUppCurveName)[0]
+        zipperLowCurve = cmds.duplicate(self.botDriverCurve, name=zipperLowCurveName)[0]
+
+        self.zipperHierarchy = cmds.createNode("transform", name="{}_zipper".format(self.name),
+                                               parent=self.rootHierarchy)
+
+        cmds.setAttr("{}.inheritsTransform".format(self.zipperHierarchy), False)
+
+        # setuo attributes for the zipper
+        lZipper = attr.createAttr(self.paramsHierarchy, 'lZipper', "float", minValue=0, maxValue=10, value=0)
+        rZipper = attr.createAttr(self.paramsHierarchy, "rZipper", "float", minValue=0, maxValue=10, value=0)
+
+        lZipperFalloff = attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0, maxValue=10,
+                                         value=4)
+        rZipperFalloff = attr.createAttr(self.paramsHierarchy, "rZipperFalloff", "float", minValue=0, maxValue=10,
+                                         value=4)
+
+        # we need to make a duplicate of the high curve so we can drive the joints that move the actull high curve without causing a cycle
+        self.zipperJointsHierarchy = cmds.createNode("transform", name="{}_zipper_joints".format(self.name),
+                                                     parent=self.zipperHierarchy)
+
+        # create the joints we need for the duplicated hierarchy
+        zipUppJointNames = [x.replace("driver", "zipper") for x in self.uppSubJoints]
+        zipLowJointNames = [x.replace("driver", "zipper") for x in self.lowSubJoints]
+        uppZipperDriverJoints = joint.duplicateChain(self.uppSubJoints, self.zipperJointsHierarchy, zipUppJointNames)
+        cmds.parent(uppZipperDriverJoints[1:], self.zipperJointsHierarchy)
+
+        lowZipperDriverJoints = joint.duplicateChain(self.lowSubJoints, self.zipperJointsHierarchy, zipLowJointNames)
+        cmds.parent(lowZipperDriverJoints[1:], self.zipperJointsHierarchy)
+
+        # connect them to the controls
+        for ctl, jnt in zip(self.uppOrtControls + self.lowOrtControls[1:-1],
+                            uppZipperDriverJoints + lowZipperDriverJoints):
+            transform.connectOffsetParentMatrix(ctl.name, jnt)
+
+        # skin the duplicates to the curves
+        cmds.skinCluster(uppZipperDriverJoints, zipperUppCurve,
+                         dr=1.5, mi=1, bm=0, name="{}_skinCluster".format(zipperUppCurve))
+        cmds.skinCluster([uppZipperDriverJoints[0]] + lowZipperDriverJoints + [uppZipperDriverJoints[-1]],
+                         zipperLowCurve,
+                         dr=1.5, mi=1, bm=0, name="{}_skinCluster".format(zipperLowCurve))
+
+        # create zipperLocs
+        zipperTargets = list()
+        # now we can loop through the top lip joints to create a zipper joint for each child
+        for jnt in self.uppSubJoints[1:-1]:
+            jntName = jnt.split("_guide")[0]
+            jntName = jntName.replace("_upper_", "_mid_")
+            jntName = jntName.replace("_upp", "_mid")
+            jntName = jntName.replace("_driver", "_zipper")
+
+            targetLoc = cmds.createNode("transform", name="{}_trs".format(jntName), p=self.zipperHierarchy)
+            transform.matchTransform(jnt, targetLoc)
+
+            curve.attatchToCurve(targetLoc, curve=zipperCurve, toClosestParam=True)
+            zipperTargets.append(targetLoc)
+
+        # setup the zipper blendshape
+        self.zipperBlendshape = blendshape.create(zipperCurve, name='{}_zipper'.format(zipperCurve))
+        blendshape.addTarget(self.zipperBlendshape, target=zipperUppCurve, targetWeight=0.5)
+        blendshape.addTarget(self.zipperBlendshape, target=zipperLowCurve, targetWeight=0.5)
+
+        for i, jnt in enumerate(self.uppSubJoints[1:-1]):
+            mm = cmds.listConnections("{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False)[0]
+            zipperMM, dcmp = transform.connectOffsetParentMatrix(zipperTargets[i], jnt, mo=True)
+
+            blendMatrix = cmds.createNode("blendMatrix", n="{}_zipper_blendMatrix".format(jnt))
+
+            # connect the other two matricies into the blendMatrix
+            cmds.connectAttr("{}.matrixSum".format(mm), "{}.inputMatrix".format(blendMatrix))
+            cmds.connectAttr("{}.matrixSum".format(zipperMM), "{}.target[0].targetMatrix".format(blendMatrix))
+
+            # connect the blend matrix back to the joint
+            cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.offsetParentMatrix".format(jnt), f=True)
+
+
+
+        # setup the seal connection now
+        triggers = {"l": list(), "r": list()}
+        for side in 'rl':
+            # setup the falloff
+            delay_pma = node.plusMinusAverage1D([10, lZipperFalloff], operation='sub', name="{}_l_delay".format(self.name))
+
+            lerp = 1.0 / float((len(self.uppSubJoints)) - 1)
+            delay_div = node.multDoubleLinear(input1="{}.{}".format(delay_pma, 'output1D'), input2=lerp,
+                                              name="{}_seal_{}_div".format(self.name, side))
+
+            mult_triggers = list()
+            sub_triggers = list()
+            triggers[side].append(mult_triggers)
+            triggers[side].append(sub_triggers)
+
+            for index in range(len(self.uppSubJoints)):
+                indexName = "{}_{:02d}".format(self.name, index)
+
+                delay_mult = node.multDoubleLinear(index, "{}.{}".format(delay_div, 'output'),
+                                                   name="{}_seal_{}".format(indexName, side))
+                mult_triggers.append(delay_mult)
+
+                sub_delay = node.plusMinusAverage1D(["{}.{}".format(delay_mult, "output"),
+                                                     "{}.{}ZipperFalloff".format(self.paramsHierarchy, side)],
+                                                    operation='sum', name="{}_seal_{}".format(indexName, side))
+                sub_triggers.append(sub_delay)
+
+        value = len(self.uppSubJoints[1:-1])
+        for l_index in range(len(self.uppSubJoints[1:-1])):
+            r_index = value-l_index -1
+            indexName = "{}_seal_{}".format(self.name, l_index)
+
+            l_mult_trigger, l_sub_trigger = triggers['l'][0][l_index], triggers['l'][1][l_index]
+            r_mult_trigger, r_sub_trigger = triggers['r'][0][r_index], triggers['r'][1][r_index]
+
+            # right network
+            l_remap = node.remapValue("{}.{}Zipper".format(self.paramsHierarchy, 'r'),
+                                      inMin="{}.{}".format(l_mult_trigger, "output"),
+                                      inMax="{}.{}".format(l_sub_trigger, "output1D"),
+                                      outMax=1, interp='smooth', name="{}_seal_{}".format(indexName, 'r'))
+
+            # right network
+            r_sub = node.plusMinusAverage1D([1, "{}.{}".format(l_remap, "outValue")], operation='sub',
+                                            name="{}_offset_seal_r_sub".format(indexName))
+
+            r_remap = node.remapValue("{}.{}Zipper".format(self.paramsHierarchy, 'l'),
+                                      inMin="{}.{}".format(r_mult_trigger, "output"),
+                                      inMax="{}.{}".format(r_sub_trigger, "output1D"),
+                                      outMax="{}.{}".format(r_sub, "output1D"),
+                                      interp='smooth', name="{}_seal_{}".format(indexName, 'l'))
+            # final addition of both sides
+            sum = node.plusMinusAverage1D(["{}.{}".format(l_remap, "outValue"), "{}.{}".format(r_remap, "outValue")],
+                                          name="{}_sum".format(indexName))
+
+            clamp = node.remapValue("{}.output1D".format(sum), name="{}_clamp".format(indexName))
+
+            # get the blendmatrix node
+            print self.uppSubJoints[l_index]
+            blendMatrix = cmds.listConnections("{}.offsetParentMatrix".format(self.uppSubJoints[1:-1][l_index]), s=True, d=False, plugs=False)[0]
+
+            cmds.connectAttr("{}.{}".format(clamp, 'outValue'), "{}.{}".format(blendMatrix, "envelope"), f=True)
 
     def setupAnimAttrs(self):
         """ setup the animator parameters"""
@@ -722,6 +812,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
     def finalize(self):
         """ Finalize the rig setup """
+        return
+
         # hide the curves group
         cmds.setAttr("{}.v".format(self.curvesHierarchy), 0)
         attr.lock(self.curvesHierarchy, attr.TRANSFORMS)

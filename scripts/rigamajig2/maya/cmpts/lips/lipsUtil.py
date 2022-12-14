@@ -174,3 +174,96 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
             cmds.orientConstraint(closestControl.name, jnt, mo=False, w=1)
 
 
+def setupZipperBlending(joints, zipperTargets):
+    """
+    Setup a hierarachy to drive the zipper joints
+    :param joints:
+    :param zipperTargets:
+    :return:
+    """
+    for i, jnt in enumerate(joints):
+        mm = cmds.listConnections("{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False)[0]
+        zipperMM, dcmp = transform.connectOffsetParentMatrix(zipperTargets[i], jnt, mo=True)
+
+        blendMatrix = cmds.createNode("blendMatrix", n="{}_zipper_blendMatrix".format(jnt))
+
+        # connect the other two matricies into the blendMatrix
+        cmds.connectAttr("{}.matrixSum".format(mm), "{}.inputMatrix".format(blendMatrix))
+        cmds.connectAttr("{}.matrixSum".format(zipperMM), "{}.target[0].targetMatrix".format(blendMatrix))
+
+        # connect the blend matrix back to the joint
+        cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.offsetParentMatrix".format(jnt), f=True)
+
+
+def setupZipper(name, uppJoints, lowJoints, paramsHolder):
+    """
+    Build the supper setup
+
+    :param uppJoints: list of joints for the upper zipper
+    :param lowJoints:  list of joints for the lower zipper
+    """
+
+    # first we need to build a set of triggers
+    triggers = {"r": list(), "l": list()}
+    numJoints = len(uppJoints)
+
+    for side in 'rl':
+        # setup the falloff
+        delaySubtract = node.plusMinusAverage1D([10, "{}.{}ZipperFalloff".format(paramsHolder, side)], operation='sub',
+                                                name="{}_l_delay".format(name))
+
+        lerp = 1.0 / float(numJoints - 1)
+        delayDivide = node.multDoubleLinear(input1="{}.{}".format(delaySubtract, 'output1D'), input2=lerp,
+                                            name="{}_zipper_{}_div".format(name, side))
+
+        multTriggers = list()
+        subTriggers = list()
+        triggers[side].append(multTriggers)
+        triggers[side].append(subTriggers)
+
+        for index in range(numJoints):
+            indexName = "{}_{:02d}".format(name, index)
+
+            delayMult = node.multDoubleLinear(index, "{}.{}".format(delayDivide, 'output'),
+                                              name="{}_seal_{}".format(indexName, side))
+            multTriggers.append(delayMult)
+
+            subDelay = node.plusMinusAverage1D(["{}.{}".format(delayMult, "output"),
+                                                "{}.{}ZipperFalloff".format(paramsHolder, side)],
+                                               operation='sum', name="{}_seal_{}".format(indexName, side))
+            subTriggers.append(subDelay)
+
+    for i in range(numJoints):
+        rIndex = i
+        lIndex = numJoints - rIndex - 1
+        indexName = "{}_zipper_{}".format(name, lIndex)
+
+        lMultTrigger, lSubTrigger = triggers['l'][0][lIndex], triggers['l'][1][lIndex]
+        rMultTrigger, rSubTrigger = triggers['r'][0][rIndex], triggers['r'][1][rIndex]
+
+        # right network
+        lRemap = node.remapValue("{}.{}Zipper".format(paramsHolder, 'l'),
+                                 inMin="{}.{}".format(lMultTrigger, "output"),
+                                 inMax="{}.{}".format(lSubTrigger, "output1D"),
+                                 outMax=1, interp='smooth', name="{}_seal_{}".format(indexName, 'l'))
+
+        # right network
+        rSub = node.plusMinusAverage1D([1, "{}.{}".format(lRemap, "outValue")], operation='sub',
+                                       name="{}_offset_seal_r_sub".format(indexName))
+
+        rRemap = node.remapValue("{}.{}Zipper".format(paramsHolder, 'r'),
+                                 inMin="{}.{}".format(rMultTrigger, "output"),
+                                 inMax="{}.{}".format(rSubTrigger, "output1D"),
+                                 outMax="{}.{}".format(rSub, "output1D"),
+                                 interp='smooth', name="{}_seal_{}".format(indexName, 'r'))
+        # final addition of both sides
+        total = node.plusMinusAverage1D(["{}.{}".format(rRemap, "outValue"), "{}.{}".format(lRemap, "outValue")],
+                                      name="{}_sum".format(indexName))
+
+        clamp = node.remapValue("{}.output1D".format(total), name="{}_clamp".format(indexName))
+
+        for jointList in [uppJoints, lowJoints]:
+            # get the proper joint and attatch the output of the zipper setup
+            jnt = jointList[i]
+            blendMatrix = cmds.listConnections("{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False)[0]
+            cmds.connectAttr("{}.{}".format(clamp, 'outValue'), "{}.{}".format(blendMatrix, "envelope"), f=True)

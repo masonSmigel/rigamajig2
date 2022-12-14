@@ -630,9 +630,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         lZipper = attr.createAttr(self.paramsHierarchy, 'lZipper', "float", minValue=0, maxValue=10, value=0)
         rZipper = attr.createAttr(self.paramsHierarchy, "rZipper", "float", minValue=0, maxValue=10, value=0)
 
-        lZipperFalloff = attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0, maxValue=10,
+        lZipperFalloff = attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0.001, maxValue=10,
                                          value=4)
-        rZipperFalloff = attr.createAttr(self.paramsHierarchy, "rZipperFalloff", "float", minValue=0, maxValue=10,
+        rZipperFalloff = attr.createAttr(self.paramsHierarchy, "rZipperFalloff", "float", minValue=0.001, maxValue=10,
                                          value=4)
 
         # we need to make a duplicate of the high curve so we can drive the joints that move the actull high curve without causing a cycle
@@ -680,82 +680,16 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         blendshape.addTarget(self.zipperBlendshape, target=zipperUppCurve, targetWeight=0.5)
         blendshape.addTarget(self.zipperBlendshape, target=zipperLowCurve, targetWeight=0.5)
 
-        for i, jnt in enumerate(self.uppSubJoints[1:-1]):
-            mm = cmds.listConnections("{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False)[0]
-            zipperMM, dcmp = transform.connectOffsetParentMatrix(zipperTargets[i], jnt, mo=True)
+        # setup a blending hierarchy for the zipper joints
+        lipsUtil.setupZipperBlending(self.uppSubJoints[1:-1], zipperTargets=zipperTargets)
+        lipsUtil.setupZipperBlending(self.lowSubJoints, zipperTargets=zipperTargets)
 
-            blendMatrix = cmds.createNode("blendMatrix", n="{}_zipper_blendMatrix".format(jnt))
-
-            # connect the other two matricies into the blendMatrix
-            cmds.connectAttr("{}.matrixSum".format(mm), "{}.inputMatrix".format(blendMatrix))
-            cmds.connectAttr("{}.matrixSum".format(zipperMM), "{}.target[0].targetMatrix".format(blendMatrix))
-
-            # connect the blend matrix back to the joint
-            cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.offsetParentMatrix".format(jnt), f=True)
-
-
-
-        # setup the seal connection now
-        triggers = {"l": list(), "r": list()}
-        for side in 'rl':
-            # setup the falloff
-            delay_pma = node.plusMinusAverage1D([10, lZipperFalloff], operation='sub', name="{}_l_delay".format(self.name))
-
-            lerp = 1.0 / float((len(self.uppSubJoints)) - 1)
-            delay_div = node.multDoubleLinear(input1="{}.{}".format(delay_pma, 'output1D'), input2=lerp,
-                                              name="{}_seal_{}_div".format(self.name, side))
-
-            mult_triggers = list()
-            sub_triggers = list()
-            triggers[side].append(mult_triggers)
-            triggers[side].append(sub_triggers)
-
-            for index in range(len(self.uppSubJoints)):
-                indexName = "{}_{:02d}".format(self.name, index)
-
-                delay_mult = node.multDoubleLinear(index, "{}.{}".format(delay_div, 'output'),
-                                                   name="{}_seal_{}".format(indexName, side))
-                mult_triggers.append(delay_mult)
-
-                sub_delay = node.plusMinusAverage1D(["{}.{}".format(delay_mult, "output"),
-                                                     "{}.{}ZipperFalloff".format(self.paramsHierarchy, side)],
-                                                    operation='sum', name="{}_seal_{}".format(indexName, side))
-                sub_triggers.append(sub_delay)
-
-        value = len(self.uppSubJoints[1:-1])
-        for l_index in range(len(self.uppSubJoints[1:-1])):
-            r_index = value-l_index -1
-            indexName = "{}_seal_{}".format(self.name, l_index)
-
-            l_mult_trigger, l_sub_trigger = triggers['l'][0][l_index], triggers['l'][1][l_index]
-            r_mult_trigger, r_sub_trigger = triggers['r'][0][r_index], triggers['r'][1][r_index]
-
-            # right network
-            l_remap = node.remapValue("{}.{}Zipper".format(self.paramsHierarchy, 'r'),
-                                      inMin="{}.{}".format(l_mult_trigger, "output"),
-                                      inMax="{}.{}".format(l_sub_trigger, "output1D"),
-                                      outMax=1, interp='smooth', name="{}_seal_{}".format(indexName, 'r'))
-
-            # right network
-            r_sub = node.plusMinusAverage1D([1, "{}.{}".format(l_remap, "outValue")], operation='sub',
-                                            name="{}_offset_seal_r_sub".format(indexName))
-
-            r_remap = node.remapValue("{}.{}Zipper".format(self.paramsHierarchy, 'l'),
-                                      inMin="{}.{}".format(r_mult_trigger, "output"),
-                                      inMax="{}.{}".format(r_sub_trigger, "output1D"),
-                                      outMax="{}.{}".format(r_sub, "output1D"),
-                                      interp='smooth', name="{}_seal_{}".format(indexName, 'l'))
-            # final addition of both sides
-            sum = node.plusMinusAverage1D(["{}.{}".format(l_remap, "outValue"), "{}.{}".format(r_remap, "outValue")],
-                                          name="{}_sum".format(indexName))
-
-            clamp = node.remapValue("{}.output1D".format(sum), name="{}_clamp".format(indexName))
-
-            # get the blendmatrix node
-            print self.uppSubJoints[l_index]
-            blendMatrix = cmds.listConnections("{}.offsetParentMatrix".format(self.uppSubJoints[1:-1][l_index]), s=True, d=False, plugs=False)[0]
-
-            cmds.connectAttr("{}.{}".format(clamp, 'outValue'), "{}.{}".format(blendMatrix, "envelope"), f=True)
+        # setup the zipper lips
+        lipsUtil.setupZipper(
+            name=self.name,
+            uppJoints=self.uppSubJoints[1:-1],
+            lowJoints=self.lowSubJoints,
+            paramsHolder=self.paramsHierarchy)
 
     def setupAnimAttrs(self):
         """ setup the animator parameters"""

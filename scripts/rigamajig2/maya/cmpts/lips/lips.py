@@ -53,8 +53,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, useJaw=False, jawJoints=None,
-                 addZipperLips=True):
+    def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, useJaw=False, jawJoints=None):
         """
         :param name: Component Name
         :param input: a single joint this will be the pivot where the lips rotate around
@@ -72,7 +71,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['lipSpans'] = lipSpans
         self.cmptSettings['useJaw'] = useJaw
         self.cmptSettings['jawJoints'] = jawJoints or list()
-        self.cmptSettings['addZipperLips'] = addZipperLips
+        # self.cmptSettings['addZipperLips'] = addZipperLips
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['lipsAllName'] = inputBaseNames[0]
@@ -609,64 +608,64 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         return driverJoints
 
-    def setupZipperLips(self):
-        """ Setup the zipperLips"""
-        # if we want to do a zipper lips setup we need to create the curve here before we add the other setup to it
-        zipCurve = "{}_zip".format(self.name)
-        self.zipperCurve = cmds.duplicate(self.topDriverCurve, name=zipCurve)[0]
-
-        self.zipperHierarchy = cmds.createNode("transform", name="{}_zipper".format(self.name),
-                                               parent=self.rootHierarchy)
-        cmds.setAttr("{}.inheritsTransform".format(self.zipperHierarchy), False)
-
-        # setuo attributes for the zipper
-        lZipper = attr.createAttr(self.paramsHierarchy, 'lZipper', "float", minValue=0, maxValue=10, value=0)
-        rZipper = attr.createAttr(self.paramsHierarchy, "rZipper", "float", minValue=0, maxValue=10, value=0)
-
-        lZipperFalloff = attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0, maxValue=10, value=4)
-        rZipperFalloff = attr.createAttr(self.paramsHierarchy, "rZipperFalloff", "float", minValue=0, maxValue=10, value=4)
-
-        # create zipperLocs
-        self.zipperTargets = list()
-        for guide in self.upperGuideList:
-            guideName = guide.split("_guide")[0] + "_zipper"
-            guideName = guideName.replace("_upper_", "_mid_")
-
-            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.zipperHierarchy)
-            transform.matchTransform(guide, targetLoc)
-
-            curve.attatchToCurve(targetLoc, curve=self.zipperCurve, toClosestParam=True)
-            self.zipperTargets.append(targetLoc)
-
-        # setup the zipper blendshape
-        self.zipperBlendshape = blendshape.create(self.zipperCurve, name='{}_zipper'.format(self.zipperCurve))
-        blendshape.addTarget(self.zipperBlendshape, target=self.topDriverCurve, targetWeight=0.5)
-        blendshape.addTarget(self.zipperBlendshape, target=self.botDriverCurve, targetWeight=0.5)
-
-        # we'll build a list to constrain the newly created target joints to
-        zipperParentList = self.zipperTargets + self.zipperTargets[1:-1]
-
-        # now we can create the zipper targets
-        zipperTargetList = list()
-        for i, guide in enumerate(self.upperGuideList + self.lowerGuideList[1:-1]):
-            guideName = guide.split("_guide")[0] + "_zipperTarget"
-
-            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.zipperHierarchy)
-            transform.matchTransform(guide, targetLoc)
-
-            cmds.parent(targetLoc, zipperParentList[i])
-            zipperTargetList.append(targetLoc)
-
-        parentConstraintList = list()
-        upperLipJionts = self.lipJointsList[:self.lipSpans]
-        lowerLipJionts = self.lipJointsList[self.lipSpans:]
-        for i in range(len(self.lipJointsList[:self.lipSpans])):
-            # setup  the parent constraint
-
-            constraint = cmds.parentConstraint(self.aimTgtList[i], self.lipJointsList[i], mo=False, w=1)[0]
-            cmds.parentConstraint(zipperTargetList[i], self.lipJointsList[i], mo=False, w=0)
-            cmds.setAttr("{}.interpType".format(constraint), 2)
-            parentConstraintList.append(constraint)
+    # def setupZipperLips(self):
+    #     """ Setup the zipperLips"""
+    #     # if we want to do a zipper lips setup we need to create the curve here before we add the other setup to it
+    #     zipCurve = "{}_zip".format(self.name)
+    #     self.zipperCurve = cmds.duplicate(self.topDriverCurve, name=zipCurve)[0]
+    #
+    #     self.zipperHierarchy = cmds.createNode("transform", name="{}_zipper".format(self.name),
+    #                                            parent=self.rootHierarchy)
+    #     cmds.setAttr("{}.inheritsTransform".format(self.zipperHierarchy), False)
+    #
+    #     # setuo attributes for the zipper
+    #     lZipper = attr.createAttr(self.paramsHierarchy, 'lZipper', "float", minValue=0, maxValue=10, value=0)
+    #     rZipper = attr.createAttr(self.paramsHierarchy, "rZipper", "float", minValue=0, maxValue=10, value=0)
+    #
+    #     lZipperFalloff = attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0, maxValue=10, value=4)
+    #     rZipperFalloff = attr.createAttr(self.paramsHierarchy, "rZipperFalloff", "float", minValue=0, maxValue=10, value=4)
+    #
+    #     # create zipperLocs
+    #     self.zipperTargets = list()
+    #     for guide in self.upperGuideList:
+    #         guideName = guide.split("_guide")[0] + "_zipper"
+    #         guideName = guideName.replace("_upper_", "_mid_")
+    #
+    #         targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.zipperHierarchy)
+    #         transform.matchTransform(guide, targetLoc)
+    #
+    #         curve.attatchToCurve(targetLoc, curve=self.zipperCurve, toClosestParam=True)
+    #         self.zipperTargets.append(targetLoc)
+    #
+    #     # setup the zipper blendshape
+    #     self.zipperBlendshape = blendshape.create(self.zipperCurve, name='{}_zipper'.format(self.zipperCurve))
+    #     blendshape.addTarget(self.zipperBlendshape, target=self.topDriverCurve, targetWeight=0.5)
+    #     blendshape.addTarget(self.zipperBlendshape, target=self.botDriverCurve, targetWeight=0.5)
+    #
+    #     # we'll build a list to constrain the newly created target joints to
+    #     zipperParentList = self.zipperTargets + self.zipperTargets[1:-1]
+    #
+    #     # now we can create the zipper targets
+    #     zipperTargetList = list()
+    #     for i, guide in enumerate(self.upperGuideList + self.lowerGuideList[1:-1]):
+    #         guideName = guide.split("_guide")[0] + "_zipperTarget"
+    #
+    #         targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.zipperHierarchy)
+    #         transform.matchTransform(guide, targetLoc)
+    #
+    #         cmds.parent(targetLoc, zipperParentList[i])
+    #         zipperTargetList.append(targetLoc)
+    #
+    #     parentConstraintList = list()
+    #     upperLipJionts = self.lipJointsList[:self.lipSpans]
+    #     lowerLipJionts = self.lipJointsList[self.lipSpans:]
+    #     for i in range(len(self.lipJointsList[:self.lipSpans])):
+    #         # setup  the parent constraint
+    #
+    #         constraint = cmds.parentConstraint(self.aimTgtList[i], self.lipJointsList[i], mo=False, w=1)[0]
+    #         cmds.parentConstraint(zipperTargetList[i], self.lipJointsList[i], mo=False, w=0)
+    #         cmds.setAttr("{}.interpType".format(constraint), 2)
+    #         parentConstraintList.append(constraint)
 
     def setupAnimAttrs(self):
         """ setup the animator parameters"""

@@ -456,6 +456,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             dummyJntOffset = hierarchy.create(dummyJoint, hierarchy=["{}_offset".format(dummyJoint)],
                                               matchTransform=True)
             cmds.parentConstraint(aimTrs, dummyJntOffset, mo=True)
+            # hide the dummy joint
+            joint.hideJoints(dummyJoint)
 
             # now we can build the setup to add translation to the joint
             narrowWideCond = node.condition("{}.tx".format(ctl.name), 0,
@@ -648,9 +650,13 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         lowZipperDriverJoints = joint.duplicateChain(self.lowSubJoints, self.zipperJointsHierarchy, zipLowJointNames)
         cmds.parent(lowZipperDriverJoints[1:], self.zipperJointsHierarchy)
 
+        # hide the zipper joints
+        joint.hideJoints(uppZipperDriverJoints + lowZipperDriverJoints)
+
         # connect them to the controls
-        for ctl, jnt in zip(self.uppOrtControls + self.lowOrtControls[1:-1],
-                            uppZipperDriverJoints + lowZipperDriverJoints):
+        allControls = self.uppOrtControls + self.lowOrtControls[1:-1]
+        allJoints = uppZipperDriverJoints + lowZipperDriverJoints
+        for ctl, jnt in zip(allControls, allJoints):
             transform.connectOffsetParentMatrix(ctl.name, jnt)
 
         # skin the duplicates to the curves
@@ -699,6 +705,18 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         subControls = [x.name for x in self.subControls]
         control.connectControlVisiblity(self.lipsAll.name, "tweakers", controls=subControls)
 
+        # add the lip zipper to the controls
+        if self.addZipperLips:
+            for side in 'lr':
+                ctl = self.lCorner if side == 'l' else self.rCorner
+                attr.addSeparator(ctl.name, '---')
+
+                zipAttr = attr.createAttr(ctl.name, "zip", "float", value=0, minValue=0, maxValue=10)
+                cmds.connectAttr(zipAttr, "{}.{}Zipper".format(self.paramsHierarchy, side))
+
+                falloffAttr = attr.createAttr(ctl.name, "zipperFalloff", "float", value=3, minValue=0, maxValue=10)
+                cmds.connectAttr(falloffAttr, "{}.{}ZipperFalloff".format(self.paramsHierarchy, side))
+
     def connect(self):
         """Create the connection to other components """
 
@@ -746,7 +764,6 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
     def finalize(self):
         """ Finalize the rig setup """
-        return
 
         # hide the curves group
         cmds.setAttr("{}.v".format(self.curvesHierarchy), 0)

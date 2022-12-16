@@ -78,8 +78,8 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
             lookAtName = getattr(self, "{}Name".format(input))
             aimAxis = rig_transform.getAimAxis(input)
             lookAtControl = rig_control.createAtObject(lookAtName, hideAttrs=['v'], size=self.size,
-                                                    color='banana', parent=self.controlHierarchy, shape='circle',
-                                                    shapeAim=aimAxis, xformObj=input)
+                                                       color='banana', parent=self.controlHierarchy, shape='circle',
+                                                       shapeAim=aimAxis, xformObj=input)
             lookAtControl.addTrs("aim")
 
             # postion the control at the end joint. Get the aim vector from the input and mutiply by joint length.
@@ -94,14 +94,14 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         """
         self.upVecObjList = list()
         for input, lookatControl in zip(self.input, self.lookAtCtlList):
-
             # gather component settings from the container
             aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(input))
             upVector = rig_transform.getVectorFromAxis(self.upAxis)
             upVectorGuide = getattr(self, "_{}_upVecTgt".format(input))
 
             # create an upvector and aim contraint
-            upVectorTrs = cmds.createNode("transform", name="{}_upVec".format(lookatControl.trs), p=self.spacesHierarchy)
+            upVectorTrs = cmds.createNode("transform", name="{}_upVec".format(lookatControl.trs),
+                                          p=self.spacesHierarchy)
             rig_transform.matchTranslate(upVectorGuide, upVectorTrs)
             self.upVecObjList.append(upVectorTrs)
 
@@ -138,4 +138,3 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
             spaceValues = [self.lookAtSpaces[k] for k in self.lookAtSpaces.keys()]
             spacesAttrs = self.lookAtSpaces.keys()
             spaces.addSpace(self.aimTarget.spaces, spaceValues, spacesAttrs, 'parent')
-

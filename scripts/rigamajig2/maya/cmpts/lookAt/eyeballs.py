@@ -5,7 +5,8 @@
     file: eyeballs.py
     author: masonsmigel
     date: 12/2022
-    discription: eyeballs component. This is a subclass of the lookAt component but with some attributes for the iris and pupil
+    discription: eyeballs component. This is a subclass of the lookAt component
+                with some atributes for the iris and pupil size
 
 """
 import maya.cmds as cmds
@@ -120,9 +121,10 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
                 offset = angle[0] / 180
 
                 # add the offset to the default value so the joint starts in the right place
-                remapName = "{}_dialate".format(jnt)
+                remapName = "{}_size".format(jnt)
                 remap = node.remapValue(input=sizeAttr, inMin=-10, inMax=10, outMin=0, outMax=1, name=remapName)
-                # add a midpoint to the remap value with the value set at our offset.
+
+                # add a midpoint to the remap value with the value found for the offset.
                 # we can set it to the absoutle value of the offset so even when its negative we output a positive number.
                 remapDict = {"0": [0.0, 1.0, 1],
                              "1": [0.5, abs(offset), 1],
@@ -141,10 +143,13 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
                 sinScale = node.multDoubleLinear("{}.outputQuatX".format(quat), trsFactor, name="{}_sinScale".format(jnt))
                 cosScale = node.multDoubleLinear("{}.outputQuatW".format(quat), length, name="{}_cosScale".format(jnt))
 
+                # we dont want to adjust the translation of the pupil because it looks strange if the pupil extends
+                # forward more than the iris. instead it will be constrained to the iris later.
                 if part != "pupil":
                     cmds.connectAttr("{}.output".format(sinScale), "{joint}.t{axis}".format(joint=jnt, axis=aimAxis))
-                scaleAxies = ['x', 'y', 'z']
-                scaleAxies.remove(aimAxis)
+
+                # build a list of the scale axies we want to use (the two that are not the aim axis)
+                scaleAxies = [axis for axis in 'x', 'y', 'z' if axis != aimAxis]
                 for axis in scaleAxies:
                     cmds.connectAttr("{}.output".format(cosScale), "{joint}.s{axis}".format(joint=jnt, axis=axis))
 

@@ -225,6 +225,10 @@ def setupZipperBlending(joints, zipperTargets):
         cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.offsetParentMatrix".format(jnt), f=True)
 
 
+ZIPPER_ATTR = "Zipper"
+ZIPPER_FALLOFF_ATTR = "ZipperFalloff"
+
+
 def setupZipper(name, uppJoints, lowJoints, paramsHolder):
     """
     Build the supper setup by creating a setup to adjust the weight of the blendMatrix nodes we built
@@ -243,7 +247,7 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
     for side in 'rl':
         # setup the falloff
         delaySubtract = node.plusMinusAverage1D(
-            [10, "{}.{}ZipperFalloff".format(paramsHolder, side)],
+            [10, "{}.{}{}".format(paramsHolder, side, ZIPPER_FALLOFF_ATTR)],
             operation='sub',
             name="{}_l_delay".format(name))
 
@@ -260,13 +264,13 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
         for index in range(numJoints):
             indexName = "{}_{:02d}".format(name, index)
 
-            delayMultName = "{}_seal_{}".format(indexName, side)
+            delayMultName = "{}_zipper_{}".format(indexName, side)
             delayMult = node.multDoubleLinear(index, "{}.{}".format(delayDivide, 'output'), name=delayMultName)
             multTriggers.append(delayMult)
 
-            subDelayName = "{}_seal_{}".format(indexName, side)
+            subDelayName = "{}_zipper_{}".format(indexName, side)
             subDelay = node.plusMinusAverage1D(
-                inputs=["{}.{}".format(delayMult, "output"), "{}.{}ZipperFalloff".format(paramsHolder, side)],
+                inputs=["{}.{}".format(delayMult, "output"), "{}.{}{}".format(paramsHolder, side, ZIPPER_FALLOFF_ATTR)],
                 operation='sum',
                 name=subDelayName)
             subTriggers.append(subDelay)
@@ -280,20 +284,20 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
         rMultTrigger, rSubTrigger = triggers['r'][0][rIndex], triggers['r'][1][rIndex]
 
         # Setup the network for the left side
-        lRemap = node.remapValue("{}.{}Zipper".format(paramsHolder, 'l'),
+        lRemap = node.remapValue("{}.{}{}".format(paramsHolder, 'l', ZIPPER_ATTR),
                                  inMin="{}.{}".format(lMultTrigger, "output"),
                                  inMax="{}.{}".format(lSubTrigger, "output1D"),
-                                 outMax=1, interp='smooth', name="{}_seal_{}".format(indexName, 'l'))
+                                 outMax=1, interp='smooth', name="{}_zipper_{}".format(indexName, 'l'))
 
         # setup the nextwork for the right side
         rSub = node.plusMinusAverage1D([1, "{}.{}".format(lRemap, "outValue")], operation='sub',
-                                       name="{}_offset_seal_r_sub".format(indexName))
+                                       name="{}_offset_zipper_r_sub".format(indexName))
 
-        rRemap = node.remapValue("{}.{}Zipper".format(paramsHolder, 'r'),
+        rRemap = node.remapValue("{}.{}{}".format(paramsHolder, 'r', ZIPPER_ATTR),
                                  inMin="{}.{}".format(rMultTrigger, "output"),
                                  inMax="{}.{}".format(rSubTrigger, "output1D"),
                                  outMax="{}.{}".format(rSub, "output1D"),
-                                 interp='smooth', name="{}_seal_{}".format(indexName, 'r'))
+                                 interp='smooth', name="{}_zipper_{}".format(indexName, 'r'))
 
         # Add the outputs of both the left and right network together so we can zip from either side
         total = node.plusMinusAverage1D(["{}.{}".format(rRemap, "outValue"), "{}.{}".format(lRemap, "outValue")],
@@ -302,7 +306,7 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
         # clamp the value to one so we cant overdrive the zip
         clamp = node.remapValue("{}.output1D".format(total), name="{}_clamp".format(indexName))
 
-        # Connect the clamp node to our blendMatrix node 
+        # Connect the clamp node to our blendMatrix node
         for jointList in [uppJoints, lowJoints]:
             jnt = jointList[i]
             blendMatrix = cmds.listConnections("{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False)[0]

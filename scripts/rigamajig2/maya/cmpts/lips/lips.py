@@ -634,10 +634,12 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         cmds.setAttr("{}.inheritsTransform".format(self.zipperHierarchy), False)
 
         # setup attributes for the zipper
-        attr.createAttr(self.paramsHierarchy, 'lZipper', "float", minValue=0, maxValue=10, value=0)
-        attr.createAttr(self.paramsHierarchy, "rZipper", "float", minValue=0, maxValue=10, value=0)
-        attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0.001, maxValue=10, value=4)
-        attr.createAttr(self.paramsHierarchy, "rZipperFalloff", "float", minValue=0.001, maxValue=10, value=4)
+        zipName = lipsUtil.ZIPPER_ATTR
+        falloffName = lipsUtil.ZIPPER_FALLOFF_ATTR
+        attr.createAttr(self.paramsHierarchy, 'l{}'.format(zipName), "float", minValue=0, maxValue=10, value=0)
+        attr.createAttr(self.paramsHierarchy, "r{}".format(zipName), "float", minValue=0, maxValue=10, value=0)
+        attr.createAttr(self.paramsHierarchy, "l{}".format(falloffName), "float", minValue=0.001, maxValue=10, value=4)
+        attr.createAttr(self.paramsHierarchy, "r{}".format(falloffName), "float", minValue=0.001, maxValue=10, value=4)
 
         # we need to make a duplicate of the high curve so we can drive the joints that move the actull high curve without causing a cycle
         zipJntsHierarchyName = "{}_zipper_joints".format(self.name)

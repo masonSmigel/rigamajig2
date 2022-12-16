@@ -358,6 +358,16 @@ def radToDegree(angle):
     return [rad * 180 / math.pi for rad in angle]
 
 
+def degreeToRad(angle):
+    """
+    Convert an angle from degrees to radians
+
+    :param angle: angle in degrees
+    :return: angle in radians
+    """
+    return [degree * (pi / 180) for degree in angle]
+
+
 def quaternionToEuler(x, y, z, w, asDegrees=True):
     """
     Convert a quaternion into an angle

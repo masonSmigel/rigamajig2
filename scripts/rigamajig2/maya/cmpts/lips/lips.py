@@ -628,12 +628,12 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         zipperUppCurve = cmds.duplicate(self.topHighCurve, name=zipperUppCurveName)[0]
         zipperLowCurve = cmds.duplicate(self.botHighCurve, name=zipperLowCurveName)[0]
 
-        self.zipperHierarchy = cmds.createNode("transform", name="{}_zipper".format(self.name),
-                                               parent=self.rootHierarchy)
+        zipperHierarchyName = "{}_zipper".format(self.name)
+        self.zipperHierarchy = cmds.createNode("transform", name=zipperHierarchyName, parent=self.rootHierarchy)
 
         cmds.setAttr("{}.inheritsTransform".format(self.zipperHierarchy), False)
 
-        # setuo attributes for the zipper
+        # setup attributes for the zipper
         attr.createAttr(self.paramsHierarchy, 'lZipper', "float", minValue=0, maxValue=10, value=0)
         attr.createAttr(self.paramsHierarchy, "rZipper", "float", minValue=0, maxValue=10, value=0)
         attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0.001, maxValue=10, value=4)
@@ -723,11 +723,11 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
     def connect(self):
         """Create the connection to other components """
 
+        # connect the lips all
         if cmds.objExists(self.rigParent):
-            # connect the lips all
             transform.connectOffsetParentMatrix(self.rigParent, self.lipsAll.orig, mo=True)
 
-        # connect the up vector to the eyesocket control
+        # connect the up vector to the lips control
         transform.connectOffsetParentMatrix(self.lipsAll.name, self.upVector, mo=True)
 
         # If we have specified a new jaw then connection then connect it here. The goal here is to add the transform of

@@ -22,7 +22,8 @@ from rigamajig2.maya import connection
 
 def autoSkinLowCurve(crv, min, mid, max):
     """
-    Auto skinweight the main curves
+    Auto skinweight the main curves.
+
     :param crv:  the curve to weigh
     :param min: the minimum influence (the right corner)
     :param mid: the middle influence (the top or bottom lip)
@@ -57,6 +58,16 @@ def autoSkinLowCurve(crv, min, mid, max):
 
 
 def noFlipOrient(driver1, driver2, target, blend=0.5):
+    """
+    Create the no flip orient constraint for the lips.
+    This is done by creating two separate orient constraints and blending them together using a pairBlend
+    with the rotate interpolation set to Quaternion
+
+    :param driver1: first driver node
+    :param driver2: second driver node
+    :param target: target node to constraint
+    :param blend: blend between the first and second drivers
+    """
     parent = cmds.listRelatives(target, parent=True)
 
     # a simple hierarchy for the rotations. we will create two joints each constrained to a different control then use a pair blend to rotate them!
@@ -69,8 +80,8 @@ def noFlipOrient(driver1, driver2, target, blend=0.5):
     cmds.orientConstraint(driver1, driver1Jnt, mo=True, w=1)
     cmds.orientConstraint(driver2, driver2Jnt, mo=True, w=1)
 
+    # create and connect a pairBlend None
     pairBlend = cmds.createNode("pairBlend", n="{}_ort_pairBlend".format(target))
-
     cmds.connectAttr("{}.r".format(driver1Jnt), "{}.inRotate1".format(pairBlend))
     cmds.connectAttr("{}.r".format(driver2Jnt), "{}.inRotate2".format(pairBlend))
 
@@ -84,10 +95,20 @@ def noFlipOrient(driver1, driver2, target, blend=0.5):
 
 
 def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
-    """ Auto weight a bunch of controls """
+    """
+    Auto weight orientation of controls along a curve. This is done by sampling the controls parameter,
+    then sampling the joints and comparng them to the controls. Joints have their orientation weighted between the two
+    nearest controls.
 
+    :param sampleCurve: Curve which to sample the parameters off of.
+    :param controlsList: List of controls(or other objects) which will drive the rotation of the joints
+    :param jointsList: list of joints (or other nodes) that will be driven by objects in the controlList
+    :param parent: specify a parent for setups we create
+    """
+
+    # first make a list of the control parameters to setup.
+    # we will use this list to compare against the parameter of the joints
     controlParams = list()
-    # first make a list of the control parameters to setup
     for ctl in controlsList:
         pos = cmds.xform(ctl.name, q=True, ws=True, t=True)
         param = curve.getClosestParameter(sampleCurve, pos)
@@ -96,24 +117,28 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
     # next we can start to find values for the orient constraint
     for jnt in jointsList:
 
+        # get the joint parameter and find the closest control by comparing to the controlList
         jntPos = cmds.xform(jnt, q=True, ws=True, t=True)
         jntParam = curve.getClosestParameter(sampleCurve, jntPos)
-
         closestParam = mathUtils.closestValue(controlParams, jntParam)
 
-        # now we can get the closest control!
+        # now that we have the parameter we can index the controlParams list
+        # to find the the control from the controlsList
         controlIndex = controlParams.index(closestParam)
         closestControl = controlsList[controlIndex]
 
-        # great new we need the next closest control
-        # first lets check if the two are almost equal
+        # great new we need the next closest control so we can blend the rotation.
+
+        # first lets check if the two are almost equal.
+        # If they are then we dont need to find another control and can constrain directly to the cloestControl
         if mathUtils.isEqual(jntParam, closestParam, tol=0.001):
             nextIndex = None
 
+        # if the jntParam is larger than the closestParam we can get the control that is next to the closestControl
         elif jntParam > closestParam:
             nextIndex = controlIndex + 1
             nextIsLarger = True
-
+        # if the jntParam is smaller than the closestparam we can get the control before the closest control
         elif jntParam < closestParam:
             nextIndex = controlIndex - 1
             nextIsLarger = False
@@ -121,35 +146,39 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
         # if the values are equal we can skip the orient weighting and go straight to the nearest joint
         if nextIndex is not None:
 
+            # next grab the next control
             nextControl = controlsList[nextIndex]
-            # now we need to get the weights for the two controls
+
+            # now we need to get the weights for the two controls. We can do this by comparing the distance between the
+            # jntParam and the smaller parameter to get a fraction.
             nextParam = controlParams[nextIndex]
             minParam = min([closestParam, nextParam])
-
-            # now we know the distance between the joint and the smallest parameter.
             closestDistance = jntParam - minParam
 
             # round this to the nearest decimal to make the numbers a bit nicer. We dont need alot of precision here!
             roundedDistance = round(closestDistance, 1)
 
-            # now we can get a proper weight
+            # next because sometimes the nextControl is before and sometimes after the closest control
+            # we may need to invert the distance
             if nextIsLarger:
                 closeWeight = roundedDistance
 
             elif not nextIsLarger:
                 closeWeight = 1 - roundedDistance
 
-            # a simple hierarchy for the rotations. we will create two joints each constrained
+            # Finally we can build a simple hierarchy for the rotations. we will create two joints each constrained
             # to a different control then use a pair blend to rotate them!
             offset = cmds.createNode("transform", name="{}_offset".format(jnt), parent=parent)
             closestJoint = cmds.createNode("transform", name="{}_{}_ort".format(jnt, closestControl.name),
                                            parent=offset)
             nextJoint = cmds.createNode("transform", name="{}_{}_ort".format(jnt, nextControl.name), parent=offset)
 
-            # match the orientation of the new joint before we adjus them
+            # match the orientation of the new joint before we adjust them
             for newJoint in [closestJoint, nextJoint]:
                 transform.matchRotate(jnt, newJoint)
 
+            # because we know theese are constrained to a point on a curve
+            # lets grab the pointOnCurveInfo node to drive our offset
             transform.matchTransform(jnt, offset)
             jntPci = cmds.listConnections("{}.t".format(jnt), type="pointOnCurveInfo")
             cmds.connectAttr("{}.result.position".format(jntPci[0]), "{}.t".format(offset))
@@ -177,8 +206,9 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
 def setupZipperBlending(joints, zipperTargets):
     """
     Setup a hierarachy to drive the zipper joints
-    :param joints:
-    :param zipperTargets:
+
+    :param joints: list of zipper joints to be driven by the list of zipper targets
+    :param zipperTargets: list of zipper targets to drive the joints
     :return:
     """
     for i, jnt in enumerate(joints):
@@ -197,10 +227,13 @@ def setupZipperBlending(joints, zipperTargets):
 
 def setupZipper(name, uppJoints, lowJoints, paramsHolder):
     """
-    Build the supper setup
+    Build the supper setup by creating a setup to adjust the weight of the blendMatrix nodes we built
+    in the previous step.
 
+    :param name: name of the component. this is used to rename some of the nodes
     :param uppJoints: list of joints for the upper zipper
     :param lowJoints:  list of joints for the lower zipper
+    :param paramsHolder: the node that holds our zipperAttributes
     """
 
     # first we need to build a set of triggers
@@ -209,12 +242,15 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
 
     for side in 'rl':
         # setup the falloff
-        delaySubtract = node.plusMinusAverage1D([10, "{}.{}ZipperFalloff".format(paramsHolder, side)], operation='sub',
-                                                name="{}_l_delay".format(name))
+        delaySubtract = node.plusMinusAverage1D(
+            [10, "{}.{}ZipperFalloff".format(paramsHolder, side)],
+            operation='sub',
+            name="{}_l_delay".format(name))
 
-        lerp = 1.0 / float(numJoints - 1)
-        delayDivide = node.multDoubleLinear(input1="{}.{}".format(delaySubtract, 'output1D'), input2=lerp,
-                                            name="{}_zipper_{}_div".format(name, side))
+        delayDivide = node.multDoubleLinear(
+            input1="{}.{}".format(delaySubtract, 'output1D'),
+            input2=1.0 / float(numJoints - 1),
+            name="{}_zipper_{}_div".format(name, side))
 
         multTriggers = list()
         subTriggers = list()
@@ -224,13 +260,15 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
         for index in range(numJoints):
             indexName = "{}_{:02d}".format(name, index)
 
-            delayMult = node.multDoubleLinear(index, "{}.{}".format(delayDivide, 'output'),
-                                              name="{}_seal_{}".format(indexName, side))
+            delayMultName = "{}_seal_{}".format(indexName, side)
+            delayMult = node.multDoubleLinear(index, "{}.{}".format(delayDivide, 'output'), name=delayMultName)
             multTriggers.append(delayMult)
 
-            subDelay = node.plusMinusAverage1D(["{}.{}".format(delayMult, "output"),
-                                                "{}.{}ZipperFalloff".format(paramsHolder, side)],
-                                               operation='sum', name="{}_seal_{}".format(indexName, side))
+            subDelayName = "{}_seal_{}".format(indexName, side)
+            subDelay = node.plusMinusAverage1D(
+                inputs=["{}.{}".format(delayMult, "output"), "{}.{}ZipperFalloff".format(paramsHolder, side)],
+                operation='sum',
+                name=subDelayName)
             subTriggers.append(subDelay)
 
     for i in range(numJoints):
@@ -241,13 +279,13 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
         lMultTrigger, lSubTrigger = triggers['l'][0][lIndex], triggers['l'][1][lIndex]
         rMultTrigger, rSubTrigger = triggers['r'][0][rIndex], triggers['r'][1][rIndex]
 
-        # right network
+        # Setup the network for the left side
         lRemap = node.remapValue("{}.{}Zipper".format(paramsHolder, 'l'),
                                  inMin="{}.{}".format(lMultTrigger, "output"),
                                  inMax="{}.{}".format(lSubTrigger, "output1D"),
                                  outMax=1, interp='smooth', name="{}_seal_{}".format(indexName, 'l'))
 
-        # right network
+        # setup the nextwork for the right side
         rSub = node.plusMinusAverage1D([1, "{}.{}".format(lRemap, "outValue")], operation='sub',
                                        name="{}_offset_seal_r_sub".format(indexName))
 
@@ -256,14 +294,16 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
                                  inMax="{}.{}".format(rSubTrigger, "output1D"),
                                  outMax="{}.{}".format(rSub, "output1D"),
                                  interp='smooth', name="{}_seal_{}".format(indexName, 'r'))
-        # final addition of both sides
-        total = node.plusMinusAverage1D(["{}.{}".format(rRemap, "outValue"), "{}.{}".format(lRemap, "outValue")],
-                                      name="{}_sum".format(indexName))
 
+        # Add the outputs of both the left and right network together so we can zip from either side
+        total = node.plusMinusAverage1D(["{}.{}".format(rRemap, "outValue"), "{}.{}".format(lRemap, "outValue")],
+                                        name="{}_sum".format(indexName))
+
+        # clamp the value to one so we cant overdrive the zip
         clamp = node.remapValue("{}.output1D".format(total), name="{}_clamp".format(indexName))
 
+        # Connect the clamp node to our blendMatrix node 
         for jointList in [uppJoints, lowJoints]:
-            # get the proper joint and attatch the output of the zipper setup
             jnt = jointList[i]
             blendMatrix = cmds.listConnections("{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False)[0]
             cmds.connectAttr("{}.{}".format(clamp, 'outValue'), "{}.{}".format(blendMatrix, "envelope"), f=True)

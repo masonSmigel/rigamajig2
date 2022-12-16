@@ -85,39 +85,49 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
         """ do the rig setup"""
         super(Eyeballs, self).rigSetup()
 
-        for inputJoint, lookAtControl in zip(self.input, self.lookAtCtlList):
+        for inputJoint, eyeControl in zip(self.input, self.lookAtCtlList):
             # get the aim axis and length to use in the iris and pupil setup
             aimAxis = transform.getAimAxis(inputJoint)
             length = joint.length(inputJoint)
 
+            isNegative = False
+            if aimAxis.startswith("-"):
+                isNegative = True
+                aimAxis = aimAxis[-1]
+
             irisJoint = getattr(self, "{}_irisJoint".format(inputJoint))
             pupilJoint = getattr(self, "{}_pupilJoint".format(inputJoint))
 
-            attr.addSeparator(lookAtControl.name, "----")
-            for jnt, part in zip([irisJoint, pupilJoint], ["iris", "pupil"]):
-                dialateAttr = attr.createAttr(lookAtControl.name, "{}Dialate".format(part), "float", minValue=-10, maxValue=10)
+            irisTarget = cmds.createNode("transform", name="{}_trs".format(irisJoint), parent=eyeControl.name)
+            transform.matchTransform(irisJoint, irisTarget)
+            pupilTarget = cmds.createNode("transform", name="{}_trs".format(pupilJoint), parent=eyeControl.name)
+            transform.matchTransform(pupilJoint, pupilTarget)
+
+            attr.addSeparator(eyeControl.name, "----")
+            for jnt, part in zip([irisTarget, pupilTarget], ["iris", "pupil"]):
+                sizeAttr = attr.createAttr(eyeControl.name, "{}Size".format(part), "float", minValue=-10, maxValue=10)
 
                 # use the guide to get the position of the joint
                 position = cmds.getAttr("{joint}.t{axis}".format(joint=jnt, axis=aimAxis))
                 percent = position / length
 
-                # create the nodes we need for the setup
 
-                # find the right starting value =
-
+                # find the right starting value. To do this we need to reverse engineer the sin portion of the node
+                # setup so we can add an offset to the input values. This ensures the joint maintains its position when
+                # the sin fnction is connected.
                 w = pow((1 - (pow(percent, 2))), 0.5)
                 angle = mathUtils.quaternionToEuler(percent, 0, 0, w)
 
                 offset = angle[0] / 180
-                print offset
 
                 # add the offset to the default value so the joint starts in the right place
                 remapName = "{}_dialate".format(jnt)
-                remap = node.remapValue(input=dialateAttr, inMin=-10, inMax=10, outMin=0, outMax=1, name=remapName)
-                # add a midpoint to the remap value with the value set at our offset
-                remapDict = {"0": [0.0, 0.0, 1],
-                             "1": [0.5, offset, 1],
-                             "2": [1.0, 1.0, 1]}
+                remap = node.remapValue(input=sizeAttr, inMin=-10, inMax=10, outMin=0, outMax=1, name=remapName)
+                # add a midpoint to the remap value with the value set at our offset.
+                # we can set it to the absoutle value of the offset so even when its negative we output a positive number.
+                remapDict = {"0": [0.0, 1.0, 1],
+                             "1": [0.5, abs(offset), 1],
+                             "2": [1.0, 0.0, 1]}
                 for i in remapDict.keys():
                     cmds.setAttr(remap + '.value[{}].value_Position'.format(i), remapDict[i][0])
                     cmds.setAttr(remap + '.value[{}].value_FloatValue'.format(i), remapDict[i][1])
@@ -128,11 +138,23 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
                 quat = cmds.createNode("eulerToQuat", name="{}_eulerToQuat".format(jnt))
                 cmds.connectAttr("{}.output".format(mdl), "{}.inputRotateX".format(quat))
 
-                sinScale = node.multDoubleLinear("{}.outputQuatX".format(quat), length, name="{}_sinScale".format(jnt))
+                trsFactor = -length if isNegative else length
+                sinScale = node.multDoubleLinear("{}.outputQuatX".format(quat), trsFactor, name="{}_sinScale".format(jnt))
                 cosScale = node.multDoubleLinear("{}.outputQuatW".format(quat), length, name="{}_cosScale".format(jnt))
 
-                cmds.connectAttr("{}.output".format(sinScale), "{joint}.t{axis}".format(joint=jnt, axis=aimAxis))
+                if part != "pupil":
+                    cmds.connectAttr("{}.output".format(sinScale), "{joint}.t{axis}".format(joint=jnt, axis=aimAxis))
                 scaleAxies = ['x', 'y', 'z']
                 scaleAxies.remove(aimAxis)
                 for axis in scaleAxies:
                     cmds.connectAttr("{}.output".format(cosScale), "{joint}.s{axis}".format(joint=jnt, axis=axis))
+
+            # connect the translation of the iris to the translation of the pupil
+            transform.connectOffsetParentMatrix(irisTarget, pupilTarget, mo=True, s=True, sh=True)
+
+            # connect theese targets to the joints
+            # instead of using the connect chains function we will use a parent and scale constraint. 
+            for target, jnt in zip([irisTarget, pupilTarget], [irisJoint, pupilJoint]):
+                cmds.parentConstraint(target, jnt, mo=False)
+                cmds.scaleConstraint(target, jnt, mo=False)
+                attr.lock(jnt, attr.TRANSFORMS + ['v'])

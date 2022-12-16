@@ -111,7 +111,6 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
                 position = cmds.getAttr("{joint}.t{axis}".format(joint=jnt, axis=aimAxis))
                 percent = position / length
 
-
                 # find the right starting value. To do this we need to reverse engineer the sin portion of the node
                 # setup so we can add an offset to the input values. This ensures the joint maintains its position when
                 # the sin fnction is connected.

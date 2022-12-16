@@ -1,5 +1,34 @@
 # Change Log 
 
+## 1.0.9 
+### Added: 
+* Added facial components: 
+  * `eyelid.eyelid`: an eyelid component built around a spherical eye. built using curves 
+    the eyelid will have nice natural shapes and a blink that will always seal the eye. 
+  * `brow.brow`: a component for the brow area. This component is built using a curve to layer deformations together. 
+      the control layout mimics the way our brow muscles work. 
+  * `lips.lips`: a component for the lips. This component connects with the jaw for the overall 
+      deformation of the mouth. It has a ton of features including zipper lips, auto rotate around 
+      the teeth and a nice set of tweak controls for alot of flexibility 
+  * 'lookAt.eyeballs': Added a subclass of the `lookAt.lookAt` component for eyeballs. This adds 
+      controls to to change the size of the pupil and iris using some neat sine and cos functions!
+* Added some utility functions to aide in the creation of the face: 
+  * Added 'connect.connectTransforms' to quickly connect transform channels between two nodes.
+  * added `mathUtils.getClosestInList` to get the closest number in a list 
+  * Added functions to `mathUtils` for working with quaternions and angles including: 
+    `radToDegree`, `degreeToRad` and `quaternionToEuler`. 
+
+### Fixed: 
+* Internal python errors caused by trying to access PyQt widgets that had been deleted in the `initalize_widget`
+
+### Changed: 
+* Removed storing and returning the override color for the live pinning. If a joint was left pinned when
+  the joints were saved it would load in with the pinned color next time. 
+
+### Removed:
+* Removed the option to `createInputJoints` from all components. It was a bit redundant and doesnt fit with the 
+  philosophy of the tool. Instead users should carefully read the docstrings to setup input joints correctly. 
+
 ## 1.0.8
 
 ### Added: 

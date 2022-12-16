@@ -226,7 +226,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                                         shape='sphere',
                                         size=GUIDE_SCALE * size,
                                         parent=parent,
-                                        color=color)
+                                        color=color
+                                        )
             # find the appropriate parameters
             minParam, maxParam = curve.getRange(targetCurve)
             param = maxParam * paramList[i]
@@ -320,43 +321,42 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         self.upVector = cmds.createNode("transform", name="{}_upVec".format(self.name), p=self.spacesHierarchy)
         transform.matchTranslate(self.upVectorGuide, self.upVector)
 
-        self.curvesHierarchy = cmds.createNode("transform", name="{}_curves".format(self.name), p=self.rootHierarchy)
+        curvesHierarchyName = "{}_curves".format(self.name)
+        self.curvesHierarchy = cmds.createNode("transform", name=curvesHierarchyName, p=self.rootHierarchy)
         cmds.setAttr("{}.inheritsTransform".format(self.curvesHierarchy), False)
 
         topHighCurve = "{}_upperLip_high".format(self.name)
         botHighCurve = "{}_lowerLip_high".format(self.name)
 
-        topLowCurve = "{}_upperLip_low".format(self.name)
-        botLowCurve = "{}_lowerLip_low".format(self.name)
-
         topMidCurve = "{}_upperLip_mid".format(self.name)
         botMidCurve = "{}_lowerLip_mid".format(self.name)
+
+        topLowCurve = "{}_upperLip_low".format(self.name)
+        botLowCurve = "{}_lowerLip_low".format(self.name)
 
         # Unlike the eyelids its super important that animators can rotate the lip controls.
         # So to do that we will create our lip control From the CONTROls not the per span guides
 
         # theese lists are comprised of the main and sub controls that would define the spans fo the lip.
-        uppLipPoints = [self.mainControlGuides[0], self.subControlGuides[1], self.mainControlGuides[1],
-                        self.subControlGuides[2], self.mainControlGuides[2], self.subControlGuides[3],
-                        self.mainControlGuides[3], self.subControlGuides[4], self.mainControlGuides[4]]
+        uppPoints = [self.mainControlGuides[0], self.subControlGuides[1], self.mainControlGuides[1],
+                     self.subControlGuides[2], self.mainControlGuides[2], self.subControlGuides[3],
+                     self.mainControlGuides[3], self.subControlGuides[4], self.mainControlGuides[4]]
 
-        lowLipPoints = [self.mainControlGuides[0], self.subControlGuides[6], self.mainControlGuides[5],
-                        self.subControlGuides[7], self.mainControlGuides[6], self.subControlGuides[8],
-                        self.mainControlGuides[7], self.subControlGuides[9], self.mainControlGuides[4]]
+        lowPoints = [self.mainControlGuides[0], self.subControlGuides[6], self.mainControlGuides[5],
+                     self.subControlGuides[7], self.mainControlGuides[6], self.subControlGuides[8],
+                     self.mainControlGuides[7], self.subControlGuides[9], self.mainControlGuides[4]]
 
         # create the two driver curves. The jionts will be bound to this
-        self.topDriverCurve = curve.createCurveFromTransform(uppLipPoints, degree=3, name=topHighCurve,
-                                                             parent=self.curvesHierarchy)
-        self.botDriverCurve = curve.createCurveFromTransform(lowLipPoints, degree=3, name=botHighCurve,
-                                                             parent=self.curvesHierarchy)
+        self.topHighCurve = curve.createCurveFromTransform(uppPoints, degree=3, name=topHighCurve, parent=self.curvesHierarchy)
+        self.botHighCurve = curve.createCurveFromTransform(lowPoints, degree=3, name=botHighCurve, parent=self.curvesHierarchy)
 
         # create the two low curves theese will be affected by the corners and upper/lower lips
-        self.topLowCurve = cmds.duplicate(self.topDriverCurve, name=topLowCurve)[0]
-        self.botLowCurve = cmds.duplicate(self.botDriverCurve, name=botLowCurve)[0]
+        self.topLowCurve = cmds.duplicate(self.topHighCurve, name=topLowCurve)[0]
+        self.botLowCurve = cmds.duplicate(self.botHighCurve, name=botLowCurve)[0]
 
         # create the two low curves theese will be affected by the corners and upper/lower lips
-        self.topMidCurve = cmds.duplicate(self.topDriverCurve, name=topMidCurve)[0]
-        self.botMidCurve = cmds.duplicate(self.botDriverCurve, name=botMidCurve)[0]
+        self.topMidCurve = cmds.duplicate(self.topHighCurve, name=topMidCurve)[0]
+        self.botMidCurve = cmds.duplicate(self.botHighCurve, name=botMidCurve)[0]
 
         # setup joints for each span of the lips
         self.targetHierarchy = cmds.createNode("transform", name="{}_aimTgts".format(self.name), p=self.rootHierarchy)
@@ -377,10 +377,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.targetHierarchy)
             transform.matchTransform(guide, targetLoc)
 
-            targetCurve = self.botDriverCurve if 'lower' in guideName else self.topDriverCurve
+            targetCurve = self.botHighCurve if 'lower' in guideName else self.topHighCurve
             curve.attatchToCurve(targetLoc, curve=targetCurve, toClosestParam=True)
 
-            # if not self.addZipperLips:
             joint.connectChains([targetLoc], [endJoint])
             self.aimTgtList.append(targetLoc)
 
@@ -394,6 +393,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         # build the middle resolution curve
         self.setupMidCurve()
 
+        # if we want to add the zipper lips do that here.
         if self.addZipperLips:
             self.setupZipperLips()
 
@@ -402,15 +402,13 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         Build a rig setup for the low res curve.
         (its actully not that low res but we need to set the skinweights in a particular way to make it work)
         """
-
         # setup the main joint hierarchy
-        self.jointsHierarchy = cmds.createNode("transform", name="{}_joints".format(self.name),
-                                               parent=self.rootHierarchy)
+        jointsHierarchyName = "{}_joints".format(self.name)
+        cornerHierarchyName = "{}_corners".format(self.name)
+        self.jointsHierarchy = cmds.createNode("transform", name=jointsHierarchyName, parent=self.rootHierarchy)
+        self.cornersHierarchy = cmds.createNode("transform", name=cornerHierarchyName, parent=self.rootHierarchy)
 
-        self.cornersHierarchy = cmds.createNode("transform", name="{}_corners".format(self.name),
-                                                parent=self.rootHierarchy)
-
-        # the first portion of this setup is to build a systemt to wrap the corner of the lips around the teeth.
+        # the first portion of this setup is to build a system to wrap the corner of the lips around the teeth.
         # this is accomplished by created a separate hierarchy at the lips joint which aims at the mouth control (giving an expected rotation)
         # however once the rotation reaches a limit the transformation instead becomes a translation
 
@@ -429,10 +427,10 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             setupOffset = hierarchy.create(jawConnecter, hierarchy=["{}_offset".format(jawConnecter)],
                                            matchTransform=True)
 
-            aimTrsOffset = cmds.createNode("transform", name='{}_aimTrs_offset'.format(ctl.name),
-                                           parent=jawConnecter)
-            aimTrs = cmds.createNode("transform", name='{}_aimTrs'.format(ctl.name), parent=aimTrsOffset)
-            transform.matchTranslate(self.input[0], aimTrsOffset)
+            aimOffset = cmds.createNode("transform", name='{}_aimTrs_offset'.format(ctl.name),
+                                        parent=jawConnecter)
+            aimTrs = cmds.createNode("transform", name='{}_aimTrs'.format(ctl.name), parent=aimOffset)
+            transform.matchTranslate(self.input[0], aimOffset)
 
             # create a duplicate of the corner contorl
             aimDummy = cmds.createNode("transform", name="{}_dummy_trs".format(ctl.name), parent=jawConnecter)
@@ -444,35 +442,41 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
             # create a temportary aim constraint to orient the offset
             aimVector = (-1, 0, 0) if side == 'r' else (1, 0, 0)
-            const = cmds.aimConstraint(ctl.name, aimTrsOffset, aim=aimVector, u=(0, 1, 0), wut='object',
-                                       wuo=self.upVector)
+            const = cmds.aimConstraint(ctl.name, aimOffset, aim=aimVector, u=(0, 1, 0), wut='object', wuo=self.upVector)
             cmds.delete(const)
-            cmds.aimConstraint(aimDummy, aimTrs, aim=aimVector, u=(0, 1, 0), wut='object',
-                               wuo=self.upVector, skip=['x', 'z'])
+            cmds.aimConstraint(aimDummy, aimTrs,
+                               aim=aimVector, u=(0, 1, 0),
+                               wut='object', wuo=self.upVector,
+                               skip=['x', 'z'])
 
             # next we need to make a dummy joint to constrain to
             dummyJoint = cmds.createNode("joint", name="{}_dummy_joint".format(ctl.name), parent=jawConnecter)
             transform.matchTransform(ctl.name, dummyJoint)
-            dummyJntOffset = hierarchy.create(dummyJoint, hierarchy=["{}_offset".format(dummyJoint)],
-                                              matchTransform=True)
-            cmds.parentConstraint(aimTrs, dummyJntOffset, mo=True)
+            dummyOffset = hierarchy.create(dummyJoint, hierarchy=["{}_offset".format(dummyJoint)], matchTransform=True)
+            cmds.parentConstraint(aimTrs, dummyOffset, mo=True)
             # hide the dummy joint
             joint.hideJoints(dummyJoint)
 
             # now we can build the setup to add translation to the joint
-            narrowWideCond = node.condition("{}.tx".format(ctl.name), 0,
-                                            ifTrue=[wideLimit, 2, 0],
-                                            ifFalse=[narrowLimit, 4, 0],
-                                            operation=">",
-                                            name="{}_narrowOrWide".format(ctl.name))
+            narrowWideCond = node.condition(
+                firstTerm="{}.tx".format(ctl.name),
+                secondTerm=0,
+                ifTrue=[wideLimit, 2, 0],
+                ifFalse=[narrowLimit, 4, 0],
+                operation=">",
+                name="{}_narrowOrWide".format(ctl.name)
+                )
             mdl = node.multDoubleLinear("{}.outColorR".format(narrowWideCond), -1, name="{}_neg".format(ctl.name))
             adl = node.addDoubleLinear("{}.tx".format(ctl.name), "{}.output".format(mdl),
-                                       name="{}_offset".format(ctl.name))
+                                       name="{}_off".format(ctl.name))
 
-            translateCondition = node.condition("{}.tx".format(ctl.name), "{}.outColorR".format(narrowWideCond),
-                                                ifTrue=["{}.output".format(adl), 0, 0],
-                                                ifFalse=[0, 0, 0],
-                                                name="{}_translateAddition".format(ctl.name))
+            translateCondition = node.condition(
+                firstTerm="{}.tx".format(ctl.name),
+                secondTerm="{}.outColorR".format(narrowWideCond),
+                ifTrue=["{}.output".format(adl), 0, 0],
+                ifFalse=[0, 0, 0],
+                name="{}_translateOffset".format(ctl.name)
+                )
             cmds.connectAttr("{}.outColorG".format(narrowWideCond), "{}.{}".format(translateCondition, "operation"))
 
             # now we can connect to the driver joint
@@ -495,13 +499,13 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         lowLidJoints = [self.mainDriverJnts[0], self.mainDriverJnts[3], self.mainDriverJnts[2]]
 
         # for theese controls we need to set the skinning method to dual quaternion
-        # so that we can get a nice rotationa around the teeth (skinningMethod=1 for DQ skinning)
-        cmds.skinCluster(uppLidJoints, self.topLowCurve, dr=1, mi=2, bm=0,
-                         name="{}_skinCluster".format(self.topLowCurve), skinMethod=1)
-        cmds.skinCluster(lowLidJoints, self.botLowCurve, dr=1, mi=2, bm=0,
-                         name="{}_skinCluster".format(self.botLowCurve), skinMethod=1)
+        # so that we can get a nice rotation around the teeth (skinningMethod=1 for DQ skinning)
+        uppSkinClusterName = "{}_skinCluster".format(self.topLowCurve)
+        lowSkinClusterName = "{}_skinCluster".format(self.botLowCurve)
+        cmds.skinCluster(uppLidJoints, self.topLowCurve, dr=1, mi=2, bm=0, name=uppSkinClusterName, skinMethod=1)
+        cmds.skinCluster(lowLidJoints, self.botLowCurve, dr=1, mi=2, bm=0, name=lowSkinClusterName, skinMethod=1)
 
-        # autoskin the curves! This idea comes from "the art of moving points" to create a great shape for our lowres curve.
+        # autoskin the curves! Based on "the art of moving points" to create a 'football' shape for the curve.
         # we can do that by setting the skinweights using the equation: y=-(x-1)^{2.4} +1
         lipsUtil.autoSkinLowCurve(self.topLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[1],
                                   self.mainDriverJnts[2])
@@ -521,16 +525,16 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         uppLidJoints = [self.mainDriverJnts[0]] + midDriverJoints[:3] + [self.mainDriverJnts[2]]
         lowLidJoints = [self.mainDriverJnts[0]] + midDriverJoints[3:] + [self.mainDriverJnts[2]]
 
-        cmds.skinCluster(uppLidJoints, self.topMidCurve, dr=1.5, mi=2, bm=0,
-                         name="{}_skinCluster".format(self.topMidCurve))
-        cmds.skinCluster(lowLidJoints, self.botMidCurve, dr=1.5, mi=2, bm=0,
-                         name="{}_skinCluster".format(self.botMidCurve))
+        uppMidSkinClusterName = "{}_skinCluster".format(self.topMidCurve)
+        lowMidSkinClusterName = "{}_skinCluster".format(self.botMidCurve)
+        cmds.skinCluster(uppLidJoints, self.topMidCurve, dr=1.5, mi=2, bm=0, name=uppMidSkinClusterName)
+        cmds.skinCluster(lowLidJoints, self.botMidCurve, dr=1.5, mi=2, bm=0, name=lowMidSkinClusterName)
 
         # connect the secondary controls to this curve
         self.connectControlsToCurve(self.subControls[:5], self.topMidCurve)
         self.connectControlsToCurve(self.subControls[5:], self.botMidCurve)
 
-        # add in the orientation for the sub controls
+        # add in the orientation for the sub controls.
         cmds.parent(self.subControls[0].orig, self.mainControls[0].name)
         lipsUtil.noFlipOrient(self.mainControls[0].name, self.mainControls[1].name, self.subControls[1].trs)
         lipsUtil.noFlipOrient(self.mainControls[1].name, self.mainControls[2].name, self.subControls[2].trs)
@@ -554,12 +558,13 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         self.uppSubJoints = self.createJointsForCurve(uppControlsForJoints, suffix='sub')
         self.lowSubJoints = self.createJointsForCurve(lowControlsForJoints[1:-1], suffix='sub')
 
-        # skin the upper and lower driver curves. For the lower curve we'll use the corners from the upper curve to avoid
-        # duplicate connections
-        cmds.skinCluster(self.uppSubJoints, self.topDriverCurve, dr=1.5, mi=1, bm=0,
-                         name="{}_skinCluster".format(self.topDriverCurve))
-        cmds.skinCluster([self.uppSubJoints[0]] + self.lowSubJoints + [self.uppSubJoints[-1]], self.botDriverCurve,
-                         dr=1.5, mi=1, bm=0, name="{}_skinCluster".format(self.botDriverCurve))
+        # skin the upper and lower driver curves.
+        # For the lower curve we'll use the corners from the upper curve to avoid duplicate controls.
+        uppDriverSkinClusterName = "{}_skinCluster".format(self.topHighCurve)
+        lowDriverSkinClusterName = "{}_skinCluster".format(self.botHighCurve)
+        cmds.skinCluster(self.uppSubJoints, self.topHighCurve, dr=1.5, mi=1, bm=0, name=uppDriverSkinClusterName)
+        cmds.skinCluster([self.uppSubJoints[0]] + self.lowSubJoints + [self.uppSubJoints[-1]], self.botHighCurve,
+                         dr=1.5, mi=1, bm=0, name=lowDriverSkinClusterName)
 
         # finally we need to connect the joints rotation to the control orient
         # here we will use the joint targetLocators to drive the rotation
@@ -572,13 +577,13 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         # do the auto weighting for the lip controls
         lipsUtil.autoWeightOrientation(
-            sampleCurve=self.topDriverCurve,
+            sampleCurve=self.topHighCurve,
             controlsList=self.uppOrtControls,
             jointsList=self.aimTgtList[:self.lipSpans],
             parent=self.targetHierarchy)
 
         lipsUtil.autoWeightOrientation(
-            sampleCurve=self.botDriverCurve,
+            sampleCurve=self.botHighCurve,
             controlsList=self.lowOrtControls,
             jointsList=self.aimTgtList[self.lipSpans:],
             parent=self.targetHierarchy)
@@ -619,9 +624,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         zipperLowCurveName = "{}_lower_zipper".format(self.name)
         zipCurveName = "{}_mid_zipper".format(self.name)
 
-        zipperCurve = cmds.duplicate(self.topDriverCurve, name=zipCurveName)[0]
-        zipperUppCurve = cmds.duplicate(self.topDriverCurve, name=zipperUppCurveName)[0]
-        zipperLowCurve = cmds.duplicate(self.botDriverCurve, name=zipperLowCurveName)[0]
+        zipperCurve = cmds.duplicate(self.topHighCurve, name=zipCurveName)[0]
+        zipperUppCurve = cmds.duplicate(self.topHighCurve, name=zipperUppCurveName)[0]
+        zipperLowCurve = cmds.duplicate(self.botHighCurve, name=zipperLowCurveName)[0]
 
         self.zipperHierarchy = cmds.createNode("transform", name="{}_zipper".format(self.name),
                                                parent=self.rootHierarchy)
@@ -629,26 +634,23 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         cmds.setAttr("{}.inheritsTransform".format(self.zipperHierarchy), False)
 
         # setuo attributes for the zipper
-        lZipper = attr.createAttr(self.paramsHierarchy, 'lZipper', "float", minValue=0, maxValue=10, value=0)
-        rZipper = attr.createAttr(self.paramsHierarchy, "rZipper", "float", minValue=0, maxValue=10, value=0)
-
-        lZipperFalloff = attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0.001, maxValue=10,
-                                         value=4)
-        rZipperFalloff = attr.createAttr(self.paramsHierarchy, "rZipperFalloff", "float", minValue=0.001, maxValue=10,
-                                         value=4)
+        attr.createAttr(self.paramsHierarchy, 'lZipper', "float", minValue=0, maxValue=10, value=0)
+        attr.createAttr(self.paramsHierarchy, "rZipper", "float", minValue=0, maxValue=10, value=0)
+        attr.createAttr(self.paramsHierarchy, 'lZipperFalloff', "float", minValue=0.001, maxValue=10, value=4)
+        attr.createAttr(self.paramsHierarchy, "rZipperFalloff", "float", minValue=0.001, maxValue=10, value=4)
 
         # we need to make a duplicate of the high curve so we can drive the joints that move the actull high curve without causing a cycle
-        self.zipperJointsHierarchy = cmds.createNode("transform", name="{}_zipper_joints".format(self.name),
-                                                     parent=self.zipperHierarchy)
+        zipJntsHierarchyName = "{}_zipper_joints".format(self.name)
+        self.zipJntsHierarchy = cmds.createNode("transform", name=zipJntsHierarchyName, parent=self.zipperHierarchy)
 
         # create the joints we need for the duplicated hierarchy
         zipUppJointNames = [x.replace("driver", "zipper") for x in self.uppSubJoints]
         zipLowJointNames = [x.replace("driver", "zipper") for x in self.lowSubJoints]
-        uppZipperDriverJoints = joint.duplicateChain(self.uppSubJoints, self.zipperJointsHierarchy, zipUppJointNames)
-        cmds.parent(uppZipperDriverJoints[1:], self.zipperJointsHierarchy)
+        uppZipperDriverJoints = joint.duplicateChain(self.uppSubJoints, self.zipJntsHierarchy, zipUppJointNames)
+        cmds.parent(uppZipperDriverJoints[1:], self.zipJntsHierarchy)
 
-        lowZipperDriverJoints = joint.duplicateChain(self.lowSubJoints, self.zipperJointsHierarchy, zipLowJointNames)
-        cmds.parent(lowZipperDriverJoints[1:], self.zipperJointsHierarchy)
+        lowZipperDriverJoints = joint.duplicateChain(self.lowSubJoints, self.zipJntsHierarchy, zipLowJointNames)
+        cmds.parent(lowZipperDriverJoints[1:], self.zipJntsHierarchy)
 
         # hide the zipper joints
         joint.hideJoints(uppZipperDriverJoints + lowZipperDriverJoints)
@@ -660,11 +662,11 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             transform.connectOffsetParentMatrix(ctl.name, jnt)
 
         # skin the duplicates to the curves
-        cmds.skinCluster(uppZipperDriverJoints, zipperUppCurve,
-                         dr=1.5, mi=1, bm=0, name="{}_skinCluster".format(zipperUppCurve))
+        uppSkinClusterName = "{}_skinCluster".format(zipperUppCurve)
+        lowSkinClusterName = "{}_skinCluster".format(zipperLowCurve)
+        cmds.skinCluster(uppZipperDriverJoints, zipperUppCurve, dr=1.5, mi=1, bm=0, name=uppSkinClusterName)
         cmds.skinCluster([uppZipperDriverJoints[0]] + lowZipperDriverJoints + [uppZipperDriverJoints[-1]],
-                         zipperLowCurve,
-                         dr=1.5, mi=1, bm=0, name="{}_skinCluster".format(zipperLowCurve))
+                         zipperLowCurve, dr=1.5, mi=1, bm=0, name=lowSkinClusterName)
 
         # create zipperLocs
         zipperTargets = list()
@@ -695,7 +697,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             name=self.name,
             uppJoints=self.uppSubJoints[1:-1],
             lowJoints=self.lowSubJoints,
-            paramsHolder=self.paramsHierarchy)
+            paramsHolder=self.paramsHierarchy
+            )
 
     def setupAnimAttrs(self):
         """ setup the animator parameters"""
@@ -733,22 +736,21 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         if self.useJaw:
             jawConnectControls = [self.uppLips, self.lowLips, self.mainControls[4], self.mainControls[0]]
 
-            jawOffsetGroup = cmds.createNode("transform", name="{}_jaw_space".format(self.name),
-                                             parent=self.spacesHierarchy)
+            jawOffset = cmds.createNode("transform", name="{}_jaw_space".format(self.name), parent=self.spacesHierarchy)
 
             # if the rig parent exists connect it to the offset control
             if cmds.objExists(self.rigParent):
-                transform.connectOffsetParentMatrix(self.rigParent, jawOffsetGroup)
+                transform.connectOffsetParentMatrix(self.rigParent, jawOffset)
 
             for i, ctl in enumerate(jawConnectControls):
 
                 # first we can create the local rig to extract the jaw transformation
                 # create an offset transform node
-                jawTrs = cmds.createNode("transform", name="{}_jawTrs".format(ctl.name), parent=jawOffsetGroup)
+                jawTrs = cmds.createNode("transform", name="{}_jawTrs".format(ctl.name), parent=jawOffset)
                 transform.matchTransform(ctl.name, jawTrs)
                 hierarchy.create(jawTrs, hierarchy=["{}_offset".format(jawTrs)], above=True, matchTransform=True)
 
-                # connect the offset transforms to the jaw joints  (Must drive the transforms directly!! use a constraint)
+                # connect the offset transforms to the jaw joints (Must drive the transforms directly!! use a constraint)
                 cmds.parentConstraint(self.jawJoints[i], jawTrs, mo=True)
 
                 # Finally, connect the jaw offsets to the control trs groups. We can use the direct connections here to add
@@ -758,13 +760,13 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
                     # if we are on the corners then we need to connect the offsets as well to the jaw translation
                     if i > 1:
-                        # we can use the index by subtracting 2 from the index
-                        cmds.connectAttr("{}.{}".format(jawTrs, channel),
-                                         "{}.{}".format(self.cornerSetups[i - 2], channel))
+                        # we can use i by subtracting 2 from the index to get the proper one for the corners.
+                        # (leftCorner setup = self.cornerSetups[0], right corner setup = self.cornerSetups[1])
+                        cornerSetup = self.cornerSetups[i - 2]
+                        cmds.connectAttr("{}.{}".format(jawTrs, channel), "{}.{}".format(cornerSetup, channel))
 
     def finalize(self):
         """ Finalize the rig setup """
-
         # hide the curves group
         cmds.setAttr("{}.v".format(self.curvesHierarchy), 0)
         attr.lock(self.curvesHierarchy, attr.TRANSFORMS)

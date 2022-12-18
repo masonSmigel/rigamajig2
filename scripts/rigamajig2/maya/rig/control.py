@@ -547,6 +547,7 @@ def createDisplayLine(point1, point2, name=None, parent=None, displayType='temp'
     displayLineShape = cmds.listRelatives(displayLine, s=True) or []
     cmds.connectAttr(dcmp1 + '.outputTranslate', displayLineShape[0] + '.controlPoints[0]', f=True)
     cmds.connectAttr(dcmp2 + '.outputTranslate', displayLineShape[0] + '.controlPoints[1]', f=True)
+    return displayLine
 
 
 def connectControlVisiblity(driverNode, driverAttr, controls, force=True):

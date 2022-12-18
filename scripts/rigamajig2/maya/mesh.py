@@ -108,6 +108,32 @@ def getVerts(mesh):
     return common.flattenList(verts)
 
 
+def getVertexNormal(mesh, vertex, world=True):
+    """
+    Get the vertex normal of a vertex
+
+    :param str mesh: mesh to get the vertex normal of
+    :param int vertex: vertex ID to get the normal of
+    :param bool world: Space to get the vertex normal in
+    :return:
+    """
+
+    if isinstance(mesh, (list, tuple)):
+        mesh = mesh[0]
+
+    if shape.getType(mesh) != 'mesh':
+        cmds.error("Node must be of type 'mesh'. {} is of type {}".format(mesh, shape.getType(mesh)))
+
+    mfnMesh = getMeshFn(mesh)
+
+    # fn_mesh.getVertexNormal(vertex, False, om.MSpace.kWorld)
+    space = om2.MSpace.kWorld if world else om2.MSpace.kObject
+
+    vertexNormal = mfnMesh.getVertexNormal(vertex, False, space)
+
+    return vertexNormal
+
+
 def cleanShapes(nodes):
     """
     Cleanup a shape nodes. removes all intermediate shapes on the given nodes

@@ -153,6 +153,40 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
     return multMatrix, pickMat
 
 
+def blendedOffsetParentMatrix(driver1, driver2, driven, mo=False, t=True, r=True ,s=True, sh=True, blend=0):
+    """
+    Create a blended offset parent matrix connection setup
+
+    :param driver1: first driver node
+    :param driver2: second driver node
+    :param driven: driven node
+    :param bool mo: add a transform node to store the offset between the driver and driven nodes
+    :param bool t: Apply translation transformations
+    :param bool r: Apply rotation transformations
+    :param bool s: Apply scale transformations
+    :param bool sh: Apply shear transformations
+    :param blend: default blend between the driver1 and driver2.
+    :return: blend Matrix node
+    """
+    mm1, pick1 = connectOffsetParentMatrix(driver1, driven, mo=mo, t=t, r=r, s=s, sh=sh)
+    mm2, pick2 = connectOffsetParentMatrix(driver2, driven, mo=mo, t=t, r=r, s=s, sh=sh)
+
+    blendMatrix = cmds.createNode("blendMatrix", n="{}_blendMatrix".format(driven))
+
+    # connect the other two matricies into the blendMatrix
+    matrix1Out = "{}.outputMatrix".format(pick1) if pick1 else "{}.matrixSum".format(mm1)
+    matrix2Out = "{}.outputMatrix".format(pick2) if pick2 else "{}.matrixSum".format(mm2)
+
+    cmds.connectAttr(matrix1Out, "{}.inputMatrix".format(blendMatrix))
+    cmds.connectAttr(matrix2Out, "{}.target[0].targetMatrix".format(blendMatrix))
+
+    # connect the blend matrix back to the joint
+    cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.offsetParentMatrix".format(driven), f=True)
+    cmds.setAttr("{}.envelope".format(blendMatrix), blend)
+
+    return blendMatrix
+
+
 def localOffset(node):
     """
     Get the local offset matrix of a node relative to its parent.

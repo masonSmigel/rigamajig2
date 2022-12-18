@@ -3,6 +3,7 @@ This module contains functions to navigate mesh topology
 """
 
 import maya.api.OpenMaya as om2
+import maya.OpenMaya as om
 import maya.cmds as cmds
 import operator
 import rigamajig2.maya.mesh
@@ -94,3 +95,20 @@ def getBboxCenter(obj):
     bboxMax = bbox[3:]
     center = [(bboxMin[x] + bboxMax[x]) / 2.0 for x in range(3)]
     return center
+
+
+def getConnectedVerticies(mesh, id):
+    # Get the active selection
+    mSel = om.MSelectionList()
+
+    om.MGlobal.getSelectionListByName("{}.vtx[{}]".format(mesh, id), mSel)
+    dagPath = om.MDagPath()
+    component = om.MObject()
+    mSel.getDagPath(0, dagPath, component)
+
+    # Iterate and calculate vectors based on connected vertices
+    iter = om.MItMeshVertex(dagPath, component)
+    connectedVertices = om.MIntArray()
+    iter.getConnectedVertices(connectedVertices)
+
+    return connectedVertices

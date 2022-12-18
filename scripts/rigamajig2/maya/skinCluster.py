@@ -17,7 +17,7 @@ import rigamajig2.shared.common
 import rigamajig2.maya.deformer
 import rigamajig2.maya.openMayaUtils
 import rigamajig2.maya.shape
-
+import rigamajig2.maya.attr
 
 logger = logging.getLogger(__name__)
 
@@ -30,9 +30,26 @@ def isSkinCluster(skinCluster):
     :return: True if Valid. False is invalid.
     :rtype: bool
     """
+    if skinCluster is None: return False
     if not cmds.objExists(skinCluster): return False
     if cmds.nodeType(skinCluster) != 'skinCluster': return False
     return True
+
+
+def getAllSkinClusters(obj):
+    """
+    Get a list of all the skinclusters on a target object
+
+    :param obj: object to get connected skin cluster
+    :return: list of all skinclusters on an object
+    :rtype: list
+    """
+    shape = rigamajig2.maya.deformer.getDeformShape(obj)
+    if shape is None:
+        return list()
+    deformers = rigamajig2.maya.deformer.getDeformersForShape(shape)
+    skins = [x for x in deformers if cmds.nodeType(x) == 'skinCluster']
+    return skins
 
 
 def getSkinCluster(obj):
@@ -43,11 +60,9 @@ def getSkinCluster(obj):
     :return: Skin cluster node
     :rtype: str
     """
-    shape = rigamajig2.maya.deformer.getDeformShape(obj)
-    deformers = rigamajig2.maya.deformer.getDeformersForShape(shape)
-    skins = [x for x in deformers if cmds.nodeType(x) == 'skinCluster']
+    skins = getAllSkinClusters(obj)
 
-    assert len(skins) < 2, "Cannot use getSkinCluster on Stacked Skins"
+    assert len(skins) < 2, "Cannot use getSkinCluster on Stacked Skins. Please use get all Skinclusters instead"
     skin = skins[0] if len(skins) else None
     if skin:
         # This is a tip from Charles Wardlaw,
@@ -97,22 +112,6 @@ def getCompleteComponents(mesh):
     completeComponentData = indexedComponent.create(om2.MFn.kMeshVertComponent)
     indexedComponent.setCompleteData(mesh.numVertices)
     return completeComponentData
-
-
-def tryMatrixSet(plug, value):
-    """try to set a matrix plug to given value. used to avoid errors seting an invalid value"""
-    try:
-        cmds.setAttr(plug, value)
-    except RuntimeError:
-        pass
-
-
-def tryMatrixConnect(plug, target):
-    """try to connect a given target to a matrix plug . used to avoid errors seting an invalid value"""
-    try:
-        cmds.connectAttr(plug, target)
-    except RuntimeError:
-        pass
 
 
 def getWeights(mesh):
@@ -263,11 +262,84 @@ def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
     skinMfn.setBlendWeights(meshDag, components, blendedWeights)
 
 
+def getMatrixConnections(mesh, attribute='bindPreMatrix'):
+    """
+    Get a list of the the nodes or values set on the prebind matrix of each influence joint
+
+    :param mesh: mesh to get weights on
+    :param attribute: Matrix attribute to get the values of.
+    :return: A dictionary  of influence joints and the connection or value
+    """
+    skinCls = getSkinCluster(mesh)
+
+    skinClusterMatrixAttr = "{}.{}".format(skinCls, attribute)
+
+    matrixInputs = list()
+    for i in range(len(getInfluenceJoints(skinCls))):
+        matrixAttr = "{}[{}]".format(skinClusterMatrixAttr, i)
+        matrixInputConnection = cmds.listConnections(matrixAttr, plugs=True, s=True, d=False)
+
+        # append the result to a list of matricies
+        matrixInputs.append(matrixInputConnection[0] if matrixInputConnection else None)
+
+    return matrixInputs
+
+
+def getMatrixValues(mesh, attribute='bindPreMatrix'):
+    """
+    Get a list of the the nodes or values set on the prebind matrix of each influence joint
+
+    :param mesh: mesh to get weights on
+    :param attribute: Matrix attribute to get the values of.
+    :return: A dictionary  of influence joints and the connection or value
+    """
+    skinCls = getSkinCluster(mesh)
+
+    skinClusterMatrixAttr = "{}.{}".format(skinCls, attribute)
+
+    matrixValues = list()
+    for i in range(len(getInfluenceJoints(skinCls))):
+        matrixAttr = "{}[{}]".format(skinClusterMatrixAttr, i)
+        value = cmds.getAttr(matrixAttr)
+
+        # append the result to a list of matricies
+        matrixValues.append(value)
+
+    return matrixValues
+
+
+def setMatrixConnections(skinCluster, connectionsList, attribute='bindPreMatrix'):
+    """
+    Set the preBind Matrix connections of a skin cluster
+
+    :param attribute:
+    :param skinCluster: skin cluster to set the pre bind matrix connections on
+    :param connectionsList: dictonary of influences and bind pre matrix connections
+    """
+    for i, bindInput in enumerate(connectionsList):
+        if bindInput:
+            try:
+                cmds.connectAttr(bindInput, "{}.{}[{}]".format(skinCluster, attribute, i), f=True)
+            except RuntimeError:
+                pass
+
+
+def setMatrixValues(skinCluster, valuesList, attribute='bindPreMatrx'):
+    """
+    Try to set the inital values of all connections for the matrix or bindPreMatrix
+    """
+    for i, value in enumerate(valuesList):
+        try:
+            cmds.setAttr("{}.{}[{}]".format(skinCluster, attribute, i), value)
+        except RuntimeError:
+            pass
+
+
 def getInfluenceJoints(skinCluster):
     """
     Get the influences of a skin cluster
 
-    :param skinCluster: skinCluster to get influences from
+    :param str skinCluster: skinCluster to get influences from
     :return: list of influences for a given skincluster
     """
     if not isinstance(skinCluster, oma2.MFnSkinCluster):
@@ -295,6 +367,69 @@ def getInfluenceIndex(skinCluster, influence):
     influencePath = rigamajig2.maya.openMayaUtils.getDagPath(influence)
 
     return skinClusterFn.indexForInfluenceObject(influencePath)
+
+
+def copySkinWeights(sourceMesh, targetMesh, targetSkin):
+    """
+    Copy our skinweights
+    """
+    sourceSkinCluster = getSkinCluster(sourceMesh)
+
+    weights, influenceCount = getWeights(sourceMesh)
+    blendedWeights = getBlendWeights(sourceMesh)
+
+    # now we need to store and copy over the influences
+    matrixValues = getMatrixValues(sourceMesh, attribute='matrix')
+    matrixConnections = getMatrixConnections(sourceMesh, attribute='matrix')
+
+    bpmValues = getMatrixValues(sourceMesh, attribute='bindPreMatrix')
+    bpmConnections = getMatrixConnections(sourceMesh, attribute='bindPreMatrix')
+
+    # set the matrix connections
+    setMatrixValues(targetSkin, matrixValues, attribute='matrix')
+    setMatrixValues(targetSkin, bpmValues, attribute='bindPreMatrix')
+
+    setMatrixConnections(targetSkin, matrixConnections, attribute='matrix')
+    setMatrixConnections(targetSkin, bpmConnections, attribute='bindPreMatrix')
+
+    # now copy that over to the new mesh
+    setWeights(targetMesh, skincluster=targetSkin, weightDict=weights)
+    setBlendWeights(targetMesh, skincluster=targetSkin, weightDict=blendedWeights)
+
+    # copy the skin cluster settings
+    attrs = ["skinningMethod", "dqsSupportNonRigid", "normalizeWeights", "maxInfluences", "maintainMaxInfluences"]
+    for attr in attrs:
+        value = cmds.getAttr("{}.{}".format(sourceSkinCluster, attr))
+        cmds.setAttr("{}.{}".format(targetSkin, attr), value)
+
+
+def stackSkinCluster(sourceMesh, targetMesh):
+    """
+    Copy and stack the skincluster from the source mesh to the target mesh
+
+    :param sourceMesh: mesh with the skincluster to copy from.
+    The source mesh is our authoring mesh and should only have ONE skin cluster
+    :param targetMesh: the mesh to copy the skin cluster to. This is the result mesh and can have several skin clusters.
+    """
+    sourceSkin = getSkinCluster(sourceMesh)
+    allTargetSkins = getAllSkinClusters(targetMesh)
+
+    if len(allTargetSkins):
+        targetSkin = cmds.deformer(targetMesh, type='skinCluster', n='stacked__' + sourceSkin)[0]
+    else:
+        # no skins yet-- make sure to use this command
+        sourceInfluences = getInfluenceJoints(sourceSkin)
+        targetSkinName = targetMesh + "_skinCluster"
+        targetSkin = cmds.skinCluster(sourceInfluences, targetMesh, tsb=True, mi=3, dr=4.0, n=targetSkinName)[0]
+
+    # set the weight distribution to neighbors
+    cmds.setAttr("{}.weightDistribution".format(targetSkin), 1)
+
+    # copy the skinweights and data
+    copySkinWeights(sourceMesh, targetMesh=targetMesh, targetSkin=targetSkin)
+
+    # finally recache the bind matricies
+    cmds.skinCluster(targetSkin, e=True, recacheBindMatrices=True)
 
 
 def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestPoint', influenceMode='closestJoint'):
@@ -381,16 +516,6 @@ def breakLocalization(skinClusters):
     """
     for skinClusters in skinClusters:
         pass
-
-
-def stackSkinCluster(source, target):
-    """
-    create stacked skinclusters
-
-    :param source: mesh to copy skincluster from
-    :param target: mesh to add new skin cluster too
-    """
-    pass
 
 
 if __name__ == '__main__':

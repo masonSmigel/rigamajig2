@@ -52,7 +52,6 @@ class SkinData(maya_data.MayaData):
         skinClsPreBindAttr = "{}.bindPreMatrix".format(skinCls)
 
         # get the preBind joints in the order they are listed on the skinCluster node
-
         preBindInputs = dict()
         for influence in skinCluster.getInfluenceJoints(skinCls):
             influenceIndex = skinCluster.getInfluenceIndex(skinCls, influence)

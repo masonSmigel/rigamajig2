@@ -18,10 +18,10 @@
         ], 
         "control_shapes": null, 
         "guides": null, 
-        "components": "/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/base/components.json", 
+        "components": "components.json",
         "skins": null, 
         "psd": null, 
-        "output_file": "/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/out", 
+        "output_file": "out",
         "output_file_type": "mb"
     }
 }

@@ -63,9 +63,9 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
             self.controlNameAttrs.append(jointNameStr)
             self.cmptSettings[jointNameStr] = inputBaseNames[i]
 
-    def initalHierachy(self):
+    def initialHierachy(self):
         """ Build the inital hierarchy"""
-        super(BasicArray, self).initalHierachy()
+        super(BasicArray, self).initialHierachy()
 
         self.basicComponentList = list()
         for i in range(len(self.input)):

@@ -81,6 +81,9 @@ def loadGuideData(path=None):
     :param path: path to guide data to save
     :return:
     """
+    if not path:
+        return
+
     if path and not os.path.exists(path):
         return
 

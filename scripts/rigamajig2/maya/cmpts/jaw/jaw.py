@@ -56,9 +56,9 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['jawOpenTyOffset'] = -0.2
         self.cmptSettings['jawOpenTzOffset'] = -0.4
 
-    def initalHierachy(self):
+    def initialHierachy(self):
         """Build the inital rig hierarchy"""
-        super(Jaw, self).initalHierachy()
+        super(Jaw, self).initialHierachy()
 
         self.jawControl = control.createAtObject(
             self.jawName,

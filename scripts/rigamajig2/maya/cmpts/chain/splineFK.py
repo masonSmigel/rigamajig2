@@ -67,9 +67,9 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         self.upVectorGuide = rig_control.createGuide(self.name + "_upVector", parent=self.guidesHierarchy,
                                                      position=pos)
 
-    def initalHierachy(self):
+    def initialHierachy(self):
         """Build the initial hirarchy"""
-        super(SplineFK, self).initalHierachy()
+        super(SplineFK, self).initialHierachy()
 
         self.fkControlList = list()
         self.ikControlList = list()

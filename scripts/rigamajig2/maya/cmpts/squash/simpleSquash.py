@@ -70,9 +70,9 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
                                                 rotation=rot
                                                 )
 
-    def initalHierachy(self):
+    def initialHierachy(self):
         """Build the initial hirarchy"""
-        super(SimpleSquash, self).initalHierachy()
+        super(SimpleSquash, self).initialHierachy()
 
         self.squashStart = rig_control.createAtObject(self.startControlName, self.side,
                                                       hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',

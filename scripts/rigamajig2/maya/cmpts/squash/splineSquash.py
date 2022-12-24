@@ -80,9 +80,9 @@ class SplineSquash(rigamajig2.maya.cmpts.base.Base):
                                                 position=topPos,
                                                 )
 
-    def initalHierachy(self):
+    def initialHierachy(self):
         """ Build the initial heirarchy"""
-        super(SplineSquash, self).initalHierachy()
+        super(SplineSquash, self).initialHierachy()
         self.botControl = rig_control.createAtObject(self.botControlName, side=self.side,
                                                      hideAttrs=['s', 'v'], size=self.size, color='yellow',
                                                      parent=self.controlHierarchy, shape='pyramid', shapeAim='x',

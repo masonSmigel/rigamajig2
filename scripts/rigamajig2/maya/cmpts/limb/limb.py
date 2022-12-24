@@ -107,9 +107,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rig_control.createDisplayLine(self.input[2], self.guidePoleVector, pvLineName, self.guidesHierarchy)
         rig_control.createDisplayLine(self.input[1], self.input[3], ikLineName, self.guidesHierarchy)
 
-    def initalHierachy(self):
+    def initialHierachy(self):
         """Build the initial hirarchy"""
-        super(Limb, self).initalHierachy()
+        super(Limb, self).initialHierachy()
 
         hideAttrs = [] if self.useScale else ['s']
 

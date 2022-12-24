@@ -91,9 +91,9 @@ class StickyControls(rigamajig2.maya.cmpts.base.Base):
         # then a second tme to get the data for the new attributes we add
         super(StickyControls, self).loadSettings(data)
 
-    def initalHierachy(self):
+    def initialHierachy(self):
         """Setup the inital Hirarchy. implement in subclass"""
-        super(StickyControls, self).initalHierachy()
+        super(StickyControls, self).initialHierachy()
 
         # in order for the controls to rotate properly with their parent we need to connect the rigparents matrix to the
         self.controlOffsetTrs = cmds.createNode('transform', n=self.name + '_control_trs', parent=self.controlHierarchy)

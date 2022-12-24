@@ -60,9 +60,9 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
 
         self.cmptSettings['limb_autoWristName'] = self.name.split("_")[0] + "_autoWrist"
 
-    def initalHierachy(self):
+    def initialHierachy(self):
         """Build the initial hirarchy"""
-        super(Arm, self).initalHierachy()
+        super(Arm, self).initialHierachy()
 
         self.limbAutoAim = rig_control.create(
             self.limb_autoWristName,

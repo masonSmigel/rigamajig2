@@ -34,7 +34,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         """
         super(Main, self).__init__(name=name, input=input, size=size)
 
-    def initalHierachy(self):
+    def initialHierachy(self):
         """Build the initial hirarchy"""
         self.rootHierarchy = cmds.createNode('transform', n=self.name)
         self.rigHierarchy = cmds.createNode('transform', n=RIG_HRC_NAME, parent=self.rootHierarchy)

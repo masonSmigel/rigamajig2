@@ -55,8 +55,8 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['addSdk'] = addSdk
         self.cmptSettings['addBpm'] = addBpm
 
-    def initalHierachy(self):
-        super(Basic, self).initalHierachy()
+    def initialHierachy(self):
+        super(Basic, self).initialHierachy()
 
         self.control = rig_control.create(self.controlName, self.side,
                                           spaces=self.addSpaces, trs=self.addTrs, sdk=self.addSdk,

@@ -77,9 +77,9 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         if self.side == 'r':
             cmds.xform(self.thumbCupGuide, ws=True, ro=(180, 0, 0))
 
-    def initalHierachy(self):
+    def initialHierachy(self):
         """Build the initial hirarchy"""
-        super(Hand, self).initalHierachy()
+        super(Hand, self).initialHierachy()
 
         # create the hand gesture controller
         pos = rig_transform.getAveragePoint(self.input[1:])

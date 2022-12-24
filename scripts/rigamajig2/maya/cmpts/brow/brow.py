@@ -130,9 +130,9 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
 
             self.browControlGuides.append(guide)
 
-    def initialHierachy(self):
+    def initialHierarchy(self):
         """Build the inital rig hierarchy"""
-        super(Brow, self).initialHierachy()
+        super(Brow, self).initialHierarchy()
 
         self.browAll = control.createAtObject(name=self.browAllName,
                                               side=self.side,

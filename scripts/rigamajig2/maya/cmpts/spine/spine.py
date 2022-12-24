@@ -106,9 +106,9 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
         rig_attr.lockAndHide(self.chestTopGuide, rig_attr.TRANSLATE + ['v'])
 
-    def initialHierachy(self):
+    def initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(Spine, self).initialHierachy()
+        super(Spine, self).initialHierarchy()
 
         # build the hips swivel control
         hipPos = cmds.xform(self.input[0], q=True, ws=True, t=True)

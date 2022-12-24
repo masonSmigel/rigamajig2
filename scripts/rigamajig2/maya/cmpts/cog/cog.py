@@ -47,7 +47,7 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['cogGimble_name'] = 'hipsGimble'
         self.cmptSettings['cogPivot_name'] = 'hips_pivot'
 
-    def initialHierachy(self):
+    def initialHierarchy(self):
         """Build the initial hirarchy"""
         self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
         self.controlHierarchy = cmds.createNode('transform', n=self.name + '_control', parent=self.rootHierarchy)

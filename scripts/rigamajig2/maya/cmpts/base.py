@@ -121,7 +121,7 @@ class Base(object):
         build the rig
 
         process order:
-            self.initialHierachy
+            self.initialHierarchy
             self.preRigSetup
             self.rigSetup
             self.postRigSetup
@@ -132,7 +132,7 @@ class Base(object):
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
-                self.initialHierachy()
+                self.initialHierarchy()
                 self.preRigSetup()
                 self.rigSetup()
                 self.postRigSetup()
@@ -222,7 +222,7 @@ class Base(object):
         """run a prescript"""
         pass
 
-    def initialHierachy(self):
+    def initialHierarchy(self):
         """Setup the inital Hirarchy. implement in subclass"""
         self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
         self.paramsHierarchy = cmds.createNode('transform', n=self.name + '_params',

@@ -75,9 +75,9 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.ballGuide = rig_control.createGuide("{}_ball".format(self.name), parent=self.guidesHierarchy)
         self.toeGuide = rig_control.createGuide("{}_toe".format(self.name), parent=self.guidesHierarchy)
 
-    def initialHierachy(self):
+    def initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(Leg, self).initialHierachy()
+        super(Leg, self).initialHierarchy()
         self.toesFk = rig_control.createAtObject(
             self.toes_fkName,
             self.side,

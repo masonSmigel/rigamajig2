@@ -215,9 +215,9 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             returnList.append(guide)
         return returnList
 
-    def initialHierachy(self):
+    def initialHierarchy(self):
         """Build the inital rig hierarchy"""
-        super(Eyelid, self).initialHierachy()
+        super(Eyelid, self).initialHierarchy()
 
         self.eyeSocket = control.createAtObject(name=self.eyeSocketName,
                                                 side=self.side,

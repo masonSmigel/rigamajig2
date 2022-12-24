@@ -99,9 +99,9 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
             guide = rig_control.createGuide(guideName, parent=self.guidesHierarchy)
             self.mainGuidesList.append(guide)
 
-    def initialHierachy(self):
+    def initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(ChainSpline, self).initialHierachy()
+        super(ChainSpline, self).initialHierarchy()
 
         self.mainControls = list()
         self.mainDriverJoints = list()

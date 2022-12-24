@@ -66,9 +66,9 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
             self.controlNameList.append(jointNameStr)
             self.cmptSettings[jointNameStr] = inputBaseNames[i] + "_fk"
 
-    def initialHierachy(self):
+    def initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(Chain, self).initialHierachy()
+        super(Chain, self).initialHierarchy()
 
         self.fkControlList = list()
         if self.useScale:

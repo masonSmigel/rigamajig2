@@ -78,8 +78,8 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
                                                   position=skullPos)
         rig_attr.lockAndHide(self.skullGuide, rig_attr.TRANSLATE + ['v'])
 
-    def initialHierachy(self):
-        super(Neck, self).initialHierachy()
+    def initialHierarchy(self):
+        super(Neck, self).initialHierarchy()
 
         self.neck = rig_control.createAtObject(
             self.neck_name, self.side,

@@ -243,9 +243,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         return returnList
 
-    def initialHierachy(self):
+    def initialHierarchy(self):
         """ Build the initial rig hierarchy"""
-        super(Lips, self).initialHierachy()
+        super(Lips, self).initialHierarchy()
 
         # create the lips all control
         self.lipsAll = control.createAtObject(name=self.lipsAllName,

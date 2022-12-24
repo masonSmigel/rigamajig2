@@ -61,11 +61,11 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
             setattr(self, "_{}_upVecTgt".format(input), inputUpVector)
             rig_transform.matchTranslate(input, inputUpVector)
 
-    def initialHierachy(self):
+    def initialHierarchy(self):
         """
         :return:
         """
-        super(LookAt, self).initialHierachy()
+        super(LookAt, self).initialHierarchy()
 
         self.aimTarget = rig_control.createAtObject(self.aimTargetName,
                                                     spaces=True,

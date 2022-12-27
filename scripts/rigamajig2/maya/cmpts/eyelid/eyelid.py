@@ -551,22 +551,16 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         lowLidFollow = attr.createAttr(self.paramsHierarchy, "low{}TweakFollow".format(prefix), "float", minValue=0,
                                        maxValue=1, value=0.8)
 
-        uppLidReverse = node.reverse(uppLidFollow, name="{}_uppLidFollow".format(self.name))
-        lowLidReverse = node.reverse(lowLidFollow, name="{}_uppLidFollow".format(self.name))
-
         # create some parent constraints for the eyelid controls
-        const1 = cmds.parentConstraint(controls[2].name, controls[0].name, controls[1].orig, mo=True)
-        const2 = cmds.parentConstraint(controls[2].name, controls[4].name, controls[3].orig, mo=True)
-        const3 = cmds.parentConstraint(controls[6].name, controls[0].name, controls[5].orig, mo=True)
-        const4 = cmds.parentConstraint(controls[6].name, controls[4].name, controls[7].orig, mo=True)
+        blend1 = transform.blendedOffsetParentMatrix(controls[0].name, controls[2].name, controls[1].trs, mo=True)
+        blend2 = transform.blendedOffsetParentMatrix(controls[4].name, controls[2].name, controls[3].trs, mo=True)
+        blend3 = transform.blendedOffsetParentMatrix(controls[0].name, controls[6].name, controls[5].trs, mo=True)
+        blend4 = transform.blendedOffsetParentMatrix(controls[4].name, controls[6].name, controls[7].trs, mo=True)
 
-        # setup the target weight inputs and reverse nodes.
-        for const in [const1, const2]:
-            cmds.connectAttr(uppLidFollow, "{}.w0".format(const[0]))
-            cmds.connectAttr("{}.outputX".format(uppLidReverse), "{}.w1".format(const[0]))
-        for const in [const3, const4]:
-            cmds.connectAttr(lowLidFollow, "{}.w0".format(const[0]))
-            cmds.connectAttr("{}.outputX".format(lowLidReverse), "{}.w1".format(const[0]))
+        cmds.connectAttr(uppLidFollow, "{}.envelope".format(blend1))
+        cmds.connectAttr(uppLidFollow, "{}.envelope".format(blend2))
+        cmds.connectAttr(lowLidFollow, "{}.envelope".format(blend3))
+        cmds.connectAttr(lowLidFollow, "{}.envelope".format(blend4))
 
     def setupFleshyEye(self):
         """ Setup teh fleshy eye system"""
@@ -619,19 +613,19 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
 
         # setup the upper lid
         attr.addSeparator(self.lidControls[2].name, "----")
-        attr.driveAttribute("uppLidTweakFollow", self.paramsHierarchy, self.lidControls[2].name)
+        attr.moveAttribute("uppLidTweakFollow", self.paramsHierarchy, self.lidControls[2].name)
 
         # setup the lower lid
         attr.addSeparator(self.lidControls[6].name, "----")
-        attr.driveAttribute("lowLidTweakFollow", self.paramsHierarchy, self.lidControls[6].name)
+        attr.moveAttribute("lowLidTweakFollow", self.paramsHierarchy, self.lidControls[6].name)
 
         # setup the upper lid
         attr.addSeparator(self.creaseControls[2].name, "----")
-        attr.driveAttribute("uppCreaseTweakFollow", self.paramsHierarchy, self.creaseControls[2].name)
+        attr.moveAttribute("uppCreaseTweakFollow", self.paramsHierarchy, self.creaseControls[2].name)
 
         # setup the lower lid
         attr.addSeparator(self.creaseControls[6].name, "----")
-        attr.driveAttribute("lowCreaseTweakFollow", self.paramsHierarchy, self.creaseControls[6].name)
+        attr.moveAttribute("lowCreaseTweakFollow", self.paramsHierarchy, self.creaseControls[6].name)
 
         # setup controlVisabilities
         attr.createAttr(self.eyeSocket.name, "crease", attributeType='bool', value=1, keyable=False, channelBox=True)
@@ -657,7 +651,8 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
 
         for part in ['upp', 'low']:
             creaseDriver = self.uppCreaseDriver if part == 'upp' else self.lowCreaseDriver
-            if not creaseDriver:
+            # if the string is empty then we can display a wanring and skip this
+            if creaseDriver == '':
                 cmds.warning("Must provide a crease driver to useCreaseFollow")
                 return
 
@@ -695,7 +690,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             cmds.connectAttr("{}.outputMatrix".format(blend), "{}.offsetParentMatrix".format(creaseControl.trs), f=True)
 
             # add the crease follow attribute to the lidControl.
-            followAttr = attr.createAttr(lidControl.name, "creaseFollow", "float", value=1, minValue=0,maxValue=1)
+            followAttr = attr.createAttr(lidControl.name, "creaseFollow", "float", value=1, minValue=0, maxValue=1)
             cmds.connectAttr(followAttr, "{}.envelope".format(blend))
 
     def finalize(self):

@@ -46,7 +46,8 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
     __version__ = version
 
     def __init__(self, name, input, size=1, rigParent=str(), eyelidSpans=8, addCrease=True,
-                 addFleshyEye=True, eyeballJoint=str()):
+                 addFleshyEye=True, eyeballJoint=str(),
+                 useCreaseFollow=False, uppCreaseDriver=str(), lowCreaseDriver=str()):
         """
         :param name: Component Name
         :param input: A single joint located at the center of the eyeball. This will become the eyeRoot.
@@ -57,6 +58,9 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         :param addCrease: if True a second set of joints around the crease of the eyelid will be created.
         :param addFleshyEye: If True an eyeballJoint must be provided and the rotation will drive the eye look
         :param eyeballJoint: Used when adding a fleshy eye setup to drive the fleshy eye
+        :param useCreaseFollow: If True setup the crease follows
+        :param uppCreaseDriver: The other driver for the upper crease follow. Only the first idex is used.
+        :param uppCreaseFollow: The other driver for the lower crease follow. Only the first idex is used.
         """
         super(Eyelid, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
@@ -65,6 +69,10 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['addCrease'] = addCrease
         self.cmptSettings['addFleshyEye'] = addFleshyEye
         self.cmptSettings['eyeballJoint'] = eyeballJoint
+
+        self.cmptSettings['useCreaseFollow'] = useCreaseFollow
+        self.cmptSettings['uppCreaseDriver'] = uppCreaseDriver
+        self.cmptSettings['lowCreaseDriver'] = lowCreaseDriver
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['eyeSocketName'] = inputBaseNames[0]
@@ -110,7 +118,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         sideMultipler = -1 if self.side == 'r' else 1
         # Here we can caululcate the mid point
         # zowever we eant to reduce the number of eyelid spans by two to remove the corners
-        midpoint = (float((self.eyelidSpans-2) - 1) * 0.5) * GUIDE_SCALE
+        midpoint = (float((self.eyelidSpans - 2) - 1) * 0.5) * GUIDE_SCALE
         guideSize = self.size * GUIDE_SCALE
 
         parent = cmds.createNode("transform", name='{}_{}_guide'.format(self.name, part), parent=self.guidesHierarchy)
@@ -119,7 +127,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         lowerList = list()
 
         for section in ['upper', 'lower']:
-            for x in range(self.eyelidSpans-2):
+            for x in range(self.eyelidSpans - 2):
                 # first we can caluclate the position of the guides at the origin
                 # then multiply them by the postion of the socket joint to position them around the eyeball.
                 translateX = float(-midpoint + (x * GUIDE_SCALE)) * sideMultipler
@@ -538,9 +546,9 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
 
         # setup the constraint relationship between the eyelid and
 
-        uppLidFollow = attr.createAttr(self.paramsHierarchy, "upp{}Follow".format(prefix), "float", minValue=0,
+        uppLidFollow = attr.createAttr(self.paramsHierarchy, "upp{}TweakFollow".format(prefix), "float", minValue=0,
                                        maxValue=1, value=0.8)
-        lowLidFollow = attr.createAttr(self.paramsHierarchy, "low{}Follow".format(prefix), "float", minValue=0,
+        lowLidFollow = attr.createAttr(self.paramsHierarchy, "low{}TweakFollow".format(prefix), "float", minValue=0,
                                        maxValue=1, value=0.8)
 
         uppLidReverse = node.reverse(uppLidFollow, name="{}_uppLidFollow".format(self.name))
@@ -611,23 +619,24 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
 
         # setup the upper lid
         attr.addSeparator(self.lidControls[2].name, "----")
-        attr.driveAttribute("uppLidFollow", self.paramsHierarchy, self.lidControls[2].name)
+        attr.driveAttribute("uppLidTweakFollow", self.paramsHierarchy, self.lidControls[2].name)
 
         # setup the lower lid
         attr.addSeparator(self.lidControls[6].name, "----")
-        attr.driveAttribute("lowLidFollow", self.paramsHierarchy, self.lidControls[6].name)
+        attr.driveAttribute("lowLidTweakFollow", self.paramsHierarchy, self.lidControls[6].name)
 
         # setup the upper lid
         attr.addSeparator(self.creaseControls[2].name, "----")
-        attr.driveAttribute("uppCreaseFollow", self.paramsHierarchy, self.creaseControls[2].name)
+        attr.driveAttribute("uppCreaseTweakFollow", self.paramsHierarchy, self.creaseControls[2].name)
 
         # setup the lower lid
         attr.addSeparator(self.creaseControls[6].name, "----")
-        attr.driveAttribute("lowCreaseFollow", self.paramsHierarchy, self.creaseControls[6].name)
+        attr.driveAttribute("lowCreaseTweakFollow", self.paramsHierarchy, self.creaseControls[6].name)
 
         # setup controlVisabilities
         attr.createAttr(self.eyeSocket.name, "crease", attributeType='bool', value=1, keyable=False, channelBox=True)
-        control.connectControlVisiblity(self.eyeSocket.name, "crease", controls=[ctl.name for ctl in self.creaseControls])
+        control.connectControlVisiblity(self.eyeSocket.name, "crease",
+                                        controls=[ctl.name for ctl in self.creaseControls])
 
     def connect(self):
         """connect to the rig parent"""
@@ -639,7 +648,55 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             # connect the up vector to the eyesocket control
             transform.connectOffsetParentMatrix(self.eyeSocket.name, self.upVector, mo=True)
 
+        # if we're using the crease follow and have a crease then connect the crease follow
+        if self.addCrease and self.useCreaseFollow:
+            self.setupCreaseFollows()
 
+    def setupCreaseFollows(self):
+        """Build the crease follow stuff"""
+
+        for part in ['upp', 'low']:
+            creaseDriver = self.uppCreaseDriver if part == 'upp' else self.lowCreaseDriver
+            if creaseDriver == None:
+                cmds.warning("Must provide a crease driver to useCreaseFollow")
+                return
+
+            creaseHierachy = cmds.createNode("transform", name="{}_{}CreaseFollow".format(self.name, part),
+                                             parent=self.spacesHierarchy)
+
+            # create a trs node to get the position of the curve then attatch it to the curve
+            lidTrsName = "{}_{}CreaseFollow_lid_trs".format(self.name, part)
+            lidTrs = cmds.createNode("transform", name=lidTrsName, parent=creaseHierachy)
+            cmds.setAttr("{}.inheritsTransform".format(lidTrs), False)
+
+            lidControl = self.lidControls[2] if part == 'upp' else self.lidControls[6]
+            creaseControl = self.creaseControls[2] if part == 'upp' else self.creaseControls[6]
+            lidCurve = self.topDriverCruve if part == 'upp' else self.botDriverCurve
+            transform.matchTransform(lidControl.name, lidTrs)
+            curve.attatchToCurve(lidTrs, curve=lidCurve, toClosestParam=True)
+
+            # add an attribute to drive the bias fo the crease
+            creaseBiasAttr = attr.createAttr(self.paramsHierarchy, "{}CreaseBias".format(part), "float",
+                                             value=0.5, minValue=0, maxValue=1)
+
+            # now build a trs to store the positon of the lidTrs and the creaseDriver
+            creaseTrsName = "{}_{}CreaseFollow_out_trs".format(self.name, part)
+            outputTrs = cmds.createNode("transform", name=creaseTrsName, parent=creaseHierachy)
+            transform.matchTransform(creaseControl.name, outputTrs)
+            creaseBlend = transform.blendedOffsetParentMatrix(lidTrs, creaseDriver, outputTrs, mo=True, blend=0.5)
+            cmds.connectAttr(creaseBiasAttr, "{}.envelope".format(creaseBlend))
+
+            # connect the outputTrs into the creaseTrs node and add a blend so we can turn it on or off
+            mm, pick = transform.connectOffsetParentMatrix(outputTrs, creaseControl.trs,
+                                                           mo=True, t=True, r=False, s=False, sh=False)
+
+            blend = cmds.createNode("blendMatrix", name="{}_{}creaseFollow_blendMatrix".format(self.name, part))
+            cmds.connectAttr("{}.outputMatrix".format(pick), "{}.target[0].targetMatrix".format(blend))
+            cmds.connectAttr("{}.outputMatrix".format(blend), "{}.offsetParentMatrix".format(creaseControl.trs), f=True)
+
+            # add the crease follow attribute to the lidControl.
+            followAttr = attr.createAttr(lidControl.name, "creaseFollow", "float", value=1, minValue=0,maxValue=1)
+            cmds.connectAttr(followAttr, "{}.envelope".format(blend))
 
     def finalize(self):
         """ Finalize the rig setup """

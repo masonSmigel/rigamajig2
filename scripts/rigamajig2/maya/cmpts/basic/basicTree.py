@@ -88,6 +88,8 @@ class BasicTree(rigamajig2.maya.cmpts.base.Base):
             ctl = rig_control.createAtObject(name,
                                              shape=self.controlShape,
                                              orig=True,
+                                             trs=self.addTrs,
+                                             sdk=self.addSdk,
                                              size=self.size,
                                              xformObj=jnt)
             self.hierarchyDict[jnt]['control'] = ctl

@@ -53,7 +53,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, useJaw=False, jawJoints=None,
+    def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, addSdk=False, useJaw=False, jawJoints=None,
                  addZipperLips=True):
         """
         :param name: Component Name
@@ -61,6 +61,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         :param size: default size of the controls
         :param rigParent: connect the component to a rigParent
         :param lipSpans: The number of spans from the right corner to the left corner.
+        :param addSdk: Add an SDK group the the main lip controls
         :param useJaw: If true connect the setup to the jaw
         :param jawJoints:  If useJaw then provide the following joints to the jaw:
                             [lipsTop, lipsBot, lips_l, lips_r]
@@ -70,6 +71,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         self.side = common.getSide(self.name)
 
         self.cmptSettings['lipSpans'] = lipSpans
+        self.cmptSettings['addSdk'] = addSdk
         self.cmptSettings['useJaw'] = useJaw
         self.cmptSettings['jawJoints'] = jawJoints or list()
         self.cmptSettings['addZipperLips'] = addZipperLips
@@ -284,6 +286,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                                          shape='triangle',
                                          orig=True,
                                          trs=True,
+                                         sdk=self.addSdk,
                                          parent=self.lipsAll.name,
                                          shapeAim='y',
                                          xformObj=guide,
@@ -452,8 +455,10 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             # next we need to make a dummy joint to constrain to
             dummyJoint = cmds.createNode("joint", name="{}_dummy_joint".format(ctl.name), parent=jawConnecter)
             transform.matchTransform(ctl.name, dummyJoint)
-            dummyOffset = hierarchy.create(dummyJoint, hierarchy=["{}_offset".format(dummyJoint)], matchTransform=True)
-            cmds.parentConstraint(aimTrs, dummyOffset, mo=True)
+            dummyOffset = hierarchy.create(dummyJoint,
+                                           hierarchy=["{}_offset".format(dummyJoint), "{}_sdk".format(dummyJoint)],
+                                           matchTransform=True)
+            cmds.parentConstraint(aimTrs, dummyOffset[0], mo=True)
             # hide the dummy joint
             joint.hideJoints(dummyJoint)
 
@@ -483,6 +488,11 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             cmds.connectAttr("{}.outColorR".format(translateCondition), "{}.tx".format(dummyJoint))
             cmds.connectAttr("{}.ty".format(ctl.name), "{}.ty".format(dummyJoint))
             cmds.connectAttr("{}.tz".format(ctl.name), "{}.tz".format(dummyJoint))
+
+            if self.addSdk:
+                cmds.connectAttr("{}.tx".format(ctl.sdk), "{}.tx".format(dummyOffset[1]))
+                cmds.connectAttr("{}.ty".format(ctl.sdk), "{}.ty".format(dummyOffset[1]))
+                cmds.connectAttr("{}.tz".format(ctl.sdk), "{}.tz".format(dummyOffset[1]))
 
             # constrain it to the lips group
             transform.connectOffsetParentMatrix(self.lipsAll.name, setupOffset, mo=True)
@@ -721,6 +731,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
                 falloffAttr = attr.createAttr(ctl.name, "zipperFalloff", "float", value=3, minValue=0, maxValue=10)
                 cmds.connectAttr(falloffAttr, "{}.{}ZipperFalloff".format(self.paramsHierarchy, side))
+
+
+        # we also need to setup some
 
     def connect(self):
         """Create the connection to other components """

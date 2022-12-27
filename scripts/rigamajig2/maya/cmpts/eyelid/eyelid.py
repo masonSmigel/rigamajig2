@@ -657,7 +657,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
 
         for part in ['upp', 'low']:
             creaseDriver = self.uppCreaseDriver if part == 'upp' else self.lowCreaseDriver
-            if creaseDriver == None:
+            if not creaseDriver:
                 cmds.warning("Must provide a crease driver to useCreaseFollow")
                 return
 

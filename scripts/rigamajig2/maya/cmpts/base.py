@@ -232,6 +232,10 @@ class Base(object):
         self.spacesHierarchy = cmds.createNode('transform', n=self.name + '_spaces',
                                                parent=self.rootHierarchy)
 
+        # lock and hide the attributes
+        for hierarchy in [self.paramsHierarchy, self.controlHierarchy, self.spacesHierarchy]:
+            rigamajig2.maya.attr.lockAndHide(hierarchy, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+
     def preRigSetup(self):
         """Pre rig setup. implement in subclass"""
         pass

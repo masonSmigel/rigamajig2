@@ -733,8 +733,6 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                 cmds.connectAttr(falloffAttr, "{}.{}ZipperFalloff".format(self.paramsHierarchy, side))
 
 
-        # we also need to setup some
-
     def connect(self):
         """Create the connection to other components """
 

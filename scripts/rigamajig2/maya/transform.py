@@ -153,7 +153,7 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
     return multMatrix, pickMat
 
 
-def blendedOffsetParentMatrix(driver1, driver2, driven, mo=False, t=True, r=True ,s=True, sh=True, blend=0):
+def blendedOffsetParentMatrix(driver1, driver2, driven, mo=False, t=True, r=True, s=True, sh=True, blend=0):
     """
     Create a blended offset parent matrix connection setup
 

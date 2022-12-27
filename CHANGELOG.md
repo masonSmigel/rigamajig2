@@ -1,5 +1,21 @@
 # Change Log 
 
+## 1.0.10
+### Added: 
+* Initial implementation of the `deformCage`. Will add a tool or something to guide users through it better.
+  Essentially it allows the rigger to create a low-res cage around a character to shape them similarly to a lattice. 
+  The controls and skinning are all built from a mesh that is skined to the joints of the character. 
+* Added a follow system to the creases on the `eyelid.eyelid` component. similarly to the `lips.lips` it reuires 
+  additional inputs to use as drivers. In this case it requires an upperCrease driver and lowerCrease driver. In most 
+  cases this will be the brows and squint controls 
+* Added sdk groups to more components. can be turned on via the `addSdk` parameter. 
+
+### Changed:  
+* Fixed typo across all components. `initalHierarchy` is not `initialHierarchy`
+
+### Fixed: 
+ * Fixed a cycle cluster in the `eyelid.eyelid` by moving some attributes to the controls rather than driving the params Hierarchy. 
+
 ## 1.0.9 
 ### Added: 
 * Added facial components: 

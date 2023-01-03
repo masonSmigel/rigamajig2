@@ -145,6 +145,10 @@ class DeformationCage(object):
         if not skin:
             raise Exception("the input mesh: {} must have a skincluster.".format(self.cageMesh))
 
+        # check the max influences for a skin cluster
+        if cmds.skinCluster(q=True, mi=True) > 2:
+            raise Exception("The input mesh: {} must have a maximum influence of 2 or lower".format(self.cageMesh))
+
         # get a list of all the influences to use later
         influences = skinCluster.getInfluenceJoints(skin)
 

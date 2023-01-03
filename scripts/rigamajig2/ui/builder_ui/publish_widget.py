@@ -36,6 +36,10 @@ class PublishWidget(QtWidgets.QWidget):
         """ Create Widgets"""
         self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
         self.publishScriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
+
+        self.outFileSuffix = QtWidgets.QLineEdit()
+        self.outFileSuffix.setPlaceholderText("_rig")
+
         self.outPathSelector = pathSelector.PathSelector(
             "out file:",
             caption="Select a location to save",
@@ -65,9 +69,12 @@ class PublishWidget(QtWidgets.QWidget):
         self.mainCollapseableWidget.addWidget(self.publishScriptRunner)
         self.mainCollapseableWidget.addSpacing(10)
         publishFileLayout = QtWidgets.QHBoxLayout()
-        publishFileLayout.addWidget(self.outPathSelector)
+        publishFileLayout.addWidget(QtWidgets.QLabel("suffix:"))
+        publishFileLayout.addWidget(self.outFileSuffix)
+        publishFileLayout.addSpacing(60)
         publishFileLayout.addWidget(self.outFileTypeComboBox)
         self.mainCollapseableWidget.addLayout(publishFileLayout)
+        self.mainCollapseableWidget.addWidget(self.outPathSelector)
         self.mainCollapseableWidget.addWidget(self.publishButton)
 
         self.mainLayout.addWidget(self.mainCollapseableWidget)
@@ -100,6 +107,12 @@ class PublishWidget(QtWidgets.QWidget):
         if index >= 0:
             self.outFileTypeComboBox.setCurrentIndex(index)
 
+        # set the file selector
+        self.outFileSuffix.clear()
+        fileSuffix = self.builder.getRigData(rigFile, constants.OUTPUT_FILE_SUFFIX)
+        if fileSuffix:
+            self.outFileSuffix.setText(fileSuffix)
+
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.publishScriptRunner.executeAllScripts()
@@ -128,5 +141,6 @@ class PublishWidget(QtWidgets.QWidget):
         if res == QtWidgets.QMessageBox.Save:
             outputfile = self.outPathSelector.getPath()
             fileType = self.outFileTypeComboBox.currentText()
+            suffix = self.outFileSuffix.text()
 
-            self.builder.run(publish=True, outputfile=outputfile, assetName=None, fileType=fileType)
+            self.builder.run(publish=True, outputfile=outputfile, suffix=suffix, assetName=None, fileType=fileType)

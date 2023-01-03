@@ -486,7 +486,7 @@ class Builder(object):
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
-    def run(self, publish=False, outputfile=None, assetName=None, fileType=None, versioning=True):
+    def run(self, publish=False, suffix=None, outputfile=None, assetName=None, fileType=None, versioning=True):
         """
         Build a rig.
 
@@ -523,20 +523,21 @@ class Builder(object):
         self.loadDeformationData()
         if publish:
             self.publishScript()
-            self.publish(outputfile=outputfile, assetName=assetName, fileType=fileType, versioning=versioning)
+            self.publish(outputfile=outputfile, suffix=suffix, assetName=assetName, fileType=fileType, versioning=versioning)
         endTime = time.time()
         finalTime = endTime - startTime
 
         print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
-    def publish(self, outputfile=None, assetName=None, fileType=None, versioning=True):
+    def publish(self, outputfile=None, suffix=None, assetName=None, fileType=None, versioning=True):
         """
         Publish a rig.
 
         This will run the whole builder as well as create a publish file.
 
         :param outputfile: Path for the output file
+        :param suffix: the file suffix to add to the rig file
         :param assetName: Asset name used to generate a file name
         :param fileType: File type of the publish file. valid values are 'mb' or 'ma'
         :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
@@ -546,6 +547,9 @@ class Builder(object):
         outputfile = outputfile or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_RIG))
         assetName = assetName or self.getAbsoultePath(self.getRigData(self.rigFile, constants.RIG_NAME))
         fileType = fileType or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_RIG_FILE_TYPE))
+        suffix = suffix or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_FILE_SUFFIX))
+
+        suffix = suffix or str()
 
         # check if the provided path is a file path.
         # if so use the file naming and extension from the provided path
@@ -558,7 +562,7 @@ class Builder(object):
             dirName = outputfile
             if assetName:
                 rigName = self.getRigData(self.rigFile, constants.RIG_NAME)
-                fileName = "{}_{}.{}".format(rigName, 'rig', fileType)
+                fileName = "{}{}.{}".format(rigName, suffix, fileType)
             else:
                 raise RuntimeError("Must select an output path or character name to publish a rig")
 

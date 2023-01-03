@@ -22,6 +22,7 @@
         "skins": "skin_weights/", 
         "psd": "", 
         "output_file": "../out/", 
-        "output_file_type": "mb"
+        "output_file_type": "mb",
+        "output_file_suffix": "_rig"
     }
 }

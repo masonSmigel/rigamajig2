@@ -92,17 +92,26 @@ def removeNodes(nodes, container, removeShapes=True):
                     cmds.container(container, e=True, removeNode=shape)
 
 
-def getNodesInContainer(container):
+def getNodesInContainer(container, getSubContained=False):
     """
     get the nodes within a container
 
     :param str container: container
+    :param bool getSubContained: get nodes within subcontainers
     :return: list of nodes within the container
     :rtype: list
     """
     if not isContainer(container):
         raise RuntimeError("{} is not a container.".format(container))
     nodeList = cmds.container(container, q=True, nodeList=True) or []
+
+    # we also need to get nodes from subcontainers
+    if getSubContained:
+        subContainers = cmds.ls(nodeList, type='container')
+        for subContainer in subContainers:
+            subNodeList = cmds.container(subContainer, q=True, nodeList=True) or []
+            nodeList += subNodeList
+
     return nodeList
 
 

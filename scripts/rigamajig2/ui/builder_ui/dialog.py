@@ -272,7 +272,13 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
         # setup ui Data
         self.assetNameLineEdit.setText(self.rigBuilder.getRigData(self.rigFile, constants.RIG_NAME))
-        self.archetypeBaseLabel.setText(self.rigBuilder.getRigData(self.rigFile, constants.BASE_ARCHETYPE))
+
+       # set the text of the archetype to the archetype. We need to check if its a string and update the formatting
+        archetype = self.rigBuilder.getRigData(self.rigFile, constants.BASE_ARCHETYPE)
+        if isinstance(archetype, (list, tuple)):
+            archetype = ", ".join(archetype)
+        self.archetypeBaseLabel.setText(str(archetype))
+
 
         # set paths and widgets relative to the rig env
         for widget in self.mainWidgets:

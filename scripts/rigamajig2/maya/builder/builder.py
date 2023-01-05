@@ -159,6 +159,9 @@ class Builder(object):
         for cmpt in self.componentList:
             logger.info('Building: {}'.format(cmpt.name))
             cmpt._buildComponent()
+
+        # loop through the components a second time to parent them if applicaple
+        for cmpt in self.componentList:
             # if the component is not a main parent the cmpt.rootHierarchy to the rig
             if cmds.objExists('rig') and cmpt.getComponenetType() != 'main.main':
                 if hasattr(cmpt, "rootHierarchy"):
@@ -171,9 +174,11 @@ class Builder(object):
         # parent the bind joints to the bind group. if one exists
         if cmds.objExists('bind'):
             topSkeletonNodes = meta.getTagged('skeleton_root')
+            print topSkeletonNodes
             if topSkeletonNodes:
-                if not cmds.listRelatives(topSkeletonNodes, p=True):
-                    cmds.parent(topSkeletonNodes, 'bind')
+                for topSkeletonNode in topSkeletonNodes:
+                    if not cmds.listRelatives(topSkeletonNode, p=True):
+                        cmds.parent(topSkeletonNodes, 'bind')
 
         # if the model group exists. parent the model
         if cmds.objExists('model'):

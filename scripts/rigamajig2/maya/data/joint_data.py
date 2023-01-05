@@ -57,7 +57,7 @@ class JointData(node_data.NodeData):
             if "parent" in self._data[node]:
                 if self._data[node]["parent"] and cmds.objExists(self._data[node]["parent"]):
                     # check to make sure the node isnt already parented to the parent
-                    parents = cmds.listRelatives(node, p=True)  or []
+                    parents = cmds.listRelatives(node, p=True) or []
                     if self._data[node]["parent"] not in parents:
                         cmds.parent(node, self._data[node]["parent"])
 

@@ -64,11 +64,11 @@ class BuildWidget(QtWidgets.QWidget):
         self.mainCollapseableWidget .addLayout(buildLayout)
 
         # Post Script
-        self.mainCollapseableWidget .addSpacing()
-        self.mainCollapseableWidget .addWidget(self.postScriptScriptRunner)
+        self.mainCollapseableWidget.addSpacing()
+        self.mainCollapseableWidget.addWidget(self.postScriptScriptRunner)
 
         # add the widget to the main layout
-        self.mainLayout.addWidget(self.mainCollapseableWidget )
+        self.mainLayout.addWidget(self.mainCollapseableWidget)
 
     def createConnections(self):
         """ Create Connections """

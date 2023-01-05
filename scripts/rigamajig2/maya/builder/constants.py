@@ -23,7 +23,6 @@ POST_SCRIPT = 'post_script'
 PUB_SCRIPT = 'pub_script'
 RIG_NAME = 'rig_name'
 MODEL_FILE = "model_file"
-SKELETON_FILE = "skeleton_file"
 SKELETON_POS = "skeleton_pos"
 CONTROL_SHAPES = "control_shapes"
 GUIDES = "guides"

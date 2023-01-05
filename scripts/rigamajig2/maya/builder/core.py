@@ -133,6 +133,7 @@ def validateScriptList(scriptsList=None):
     Validate the script list.
     This will filter all the items in the script into a script type.
     If the item is a directory then get scripts within the directory.
+
     :param scriptsList: list of directories and/or scripts to check and add to the list
     :return:
     """
@@ -224,11 +225,15 @@ class GetCompleteScriptList():
         for localScriptPath in localScriptPaths:
             fullScriptPath = os.path.join(rigEnviornmentPath, localScriptPath)
             builderScripts = validateScriptList(fullScriptPath)
-            cls.scriptList += (builderScripts)
+
+            for script in builderScripts:
+                if script not in cls.scriptList:
+                    cls.scriptList.append(script)
 
         baseArchetype = getRigData(rigFile, constants.BASE_ARCHETYPE)
-        if baseArchetype:
-            if baseArchetype in getAvailableArchetypes():
+        archetypeList = common.toList(baseArchetype)
+        for baseArchetype in archetypeList:
+            if baseArchetype and baseArchetype in getAvailableArchetypes():
                 archetypePath = os.sep.join([common.ARCHETYPES_PATH, baseArchetype])
                 archetypeRigFile = findRigFile(archetypePath)
 

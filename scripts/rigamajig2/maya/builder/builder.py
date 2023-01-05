@@ -156,12 +156,19 @@ class Builder(object):
         build rig
         """
 
+        # we need to make sure the main.main component gets built first if it exists in the list.
+        # this is because all components that use the joint.connectChains function check for a bind group
+        # to build the proper scale constraints
+        for cmpt in self.componentList:
+            if cmpt.getComponenetType() == 'main.main':
+                self.componentList.remove(cmpt)
+                self.componentList.insert(0, cmpt)
+
+        # now we can safely build all the components in the scene
         for cmpt in self.componentList:
             logger.info('Building: {}'.format(cmpt.name))
             cmpt._buildComponent()
 
-        # loop through the components a second time to parent them if applicaple
-        for cmpt in self.componentList:
             # if the component is not a main parent the cmpt.rootHierarchy to the rig
             if cmds.objExists('rig') and cmpt.getComponenetType() != 'main.main':
                 if hasattr(cmpt, "rootHierarchy"):
@@ -174,7 +181,6 @@ class Builder(object):
         # parent the bind joints to the bind group. if one exists
         if cmds.objExists('bind'):
             topSkeletonNodes = meta.getTagged('skeleton_root')
-            print topSkeletonNodes
             if topSkeletonNodes:
                 for topSkeletonNode in topSkeletonNodes:
                     if not cmds.listRelatives(topSkeletonNode, p=True):
@@ -528,7 +534,8 @@ class Builder(object):
         self.loadDeformationData()
         if publish:
             self.publishScript()
-            self.publish(outputfile=outputfile, suffix=suffix, assetName=assetName, fileType=fileType, versioning=versioning)
+            self.publish(outputfile=outputfile, suffix=suffix, assetName=assetName, fileType=fileType,
+                         versioning=versioning)
         endTime = time.time()
         finalTime = endTime - startTime
 

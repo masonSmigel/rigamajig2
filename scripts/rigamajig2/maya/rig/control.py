@@ -564,6 +564,11 @@ def connectControlVisiblity(driverNode, driverAttr, controls, force=True):
 
     for control in controls:
         shapes = cmds.listRelatives(control, s=True) or []
+
+        # we can only continue if there are some shapes.
+        if not shapes:
+            continue
+
         existingConnections = rigamajig2.maya.connection.getPlugInput("{}.v".format(shapes[0]))
         if len(existingConnections) > 0:
             existingDriver = existingConnections[0]

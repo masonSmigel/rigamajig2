@@ -198,7 +198,7 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
             # cmds.tangentConstraint(self.driverCurve, targetLoc, aim=(1, 0, 0), u=(0,1,0))
             constrain.orientConstraint(self.browAll.name, targetLoc)
 
-            joint.connectChains([targetLoc], [endJoint])
+            joint.connectChains([targetLoc], [endJoint], connectScale=False)
 
             # we also want to create a tilt joint if this is the first joint
             if i == 0:

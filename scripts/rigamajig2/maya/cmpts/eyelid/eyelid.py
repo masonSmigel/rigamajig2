@@ -403,7 +403,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
                 curve.attatchToCurve(targetLoc, curve=targetCurve, toClosestParam=True)
                 constrain.orientConstraint(self.eyeSocket.name, targetLoc)
 
-                joint.connectChains([targetLoc], [endJoint])
+                joint.connectChains([targetLoc], [endJoint], connectScale=False)
 
     def rigSetup(self):
         """ create the main rig setup """

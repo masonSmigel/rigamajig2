@@ -466,7 +466,7 @@ def getCrossUpVector(trs0, trs1, trs2):
     return crossProd
 
 
-def connectChains(source, destination):
+def connectChains(source, destination, connectScale=True):
     """
     Connect two skeletons.
 
@@ -474,6 +474,8 @@ def connectChains(source, destination):
 
     :param list source: list of source joints to connect to the matching item in the destination list
     :param list destination: list of destination joints to connect to the matching item in the source list
+    :param bool connectScale: Connect the scale to the destination joints. This may not be disireable for some facial
+                                components.
     """
     source = common.toList(source)
     destination = common.toList(destination)
@@ -484,20 +486,21 @@ def connectChains(source, destination):
         attr.unlock(driven, attr.TRANSFORMS + ['v'])
         cmds.parentConstraint(driver, driven, mo=False)
 
-        parent = 'bind' if cmds.objExists("bind") else None
+        if connectScale:
+            parent = 'bind' if cmds.objExists("bind") else None
 
-        mult = cmds.createNode('multMatrix', name="{}_local_{}".format(driven, "mm"))
-        worldMatrix = "{}.worldMatrix[0]".format(driver)
-        cmds.connectAttr(worldMatrix, "{}.matrixIn[0]".format(mult))
-        if parent:
-            parentInverse = "{}.worldInverseMatrix[0]".format(parent)
-            cmds.connectAttr(parentInverse, "{}.matrixIn[1]".format(mult))
+            mult = cmds.createNode('multMatrix', name="{}_local_{}".format(driven, "mm"))
+            worldMatrix = "{}.worldMatrix[0]".format(driver)
+            cmds.connectAttr(worldMatrix, "{}.matrixIn[0]".format(mult))
+            if parent:
+                parentInverse = "{}.worldInverseMatrix[0]".format(parent)
+                cmds.connectAttr(parentInverse, "{}.matrixIn[1]".format(mult))
 
-        dcmp = cmds.createNode('decomposeMatrix', n=driver + '_mm_' + "dcmp")
-        cmds.connectAttr(mult + '.matrixSum', dcmp + '.inputMatrix')
+            dcmp = cmds.createNode('decomposeMatrix', n=driver + '_mm_' + "dcmp")
+            cmds.connectAttr(mult + '.matrixSum', dcmp + '.inputMatrix')
 
-        cmds.connectAttr(dcmp + '.outputScale', driven + ".scale", f=True)
-        cmds.connectAttr(dcmp + '.outputShear', driven + ".shear", f=True)
+            cmds.connectAttr(dcmp + '.outputScale', driven + ".scale", f=True)
+            cmds.connectAttr(dcmp + '.outputShear', driven + ".shear", f=True)
 
         attr.lock(driven, attr.TRANSFORMS + ['v'])
 

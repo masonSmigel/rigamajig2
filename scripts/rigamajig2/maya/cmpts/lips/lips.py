@@ -383,7 +383,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             targetCurve = self.botHighCurve if 'lower' in guideName else self.topHighCurve
             curve.attatchToCurve(targetLoc, curve=targetCurve, toClosestParam=True)
 
-            joint.connectChains([targetLoc], [endJoint])
+            joint.connectChains([targetLoc], [endJoint], connectScale=False)
             self.aimTgtList.append(targetLoc)
 
     def rigSetup(self):

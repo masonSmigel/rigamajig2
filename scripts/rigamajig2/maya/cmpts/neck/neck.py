@@ -95,7 +95,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         self.head = rig_control.createAtObject(
             self.head_name, self.side,
             spaces=True,
-            hideAttrs=['s', 'v'],
+            hideAttrs=['v'],
             size=self.size,
             color='yellow',
             parent=self.neck.name,
@@ -117,7 +117,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         self.skull = rig_control.createAtObject(
             self.skull_name,
             self.side,
-            hideAttrs=['s', 'v'],
+            hideAttrs=['v'],
             size=self.size,
             color='yellow',
             parent=self.headGimble.name,

@@ -27,6 +27,7 @@ from rigamajig2.maya import constrain
 
 GUIDE_SCALE = 0.2
 
+WIRE_DROPOFF = 1000
 
 class Brow(rigamajig2.maya.cmpts.base.Base):
     """
@@ -220,7 +221,8 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
         joint.connectChains([self.browAll.name], [self.input[0]])
 
         # setup the main wire
-        wire1, _ = cmds.wire(self.driverCurve, wire=self.lowCurve, dds=[0, 5], name="{}_wire".format(self.driverCurve))
+        wire1, _ = cmds.wire(self.driverCurve, wire=self.lowCurve,
+                             dds=[0, WIRE_DROPOFF], name="{}_wire".format(self.driverCurve))
         cmds.setAttr("{}.scale[0]".format(wire1), 0)
 
         # setup the main brow transformations

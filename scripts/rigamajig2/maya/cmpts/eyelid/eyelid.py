@@ -27,6 +27,8 @@ from rigamajig2.maya import constrain
 
 GUIDE_SCALE = 0.2
 
+WIRE_DROPOFF = 1000
+
 
 class Eyelid(rigamajig2.maya.cmpts.base.Base):
     """
@@ -430,9 +432,9 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         # if add crease
         if self.addCrease:
             wire1, _ = cmds.wire(self.topCreaseDriverCruve, wire=self.topCreaseLowCurve,
-                                 dds=[0, 5], name="{}_wire".format(self.topDriverCruve))
+                                 dds=[0, WIRE_DROPOFF], name="{}_wire".format(self.topDriverCruve))
             wire2, _ = cmds.wire(self.botCreaseDriverCurve, wire=self.botCreaseLowCurve,
-                                 dds=[0, 5], name="{}_wire".format(self.botDriverCurve))
+                                 dds=[0, WIRE_DROPOFF], name="{}_wire".format(self.botDriverCurve))
 
             # now we need to set the scale for all the wires. This prevents them from scaling weirdly.
             # it will slightly alter the shape of the curves, but since we do it before the bind it wont affect the model!
@@ -450,13 +452,13 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
 
         # setup the blink wires.
         wire1, _ = cmds.wire(self.topDriverCruve, wire=self.topLowCurve,
-                             dds=[0, 5], name="{}_wire".format(self.topDriverCruve))
+                             dds=[0, WIRE_DROPOFF], name="{}_wire".format(self.topDriverCruve))
         wire2, _ = cmds.wire(self.botDriverCurve, wire=self.botLowCurve,
-                             dds=[0, 5], name="{}_wire".format(self.botDriverCurve))
+                             dds=[0, WIRE_DROPOFF], name="{}_wire".format(self.botDriverCurve))
         wire3, _ = cmds.wire(self.uppBlinkCurve, wire=self.blinkCurve,
-                             dds=[0, 5], name="{}_wire".format(self.uppBlinkCurve))
+                             dds=[0, WIRE_DROPOFF], name="{}_wire".format(self.uppBlinkCurve))
         wire4, _ = cmds.wire(self.lowBlinkCurve, wire=self.blinkCurve,
-                             dds=[0, 5], name="{}_wire".format(self.lowBlinkCurve))
+                             dds=[0, WIRE_DROPOFF], name="{}_wire".format(self.lowBlinkCurve))
 
         # now we need to set the scale for all the wires. This prevents them from scaling weirdly.
         # it will slightly alter the shape of the curves, but since we do it before the bind it wont affect the model!

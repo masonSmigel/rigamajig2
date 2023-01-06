@@ -224,7 +224,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         for i in range(len(nameList)):
             suffix = nameList[i]
 
-            guide = control.createGuide("{}_{}".format(self.name, suffix),
+            guideName = "{}_{}".format(self.name, suffix)
+            guide = control.createGuide(guideName,
                                         shape='sphere',
                                         size=GUIDE_SCALE * size,
                                         parent=parent,
@@ -238,6 +239,10 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             # create a slide attribute so we can easily slide the controls along the shape of the eyelid
             slideAttr = attr.createAttr(guide, "param", "float", value=param, minValue=minParam, maxValue=maxParam)
             cmds.connectAttr(slideAttr, "{}.{}".format(pointOnCurveInfo, "parameter"))
+
+            # check if the controls are on the right side and if so mirror them
+            if common.getSide(guideName) == 'r':
+                cmds.setAttr("{}.ry".format(guide), 180)
 
             attr.lock(guide, attr.TRANSLATE)
 

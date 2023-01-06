@@ -93,10 +93,28 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
 
         self.upVectorGuide = rig_control.createGuide("{}_upVec".format(self.name), parent=self.guidesHierarchy)
 
+        self.inputList = rigamajig2.maya.joint.getInbetweenJoints(self.input[0], self.input[1])
+        guideCurve = curve.createCurveFromTransform(self.inputList,
+                                                    degree=3,
+                                                    name="{}_guideCurve".format(self.name),
+                                                    form="Closed",
+                                                    parent=self.guidesHierarchy)
+
         self.mainGuidesList = list()
+        minParam, maxParam = curve.getRange(guideCurve)
+
         for i in range(self.numberMainControls):
             guideName = "mainDriver_{}".format(i)
-            guide = rig_control.createGuide(guideName, parent=self.guidesHierarchy)
+            guide = rig_control.createGuide(guideName, parent=self.guidesHierarchy, hideAttrs=['s', 'v'])
+
+            param = maxParam * float(i / float(self.numberMainControls))
+            pointOnCurveInfo = curve.attatchToCurve(guide, guideCurve, parameter=param)
+
+            # create a slide attribute so we can easily slide the controls along the shape of the eyelid
+            slideAttr = attr.createAttr(guide, "param", "float", value=param, minValue=minParam, maxValue=maxParam)
+            cmds.connectAttr(slideAttr, "{}.{}".format(pointOnCurveInfo, "parameter"))
+            attr.lock(guide, attr.TRANSLATE)
+
             self.mainGuidesList.append(guide)
 
     def initialHierarchy(self):
@@ -121,7 +139,6 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
             self.mainDriverJoints.append(driverJoint)
 
         # setup controllers for the subjoints
-        self.inputList = rigamajig2.maya.joint.getInbetweenJoints(self.input[0], self.input[1])
         inputBaseNames = [x.split("_")[0] for x in self.inputList]
 
         self.subControlers = list()

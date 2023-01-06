@@ -9,6 +9,7 @@
 
 """
 import os
+import logging
 from rigamajig2.shared import path
 from distutils.dir_util import copy_tree
 from rigamajig2.maya.builder import constants
@@ -21,13 +22,12 @@ mergableFeilds = [constants.SKELETON_POS,
                   constants.GUIDES,
                   constants.COMPONENTS]
 
+logger = logging.getLogger(__name__)
 
 def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-deliver', method='game'):
     """
     Merge two rig files into a single rig file. The order of rig files in vital! the first one will be used when there
     are discrepencies!
-
-    The archetype of the first rig file is also the one that will be copied
 
     For feilds such as blendshapes, skins and SHAPES only both rig files must be set to none OR a Directory,
     individual files cannot be used!
@@ -95,6 +95,14 @@ def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-delive
     # finally set all the values back to the rig file and write it out!
     rigFileData.setData(rigFileDict)
     rigFileData.write(rigFile)
+
+    # display a log statement
+    filename1 = os.path.basename(rigFile1)
+    filename2 = os.path.basename(rigFile2)
+
+    logger.info("Rig files: '{}' and '{}' sucessfully merged! Output: {}".format(filename1, filename2, rigEnv))
+
+    return rigFile
 
 
 def mergeModelFile(rigFile1, rigFile2, rigEnv):

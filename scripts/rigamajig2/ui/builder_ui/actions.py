@@ -64,6 +64,9 @@ class Actions(object):
         self.reloadRigamajigModulesAction = QtWidgets.QAction("Reload Rigamajig2 Modules", self.dialog)
         self.reloadRigamajigModulesAction.triggered.connect(self.reloadRigamajigModules)
 
+        self.mergeRigFilesAction = QtWidgets.QAction("Merge Rig Files", self.dialog)
+        self.mergeRigFilesAction.triggered.connect(self.showMergeRigFilesDialog)
+
         # TOOLS
         self.runPerformanceTestAction = QtWidgets.QAction("Run Performance Test", self.dialog)
         self.runPerformanceTestAction.triggered.connect(self.runPerformanceTest)
@@ -138,6 +141,12 @@ class Actions(object):
         """ Reload riamajig modules"""
         import rigamajig2
         rigamajig2.reloadModule(log=True)
+
+    def showMergeRigFilesDialog(self):
+        """ Show the merge rig files dialog"""
+        from rigamajig2.ui.builder_ui import mergeRigs_dialog
+
+        mergeRigs_dialog.MergeRigsDialog.showDialog()
 
     # SHOW HELP
     def showDocumentation(self):

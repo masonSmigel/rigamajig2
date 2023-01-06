@@ -22,6 +22,20 @@ class PathSelector(QtWidgets.QWidget):
                  fileMode=1,
                  relativePath=None,
                  parent=None):
+        """
+        :param label: label to give the path selector
+        :param caption: hover over caption
+        :param fileFilter: List of file type filters to the dialog. Multiple filters should be separated by double semi-colons.
+        :param fileMode: Indicate what the dialog is to return.
+                         0 Any file, whether it exists or not.
+                         1 A single existing file.
+                         2 The name of a directory. Both directories and files are displayed in the dialog.
+                         3 The name of a directory. Only directories are displayed in the dialog.
+                         4 Then names of one or more existing files.
+
+        :param relativePath: if a relative path is set the path is stored relative to this path.
+        :param parent: Pyqt parent for the widget
+        """
         super(PathSelector, self).__init__(parent)
         self.caption = caption
         self.fileFilter = fileFilter

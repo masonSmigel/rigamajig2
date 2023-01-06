@@ -115,6 +115,8 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         fileMenu.addAction(self.actions.reloadRigFileAction)
 
         utilsMenu = self.mainMenu.addMenu("Utils")
+        utilsMenu.addAction(self.actions.mergeRigFilesAction)
+        utilsMenu.addSeparator()
         utilsMenu.addAction(self.actions.reloadRigamajigModulesAction)
 
         qcMenu = self.mainMenu.addMenu("QC")

@@ -1,0 +1,339 @@
+{
+    "type": "AbstractData", 
+    "user": "masonsmigel", 
+    "time": "2023-01-04 17:10:52", 
+    "data": {
+        "main": {
+            "input": [], 
+            "rigParent": "", 
+            "type": "main.main", 
+            "name": "main", 
+            "size": 1
+        }, 
+        "eyes": {
+            "input": [
+                "eyeball_l_bind", 
+                "eyeball_r_bind"
+            ], 
+            "rigParent": "", 
+            "type": "lookAt.eyeballs", 
+            "name": "eyes", 
+            "size": 1, 
+            "aimTargetName": "eyes_aim", 
+            "lookAtSpaces": {}, 
+            "rigParentList": [
+                "eyeSocket_l_bind", 
+                "eyeSocket_r_bind"
+            ], 
+            "upAxis": "y", 
+            "eyeball_l_bindName": "eyeball_l", 
+            "eyeball_r_bindName": "eyeball_r"
+        }, 
+        "eyelid_l": {
+            "input": [
+                "eyeSocket_l_bind"
+            ], 
+            "rigParent": "headSquashMid_bind", 
+            "type": "eyelid.eyelid", 
+            "name": "eyelid_l", 
+            "size": 1, 
+            "eyelidSpans": 15, 
+            "addCrease": true, 
+            "addFleshyEye": true, 
+            "eyeballJoint": "eyeball_l_bind", 
+            "useCreaseFollow": true, 
+            "uppCreaseDriver": "brow_l_mid", 
+            "lowCreaseDriver": "squintMid_l", 
+            "eyeSocketName": "eyeSocket"
+        }, 
+        "eyelid_r": {
+            "input": [
+                "eyeSocket_r_bind"
+            ], 
+            "rigParent": "headSquashMid_bind", 
+            "type": "eyelid.eyelid", 
+            "name": "eyelid_r", 
+            "size": 1, 
+            "eyelidSpans": 15, 
+            "addCrease": true, 
+            "addFleshyEye": true, 
+            "eyeballJoint": "eyeball_r_bind", 
+            "useCreaseFollow": true, 
+            "uppCreaseDriver": "brow_r_mid", 
+            "lowCreaseDriver": "squintMid_r", 
+            "eyeSocketName": "eyeSocket"
+        }, 
+        "brow_l": {
+            "input": [
+                "brow_l_trs"
+            ], 
+            "rigParent": "headSquashMid_bind", 
+            "type": "brow.brow", 
+            "name": "brow_l", 
+            "size": 1, 
+            "browSpans": 10, 
+            "browAllName": "brow"
+        }, 
+        "brow_r": {
+            "input": [
+                "brow_r_trs"
+            ], 
+            "rigParent": "headSquashMid_bind", 
+            "type": "brow.brow", 
+            "name": "brow_r", 
+            "size": 1, 
+            "browSpans": 10, 
+            "browAllName": "brow"
+        }, 
+        "jaw": {
+            "input": [
+                "jaw_bind", 
+                "muppet_bind", 
+                "jawTop_bind", 
+                "jawLow_bind", 
+                "jawCorner_l_bind", 
+                "jawCorner_r_bind"
+            ], 
+            "rigParent": "head_bind", 
+            "type": "jaw.jaw", 
+            "name": "jaw", 
+            "size": 1, 
+            "addLipControls": false, 
+            "jawName": "jaw", 
+            "muppetName": "headSquash_bot", 
+            "lipsTopName": "jawTop", 
+            "lipsBotName": "jawLow", 
+            "lips_lName": "jawCorner_l", 
+            "lips_rName": "jawCorner_r", 
+            "jawOpenTyOffset": -0.2, 
+            "jawOpenTzOffset": -0.4
+        }, 
+        "lips": {
+            "input": [
+                "lips_bind"
+            ], 
+            "rigParent": "head_bind", 
+            "type": "lips.lips", 
+            "name": "lips", 
+            "size": 1, 
+            "lipSpans": 17, 
+            "addSdk": true, 
+            "useJaw": true, 
+            "jawJoints": [
+                "jawTop_bind", 
+                "jawLow_bind", 
+                "jawCorner_l_bind", 
+                "jawCorner_r_bind"
+            ], 
+            "addZipperLips": true, 
+            "lipsAllName": "lips"
+        }, 
+        "nose": {
+            "input": [
+                "noseBridge_bind"
+            ], 
+            "rigParent": "muppet_bind", 
+            "type": "basic.basicTree", 
+            "name": "nose", 
+            "size": 1, 
+            "controlShape": "cube", 
+            "addTrs": true, 
+            "addSdk": true, 
+            "skipJoints": []
+        }, 
+        "uppTeeth": {
+            "input": [
+                "uppTeethAll_trs"
+            ], 
+            "rigParent": "jawTop_bind", 
+            "type": "basic.basicTree", 
+            "name": "uppTeeth", 
+            "size": 1, 
+            "controlShape": "cube", 
+            "addTrs": false, 
+            "addSdk": false, 
+            "skipJoints": []
+        }, 
+        "lowTeeth": {
+            "input": [
+                "lowTeethAll_trs"
+            ], 
+            "rigParent": "jawLow_bind", 
+            "type": "basic.basicTree", 
+            "name": "lowTeeth", 
+            "size": 1, 
+            "controlShape": "cube", 
+            "addTrs": false, 
+            "addSdk": false, 
+            "skipJoints": []
+        }, 
+        "headSquash": {
+            "input": [
+                "headSquashMid_bind", 
+                "headSquash_end"
+            ], 
+            "rigParent": "muppet_bind", 
+            "type": "chain.chain", 
+            "name": "headSquash", 
+            "size": 1, 
+            "component_side": null, 
+            "useProxyAttrs": true, 
+            "useScale": true, 
+            "addSdk": true, 
+            "addFKSpace": false, 
+            "joint0Name": "headSquashMid"
+        }, 
+        "squint_l": {
+            "input": [
+                "squintInn_l_bind", 
+                "squintMid_l_bind", 
+                "squintOut_l_bind"
+            ], 
+            "rigParent": "muppet_bind", 
+            "type": "basic.basicArray", 
+            "name": "squint_l", 
+            "size": 1, 
+            "controlName": "squint_l", 
+            "controlShape": "cube", 
+            "worldOrient": false, 
+            "addSpaces": false, 
+            "addTrs": false, 
+            "addSdk": true, 
+            "addBpm": false, 
+            "joint0Name": "squintInn", 
+            "joint1Name": "squintMid", 
+            "joint2Name": "squintOut"
+        }, 
+        "squint_r": {
+            "input": [
+                "squintInn_r_bind", 
+                "squintMid_r_bind", 
+                "squintOut_r_bind"
+            ], 
+            "rigParent": "muppet_bind", 
+            "type": "basic.basicArray", 
+            "name": "squint_r", 
+            "size": 1, 
+            "controlName": "squint_r", 
+            "controlShape": "cube", 
+            "worldOrient": false, 
+            "addSpaces": false, 
+            "addTrs": false, 
+            "addSdk": true, 
+            "addBpm": false, 
+            "joint0Name": "squintInn", 
+            "joint1Name": "squintMid", 
+            "joint2Name": "squintOut"
+        }, 
+        "cheekPuff_l": {
+            "input": [
+                "cheekPuff_l_bind"
+            ], 
+            "rigParent": "", 
+            "type": "basic.basic", 
+            "name": "cheekPuff_l", 
+            "size": 1, 
+            "controlName": "cheekPuff", 
+            "controlShape": "cube", 
+            "worldOrient": false, 
+            "addSpaces": false, 
+            "addTrs": false, 
+            "addSdk": true, 
+            "addBpm": false
+        }, 
+        "cheekPuff_r": {
+            "input": [
+                "cheekPuff_r_bind"
+            ], 
+            "rigParent": "", 
+            "type": "basic.basic", 
+            "name": "cheekPuff_r", 
+            "size": 1, 
+            "controlName": "cheekPuff", 
+            "controlShape": "cube", 
+            "worldOrient": false, 
+            "addSpaces": false, 
+            "addTrs": false, 
+            "addSdk": true, 
+            "addBpm": false
+        }, 
+        "ear_l": {
+            "input": [
+                "ear_l_bind"
+            ], 
+            "rigParent": "muppet_bind", 
+            "type": "basic.basicTree", 
+            "name": "ear_l", 
+            "size": 1, 
+            "controlShape": "cube", 
+            "addTrs": false, 
+            "addSdk": true, 
+            "skipJoints": []
+        }, 
+        "ear_r": {
+            "input": [
+                "ear_r_bind"
+            ], 
+            "rigParent": "muppet_bind", 
+            "type": "basic.basicTree", 
+            "name": "ear_r", 
+            "size": 1, 
+            "controlShape": "cube", 
+            "addTrs": false, 
+            "addSdk": true, 
+            "skipJoints": []
+        }, 
+        "nasalLabial_l": {
+            "input": [
+                "nasalLabial_l_bind"
+            ], 
+            "rigParent": "muppet_bind", 
+            "type": "basic.basic", 
+            "name": "nasalLabial_l", 
+            "size": 1, 
+            "controlName": "nasalLabial", 
+            "controlShape": "cube", 
+            "worldOrient": false, 
+            "addSpaces": false, 
+            "addTrs": false, 
+            "addSdk": false, 
+            "addBpm": false
+        }, 
+        "nasalLabial_r": {
+            "input": [
+                "nasalLabial_r_bind"
+            ], 
+            "rigParent": "muppet_bind", 
+            "type": "basic.basic", 
+            "name": "nasalLabial_r", 
+            "size": 1, 
+            "controlName": "nasalLabial", 
+            "controlShape": "cube", 
+            "worldOrient": false, 
+            "addSpaces": false, 
+            "addTrs": false, 
+            "addSdk": false, 
+            "addBpm": false
+        }, 
+        "tounge": {
+            "input": [
+                "tounge_0_bind", 
+                "tounge_end"
+            ], 
+            "rigParent": "jawLow_bind", 
+            "type": "chain.chain", 
+            "name": "tounge", 
+            "size": 1, 
+            "component_side": null, 
+            "useProxyAttrs": true, 
+            "useScale": true, 
+            "addSdk": true, 
+            "addFKSpace": false, 
+            "joint0Name": "tounge_fk", 
+            "joint1Name": "tounge_fk", 
+            "joint2Name": "tounge_fk", 
+            "joint3Name": "tounge_fk", 
+            "joint4Name": "tounge_fk"
+        }
+    }
+}

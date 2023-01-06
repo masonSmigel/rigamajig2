@@ -1,0 +1,3429 @@
+{
+    "type": "JointData", 
+    "user": "masonsmigel", 
+    "time": "2023-01-06 18:15:13", 
+    "data": {
+        "head_bind": {
+            "dagPath": "|head_bind", 
+            "translate": [
+                0.0, 
+                161.5, 
+                3.5
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                0.0, 
+                161.5, 
+                3.5
+            ], 
+            "world_rotate": [
+                -89.99999999999997, 
+                6.36110936292703e-15, 
+                89.99999999999997
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": null, 
+            "jointOrient": [
+                -90.0, 
+                0.0, 
+                90.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "brow_l_trs": {
+            "dagPath": "|head_bind|muppet_bind|headSquashMid_bind|brow_l_trs", 
+            "translate": [
+                3.0, 
+                2.0, 
+                8.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                3.0000000000000027, 
+                169.1685939523758, 
+                12.602398903416438
+            ], 
+            "world_rotate": [
+                -1.214800000000007, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "headSquashMid_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "brow_r_trs": {
+            "dagPath": "|head_bind|muppet_bind|headSquashMid_bind|brow_r_trs", 
+            "translate": [
+                -3.0, 
+                2.0, 
+                8.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -2.9999999999999973, 
+                169.1685939523758, 
+                12.60239890341644
+            ], 
+            "world_rotate": [
+                1.2147999999999988, 
+                180.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "headSquashMid_bind", 
+            "jointOrient": [
+                0.0, 
+                180.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "eyeball_r_end": {
+            "dagPath": "|head_bind|muppet_bind|headSquashMid_bind|eyeSocket_r_bind|eyeball_r_bind|eyeball_r_end", 
+            "translate": [
+                -0.0, 
+                -0.0, 
+                2.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -3.0000000000000058, 
+                167.16905045110207, 
+                12.644800097915118
+            ], 
+            "world_rotate": [
+                -1.2149999999999974, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "eyeball_r_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                -0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "eyeball_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|headSquashMid_bind|eyeSocket_r_bind|eyeball_r_bind", 
+            "translate": [
+                -0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -3.000000000000004, 
+                167.12664212883504, 
+                10.645249764914595
+            ], 
+            "world_rotate": [
+                -1.2149999999999974, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "eyeSocket_r_bind", 
+            "jointOrient": [
+                179.9998, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "eyeSocket_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|headSquashMid_bind|eyeSocket_r_bind", 
+            "translate": [
+                -3.0, 
+                -0.0, 
+                6.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -3.000000000000002, 
+                167.12664212883502, 
+                10.645249764914595
+            ], 
+            "world_rotate": [
+                178.78519999999997, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "headSquashMid_bind", 
+            "jointOrient": [
+                180.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 2.0
+        }, 
+        "eyeball_l_end": {
+            "dagPath": "|head_bind|muppet_bind|headSquashMid_bind|eyeSocket_l_bind|eyeball_l_bind|eyeball_l_end", 
+            "translate": [
+                0.0, 
+                0.0, 
+                2.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                3.000000000000003, 
+                167.1690434713545, 
+                12.644800245935903
+            ], 
+            "world_rotate": [
+                -1.214800000000007, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "eyeball_l_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "eyeball_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|headSquashMid_bind|eyeSocket_l_bind|eyeball_l_bind", 
+            "translate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                3.0000000000000027, 
+                167.12664212883504, 
+                10.645249764914594
+            ], 
+            "world_rotate": [
+                -1.214800000000007, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "eyeSocket_l_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                -0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "eyeSocket_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|headSquashMid_bind|eyeSocket_l_bind", 
+            "translate": [
+                3.0, 
+                0.0, 
+                6.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                3.000000000000002, 
+                167.12664212883504, 
+                10.645249764914594
+            ], 
+            "world_rotate": [
+                -1.214800000000007, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "headSquashMid_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 2.0
+        }, 
+        "headSquash_end": {
+            "dagPath": "|head_bind|muppet_bind|headSquashMid_bind|headSquash_end", 
+            "translate": [
+                0.0, 
+                5.0, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                8.968180130479536e-16, 
+                171.99831430382991, 
+                4.540594965552005
+            ], 
+            "world_rotate": [
+                -1.214800000000007, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "headSquashMid_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "headSquashMid_bind": {
+            "dagPath": "|head_bind|muppet_bind|headSquashMid_bind", 
+            "translate": [
+                0.0, 
+                2.5, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                9.206050195780922e-16, 
+                166.99943810127664, 
+                4.646598321850669
+            ], 
+            "world_rotate": [
+                -1.214800000000007, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "earUpp_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|ear_l_bind|earUpp_l_bind", 
+            "translate": [
+                0.0, 
+                1.0, 
+                -1.0
+            ], 
+            "rotate": [
+                -0.0, 
+                -0.0, 
+                -0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                6.541675220419703, 
+                165.8782312641933, 
+                3.2318416764686773
+            ], 
+            "world_rotate": [
+                -6.402660162455472, 
+                -29.992565294412334, 
+                0.701277539009228
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "ear_l_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "earLow_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|ear_l_bind|earLow_l_bind", 
+            "translate": [
+                0.0, 
+                -1.0, 
+                -1.0
+            ], 
+            "rotate": [
+                -0.0, 
+                -0.0, 
+                -0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                6.4545194776720445, 
+                163.88949009106696, 
+                3.4250059144066496
+            ], 
+            "world_rotate": [
+                -6.402660162455472, 
+                -29.992565294412334, 
+                0.701277539009228
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "ear_l_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "ear_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|ear_l_bind", 
+            "translate": [
+                6.0, 
+                0.5, 
+                -0.5
+            ], 
+            "rotate": [
+                -5.0, 
+                -30.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                6.000000000000001, 
+                164.98928728462545, 
+                4.189112044114806
+            ], 
+            "world_rotate": [
+                -6.402660162455471, 
+                -29.992565294412344, 
+                0.7012775390092263
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "earLow_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|ear_r_bind|earLow_r_bind", 
+            "translate": [
+                -0.0, 
+                -1.0, 
+                1.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.454519477672043, 
+                163.88949009106696, 
+                3.4250059144066514
+            ], 
+            "world_rotate": [
+                -173.59733983754452, 
+                -29.992565294412376, 
+                179.29872246099077
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "ear_r_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "earUpp_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|ear_r_bind|earUpp_r_bind", 
+            "translate": [
+                -0.0, 
+                1.0875, 
+                0.8515
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -6.471520827831599, 
+                165.98089454165637, 
+                3.3512029459874486
+            ], 
+            "world_rotate": [
+                -173.59733983754452, 
+                -29.992565294412376, 
+                179.29872246099077
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "ear_r_bind", 
+            "jointOrient": [
+                -0.0, 
+                -0.0, 
+                -0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "ear_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|ear_r_bind", 
+            "translate": [
+                -6.0, 
+                0.5, 
+                -0.5
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -5.999999999999999, 
+                164.98928728462545, 
+                4.1891120441148075
+            ], 
+            "world_rotate": [
+                -173.59733983754452, 
+                -29.992565294412376, 
+                179.29872246099077
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                5.0, 
+                210.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "squintInn_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|squintInn_l_bind", 
+            "translate": [
+                1.9317, 
+                0.6379, 
+                8.7004
+            ], 
+            "rotate": [
+                11.0, 
+                0.0, 
+                -15.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                1.9317000000000029, 
+                165.32221094614994, 
+                13.384520594342314
+            ], 
+            "world_rotate": [
+                9.826581528730644, 
+                -0.3143913975059649, 
+                -14.996780508994377
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "squintMid_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|squintMid_l_bind", 
+            "translate": [
+                3.5986, 
+                0.0024, 
+                8.1033
+            ], 
+            "rotate": [
+                15.0, 
+                25.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                3.5986000000000025, 
+                164.67419485999622, 
+                12.801027824818963
+            ], 
+            "world_rotate": [
+                13.659660170978539, 
+                24.993995143882525, 
+                -0.5664096506589005
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "squintOut_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|squintOut_l_bind", 
+            "translate": [
+                5.3576, 
+                0.6319, 
+                6.8616
+            ], 
+            "rotate": [
+                15.0, 
+                60.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                5.357600000000002, 
+                165.27722850039447, 
+                11.54626108611888
+            ], 
+            "world_rotate": [
+                12.57149121130941, 
+                59.97770256206637, 
+                -2.102992790914793
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "squintInn_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|squintInn_r_bind", 
+            "translate": [
+                -1.9317, 
+                0.6379, 
+                8.7004
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -1.931699999999997, 
+                165.32221094614994, 
+                13.384520594342314
+            ], 
+            "world_rotate": [
+                170.17341847126934, 
+                -0.3143913975059777, 
+                -165.0032194910056
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                169.0, 
+                0.0, 
+                -165.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "squintMid_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|squintMid_r_bind", 
+            "translate": [
+                -3.5986, 
+                0.0024, 
+                8.1033
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -3.598599999999997, 
+                164.67419485999622, 
+                12.801027824818965
+            ], 
+            "world_rotate": [
+                166.34033982902145, 
+                24.99399514388251, 
+                -179.4335903493411
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                165.0, 
+                25.0, 
+                -180.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "squintOut_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|squintOut_r_bind", 
+            "translate": [
+                -5.3576, 
+                0.6319, 
+                6.8616
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -5.357599999999997, 
+                165.27722850039447, 
+                11.546261086118882
+            ], 
+            "world_rotate": [
+                167.42850878869058, 
+                59.977702562066355, 
+                -177.89700720908522
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                165.0, 
+                60.0, 
+                -180.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "cheekPuff_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|cheekPuff_l_bind", 
+            "translate": [
+                3.0, 
+                -2.0, 
+                4.5
+            ], 
+            "rotate": [
+                0.0, 
+                -30.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                3.0000000000000018, 
+                162.5958525396475, 
+                9.24098992481741
+            ], 
+            "world_rotate": [
+                -1.4026601624554718, 
+                -29.99256529441235, 
+                0.7012775390092266
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "cheekPuff_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|cheekPuff_r_bind", 
+            "translate": [
+                -3.0, 
+                -2.0, 
+                4.5
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -2.9999999999999982, 
+                162.5958525396475, 
+                9.240989924817411
+            ], 
+            "world_rotate": [
+                -178.59733983754455, 
+                -29.992565294412366, 
+                179.29872246099077
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                0.0, 
+                210.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "nasalLabial_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|nasalLabial_l_bind", 
+            "translate": [
+                2.5, 
+                -2.0, 
+                9.0
+            ], 
+            "rotate": [
+                -15.0, 
+                0.0, 
+                -45.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.500000000000003, 
+                162.69125556031628, 
+                13.739978507115355
+            ], 
+            "world_rotate": [
+                -15.859057678722385, 
+                -0.8589611362318175, 
+                -44.99356039127303
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "nasalLabial_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|nasalLabial_r_bind", 
+            "translate": [
+                -2.5, 
+                -2.0, 
+                9.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -2.499999999999997, 
+                162.69125556031628, 
+                13.739978507115355
+            ], 
+            "world_rotate": [
+                15.85905767872237, 
+                180.8589611362318, 
+                44.993560391273014
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                15.0, 
+                180.0, 
+                45.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "nostrilFlare_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|noseBridge_bind|noseBase_bind|nostril_l_bind|nostrilFlare_l_bind", 
+            "translate": [
+                -0.25, 
+                -0.25, 
+                0.75
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                1.3895940378958387, 
+                164.57560578224306, 
+                15.789013814788355
+            ], 
+            "world_rotate": [
+                -31.51236589152189, 
+                9.316041000812596, 
+                -3.6509013977061775
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 0, 
+            "parent": "nostril_l_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "nostril_l_bind": {
+            "dagPath": "|head_bind|muppet_bind|noseBridge_bind|noseBase_bind|nostril_l_bind", 
+            "translate": [
+                1.5, 
+                -1.5, 
+                0.0
+            ], 
+            "rotate": [
+                -10.0, 
+                10.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                1.5000000000000033, 
+                164.38931729709472, 
+                14.988634452340152
+            ], 
+            "world_rotate": [
+                -31.512365891521895, 
+                9.316041000812586, 
+                -3.6509013977061784
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "noseBase_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "noseTip_bind": {
+            "dagPath": "|head_bind|muppet_bind|noseBridge_bind|noseBase_bind|noseTip_bind", 
+            "translate": [
+                -0.0, 
+                -1.5, 
+                1.5
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                3.582658040113101e-15, 
+                164.9321153751818, 
+                16.38697999133435
+            ], 
+            "world_rotate": [
+                -21.21480000000001, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "noseBase_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "columnella_bind": {
+            "dagPath": "|head_bind|muppet_bind|noseBridge_bind|noseBase_bind|columnella_bind", 
+            "translate": [
+                -0.0, 
+                -2.0, 
+                0.2
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                3.3488374198274882e-15, 
+                163.99557519450826, 
+                15.35601321690174
+            ], 
+            "world_rotate": [
+                -21.21480000000001, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "noseBase_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "nostrilFlare_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|noseBridge_bind|noseBase_bind|nostril_r_bind|nostrilFlare_r_bind", 
+            "translate": [
+                -0.25, 
+                -0.25, 
+                -0.75
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -1.3895940378958316, 
+                164.57560578224306, 
+                15.789013814788355
+            ], 
+            "world_rotate": [
+                31.51236589152188, 
+                170.68395899918744, 
+                3.6509013977061775
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "nostril_r_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "nostril_r_bind": {
+            "dagPath": "|head_bind|muppet_bind|noseBridge_bind|noseBase_bind|nostril_r_bind", 
+            "translate": [
+                -1.5, 
+                -1.5, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -1.4999999999999967, 
+                164.38931729709472, 
+                14.988634452340152
+            ], 
+            "world_rotate": [
+                31.51236589152188, 
+                170.68395899918744, 
+                3.6509013977061775
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "noseBase_bind", 
+            "jointOrient": [
+                10.0, 
+                170.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "noseBase_bind": {
+            "dagPath": "|head_bind|muppet_bind|noseBridge_bind|noseBase_bind", 
+            "translate": [
+                0.0, 
+                -1.2, 
+                0.0
+            ], 
+            "rotate": [
+                20.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                3.142542346808941e-15, 
+                165.7876628360889, 
+                14.445836374253071
+            ], 
+            "world_rotate": [
+                -21.214800000000025, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "noseBridge_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "noseBridge_bind": {
+            "dagPath": "|head_bind|muppet_bind|noseBridge_bind", 
+            "translate": [
+                0.0, 
+                2.0, 
+                9.0
+            ], 
+            "rotate": [
+                -40.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.9633034569343694e-15, 
+                166.6903565223589, 
+                13.655175822076425
+            ], 
+            "world_rotate": [
+                -41.21480000000001, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "muppet_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                -0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "muppet_bind": {
+            "dagPath": "|head_bind|muppet_bind", 
+            "translate": [
+                3.0, 
+                -1.1996, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                9.324985228431615e-16, 
+                164.5, 
+                4.6996
+            ], 
+            "world_rotate": [
+                -1.214800000000007, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 0, 
+            "parent": "head_bind", 
+            "jointOrient": [
+                88.7852, 
+                90.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "lowTeeth_fr_bind": {
+            "dagPath": "|head_bind|jaw_bind|jawLow_bind|lowTeethAll_trs|lowTeeth_fr_bind", 
+            "translate": [
+                0.0, 
+                -0.15, 
+                -0.5
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.5091040356528543e-15, 
+                159.35, 
+                13.8
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "lowTeethAll_trs", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "lowTeeth_bk_l_bind": {
+            "dagPath": "|head_bind|jaw_bind|jawLow_bind|lowTeethAll_trs|lowTeeth_bk_l_bind", 
+            "translate": [
+                2.5, 
+                -0.15, 
+                -2.5
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.500000000000002, 
+                159.35, 
+                11.8
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "lowTeethAll_trs", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "lowTeeth_bk_r_bind": {
+            "dagPath": "|head_bind|jaw_bind|jawLow_bind|lowTeethAll_trs|lowTeeth_bk_r_bind", 
+            "translate": [
+                -2.5, 
+                -0.15, 
+                -2.5
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -2.499999999999998, 
+                159.35, 
+                11.8
+            ], 
+            "world_rotate": [
+                0.0, 
+                180.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "lowTeethAll_trs", 
+            "jointOrient": [
+                0.0, 
+                180.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "lowTeethAll_trs": {
+            "dagPath": "|head_bind|jaw_bind|jawLow_bind|lowTeethAll_trs", 
+            "translate": [
+                0.0, 
+                -0.5, 
+                -0.2
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.62012633811537e-15, 
+                159.5, 
+                14.3
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "jawLow_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "jawLow_bind": {
+            "dagPath": "|head_bind|jaw_bind|jawLow_bind", 
+            "translate": [
+                0.0, 
+                -2.5, 
+                10.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.664535259100376e-15, 
+                160.0, 
+                14.5
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "jaw_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "jawCorner_r_bind": {
+            "dagPath": "|head_bind|jaw_bind|jawCorner_r_bind", 
+            "translate": [
+                -2.5, 
+                -2.2, 
+                9.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -2.4999999999999973, 
+                160.3, 
+                13.500000000000002
+            ], 
+            "world_rotate": [
+                0.0, 
+                135.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "jaw_bind", 
+            "jointOrient": [
+                0.0, 
+                135.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "lips_bind": {
+            "dagPath": "|head_bind|jaw_bind|lips_bind", 
+            "translate": [
+                0.0, 
+                -2.0, 
+                6.0
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                1.776356839400251e-15, 
+                160.5, 
+                10.5
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "jaw_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "jawCorner_l_bind": {
+            "dagPath": "|head_bind|jaw_bind|jawCorner_l_bind", 
+            "translate": [
+                2.5, 
+                -2.2, 
+                9.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.5000000000000027, 
+                160.3, 
+                13.5
+            ], 
+            "world_rotate": [
+                0.0, 
+                45.00000000000002, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "jaw_bind", 
+            "jointOrient": [
+                0.0, 
+                45.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "uppTeeth_fr_bind": {
+            "dagPath": "|head_bind|jaw_bind|jawTop_bind|uppTeethAll_trs|uppTeeth_fr_bind", 
+            "translate": [
+                0.0, 
+                0.2, 
+                -0.5
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.5091040356528543e-15, 
+                161.2, 
+                13.8
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "uppTeethAll_trs", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "uppTeeth_bk_l_bind": {
+            "dagPath": "|head_bind|jaw_bind|jawTop_bind|uppTeethAll_trs|uppTeeth_bk_l_bind", 
+            "translate": [
+                2.5, 
+                0.2, 
+                -2.5
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.500000000000002, 
+                161.2, 
+                11.8
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "uppTeethAll_trs", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "uppTeeth_bk_r_bind": {
+            "dagPath": "|head_bind|jaw_bind|jawTop_bind|uppTeethAll_trs|uppTeeth_bk_r_bind", 
+            "translate": [
+                -2.5, 
+                0.2, 
+                -2.5
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                -2.499999999999998, 
+                161.2, 
+                11.8
+            ], 
+            "world_rotate": [
+                0.0, 
+                180.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "uppTeethAll_trs", 
+            "jointOrient": [
+                0.0, 
+                180.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "uppTeethAll_trs": {
+            "dagPath": "|head_bind|jaw_bind|jawTop_bind|uppTeethAll_trs", 
+            "translate": [
+                0.0, 
+                -0.5, 
+                -0.2
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.62012633811537e-15, 
+                161.0, 
+                14.3
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "jawTop_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "jawTop_bind": {
+            "dagPath": "|head_bind|jaw_bind|jawTop_bind", 
+            "translate": [
+                0.0, 
+                -1.0, 
+                10.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.664535259100376e-15, 
+                161.5, 
+                14.5
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "jaw_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                -0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "tounge_end": {
+            "dagPath": "|head_bind|jaw_bind|tounge_0_bind|tounge_1_bind|tounge_2_bind|tounge_3_bind|tounge_4_bind|tounge_end", 
+            "translate": [
+                0.0, 
+                0.6227, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.4491516615558298e-15, 
+                160.0276377196324, 
+                13.529998510356663
+            ], 
+            "world_rotate": [
+                92.99999999999999, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "tounge_4_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "tounge_4_bind": {
+            "dagPath": "|head_bind|jaw_bind|tounge_0_bind|tounge_1_bind|tounge_2_bind|tounge_3_bind|tounge_4_bind", 
+            "translate": [
+                0.0, 
+                0.7604, 
+                0.0
+            ], 
+            "rotate": [
+                3.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.3110739764276008e-15, 
+                160.06022731958487, 
+                12.90815189906499
+            ], 
+            "world_rotate": [
+                92.99999999999999, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "tounge_3_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "tounge_3_bind": {
+            "dagPath": "|head_bind|jaw_bind|tounge_0_bind|tounge_1_bind|tounge_2_bind|tounge_3_bind", 
+            "translate": [
+                0.0, 
+                0.7207, 
+                0.0
+            ], 
+            "rotate": [
+                5.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                2.142231258842607e-15, 
+                160.06022731958487, 
+                12.147751899064989
+            ], 
+            "world_rotate": [
+                89.99999999999999, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "tounge_2_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "tounge_2_bind": {
+            "dagPath": "|head_bind|jaw_bind|tounge_0_bind|tounge_1_bind|tounge_2_bind", 
+            "translate": [
+                0.0, 
+                0.6552, 
+                0.0
+            ], 
+            "rotate": [
+                20.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                1.982812665202232e-15, 
+                159.99741417578664, 
+                11.429794380150268
+            ], 
+            "world_rotate": [
+                85.00000000000001, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "tounge_1_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "tounge_1_bind": {
+            "dagPath": "|head_bind|jaw_bind|tounge_0_bind|tounge_1_bind", 
+            "translate": [
+                0.0, 
+                0.795, 
+                0.0
+            ], 
+            "rotate": [
+                40.0, 
+                -0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                1.850959722845293e-15, 
+                159.72051469069413, 
+                10.835981518083855
+            ], 
+            "world_rotate": [
+                64.99999999999997, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "tounge_0_bind", 
+            "jointOrient": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "tounge_0_bind": {
+            "dagPath": "|head_bind|jaw_bind|tounge_0_bind", 
+            "translate": [
+                0.0, 
+                -3.5, 
+                6.0
+            ], 
+            "rotate": [
+                25.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                1.7763568394002513e-15, 
+                159.0, 
+                10.5
+            ], 
+            "world_rotate": [
+                25.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": false, 
+            "parent": "jaw_bind", 
+            "jointOrient": [
+                0.0, 
+                -0.0, 
+                -0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }, 
+        "jaw_bind": {
+            "dagPath": "|head_bind|jaw_bind", 
+            "translate": [
+                1.0, 
+                -1.0, 
+                0.0
+            ], 
+            "rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "scale": [
+                1.0, 
+                1.0, 
+                1.0
+            ], 
+            "offsetParentMatrix": [
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                0.0, 
+                1.0
+            ], 
+            "world_translate": [
+                4.440892098500626e-16, 
+                162.5, 
+                4.5
+            ], 
+            "world_rotate": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "rotateOrder": 0, 
+            "overrideEnabled": true, 
+            "overrideRGBColors": false, 
+            "overrideColor": 0, 
+            "parent": "head_bind", 
+            "jointOrient": [
+                90.0, 
+                90.0, 
+                0.0
+            ], 
+            "preferredAngle": [
+                0.0, 
+                0.0, 
+                0.0
+            ], 
+            "drawStyle": 0, 
+            "radius": 1.0
+        }
+    }
+}

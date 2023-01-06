@@ -1,0 +1,30 @@
+{
+    "type": "AbstractData", 
+    "user": "masonsmigel", 
+    "time": "2023-01-05 20:25:40", 
+    "data": {
+        "archetype_parent": "base", 
+        "rig_name": "face", 
+        "model_file": null, 
+        "skeleton_pos": "joint_pos.json", 
+        "pre_script": [
+            "pre_scripts"
+        ], 
+        "post_script": [
+            "post_scripts"
+        ], 
+        "pub_script": [
+            "pub_scripts"
+        ], 
+        "control_shapes": "controlShapes.json", 
+        "guides": "guides.json", 
+        "components": "components.json", 
+        "skins": "skin_weights", 
+        "psd": null, 
+        "output_file": "../../publish", 
+        "output_file_type": "mb", 
+        "deform_layers": null, 
+        "SHAPES": "SHAPES", 
+        "output_file_suffix": "_rig-facial"
+    }
+}

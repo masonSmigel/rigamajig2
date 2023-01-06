@@ -100,7 +100,6 @@ class MergeRigsDialog(QtWidgets.QDialog):
         self.outputPathSelector = pathSelector.PathSelector(
             label='Output:',
             caption='Select a folder to place the new rig enviornment',
-            fileFilter="Rig Files (*.rig)",
             fileMode=2,
             relativePath=None,
             parent=None

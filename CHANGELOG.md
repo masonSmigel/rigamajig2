@@ -1,5 +1,18 @@
 # Change Log 
 
+## 1.0.11
+### Added: 
+* Face archetype using new facial components 
+* dual inheritance for rigs. Rigs can now inherit from several archetypes. 
+* Functionality to merge rigs. This can be accessed through the mergeRigs UI 
+
+
+### Fixed: 
+* Added a check to the `builder` to ensure the `main.main` component is always built first if its listed in the component list. 
+* Added a check to ensure deform cage geometry meets max infuence requirements
+* Fixed an issue regarding the wire deformers in the eyelid and brows preventing it from working properly at large 
+  distances away from the origin. (Changed the dropoff to 1000 for all wires)
+
 ## 1.0.10
 ### Added: 
 * Initial implementation of the `deformCage`. Will add a tool or something to guide users through it better.

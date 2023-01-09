@@ -41,7 +41,7 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
     and may behave better when oriented manually.
     """
     VERSION_MAJOR = 1
-    VERSION_MINOR = 0
+    VERSION_MINOR = 1
     VERSION_PATCH = 0
 
     version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)

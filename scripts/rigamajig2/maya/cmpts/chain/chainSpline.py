@@ -104,7 +104,7 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         minParam, maxParam = curve.getRange(guideCurve)
 
         for i in range(self.numberMainControls):
-            guideName = "mainDriver_{}".format(i)
+            guideName = "{}_control_{}".format(self.name, i)
             guide = rig_control.createGuide(guideName, parent=self.guidesHierarchy, hideAttrs=['s', 'v'])
 
             param = maxParam * float(i / float(self.numberMainControls))

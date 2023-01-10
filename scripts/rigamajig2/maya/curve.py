@@ -2,11 +2,13 @@
 from collections import OrderedDict
 
 import maya.cmds as cmds
+import maya.api.OpenMaya as om2
 
 import rigamajig2.maya.decorators
 import rigamajig2.shared.common as common
 import rigamajig2.maya.shape as shape
 import rigamajig2.maya.mathUtils as mathUtils
+import rigamajig2.maya.openMayaUtils as openMayaUtils
 
 
 def createCurve(points, degree=3, name='curve', transformType="transform", form="Open", parent=None):
@@ -164,25 +166,32 @@ def getArcLen(curve):
     return cmds.arclen(curve, ch=False)
 
 
-def getClosestParameter(curve, position):
+def getClosestParameter(curve, position, world=True):
     """
     Get the closest parameter on a curve
 
     :param str curve: curve to get the closest parameter on
     :param list tuple str position: postion to get the closest parameter from.
         If a transform is passed  get the postion from the tranform
+    :param bool world: get the point and parameter in world space otherwise do it in local space
+    :return: closest parameter on the curve
     """
     if not isinstance(position, (list, tuple)):
         position = cmds.xform(position, q=True, ws=True, t=True)
 
-    cmds.loadPlugin("closestPointOnCurve", qt=True)
-    closestPointOnCurveNode = cmds.closestPointOnCurve(curve, inPosition=position, paramU=True)
-    uParamater = cmds.getAttr("{}.paramU".format(closestPointOnCurveNode))
-    cmds.delete(closestPointOnCurveNode)
+    dagPath = openMayaUtils.getDagPath(curve)
+    dagPath.extendToShape()
+    mFnNurbsCurve = om2.MFnNurbsCurve(dagPath)
 
-    # cmds.unloadPlugin("closestPointOnCurve")
+    # get the proper space
+    space = om2.MSpace.kWorld if world else om2.MSpace.kObject
 
-    return uParamater
+    # get the closest point on the curve from the point
+    mPoint = om2.MPoint(position[0], position[1], position[2])
+    mPointOnCurve = mFnNurbsCurve.closestPoint(mPoint, space=space)[0]
+
+    parameter = mFnNurbsCurve.getParamAtPoint(mPointOnCurve, tolerance=0.01, space=space)
+    return parameter
 
 
 def getRange(curve):

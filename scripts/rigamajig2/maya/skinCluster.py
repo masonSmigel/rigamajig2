@@ -258,7 +258,6 @@ def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
     else:
         raise NotImplementedError("Not implemented")
 
-    # print len(blendedWeights), components.length()
     skinMfn.setBlendWeights(meshDag, components, blendedWeights)
 
 
@@ -319,7 +318,10 @@ def setMatrixConnections(skinCluster, connectionsList, attribute='bindPreMatrix'
     for i, bindInput in enumerate(connectionsList):
         if bindInput:
             try:
-                cmds.connectAttr(bindInput, "{}.{}[{}]".format(skinCluster, attribute, i), f=True)
+                matrixAttr = "{}.{}[{}]".format(skinCluster, attribute, i)
+                connections = cmds.listConnections(matrixAttr, s=True, d=False, plugs=True) or list()
+                if bindInput not in connections:
+                    cmds.connectAttr(bindInput, "{}.{}[{}]".format(skinCluster, attribute, i), f=True)
             except RuntimeError:
                 pass
 
@@ -432,7 +434,8 @@ def stackSkinCluster(sourceMesh, targetMesh):
     cmds.skinCluster(targetSkin, e=True, recacheBindMatrices=True)
 
 
-def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestPoint', influenceMode='closestJoint'):
+def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestPoint', influenceMode='closestJoint',
+                                 uvSpace=False):
     """
     Copy skin cluster and all influences to a target mesh
 
@@ -440,6 +443,7 @@ def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestP
     :param list tuple targetMeshes: target mesh to copy the skin clustes to
     :param str surfaceMode: surface association method for copy skin weights
     :param str influenceMode: influence association to copy the skin weights
+    :param bool uvSpace: transfer the skins in UV space. This is great for transfering to a smoothed mesh
     :return:
     """
     targetMeshes = rigamajig2.shared.common.toList(targetMeshes)
@@ -468,8 +472,15 @@ def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestP
             value = cmds.getAttr("{}.{}".format(srcSkinCluster, attr))
             cmds.setAttr("{}.{}".format(tgtSkinCluster, attr), value)
 
+        kwargs = {"sa": surfaceMode, "ia":influenceMode}
+        if uvSpace:
+            sourceUVSet = cmds.polyUVSet(sourceMesh,q=True, currentUVSet=True)[0]
+            DestUvSet = cmds.polyUVSet(tgtMesh,q=True, currentUVSet=True)[0]
+
+            kwargs["uv"] = [sourceUVSet, DestUvSet]
+
         # copy the skin weights
-        cmds.copySkinWeights(ss=srcSkinCluster, ds=tgtSkinCluster, nm=True, sa=surfaceMode, ia=influenceMode)
+        cmds.copySkinWeights(ss=srcSkinCluster, ds=tgtSkinCluster, nm=True, **kwargs)
         logger.info("weights copied: {}({}) -> {}({})".format(sourceMesh, srcSkinCluster, tgtMesh, tgtSkinCluster))
 
 
@@ -489,7 +500,6 @@ def connectExistingBPMs(skinCluster, influences=None):
     for influence in influences:
         index = getInfluenceIndex(skinCluster, influence)
 
-        print influence
         bpmInfluence = influence.replace("bind", "bpm")
         if cmds.objExists(bpmInfluence):
             cmds.connectAttr("{}.worldInverseMatrix".format(bpmInfluence),

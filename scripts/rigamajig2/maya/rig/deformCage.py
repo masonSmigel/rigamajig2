@@ -58,6 +58,7 @@ def createCageControlPoint(name, side=None, size=1, position=None, color='slateg
     meta.tag(bpmJoint, "bpm", type="cage")
     meta.createMessageConnection(ctl.name, bpmJoint, "bpmJoint")
     joint.setRadius(bpmJoint, size * 0.5)
+    joint.hideJoints([bpmJoint, bindJoint])
 
     return ctl, bindJoint, bpmJoint
 
@@ -140,14 +141,14 @@ class DeformationCage(object):
         :param orientToNormal: orient the controls to the vertex normals
         """
         if not mesh.isMesh(self.cageMesh):
-            raise ValueError("The provided mesh MUST be a polyMesh. {} is not a poly mesh".format(polyMesh))
+            raise ValueError("The provided mesh MUST be a polyMesh. {} is not a poly mesh".format(self.cageMesh))
         skin = skinCluster.getSkinCluster(self.cageMesh)
         if not skin:
             raise Exception("the input mesh: {} must have a skincluster.".format(self.cageMesh))
 
         # check the max influences for a skin cluster
-        if cmds.skinCluster(q=True, mi=True) > 2:
-            raise Exception("The input mesh: {} must have a maximum influence of 2 or lower".format(self.cageMesh))
+        # if len(cmds.skinCluster(skin, q=True, mi=True)) > 2:
+        #     raise Exception("The input mesh: {} must have a maximum influence of 2 or lower".format(self.cageMesh))
 
         # get a list of all the influences to use later
         influences = skinCluster.getInfluenceJoints(skin)
@@ -181,7 +182,7 @@ class DeformationCage(object):
             # if we want to orient the control as well construct a rotation from the vertex normal
             rotation = None
             if orientToNormal:
-                vtxNormal = mesh.getVertexNormal(self.name, componentId, world=True)
+                vtxNormal = mesh.getVertexNormal(self.cageMesh, componentId, world=True)
                 mtxConstruct = (vtxNormal.x, vtxNormal.y, vtxNormal.z, 0,
                                 0, 1, 0, 0,
                                 0, 0, 1, 0,

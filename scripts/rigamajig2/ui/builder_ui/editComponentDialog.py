@@ -77,6 +77,7 @@ class EditComponentDialog(QtWidgets.QDialog):
         self.inputMayaList = mayaListWidget.MayaList()
         self.inputMayaList.setHeight(120)
         self.rigParentMayaString = mayaStringWidget.MayaString()
+        self.tagLineEdit = QtWidgets.QLineEdit()
 
         self.applyButton = QtWidgets.QPushButton("Apply Parameters")
         self.applyButton.setFixedHeight(35)
@@ -97,6 +98,7 @@ class EditComponentDialog(QtWidgets.QDialog):
         commonFormLayout.addRow(QtWidgets.QLabel("type:"), self.typeLineEdit)
         commonFormLayout.addRow(QtWidgets.QLabel("inputs:"), self.inputMayaList)
         commonFormLayout.addRow(QtWidgets.QLabel("rigParent:"), self.rigParentMayaString)
+        commonFormLayout.addRow(QtWidgets.QLabel("component Tag:"), self.tagLineEdit)
         commonLayout.addLayout(commonFormLayout)
         # add a tiny space at the bottom
         commonLayout.addSpacing(4)
@@ -175,6 +177,7 @@ class EditComponentDialog(QtWidgets.QDialog):
         self.typeLineEdit.setText(self.currentComponent.componentType)
         self.inputMayaList.setItems(self.currentComponent.input)
         self.rigParentMayaString.setText(self.currentComponent.rigParent)
+        self.tagLineEdit.setText(self.currentComponent.componentTag or None)
 
         # clear the old parameter widgets
         self.componentWidgets = list()
@@ -183,7 +186,7 @@ class EditComponentDialog(QtWidgets.QDialog):
 
         # add all the new widgets
         for item in self.currentComponent.cmptSettings:
-            if item not in ['name', 'input', 'rigParent', 'type', 'component_side']:
+            if item not in ['name', 'input', 'rigParent', 'type', 'component_side', 'componentTag']:
                 self.addWidgetFromParameter(
                     parameter=item,
                     container=self.currentComponent.getContainer(),
@@ -245,7 +248,7 @@ class EditComponentDialog(QtWidgets.QDialog):
         metaNode = meta.MetaNode(container)
 
         # insert our common parameters into the top of the list
-        commonWidgets = [["input", self.inputMayaList], ["rigParent", self.rigParentMayaString]]
+        commonWidgets = [["input", self.inputMayaList], ["rigParent", self.rigParentMayaString], ["componentTag", self.tagLineEdit]]
         allComponentWidgets = commonWidgets + self.componentWidgets
 
         for parameter, widget in allComponentWidgets:

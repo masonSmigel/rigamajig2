@@ -29,7 +29,7 @@ class Base(object):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         constructor of the base class.
 
@@ -54,6 +54,7 @@ class Base(object):
         self.componentType = self.__module__.split('cmpts.')[-1]
         self.input = input
         self.rigParent = rigParent
+        self.componentTag = componentTag
         self.container = self.name + '_container'
         self.metaNode = None
 
@@ -68,7 +69,8 @@ class Base(object):
             type=self.componentType,
             input=self.input,
             size=size,
-            rigParent=rigParent
+            rigParent=rigParent,
+            componentTag=componentTag,
             )
 
     def _initalizeComponent(self):
@@ -173,6 +175,11 @@ class Base(object):
                 self.finalize()
                 self.setAttrs()
                 self.postScript()
+
+            # if we added a component tag build that now!
+            if self.componentTag:
+                rigamajig2.maya.meta.tag(self.container, 'component', self.componentTag)
+
             self.setStep(5)
         else:
             logger.debug('component {} already finalized.'.format(self.name))
@@ -379,7 +386,7 @@ class Base(object):
         infoDict = OrderedDict()
         data = self.cmptSettings
 
-        for key in self.cmptSettings.keys() + ['name', 'type', 'input']:
+        for key in self.cmptSettings.keys() + ['name', 'type', 'input', 'componentTag']:
             infoDict[key] = data[key]
         return infoDict
 

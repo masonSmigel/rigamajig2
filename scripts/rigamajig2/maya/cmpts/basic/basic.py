@@ -30,7 +30,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
 
     def __init__(self, name, input, size=1, rigParent=str(),
                  addSpaces=False,  addTrs=False, addSdk=False, addBpm=False,
-                 controlShape='cube', worldOrient=False):
+                 controlShape='cube', worldOrient=False, spaceType='orient'):
         """
         :param name: Component name. To add a side use a side token
         :param input: Single input joint
@@ -42,6 +42,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         :param rigParent:  Connect the component to a rigParent.
         :param controlShape: Control shape to apply. Default: "cube"
         :param worldOrient: Orient the control to the world. Default: False
+        :param spaceType: Control the type of space switch added. Valud values are "orient" or "parent"
         """
         super(Basic, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
@@ -51,6 +52,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['controlShape'] = controlShape
         self.cmptSettings['worldOrient'] = worldOrient
         self.cmptSettings['addSpaces'] = addSpaces
+        self.cmptSettings['spaceType'] = spaceType
         self.cmptSettings['addTrs'] = addTrs
         self.cmptSettings['addSdk'] = addSdk
         self.cmptSettings['addBpm'] = addBpm
@@ -68,7 +70,12 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
 
     def rigSetup(self):
         if self.worldOrient:
-            offset = cmds.createNode("transform", n="{}_{}_trs".format(self.controlName, self.side))
+            if self.side:
+                name = "{}_{}_trs".format(self.controlName, self.side)
+            else:
+                name = "{}_trs".format(self.controlName)
+
+            offset = cmds.createNode("transform", n=name)
             rig_transform.matchTransform(self.input[0], offset)
             cmds.parent(offset, self.control.name)
             joint.connectChains(offset, self.input[0])
@@ -93,7 +100,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
 
         if self.addSpaces:
             spaces.create(self.control.spaces, self.control.name, parent=self.spacesHierarchy)
-            spaces.addSpace(self.control.spaces, ['trs_motion'], nameList=['world'], constraintType='orient')
+            spaces.addSpace(self.control.spaces, ['trs_motion'], nameList=['world'], constraintType=self.spaceType)
 
         if self.addBpm:
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)

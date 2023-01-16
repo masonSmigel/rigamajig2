@@ -21,6 +21,7 @@ import rigamajig2.maya.joint as joint
 from rigamajig2.maya import curve
 from rigamajig2.maya import node
 from rigamajig2.maya import attr
+from rigamajig2.maya import naming
 
 import rigamajig2.shared.common as common
 import rigamajig2.maya.node
@@ -48,15 +49,15 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, numberMainControls=4, closed=True, aimVector=None, upVector=None, rigParent=str()):
+    def __init__(self, name, input, size=1, numberMainControls=4, closed=True, aimAxis=None, upAxis=None, rigParent=str()):
         """"
         :param str name: name of the components
         :param list input: list of two joints. A start and an end joint
         :param float int size: default size of the controls:
         :param int numberMainControls: The amout of main controls we want to add
         :param bool closed: closed curve
-        :param aimVector: aim vector used in the tanget control to keep subcontrols properly oriented.
-        :param upVector: up vector used in the tanget control to keep subcontrols properly oriented.
+        :param aimAxis: aim vector used in the tanget control to keep subcontrols properly oriented.
+        :param upAxis: up vector used in the tanget control to keep subcontrols properly oriented.
         :param str rigParent: node to parent to connect the component to in the heirarchy
         """
 
@@ -68,8 +69,8 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['numberMainControls'] = numberMainControls
         self.cmptSettings['closed'] = closed
 
-        self.cmptSettings['aimVector'] = aimVector or [1, 0, 0]
-        self.cmptSettings['upVector'] = aimVector or [0, 1, 0]
+        self.cmptSettings['aimAxis'] = aimAxis or "x"
+        self.cmptSettings['upAxis'] = upAxis or "y"
 
         if not closed:
             raise NotImplemented("This has yet to be implemented into rigamajig.")
@@ -78,15 +79,6 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         if len(self.input) != 2:
             raise RuntimeError('Input list must have a length of 2')
 
-    def setInitalData(self):
-
-        # setup a list of main controller names
-        self._loadComponentParametersToClass()
-        self.controlNameList = list()
-        for i in range(self.numberMainControls):
-            controlName = ("mainControl{}Name".format(i))
-            self.controlNameList.append(controlName)
-            self.cmptSettings[controlName] = "{}Driver_{}".format(self.name, i)
 
     def createBuildGuides(self):
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
@@ -125,7 +117,7 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         self.mainDriverJoints = list()
 
         for i in range(self.numberMainControls):
-            mainControlName = getattr(self, self.controlNameList[i])
+            mainControlName = "{}_driver_{}".format(self.name, i)
             mainControl = rig_control.createAtObject(mainControlName,
                                                      side=self.side,
                                                      xformObj=self.mainGuidesList[i],
@@ -194,7 +186,9 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
             cmds.connectAttr("{}.{}".format(pointOnCurveInfo, "result.position"),
                              "{}.{}".format(pointOnCurveResult, "translate"))
 
-            cmds.tangentConstraint(ikCurve, pointOnCurveResult, aim=self.aimVector, upVector=self.upVector, worldUpType='object',
+            aimVector = rig_transform.getVectorFromAxis(self.aimAxis)
+            upVector = rig_transform.getVectorFromAxis(self.upAxis)
+            cmds.tangentConstraint(ikCurve, pointOnCurveResult, aim=aimVector, upVector=upVector, worldUpType='object',
                                    worldUpObject=self.upVectorTrs)
             # finally connect the point on curve result to the control
             rig_transform.connectOffsetParentMatrix(pointOnCurveResult, subControl.name,
@@ -212,3 +206,9 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
                 rig_transform.connectOffsetParentMatrix(self.rigParent, control.orig, mo=True)
 
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.upVectorTrs, mo=True)
+
+    def finalize(self):
+        """ Finalize the component """
+        attr.createAttr(self.paramsHierarchy, "subControls", "bool", value=0, keyable=False, channelBox=True)
+        controls = [c.name for c in self.subControlers]
+        rig_control.connectControlVisiblity(self.paramsHierarchy, "subControls", controls)

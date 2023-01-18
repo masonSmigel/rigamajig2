@@ -122,6 +122,9 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         qcMenu = self.mainMenu.addMenu("QC")
         qcMenu.addAction(self.actions.runPerformanceTestAction)
         qcMenu.addAction(self.actions.generateRandomAnimationAction)
+        qcMenu.addSeparator()
+        qcMenu.addAction(self.actions.openProfilerAction)
+        qcMenu.addAction(self.actions.openEvaluationToolkitAction)
 
         helpmenu = self.mainMenu.addMenu("Help")
         helpmenu.addAction(self.actions.showDocumentationAction)

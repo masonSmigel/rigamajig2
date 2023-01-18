@@ -14,6 +14,7 @@ import os
 
 # MAYA
 import maya.cmds as cmds
+import maya.mel as mel
 import maya.OpenMayaUI as omui
 from PySide2 import QtWidgets
 from PySide2 import QtGui
@@ -73,6 +74,12 @@ class Actions(object):
 
         self.generateRandomAnimationAction = QtWidgets.QAction("Generate Random Animation", self.dialog)
         self.generateRandomAnimationAction.triggered.connect(self.generateRandomAnimation)
+
+        self.openProfilerAction = QtWidgets.QAction("Profiler", self.dialog)
+        self.openProfilerAction.triggered.connect(self.openProfiler)
+
+        self.openEvaluationToolkitAction = QtWidgets.QAction("Evaluation Toolkit", self.dialog)
+        self.openEvaluationToolkitAction.triggered.connect(self.openEvaluationToolkit)
 
         # HELP
         self.showDocumentationAction = QtWidgets.QAction("Documentation", self.dialog)
@@ -136,6 +143,12 @@ class Actions(object):
     def generateRandomAnimation(self):
         """ Generate Random animation"""
         qc.generateRandomAnim()
+
+    def openProfiler(self):
+        mel.eval("ProfilerTool;")
+
+    def openEvaluationToolkit(self):
+        mel.eval("openEvaluationToolkit;")
 
     def reloadRigamajigModules(self):
         """ Reload riamajig modules"""

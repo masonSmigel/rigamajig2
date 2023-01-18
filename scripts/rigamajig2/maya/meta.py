@@ -74,16 +74,21 @@ def getTagged(tag, type=None, namespace=None):
         return [s.split(".")[0] for s in cmds.ls("{}:*.__{}__".format(namespace, tag))]
 
 
-def hasTag(node, tag):
+def hasTag(node, tag, type=None):
     """
     Check if a specified node has a given tag
 
     :param str node: nodes to check tag
     :param str tag: tag to check for
+    :param type: specify a tag type to get
     :return: True if node has tag. false if it doesnt.
     :rtype: bool
     """
     node = common.getFirstIndex(node)
+
+    if type:
+        tag = "{}_{}".format(type, tag)
+
     if cmds.objExists("{}.__{}__".format(node, tag)):
         return True
     return False

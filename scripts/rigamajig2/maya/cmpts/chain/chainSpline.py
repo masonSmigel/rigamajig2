@@ -42,14 +42,15 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
     and may behave better when oriented manually.
     """
     VERSION_MAJOR = 1
-    VERSION_MINOR = 1
+    VERSION_MINOR = 2
     VERSION_PATCH = 0
 
     version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, numberMainControls=4, closed=True, aimAxis=None, upAxis=None, rigParent=str()):
+    def __init__(self, name, input, size=1, numberMainControls=4, closed=True, aimAxis=None, upAxis=None,
+                 rigParent=str()):
         """"
         :param str name: name of the components
         :param list input: list of two joints. A start and an end joint
@@ -79,17 +80,17 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         if len(self.input) != 2:
             raise RuntimeError('Input list must have a length of 2')
 
-
     def createBuildGuides(self):
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
         self.upVectorGuide = rig_control.createGuide("{}_upVec".format(self.name), parent=self.guidesHierarchy)
 
+        form = "Closed" if self.closed else "Open"
         self.inputList = rigamajig2.maya.joint.getInbetweenJoints(self.input[0], self.input[1])
         guideCurve = curve.createCurveFromTransform(self.inputList,
                                                     degree=3,
                                                     name="{}_guideCurve".format(self.name),
-                                                    form="Closed",
+                                                    form=form,
                                                     parent=self.guidesHierarchy)
 
         self.mainGuidesList = list()
@@ -119,7 +120,6 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         for i in range(self.numberMainControls):
             mainControlName = "{}_driver_{}".format(self.name, i)
             mainControl = rig_control.createAtObject(mainControlName,
-                                                     side=self.side,
                                                      xformObj=self.mainGuidesList[i],
                                                      size=self.size * 1.5,
                                                      shape="sphere",
@@ -150,10 +150,10 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
     def rigSetup(self):
         """ Do the rig setup"""
 
-        # TODO: make this closed?
+        form = "Closed" if self.closed else "Open"
         ikHierarchy = cmds.createNode("transform", name="{}_ik".format(self.name), parent=self.rootHierarchy)
         ikCurve = curve.createCurveFromTransform(self.inputList, degree=3, name="{}_ikCrv".format(self.name),
-                                                 form="Closed")
+                                                 form=form)
         cmds.setAttr("{}.{}".format(ikCurve, "inheritsTransform"), 0)
         cmds.setAttr("{}.{}".format(ikCurve, "v"), 0)
         ikCurveShape = cmds.listRelatives(ikCurve, s=True)[0]

@@ -79,7 +79,8 @@ def createCurveFromTransform(transforms, degree=3, name='curve', transformType='
     points = [cmds.xform(transform, q=True, ws=True, t=True) for transform in transforms]
 
     if form == "Closed":
-        points.append(cmds.xform(transforms[0], q=True, ws=True, t=True))
+        pass
+        # points.append(cmds.xform(transforms[0], q=True, ws=True, t=True))
 
     if ep:
         return createCurveFromEP(points, degree=degree, name=name, transformType=transformType, form=form, parent=parent)

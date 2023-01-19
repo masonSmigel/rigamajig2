@@ -12,6 +12,11 @@ logger = logging.getLogger(__name__)
 
 VALID_IKFK_COMPONENTS = ["arm.arm", "leg.leg", "limb.limb"]
 
+IDENTITY_MATRIX = [1, 0, 0, 0,
+                   0, 1, 0, 0,
+                   0, 0, 1, 0,
+                   0, 0, 0, 1]
+
 
 def switchSelectedComponent(controlNode=None, ik=None, fk=None):
     """
@@ -48,7 +53,7 @@ def switchSelectedComponent(controlNode=None, ik=None, fk=None):
     ikfkGroup = None
     for node in nodesInComponent:
         # check if the node has an message connection
-        if cmds.attributeQuery("ikControls", node = node, ex=True):
+        if cmds.attributeQuery("ikControls", node=node, ex=True):
             ikfkGroup = node
             break
 
@@ -72,6 +77,7 @@ def switchSelectedComponent(controlNode=None, ik=None, fk=None):
 
 class IkFkSwitch(object):
     """Class to switch IKFK components"""
+
     def __init__(self, node):
         """initalize"""
         self.node = node

@@ -21,6 +21,7 @@ def cleanPath(path):
 
 def isFile(path):
     """Check if the path is a file"""
+    if not path: return False
     root, ext = os.path.splitext(path)
     if ext:
         return True
@@ -30,6 +31,7 @@ def isFile(path):
 
 def isDir(path):
     """Check if the path is a directory"""
+    if not path: return False
     root, ext = os.path.splitext(path)
     if ext:
         return False

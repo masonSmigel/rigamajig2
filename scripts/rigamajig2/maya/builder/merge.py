@@ -172,9 +172,12 @@ def mergeSkinWeights(rigFile1, rigFile2, rigEnv, method='game'):
 
 
 def mergeContentBased(rigFile1, rigFile2, rigEnv, key):
+
     """ Merge types that are content based ie skinweights, blendshapes or SHAPES"""
     # build a skins folder from the first rig file
     relativePath = builder.Builder.getRigData(rigFile1, key)
+    relativePath2 = builder.Builder.getRigData(rigFile2, key)
+    if not relativePath: relativePath = relativePath2
     destPath = os.path.realpath(os.path.join(rigEnv, relativePath))
     os.makedirs(destPath)
 
@@ -219,4 +222,4 @@ def getAbsoultePathFromRigFile(rigFile, dataKey):
     relativePath = builder.Builder.getRigData(rigFile, dataKey)
     if relativePath:
         absoultePath = os.path.realpath(os.path.join(os.path.dirname(rigFile), relativePath))
-    return absoultePath
+        return absoultePath

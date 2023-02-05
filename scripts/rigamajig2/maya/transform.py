@@ -365,10 +365,13 @@ def getClosestAxis(transform, target, allowNegative=True):
         if (tz > tx) and (tz > ty): axis = 'z'  # z
         if (tz < tx) and (tz < ty): axis = '-z'  # -z
 
-    # return the axis. If allow negetive is off, then just get the axis.
-    if not allowNegative: return axis[-1]
+    # if axis is still None then we failed to find one. This probably occured because the
+    # transform and target are at the same location.
     if not axis:
         raise RuntimeError("Failed to calucate an axis between {} and {}. They may have the same transform".format(transform, target))
+
+    # return the axis. If allow negetive is off, then just get the axis.
+    if not allowNegative: return axis[-1]
 
     return axis
 

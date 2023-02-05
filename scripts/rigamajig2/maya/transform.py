@@ -352,6 +352,7 @@ def getClosestAxis(transform, target, allowNegative=True):
 
     tx, ty, tz = matrix.getTranslation(offset)
 
+    axis=None
     if (abs(tx) > abs(ty)) and (abs(tx) > abs(tz)):
         if (tx > ty) and (tx > tz): axis = 'x'  # x
         if (tx < ty) and (tx < tz): axis = '-x'  # -x
@@ -366,6 +367,9 @@ def getClosestAxis(transform, target, allowNegative=True):
 
     # return the axis. If allow negetive is off, then just get the axis.
     if not allowNegative: return axis[-1]
+    if not axis:
+        raise RuntimeError("Failed to calucate an axis between {} and {}. They may have the same transform".format(transform, target))
+
     return axis
 
 

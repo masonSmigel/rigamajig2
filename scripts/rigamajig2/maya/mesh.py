@@ -150,8 +150,9 @@ def cleanShapes(nodes):
             return shapes[0]
         else:
             intermidiateShapes = [x for x in shapes if cmds.getAttr('{}.intermediateObject'.format(x))]
-            cmds.delete(intermidiateShapes)
-            print("Deleted Intermeidate Shapes: {}".format(intermidiateShapes))
+            if intermidiateShapes:
+                cmds.delete(intermidiateShapes)
+                print("Deleted Intermeidate Shapes: {}".format(intermidiateShapes))
 
 
 def cleanModel(nodes=None):
@@ -176,3 +177,15 @@ def cleanModel(nodes=None):
         if isMesh(node):
             cleanShapes(node)
             print('Cleaned Mesh: {}'.format(node))
+
+
+def cleanColorSets(meshes):
+    """
+    Remove all color set and vertex color data from a model. Theese can appear from things like transfering UVs or
+    using sculptiing tools.
+    """
+    for mesh in meshes:
+        colorSets = cmds.polyColorSet(mesh, q=True, allColorSets=True) or list()
+        for colorSet in colorSets:
+            cmds.polyColorSet(mesh, delete=True, colorSet=colorSet)
+            print("Deleted colorSet: {}".format(colorSet))

@@ -42,6 +42,22 @@ def getUvCoordsFromVertex(geometry, vertexId):
     return uvs[0], uvs[1]
 
 
+def checkIfOverlapping(geometry):
+    """
+    Check if the provided geometry has overlapping UVs
+    :param geometry: geometry to check if is overlapping
+    :return: True if the mesh has overlapping Uvs False if it does not.
+    """
+    geometry = common.getFirstIndex(geometry)
+
+    if rigamajig2.maya.shape.getType(geometry) != 'mesh':
+        return False
+
+    uvComponentList = uvs = cmds.polyListComponentConversion(geometry, toUV=True)
+    overlap = cmds.polyUVOverlap(uvComponentList, overlappingComponents=True) or []
+    return True if len(overlap) > 0 else False
+
+
 def transferUvsToRigged(source, targets):
     """
     transfer Uvs to a rigged model.

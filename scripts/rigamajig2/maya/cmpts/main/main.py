@@ -7,6 +7,7 @@ import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.container
 import rigamajig2.maya.node
 import rigamajig2.maya.attr
+import rigamajig2.maya.meta
 
 RIG_HRC_NAME = 'rig'
 BIND_HRC_NAME = 'bind'
@@ -144,6 +145,8 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         import rigamajig2
         import getpass
         from time import gmtime, strftime
+
+        rigamajig2.maya.meta.tag(self.rootHierarchy, "__rig_root__")
 
         rigamajig2.maya.attr.createAttr(self.rootHierarchy, "__rigamajigVersion__", "string",
                                         value=rigamajig2.version,

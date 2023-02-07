@@ -558,8 +558,8 @@ class Builder(object):
         """
         outputfile = outputfile or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_RIG))
         assetName = assetName or self.getAbsoultePath(self.getRigData(self.rigFile, constants.RIG_NAME))
-        fileType = fileType or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_RIG_FILE_TYPE))
-        suffix = suffix or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_FILE_SUFFIX))
+        fileType = fileType or self.getRigData(self.rigFile, constants.OUTPUT_RIG_FILE_TYPE)
+        suffix = suffix or self.getRigData(self.rigFile, constants.OUTPUT_FILE_SUFFIX)
 
         suffix = suffix or str()
 

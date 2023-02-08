@@ -102,7 +102,8 @@ def createCurveFromEP(epList, degree=3, name='curve', transformType='transform',
     """
 
     # create a linear curve from the EP list
-    curve = createCurve(epList, degree=1, name=name, transformType=transformType, form=form)
+    curve = createCurve(epList, degree=1, name=name, transformType=transformType, form=form, parent=parent)
+
 
     # create a new fit spline
     fitCurve = cmds.fitBspline(curve,ch=0,tol=0.01)
@@ -111,6 +112,7 @@ def createCurveFromEP(epList, degree=3, name='curve', transformType='transform',
     cmds.delete(curve)
     # Rename fit curve
     curve = cmds.rename(fitCurve[0], curve)
+    cmds.parent(curve, parent)
     # Return curve
     return curve
 

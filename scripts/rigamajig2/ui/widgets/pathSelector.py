@@ -119,6 +119,7 @@ class PathSelector(QtWidgets.QWidget):
             if self.relativePath and os.path.isabs(path):
                 path = os.path.relpath(path, self.relativePath)
             self.pathLineEdit.setText(path)
+            self.pathLineEdit.setToolTip(path)
 
     def showInFolder(self):
         """ show the given file in the enclosing folder"""

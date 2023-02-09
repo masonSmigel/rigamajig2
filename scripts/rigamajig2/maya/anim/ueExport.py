@@ -48,6 +48,9 @@ def formatFBXOptions(options):
         if value == True or value == False:
             value = 1 if value == True else 0
 
+        print '{} -v {}'.format(option, value)
+        mel.eval('{} -v {}'.format(option, value))
+
         resultString += "{}={};".format(option, value)
     return resultString
 
@@ -75,15 +78,17 @@ def exportSkeletalMesh(mainNode, outputPath=None):
     cmds.select(bind, model)
 
     # before exporting it we need to setup the export options
+
+    mel.eval('FBXResetExport')
     options = OrderedDict(FBXExportSkins=True,
                           FBXExportShapes=True,
                           FBXExportCameras=False,
                           FBXExportSmoothMesh=True,
                           FBXExportSmoothingGroups=True,
                           FBXExportLights=False,
-                          FBXExportAnimation=False,
+                          # FBXExportAnimation=False,
                           FBXExportBakeComplexAnimation=False,
-                          FBXExportBakeResampleAll=False,
+                          # FBXExportBakeResampleAll=False,
                           FBXExportConstraints=False,
                           FBXExportInputConnections=False
                           )
@@ -131,18 +136,20 @@ def exportAnimationClip(mainNode, outputPath=None):
     minFrame = cmds.playbackOptions(q=True, min=True)
     maxFrame = cmds.playbackOptions(q=True, max=True)
 
+    mel.eval('FBXResetExport')
     options = OrderedDict(FBXExportSkins=True,
                           FBXExportShapes=True,
                           FBXExportCameras=False,
                           FBXExportSmoothMesh=True,
                           FBXExportSmoothingGroups=True,
                           FBXExportLights=False,
-                          FBXExportAnimation=True,
+                          # FBXExportAnimation=True,
                           FBXExportBakeComplexAnimation=True,
-                          FBXExportBakeResampleAll=True,
                           FBXExportBakeComplexStart=int(minFrame),
                           FBXExportBakeComplexEnd=int(maxFrame),
+                          # FBXExportBakeResampleAll=True,
                           FBXExportConstraints=False,
+                          FBXExportUseSceneName=True,
                           )
 
     # finally we can do the export. Here we also want to pass in kwargs to allow the user to add any additional options
@@ -307,14 +314,14 @@ class BatchExportFBX(QtWidgets.QDialog):
 
 
 if __name__ == '__main__':
-    # exportSkeletalMesh("main", outputPath="/Users/masonsmigel/Desktop/test_v01_mesh.fbx")
-    # exportAnimationClip("main", outputPath="/Users/masonsmigel/Desktop/test_v005_anim.fbx")
+    exportSkeletalMesh("lich_rig_proxy:main", outputPath="/Users/masonsmigel/Desktop/lich_mesh.fbx")
+    exportAnimationClip("lich_rig_proxy:main", outputPath="/Users/masonsmigel/Desktop/lich_anim.fbx")
 
     # print gatherRigsFromScene()
-    try:
-        dlg.deleteLater()
-    except:
-        print "didnt delete"
-
-    dlg = BatchExportFBX()
-    dlg.show()
+    # try:
+    #     dlg.deleteLater()
+    # except:
+    #     print "didnt delete"
+    #
+    # dlg = BatchExportFBX()
+    # dlg.show()

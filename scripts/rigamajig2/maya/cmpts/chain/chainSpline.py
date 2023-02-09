@@ -80,6 +80,16 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         if len(self.input) != 2:
             raise RuntimeError('Input list must have a length of 2')
 
+    def setInitalData(self):
+
+        # setup a list of main controller names
+        self._loadComponentParametersToClass()
+        self.controlNameList = list()
+        for i in range(self.numberMainControls):
+            controlName = ("mainControl{}Name".format(i))
+            self.controlNameList.append(controlName)
+            self.cmptSettings[controlName] = "{}Driver_{}".format(self.name, i)
+
     def createBuildGuides(self):
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
@@ -90,7 +100,8 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         guideCurve = curve.createCurveFromTransform(self.inputList,
                                                     degree=3,
                                                     name="{}_guideCurve".format(self.name),
-                                                    form=form,
+                                                    form="Open",
+                                                    ep=True,
                                                     parent=self.guidesHierarchy)
 
         self.mainGuidesList = list()
@@ -118,7 +129,8 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         self.mainDriverJoints = list()
 
         for i in range(self.numberMainControls):
-            mainControlName = "{}_driver_{}".format(self.name, i)
+            # mainControlName = "{}_driver_{}".format(self.name, i)
+            mainControlName = getattr(self, self.controlNameList[i])
             mainControl = rig_control.createAtObject(mainControlName,
                                                      xformObj=self.mainGuidesList[i],
                                                      size=self.size * 1.5,

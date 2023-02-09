@@ -135,6 +135,7 @@ def exportAnimationClip(mainNode, outputPath=None):
     # before exporting it we need to setup the export options
     minFrame = cmds.playbackOptions(q=True, min=True)
     maxFrame = cmds.playbackOptions(q=True, max=True)
+    framerate = cmds.playbackOptions(q=True, playbackSpeed=True)
 
     mel.eval('FBXResetExport')
     options = OrderedDict(FBXExportSkins=True,
@@ -147,6 +148,8 @@ def exportAnimationClip(mainNode, outputPath=None):
                           FBXExportBakeComplexAnimation=True,
                           FBXExportBakeComplexStart=int(minFrame),
                           FBXExportBakeComplexEnd=int(maxFrame),
+                          FBXExportBakeComplexStep=int(1),
+                          # FBXExportColladaFrameRate=float(framerate),
                           # FBXExportBakeResampleAll=True,
                           FBXExportConstraints=False,
                           FBXExportUseSceneName=True,
@@ -304,17 +307,18 @@ class BatchExportFBX(QtWidgets.QDialog):
         for i in range(self.rigsList.topLevelItemCount()):
             # get informaiton associated with the mainNode
             item = self.rigsList.topLevelItem(i)
-            mainNode = item.data(1, QtCore.Qt.UserRole)
-            fileName = item.text(2)
+            if item.checkState(0):
+                mainNode = item.data(1, QtCore.Qt.UserRole)
+                fileName = item.text(2)
 
-            # export the FBX file
-            fullFilePath = os.path.join(outputFilePath, fileName)
-            exportAnimationClip(mainNode, outputPath=fullFilePath)
-            logger.info("Exported animation clip for {} ({})".format(mainNode, fileName))
+                # export the FBX file
+                fullFilePath = os.path.join(outputFilePath, fileName)
+                exportAnimationClip(mainNode, outputPath=fullFilePath)
+                logger.info("Exported animation clip for {} ({})".format(mainNode, fileName))
 
 
 if __name__ == '__main__':
-    exportSkeletalMesh("lich_rig_proxy:main", outputPath="/Users/masonsmigel/Desktop/lich_mesh.fbx")
+    # exportSkeletalMesh("lich_rig_proxy:main", outputPath="/Users/masonsmigel/Desktop/lich_mesh.fbx")
     exportAnimationClip("lich_rig_proxy:main", outputPath="/Users/masonsmigel/Desktop/lich_anim.fbx")
 
     # print gatherRigsFromScene()

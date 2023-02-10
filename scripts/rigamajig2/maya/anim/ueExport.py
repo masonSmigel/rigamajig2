@@ -10,12 +10,16 @@
 """
 import os
 import sys
-import logging
 from collections import OrderedDict
 import maya.cmds as cmds
 import maya.mel as mel
+
+from mayafbx import FbxExportOptions, export_fbx
+
 from rigamajig2.maya import meta
 from rigamajig2.maya import decorators
+from rigamajig2.maya import container
+from rigamajig2.maya.rig import control
 
 import maya.OpenMayaUI as omui
 from PySide2 import QtCore
@@ -25,34 +29,35 @@ from shiboken2 import wrapInstance
 
 from rigamajig2.ui.widgets import pathSelector
 
-
-logger = logging.getLogger(__name__)
-
 try:
     if "fbxmaya" not in cmds.pluginInfo(q=True, ls=True):
         cmds.loadPlugin("fbxmaya")
 except:
     raise Exception("Failed to load maya FBX plugin")
 
+UPAXIS_DICT = {"x": [0, 0, 90],
+               "y": [0, 0, 0],
+               "z": [90, 0, 0]}
 
-def formatFBXOptions(options):
-    """
-    Format a dictonary of keywords and values into a string to be used as the 'options' argument in the file comman
-    :param options: dictionary of keywords and values to set in the string formatting
-    :return: string of options
-    """
-
-    resultString = str()
-    for option in options:
-        value = options[option]
-        if value == True or value == False:
-            value = 1 if value == True else 0
-
-        print '{} -v {}'.format(option, value)
-        mel.eval('{} -v {}'.format(option, value))
-
-        resultString += "{}={};".format(option, value)
-    return resultString
+#
+# def formatFBXOptions(options):
+#     """
+#     Format a dictonary of keywords and values into a string to be used as the 'options' argument in the file comman
+#     :param options: dictionary of keywords and values to set in the string formatting
+#     :return: string of options
+#     """
+#
+#     resultString = str()
+#     for option in options:
+#         value = options[option]
+#         if value == True or value == False:
+#             value = 1 if value == True else 0
+#
+#         print '{} -v {}'.format(option, value)
+#         mel.eval('{} -v {}'.format(option, value))
+#
+#         resultString += "{}={};".format(option, value)
+#     # return resultString
 
 
 @decorators.preserveSelection
@@ -75,31 +80,32 @@ def exportSkeletalMesh(mainNode, outputPath=None):
 
     # in order to export only the right nodes we need to select them.
     # using the preserve selection decorator will help to ensure we keep the selction we started with
-    cmds.select(bind, model)
+    cmds.select(bind, model, replace=True)
 
     # before exporting it we need to setup the export options
+    # mel.eval("FBXResetExport")
 
-    mel.eval('FBXResetExport')
-    options = OrderedDict(FBXExportSkins=True,
-                          FBXExportShapes=True,
-                          FBXExportCameras=False,
-                          FBXExportSmoothMesh=True,
-                          FBXExportSmoothingGroups=True,
-                          FBXExportLights=False,
-                          # FBXExportAnimation=False,
-                          FBXExportBakeComplexAnimation=False,
-                          # FBXExportBakeResampleAll=False,
-                          FBXExportConstraints=False,
-                          FBXExportInputConnections=False
-                          )
+    # using the awesome mayafbx module we can easily setup the proper arguments for the export
+    options = FbxExportOptions()
+    options.selected = True
+    options.selected_input_connections = True
+
+    options.smoothing_groups = True
+    options.smooth_mesh = True
+    options.animation = False
+    options.deformation = True
+    options.defomation_shapes = True
+    options.deformation_skins = True
+    options.constraints = False
+
+    options.cameras = False
+
+    options.show_warning_ui = False
+    options.generate_log = False
 
     # finally we can do the export. Here we also want to pass in kwargs to allow the user to add any additional options
-    cmds.file(outputPath,
-              exportSelected=True,
-              force=True,
-              type="FBX export",
-              preserveReferences=True,
-              options=formatFBXOptions(options=options))
+    export_fbx(outputPath, options)
+
 
 
 def gatherRigsFromScene():
@@ -111,11 +117,12 @@ def gatherRigsFromScene():
 
 
 @decorators.preserveSelection
-def exportAnimationClip(mainNode, outputPath=None):
+def exportAnimationClip(mainNode, outputPath=None, upAxis='y'):
     """
     Export the selected rig as an FBX without animation. This is used to make the Skeletal mesh for unreal
     :param mainNode: main node of the rig. This is the highest node or 'rig_root' of the rig.
     :param outputPath: path to save the output file to.
+    :param upAxis: set the up axis.
 
     :return:
     """
@@ -128,40 +135,77 @@ def exportAnimationClip(mainNode, outputPath=None):
 
     # TODO: add some stuff to build the file path
 
-    # in order to export only the right nodes we need to select them.
-    # using the preserve selection decorator will help to ensure we keep the selction we started with
-    cmds.select(bind, model)
-
     # before exporting it we need to setup the export options
     minFrame = cmds.playbackOptions(q=True, min=True)
     maxFrame = cmds.playbackOptions(q=True, max=True)
-    framerate = cmds.playbackOptions(q=True, playbackSpeed=True)
 
-    mel.eval('FBXResetExport')
-    options = OrderedDict(FBXExportSkins=True,
-                          FBXExportShapes=True,
-                          FBXExportCameras=False,
-                          FBXExportSmoothMesh=True,
-                          FBXExportSmoothingGroups=True,
-                          FBXExportLights=False,
-                          # FBXExportAnimation=True,
-                          FBXExportBakeComplexAnimation=True,
-                          FBXExportBakeComplexStart=int(minFrame),
-                          FBXExportBakeComplexEnd=int(maxFrame),
-                          FBXExportBakeComplexStep=int(1),
-                          # FBXExportColladaFrameRate=float(framerate),
-                          # FBXExportBakeResampleAll=True,
-                          FBXExportConstraints=False,
-                          FBXExportUseSceneName=True,
-                          )
+    options = FbxExportOptions()
+    options.selected = True
+    options.smoothing_groups = True
+    options.smooth_mesh = True
+    options.animation = True
+    options.bake_animation = True
+    options.bake_resample_all = True
+    options.bake_animation_start = int(minFrame)
+    options.bake_animation_end = int(maxFrame)
+    options.bake_animation_step = int(1)
+
+    options.use_scene_name = True
+    options.deformation = True
+    options.defomation_shapes = True
+    options.deformation_skins = True
+    options.constraints = False
+    options.cameras = False
+    options.selected_input_connections = True
+
+    options.show_warning_ui = False
+    options.generate_log = False
+
+    # mel.eval("FBXResetExport")
+    # options = OrderedDict(FBXExportSkins=True,
+    #                       FBXExportShapes=True,
+    #                       FBXExportCameras=False,
+    #                       FBXExportSmoothMesh=True,
+    #                       FBXExportSmoothingGroups=True,
+    #                       FBXExportLights=False,
+    #                       FBXExportAnimationOnly=True,
+    #                       FBXExportBakeComplexAnimation=True,
+    #                       # FBXExportBakeResampleAll=True,
+    #                       FBXExportBakeComplexStart=int(minFrame),
+    #                       FBXExportBakeComplexEnd=int(maxFrame),
+    #                       FBXExportConstraints=False,
+    #                       # FBXExportUpAxis='"y"',
+    #                       # FBXExportShowWarningsManager=False,
+    #                       # FBXExportGenerateLogData=False,
+    #                       )
+
+    # if the up axis is set we need to make a tempory transform and connect it to the rig
+    tempTransform = cmds.createNode("transform", name="tmpTransform")
+    componentContainer = container.getContainerFromNode(model)
+    nodes = container.getNodesInContainer(componentContainer)
+    trsNode = [x for x in nodes if "trs_global" in x and control.isControl(x)]
+    const = cmds.parentConstraint(tempTransform, trsNode, mo=True)
+
+    # set the rotation of the temp transform
+    cmds.setAttr("{}.r".format(tempTransform), *UPAXIS_DICT[upAxis])
+
+    # in order to export only the right nodes we need to select them.
+    # using the preserve selection decorator will help to ensure we keep the selction we started with
+    cmds.select(bind, model, replace=True)
 
     # finally we can do the export. Here we also want to pass in kwargs to allow the user to add any additional options
-    cmds.file(outputPath,
-              exportSelected=True,
-              force=True,
-              type="FBX export",
-              preserveReferences=True,
-              options=formatFBXOptions(options=options))
+    export_fbx(outputPath, options)
+
+    # cmds.file(outputPath,
+    #           exportSelected=True,
+    #           force=True,
+    #           type="FBX export",
+    #           preserveReferences=True
+    #           )
+
+    # reset the temp transfrom and delte it.
+    cmds.setAttr("{}.r".format(tempTransform), *[0, 0, 0])
+    cmds.delete(const, tempTransform)
 
 
 class BatchExportFBX(QtWidgets.QDialog):
@@ -298,7 +342,6 @@ class BatchExportFBX(QtWidgets.QDialog):
         """Export all the selected items"""
 
         outputFilePath = self.outputPath.getPath(absoultePath=True)
-        print outputFilePath
         if outputFilePath is None:
             cmds.error("Please select an output path before exporting FBXs")
             return
@@ -307,6 +350,7 @@ class BatchExportFBX(QtWidgets.QDialog):
         for i in range(self.rigsList.topLevelItemCount()):
             # get informaiton associated with the mainNode
             item = self.rigsList.topLevelItem(i)
+
             if item.checkState(0):
                 mainNode = item.data(1, QtCore.Qt.UserRole)
                 fileName = item.text(2)
@@ -314,18 +358,17 @@ class BatchExportFBX(QtWidgets.QDialog):
                 # export the FBX file
                 fullFilePath = os.path.join(outputFilePath, fileName)
                 exportAnimationClip(mainNode, outputPath=fullFilePath)
-                logger.info("Exported animation clip for {} ({})".format(mainNode, fileName))
 
 
 if __name__ == '__main__':
-    # exportSkeletalMesh("lich_rig_proxy:main", outputPath="/Users/masonsmigel/Desktop/lich_mesh.fbx")
-    exportAnimationClip("lich_rig_proxy:main", outputPath="/Users/masonsmigel/Desktop/lich_anim.fbx")
+    # exportSkeletalMesh("main", outputPath="/Users/masonsmigel/Desktop/paladin_v02_mesh.fbx")
+    exportAnimationClip("lich_rig_proxy:main", outputPath="/Users/masonsmigel/Desktop/test_v007_anim.fbx", upAxis='z')
 
     # print gatherRigsFromScene()
-    # try:
-    #     dlg.deleteLater()
-    # except:
-    #     print "didnt delete"
-    #
-    # dlg = BatchExportFBX()
-    # dlg.show()
+    try:
+        dlg.deleteLater()
+    except:
+        print "didnt delete"
+
+    dlg = BatchExportFBX()
+    dlg.show()

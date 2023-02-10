@@ -206,6 +206,7 @@ class BatchExportFBX(QtWidgets.QDialog):
             relativePath=None,
             parent=None)
 
+        # setup the rigList widget
         self.rigsList = QtWidgets.QTreeWidget()
         self.rigsList.setIndentation(10)
         self.rigsList.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
@@ -216,10 +217,10 @@ class BatchExportFBX(QtWidgets.QDialog):
         self.rigsList.setUniformRowHeights(True)
         self.rigsList.setAlternatingRowColors(True)
 
+        # setup the upAxis combo box
         self.upAxisComboBox = QtWidgets.QComboBox()
         self.upAxisComboBox.addItem("Z (Unreal)")
         self.upAxisComboBox.setItemData(0, "z")
-
         self.upAxisComboBox.addItem("Y (Maya)")
         self.upAxisComboBox.setItemData(1, "y")
 
@@ -243,8 +244,6 @@ class BatchExportFBX(QtWidgets.QDialog):
         topLayout.addWidget(self.upAxisComboBox)
         topLayout.addSpacing(40)
         topLayout.addWidget(self.outputPath)
-
-        # setup the list widget
 
         # setup the bottom buttons
         botLayout = QtWidgets.QHBoxLayout()
@@ -288,6 +287,7 @@ class BatchExportFBX(QtWidgets.QDialog):
 
     def refreshList(self):
         """ Gather a list of all rigs in the scene"""
+        # clear the current rig list...
         self.rigsList.clear()
 
         # ... then add new items based on the info gathered in the scene

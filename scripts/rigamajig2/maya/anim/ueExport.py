@@ -29,35 +29,9 @@ from shiboken2 import wrapInstance
 
 from rigamajig2.ui.widgets import pathSelector
 
-try:
-    if "fbxmaya" not in cmds.pluginInfo(q=True, ls=True):
-        cmds.loadPlugin("fbxmaya")
-except:
-    raise Exception("Failed to load maya FBX plugin")
-
 UPAXIS_DICT = {"x": [0, 0, 90],
                "y": [0, 0, 0],
                "z": [90, 0, 0]}
-
-#
-# def formatFBXOptions(options):
-#     """
-#     Format a dictonary of keywords and values into a string to be used as the 'options' argument in the file comman
-#     :param options: dictionary of keywords and values to set in the string formatting
-#     :return: string of options
-#     """
-#
-#     resultString = str()
-#     for option in options:
-#         value = options[option]
-#         if value == True or value == False:
-#             value = 1 if value == True else 0
-#
-#         print '{} -v {}'.format(option, value)
-#         mel.eval('{} -v {}'.format(option, value))
-#
-#         resultString += "{}={};".format(option, value)
-#     # return resultString
 
 
 @decorators.preserveSelection
@@ -107,15 +81,6 @@ def exportSkeletalMesh(mainNode, outputPath=None):
     export_fbx(outputPath, options)
 
 
-
-def gatherRigsFromScene():
-    """ Gather a list of all rigs in the scene"""
-
-    # list all nodes associated as a rigamajig root
-    rootNodes = meta.getTagged("rigamajigVersion", type=None, namespace="*")
-    return rootNodes
-
-
 @decorators.preserveSelection
 def exportAnimationClip(mainNode, outputPath=None, upAxis='y'):
     """
@@ -161,24 +126,6 @@ def exportAnimationClip(mainNode, outputPath=None, upAxis='y'):
     options.show_warning_ui = False
     options.generate_log = False
 
-    # mel.eval("FBXResetExport")
-    # options = OrderedDict(FBXExportSkins=True,
-    #                       FBXExportShapes=True,
-    #                       FBXExportCameras=False,
-    #                       FBXExportSmoothMesh=True,
-    #                       FBXExportSmoothingGroups=True,
-    #                       FBXExportLights=False,
-    #                       FBXExportAnimationOnly=True,
-    #                       FBXExportBakeComplexAnimation=True,
-    #                       # FBXExportBakeResampleAll=True,
-    #                       FBXExportBakeComplexStart=int(minFrame),
-    #                       FBXExportBakeComplexEnd=int(maxFrame),
-    #                       FBXExportConstraints=False,
-    #                       # FBXExportUpAxis='"y"',
-    #                       # FBXExportShowWarningsManager=False,
-    #                       # FBXExportGenerateLogData=False,
-    #                       )
-
     # if the up axis is set we need to make a tempory transform and connect it to the rig
     tempTransform = cmds.createNode("transform", name="tmpTransform")
     componentContainer = container.getContainerFromNode(model)
@@ -196,16 +143,17 @@ def exportAnimationClip(mainNode, outputPath=None, upAxis='y'):
     # finally we can do the export. Here we also want to pass in kwargs to allow the user to add any additional options
     export_fbx(outputPath, options)
 
-    # cmds.file(outputPath,
-    #           exportSelected=True,
-    #           force=True,
-    #           type="FBX export",
-    #           preserveReferences=True
-    #           )
-
     # reset the temp transfrom and delte it.
     cmds.setAttr("{}.r".format(tempTransform), *[0, 0, 0])
     cmds.delete(const, tempTransform)
+
+
+def gatherRigsFromScene():
+    """ Gather a list of all rigs in the scene"""
+
+    # list all nodes associated as a rigamajig root
+    rootNodes = meta.getTagged("rigamajigVersion", type=None, namespace="*")
+    return rootNodes
 
 
 class BatchExportFBX(QtWidgets.QDialog):
@@ -268,6 +216,13 @@ class BatchExportFBX(QtWidgets.QDialog):
         self.rigsList.setUniformRowHeights(True)
         self.rigsList.setAlternatingRowColors(True)
 
+        self.upAxisComboBox = QtWidgets.QComboBox()
+        self.upAxisComboBox.addItem("Z (Unreal)")
+        self.upAxisComboBox.setItemData(0, "z")
+
+        self.upAxisComboBox.addItem("Y (Maya)")
+        self.upAxisComboBox.setItemData(1, "y")
+
         self.rigsList.setStyleSheet("QTreeView::indicator::unchecked {background-color: rgb(70, 70, 70)}}")
 
         self.cancelButton = QtWidgets.QPushButton("Close")
@@ -283,6 +238,9 @@ class BatchExportFBX(QtWidgets.QDialog):
         # setup the buttons along the top
         topLayout = QtWidgets.QHBoxLayout()
         topLayout.addWidget(self.refreshButton)
+        topLayout.addSpacing(40)
+        topLayout.addWidget(QtWidgets.QLabel("Export Up Axis:"))
+        topLayout.addWidget(self.upAxisComboBox)
         topLayout.addSpacing(40)
         topLayout.addWidget(self.outputPath)
 
@@ -318,7 +276,6 @@ class BatchExportFBX(QtWidgets.QDialog):
 
         # setup the rig name
         item.setText(1, str(rigName))
-        print mainNode
         item.setData(1, QtCore.Qt.UserRole, str(mainNode))
 
         # setup the file name
@@ -346,6 +303,8 @@ class BatchExportFBX(QtWidgets.QDialog):
             cmds.error("Please select an output path before exporting FBXs")
             return
 
+        upAxis = self.upAxisComboBox.currentData()
+
         # for each item export all the fbx files.
         for i in range(self.rigsList.topLevelItemCount()):
             # get informaiton associated with the mainNode
@@ -357,14 +316,10 @@ class BatchExportFBX(QtWidgets.QDialog):
 
                 # export the FBX file
                 fullFilePath = os.path.join(outputFilePath, fileName)
-                exportAnimationClip(mainNode, outputPath=fullFilePath)
+                exportAnimationClip(mainNode, outputPath=fullFilePath, upAxis=upAxis)
 
 
 if __name__ == '__main__':
-    # exportSkeletalMesh("main", outputPath="/Users/masonsmigel/Desktop/paladin_v02_mesh.fbx")
-    exportAnimationClip("lich_rig_proxy:main", outputPath="/Users/masonsmigel/Desktop/test_v007_anim.fbx", upAxis='z')
-
-    # print gatherRigsFromScene()
     try:
         dlg.deleteLater()
     except:

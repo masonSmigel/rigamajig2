@@ -80,17 +80,25 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         if len(self.input) != 2:
             raise RuntimeError('Input list must have a length of 2')
 
-    def setInitalData(self):
+    def setupInitialData(self):
 
-        # setup a list of main controller names
-        self._loadComponentParametersToClass()
+        # setup a list of main controler names
         self.controlNameList = list()
         for i in range(self.numberMainControls):
             controlName = ("mainControl{}Name".format(i))
             self.controlNameList.append(controlName)
             self.cmptSettings[controlName] = "{}Driver_{}".format(self.name, i)
 
+        # here we need to forcibly save the new component settings and load the parameters back to the class
+        # to manaully add the componentSettings we just added
+        self.loadSettings(self.cmptSettings)
+        self._loadComponentParametersToClass()
+
     def createBuildGuides(self):
+
+        # load the component name stuff
+        self.setupInitialData()
+
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
         self.upVectorGuide = rig_control.createGuide("{}_upVec".format(self.name), parent=self.guidesHierarchy)

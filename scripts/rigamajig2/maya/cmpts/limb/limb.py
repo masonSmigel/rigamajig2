@@ -481,10 +481,10 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'softStretch'), self.limbIk.name)
             rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'pvPin'), [self.limbIk.name, self.limbPv.name])
             rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'twist'), self.controlers)
-            rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'uppCounterTwist'), self.limbIk.name)
             if self.addTwistJoints and self.addBendies:
                 rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'volumeFactor'), self.limbIk.name)
                 rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'bendies'), self.limbIk.name)
+                rig_attr.createProxy('{}.{}'.format(self.paramsHierarchy, 'uppCounterTwist'), self.limbIk.name)
         else:
             rig_attr.driveAttribute('ikfk', self.paramsHierarchy, self.ikfkControl.name)
             rig_attr.driveAttribute('stretch', self.paramsHierarchy, self.ikfkControl.name)
@@ -492,10 +492,10 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             rig_attr.driveAttribute('stretchBot', self.paramsHierarchy, self.ikfkControl.name)
             rig_attr.driveAttribute('softStretch', self.paramsHierarchy, self.ikfkControl.name)
             rig_attr.driveAttribute('pvPin', self.paramsHierarchy, self.ikfkControl.name)
-            rig_attr.driveAttribute('uppCounterTwist', self.paramsHierarchy, self.ikfkControl.name)
             if self.addTwistJoints and self.addBendies:
                 rig_attr.driveAttribute('volumeFactor', self.paramsHierarchy, self.ikfkControl.name)
                 rig_attr.driveAttribute('bendies', self.paramsHierarchy, self.ikfkControl.name)
+                rig_attr.driveAttribute('uppCounterTwist', self.paramsHierarchy, self.ikfkControl.name)
 
         # create a visability control for the ikGimble control
         rig_attr.createAttr(self.limbIk.name, "gimble", attributeType='bool', value=0, keyable=False, channelBox=True)

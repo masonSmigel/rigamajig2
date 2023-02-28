@@ -284,7 +284,7 @@ def copyAttribute(attr, source, target):
     :param str target:name of the node to move the attribute to
     """
     if not cmds.objExists("{}.{}".format(source, attr)):
-        raise RuntimeError("Source attribute does not exist")
+        raise RuntimeError("Source attribute {}.{} does not exist".format(source, attr))
 
     if not cmds.objExists("{}.{}".format(target, attr)):
         kwargs = dict()

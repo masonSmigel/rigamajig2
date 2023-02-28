@@ -125,6 +125,9 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
             rig_transform.matchTransform(tempObject, self.fkControlList[i].orig)
             cmds.parent(self.ikspline.getClusters()[i], self.ikControlList[i].name)
 
+            # orient contstrain the last joint
+            cmds.orientConstraint(self.fkControlList[-1].name, self.ikspline.getIkJointList()[-1])
+
             # delete temp objects
             cmds.delete(tempObject)
 

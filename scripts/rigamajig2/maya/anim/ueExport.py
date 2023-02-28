@@ -137,6 +137,8 @@ def exportAnimationClip(mainNode, outputPath=None, upAxis='y'):
     if len(connections) > 0:
         cmds.warning("{} has incoming connections. pre-rotaton may not apply as expected".format(trsNode))
 
+    # TODO: add something to bake this into the trs_shot instead.
+
     const = cmds.parentConstraint(tempTransform, trsNode, mo=True)
 
     # set the rotation of the temp transform

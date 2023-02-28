@@ -131,6 +131,12 @@ def exportAnimationClip(mainNode, outputPath=None, upAxis='y'):
     componentContainer = container.getContainerFromNode(model)
     nodes = container.getNodesInContainer(componentContainer)
     trsNode = [x for x in nodes if "trs_global" in x and control.isControl(x)]
+
+    # check for keyframes or constraints
+    connections = cmds.listConnections(trsNode, s=True, d=False)
+    if len(connections) > 0:
+        cmds.warning("{} has incoming connections. pre-rotaton may not apply as expected".format(trsNode))
+
     const = cmds.parentConstraint(tempTransform, trsNode, mo=True)
 
     # set the rotation of the temp transform

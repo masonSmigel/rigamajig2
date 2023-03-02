@@ -53,11 +53,13 @@ class PublishWidget(QtWidgets.QWidget):
         self.outFileTypeComboBox.addItem('ma')
         self.outFileTypeComboBox.addItem('mb')
 
-        self.runSelectedButton = QtWidgets.QPushButton("Run Selected")
-        self.runButton = QtWidgets.QPushButton("Run")
-        self.runButton.setFixedWidth(80)
+        self.saveFBXCheckbox = QtWidgets.QCheckBox("Export FBX Skeletal Mesh")
 
-        self.closeButton = QtWidgets.QPushButton("Close")
+        # self.runSelectedButton = QtWidgets.QPushButton("Run Selected")
+        # self.runButton = QtWidgets.QPushButton("Run")
+        # self.runButton.setFixedWidth(80)
+        #
+        # self.closeButton = QtWidgets.QPushButton("Close")
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -76,6 +78,7 @@ class PublishWidget(QtWidgets.QWidget):
         self.mainCollapseableWidget.addLayout(publishFileLayout)
         self.mainCollapseableWidget.addWidget(self.outPathSelector)
         self.mainCollapseableWidget.addWidget(self.publishButton)
+        self.mainCollapseableWidget.addWidget(self.saveFBXCheckbox)
 
         self.mainLayout.addWidget(self.mainCollapseableWidget)
 
@@ -142,5 +145,6 @@ class PublishWidget(QtWidgets.QWidget):
             outputfile = self.outPathSelector.getPath()
             fileType = self.outFileTypeComboBox.currentText()
             suffix = self.outFileSuffix.text()
+            saveFBX = self.saveFBXCheckbox.isChecked()
 
-            self.builder.run(publish=True, outputfile=outputfile, suffix=suffix, assetName=None, fileType=fileType)
+            self.builder.run(publish=True, outputfile=outputfile, suffix=suffix, assetName=None, fileType=fileType, saveFBX=saveFBX)

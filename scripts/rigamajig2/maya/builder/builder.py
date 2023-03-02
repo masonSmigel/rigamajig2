@@ -497,7 +497,7 @@ class Builder(object):
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
-    def run(self, publish=False, suffix=None, outputfile=None, assetName=None, fileType=None, versioning=True):
+    def run(self, publish=False, suffix=None, outputfile=None, assetName=None, fileType=None, versioning=True, saveFBX=False):
         """
         Build a rig.
 
@@ -510,6 +510,7 @@ class Builder(object):
         :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
                            and store a new version each time the publish file is overwritten.
                            This allows the user to keep a log of files approved to be published.
+        :param saveFBX: Save an FBX of the rig for use as a skeletal mesh in Unreal
         """
         if not self.path:
             logger.error('you must provide a build enviornment path. Use Bulder.setRigFile()')
@@ -535,14 +536,14 @@ class Builder(object):
         if publish:
             self.publishScript()
             self.publish(outputfile=outputfile, suffix=suffix, assetName=assetName, fileType=fileType,
-                         versioning=versioning)
+                         versioning=versioning, saveFBX=saveFBX)
         endTime = time.time()
         finalTime = endTime - startTime
 
         print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
-    def publish(self, outputfile=None, suffix=None, assetName=None, fileType=None, versioning=True):
+    def publish(self, outputfile=None, suffix=None, assetName=None, fileType=None, versioning=True, saveFBX=False):
         """
         Publish a rig.
 
@@ -555,6 +556,7 @@ class Builder(object):
         :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
                            and store a new version each time the publish file is overwritten.
                            This allows the user to keep a log of files approved to be published.
+       :param saveFBX: Save an FBX of the rig for use as a skeletal mesh in Unreal
         """
         outputfile = outputfile or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_RIG))
         assetName = assetName or self.getAbsoultePath(self.getRigData(self.rigFile, constants.RIG_NAME))
@@ -583,6 +585,15 @@ class Builder(object):
         publishPath = os.path.join(dirName, fileName)
         file.saveAs(publishPath, log=False)
         logger.info("out rig published: {}".format(publishPath))
+
+        # if we have the save FBX box checked we can also save and FBX on publish.
+        if saveFBX:
+            from rigamajig2.maya.anim import ueExport
+            fbxFileName = "{}{}.{}".format(rigName, suffix, "fbx")
+            fbxPublishPath = os.path.join(dirName, fbxFileName)
+
+            ueExport.exportSkeletalMesh("main", fbxPublishPath)
+            logger.info("fbx expoerted: {}".format(fbxPublishPath))
 
         # if we want to save a version as well
         if versioning:

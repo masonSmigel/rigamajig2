@@ -94,7 +94,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
 
         # intialize new compoents
         self.fingerComponentList = list()
-        inputBaseNames = [x.split("_")[0] for x in self.input]
+        inputBaseNames = [x.rsplit("_", 1)[0] for x in self.input]
         for i in range(len(self.input)):
             endJoint = cmds.ls(reversed(cmds.listRelatives(self.input[i], ad=True)), type='joint')[-1]
 

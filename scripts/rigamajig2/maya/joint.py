@@ -170,6 +170,8 @@ def insertJoints(startJoint, endJoint, amount=1, name=None):
         pos = mathUtils.vectorLerp(startPos, endPos, multiplier * (i + 1))
         cmds.xform(joint, ws=True, t=pos)
         cmds.delete(cmds.orientConstraint(startJoint, joint, mo=False))
+        parentRadius = cmds.getAttr("{}.radius".format(startJoint))
+        cmds.setAttr("{}.radius".format(joint), parentRadius)
 
     reverseList = [startJoint] + jointList + [endJoint]
     reverseList.reverse()

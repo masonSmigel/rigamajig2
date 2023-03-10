@@ -315,6 +315,8 @@ class IkFkMatchRangeDialog(QtWidgets.QDialog):
         # set the minimum to an incredibly small number
         self.startFrameSpinBox.setMinimum(-1e+6)
         self.endFrameSpinBox.setMinimum(-1e+6)
+        self.startFrameSpinBox.setMaximum(1e+6)
+        self.endFrameSpinBox.setMaximum(1e+6)
 
         self.doMatchButton = QtWidgets.QPushButton("Match Range")
 

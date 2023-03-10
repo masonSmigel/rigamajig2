@@ -3,8 +3,8 @@ Ik FK switcher
 """
 import sys
 import logging
+import time
 from shiboken2 import wrapInstance
-
 
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
@@ -30,7 +30,7 @@ IDENTITY_MATRIX = [1, 0, 0, 0,
                    0, 0, 0, 1]
 
 
-def __getIkFkSwitchNode(controlNode):
+def getIkFkSwitchNode(controlNode):
     """
     Check if the given control is part of a component that can be switched.
     If so get the name of the ikfk node (node made by the ikfk module that contains metadata to switch)
@@ -77,11 +77,14 @@ def switchSelectedComponent(controlNode=None, ik=None, fk=None):
     if controlNode is None:
         if len(cmds.ls(sl=True)) > 0:
             controlNode = cmds.ls(sl=True)[0]
+            # add a warning that only the first node will be matched
+            if len(cmds.ls(sl=True)) > 1:
+                cmds.warning("Only the First control in the selection will be matched.")
         else:
             raise Exception("Please select a control to switch components")
 
     # get the ikfk group
-    ikfkGroup = __getIkFkSwitchNode(controlNode=controlNode)
+    ikfkGroup = getIkFkSwitchNode(controlNode=controlNode)
 
     # create an isntance of the IkFkSwithcer class. with that we can switch the component
     switcher = IkFkSwitch(ikfkGroup)
@@ -124,19 +127,21 @@ class IkFkSwitch(object):
         self.fkMatchList = meta.getMessageConnection("{}.{}".format(self.node, 'fkMatchList'))
 
     @decorators.oneUndo
-    def switchRange(self, value, startTime, endTime):
+    def switchRange(self, value, startFrame, endFrame):
         """
-       Switch and match from ik to fk or vice versa for a range of time. This will key each frame of the switched controls
+        Switch and match from ik to fk or vice versa for a range of time. This will key each frame of the switched controls
+
         :param value: value to switch to. 0=ik, 1=fk
-        :param startTime: frist frame of animation to switch from
-        :param endTime: last frame of the range to switch from
+        :param startFrame: frist frame of animation to switch from
+        :param endFrame: last frame of the range to switch from
         """
+        startTime = time.time()
         currentFrame = cmds.currentTime(q=True)
 
-        if startTime > endTime:
-            raise Exception("Start time cannot be after the end time. {}>{}".format(startTime, endTime))
+        if startFrame > endFrame:
+            raise Exception("Start time cannot be after the end time. {}>{}".format(startFrame, endFrame))
 
-        framesList = [x + 1 for x in range(startTime, endTime)]
+        framesList = [x + 1 for x in range(startFrame, endFrame)]
         for frame in framesList:
             # go to the current frame
             cmds.currentTime(frame, edit=True)
@@ -151,6 +156,9 @@ class IkFkSwitch(object):
 
         # set the frame back to the frame we started on
         cmds.currentTime(currentFrame, edit=True)
+
+        elapsedTime = time.time() - startTime
+        logger.info("Ik Fk Match Range complete in: {}".format(elapsedTime))
 
     def switch(self, value):
         """
@@ -257,7 +265,7 @@ class IkFkSwitch(object):
 
 class IkFkMatchRangeDialog(QtWidgets.QDialog):
     """ Dialog for the mocap import """
-    WINDOW_TITLE = "Ik Fk match range"
+    WINDOW_TITLE = "Ik Fk Match Range"
 
     dlg_instance = None
 
@@ -269,6 +277,7 @@ class IkFkMatchRangeDialog(QtWidgets.QDialog):
 
         if cls.dlg_instance.isHidden():
             cls.dlg_instance.show()
+            cls.dlg_instance.updateUi()
         else:
             cls.dlg_instance.raise_()
             cls.dlg_instance.activateWindow()
@@ -298,18 +307,71 @@ class IkFkMatchRangeDialog(QtWidgets.QDialog):
         self.matchToIkRadioButton = QtWidgets.QRadioButton("ik")
         self.matchToFkRadioButton = QtWidgets.QRadioButton("fk")
 
-        self.startFrame
+        self.matchToIkRadioButton.setChecked(True)
+
+        self.startFrameSpinBox = QtWidgets.QSpinBox()
+        self.endFrameSpinBox = QtWidgets.QSpinBox()
 
         self.doMatchButton = QtWidgets.QPushButton("Match Range")
 
     def createLayouts(self):
         """Create layouts"""
-        pass
+        mainLayout = QtWidgets.QVBoxLayout(self)
+        mainLayout.setContentsMargins(6, 6, 6, 6)
+        mainLayout.setSpacing(4)
+
+        # setup the radio button layout
+        radioButtonLayout = QtWidgets.QHBoxLayout()
+        radioButtonLayout.addWidget(QtWidgets.QLabel("Match to: "))
+        radioButtonLayout.addWidget(self.matchToIkRadioButton)
+        radioButtonLayout.addSpacing(10)
+        radioButtonLayout.addWidget(self.matchToFkRadioButton)
+        radioButtonLayout.addStretch()
+
+        startEndFrameLayout = QtWidgets.QHBoxLayout()
+        startEndFrameLayout.addWidget(QtWidgets.QLabel("Start Frame:"))
+        startEndFrameLayout.addWidget(self.startFrameSpinBox)
+        startEndFrameLayout.addSpacing(20)
+        startEndFrameLayout.addWidget(QtWidgets.QLabel("End Frame:"))
+        startEndFrameLayout.addWidget(self.endFrameSpinBox)
+
+        # add all layouts tot he main layout
+        mainLayout.addLayout(radioButtonLayout)
+        mainLayout.addLayout(startEndFrameLayout)
+        mainLayout.addWidget(self.doMatchButton)
 
     def createConnections(self):
         """Create Pyside connections"""
-        pass
+        self.doMatchButton.clicked.connect(self.doMatch)
 
+    def updateUi(self):
+
+        startFrame = cmds.playbackOptions(q=True, min=True)
+        endFrame = cmds.playbackOptions(q=True, max=True)
+
+        self.startFrameSpinBox.setValue(startFrame)
+        self.endFrameSpinBox.setValue(endFrame)
+
+    def doMatch(self):
+
+        if len(cmds.ls(sl=True)) > 0:
+            controlNode = cmds.ls(sl=True)[0]
+            # add a warning that only the first node will be matched
+            if len(cmds.ls(sl=True)) > 1:
+                cmds.warning("Only the First control in the selection will be matched.")
+        else:
+            raise Exception("Please select a control to switch components")
+
+        ikfkGroup = getIkFkSwitchNode(controlNode)
+
+        # create a switcher instance
+        switcher = IkFkSwitch(ikfkGroup)
+
+        switchValue = 0 if self.matchToIkRadioButton.isChecked() else 1
+
+        switcher.switchRange(value=switchValue,
+                             startFrame=self.startFrameSpinBox.value(),
+                             endFrame=self.endFrameSpinBox.value())
 
 
 if __name__ == '__main__':

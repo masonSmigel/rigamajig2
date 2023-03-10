@@ -30,6 +30,8 @@ IDENTITY_MATRIX = [1, 0, 0, 0,
                    0, 0, 0, 1]
 
 
+# TODO: add a check to see if Pole vector position flips and compensate it.
+
 def getIkFkSwitchNode(controlNode):
     """
     Check if the given control is part of a component that can be switched.

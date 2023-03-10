@@ -1,12 +1,24 @@
 """
 Ik FK switcher
 """
-import maya.cmds as cmds
-import rigamajig2.maya.meta as meta
-import maya.api.OpenMaya as om2
+import sys
 import logging
+from shiboken2 import wrapInstance
+
+
+import maya.cmds as cmds
+import maya.api.OpenMaya as om2
+import maya.OpenMayaUI as omui
+
+from PySide2 import QtWidgets
+from PySide2 import QtGui
+from PySide2 import QtCore
+from shiboken2 import wrapInstance
+
+import rigamajig2.maya.meta as meta
 from rigamajig2.maya.rig import control
 from rigamajig2.maya import container
+from rigamajig2.maya import decorators
 
 logger = logging.getLogger(__name__)
 
@@ -18,21 +30,13 @@ IDENTITY_MATRIX = [1, 0, 0, 0,
                    0, 0, 0, 1]
 
 
-def switchSelectedComponent(controlNode=None, ik=None, fk=None):
+def __getIkFkSwitchNode(controlNode):
     """
-    Switch the components ikfk switch from the given control node.
-    The user can specify a switch to ik, fk, or a smart switch by leaving both ik and fk at False.
-
-    :param str list controlNode: spedify a control to get the component from. if None use the active selection.
-    :param bool ik: if true the component will be switched to ik
-    :param bool fk: if true the component will be switched to fk.
+    Check if the given control is part of a component that can be switched.
+    If so get the name of the ikfk node (node made by the ikfk module that contains metadata to switch)
+    :param controlNode: specify a control to get the component from.
+    :return:
     """
-
-    if controlNode is None:
-        if len(cmds.ls(sl=True)) > 0:
-            controlNode = cmds.ls(sl=True)[0]
-        else:
-            raise Exception("Please select a control to switch components")
 
     # Validate the control. it must be a component type that supports IkFk switching
     if not control.isControl(controlNode):
@@ -56,6 +60,28 @@ def switchSelectedComponent(controlNode=None, ik=None, fk=None):
         if cmds.attributeQuery("ikControls", node=node, ex=True):
             ikfkGroup = node
             break
+
+    return ikfkGroup
+
+
+def switchSelectedComponent(controlNode=None, ik=None, fk=None):
+    """
+    Switch the components ikfk switch from the given control node.
+    The user can specify a switch to ik, fk, or a smart switch by leaving both ik and fk at False.
+
+    :param str list controlNode: specify a control to get the component from. if None use the active selection.
+    :param bool ik: if true the component will be switched to ik
+    :param bool fk: if true the component will be switched to fk.
+    """
+
+    if controlNode is None:
+        if len(cmds.ls(sl=True)) > 0:
+            controlNode = cmds.ls(sl=True)[0]
+        else:
+            raise Exception("Please select a control to switch components")
+
+    # get the ikfk group
+    ikfkGroup = __getIkFkSwitchNode(controlNode=controlNode)
 
     # create an isntance of the IkFkSwithcer class. with that we can switch the component
     switcher = IkFkSwitch(ikfkGroup)
@@ -97,9 +123,38 @@ class IkFkSwitch(object):
         self.ikMatchList = meta.getMessageConnection("{}.{}".format(self.node, 'ikMatchList'))
         self.fkMatchList = meta.getMessageConnection("{}.{}".format(self.node, 'fkMatchList'))
 
+    @decorators.oneUndo
+    def switchRange(self, value, startTime, endTime):
+        """
+       Switch and match from ik to fk or vice versa for a range of time. This will key each frame of the switched controls
+        :param value: value to switch to. 0=ik, 1=fk
+        :param startTime: frist frame of animation to switch from
+        :param endTime: last frame of the range to switch from
+        """
+        currentFrame = cmds.currentTime(q=True)
+
+        if startTime > endTime:
+            raise Exception("Start time cannot be after the end time. {}>{}".format(startTime, endTime))
+
+        framesList = [x + 1 for x in range(startTime, endTime)]
+        for frame in framesList:
+            # go to the current frame
+            cmds.currentTime(frame, edit=True)
+
+            # switch and match from ik to fk
+            switchedControls = self.switch(value)
+
+            # key all the controls we switched
+            for switchedControl in switchedControls:
+                for channel in ['tx', 'ty', 'tz', 'rx', 'ry', 'rz']:
+                    cmds.setKeyframe(switchedControl, attribute=channel, time=frame)
+
+        # set the frame back to the frame we started on
+        cmds.currentTime(currentFrame, edit=True)
+
     def switch(self, value):
         """
-        Switch to ik for fk setup
+        Switch and match from ik to fk or vice versa.
         :param value: value to switch to. 0=ik, 1=fk
         """
 
@@ -111,12 +166,15 @@ class IkFkSwitch(object):
             self._setSourceAttr('{}.stretchTop'.format(self.ikfkControl), 1)
             self._setSourceAttr('{}.stretchBot'.format(self.ikfkControl), 1)
 
-            self.ikMatchFk(self.fkMatchList, self.ikControls[0], self.ikControls[1], self.ikControls[2])
+            controls = self.ikMatchFk(self.fkMatchList, self.ikControls[0], self.ikControls[1], self.ikControls[2])
             logger.info("switched {}: ik -> fk".format(self.ikfkControl))
         else:
             self._setSourceAttr('{}.ikfk'.format(self.ikfkControl), value)
-            self.fkMatchIk(self.fkControls, self.ikMatchList)
+            controls = self.fkMatchIk(self.fkControls, self.ikMatchList)
             logger.info("switched {}: fk -> ik".format(self.ikfkControl))
+
+        # return a list of all the controls switched
+        return controls
 
     @staticmethod
     def fkMatchIk(fkControls, ikJoints):
@@ -138,6 +196,8 @@ class IkFkSwitch(object):
         # reset the gimble fk control
         cmds.xform(fkControls[-1], matrix=IDENTITY_MATRIX)
 
+        return fkControls
+
     @staticmethod
     def ikMatchFk(fkMatchList, ik, ikGimble, pv):
         """
@@ -153,6 +213,8 @@ class IkFkSwitch(object):
         cmds.xform(ik, ws=True, matrix=endJntMatrix)
         cmds.xform(ikGimble, matrix=IDENTITY_MATRIX)
         cmds.xform(pv, ws=True, t=newPvPos)
+
+        return ik, ikGimble, pv
 
     @staticmethod
     def getPoleVectorPos(matchList, magnitude=10):
@@ -191,6 +253,63 @@ class IkFkSwitch(object):
             cmds.setAttr(src, value)
         else:
             cmds.setAttr(attribute, value)
+
+
+class IkFkMatchRangeDialog(QtWidgets.QDialog):
+    """ Dialog for the mocap import """
+    WINDOW_TITLE = "Ik Fk match range"
+
+    dlg_instance = None
+
+    @classmethod
+    def showDialog(cls):
+        """Show the dialog"""
+        if not cls.dlg_instance:
+            cls.dlg_instance = IkFkMatchRangeDialog()
+
+        if cls.dlg_instance.isHidden():
+            cls.dlg_instance.show()
+        else:
+            cls.dlg_instance.raise_()
+            cls.dlg_instance.activateWindow()
+
+    def __init__(self):
+        if sys.version_info.major < 3:
+            mayaMainWindow = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+        else:
+            mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+
+        super(IkFkMatchRangeDialog, self).__init__(mayaMainWindow)
+
+        self.setWindowTitle(self.WINDOW_TITLE)
+        if cmds.about(ntOS=True):
+            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+        elif cmds.about(macOS=True):
+            self.setProperty("saveWindowPref", True)
+            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+        self.setMinimumSize(300, 100)
+
+        self.createWidgets()
+        self.createLayouts()
+        self.createConnections()
+
+    def createWidgets(self):
+        """Create widgets"""
+        self.matchToIkRadioButton = QtWidgets.QRadioButton("ik")
+        self.matchToFkRadioButton = QtWidgets.QRadioButton("fk")
+
+        self.startFrame
+
+        self.doMatchButton = QtWidgets.QPushButton("Match Range")
+
+    def createLayouts(self):
+        """Create layouts"""
+        pass
+
+    def createConnections(self):
+        """Create Pyside connections"""
+        pass
+
 
 
 if __name__ == '__main__':

@@ -7,6 +7,7 @@
     date: 07/2022
 
 """
+import time
 from functools import wraps
 
 from maya import cmds as cmds
@@ -43,15 +44,67 @@ def oneUndo(func):
 
     :param func:
     """
+
+    # pylint:disable=missing-docstring
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        # Open the undo chunk
+        cmds.undoInfo(openChunk=True)
+
+        # Call the original function
+        result = func(*args, **kwargs)
+
+        # Close the undo chunk
+        cmds.undoInfo(closeChunk=True)
+
+        return result
+
+    return wrapper
+
+
+def suspendViewport(func):
+    """
+    Wrap the function to suspend the viewport
+
+    :param func:
+    """
+
     # pylint:disable=missing-docstring
     @wraps(func)
     def wrap(*args, **kwargs):
-        cmds.undoInfo(openChunk=True, chunkName=func.__name__)
+        cmds.refresh(suspend=True)
         try:
             return func(*args, **kwargs)
         except Exception as e:
             raise e
         finally:
-            cmds.undoInfo(closeChunk=True, chunkName=func.__name__)
+            cmds.refresh(suspend=False)
+
+    return wrap
+
+
+def timeFunction(func):
+    """
+    Wrap the function to suspend the viewport
+
+    :param func:
+    """
+
+    # pylint:disable=missing-docstring
+    @wraps(func)
+    def wrap(*args, **kwargs):
+        startTime = time.time()
+
+        try:
+            return func(*args, **kwargs)
+
+        except Exception as e:
+            raise e
+
+        finally:
+            endTime = time.time()
+            finalTime = endTime - startTime
+
+            print "Function {} completed in {}".format(func, finalTime)
 
     return wrap

@@ -312,6 +312,10 @@ class IkFkMatchRangeDialog(QtWidgets.QDialog):
         self.startFrameSpinBox = QtWidgets.QSpinBox()
         self.endFrameSpinBox = QtWidgets.QSpinBox()
 
+        # set the minimum to an incredibly small number
+        self.startFrameSpinBox.setMinimum(-1e+6)
+        self.endFrameSpinBox.setMinimum(-1e+6)
+
         self.doMatchButton = QtWidgets.QPushButton("Match Range")
 
     def createLayouts(self):

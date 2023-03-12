@@ -133,7 +133,7 @@ def exportAnimationClip(mainNode, outputPath=None, upAxis='y'):
     trsNode = [x for x in nodes if "trs_global" in x and control.isControl(x)]
 
     # check for keyframes or constraints
-    connections = cmds.listConnections(trsNode, s=True, d=False)
+    connections = cmds.listConnections(trsNode, s=True, d=False) or list()
     if len(connections) > 0:
         cmds.warning("{} has incoming connections. pre-rotaton may not apply as expected".format(trsNode))
 

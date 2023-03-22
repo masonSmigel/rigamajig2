@@ -245,7 +245,8 @@ class ComponentManager(QtWidgets.QWidget):
         self.createActions()
         self.createWidgets()
         self.createLayouts()
-        self.setMinimumHeight(300)
+        self.createConnections()
+        self.setMinimumHeight(320)
 
     def createActions(self):
         """ Create Actions"""
@@ -277,8 +278,39 @@ class ComponentManager(QtWidgets.QWidget):
         self.deleteComponentAction.setIcon(QtGui.QIcon(":trash.png"))
         self.deleteComponentAction.triggered.connect(self.deleteComponent)
 
+    def _createContextMenu(self, position):
+
+        menu = QtWidgets.QMenu(self.componentTree)
+        menu.addAction(self.selectContainerAction)
+        menu.addAction(self.editComponentSettingsAction)
+        menu.addAction(self.renameComponentAction)
+        menu.addSeparator()
+        menu.addAction(self.createSymetricalComponent)
+        menu.addAction(self.mirrorComponentSettingsAction)
+        menu.addSeparator()
+        menu.addAction(self.reloadComponentAction)
+        menu.addAction(self.deleteComponentAction)
+        menu.exec_(self.componentTree.mapToGlobal(position))
+
     def createWidgets(self):
         """ Create Widgets"""
+        # search icon
+        self.search_icon = QtWidgets.QLabel()
+        pixmap = QtGui.QPixmap(":hotkeyFieldSearch.png")
+        self.search_icon.setScaledContents(True)
+        self.search_icon.setPixmap(pixmap)
+        self.search_icon.setMinimumSize(20, 15)
+
+        # setup the search bar and completer
+        self.searchBar = QtWidgets.QLineEdit()
+        self.searchBar.setPlaceholderText("find a component")
+
+        self.searchCompleter = QtWidgets.QCompleter(self)
+        self.searchCompleterModel = QtCore.QStringListModel(list(), self)
+        self.searchCompleter.setModel(self.searchCompleterModel)
+
+        self.searchBar.setCompleter(self.searchCompleter)
+
         self.componentTree = QtWidgets.QTreeWidget()
         self.componentTree.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.componentTree.setHeaderHidden(True)
@@ -291,14 +323,8 @@ class ComponentManager(QtWidgets.QWidget):
         self.componentTree.setColumnWidth(1, 120)
         self.componentTree.setColumnWidth(2, 60)
 
-        self.componentTree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
-        self.componentTree.addAction(self.selectContainerAction)
-        self.componentTree.addAction(self.editComponentSettingsAction)
-        self.componentTree.addAction(self.renameComponentAction)
-        self.componentTree.addAction(self.createSymetricalComponent)
-        self.componentTree.addAction(self.mirrorComponentSettingsAction)
-        self.componentTree.addAction(self.reloadComponentAction)
-        self.componentTree.addAction(self.deleteComponentAction)
+        self.componentTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.componentTree.customContextMenuRequested.connect(self._createContextMenu)
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -306,7 +332,17 @@ class ComponentManager(QtWidgets.QWidget):
         self.mainLayout.minimumSize()
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(4)
+
+        # build the search bar layout
+        searchBarLayout = QtWidgets.QHBoxLayout()
+        searchBarLayout.addWidget(self.search_icon)
+        searchBarLayout.addWidget(self.searchBar)
+
+        self.mainLayout.addLayout(searchBarLayout)
         self.mainLayout.addWidget(self.componentTree)
+
+    def createConnections(self):
+        self.searchBar.returnPressed.connect(self.searchForComponent)
 
     def setScriptJobEnabled(self, enabled):
         """
@@ -359,6 +395,13 @@ class ComponentManager(QtWidgets.QWidget):
         item.setTextColor(1, QtGui.QColor(*destaturatedColor))
         item.setTextColor(2, QtGui.QColor(156, 156, 156))
 
+        # add the item to the search bar if it isnt there already
+
+        # if the name is not in the string list then add it to the string list for autocomplete
+        stringList = self.searchCompleterModel.stringList()
+        if name not in stringList:
+            newStringList = stringList + [name]
+            self.searchCompleterModel.setStringList(newStringList)
         return item
 
     def createComponent(self, name, componentType, input, rigParent):
@@ -431,7 +474,6 @@ class ComponentManager(QtWidgets.QWidget):
         cmds.select(cl=True)
         for item in self.getSelectedItem():
             itemDict = self.parseData(item)
-            print itemDict
             cmds.select(itemDict['container'], add=True)
 
     def editComponentParameters(self):
@@ -511,7 +553,6 @@ class ComponentManager(QtWidgets.QWidget):
             sourceValue = sourceData[parameter]
             # check if the source value is a string. if it is try to mirror it.
             if isinstance(sourceValue, (str, unicode)):
-                print parameter
                 # use the mirror name if one exists. otherwise revert back to the source value
                 mirroredValue = common.getMirrorName(sourceValue) if common.getMirrorName(sourceValue) else sourceValue
 
@@ -593,6 +634,14 @@ class ComponentManager(QtWidgets.QWidget):
             # rename the component in the UI
             item.setText(0, text)
 
+    def searchForComponent(self):
+        searchedText = self.searchBar.text()
+
+        for item in self.getAll():
+            if item.text(0) == searchedText:
+                self.componentTree.setCurrentItem(item)
+                # self.searchBar.clear()
+
     def clearTree(self):
         """ clear the component tree"""
         try:
@@ -607,7 +656,9 @@ class ComponentManager(QtWidgets.QWidget):
 
     def loadListFromBuilder(self):
         """ Load the compoonent list from the builder"""
+        # reset the tree and autocompletes
         self.clearTree()
+        self.searchCompleterModel.setStringList(list())
 
         if not self.builder:
             raise RuntimeError("No valid rig builder found")

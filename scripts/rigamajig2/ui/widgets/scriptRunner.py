@@ -89,8 +89,6 @@ class ScriptRunner(QtWidgets.QWidget):
         self.newScriptAction.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
         self.newScriptAction.triggered.connect(self.createNewScript)
 
-
-
         self.deleteScriptAction = QtWidgets.QAction("Delete Script", self)
         self.deleteScriptAction.setIcon(QtGui.QIcon(":trash.png"))
         self.deleteScriptAction.triggered.connect(self.deleteSelectedScripts)

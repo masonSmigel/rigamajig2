@@ -36,6 +36,8 @@ class BasicTree(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (208, 132, 67)
+
     def __init__(self, name, input, size=1, rigParent=str(), controlShape='cube',
                  addTrs=False, addSdk=False, skipJoints=None):
         """

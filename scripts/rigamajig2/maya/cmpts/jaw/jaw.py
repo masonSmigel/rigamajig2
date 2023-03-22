@@ -34,6 +34,8 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (254, 66, 129)
+
     def __init__(self, name, input, size=1, rigParent=str(), addLipControls=True):
         """
         :param name: Component Name

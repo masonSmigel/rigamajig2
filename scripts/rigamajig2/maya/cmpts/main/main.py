@@ -27,6 +27,8 @@ class Main(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (48, 150, 225)
+
     def __init__(self, name, input=None, size=1, rigParent=None):
         """
         :param name: name of the component

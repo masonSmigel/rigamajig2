@@ -28,6 +28,8 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (109, 208, 159)
+
     def __init__(self, name, input, size=1, useScale=False, addFKSpace=False, addSdk=True,
                  useProxyAttrs=True, rigParent=str()):
         """"

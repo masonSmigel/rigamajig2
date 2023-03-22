@@ -38,6 +38,8 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (0, 107, 185)
+
     def __init__(self, name, input, size=1, rigParent=str(),
                  useProxyAttrs=True, useScale=False, addFKSpace=False, useSubMeta=True, useFirstAsThumb=True):
         """

@@ -29,6 +29,13 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
     """
     The eyeballs component is a Sublcass of the lookAt component but it has extra options for the iris and pupil scaling
     """
+    VERSION_MAJOR = 1
+    VERSION_MINOR = 0
+    VERSION_PATCH = 0
+
+    version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
+    version = '%i.%i.%i' % version_info
+    __version__ = version
 
     def __init__(self, name, input, size=1, rigParent=str(), lookAtSpaces=None, rigParentList=None):
         super(Eyeballs, self).__init__(name=name, input=input, size=size, rigParent=rigParent,

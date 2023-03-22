@@ -30,6 +30,8 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (243, 115, 58)
+
     def __init__(self, name, input, size=1, bindToInput=False, rigParent=str()):
         """
         :param str name: name of the components

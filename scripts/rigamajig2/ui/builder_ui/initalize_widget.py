@@ -245,7 +245,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.createActions()
         self.createWidgets()
         self.createLayouts()
-        self.setFixedHeight(280)
+        self.setMinimumHeight(300)
 
     def createActions(self):
         """ Create Actions"""
@@ -336,9 +336,6 @@ class ComponentManager(QtWidgets.QWidget):
         item.setText(1, componentType)
         item.setText(2, buildStep)
 
-        item.setTextColor(1, QtGui.QColor(156, 156, 156))
-        item.setTextColor(2, QtGui.QColor(156, 156, 156))
-
         # set the icon
         icon = _getComponentIcon(componentType)
         item.setIcon(0, icon)
@@ -348,6 +345,20 @@ class ComponentManager(QtWidgets.QWidget):
             item.setData(QtCore.Qt.UserRole, 0, container)
 
         self.componentTree.addTopLevelItem(item)
+
+        # get a temp ui color
+        tmpComponentObj = getComponentObject(componentType)
+        uiColor = tmpComponentObj.UI_COLOR
+        # after we get the UI color we can delte the tmp component instance
+        del tmpComponentObj
+
+        # now we can
+        item.setTextColor(0, QtGui.QColor(*uiColor))
+
+        destaturatedColor = [v * 0.78 for v in uiColor]
+        item.setTextColor(1, QtGui.QColor(*destaturatedColor))
+        item.setTextColor(2, QtGui.QColor(156, 156, 156))
+
         return item
 
     def createComponent(self, name, componentType, input, rigParent):

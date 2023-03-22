@@ -37,6 +37,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (109, 189, 224)
+
     # pylint:disable=too-many-arguments
     def __init__(self, name, input, size=1, ikSpaces=None, pvSpaces=None,
                  useProxyAttrs=True, useScale=True, addTwistJoints=True, addBendies=True,

@@ -36,6 +36,8 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (140, 215, 122)
+
     def __init__(self, name, input, size=1, rigParent=str(), addSpineMid=False, chestSpaces=None):
         """
         :param str name: name of the component

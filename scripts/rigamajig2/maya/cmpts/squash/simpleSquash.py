@@ -27,6 +27,8 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (39, 189, 46)
+
     def __init__(self, name, input, size=1, useProxyAttrs=True, rigParent=str()):
         """
         :param str name: name of the components

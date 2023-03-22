@@ -33,6 +33,8 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (47, 177, 161)
+
     def __init__(self, name, input, size=1, headSpaces=None, neckSpaces=None, rigParent=str()):
         """
         :param str name: name of the component

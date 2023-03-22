@@ -49,6 +49,8 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (109, 228, 189)
+
     def __init__(self, name, input, size=1, numberMainControls=4, closed=True, aimAxis=None, upAxis=None,
                  rigParent=str()):
         """"

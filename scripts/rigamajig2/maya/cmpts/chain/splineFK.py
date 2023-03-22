@@ -32,6 +32,8 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (149, 228, 189)
+
     def __init__(self, name, input, size=1, rigParent=str(), numControls=4, addFKSpace=False):
         """
         :param str name: name of the components

@@ -53,6 +53,8 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (255, 117, 129)
+
     def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, addSdk=False, useJaw=False, jawJoints=None,
                  addZipperLips=True):
         """

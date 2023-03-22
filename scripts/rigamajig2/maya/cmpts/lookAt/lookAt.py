@@ -24,6 +24,8 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (198, 167, 255)
+
     def __init__(self, name, input, size=1, rigParent=str(), lookAtSpaces=None, rigParentList=None):
         """
         :param str name: name of the components

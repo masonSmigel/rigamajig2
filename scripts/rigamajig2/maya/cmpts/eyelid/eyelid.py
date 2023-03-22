@@ -47,6 +47,8 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (116, 189, 224)
+
     def __init__(self, name, input, size=1, rigParent=str(), eyelidSpans=8, addCrease=True,
                  addFleshyEye=True, eyeballJoint=str(),
                  useCreaseFollow=False, uppCreaseDriver=str(), lowCreaseDriver=str()):

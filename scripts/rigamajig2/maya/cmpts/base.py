@@ -29,6 +29,8 @@ class Base(object):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (200, 200, 200)
+
     def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         constructor of the base class.

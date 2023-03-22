@@ -47,6 +47,8 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (151, 219, 175)
+
     def __init__(self, name, input, size=1, rigParent=str(), browSpans=8):
         """
         :param name: Component Name

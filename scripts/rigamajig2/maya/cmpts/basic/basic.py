@@ -28,6 +28,8 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (204, 194, 109)
+
     def __init__(self, name, input, size=1, rigParent=str(),
                  addSpaces=False,  addTrs=False, addSdk=False, addBpm=False,
                  controlShape='cube', worldOrient=False, spaceType='orient'):

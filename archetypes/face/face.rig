@@ -11,7 +11,7 @@
             "pre_scripts"
         ], 
         "post_script": [
-            "post_scripts"
+            "post_scripts/connectFaceBits.py"
         ], 
         "pub_script": [
             "pub_scripts"

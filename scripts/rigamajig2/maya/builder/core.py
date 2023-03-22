@@ -165,7 +165,8 @@ def runAllScripts(scripts=None):
         scripts = list()
 
     fileScripts = validateScriptList(scripts)
-    print fileScripts
+
+    fileScripts.reverse()
     for script in fileScripts:
         runScript.runScript(script)
 

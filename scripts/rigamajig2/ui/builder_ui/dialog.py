@@ -95,7 +95,7 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.setMinimumSize(420, 600)
 
         # with the maya mixin stuff the window comes in at a weird size. This ensures its not a weird size.
-        self.resize(420,800)
+        self.resize(420, 800)
 
         self.createMenus()
         self.createWidgets()
@@ -278,12 +278,11 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # setup ui Data
         self.assetNameLineEdit.setText(self.rigBuilder.getRigData(self.rigFile, constants.RIG_NAME))
 
-       # set the text of the archetype to the archetype. We need to check if its a string and update the formatting
+        # set the text of the archetype to the archetype. We need to check if its a string and update the formatting
         archetype = self.rigBuilder.getRigData(self.rigFile, constants.BASE_ARCHETYPE)
         if isinstance(archetype, (list, tuple)):
             archetype = ", ".join(archetype)
         self.archetypeBaseLabel.setText(str(archetype))
-
 
         # set paths and widgets relative to the rig env
         for widget in self.mainWidgets:

@@ -40,6 +40,8 @@ class StickyControls(rigamajig2.maya.cmpts.base.Base):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
+    UI_COLOR = (135, 90, 218)
+
     def __init__(self, name, input, size=1, rigParent=str(), numControls=1, negateTranslate=True, mirrorAxis='x'):
         """
         :param name: Component name. To add a side use a side token

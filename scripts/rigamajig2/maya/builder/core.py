@@ -31,6 +31,8 @@ logger = logging.getLogger(__name__)
 
 CMPT_ROOT_MODULE = 'cmpts'
 
+SCRIPT_FOLDER_CONSTANTS = ['pre_scripts', 'post_scripts', 'pub_scripts']
+
 
 def findComponents(path, excludedFolders, excludedFiles):
     """
@@ -352,13 +354,16 @@ def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
 
     newData = data.getData()
     newData[constants.BASE_ARCHETYPE] = archetype
+    newData[constants.PRE_SCRIPT] = list()
+    newData[constants.POST_SCRIPT] = list()
+    newData[constants.PUB_SCRIPT] = list()
     data.setData(newData)
     data.write(rigFile)
 
     # delete the contents of the scripts folders as they should be constructed from
     # previous inheritance. Keeping them here will duplicate the execution.
-    for scriptType in [constants.PRE_SCRIPT, constants.POST_SCRIPT, constants.PUB_SCRIPT]:
-        path = os.sep.join([newEnv, rigName, data.getData()[scriptType][0]])
+    for scriptType in SCRIPT_FOLDER_CONSTANTS:
+        path = os.sep.join([newEnv, rigName, scriptType])
         files = glob.glob('{}/*'.format(path))
         for f in files:
             os.remove(f)

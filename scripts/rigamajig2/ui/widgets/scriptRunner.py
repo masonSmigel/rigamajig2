@@ -103,7 +103,7 @@ class ScriptRunner(QtWidgets.QWidget):
         self.scriptList = QtWidgets.QListWidget()
         self.scriptList.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.scriptList.setFixedHeight(155)
-        self.scriptList.setAlternatingRowColors(True)
+        self.scriptList.setDragDropMode(QtWidgets.QListWidget.InternalMove)
 
         self.scriptList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.scriptList.customContextMenuRequested.connect(self._createContextMenu)
@@ -179,7 +179,7 @@ class ScriptRunner(QtWidgets.QWidget):
             scriptsList = scriptsDict[recursion]
 
             for script in scriptsList:
-                self._addScriptToWidget(script, data=recursion, color=RECURSION_COLORS[recursion])
+                item = self._addScriptToWidget(script, data=recursion, color=RECURSION_COLORS[recursion])
                 self.currentScriptsList.append(script)
 
     def _addScriptToWidget(self, script, data=0, color=None):
@@ -205,6 +205,7 @@ class ScriptRunner(QtWidgets.QWidget):
                 item.setTextColor(color)
 
             self.scriptList.addItem(item)
+        return item
 
     def addScriptBrowser(self):
         """add script through a browswer"""

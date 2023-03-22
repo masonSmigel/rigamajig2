@@ -198,6 +198,15 @@ def _getComponentIcon(cmpt):
     return QtGui.QIcon(os.path.join(ICON_PATH, "{}.png".format(cmpt.split('.')[0])))
 
 
+def _getComponentColor(cmpt):
+    """get the ui color for the component"""
+    tmpComponentObj = getComponentObject(cmpt)
+    uiColor = tmpComponentObj.UI_COLOR
+    # after we get the UI color we can delte the tmp component instance
+    del tmpComponentObj
+    return uiColor
+
+
 def getComponentObject(componentType=None):
     """
     Get an instance of the component object based on the componentType
@@ -382,11 +391,8 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.componentTree.addTopLevelItem(item)
 
-        # get a temp ui color
-        tmpComponentObj = getComponentObject(componentType)
-        uiColor = tmpComponentObj.UI_COLOR
-        # after we get the UI color we can delte the tmp component instance
-        del tmpComponentObj
+        # get the component color
+        uiColor = _getComponentColor(componentType)
 
         # now we can
         item.setTextColor(0, QtGui.QColor(*uiColor))
@@ -640,7 +646,7 @@ class ComponentManager(QtWidgets.QWidget):
         for item in self.getAll():
             if item.text(0) == searchedText:
                 self.componentTree.setCurrentItem(item)
-                # self.searchBar.clear()
+                self.searchBar.clear()
 
     def clearTree(self):
         """ clear the component tree"""
@@ -804,9 +810,13 @@ class CreateComponentDialog(QtWidgets.QDialog):
         """ Update the combobox with the exisitng component types """
         self.componentTypeComboBox.clear()
         tempBuilder = builder.Builder()
-        for i, component in enumerate(sorted(tempBuilder.getAvailableComponents())):
-            self.componentTypeComboBox.addItem(component)
-            self.componentTypeComboBox.setItemIcon(i, QtGui.QIcon(_getComponentIcon(component)))
+        for i, componentType in enumerate(sorted(tempBuilder.getAvailableComponents())):
+            self.componentTypeComboBox.addItem(componentType)
+            self.componentTypeComboBox.setItemIcon(i, QtGui.QIcon(_getComponentIcon(componentType)))
+
+            # get the UI Color
+            uiColor = _getComponentColor(componentType)
+            self.componentTypeComboBox.setItemData(i, QtGui.QColor(*uiColor), QtCore.Qt.TextColorRole)
 
     def updateDiscription(self):
         """

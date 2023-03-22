@@ -30,8 +30,8 @@ def mayaMainWindow():
 
 
 RECURSION_COLORS = {0: None,
-                    1: QtGui.QColor(58, 172, 168),
-                    2: QtGui.QColor(229, 238, 193),
+                    1: QtGui.QColor(116, 189, 224),
+                    2: QtGui.QColor(204, 194, 109),
                     3: QtGui.QColor(161, 213, 172),
                     4: QtGui.QColor(85, 124, 131),
                     }

@@ -8,13 +8,16 @@
         "model_file": null, 
         "skeleton_pos": null, 
         "pre_script": [
-            "pre_scripts"
+            "pre_scripts/initalize_scene.py"
         ], 
         "post_script": [
-            "post_scripts"
+            "post_scripts/finalize_scene.py"
         ], 
         "pub_script": [
-            "pub_scripts"
+            "pub_scripts/addContainerScriptNode.py",
+            "pub_scripts/cleanupRig.py", 
+            "pub_scripts/hideNodeHistory.py"
+
         ], 
         "control_shapes": null, 
         "guides": null, 

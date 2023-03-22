@@ -35,7 +35,7 @@ class PublishWidget(QtWidgets.QWidget):
     def createWidgets(self):
         """ Create Widgets"""
         self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
-        self.publishScriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
+        self.pubScriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
 
         self.outFileSuffix = QtWidgets.QLineEdit()
         self.outFileSuffix.setPlaceholderText("_rig")
@@ -68,7 +68,7 @@ class PublishWidget(QtWidgets.QWidget):
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(0)
 
-        self.mainCollapseableWidget.addWidget(self.publishScriptRunner)
+        self.mainCollapseableWidget.addWidget(self.pubScriptRunner)
         self.mainCollapseableWidget.addSpacing(10)
         publishFileLayout = QtWidgets.QHBoxLayout()
         publishFileLayout.addWidget(QtWidgets.QLabel("suffix:"))
@@ -94,15 +94,15 @@ class PublishWidget(QtWidgets.QWidget):
         self.outPathSelector.setRelativePath(rigEnv)
 
         # clear the ui
-        self.publishScriptRunner.clearScript()
+        self.pubScriptRunner.clearScript()
 
         # update data within the rig
         outFile = self.builder.getRigData(self.builder.getRigFile(), constants.OUTPUT_RIG)
         self.outPathSelector.selectPath(outFile)
 
         # update the script runner
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PUB_SCRIPT)
-        self.publishScriptRunner.addScripts(scripts)
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PUB_SCRIPT, asDict=True)
+        self.pubScriptRunner.addScriptsWithRecursionData(scripts)
 
         # set the default output file type
         fileTypeText = self.builder.getRigData(rigFile, constants.OUTPUT_RIG_FILE_TYPE)
@@ -118,7 +118,7 @@ class PublishWidget(QtWidgets.QWidget):
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
-        self.publishScriptRunner.executeAllScripts()
+        self.pubScriptRunner.executeAllScripts()
 
     @property
     def isChecked(self):

@@ -117,8 +117,13 @@ class DeformationWidget(QtWidgets.QWidget):
             caption="Select a SHAPES Node Setup",
             fileFilter=constants.MEL_FILTER,
             fileMode=2)
+        self.saveSHAPESButton = QtWidgets.QPushButton("Save SHAPES Setup")
+        self.saveSHAPESButton.setIcon(QtGui.QIcon(common.getIcon("saveShapesSetup.png")))
         self.loadSHAPESButton = QtWidgets.QPushButton("Load SHAPES Setup")
         self.loadSHAPESButton.setIcon(QtGui.QIcon(common.getIcon("loadShapesSetup.png")))
+
+        self.saveSHAPESButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.saveSHAPESButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
         self.loadSHAPESButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
         self.loadSHAPESButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
 
@@ -185,7 +190,14 @@ class DeformationWidget(QtWidgets.QWidget):
 
         self.mainCollapseableWidget.addSpacing(5)
         self.mainCollapseableWidget.addWidget(self.SHAPESPathSelector)
-        self.mainCollapseableWidget.addWidget(self.loadSHAPESButton)
+
+        # SHAPES layout
+        SHAPESButtonLayout = QtWidgets.QHBoxLayout()
+        SHAPESButtonLayout.setContentsMargins(0, 0, 0, 0)
+        SHAPESButtonLayout.setSpacing(4)
+        SHAPESButtonLayout.addWidget(self.saveSHAPESButton)
+        SHAPESButtonLayout.addWidget(self.loadSHAPESButton)
+        self.mainCollapseableWidget.addLayout(SHAPESButtonLayout)
 
         # add the widget to the main layout
         self.mainLayout.addWidget(self.mainCollapseableWidget)

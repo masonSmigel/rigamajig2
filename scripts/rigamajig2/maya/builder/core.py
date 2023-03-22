@@ -147,11 +147,11 @@ def validateScriptList(scriptsList=None):
             continue
 
         if rig_path.isFile(item):
-            resultList.append(item)
+            resultList.insert(0, item)
 
         if rig_path.isDir(item):
             for script in runScript.findScripts(item):
-                resultList.append(script)
+                resultList.insert(0, script)
 
     return resultList
 
@@ -165,6 +165,7 @@ def runAllScripts(scripts=None):
         scripts = list()
 
     fileScripts = validateScriptList(scripts)
+    print fileScripts
     for script in fileScripts:
         runScript.runScript(script)
 
@@ -186,58 +187,131 @@ def getAvailableArchetypes():
     return archetypeList
 
 
-class GetCompleteScriptList():
+class GetCompleteScriptList(object):
     """
-    This class will get a list of all scripts for a given rigfile
-    Including any upstream archetype parents script contents.
+    This class will get a list of all scripts for a given rig file and return them in a dictionary
     """
+
+    scriptDict = dict()
     scriptList = list()
 
     @classmethod
-    def getScriptList(cls, rigFile, scriptType=None):
+    def getScriptList(cls, rigFile, scriptType=None, asDict=False):
         """
         This function will get a list of all scripts for a given rigfile including any upstream archetype parents.
 
-        The list is reversed to provide scripts at the lowest level of inheritance first.
-
         :param rigFile: rig file to get scripts for
         :param scriptType: key of scripts to get. Typical values are pre_script, post_script or pub_script.
+        :param asDict: return the list of scripts as a dictionary instead. This provides the recursion level as a key.
         :return: list of scripts
         """
+        cls.scriptDict = dict()
         cls.scriptList = list()
+
         cls.findScripts(rigFile=rigFile, scriptType=scriptType)
 
-        return list(reversed(cls.scriptList))
+        if asDict:
+            return cls.scriptDict
+        else:
+            returnList = list()
+            # The list is reversed to provide scripts at the lowest level of inheritance first.
+            for key in cls.scriptDict.keys():
+                for script in cls.scriptDict[key]:
+                    returnList.append(script)
+            return returnList
 
     @classmethod
-    def findScripts(cls, rigFile, scriptType=None):
+    def findScripts(cls, rigFile, scriptType, recursionLevel=0):
         """
-
         :param rigFile: directories at the current rig file level of the rig
         :param scriptType: key of scripts to get. Typical values are pre_script, post_script or pub_script.
+        :param recursionLevel: the recursion level of the script to store as the dictionary key.
         """
         scriptType = scriptType or constants.PRE_SCRIPT
-
         localScriptPaths = getRigData(rigFile, scriptType)
         rigEnviornmentPath = os.path.abspath(os.path.join(rigFile, "../"))
 
-        # for each item in the prescript path append the scripts within that directory
+        # for each item in the scriptpath append the scripts
         for localScriptPath in localScriptPaths:
             fullScriptPath = os.path.join(rigEnviornmentPath, localScriptPath)
             builderScripts = validateScriptList(fullScriptPath)
 
+            # make a temp script list
+            _scriptList = list()
+
             for script in builderScripts:
                 if script not in cls.scriptList:
-                    cls.scriptList.append(script)
+                    _scriptList.insert(0, script)
+                    cls.scriptList.insert(0, script)
 
+            currentList = cls.scriptDict.get(recursionLevel, list())
+            cls.scriptDict[recursionLevel] = _scriptList + currentList
+
+        # now we can look at the parent archetypes and itterate through them too.
         baseArchetype = getRigData(rigFile, constants.BASE_ARCHETYPE)
         archetypeList = common.toList(baseArchetype)
         for baseArchetype in archetypeList:
             if baseArchetype and baseArchetype in getAvailableArchetypes():
+
                 archetypePath = os.sep.join([common.ARCHETYPES_PATH, baseArchetype])
                 archetypeRigFile = findRigFile(archetypePath)
 
-                cls.findScripts(archetypeRigFile, scriptType=scriptType)
+                cls.findScripts(archetypeRigFile, scriptType=scriptType, recursionLevel=recursionLevel + 1)
+
+#
+# class GetCompleteScriptList(object):
+#     """
+#     This class will get a list of all scripts for a given rigfile
+#     Including any upstream archetype parents script contents.
+#     """
+#
+#     scriptList = list()
+#     scriptDict = dict()
+#
+#     @classmethod
+#     def getScriptList(cls, rigFile, scriptType=None):
+#         """
+#         This function will get a list of all scripts for a given rigfile including any upstream archetype parents.
+#
+#         :param rigFile: rig file to get scripts for
+#         :param scriptType: key of scripts to get. Typical values are pre_script, post_script or pub_script.
+#         :return: list of scripts
+#         """
+#         cls.scriptList = list()
+#
+#         cls.findScripts(rigFile=rigFile, scriptType=scriptType)
+#
+#         # The list is reversed to provide scripts at the lowest level of inheritance first.
+#         return list(reversed(cls.scriptList))
+#
+#     @classmethod
+#     def findScripts(cls, rigFile, scriptType=None):
+#         """
+#         :param rigFile: directories at the current rig file level of the rig
+#         :param scriptType: key of scripts to get. Typical values are pre_script, post_script or pub_script.
+#         """
+#         scriptType = scriptType or constants.PRE_SCRIPT
+#
+#         localScriptPaths = getRigData(rigFile, scriptType)
+#         rigEnviornmentPath = os.path.abspath(os.path.join(rigFile, "../"))
+#
+#         # for each item in the prescript path append the scripts within that directory
+#         for localScriptPath in localScriptPaths:
+#             fullScriptPath = os.path.join(rigEnviornmentPath, localScriptPath)
+#             builderScripts = validateScriptList(fullScriptPath)
+#
+#             for script in builderScripts:
+#                 if script not in cls.scriptList:
+#                     cls.scriptList.insert(0, script)
+#
+#         baseArchetype = getRigData(rigFile, constants.BASE_ARCHETYPE)
+#         archetypeList = common.toList(baseArchetype)
+#         for baseArchetype in archetypeList:
+#             if baseArchetype and baseArchetype in getAvailableArchetypes():
+#                 archetypePath = os.sep.join([common.ARCHETYPES_PATH, baseArchetype])
+#                 archetypeRigFile = findRigFile(archetypePath)
+#
+#                 cls.findScripts(archetypeRigFile, scriptType=scriptType)
 
 
 def findRigFile(path):

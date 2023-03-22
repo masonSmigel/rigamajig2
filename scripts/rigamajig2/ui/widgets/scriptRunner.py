@@ -1,6 +1,7 @@
 """
 Script runner widget
 """
+import os.path
 import sys
 from os.path import relpath
 
@@ -26,6 +27,14 @@ def mayaMainWindow():
         return wrapInstance(int(mainWindowPointer), QtWidgets.QWidget)
     else:
         return wrapInstance(long(mainWindowPointer), QtWidgets.QWidget)
+
+
+RECURSION_COLORS = {0: None,
+                    1: QtGui.QColor(58, 172, 168),
+                    2: QtGui.QColor(229, 238, 193),
+                    3: QtGui.QColor(161, 213, 172),
+                    4: QtGui.QColor(85, 124, 131),
+                    }
 
 
 # ignore too many public methods to UI classes.
@@ -72,9 +81,15 @@ class ScriptRunner(QtWidgets.QWidget):
         self.showInFolderAction.setIcon(QtGui.QIcon(":folder-open.png"))
         self.showInFolderAction.triggered.connect(self.showInFolder)
 
+        self.addScriptAction = QtWidgets.QAction("Add Existing Script", self)
+        self.addScriptAction.setIcon(QtGui.QIcon(":addCreateGeneric.png"))
+        self.addScriptAction.triggered.connect(self.addScriptBrowser)
+
         self.newScriptAction = QtWidgets.QAction("Create New Script", self)
         self.newScriptAction.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
         self.newScriptAction.triggered.connect(self.createNewScript)
+
+
 
         self.deleteScriptAction = QtWidgets.QAction("Delete Script", self)
         self.deleteScriptAction.setIcon(QtGui.QIcon(":trash.png"))
@@ -115,22 +130,15 @@ class ScriptRunner(QtWidgets.QWidget):
         menu.addAction(self.executeSelectedAction)
         menu.addSeparator()
         menu.addAction(self.showInFolderAction)
+        menu.addAction(self.addScriptAction)
         menu.addAction(self.newScriptAction)
+        menu.addSeparator()
+        menu.addAction(self.deleteScriptAction)
+
         # menu .addSeparator()
         # menu .addAction(self.deleteScriptAction)
 
         menu.exec_(self.scriptList.mapToGlobal(position))
-
-    def _addItem(self, name, data=None, icon=None):
-        """ add an item to the script list"""
-        item = QtWidgets.QListWidgetItem(name)
-        if data:
-            item.setData(QtCore.Qt.UserRole, data)
-            item.setToolTip(data)
-        if icon:
-            item.setIcon(icon)
-
-        self.scriptList.addItem(item)
 
     def addScripts(self, scriptsList):
         """
@@ -147,7 +155,7 @@ class ScriptRunner(QtWidgets.QWidget):
 
             # if the item is a script then add it 
             if rig_path.isFile(item):
-                self._addScriptToWidget(item)
+                self._addScriptToWidget(item, color=None)
 
             # if the item is a directory then add all scripts in the directory
             if rig_path.isDir(item):
@@ -158,12 +166,41 @@ class ScriptRunner(QtWidgets.QWidget):
             # This keeps a list of all the current directories and scripts added to the UI
             self.currentScriptsList.append(item)
 
-    def _addScriptToWidget(self, script):
+    def addScriptsWithRecursionData(self, scriptsDict):
+        """
+        add a list of script while including recusion data in the loaded script data
+        """
+
+        for recursion in scriptsDict:
+            scriptsList = scriptsDict[recursion]
+
+            for script in scriptsList:
+                self._addScriptToWidget(script, data=recursion, color=RECURSION_COLORS[recursion])
+                self.currentScriptsList.append(script)
+
+    def _addScriptToWidget(self, script, data=0, color=None):
         """private method to add scripts to the list """
         fileInfo = QtCore.QFileInfo(script)
         if fileInfo.exists():
             fileName = fileInfo.fileName()
-            self._addItem(fileName, data=fileInfo.filePath(), icon=QtGui.QIcon(":fileNew.png"))
+            item = QtWidgets.QListWidgetItem(fileName)
+
+            # set the data
+            item.setData(QtCore.Qt.UserRole, fileInfo.filePath())
+            item.setToolTip(fileInfo.filePath())
+
+            if data:
+                pass
+                # item.setData(QtCore.Qt.ItemDataRole, data)
+
+            # set the icon
+            item.setIcon(QtGui.QIcon(":fileNew.png"))
+
+            # set the text color
+            if color:
+                item.setTextColor(color)
+
+            self.scriptList.addItem(item)
 
     def addScriptBrowser(self):
         """add script through a browswer"""
@@ -215,15 +252,27 @@ class ScriptRunner(QtWidgets.QWidget):
         """get selected items in the script list"""
         return [i for i in self.scriptList.selectedItems()]
 
-    def getCurrentScriptList(self, relativePaths=False):
-        """ get a list of current items in the script list """
+    def getCurrentScriptList(self, relativePath=None):
+        """
+        get a list of scripts at the current recursion level (no recursion level)
+        :param relativePath:
+        :return:
+        """
+
         scriptList = list()
-        if relativePaths:
-            for script in self.currentScriptsList:
-                print script, self.rootDirectory
-                scriptList.append(relpath(script, self.rootDirectory))
-            return scriptList
-        return self.currentScriptsList
+        for item in self.getAllItems():
+
+            # TODO: this is a bit hacky....
+
+            if item.textColor() == QtGui.QColor():
+                scriptPath = item.data(QtCore.Qt.UserRole)
+
+                if relativePath:
+                    scriptPath = os.path.relpath(scriptPath, relativePath)
+
+                scriptList.insert(0, scriptPath)
+
+        return scriptList
 
     def showInFolder(self):
         """ Show the selected file in the enclosing folder """
@@ -232,73 +281,3 @@ class ScriptRunner(QtWidgets.QWidget):
         for item in items:
             filePath = item.data(QtCore.Qt.UserRole)
             showInFolder.showInFolder(filePath=filePath)
-
-    # def setRelativeDirectory(self, value):
-    #     """
-    #     Make all scripts in the UI relative to this path
-    #     :param value: path to make scripts relative to
-    #     :return:
-    #     """
-    #     self.rootDirectory = value
-
-
-class TestDialog(QtWidgets.QDialog):
-    """
-    Test dialog for the script executer
-    """
-    WINDOW_TITLE = "Test Dialog"
-
-    def __init__(self, parent=mayaMainWindow()):
-        super(TestDialog, self).__init__(parent)
-
-        self.setWindowTitle(self.WINDOW_TITLE)
-        if cmds.about(ntOS=True):
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        elif cmds.about(macOS=True):
-            self.setProperty("saveWindowPref", True)
-            self.setWindowFlags(QtCore.Qt.Tool)
-
-        self.setMinimumSize(250, 200)
-
-        self.createWidgets()
-        self.createLayouts()
-
-    def createWidgets(self):
-        """ Create widgets """
-        self.scriptExecuter = ScriptRunner()
-
-    def createLayouts(self):
-        """ Create layouts"""
-
-        self.bodyWidget = QtWidgets.QWidget()
-
-        self.bodyLayout = QtWidgets.QVBoxLayout(self.bodyWidget)
-        self.bodyLayout.setContentsMargins(4, 2, 4, 2)
-        self.bodyLayout.setSpacing(3)
-        self.bodyLayout.setAlignment(QtCore.Qt.AlignTop)
-
-        self.bodyLayout.addWidget(self.scriptExecuter)
-        self.scriptExecuter.add_scripts_from_dir(
-            "/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/preScript")
-        self.scriptExecuter.add_scripts_from_dir("/Users/masonsmigel/Desktop/demo_scripts")
-
-        self.bodyScrollAra = QtWidgets.QScrollArea()
-        self.bodyScrollAra.setFrameShape(QtWidgets.QFrame.NoFrame)
-        self.bodyScrollAra.setWidgetResizable(True)
-        self.bodyScrollAra.setWidget(self.bodyWidget)
-
-        mainLayout = QtWidgets.QVBoxLayout(self)
-        mainLayout.setContentsMargins(0, 0, 0, 0)
-        mainLayout.addWidget(self.bodyScrollAra)
-
-
-if __name__ == "__main__":
-
-    try:
-        testDialog.close()  # pylint: disable=E0601
-        testDialog.deleteLater()
-    except:
-        pass
-    # pylint: disable=invalid-name
-    testDialog = TestDialog()
-    testDialog.show()

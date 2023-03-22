@@ -103,8 +103,8 @@ class ModelWidget(QtWidgets.QWidget):
         self.modelPathSelector.selectPath(modelFile)
 
         # update the script runner
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PRE_SCRIPT)
-        self.preScriptRunner.addScripts(scripts)
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PRE_SCRIPT, asDict=True)
+        self.preScriptRunner.addScriptsWithRecursionData(scripts)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""

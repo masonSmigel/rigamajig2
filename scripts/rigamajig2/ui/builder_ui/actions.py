@@ -32,6 +32,7 @@ import rigamajig2.maya.builder.builder as builder
 
 class Actions(object):
     """ Setup the actions for the builder dialog"""
+
     def __init__(self, dialog):
         """
         This class will setup the actions for the the builder Dialog.
@@ -119,13 +120,22 @@ class Actions(object):
         newData[constants.GUIDES] = self.dialog.intalizeWidget.guidePathSelector.getPath(absoultePath=False)
         newData[constants.COMPONENTS] = self.dialog.intalizeWidget.componentsPathSelector.getPath(absoultePath=False)
         newData[constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlPathSelector.getPath(absoultePath=False)
-        newData[constants.DEFORM_LAYERS] = self.dialog.deformationWidget.deformLayerPathSelector.getPath(absoultePath=False)
+        newData[constants.DEFORM_LAYERS] = self.dialog.deformationWidget.deformLayerPathSelector.getPath(
+            absoultePath=False)
         newData[constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath(absoultePath=False)
         newData[constants.PSD] = self.dialog.deformationWidget.psdPathSelector.getPath(absoultePath=False)
         newData[constants.SHAPES] = self.dialog.deformationWidget.SHAPESPathSelector.getPath(absoultePath=False)
         newData[constants.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath(absoultePath=False)
         newData[constants.OUTPUT_RIG_FILE_TYPE] = self.dialog.publishWidget.outFileTypeComboBox.currentText()
         newData[constants.OUTPUT_FILE_SUFFIX] = self.dialog.publishWidget.outFileSuffix.text()
+
+        # setup new data for the scripts
+        preScripts = self.dialog.modelWidget.preScriptRunner.getCurrentScriptList(relativePath=self.dialog.rigEnviornment)
+        postScripts = self.dialog.buildWidget.postScriptRunner.getCurrentScriptList(relativePath=self.dialog.rigEnviornment)
+        pubScripts = self.dialog.publishWidget.pubScriptRunner.getCurrentScriptList(relativePath=self.dialog.rigEnviornment)
+        newData[constants.PRE_SCRIPT] = preScripts
+        newData[constants.POST_SCRIPT] = postScripts
+        newData[constants.PUB_SCRIPT] = pubScripts
 
         data.setData(newData)
         data.write(self.dialog.rigFile)

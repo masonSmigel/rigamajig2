@@ -9,14 +9,12 @@
         "skeleton_file": "skeleton.ma", 
         "skeleton_pos": "skeleton_pos.json", 
         "pre_script": [
-            "pre_scripts"
         ], 
         "post_script": [
-            "post_scripts"
+            "post_scripts/set_biped_attrs.py"
         ], 
         "pub_script": [
-            "pub_scripts"
-        ], 
+        ],
         "control_shapes": "controlShapes.json", 
         "guides": "guides.json", 
         "components": "components.json", 

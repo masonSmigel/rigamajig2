@@ -45,7 +45,7 @@ class BuildWidget(QtWidgets.QWidget):
         self.finalizeButton = QtWidgets.QPushButton("Finalize")
 
         # Post - script section
-        self.postScriptScriptRunner = scriptRunner.ScriptRunner(title="Post-Scripts:")
+        self.postScriptRunner = scriptRunner.ScriptRunner(title="Post-Scripts:")
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -65,7 +65,7 @@ class BuildWidget(QtWidgets.QWidget):
 
         # Post Script
         self.mainCollapseableWidget.addSpacing()
-        self.mainCollapseableWidget.addWidget(self.postScriptScriptRunner)
+        self.mainCollapseableWidget.addWidget(self.postScriptRunner)
 
         # add the widget to the main layout
         self.mainLayout.addWidget(self.mainCollapseableWidget)
@@ -84,16 +84,16 @@ class BuildWidget(QtWidgets.QWidget):
         self.builder = builder
 
         # clear the ui
-        self.postScriptScriptRunner.clearScript()
+        self.postScriptRunner.clearScript()
 
         # self.postScriptScriptRunner.setRelativeDirectory(rigEnv)
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.POST_SCRIPT)
-        self.postScriptScriptRunner.addScripts(scripts)
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.POST_SCRIPT, asDict=True)
+        self.postScriptRunner.addScriptsWithRecursionData(scripts)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.completeBuild()
-        self.postScriptScriptRunner.executeAllScripts()
+        self.postScriptRunner.executeAllScripts()
 
     @property
     def isChecked(self):

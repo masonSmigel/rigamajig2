@@ -3,6 +3,7 @@ Script runner widget
 """
 import os.path
 import sys
+import subprocess
 from os.path import relpath
 
 from PySide2 import QtCore
@@ -81,6 +82,10 @@ class ScriptRunner(QtWidgets.QWidget):
         self.showInFolderAction.setIcon(QtGui.QIcon(":folder-open.png"))
         self.showInFolderAction.triggered.connect(self.showInFolder)
 
+        self.openScriptAction = QtWidgets.QAction("Open Script", self)
+        self.openScriptAction.setIcon(QtGui.QIcon(":openScript.png"))
+        self.openScriptAction.triggered.connect(self.openScript)
+
         self.addScriptAction = QtWidgets.QAction("Add Existing Script", self)
         self.addScriptAction.setIcon(QtGui.QIcon(":addCreateGeneric.png"))
         self.addScriptAction.triggered.connect(self.addScriptBrowser)
@@ -128,6 +133,7 @@ class ScriptRunner(QtWidgets.QWidget):
         menu.addAction(self.executeSelectedAction)
         menu.addSeparator()
         menu.addAction(self.showInFolderAction)
+        menu.addAction(self.openScriptAction)
         menu.addAction(self.addScriptAction)
         menu.addAction(self.newScriptAction)
         menu.addSeparator()
@@ -279,3 +285,10 @@ class ScriptRunner(QtWidgets.QWidget):
         for item in items:
             filePath = item.data(QtCore.Qt.UserRole)
             showInFolder.showInFolder(filePath=filePath)
+
+    def openScript(self):
+        items = self.getSelectedItems()
+
+        for item in items:
+            filePath = item.data(QtCore.Qt.UserRole)
+            subprocess.check_call(['open', filePath])

@@ -101,9 +101,9 @@ class Actions(object):
         fileDialog.setOption(QtWidgets.QFileDialog.DontUseNativeDialog)
         fileDialog.setNameFilters(["Rig Files (*.rig)"])
 
-        fileDialog.exec_()
+        result = fileDialog.exec_()
 
-        if fileDialog.selectedFiles():
+        if result:
             self.dialog.setRigFile(fileDialog.selectedFiles()[0])
 
     def saveRigFile(self):

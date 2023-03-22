@@ -26,6 +26,7 @@ from PySide2 import QtWidgets
 # RIGAMAJIG2
 import rigamajig2.shared.common as common
 from rigamajig2.maya import meta as meta
+from rigamajig2.maya import attr as attr
 from rigamajig2.maya.builder import builder
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp
 from rigamajig2.ui.builder_ui import constants
@@ -256,6 +257,10 @@ class ComponentManager(QtWidgets.QWidget):
         self.editComponentSettingsAction.setIcon(QtGui.QIcon(":toolSettings.png"))
         self.editComponentSettingsAction.triggered.connect(self.editComponentParameters)
 
+        self.renameComponentAction = QtWidgets.QAction("Rename Component", self)
+        self.renameComponentAction.setIcon(QtGui.QIcon(":quickRename.png"))
+        self.renameComponentAction.triggered.connect(self.renameComponent)
+
         self.createSymetricalComponent = QtWidgets.QAction("Create Mirrored Component")
         self.createSymetricalComponent.setIcon(QtGui.QIcon(":kinMirrorJoint_S.png"))
         self.createSymetricalComponent.triggered.connect(self.createMirroredComponent)
@@ -289,6 +294,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.componentTree.setContextMenuPolicy(QtCore.Qt.ActionsContextMenu)
         self.componentTree.addAction(self.selectContainerAction)
         self.componentTree.addAction(self.editComponentSettingsAction)
+        self.componentTree.addAction(self.renameComponentAction)
         self.componentTree.addAction(self.createSymetricalComponent)
         self.componentTree.addAction(self.mirrorComponentSettingsAction)
         self.componentTree.addAction(self.reloadComponentAction)
@@ -553,6 +559,28 @@ class ComponentManager(QtWidgets.QWidget):
             self.componentTree.takeTopLevelItem(self.componentTree.indexOfTopLevelItem(item))
 
             self.builder.componentList.remove(component)
+
+    def renameComponent(self):
+        items = self.getSelectedItem()
+
+        if not len(items) > 0:
+            return
+        else:
+            item = items[0]
+
+        # create a window to ask for a name
+        component = self.getComponentObj(item)
+        container = component.getContainer()
+
+        text, accept = QtWidgets.QInputDialog.getText(self, "Rename {}".format(component.name), "New Name:")
+        if accept:
+            # unlock the name attribute
+            attr.unlock(container, 'name')
+            attr.setAttr(container, 'name', text)
+            attr.lock(container, 'name')
+
+            # rename the component in the UI
+            item.setText(0, text)
 
     def clearTree(self):
         """ clear the component tree"""

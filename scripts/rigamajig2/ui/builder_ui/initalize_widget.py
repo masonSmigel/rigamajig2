@@ -663,7 +663,6 @@ class ComponentManager(QtWidgets.QWidget):
 
             self.searchCompleterModel.setStringList(stringList)
 
-
     def searchForComponent(self):
         searchedText = self.searchBar.text()
 

@@ -377,6 +377,10 @@ class Base(object):
             return self.container
         return None
 
+    def getName(self):
+        """Get component name"""
+        return self.name
+
     def getInputs(self):
         """Get component inputs"""
         return self.input
@@ -404,6 +408,11 @@ class Base(object):
     def setName(self, value):
         """Set the component name"""
         self.name = value
+
+    def setContainer(self, value):
+        """Set the component container"""
+        self.container = value
+        self.metaNode = rigamajig2.maya.meta.MetaNode(self.container)
 
     @classmethod
     def testBuild(cls, cmpt):

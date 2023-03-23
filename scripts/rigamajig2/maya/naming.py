@@ -150,3 +150,41 @@ def formatName(base=None, side=None, location=None, warble=None, index=None, ext
     name = rx.sub('_', name)
 
     return normalize(name)
+
+
+def searchAndReplaceName(nodes, search, replace):
+    """
+    Loop through a list of nodes and search and replace a string in the names
+
+    :param nodes: list of nodes to search and replace names of
+    :param search: string or regex expression to search for
+    :param replace: string or regex expression to replace with
+    :return: list of renamed nodes
+    """
+
+    nodes = common.toList(nodes)
+
+    renamedNodes = list()
+    # loop through all nodes and rename them
+    for node in nodes:
+        # ensure the node exists and that its name is unique
+        if cmds.objExists(node):
+            if isUniqueName(node):
+                # generate the new name and make sure its unique
+                newName = re.sub(search, replace, node)
+
+                # if the name doesnt change dont replace it
+                if newName == node:
+                    continue
+                # if the new name isnt unique rename it
+                if not isUniqueName(newName):
+                    newName = getUniqueName(newName)
+
+                # apply the rename
+                cmds.rename(node, newName)
+                renamedNodes.append(newName)
+
+            else:
+                raise Warning("More than one node matches the name {}".format(node))
+
+    return renamedNodes

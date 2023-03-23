@@ -27,6 +27,8 @@ from PySide2 import QtWidgets
 import rigamajig2.shared.common as common
 from rigamajig2.maya import meta as meta
 from rigamajig2.maya import attr as attr
+from rigamajig2.maya import naming as naming
+from rigamajig2.maya import container as rig_container
 from rigamajig2.maya.builder import builder
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp
 from rigamajig2.ui.builder_ui import constants
@@ -630,15 +632,37 @@ class ComponentManager(QtWidgets.QWidget):
         component = self.getComponentObj(item)
         container = component.getContainer()
 
-        text, accept = QtWidgets.QInputDialog.getText(self, "Rename {}".format(component.name), "New Name:")
+        newName, accept = QtWidgets.QInputDialog.getText(self, "Rename {}".format(component.name), "New Name:")
         if accept:
+            oldName = component.getName()
+
             # unlock the name attribute
             attr.unlock(container, 'name')
-            attr.setAttr(container, 'name', text)
+            attr.setAttr(container, 'name', newName)
             attr.lock(container, 'name')
 
+            # get all nodes in the container an do a search and replace
+            containedNodes = rig_container.getNodesInContainer(container)
+            newContainerName = naming.searchAndReplaceName(container, oldName, newName)[0]
+            naming.searchAndReplaceName(containedNodes, oldName, newName)
+
+            # we need to manually reset some of the class parameters of the names we changed
+            component.setName(newName)
+            component.setContainer(newContainerName)
+
+            # reload the component parameters back into the class
+            component._loadComponentParametersToClass()
+
             # rename the component in the UI
-            item.setText(0, text)
+            item.setText(0, newName)
+
+            # update the auto complete stringModel
+            stringList = self.searchCompleterModel.stringList()
+            stringList.remove(oldName)
+            stringList.append(newName)
+
+            self.searchCompleterModel.setStringList(stringList)
+
 
     def searchForComponent(self):
         searchedText = self.searchBar.text()

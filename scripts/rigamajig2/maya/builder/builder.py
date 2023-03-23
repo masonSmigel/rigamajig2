@@ -304,7 +304,9 @@ class Builder(object):
             componentDataObj.read(path)
             componentData = componentDataObj.getData()
             for cmpt in self.componentList:
-                cmpt.loadSettings(componentData[cmpt.name])
+                # here we can use get to return an empty list of the key doesnt exist.
+                # This doest happen often but can occur if the component was renamed
+                cmpt.loadSettings(componentData.get(cmpt.name, dict()))
 
     def loadMetadataToComponentSettings(self):
         """

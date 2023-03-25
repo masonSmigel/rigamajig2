@@ -68,8 +68,18 @@ class SHAPESData(maya_data.MayaData):
 
             # now we need to save the data we need.
             self._data[blendshapeNode]['setupFile'] = None
-            self._data[blendshapeNode]['useDeltas'] = useDeltas
             self._data[blendshapeNode]['deltasFile'] = None
+
+    def applyData(self, nodes, attributes=None, loadDeltas=True):
+        """
+        Rebuild the SHAPES data from the given nodes.
+
+        :param nodes: Array of nodes to apply the data to
+        :param attributes: Array of attributes you want to apply the data to
+        :param loadDeltas: If True then load the deltas back. Otherwise exact shapes will be used as blendshape targets.
+        :return:
+        """
+        super(SHAPESData, self).applyData()
 
     def write(self, filepath, createDirectory=True):
 
@@ -80,11 +90,10 @@ class SHAPESData(maya_data.MayaData):
             # set the setup file data to be the path to the mel file for the blendshape!
             self._data[blendshapeNode]['setupFile'] = None
 
-            if self._data[blendshapeNode]['useDeltas']:
-                # export the deltas too
+            # export the deltas too
 
-                # set the file path in the json file
-                self._data[blendshapeNode]['deltasFile'] = "newPath"
+            # set the file path in the json file
+            self._data[blendshapeNode]['deltasFile'] = "newPath"
 
             # TODO: come back to this to update it!
 

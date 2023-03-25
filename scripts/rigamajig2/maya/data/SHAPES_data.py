@@ -23,7 +23,8 @@ class SHAPESData(maya_data.MayaData):
     def __init__(self):
         super(SHAPESData, self).__init__()
 
-        # if we could loaded SHAPES try to
+        # if we could loaded SHAPES then source the required mel scripts.
+        # SHAPES has a built in proc to do this so we can just source the main file and call those procs.
         if self.__validateSHAPES():
             mel.eval("source SHAPES;"
                      "shapesSourceScripts;"

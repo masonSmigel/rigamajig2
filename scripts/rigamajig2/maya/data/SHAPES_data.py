@@ -44,7 +44,7 @@ class SHAPESData(maya_data.MayaData):
 
         return SHAPESLoaded
 
-    def gatherData(self, node, useDeltas=True):
+    def gatherData(self, node):
         """
         This method will gather data from the maya node passed as an argument.
         It stores the data on the self._data attribute

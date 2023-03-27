@@ -15,6 +15,7 @@ import maya.mel as mel
 import linecache
 
 from rigamajig2.shared import common
+from rigamajig2.shared import path as rig_path
 import rigamajig2.maya.data.maya_data as maya_data
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import mesh
@@ -262,7 +263,8 @@ def rebuildSetup(filePath):
     :param filePath: The file path if the blend shape setup.
     :type filePath: str
     """
-    mel.eval('shapesUtil_performImportShapeSetup "{}"'.format(filePath))
+    cleanPath = rig_path.cleanPath(filePath)
+    mel.eval('shapesUtil_performImportShapeSetup "{}"'.format(cleanPath))
 
 
 # ----------------------------------------------------------------------

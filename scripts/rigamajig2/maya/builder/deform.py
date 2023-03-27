@@ -149,13 +149,11 @@ def loadSHAPESData(path=None):
     if not os.path.exists(path):
         return
 
-    if path:
+    if path and rig_path.isFile(path):
         dataObj = SHAPES_data.SHAPESData()
         dataObj.read(path)
         dataObj.applyData(nodes=dataObj.getKeys())
         return True
-
-
 
 
     # if rig_path.isFile(path):

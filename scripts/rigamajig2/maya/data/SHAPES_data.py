@@ -264,7 +264,10 @@ def rebuildSetup(filePath):
     :type filePath: str
     """
     cleanPath = rig_path.cleanPath(filePath)
-    mel.eval('shapesUtil_performImportShapeSetup "{}"'.format(cleanPath))
+
+    # format the path for mel
+    melFormmatedPath = cleanPath.replace("\\", "/")
+    mel.eval('shapesUtil_performImportShapeSetup "{}"'.format(melFormmatedPath))
 
 
 # ----------------------------------------------------------------------

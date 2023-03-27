@@ -1,5 +1,43 @@
 # Change Log 
 
+## 1.1.0
+
+### Added:
+* Various UI improvements
+  * Added an open to open a script in the default editor from the builder dialog. 
+  * Added a search feild to the component manager. 
+  * Added colors to the component manager so users can easily differentiate between component types at a glance 
+  * Implemented rename component functionality. This can be done through the builder Dialog
+  * Added explict control of the scripts run through the .rig file, including the order scripts are run. 
+* Several new tools for working with Unreal engine and Mocap data
+  * Added a tool to ikFK match for a time range. It can be accessed by showing the ui with the following command: 
+    `ikfkSwitcher.IkFkMatchRangeDialog.showDialog()`
+  * Created a batch FBX export tool to use for exporting animation clips for all rigs in a scene. 
+     This can be accessed by showing the ui with the following command: `ueExport.BatchExportFBX.showDialog()`
+  * Added `ue` module with support for exporting rigs and animation clips to unreal. 
+    This can be accessed through two commands `ue.exportAnimationClip` and `ue.exportSkeletalMesh`
+* Some small helper functions, useful utilities and other misc updates
+  * Added `uv.checkIfOverlapping` to see if uvs are overlapping.  
+  * Added options to create an open curve to `curve.createCurve`
+  * Added a `type` paramaeter to `meta.hasTag`
+  * Added buttons to open profiler and Evaluation toolkit from the Builder Dialog
+  * A system to tag components. This can be used in all kinds of post scripts to retreive components via tags. 
+
+### Changed: 
+* Rebuilt SHAPES data export and import with the help of Ingo Clemens. This is primarily implemented via
+  a new `SHAPES_data` class that stores pointers to the data exported from the new SHAPES wrappers. The SHAPES data type 
+  stores pointers for a ton of blendshapes while the SHAPES setup themselves are saved in a separate file. 
+  * Implemented a localization step when building the SHAPES setup which ensures the maya files paths are set properly 
+    before attempting to import them. To do this we create a temp setup.mel file with the proper paths for the current 
+    machine. We then delete the temp file after the setup is loaded. 
+* Fixed a bug with the component names in the `chain.chainSpline` component
+* The `main.main` component will now always be given a tag `rig_root`
+* updated get `getClosestParameter` to use OpenMaya 
+* Changed all component parameters that requre a vector to use an axis direction instead. Its easier to understand and edit. 
+
+### Removed: 
+* Removed the smoothing actorization stuff. 
+
 ## 1.0.11
 ### Added: 
 * Face archetype using new facial components 

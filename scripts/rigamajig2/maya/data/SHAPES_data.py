@@ -12,6 +12,7 @@ import os.path
 from collections import OrderedDict
 import maya.cmds as cmds
 import maya.mel as mel
+import linecache
 
 from rigamajig2.shared import common
 import rigamajig2.maya.data.maya_data as maya_data
@@ -84,12 +85,14 @@ class SHAPESData(maya_data.MayaData):
             self._data[blendshapeNode]['useDeltas'] = useDeltas
             self._data[blendshapeNode]['deltasFile'] = None
 
-    def applyData(self, nodes, attributes=None, rebuild=True):
+    def applyData(self, nodes, attributes=None, autoLocalize=True, rebuild=True):
         """
         Rebuild the SHAPES data from the given nodes.
 
         :param nodes: Array of nodes to apply the data to
         :param attributes: Array of attributes you want to apply the data to
+        :param autoLocalize: SHAPES has some data that is hard coded into the setup.mel file. autoLocalize will try to
+                            localize the data upon building.
         :param rebuild: if True this will rebuild any existing setup that exists
         :return:
         """
@@ -105,8 +108,21 @@ class SHAPESData(maya_data.MayaData):
             if cmds.objExists(blendshapeNode) and rebuild:
                 cmds.delete(blendshapeNode)
 
+            # get the setup path from the shapes file
             setupPath = os.sep.join([baseFolder, self._data[blendshapeNode]['setupFile']])
-            rebuildSetup(setupPath)
+
+            if autoLocalize:
+                # create a duplicate with localized paths then rebuild from that file
+                tmpLocalizedFile = localizeSHAPESFile(setupPath)
+                rebuildSetup(tmpLocalizedFile)
+
+                # delete the localized version
+                os.remove(tmpLocalizedFile)
+
+            else:
+                rebuildSetup(setupPath)
+
+            # delete the temp file
 
             if self._data[blendshapeNode]['useDeltas']:
                 deltasPath = os.sep.join([baseFolder, self._data[blendshapeNode]['deltasFile']])
@@ -306,6 +322,68 @@ def importBlendshapeDeltas(bsNode, filePath):
 
     # do a print with the br message to keep stuff consistant
     mel.eval('br_displayMessage -info ("Imported Deltas to \'{}\' from \'{}\' ");'.format(bsNode, filePath))
+
+
+def localizeSHAPESFile(melFile):
+    """
+    SHAPES setup.mel files have hard coded paths to the shapes and data files used within them.
+    This can be useful in some situations but for rigamajig2 it makes it hard to transfer between users.
+    To fix this we can update the paths based on the mel file which we know the location of.
+
+    From that we can replace out the lines that are hardcoded at runtime, creating a duplicate with proper pathing.
+    Once the setup is imported we can delete the temp file that has the 'proper' paths
+
+    :param melFile: path to the mel file with paths to localize
+    :type melFile: string
+
+    :return: path to the new mel file we create
+    :rtype: string
+    """
+    baseDirectory = os.path.dirname(melFile)
+    tmpMelFilename = "tmp_{}_localized.mel".format(os.path.basename(melFile).split(".")[0])
+    outputFile = os.path.join(baseDirectory, tmpMelFilename)
+
+    lookup1 = "// import shapes"
+    lookup2 = "// import data node"
+
+    codeToReplaceWith = 'file -i -type "mayaBinary" -mnc 0 -pr "{}";\n'
+
+    # read the existing contents into lines
+    with open(melFile) as f:
+        sourceLines = f.readlines()
+
+    for lookup in [lookup1, lookup2]:
+        f = open(melFile, 'r')
+        line_num = 0
+
+        # find the line above the line we want to replace.
+        # Since everything is commented nicely we can easily find the right string.
+        setupPathLine = 0
+        for line in f.readlines():
+            line_num += 1
+            if line.find(lookup) >= 0:
+                setupPathLine = line_num + 1
+
+        # now we need to get the correct line and read only that line
+        problemLine = linecache.getline(melFile, setupPathLine)
+
+        # now we can get the filepath from it and get the file name
+        problemFilePath = problemLine.rsplit('"', 2)[1]
+        fileName = os.path.basename(problemFilePath)
+        newFilePath = os.path.join(baseDirectory, fileName)
+
+        # build a new line of code based on the data we plug in
+        newLine = codeToReplaceWith.format(newFilePath)
+
+        # set the data in the lines we setup before
+        sourceLines[setupPathLine - 1] = newLine
+
+    # write out the new lines
+    outFileObj = open(outputFile, "w")
+    outFileObj.writelines(sourceLines)
+    outFileObj.close()
+
+    return outputFile
 
 
 if __name__ == '__main__':

@@ -23,6 +23,7 @@ from rigamajig2.maya import meta
 from rigamajig2.maya.data import psd_data
 from rigamajig2.maya.data import skin_data
 from rigamajig2.maya.data import deformLayer_data
+from rigamajig2.maya.data import SHAPES_data
 from rigamajig2.maya import skinCluster
 
 logger = logging.getLogger(__name__)
@@ -128,7 +129,12 @@ def saveSHAPESData(path=None):
     :param path:
     :return:
     """
-    pass
+    dataObj = SHAPES_data.SHAPESData()
+    if os.path.exists(path):
+        dataObj.read(path)
+
+    dataObj.gatherDataIterate(cmds.ls(sl=True))
+    dataObj.write(path)
 
 
 def loadSHAPESData(path=None):
@@ -138,22 +144,34 @@ def loadSHAPESData(path=None):
     The data is applied by sourcing a mel file
     """
 
-    path = rig_path.cleanPath(path)
+    if not path:
+        return
+    if not os.path.exists(path):
+        return
 
-    if rig_path.isFile(path):
-        # mel wont source the file if the slashes match windows slashes
-        # so we need to search for them and replace them with mel freindly slashes
-        melFormmatedPath = path.replace("\\", "/")
-        mel.eval('source "{path}";'.format(path=melFormmatedPath))
+    if path:
+        dataObj = SHAPES_data.SHAPESData()
+        dataObj.read(path)
+        dataObj.applyData(nodes=dataObj.getKeys())
         return True
-    if rig_path.isDir(path):
-        for f in os.listdir(path):
-            name, ext = os.path.splitext(f)
-            if ext == '.mel':
-                fullPath = os.path.join(path, f)
-                melFormmatedPath = fullPath.replace("\\", "/")
-                mel.eval('source "{path}";'.format(path=melFormmatedPath))
-        return True
+
+
+
+
+    # if rig_path.isFile(path):
+    #     # mel wont source the file if the slashes match windows slashes
+    #     # so we need to search for them and replace them with mel freindly slashes
+    #     melFormmatedPath = path.replace("\\", "/")
+    #     mel.eval('source "{path}";'.format(path=melFormmatedPath))
+    #     return True
+    # if rig_path.isDir(path):
+    #     for f in os.listdir(path):
+    #         name, ext = os.path.splitext(f)
+    #         if ext == '.mel':
+    #             fullPath = os.path.join(path, f)
+    #             melFormmatedPath = fullPath.replace("\\", "/")
+    #             mel.eval('source "{path}";'.format(path=melFormmatedPath))
+    #     return True
 
 
 def saveDeformLayers(path=None):

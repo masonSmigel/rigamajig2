@@ -195,8 +195,8 @@ class DeformationWidget(QtWidgets.QWidget):
         SHAPESButtonLayout = QtWidgets.QHBoxLayout()
         SHAPESButtonLayout.setContentsMargins(0, 0, 0, 0)
         SHAPESButtonLayout.setSpacing(4)
-        SHAPESButtonLayout.addWidget(self.saveSHAPESButton)
         SHAPESButtonLayout.addWidget(self.loadSHAPESButton)
+        SHAPESButtonLayout.addWidget(self.saveSHAPESButton)
         self.mainCollapseableWidget.addLayout(SHAPESButtonLayout)
 
         # add the widget to the main layout
@@ -216,6 +216,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.connectBpmsButton.clicked.connect(self.connectBindPreMatrix)
         self.loadPsdButton.clicked.connect(self.loadPoseReaders)
         self.savePsdButton.clicked.connect(self.savePoseReaders)
+        self.saveSHAPESButton.clicked.connect(self.saveSHAPESData)
         self.loadSHAPESButton.clicked.connect(self.loadSHAPESData)
 
     def setBuilder(self, builder):
@@ -302,6 +303,9 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def loadSHAPESData(self):
         self.builder.loadSHAPESData(self.SHAPESPathSelector.getPath())
+
+    def saveSHAPESData(self):
+        self.builder.saveSHAPESData(self.SHAPESPathSelector.getPath())
 
     def addDeformLayer(self):
         """

@@ -426,6 +426,11 @@ class Builder(object):
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
         deform.saveSkinWeights(path)
 
+    def saveSHAPESData(self, path=None):
+        """ Save SHAPES data """
+        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
+        deform.saveSHAPESData(path)
+
     def loadSHAPESData(self, path=None):
         """ Load data from SHAPES file"""
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
@@ -499,7 +504,8 @@ class Builder(object):
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
-    def run(self, publish=False, suffix=None, outputfile=None, assetName=None, fileType=None, versioning=True, saveFBX=False):
+    def run(self, publish=False, suffix=None, outputfile=None, assetName=None, fileType=None, versioning=True,
+            saveFBX=False):
         """
         Build a rig.
 

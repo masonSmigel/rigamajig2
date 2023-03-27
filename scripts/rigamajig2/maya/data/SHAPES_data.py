@@ -123,8 +123,6 @@ class SHAPESData(maya_data.MayaData):
             else:
                 rebuildSetup(setupPath)
 
-            # delete the temp file
-
             if self._data[blendshapeNode]['useDeltas']:
                 deltasPath = os.sep.join([baseFolder, self._data[blendshapeNode]['deltasFile']])
                 importBlendshapeDeltas(blendshapeNode, deltasPath)
@@ -266,9 +264,9 @@ def rebuildSetup(filePath):
     cleanPath = rig_path.cleanPath(filePath)
 
     # format the path for mel
-    melFormmatedPath = cleanPath.replace("\\", "/")
-    mel.eval('source "{path}";'.format(path=melFormmatedPath))
-    # mel.eval('shapesUtil_performImportShapeSetup "{}"'.format(melFormmatedPath))
+    melPath = cleanPath.replace("\\", "/")
+    # rather than using SHAPES we can just source the file to rebuild the setup.
+    mel.eval('source "{path}";'.format(path=melPath))
 
 
 # ----------------------------------------------------------------------
@@ -322,12 +320,12 @@ def importBlendshapeDeltas(bsNode, filePath):
     Import the blendshape deltas
     """
     # once again mel can be silly so reformat the path to have properly facing slashes
-    melFormatedFilePath = filePath.replace("\\", "/")
-    mel.eval('br_blendShapeImportData -delta -fileName "{filePath}" "{blendshape}";'.format(filePath=melFormatedFilePath,
+    melPath = filePath.replace("\\", "/")
+    mel.eval('br_blendShapeImportData -delta -fileName "{filePath}" "{blendshape}";'.format(filePath=melPath,
                                                                                             blendshape=bsNode))
 
     # do a print with the br message to keep stuff consistant
-    mel.eval('br_displayMessage -info ("Imported Deltas to \'{}\' from \'{}\' ");'.format(bsNode, melFormatedFilePath))
+    mel.eval('br_displayMessage -info ("Imported Deltas to \'{}\' from \'{}\' ");'.format(bsNode, melPath))
 
 
 def localizeSHAPESFile(melFile):
@@ -393,12 +391,3 @@ def localizeSHAPESFile(melFile):
     outFileObj.close()
 
     return outputFile
-
-
-if __name__ == '__main__':
-    d = SHAPESData()
-
-    d.gatherData('body_hi')
-
-    print d.getData()
-    print d.write("/Users/masonsmigel/Desktop/SHAPES_WRITE_TEST/test.json")

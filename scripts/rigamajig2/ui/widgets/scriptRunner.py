@@ -4,6 +4,7 @@ Script runner widget
 import os.path
 import sys
 import subprocess
+import platform
 from os.path import relpath
 
 from PySide2 import QtCore
@@ -292,4 +293,12 @@ class ScriptRunner(QtWidgets.QWidget):
 
         for item in items:
             filePath = item.data(QtCore.Qt.UserRole)
-            subprocess.check_call(['open', filePath])
+            # macOS
+            if platform.system() == 'Darwin':
+                subprocess.check_call(['open', filePath])
+            # Windows
+            elif platform.system() == 'Windows':
+                os.startfile(filePath)
+            # Linux
+            else:
+                subprocess.check_call(['xdg-open', filePath])

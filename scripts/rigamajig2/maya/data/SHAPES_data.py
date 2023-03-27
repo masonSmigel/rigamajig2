@@ -319,15 +319,15 @@ def exportBlendShapeDeltas(bsNode, filePath):
 
 def importBlendshapeDeltas(bsNode, filePath):
     """
-    Import the
+    Import the blendshape deltas
     """
-
-    # TODO: comment all this stuff out
-    mel.eval('br_blendShapeImportData -delta -fileName "{filePath}" "{blendshape}";'.format(filePath=filePath,
+    # once again mel can be silly so reformat the path to have properly facing slashes
+    melFormatedFilePath = filePath.replace("\\", "/")
+    mel.eval('br_blendShapeImportData -delta -fileName "{filePath}" "{blendshape}";'.format(filePath=melFormatedFilePath,
                                                                                             blendshape=bsNode))
 
     # do a print with the br message to keep stuff consistant
-    mel.eval('br_displayMessage -info ("Imported Deltas to \'{}\' from \'{}\' ");'.format(bsNode, filePath))
+    mel.eval('br_displayMessage -info ("Imported Deltas to \'{}\' from \'{}\' ");'.format(bsNode, melFormatedFilePath))
 
 
 def localizeSHAPESFile(melFile):
@@ -378,8 +378,11 @@ def localizeSHAPESFile(melFile):
         fileName = os.path.basename(problemFilePath)
         newFilePath = os.path.join(baseDirectory, fileName)
 
+        # fix the path because mel likes to mess up the paths
+        melFormmatedPath = newFilePath.replace("\\", "//")
+
         # build a new line of code based on the data we plug in
-        newLine = codeToReplaceWith.format(newFilePath)
+        newLine = codeToReplaceWith.format(melFormmatedPath)
 
         # set the data in the lines we setup before
         sourceLines[setupPathLine - 1] = newLine

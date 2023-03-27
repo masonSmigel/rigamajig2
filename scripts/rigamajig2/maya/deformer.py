@@ -163,6 +163,16 @@ def getDeformerStack(geo, ignoreTypes=None):
     geo = common.getFirstIndex(geo)
 
     inputs = cmds.ls(cmds.listHistory(geo, pruneDagObjects=True, interestLevel=1), type="geometryFilter")
+
+    # sometimes deformers can be connected to inputs that dont affect the deformation of the given geo.
+    # This happens alot in blendshapes where one blendshape drives a bunch of others for small details.
+    # we need to filter out any deformers from this list that doent affect the given geo.
+    deformShape = getDeformShape(geo)
+    for i in inputs:
+        tgtDeformShape = common.getFirstIndex(cmds.deformer(i, q=1, g=1, gi=1))
+        if tgtDeformShape != deformShape:
+            inputs.remove(i)
+
     return [i for i in inputs if not cmds.nodeType(i) in ignoreTypes]
 
 

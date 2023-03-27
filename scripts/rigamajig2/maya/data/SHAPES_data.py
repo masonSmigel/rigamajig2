@@ -18,6 +18,8 @@ import rigamajig2.maya.data.maya_data as maya_data
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import mesh
 
+SUBFOLDER_PATH = "SHAPES"
+
 
 class SHAPESData(maya_data.MayaData):
     """ Class to store maya data"""
@@ -48,13 +50,15 @@ class SHAPESData(maya_data.MayaData):
 
         return SHAPESLoaded
 
-    def gatherData(self, node):
+    def gatherData(self, node, useDeltas=True):
         """
         This method will gather data from the maya node passed as an argument.
         It stores the data on the self._data attribute
 
         :param node: blendshape node to gather data from
         :type node: str
+        :param useDeltas: If True then load the deltas back. Otherwise exact shapes will be used as blendshape targets.
+        :type useDeltas: bool
         """
 
         if not self.__validateSHAPES():
@@ -77,15 +81,16 @@ class SHAPESData(maya_data.MayaData):
             # now we need to save the data we need.
             self._data[blendshapeNode]['mesh'] = mesh
             self._data[blendshapeNode]['setupFile'] = None
+            self._data[blendshapeNode]['useDeltas'] = useDeltas
             self._data[blendshapeNode]['deltasFile'] = None
 
-    def applyData(self, nodes, attributes=None, loadDeltas=True):
+    def applyData(self, nodes, attributes=None, rebuild=True):
         """
         Rebuild the SHAPES data from the given nodes.
 
         :param nodes: Array of nodes to apply the data to
         :param attributes: Array of attributes you want to apply the data to
-        :param loadDeltas: If True then load the deltas back. Otherwise exact shapes will be used as blendshape targets.
+        :param rebuild: if True this will rebuild any existing setup that exists
         :return:
         """
 
@@ -95,10 +100,15 @@ class SHAPESData(maya_data.MayaData):
 
         baseFolder = os.path.dirname(self.filepath)
         for blendshapeNode in nodes:
+
+            # check if the blendshape node exists and delete it if we want to rebuild
+            if cmds.objExists(blendshapeNode) and rebuild:
+                cmds.delete(blendshapeNode)
+
             setupPath = os.sep.join([baseFolder, self._data[blendshapeNode]['setupFile']])
             rebuildSetup(setupPath)
 
-            if loadDeltas:
+            if self._data[blendshapeNode]['useDeltas']:
                 deltasPath = os.sep.join([baseFolder, self._data[blendshapeNode]['deltasFile']])
                 importBlendshapeDeltas(blendshapeNode, deltasPath)
 
@@ -119,13 +129,18 @@ class SHAPESData(maya_data.MayaData):
 
         for blendshapeNode in self.getKeys():
             # for each blendshape export its setup and a optionally a delta's file
-            exportCompleteSetup(mesh=self._data[blendshapeNode]['mesh'], filePath=baseFolder)
+            setupPath = os.sep.join([baseFolder, SUBFOLDER_PATH])
+            exportCompleteSetup(mesh=self._data[blendshapeNode]['mesh'], filePath=setupPath)
 
             # set the setup file data to be the path to the mel file for the blendshape!
-            self._data[blendshapeNode]['setupFile'] = "{}.mel".format(blendshapeNode)
+            filename = "{}.mel".format(blendshapeNode)
+            print setupPath, filename
+            setupRelativePath = os.path.relpath(os.path.join(setupPath, filename), baseFolder)
+
+            self._data[blendshapeNode]['setupFile'] = setupRelativePath
 
             # export the deltas too
-            deltasPath = os.sep.join([baseFolder, "{}_deltas.json".format(blendshapeNode)])
+            deltasPath = os.sep.join([baseFolder, SUBFOLDER_PATH, "{}_deltas.json".format(blendshapeNode)])
             exportBlendShapeDeltas(blendshapeNode, deltasPath)
 
             # set the file path in the json file
@@ -196,7 +211,7 @@ def exportCompleteSetup(mesh, filePath, rebuild=False):
     # Get the blend shape node.
     bsNode = mel.eval("string $temp = $gShapes_bsNode")
     # Get all blend shape nodes from the mesh.
-    nodeList = mel.eval("shapesMain_listBlendShapeNodes {} -1".format(mesh))
+    nodeList = blendshape.getBlendshapeNodes(mesh)
 
     for node in nodeList:
         cmds.optionMenu("shpUI_bsOption", edit=True, value=node)

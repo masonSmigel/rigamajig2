@@ -172,8 +172,8 @@ def getBlendshapeNodes(geometry):
     :return: blendshape node attatched to the geometry
     :rtype: str
     """
-    history = cmds.listHistory(geometry)
-    blendshapeNodes = cmds.ls(history, type='blendShape')
+    deformers = deformer.getDeformerStack(geometry)
+    blendshapeNodes = cmds.ls(deformers, type='blendShape')
     return blendshapeNodes
 
 

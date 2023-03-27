@@ -120,6 +120,17 @@ def saveSkinWeights(path=None):
             logging.info("skin weights for: {} saved to:{}.json".format(path, geo))
 
 
+def saveSHAPESData(path=None):
+    """
+    Save both a shapes setup mel file and a json file of the deltas to apply back.
+    We can also localize the mel files we create
+
+    :param path:
+    :return:
+    """
+    pass
+
+
 def loadSHAPESData(path=None):
     """
     Import blendshape and connection data from the SHAPES plugin.

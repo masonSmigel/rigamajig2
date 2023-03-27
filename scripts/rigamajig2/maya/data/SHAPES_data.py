@@ -267,7 +267,8 @@ def rebuildSetup(filePath):
 
     # format the path for mel
     melFormmatedPath = cleanPath.replace("\\", "/")
-    mel.eval('shapesUtil_performImportShapeSetup "{}"'.format(melFormmatedPath))
+    mel.eval('source "{path}";'.format(path=melFormmatedPath))
+    # mel.eval('shapesUtil_performImportShapeSetup "{}"'.format(melFormmatedPath))
 
 
 # ----------------------------------------------------------------------

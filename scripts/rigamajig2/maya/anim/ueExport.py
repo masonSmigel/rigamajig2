@@ -10,6 +10,7 @@
 """
 import os
 import sys
+import logging
 from collections import OrderedDict
 import maya.cmds as cmds
 import maya.mel as mel
@@ -19,7 +20,10 @@ from mayafbx import FbxExportOptions, export_fbx
 from rigamajig2.maya import meta
 from rigamajig2.maya import decorators
 from rigamajig2.maya import container
+from rigamajig2.maya import namespace
+from rigamajig2.shared import common
 from rigamajig2.maya.rig import control
+from rigamajig2.maya.anim import keyframe
 
 import maya.OpenMayaUI as omui
 from PySide2 import QtCore
@@ -32,6 +36,8 @@ from rigamajig2.ui.widgets import pathSelector
 UPAXIS_DICT = {"x": [0, 0, 90],
                "y": [0, 0, 0],
                "z": [90, 0, 0]}
+
+logger = logging.getLogger(__name__)
 
 
 @decorators.preserveSelection
@@ -82,11 +88,14 @@ def exportSkeletalMesh(mainNode, outputPath=None):
 
 
 @decorators.preserveSelection
-def exportAnimationClip(mainNode, outputPath=None, upAxis='y'):
+@decorators.suspendViewport
+@decorators.oneUndo
+def exportAnimationClip(mainNode, outputPath=None, upAxis='y', cleanTrsGlobal=False):
     """
     Export the selected rig as an FBX without animation. This is used to make the Skeletal mesh for unreal
     :param mainNode: main node of the rig. This is the highest node or 'rig_root' of the rig.
     :param outputPath: path to save the output file to.
+    :param cleanTrsGlobal: clean all animation on the trs_global controla and move it to the trs_shot
     :param upAxis: set the up axis.
 
     :return:
@@ -94,6 +103,8 @@ def exportAnimationClip(mainNode, outputPath=None, upAxis='y'):
 
     if not cmds.objExists(mainNode):
         raise Exception("The main node {} does not exist in the scene".format(mainNode))
+
+    mainNode = common.getFirstIndex(mainNode)
 
     bind = meta.getMessageConnection("{}.bind".format(mainNode))
     model = meta.getMessageConnection("{}.model".format(mainNode))
@@ -132,17 +143,19 @@ def exportAnimationClip(mainNode, outputPath=None, upAxis='y'):
     nodes = container.getNodesInContainer(componentContainer)
     trsNode = [x for x in nodes if "trs_global" in x and control.isControl(x)]
 
+    # if clean trs is on run the clean step
+    if cleanTrsGlobal:
+        transferTrsAnimToTrsShot(mainNode)
+
     # check for keyframes or constraints
     connections = cmds.listConnections(trsNode, s=True, d=False) or list()
     if len(connections) > 0:
         cmds.warning("{} has incoming connections. pre-rotaton may not apply as expected".format(trsNode))
 
-    # TODO: add something to bake this into the trs_shot instead.
-
     const = cmds.parentConstraint(tempTransform, trsNode, mo=True)
 
     # set the rotation of the temp transform
-    cmds.setAttr("{}.r".format(tempTransform), *UPAXIS_DICT[upAxis])
+    cmds.setAttr("{}.r".format(tempTransform), *UPAXIS_DICT[upAxis.lower()])
 
     # in order to export only the right nodes we need to select them.
     # using the preserve selection decorator will help to ensure we keep the selction we started with
@@ -162,6 +175,68 @@ def gatherRigsFromScene():
     # list all nodes associated as a rigamajig root
     rootNodes = meta.getTagged("rigamajigVersion", type=None, namespace="*")
     return rootNodes
+
+
+@decorators.oneUndo
+def transferTrsAnimToTrsShot(mainNode):
+    """
+    Prep the rig to be exported properly. This will run several steps:
+
+    first we will transfer all animation on the trs_global, trs_shot and trs_motion controls to only the trs_shot
+    :param mainNode:
+    :return:
+    """
+    mainNode = common.getFirstIndex(mainNode)
+
+    if not cmds.objExists(mainNode):
+        raise Exception("The main node {} does not exist in the scene".format(mainNode))
+
+    componentContainer = container.getContainerFromNode(mainNode)
+    nodes = container.getNodesInContainer(componentContainer)
+    trsShot = [x for x in nodes if "trs_shot" in x and control.isControl(x)]
+    trsMotion = [x for x in nodes if "trs_motion" in x and control.isControl(x)]
+
+    # create a locator and connect the motion control to this. we can re-constrain to this control
+    # to copy all gross transforms to the trs_shot control
+    tempTransform = cmds.createNode("transform", name="tmpTransform")
+    cmds.parentConstraint(trsMotion, tempTransform, mo=False)
+    keyframe.bake(tempTransform)
+
+    # we also need to get the scale value to use
+    bind = meta.getMessageConnection("{}.bind".format(mainNode))
+    scaleValue = cmds.getAttr("{}.s".format(bind))[0]
+
+    # get all the trs controls and reset them.
+    keyframe.wipeKeys([ctl for ctl in nodes if control.isControl(ctl)], reset=True)
+    trsShotConstraint = cmds.parentConstraint(tempTransform, trsShot, mo=False)
+    cmds.setAttr("{}.s".format(trsShot[0]), *scaleValue)
+
+    # bake the transformation back to the trsShot
+    keyframe.bake(trsShot)
+
+    # delete the nodes we dont need anymore
+    cmds.delete(trsShotConstraint, tempTransform)
+
+    logger.info("All gross transformation for {} transfered to '{}'".format(mainNode, trsShot[0]))
+
+
+def bakeWholeCharacter(mainNode):
+    """
+    Bake all controls on a character based on the mainNode
+    :param mainNode:
+    :return:
+    """
+
+    mainNode = common.getFirstIndex(mainNode)
+
+    # get a lsit of all controls
+    rigNs = namespace.getNamespace(mainNode)
+    controlList = control.getControls(rigNs)
+
+    # bake all the controls
+    keyframe.bake(controlList)
+
+    logger.info("Baked keys for {} controls for '{}'".format(len(controlList), rigNs[0]))
 
 
 class BatchExportFBX(QtWidgets.QDialog):
@@ -235,6 +310,8 @@ class BatchExportFBX(QtWidgets.QDialog):
         self.rigsList.setStyleSheet("QTreeView::indicator::unchecked {background-color: rgb(70, 70, 70)}}")
 
         self.cancelButton = QtWidgets.QPushButton("Close")
+        self.cleanTrsGlobalButton = QtWidgets.QPushButton("Clean Trs_Global")
+        self.bakeAllControlsButton = QtWidgets.QPushButton("Bake All Controls")
         self.exportButton = QtWidgets.QPushButton("Export")
         self.exportButton.setFixedWidth(160)
 
@@ -257,6 +334,8 @@ class BatchExportFBX(QtWidgets.QDialog):
         botLayout = QtWidgets.QHBoxLayout()
         botLayout.setAlignment(QtCore.Qt.AlignRight)
         botLayout.addWidget(self.cancelButton)
+        botLayout.addWidget(self.cleanTrsGlobalButton)
+        botLayout.addWidget(self.bakeAllControlsButton)
         botLayout.addWidget(self.exportButton)
 
         # add all widgets to the main layout
@@ -268,6 +347,8 @@ class BatchExportFBX(QtWidgets.QDialog):
         """Create Pyside connections"""
         self.refreshButton.clicked.connect(self.refreshList)
         self.cancelButton.clicked.connect(self.close)
+        self.cleanTrsGlobalButton.clicked.connect(self.cleanTrsGlobal)
+        self.bakeAllControlsButton.clicked.connect(self.bakeAllControls)
         self.exportButton.clicked.connect(self.exportSelected)
 
     def addToList(self, rigName, mainNode):
@@ -311,8 +392,11 @@ class BatchExportFBX(QtWidgets.QDialog):
             cmds.error("Please select an output path before exporting FBXs")
             return
 
+        logger.info("----- Begin Animation Clip Export -----")
+
         upAxis = self.upAxisComboBox.currentData()
 
+        counter = 0
         # for each item export all the fbx files.
         for i in range(self.rigsList.topLevelItemCount()):
             # get informaiton associated with the mainNode
@@ -321,10 +405,66 @@ class BatchExportFBX(QtWidgets.QDialog):
             if item.checkState(0):
                 mainNode = item.data(1, QtCore.Qt.UserRole)
                 fileName = item.text(2)
+                counter += 1
 
                 # export the FBX file
                 fullFilePath = os.path.join(outputFilePath, fileName)
                 exportAnimationClip(mainNode, outputPath=fullFilePath, upAxis=upAxis)
+
+        logger.info("-----  Animation Clip Export Complete for {} rigs -----".format(counter))
+
+    def cleanTrsGlobal(self):
+        """Bake all controls on the selected rigs"""
+
+        result = cmds.confirmDialog(
+            t='Clean Gross Transformation',
+            message="Cleaning Gross Transformations is a distuctive Process. Are you sure you want to continue?!",
+            button=['Cancel', 'Continue'],
+            defaultButton='Continue',
+            cancelButton='Cancel')
+
+        if result != 'Continue':
+            return
+
+        logger.info("----- Begin Clean Gross Transformation -----")
+        counter = 0
+        # for each item export all the fbx files.
+        for i in range(self.rigsList.topLevelItemCount()):
+            # get informaiton associated with the mainNode
+            item = self.rigsList.topLevelItem(i)
+
+            if item.checkState(0):
+                mainNode = item.data(1, QtCore.Qt.UserRole)
+                transferTrsAnimToTrsShot(mainNode=mainNode)
+                counter += 1
+        logger.info("----- Clean Gross Transformation Complete for {} Rigs -----".format(counter))
+
+    def bakeAllControls(self):
+        """Bake all controls on the selected rigs"""
+
+        result = cmds.confirmDialog(
+            t='Bake All Controls',
+            message="Baking all controls is a distuctive Process. Are you sure you want to continue?!",
+            button=['Cancel', 'Continue'],
+            defaultButton='Continue',
+            cancelButton='Cancel')
+
+        if result != 'Continue':
+            return
+
+        logger.info("----- Begin Bake All Controls -----")
+        counter = 0
+        # for each item export all the fbx files.
+        for i in range(self.rigsList.topLevelItemCount()):
+            # get informaiton associated with the mainNode
+            item = self.rigsList.topLevelItem(i)
+
+            if item.checkState(0):
+                mainNode = item.data(1, QtCore.Qt.UserRole)
+                bakeWholeCharacter(mainNode=mainNode)
+                counter += 1
+
+        logger.info("----- Bake All Controls Complete for {} Rigs -----".format(counter))
 
 
 if __name__ == '__main__':
@@ -335,3 +475,4 @@ if __name__ == '__main__':
 
     dlg = BatchExportFBX()
     dlg.show()
+    # prepRigForExport('lich_rig_proxy:main')

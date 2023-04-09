@@ -52,7 +52,7 @@ class Builder(object):
 
         # reset the enviornment varriables when a new class is initialized
         os.environ['RIGAMJIG_FILE'] = str()
-        os.environ['RIGAMJIG_ENVIORN'] = str()
+        os.environ['RIGAMJIG_ENV'] = str()
 
         self.setRigFile(rigFile)
         self.componentList = list()
@@ -720,7 +720,7 @@ class Builder(object):
 
         # also set the rig file and rig enviornment into eniviornment varriables to access in other scripts if needed.
         os.environ['RIGAMJIG_FILE'] = self.rigFile
-        os.environ['RIGAMJIG_ENVIORN'] = rigEnviornmentPath
+        os.environ['RIGAMJIG_ENV'] = rigEnviornmentPath
 
         logger.info('\n\nRig Enviornment path: {0}'.format(self.path))
 

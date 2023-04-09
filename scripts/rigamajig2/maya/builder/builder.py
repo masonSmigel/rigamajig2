@@ -49,6 +49,11 @@ class Builder(object):
         :param rigFile: path to the rig file
         """
         self.path = None
+
+        # reset the enviornment varriables when a new class is initialized
+        os.environ['RIGAMJIG_FILE'] = str()
+        os.environ['RIGAMJIG_ENVIORN'] = str()
+
         self.setRigFile(rigFile)
         self.componentList = list()
 
@@ -712,6 +717,11 @@ class Builder(object):
         else:
             rigEnviornmentPath = data["rig_env"]
         self.path = os.path.abspath(os.path.join(self.rigFile, rigEnviornmentPath))
+
+        # also set the rig file and rig enviornment into eniviornment varriables to access in other scripts if needed.
+        os.environ['RIGAMJIG_FILE'] = self.rigFile
+        os.environ['RIGAMJIG_ENVIORN'] = rigEnviornmentPath
+
         logger.info('\n\nRig Enviornment path: {0}'.format(self.path))
 
     @staticmethod

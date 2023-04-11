@@ -186,6 +186,19 @@ class InitializeWidget(QtWidgets.QWidget):
 
     def saveGuides(self):
         """ Save guides setup to json using the builder """
+
+        # check if there are controls in the scene before saving.
+        if len(meta.getTagged("guide")) < 1:
+            result = cmds.confirmDialog(
+                t='Save Guides',
+                message="There are no guides in the scene. Are you sure you want to continue",
+                button=['Cancel', 'Continue'],
+                defaultButton='Continue',
+                cancelButton='Cancel')
+
+            if result != 'Continue':
+                return
+
         self.builder.saveGuideData(self.guidePathSelector.getPath())
 
     def initalizeRig(self):

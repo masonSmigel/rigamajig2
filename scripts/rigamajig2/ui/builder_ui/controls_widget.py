@@ -16,6 +16,7 @@ from PySide2 import QtWidgets
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
+from rigamajig2.maya import meta
 import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, overrideColorer
@@ -180,6 +181,19 @@ class ControlsWidget(QtWidgets.QWidget):
 
     def saveControlShapes(self):
         """ Save controlshapes to json using the builder """
+
+        # check if there are controls in the scene before saving.
+        if len(meta.getTagged("control")) < 1:
+            result = cmds.confirmDialog(
+                t='Save Control Shapes',
+                message="There are no controls in the scene. Are you sure you want to continue",
+                button=['Cancel', 'Continue'],
+                defaultButton='Continue',
+                cancelButton='Cancel')
+
+            if result != 'Continue':
+                return
+
         self.builder.saveControlShapes(self.controlPathSelector.getPath())
 
     def mirrorControl(self):

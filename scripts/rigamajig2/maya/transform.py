@@ -130,7 +130,8 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
             cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(multMatrix, 'matrixIn[1]'), f=True)
 
             if parent:
-                cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'), "{}.{}".format(multMatrix, 'matrixIn[2]'),
+                cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'),
+                                 "{}.{}".format(multMatrix, 'matrixIn[2]'),
                                  f=True)
             outputPlug = "{}.{}".format(multMatrix, 'matrixSum')
 
@@ -185,6 +186,53 @@ def blendedOffsetParentMatrix(driver1, driver2, driven, mo=False, t=True, r=True
     cmds.setAttr("{}.envelope".format(blendMatrix), blend)
 
     return blendMatrix
+
+
+def multiMatrixConstraint(driverList, driven, valueList, mo=True, t=True, r=True, s=True, sh=True):
+    """
+    Create a multi blended matrix constraint. This will blend the input matrix of the drivers into the driven node
+
+    :param driverList: list of driver nodes
+    :param valueList: list of driver weight values
+    :param driven: driven node
+    :param bool mo: add a transform node to store the offset between the driver and driven nodes
+    :param bool t: Apply translation transformations
+    :param bool r: Apply rotation transformations
+    :param bool s: Apply scale transformations
+    :param bool sh: Apply shear transformations
+    """
+    if not mathUtils.isEqual(sum(valueList), 1):
+        cmds.warning("Value list is not normalized. This may produce unexpected results")
+
+    wtAddMatrix = cmds.createNode("wtAddMatrix", name="{}_multiBlended_wtAddMatrix".format(driven))
+
+    # check if the list of drivers and valyes are the same lengh
+    if not len(driverList) == len(valueList):
+        raise ValueError(
+            "Must provide an equal amount of drivers and values. drivers ({}) != values ({})".format(len(driverList),
+                                                                                                     len(valueList)))
+
+    # for each driver in the list of drivers connect it to the wtAddMatrix
+    for i in range(len(driverList)):
+        driver = driverList[i]
+        value = valueList[i]
+
+        mm, pickMatrix = connectOffsetParentMatrix(driver, driven, mo=mo, t=t, r=r, s=s, sh=sh)
+
+        # check if a pick matrix node was created. If so use that to connect to the wtAddMatrix. If not use the multMatrix
+        if pickMatrix:
+            outPlug = "{}.outputMatrix"
+        else:
+            outPlug = "{}.matrixSum".format(mm)
+
+        # connect the out plug into the wtAddMatrix
+        cmds.connectAttr(outPlug, "{}.wtMatrix[{}].matrixIn".format(wtAddMatrix, i))
+        cmds.setAttr("{}.wtMatrix[{}].weightIn".format(wtAddMatrix, i), value)
+
+    # connect the wtAddMatrix to the driven offsetParentMatrix
+    cmds.connectAttr("{}.matrixSum".format(wtAddMatrix), "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
+
+    return wtAddMatrix
 
 
 def localOffset(node):
@@ -352,7 +400,7 @@ def getClosestAxis(transform, target, allowNegative=True):
 
     tx, ty, tz = matrix.getTranslation(offset)
 
-    axis=None
+    axis = None
     if (abs(tx) > abs(ty)) and (abs(tx) > abs(tz)):
         if (tx > ty) and (tx > tz): axis = 'x'  # x
         if (tx < ty) and (tx < tz): axis = '-x'  # -x
@@ -368,7 +416,8 @@ def getClosestAxis(transform, target, allowNegative=True):
     # if axis is still None then we failed to find one. This probably occured because the
     # transform and target are at the same location.
     if not axis:
-        raise RuntimeError("Failed to calucate an axis between {} and {}. They may have the same transform".format(transform, target))
+        raise RuntimeError(
+            "Failed to calucate an axis between {} and {}. They may have the same transform".format(transform, target))
 
     # return the axis. If allow negetive is off, then just get the axis.
     if not allowNegative: return axis[-1]

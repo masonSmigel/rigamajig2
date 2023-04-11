@@ -206,10 +206,21 @@ class DeformationCage(object):
             # connect the control to the influences of the skinCluster
             currentInfluences = list(weightDict.keys())
             if len(currentInfluences) > 1:
+
+                influenceList = list()
+                valueList = list()
+                for influence in currentInfluences:
+                    weight = weightDict[influence]
+                    influenceList.append(influence)
+                    valueList.append(weight)
+
+                transform.multiMatrixConstraint(driverList=influenceList, driven=ctl.orig, valueList=valueList, mo=True)
+
+
                 weight = weightDict[currentInfluences[-1]]
-                driver1 = currentInfluences[0]
-                driver2 = currentInfluences[-1]
-                transform.blendedOffsetParentMatrix(driver1, driver2, ctl.orig, mo=True, blend=weight)
+                # driver1 = currentInfluences[0]
+                # driver2 = currentInfluences[-1]
+                # transform.blendedOffsetParentMatrix(driver1, driver2, ctl.orig, mo=True, blend=weight)
             else:
                 transform.connectOffsetParentMatrix(currentInfluences[0], ctl.orig, mo=True)
 

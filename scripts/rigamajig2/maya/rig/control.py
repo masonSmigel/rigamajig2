@@ -180,7 +180,7 @@ def isControl(control):
 # pylint:disable=too-many-arguments
 def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, sdk=False, parent=None,
            position=None, rotation=None, size=1, hideAttrs=None, color='blue', type=None, rotateOrder='xyz',
-           trasformType='transform', shapeAim='y'):
+           trasformType='transform', shapeAim='y', addRotateOrder=True):
     """
     Create a control. This will return an instance of the Control class.
     The Control class allows you to manage and add transforms into the hierarchy above.
@@ -202,6 +202,7 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     :param str rotateOrder: Specify a rotation order. Default is 'xyz'
     :param str trasformType: Type of transform to use as a control. "transform", "joint"
     :param str shapeAim: Set the direction to aim the control
+    :param addRotateOrder: Optional- Add a rotate Order parameter and connect it to the controls rotate order
 
     :return: control object
     :rtype: Control
@@ -255,8 +256,20 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     if color:
         rigamajig2.maya.color.setOverrideColor(control, color)
 
-    if rotateOrder in rigamajig2.maya.transform.ROTATEORDER:
+    # add a rotate order control to the control
+    if rotateOrder in rigamajig2.maya.transform.ROTATEORDER and addRotateOrder:
+        rotOrderAttr = rigamajig2.maya.attr.createEnum(control,"rotOrder", enum=rigamajig2.maya.transform.ROTATEORDER,
+                                                       value=rigamajig2.maya.transform.ROTATEORDER.index(rotateOrder),
+                                                       keyable=False,
+                                                       channelBox=True)
+
+        cmds.connectAttr(rotOrderAttr, "{}.rotateOrder".format(control))
+
+    elif rotateOrder in rigamajig2.maya.transform.ROTATEORDER:
         cmds.setAttr("{}.rotateOrder".format(control), rigamajig2.maya.transform.ROTATEORDER.index(rotateOrder))
+
+    # if rotateOrder in rigamajig2.maya.transform.ROTATEORDER:
+    #     cmds.setAttr("{}.rotateOrder".format(control), rigamajig2.maya.transform.ROTATEORDER.index(rotateOrder))
 
     # scale the control shape
     if size > 0:

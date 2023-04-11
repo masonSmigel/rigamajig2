@@ -186,7 +186,7 @@ class ControlsWidget(QtWidgets.QWidget):
         if len(meta.getTagged("control")) < 1:
             result = cmds.confirmDialog(
                 t='Save Control Shapes',
-                message="There are no controls in the scene. Are you sure you want to continue",
+                message="There are no controls in the scene. Are you sure you want to continue?",
                 button=['Cancel', 'Continue'],
                 defaultButton='Continue',
                 cancelButton='Cancel')

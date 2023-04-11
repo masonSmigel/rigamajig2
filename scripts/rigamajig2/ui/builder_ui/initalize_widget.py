@@ -191,7 +191,7 @@ class InitializeWidget(QtWidgets.QWidget):
         if len(meta.getTagged("guide")) < 1:
             result = cmds.confirmDialog(
                 t='Save Guides',
-                message="There are no guides in the scene. Are you sure you want to continue",
+                message="There are no guides in the scene. Are you sure you want to continue?",
                 button=['Cancel', 'Continue'],
                 defaultButton='Continue',
                 cancelButton='Cancel')

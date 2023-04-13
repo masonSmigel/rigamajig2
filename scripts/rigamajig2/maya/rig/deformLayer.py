@@ -22,6 +22,7 @@ from rigamajig2.maya import meta
 from rigamajig2.maya import attr
 from rigamajig2.maya import joint
 from rigamajig2.maya import blendshape
+from rigamajig2.maya import skinCluster
 
 LAYER_HRC = 'deformLayers'
 
@@ -69,6 +70,9 @@ class DeformLayer(object):
 
         self.model = model
         self.deformShape = deformer.getDeformShape(self.model)
+
+        # tag the model as one that has deformation layers
+        meta.tag(self.model, tag='hasDeformLayers')
 
     def _intialzeLayersSetup(self):
         """
@@ -133,6 +137,7 @@ class DeformLayer(object):
         tmpDup = cmds.duplicate(self.model)
         cmds.rename(tmpDup, meshDup)
         cmds.parent(meshDup, deformLayerName)
+        meta.untag(meshDup, tag='hasDeformLayers')
 
         # rename the shapes
         shape = deformer.getDeformShape(meshDup)
@@ -227,3 +232,28 @@ class DeformLayer(object):
 
         # Use a try exept block just incase the render mesh is connected to something.
         _safeSetVisablity(self.model, 1)
+
+    def stackDeformLayers(self, cleanup=False):
+        """
+        Connect the layer hierarchy back to the original model by stacking the skinclusters
+        :param cleanup: delete deformation layers after stacking them
+        :return:
+        """
+
+        if not self.getNumberOfDeformationLayers() > 0:
+            raise Exception("No deformation layers to connect back to render model")
+
+        layers = self.getDeformationLayers()
+        for layer in layers:
+            skinCluster.stackSkinCluster(layer, self.model, skinName="stacked__" + layer + "_skinCluster")
+            cmds.setAttr("{}.v".format(layer), 0)
+
+        # Use a try exept block just incase the render mesh is connected to something.
+        _safeSetVisablity(self.model, 1)
+
+        # if we want to cleanup delete the deformation layers after stacking the skinClusters
+        if cleanup:
+            # delete all the deformation layers
+            cmds.delete(layers)
+
+

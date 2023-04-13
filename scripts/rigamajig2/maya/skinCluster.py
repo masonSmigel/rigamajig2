@@ -405,23 +405,25 @@ def copySkinWeights(sourceMesh, targetMesh, targetSkin):
         cmds.setAttr("{}.{}".format(targetSkin, attr), value)
 
 
-def stackSkinCluster(sourceMesh, targetMesh):
+def stackSkinCluster(sourceMesh, targetMesh, skinName=None):
     """
     Copy and stack the skincluster from the source mesh to the target mesh
 
     :param sourceMesh: mesh with the skincluster to copy from.
     The source mesh is our authoring mesh and should only have ONE skin cluster
     :param targetMesh: the mesh to copy the skin cluster to. This is the result mesh and can have several skin clusters.
+    :param skinName: Optional- give the new skin cluster a name
     """
     sourceSkin = getSkinCluster(sourceMesh)
     allTargetSkins = getAllSkinClusters(targetMesh)
 
     if len(allTargetSkins):
-        targetSkin = cmds.deformer(targetMesh, type='skinCluster', n='stacked__' + sourceSkin)[0]
+        targetSkinName = skinName or 'stacked__' + sourceSkin
+        targetSkin = cmds.deformer(targetMesh, type='skinCluster', n=targetSkinName)[0]
     else:
         # no skins yet-- make sure to use this command
         sourceInfluences = getInfluenceJoints(sourceSkin)
-        targetSkinName = targetMesh + "_skinCluster"
+        targetSkinName = skinName or targetMesh + "_skinCluster"
         targetSkin = cmds.skinCluster(sourceInfluences, targetMesh, tsb=True, mi=3, dr=4.0, n=targetSkinName)[0]
 
     # set the weight distribution to neighbors

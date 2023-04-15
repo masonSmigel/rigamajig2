@@ -60,11 +60,9 @@ class Actions(object):
         self.saveRigFileAction.setIcon(QtGui.QIcon(":save.png"))
         self.saveRigFileAction.triggered.connect(self.saveRigFile)
 
-        # add an option to load recent rigFiles
+        # add a submenu to load recent rigFiles
         self.recentRigFileMenu = QtWidgets.QMenu("Recent Rig Files ...", self.dialog)
         self.recentRigFileMenu.setIcon(QtGui.QIcon(":folder-open.png"))
-
-        # create a list to store all the submenu actions
         self.updateRecentFiles()
 
         self.reloadRigFileAction = QtWidgets.QAction("Reload Rig File", self.dialog)

@@ -206,7 +206,8 @@ class ScriptRunner(QtWidgets.QWidget):
                 item.setTextColor(color)
 
             self.scriptList.addItem(item)
-        return item
+
+            return item
 
     def addScriptBrowser(self):
         """add script through a browswer"""

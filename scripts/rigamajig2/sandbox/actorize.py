@@ -139,9 +139,6 @@ def finalizeActor():
     cmds.delete(sourceNodes)
 
 
-
-
-
 def transferSkinCluster(sourceModel, sourceDeformer, destModel):
     """
     transfer the skin cluster to the higher resolution mesh

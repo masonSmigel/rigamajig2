@@ -63,6 +63,9 @@ def createNewGeometry():
             # now we can run the poly smooth opperation
             cmds.polySmooth(newModel, **POLYSMOOTH_KWARGS)
 
+            # delete the history
+            cmds.delete(newModel, ch=True)
+
             # poly smooth will select the geo so we need to clear out selection
             cmds.select(clear=True)
 

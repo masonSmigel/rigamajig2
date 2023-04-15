@@ -260,7 +260,6 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         """ Load a rig file from the path selector """
         newPath = self.rigPathSelector.getPath()
         if newPath:
-            # self.setRigFile(newPath)
             self.actions.loadRecentRigFile(newPath)
 
     def setRigFile(self, path=None):

@@ -113,6 +113,8 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         fileMenu.addAction(self.actions.saveRigFileAction)
         fileMenu.addSeparator()
         fileMenu.addAction(self.actions.reloadRigFileAction)
+        fileMenu.addSeparator()
+        fileMenu.addMenu(self.actions.recentRigFileMenu)
 
         utilsMenu = self.mainMenu.addMenu("Utils")
         utilsMenu.addAction(self.actions.mergeRigFilesAction)
@@ -258,7 +260,8 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         """ Load a rig file from the path selector """
         newPath = self.rigPathSelector.getPath()
         if newPath:
-            self.setRigFile(newPath)
+            # self.setRigFile(newPath)
+            self.actions.loadRecentRigFile(newPath)
 
     def setRigFile(self, path=None):
         """

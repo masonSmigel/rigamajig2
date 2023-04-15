@@ -11,6 +11,7 @@
 # PYTHON
 import sys
 import os
+from functools import partial
 
 # MAYA
 import maya.cmds as cmds
@@ -28,6 +29,7 @@ import rigamajig2.maya.data.abstract_data as abstract_data
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
 import rigamajig2.maya.builder
 import rigamajig2.maya.builder.builder as builder
+import rigamajig2.ui.builder_ui.recent_files as recent_files
 
 
 class Actions(object):
@@ -57,6 +59,13 @@ class Actions(object):
         self.saveRigFileAction = QtWidgets.QAction("Save Rig File", self.dialog)
         self.saveRigFileAction.setIcon(QtGui.QIcon(":save.png"))
         self.saveRigFileAction.triggered.connect(self.saveRigFile)
+
+        # add an option to load recent rigFiles
+        self.recentRigFileMenu = QtWidgets.QMenu("Recent Rig Files ...", self.dialog)
+        self.recentRigFileMenu.setIcon(QtGui.QIcon(":folder-open.png"))
+
+        # create a list to store all the submenu actions
+        self.updateRecentFiles()
 
         self.reloadRigFileAction = QtWidgets.QAction("Reload Rig File", self.dialog)
         self.reloadRigFileAction.setIcon(QtGui.QIcon(":refresh.png"))
@@ -104,7 +113,17 @@ class Actions(object):
         result = fileDialog.exec_()
 
         if result:
-            self.dialog.setRigFile(fileDialog.selectedFiles()[0])
+            rigfile = fileDialog.selectedFiles()[0]
+            self.dialog.setRigFile(rigfile)
+            recent_files.addRecentFile(rigfile)
+            self.updateRecentFiles()
+
+    def loadRecentRigFile(self, rigfile):
+        self.dialog.setRigFile(rigfile)
+
+        # lets re-add the recent file. This will just move it to the top of the list. Then update the list
+        recent_files.addRecentFile(rigfile)
+        self.updateRecentFiles()
 
     def saveRigFile(self):
         """ Save out a rig file """
@@ -130,9 +149,12 @@ class Actions(object):
         newData[constants.OUTPUT_FILE_SUFFIX] = self.dialog.publishWidget.outFileSuffix.text()
 
         # setup new data for the scripts
-        preScripts = self.dialog.modelWidget.preScriptRunner.getCurrentScriptList(relativePath=self.dialog.rigEnviornment)
-        postScripts = self.dialog.buildWidget.postScriptRunner.getCurrentScriptList(relativePath=self.dialog.rigEnviornment)
-        pubScripts = self.dialog.publishWidget.pubScriptRunner.getCurrentScriptList(relativePath=self.dialog.rigEnviornment)
+        preScripts = self.dialog.modelWidget.preScriptRunner.getCurrentScriptList(
+            relativePath=self.dialog.rigEnviornment)
+        postScripts = self.dialog.buildWidget.postScriptRunner.getCurrentScriptList(
+            relativePath=self.dialog.rigEnviornment)
+        pubScripts = self.dialog.publishWidget.pubScriptRunner.getCurrentScriptList(
+            relativePath=self.dialog.rigEnviornment)
         newData[constants.PRE_SCRIPT] = preScripts
         newData[constants.POST_SCRIPT] = postScripts
         newData[constants.PUB_SCRIPT] = pubScripts
@@ -144,6 +166,19 @@ class Actions(object):
     def reloadRigFile(self):
         """ Reload rig file"""
         self.dialog.setRigFile(self.dialog.rigFile)
+
+    def updateRecentFiles(self):
+        """Update the recent file menu based on our recent file list"""
+
+        # clear the recent file menu
+        self.recentRigFileMenu.clear()
+
+        # add any new recent files to the submenu
+        for recentFile in recent_files.getRecentFileList():
+            openRecentFileAction = QtWidgets.QAction(recentFile, self.recentRigFileMenu)
+            openRecentFileAction.triggered.connect(partial(self.loadRecentRigFile, recentFile))
+
+            self.recentRigFileMenu.addAction(openRecentFileAction)
 
     # TOOLS MENU
     def runPerformanceTest(self):

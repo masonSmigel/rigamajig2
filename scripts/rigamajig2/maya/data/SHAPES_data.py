@@ -350,7 +350,7 @@ def localizeSHAPESFile(melFile):
     lookup1 = "// import shapes"
     lookup2 = "// import data node"
 
-    codeToReplaceWith = 'file -i -type "mayaBinary" -mnc 0 -pr "{}";\n'
+    codeToReplaceWith = 'file -i -type "{fileType}" -mnc 0 -pr "{path}";\n'
 
     # read the existing contents into lines
     with open(melFile) as f:
@@ -376,14 +376,20 @@ def localizeSHAPESFile(melFile):
         fileName = os.path.basename(problemFilePath)
         newFilePath = os.path.join(baseDirectory, fileName)
 
+        ext = fileName.split('.')[-1]
+        mayaFileType = 'mayaAscii' if ext == "ma" else 'mayaBinary'
+
         # fix the path because mel likes to mess up the paths
         melFormmatedPath = newFilePath.replace("\\", "//")
 
         # build a new line of code based on the data we plug in
-        newLine = codeToReplaceWith.format(melFormmatedPath)
+        newLine = codeToReplaceWith.format(fileType=mayaFileType, path=melFormmatedPath)
 
         # set the data in the lines we setup before
         sourceLines[setupPathLine - 1] = newLine
+
+        # make sure to close the file before we move on.
+        f.close()
 
     # write out the new lines
     outFileObj = open(outputFile, "w")

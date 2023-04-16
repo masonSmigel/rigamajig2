@@ -62,7 +62,7 @@ class Actions(object):
 
         # add a submenu to load recent rigFiles
         self.recentRigFileMenu = QtWidgets.QMenu("Recent Rig Files ...", self.dialog)
-        self.recentRigFileMenu.setIcon(QtGui.QIcon(":folder-open.png"))
+        self.recentRigFileMenu.setIcon(QtGui.QIcon(":out_time.png"))
         self.updateRecentFiles()
 
         self.reloadRigFileAction = QtWidgets.QAction("Reload Rig File", self.dialog)

@@ -82,12 +82,14 @@ def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-delive
     rigFileDict[constants.CONTROL_SHAPES] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.CONTROL_SHAPES)
     rigFileDict[constants.PSD] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.PSD)
     rigFileDict[constants.DEFORM_LAYERS] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.DEFORM_LAYERS)
+    rigFileDict[constants.SHAPES] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.SHAPES)
 
     # merge the skins and SHAPES
     rigFileDict[constants.SKINS] = mergeSkinWeights(rigFile1, rigFile2, rigEnv=rigEnv, method=method)
-    rigFileDict[constants.SHAPES] = mergeContentBased(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.SHAPES)
+    # rigFileDict[constants.SHAPES] = mergeContentBased(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.SHAPES)
 
     # lets merge the script lists.
+    # TODO: this needs to be refactored
     copyScripts(rigFile1, rigFile2, rigFile, constants.PRE_SCRIPT)
     copyScripts(rigFile1, rigFile2, rigFile, constants.POST_SCRIPT)
     copyScripts(rigFile1, rigFile2, rigFile, constants.PUB_SCRIPT)

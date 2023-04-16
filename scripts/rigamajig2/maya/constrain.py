@@ -2,13 +2,15 @@
 Constraint functions
 """
 from maya import cmds as cmds
+import maya.api.OpenMaya as om2
 
 import rigamajig2.shared.common as common
 import rigamajig2.maya.node as node
 import rigamajig2.maya.hierarchy as hierarchy
 import rigamajig2.maya.meta as meta
 import rigamajig2.maya.naming as naming
-import maya.cmds as cmds
+import rigamajig2.maya.mesh as mesh
+import rigamajig2.maya.transform as transform
 
 from rigamajig2.maya import deformer, uv, attr
 
@@ -189,8 +191,80 @@ def uvPin(meshVertex):
     cmds.setAttr("{}.coordinateU".format(nextIndex), uvCoords[0])
     cmds.setAttr("{}.coordinateV".format(nextIndex), uvCoords[1])
 
-    # determine the plug to return. This shoudl be the number of elements -1 (since its a 0 based list)
+    # determine the plug to return. This should be the number of elements -1 (since its a 0 based list)
     plug = attr._getPlug("{}.coordinate".format(uvPinNode))
-    index = plug.evaluateNumElements() -1
+    index = plug.evaluateNumElements() - 1
 
     return "{}.outputMatrix[{}]".format(uvPinNode, index)
+
+
+def uvPinConstraint(target, meshName):
+    """
+    Create a uv pin constraint between the target and the mesh
+
+    :param target: transform to constrain
+    :param meshName: mesh to constrain the target to.
+    """
+    if not cmds.objExists(meshName):
+        raise Exception("the mesh {} does not exist".format(meshName))
+
+    # get the orig shape node or create one if it doesnt exist
+    origShape = cmds.deformableShape(meshName, og=True)[0]
+    if not origShape:
+        origShape = cmds.deformableShape(meshName, createOriginalGeometry=True)[0]
+    origShape = origShape.split(".")[0]
+
+    # get the deformable shape.
+    deformShape = deformer.getDeformShape(meshName)
+
+    # check if the deform shape is connected to a UV Pin node
+    uvPinNode = None
+    connections = cmds.listConnections("{}.worldMesh".format(deformShape), d=True, s=False, p=False) or []
+    for node in connections:
+        if cmds.nodeType(node) == 'uvPin':
+            uvPinNode = node
+
+        # if we dont have one then we can create one
+    if not uvPinNode:
+        name = naming.getUniqueName("{}_uvPin".format(meshName))
+        uvPinNode = cmds.createNode("uvPin", name=name)
+        cmds.connectAttr("{}.worldMesh[0]".format(deformShape), "{}.deformedGeometry".format(uvPinNode), f=True)
+        cmds.connectAttr("{}.outMesh".format(origShape), "{}.originalGeometry".format(uvPinNode), f=True)
+
+    # now lets connect the coorindates to the uv pin. We can use pen maya to get the closest uv coords
+    point = om2.MPoint(cmds.xform(target, q=True, t=True, ws=True))
+
+    mfnMesh = mesh.getMeshFn(meshName)
+    closestPoint, closestVertex = mfnMesh.getClosestPoint(point, space=om2.MSpace.kWorld)
+    uvCoords = mfnMesh.getUVAtPoint(closestPoint, space=om2.MSpace.kWorld)
+
+    # get the next available index on the coordinate plug
+    nextIndex = attr.getNextAvailableElement("{}.coordinate".format(uvPinNode))
+
+    # set the coortinate attributes
+    cmds.setAttr("{}.coordinateU".format(nextIndex), uvCoords[0])
+    cmds.setAttr("{}.coordinateV".format(nextIndex), uvCoords[1])
+
+    # connect the uv pin to the target
+    # determine the plug to return. This should be the number of elements -1 (since its a 0 based list)
+    plug = attr._getPlug("{}.coordinate".format(uvPinNode))
+    index = plug.evaluateNumElements() - 1
+    outputPlug = "{}.outputMatrix[{}]".format(uvPinNode, index)
+
+    parent = cmds.listRelatives(target, p=True) or None
+
+    if parent:
+        parent = common.getFirstIndex(parent)
+        multMatrix = cmds.createNode("multMatrix", name="{}_{}_uvPin_mm".format(target, parent))
+
+        cmds.connectAttr(outputPlug, "{}.matrixIn[1]".format(multMatrix))
+        cmds.connectAttr("{}.{}".format(parent, "worldInverseMatrix"), "{}.matrixIn[2]".format(multMatrix))
+        cmds.connectAttr("{}.matrixSum".format(multMatrix), "{}.offsetParentMatrix".format(target))
+    else:
+        cmds.connectAttr(outputPlug, "{}.offsetParentMatrix".format(target))
+
+    # reset the transform values
+    transform.resetTransformations(target)
+
+    # return the uv pin node and the output plug
+    return uvPinNode, outputPlug

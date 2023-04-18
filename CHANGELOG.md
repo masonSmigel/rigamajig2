@@ -1,5 +1,25 @@
 # Change Log 
 
+## 1.1.1 
+
+### Added: 
+* Added Clean Gross transform and bake all controls to the FBX batch exporter
+* Initial Implementation of a keyframe module
+* Added `RIGAMJIG_FILE` and `RIGAMJIG_ENV` enviornment variables when a new rig file is set. 
+* Added a rotate order attribute to all controls 
+* Implemented merge deform layers by skin cluster stacking 
+* Updated deformation cage to support more than 2 influences. This included implementation of a `multiMatrixConstraint`
+* Added a menu of recently opened Rig files to the builder dialog
+* Added Uv pin constraint to the `maya.constrain` module. This constrains a transform to the closest point on a mesh
+
+
+### Fixed: 
+* Fixed a bug loading mel files on windows machines. 
+* Fixed cross platform support to `scriptRunner` 'openFile'
+* Fixed a bug adding existing scripts to the `scriptRunner` for scripts that dont exist
+  * Added support to check the maya file type before importing from `shapes_data`
+
+
 ## 1.1.0
 
 ### Added:

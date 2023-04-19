@@ -10,6 +10,7 @@
 """
 # PYTHON
 from collections import OrderedDict
+import logging
 
 # MAYA
 import maya.cmds as cmds
@@ -33,6 +34,9 @@ MAIN_NODE_NAME = 'main'
 CONNECTION_METHOD_LIST = ['bshp', 'inmesh', 'skin']
 
 DUMMY_JOINT = 'world_dummy_bind'
+
+
+logger = logging.getLogger(__name__)
 
 
 def _safeSetVisablity(node, value):
@@ -250,6 +254,9 @@ class DeformLayer(object):
 
         # Use a try exept block just incase the render mesh is connected to something.
         _safeSetVisablity(self.model, 1)
+
+        # send out a message that the stack was sucessful
+        logger.info("deform layers succesfully stacked for: {} ({} layers)".format(self.model, len(layers)))
 
         # if we want to cleanup delete the deformation layers after stacking the skinClusters
         if cleanup:

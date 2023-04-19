@@ -98,8 +98,16 @@ class SkinData(maya_data.MayaData):
             if not rebind and not meshSkin:
                 raise RuntimeError("No skin assosicated with the given node. Use the rebind argument to re-bind.")
             # preform the rebind
+            # check for missing influences
+            realInfluences = [inf for inf in influenceObjects if cmds.objExists(inf)]
+
+            if len(realInfluences) != influenceObjects:
+                influenceDifferenge = set(influenceObjects) - set(realInfluences)
+                missingInfluences = list(influenceDifferenge)
+                cmds.warning("Skin cluster {} is missing {} influences.".format(meshSkin, missingInfluences))
+
             if rebind:
-                cmds.select(influenceObjects, mesh, r=True)
+                cmds.select(realInfluences, mesh, r=True)
                 meshSkin = cmds.skinCluster(tsb=True, mi=3, dr=1.0, wd=1,  n=mesh + "_skinCluster")[0]
 
             # set the skinweights

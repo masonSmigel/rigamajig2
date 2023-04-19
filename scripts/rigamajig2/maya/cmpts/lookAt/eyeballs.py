@@ -148,7 +148,7 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
 
                 trsFactor = -length if isNegative else length
                 sinScale = node.multDoubleLinear("{}.outputQuatX".format(quat), trsFactor, name="{}_sinScale".format(jnt))
-                cosScale = node.multDoubleLinear("{}.outputQuatW".format(quat), length, name="{}_cosScale".format(jnt))
+                cosScale = node.multDoubleLinear("{}.outputQuatW".format(quat), length*0.5, name="{}_cosScale".format(jnt))
 
                 # we dont want to adjust the translation of the pupil because it looks strange if the pupil extends
                 # forward more than the iris. instead it will be constrained to the iris later.

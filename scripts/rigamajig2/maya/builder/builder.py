@@ -593,21 +593,6 @@ class Builder(object):
             else:
                 raise RuntimeError("Must select an output path or character name to publish a rig")
 
-        # create output directory and save
-        rig_path.mkdir(dirName)
-        publishPath = os.path.join(dirName, fileName)
-        file.saveAs(publishPath, log=False)
-        logger.info("out rig published: {}".format(publishPath))
-
-        # if we have the save FBX box checked we can also save and FBX on publish.
-        if saveFBX:
-            from rigamajig2.maya.anim import ueExport
-            fbxFileName = "{}{}.{}".format(rigName, suffix, "fbx")
-            fbxPublishPath = os.path.join(dirName, fbxFileName)
-
-            ueExport.exportSkeletalMesh("main", fbxPublishPath)
-            logger.info("fbx expoerted: {}".format(fbxPublishPath))
-
         # if we want to save a version as well
         if versioning:
             # get the version directory, file
@@ -619,10 +604,35 @@ class Builder(object):
             versionFile = "{}_{}.{}".format(filebase, 'v000', fileext)
             versionPath = os.path.join(versionDir, versionFile)
 
-            # make the output directory and save the file
+            # get a list of previous publishes to determine the proper version for this file
+            versionDirContents = os.listdir(versionDir)
+            numberOfPublishes = len([x for x in versionDirContents if x.endswith(".{}".format(fileext))])
+
+            topNodes = cmds.ls(assemblies=True)
+            topTransformNodes = cmds.ls(topNodes, exactType='transform')
+            for node in topTransformNodes:
+                # set the version to the number of publishes (plus one) to account for the version we are about to publish
+                cmds.addAttr(node, longName="__version__", attributeType='short', dv=numberOfPublishes+1)
+                cmds.setAttr("{}.__version__".format(node), lock=True)
+
+            # make the output directory and save the file. This will also make the directory for the main publish
             rig_path.mkdir(versionDir)
             versionPath = file.incrimentSave(versionPath, log=False)
-            logger.info("out rig archived: {}".format(versionPath))
+            logger.info("out rig versioned: {}   ({})".format(os.path.basename(versionPath), versionPath))
+
+        # create output directory and save
+        publishPath = os.path.join(dirName, fileName)
+        file.saveAs(publishPath, log=False)
+        logger.info("out rig published: {}  ({})".format(fileName, publishPath))
+
+        # if we have the save FBX box checked we can also save and FBX on publish.
+        if saveFBX:
+            from rigamajig2.maya.anim import ueExport
+            fbxFileName = "{}{}.{}".format(rigName, suffix, "fbx")
+            fbxPublishPath = os.path.join(dirName, fbxFileName)
+
+            ueExport.exportSkeletalMesh("main", fbxPublishPath)
+            logger.info("fbx exported: {}".format(fbxPublishPath))
 
     def updateMaya(self):
         """ Update maya if in an interactive session"""

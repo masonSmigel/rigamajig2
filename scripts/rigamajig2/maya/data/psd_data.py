@@ -45,6 +45,11 @@ class PSDData(maya_data.MayaData):
         data['useTwist'] = True if True in [True if 'twist' in x else False for x in outputAttrs] else False
         data['useSwing'] = True if True in [True if 'swing' in x else False for x in outputAttrs] else False
 
+        overwriteParent = None
+        if cmds.objExists("{}.{}".format(outputNode, "overwriteParentJoint")):
+            overwriteParent = str(cmds.getAttr("{}.{}".format(outputNode, "overwriteParentJoint")))
+        data['overwriteParent'] = overwriteParent
+
         self._data[node].update(data)
 
     def applyData(self, nodes, replace=False):
@@ -62,6 +67,10 @@ class PSDData(maya_data.MayaData):
                 continue
             if not cmds.objExists(node):
                 continue
-            psd.createPsdReader(node, twist=self._data[node]['useTwist'], swing=self._data[node]['useSwing'])
+
+            psd.createPsdReader(node,
+                                twist=self._data[node]['useTwist'],
+                                swing=self._data[node]['useSwing'],
+                                overwriteParent=self._data[node].get("overwriteParent"))
 
             # TODO: This might need more complexity later... we'll see!

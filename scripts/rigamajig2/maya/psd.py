@@ -71,7 +71,7 @@ def getAllPoseReaders():
     return meta.getTagged('poseReader')
 
 
-def createPsdReader(joint, twist=False, swing=True, parent=False):
+def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParent=None):
     """
     Create a Pose space reader on the given joint
 
@@ -79,6 +79,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     :param bool  twist: Add the twist attribute to the pose reader
     :param bool swing: Add swing attributes to the pose reader
     :param bool parent: Parent in the rig for the pose reader
+    :param str overwriteParent: Object to use as a parent for the pose reader instead of the heirarchy parent
     """
     # initalize an envornment for our Psds to go to
     initalizePsds()
@@ -113,6 +114,10 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
     cmds.parent(output, hrc)
     meta.createMessageConnection(joint, output, sourceAttr="poseReaderOut")
 
+    # add the overwrite parent attribute
+    if overwriteParent:
+        attr.createAttr(output, "overwriteParentJoint", "string", value=overwriteParent)
+
     # add attributes to the joint so we have an access point for later
     aimAxis = rig_transform.getAimAxis(aimJoint, allowNegative=False)
     if twist:
@@ -131,7 +136,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False):
                     cmds.addAttr(output, longName='swing_{}'.format(axis), k=True)
                 outputPlugsList.append("{}.{}".format(output, 'swing_{}'.format(axis)))
 
-            createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputPlugsList)
+            createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputPlugsList, parentJoint=overwriteParent)
 
             for plug in outputPlugsList:
                 attrName = plug.split(".")[-1]
@@ -213,7 +218,7 @@ def createTwistPsdReader(joint, aimAxis='x', outputAttr=None):
 
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
-def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outputAttrs=None):
+def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, parentJoint=None, outputAttrs=None):
     """
     Create a swing pose reader
     For actual use Please use createPsdReader() instead. This function is used within the createPsdReader().
@@ -317,8 +322,11 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, outputA
     # connect the setup to the parent joint
     transformMultMatrix, transformPick = rig_transform.connectOffsetParentMatrix(joint, poseReader, r=False)
     jointParents = cmds.ls(cmds.listRelatives(joint, p=True), type='joint')
-    if jointParents:
+
+    if not parentJoint and jointParents:
         parentJoint = jointParents[0]
+
+    if parentJoint:
         rotateMultMatrix, rotatePick = rig_transform.connectOffsetParentMatrix(parentJoint, poseReader, mo=True,
                                                                                t=False, r=True, s=False, sh=False)
         multMatrix = cmds.createNode("multMatrix", n='{}_mergeMat'.format(joint))

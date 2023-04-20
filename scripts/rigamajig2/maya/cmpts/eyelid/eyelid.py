@@ -526,7 +526,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         """
         Setup the driver curve system. This can be used on both the eyelid and creases
         :param controls:
-        :param uppCurve:
+        :param uppCurve:a
         :param lowCurve:
         :return:
         """
@@ -636,6 +636,9 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         control.connectControlVisiblity(self.eyeSocket.name, "crease",
                                         controls=[ctl.name for ctl in self.creaseControls])
 
+        # setup the fleshy eye
+        attr.driveAttribute("fleshyEye", self.paramsHierarchy, self.eyeSocket.name)
+
     def connect(self):
         """connect to the rig parent"""
         # connect the rig to is rigParent
@@ -672,10 +675,13 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             creaseControl = self.creaseControls[2] if part == 'upp' else self.creaseControls[6]
             lidCurve = self.topDriverCruve if part == 'upp' else self.botDriverCurve
             transform.matchTransform(lidControl.name, lidTrs)
+            # we need to connect the rotation to the rig parent and the position to follow along the curve.
+            cmds.orientConstraint(self.rigParent, lidTrs, mo=True)
+            # transform.connectOffsetParentMatrix(self.rigParent, lidTrs, t=False, r=True, s=False, sh=False, mo=True)
             curve.attatchToCurve(lidTrs, curve=lidCurve, toClosestParam=True)
 
             # add an attribute to drive the bias fo the crease
-            creaseBiasAttr = attr.createAttr(self.paramsHierarchy, "{}CreaseBias".format(part), "float",
+            creaseBiasAttr = attr.createAttr(creaseControl.name, "creaseBias".format(part), "float",
                                              value=0.5, minValue=0, maxValue=1)
 
             # now build a trs to store the positon of the lidTrs and the creaseDriver
@@ -694,7 +700,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             cmds.connectAttr("{}.outputMatrix".format(blend), "{}.offsetParentMatrix".format(creaseControl.trs), f=True)
 
             # add the crease follow attribute to the lidControl.
-            followAttr = attr.createAttr(lidControl.name, "creaseFollow", "float", value=1, minValue=0, maxValue=1)
+            followAttr = attr.createAttr(creaseControl.name, "creaseFollow", "float", value=1, minValue=0, maxValue=1)
             cmds.connectAttr(followAttr, "{}.envelope".format(blend))
 
     def finalize(self):

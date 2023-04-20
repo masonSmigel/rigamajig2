@@ -51,8 +51,9 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
 
     def initialHierarchy(self):
         """Build the initial hirarchy"""
-        self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.controlHierarchy = cmds.createNode('transform', n=self.name + '_control', parent=self.rootHierarchy)
+        super(Cog, self).initialHierarchy()
+        # self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
+        # self.controlHierarchy = cmds.createNode('transform', n=self.name + '_control', parent=self.rootHierarchy)
 
         if len(self.input) >= 1:
             pos = cmds.xform(self.input[0], q=True, ws=True, t=True)

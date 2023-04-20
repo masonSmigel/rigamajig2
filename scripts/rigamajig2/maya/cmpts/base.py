@@ -8,6 +8,7 @@ from collections import OrderedDict
 import rigamajig2.maya.container
 import rigamajig2.maya.attr
 import rigamajig2.maya.meta
+import rigamajig2.maya.color
 import rigamajig2.maya.data.joint_data as joint_data
 import rigamajig2.maya.transform as transform
 
@@ -240,6 +241,8 @@ class Base(object):
                                                 parent=self.rootHierarchy)
         self.spacesHierarchy = cmds.createNode('transform', n=self.name + '_spaces',
                                                parent=self.rootHierarchy)
+
+        rigamajig2.maya.color.setOutlinerColor(self.rootHierarchy, [255, 255, 153])
 
         # lock and hide the attributes
         for hierarchy in [self.paramsHierarchy, self.controlHierarchy, self.spacesHierarchy]:

@@ -101,7 +101,7 @@ class SkinData(maya_data.MayaData):
             # check for missing influences
             realInfluences = [inf for inf in influenceObjects if cmds.objExists(inf)]
 
-            if len(realInfluences) != influenceObjects:
+            if len(realInfluences) != len(influenceObjects):
                 influenceDifferenge = set(influenceObjects) - set(realInfluences)
                 missingInfluences = list(influenceDifferenge)
                 cmds.warning("Skin cluster {} is missing {} influences.".format(meshSkin, missingInfluences))

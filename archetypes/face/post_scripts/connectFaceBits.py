@@ -4,10 +4,10 @@ Connect some miscelanous face bits
 
 import maya.cmds as cmds 
 from rigamajig2.maya import transform 
+
+
+
 from rigamajig2.maya import attr 
-
-
-
 # blend the cheekPuffs 
 transform.blendedOffsetParentMatrix("muppet_bind", "jaw_bind", "cheekPuff_l_orig", mo=True, blend=0.5)
 transform.blendedOffsetParentMatrix("muppet_bind", "jaw_bind", "cheekPuff_r_orig", mo=True, blend=0.5)
@@ -40,4 +40,15 @@ for side in 'lr':
     attr.lock(nostrilFlare, attr.TRANSFORMS)
     
 # setup the nose follow. This will keep the nose following a little bit with the upper lip 
-transform.blendedOffsetParentMatrix('noseBase_orig', 'lips_c_upper_0_bind', 'noseBase_trs', mo=True, t=True, r=False, s=False, sh=False, blend=0.1)
+offset = cmds.createNode("transform", name="noseBase_follow_trs_offset", parent="nose_spaces")
+noseFollowTrs = cmds.createNode("transform", name="noseBase_follow_trs", parent=offset)
+transform.matchTransform("noseBase", offset)
+transform.matchRotate("lips_c_upper_0_bind", offset)
+
+
+for attr in ['tx', 'ty', 'tz']: 
+    cmds.connectAttr("{}.{}".format("lips_c_upper_0_bind", attr),"{}.{}".format(noseFollowTrs, attr))
+
+
+transform.blendedOffsetParentMatrix('noseBase_orig', noseFollowTrs, 'noseBase_trs', mo=True, t=True, r=False, s=False, sh=False, blend=0.1)
+transform.blendedOffsetParentMatrix('noseBase_orig', 'lips_bind', offset, mo=True, t=True, r=False, s=False, sh=False, blend=0.1)

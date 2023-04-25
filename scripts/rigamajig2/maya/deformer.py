@@ -8,6 +8,8 @@ import maya.OpenMaya as om
 import rigamajig2.shared.common as common
 import rigamajig2.maya.openMayaUtils as omu
 import rigamajig2.maya.shape
+import rigamajig2.maya.mesh
+
 
 
 def isDeformer(deformer):
@@ -166,7 +168,7 @@ def getDeformerStack(geo, ignoreTypes=None):
 
     # sometimes deformers can be connected to inputs that dont affect the deformation of the given geo.
     # This happens alot in blendshapes where one blendshape drives a bunch of others for small details.
-    # we need to filter out any deformers from this list that doent affect the given geo.
+    # we need to filter out any deformers from this list that dont affect the given geo.
     deformShape = getDeformShape(geo)
     for i in inputs:
         tgtDeformShape = common.getFirstIndex(cmds.deformer(i, q=1, g=1, gi=1))
@@ -190,7 +192,6 @@ def getDeformersForShape(geo, ignoreTypes=None, ignoreTweaks=True):
 
     geo = common.getFirstIndex(geo)
     result = []
-
     if ignoreTweaks:
         ignoreTypes += ['tweak']
 
@@ -201,12 +202,60 @@ def getDeformersForShape(geo, ignoreTypes=None, ignoreTweaks=True):
         shapeSets = cmds.ls(cmds.listConnections(shape), type='objectSet')
 
     for deformer in geometryFilters:
-        deformerSet = cmds.ls(cmds.listConnections(deformer), type="objectSet")[0]
-        if deformerSet in shapeSets:
-            # in almost every case we
-            if not cmds.nodeType(deformer) in ignoreTypes:
-                result.append(deformer)
+        # first lets try to use this using the old version from Maya2020.
+        # if that fails we can ty another method.
+        deformerSet = cmds.ls(cmds.listConnections(deformer), type="objectSet") or list()
+        if deformerSet:
+            if deformerSet[0] in shapeSets:
+                # in almost every case we
+                if not cmds.nodeType(deformer) in ignoreTypes:
+                    result.append(deformer)
+
+        else:
+            result = cmds.deformableShape(shape, chain=True)
+
     return result
+
+
+def getOrigShape(geo, plug=False):
+    """
+    Get an orig shape from the given geometry node
+
+    :param geo:  geometry name to get the orig shape for
+    :param plug: return the orig shape as a plug or shape
+    :return: orig shape or orig shape output plug
+    """
+    deformShape = getDeformShape(geo)
+    origShape = common.getFirstIndex(cmds.deformableShape(deformShape, originalGeometry=True))
+    if not plug:
+        origShape = origShape.split(".")[0]
+    return origShape
+
+
+def createCleanGeo(geo):
+    """
+    create a completely clean version of the given geo. To do this we will revert the mesh to the shape of the orig shape
+
+    :param geo: name of the geometry to create a clean shape for
+    :return:
+    """
+    dupGeo = cmds.duplicate(geo)[0]
+    dupGeo = cmds.rename(dupGeo, "{}_clean".format(geo))
+    origShape = getOrigShape(geo)
+    shapes = cmds.listRelatives(dupGeo, s=True)
+
+    # get the point positions of the orig shape
+    origPoints = rigamajig2.maya.mesh.getVertPositions(origShape, world=False)
+
+    # delete all intermediate shapes
+    for shape in shapes:
+        if cmds.getAttr("{}.intermediateObject".format(shape)):
+            cmds.delete(shape)
+
+    # set the point positions the ones from the orig shape
+    rigamajig2.maya.mesh.setVertPositions(dupGeo, vertList=origPoints, world=False)
+
+    return dupGeo
 
 
 def setDeformerOrder(geo, order, top=True):

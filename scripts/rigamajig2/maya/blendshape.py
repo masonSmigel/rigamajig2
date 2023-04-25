@@ -18,6 +18,8 @@ import rigamajig2.maya.shape
 import rigamajig2.maya.openMayaUtils as omu
 from rigamajig2.shared import common
 from rigamajig2.maya import deformer
+from rigamajig2.maya import shape
+from rigamajig2.maya import attr
 
 
 def isBlendshape(blendshape):
@@ -142,7 +144,7 @@ def addInbetween(blendshape, targetGeo, targetName, base=None, weight=0.5, absol
 
     # add the blendshape target
     inbetweenType = 'absolute' if absolute else 'relative'
-    cmds.blendShape(blendshape, e=True, t=(base, targetIndex, targetGeo, weight),ib=True, ibt=inbetweenType)
+    cmds.blendShape(blendshape, e=True, t=(base, targetIndex, targetGeo, weight), ib=True, ibt=inbetweenType)
 
     return "{}.{}".format(blendshape, targetName)
 
@@ -163,6 +165,25 @@ def getBaseGeometry(blendshape):
     outputNode = om.MFnDagNode(baseObject[0])
 
     return outputNode.partialPathName()
+
+
+def getBaseIndex(blendshape, base):
+    """
+    Get the index for a given base geometry
+
+    :param blendshape: blendshape node
+    :param base: base node
+    :return:
+    """
+    # get the blendshape as a geometry filter
+    deformerObj = omu.getMObject(blendshape)
+    deformFn = oma.MFnGeometryFilter(deformerObj)
+
+    # get the deforming shape and an mObject for it.
+    deformingShape = deformer.getDeformShape(base)
+    deformingShapeMObj = omu.getMObject(deformingShape)
+
+    return deformFn.indexForOutputShape(deformingShapeMObj)
 
 
 def getBlendshapeNodes(geometry):
@@ -295,7 +316,8 @@ def getTargetName(blendshape, targetGeometry):
 
     targetConnectionIndex = targetConnections.index(blendshape)
     targetConnectionAttr = targetConnections[targetConnectionIndex - 1]
-    targetConnectionPlug = cmds.listConnections(targetConnectionAttr, sh=True, p=True, d=True, s=False, t='blendShape')[0]
+    targetConnectionPlug = cmds.listConnections(targetConnectionAttr, sh=True, p=True, d=True, s=False, t='blendShape')[
+        0]
 
     targetIndex = int(targetConnectionPlug.split(".")[2].split("[")[1].split("]")[0])
     targetAlias = cmds.aliasAttr("{}.weight[{}]".format(blendshape, targetIndex), q=True)
@@ -347,22 +369,22 @@ def getWeights(blendshape, targets=None, geometry=None):
     for target in targets:
         targetIndex = getTargetIndex(blendshape, target)
 
-        attr = '{}.it[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, pointCount)
+        targetAttr = '{}.it[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, pointCount)
         attrDefaultTest = '{}.it[0].itg[{}].tw[*]'.format(blendshape, targetIndex)
         if not cmds.objExists(attrDefaultTest):
             values = [1 for _ in range(pointCount + 1)]
         else:
-            values = cmds.getAttr(attr)
+            values = cmds.getAttr(targetAttr)
             values = [round(v, 5) for v in values]
         weightList[target] = values
 
     # get the base weights
-    attr = '{}.it[0].baseWeights[0:{}]'.format(blendshape, pointCount)
+    targetAttr = '{}.it[0].baseWeights[0:{}]'.format(blendshape, pointCount)
     attrDefaultTest = '{}.it[0].baseWeights[*]'.format(blendshape)
     if not cmds.objExists(attrDefaultTest):
         values = [1 for _ in range(pointCount + 1)]
     else:
-        values = cmds.getAttr(attr)
+        values = cmds.getAttr(targetAttr)
         values = [round(v, 5) for v in values]
     weightList['baseWeights'] = values
 
@@ -380,7 +402,7 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
     :param str geometry: Optional - Name of geometry to set weights on
     """
     if not isBlendshape(blendshape):
-        raise Exception("{} is not a valid blendshape target".format(blendshape))
+        raise Exception("{} is not a valid blendshape".format(blendshape))
 
     if not targets: targets = getTargetList(blendshape) + ['baseWeights']
     if not geometry: geometry = cmds.blendShape(blendshape, q=True, g=True)[0]
@@ -389,9 +411,110 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
 
     for target in targets:
         if target == 'baseWeights':
-            attr = '{}.inputTarget[0].baseWeights[0:{}]'.format(blendshape, pointCount)
-            cmds.setAttr(attr, *weights[target])
+            targetAttr = '{}.inputTarget[0].baseWeights[0:{}]'.format(blendshape, pointCount)
+            cmds.setAttr(targetAttr, *weights[target])
         else:
             targetIndex = getTargetIndex(blendshape, target)
-            attr = '{}.inputTarget[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, pointCount)
-            cmds.setAttr(attr, *weights[target])
+            targetAttr = '{}.inputTarget[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, pointCount)
+            cmds.setAttr(targetAttr, *weights[target])
+
+
+def getInputTargetItemList(blendshape, target, base=None):
+    """
+    Get the input targetItem attribute from a blendshape node and a target.
+    This is handy if we want to rebuild the targets from deltas or just check if nodes are connected to the targets already
+
+    :param blendshape: name of the blendshape node to get the target item plug
+    :param target: name of the blendshape target to check
+    :param base: Optional pass in a specific base to query from.
+    :return:
+    """
+
+    targetIndex = getTargetIndex(blendshape, target=target)
+
+    # lets assume the baseIndex is 0 as it most often is.
+    # TODO: check to find the base index from a given geometry
+
+    if not base: base = getBaseGeometry(blendshape)
+
+    # get the base index
+    baseIndex = getBaseIndex(blendshape, base)
+
+    # we need to list all the available inputTargetItems added to the blendshape
+    # The attribute can be a bit awkward to manage so set it up here.
+    # (inputTarget[0].inputTargetGroup[0].inputTargetItem).
+    targetItemAttr = "{}.it[{}].itg[{}].iti ".format(blendshape, baseIndex, targetIndex)
+
+    # return a list of all indecies gathered.
+    indices = cmds.getAttr(targetItemAttr, mi=True)
+    return indices
+
+
+def regenerateTarget(blendshape, target, reconnect=False):
+    """
+    regenerate a target mesh from a blendshape node.
+
+    :param reconnect:
+    :param blendshape: blendshape node
+    :param target: name of the target to regenerate
+    :return: newly created duplicate
+    """
+    if not isBlendshape(blendshape):
+        raise Exception("'{}' is not a valid blendshape".format(blendshape))
+
+    # get the target index
+    targetIndex = getTargetIndex(blendshape, target)
+
+    # using the sculptTarget command we can regenerate the blendshape target
+    targetMesh = cmds.sculptTarget(blendshape, e=True, regenerate=True, target=targetIndex)
+    # rename the shape node
+    shape = "{}Shape".format(targetMesh[0])
+    tmpshape = cmds.listRelatives(targetMesh, s=True)
+    cmds.rename(tmpshape[0], shape)
+
+    if not reconnect:
+        # list all relatives of the world mesh. This should give us the input targetGeomTarget attr for the target.
+        outMeshAttr = "{}.worldMesh".format(shape)
+        conn = cmds.listConnections(outMeshAttr, s=False, d=True, plugs=True)
+        # it may be under the world mesh instead. so try that too.
+        if conn: cmds.disconnectAttr(outMeshAttr, conn[0])
+
+    return targetMesh
+
+
+def getDelta(blendshape, target, inputTargetItem=6000):
+    """
+    Gather
+    :param blendshape: name of the blendshape to gather blendshape data from.
+    :param target: name of the target to gather the delta information for
+    :param inputTargetItem: inputTargetItem to gather the delta from. By default a blendshape at weight 1 starts at 6000
+                            and uses the equation index = wt * 1000 + 5000 to determine inputTargetItem Indices.
+    :return:
+    """
+    if not isBlendshape(blendshape):
+        raise Exception("'{}' is not a valid blendshape".format(blendshape))
+
+    targetIndex = getTargetIndex(blendshape, target)
+
+    base = getBaseGeometry(blendshape)
+    baseIndex = getBaseIndex(blendshape, base)
+
+    # T
+    # targetItems = getInputTargetItemList(blendshape, target)
+
+    # first lets check to see if its connected to any input geometry.
+    inputTargetItemPlug = "{}.it[{}].itg[{}].iti[{}]".format(blendshape, baseIndex, targetIndex, inputTargetItem)
+    geoTargetPlug = "{}.igt".format(inputTargetItemPlug)
+    if len(cmds.listConnections(geoTargetPlug, s=True, d=False) or list()) > 0:
+        inputShape = cmds.listConnections(geoTargetPlug, s=True, d=False, plugs=True)
+        # get the point positions!
+
+    # if we dont have any input geo then we need to gather the target points
+    else:
+        # the input points target list stores a list of offsets from the orignial shape of the vertex to the blendshape
+        pointsTarget = cmds.getAttr("{}.ipt".format(inputTargetItemPlug))
+        # the components target stores a list of components that have been modified.
+        # The order matches that of the pointsTarget list.
+        componentsTarget = common.flattenList(cmds.getAttr("{}.ict".format(inputTargetItemPlug)))
+
+        return pointsTarget, componentsTarget

@@ -156,7 +156,7 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
                     cmds.connectAttr("{}.output".format(sinScale), "{joint}.t{axis}".format(joint=jnt, axis=aimAxis))
 
                 # build a list of the scale axies we want to use (the two that are not the aim axis)
-                scaleAxies = [axis for axis in 'x', 'y', 'z' if axis != aimAxis]
+                scaleAxies = [axis for axis in ['x', 'y', 'z'] if axis != aimAxis]
                 for axis in scaleAxies:
                     cmds.connectAttr("{}.output".format(cosScale), "{joint}.s{axis}".format(joint=jnt, axis=axis))
 

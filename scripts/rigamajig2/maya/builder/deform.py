@@ -93,7 +93,7 @@ def loadSingleSkin(path):
         dataObj = skin_data.SkinData()
         dataObj.read(path)
         try:
-            dataObj.applyData(nodes=dataObj.getData().keys())
+            dataObj.applyData(nodes=dataObj.getKeys())
         except:
             fileName = os.path.basename(path)
             om2.MGlobal.displayWarning("Failed to load skin weights for {}".format(fileName))
@@ -199,5 +199,5 @@ def loadDeformLayers(path=None):
     if path:
         dataObj = deformLayer_data.DeformLayerData()
         dataObj.read(path)
-        dataObj.applyData(nodes=dataObj.getData().keys())
+        dataObj.applyData(nodes=dataObj.getKeys())
         return True

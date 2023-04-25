@@ -278,7 +278,7 @@ def getTargetIndex(blendshape, target):
     if not isBlendshape(blendshape):
         raise Exception("{} is not a valid blendshape node".format(blendshape))
 
-    if isinstance(target, (int, long)):
+    if isinstance(target, int):
         return target
 
     targetCount = cmds.blendShape(blendshape, q=True, target=True, wc=True)
@@ -499,7 +499,7 @@ def getDelta(blendshape, target, inputTargetItem=6000):
     base = getBaseGeometry(blendshape)
     baseIndex = getBaseIndex(blendshape, base)
 
-    # T
+    #
     # targetItems = getInputTargetItemList(blendshape, target)
 
     # first lets check to see if its connected to any input geometry.
@@ -508,6 +508,12 @@ def getDelta(blendshape, target, inputTargetItem=6000):
     if len(cmds.listConnections(geoTargetPlug, s=True, d=False) or list()) > 0:
         inputShape = cmds.listConnections(geoTargetPlug, s=True, d=False, plugs=True)
         # get the point positions!
+
+        # get the postions of the base geo
+
+        # get the difference of the base geo and deformed geo
+
+        # remove non moved verticies.
 
     # if we dont have any input geo then we need to gather the target points
     else:

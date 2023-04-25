@@ -383,8 +383,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             # calculate an inverted rotation to negate the upp twist start.
             # This gives a more natural twist down the limb
             twistMultMatrix, twistDecompose = rigamajig2.maya.node.multMatrix(
-                ["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(
-                    self.input[0])], outputs=[""], name="{}_invStartTist".format(uppSpline._startTwist))
+                ["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(self.input[0])],
+                outputs=[""], name="{}_invStartTist".format(uppSpline._startTwist))
             # add in a blendMatrix to allow us to
             cmds.addAttr(self.paramsHierarchy, ln='uppCounterTwist', at='float', k=True, dv=1, min=0, max=1)
 

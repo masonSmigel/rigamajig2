@@ -138,5 +138,5 @@ def transferUVs(sourceMesh, targetMesh, checkVertCount=True, constructionHistory
     if not constructionHistory:
         cmds.delete(targetMesh, constructionHistory=True)
 
-    print "transfered UVs from {}  to {}".format(sourceMesh, targetMesh)
+    print("transfered UVs from {}  to {}".format(sourceMesh, targetMesh))
 

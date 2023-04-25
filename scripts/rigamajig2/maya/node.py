@@ -16,7 +16,7 @@ def setConnection(plug, value):
     :param value: value to set the plug to
     :return: None
     """
-    if isinstance(value, (str, unicode)):
+    if isinstance(value, (str, common.UNICODE)):
         try:
             cmds.connectAttr(value, plug)
         except:
@@ -35,7 +35,7 @@ def setCompoundConnection(plug, value):
     :param value: value to set the plug to
     :return: None
     """
-    if isinstance(value, (str, unicode)):
+    if isinstance(value, (str, common.UNICODE)):
         if attr.isCompound(value):
             cmds.connectAttr(value, plug)
         else:

@@ -3,6 +3,7 @@ This module contains functions common to all modules and constants
 """
 from collections import OrderedDict
 import re
+import sys
 
 DEBUG = False
 REQUIRED_PLUGINS = ['quatNodes', 'matrixNodes']
@@ -135,6 +136,12 @@ C_TOKENS = ['center_', '_center', 'Center_', '_Center',
             '_c_', 'cr_', '_cr', 'Cr_', '_Cr',
             'ctr_', '_ctr', 'Ctr_', '_Ctr',
             'Ct_', '_Ct', '_c', 'C_', '_C', '_C_']
+
+if sys.version_info.major >= 3:
+    basestring = str
+    UNICODE = basestring
+else:
+    UNICODE = unicode
 
 
 def toList(values):

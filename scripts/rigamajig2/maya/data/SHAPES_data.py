@@ -149,7 +149,6 @@ class SHAPESData(maya_data.MayaData):
 
             # set the setup file data to be the path to the mel file for the blendshape!
             filename = "{}.mel".format(blendshapeNode)
-            print setupPath, filename
             setupRelativePath = os.path.relpath(os.path.join(setupPath, filename), baseFolder)
 
             self._data[blendshapeNode]['setupFile'] = setupRelativePath

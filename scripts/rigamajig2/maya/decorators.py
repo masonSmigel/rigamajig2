@@ -105,6 +105,6 @@ def timeFunction(func):
             endTime = time.time()
             finalTime = endTime - startTime
 
-            print "Function {} completed in {}".format(func, finalTime)
+            print("Function {} completed in {}".format(func, finalTime))
 
     return wrap

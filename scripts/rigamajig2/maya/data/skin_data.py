@@ -87,7 +87,7 @@ class SkinData(maya_data.MayaData):
             mesh = cmds.listRelatives(meshShape, p=True)[0]
             meshSkin = skinCluster.getSkinCluster(mesh)
 
-            influenceObjects = self._data[node]['weights'].keys()
+            influenceObjects = list(self._data[node]['weights'].keys())
 
             if not rebind and meshSkin:
                 assert len(skinCluster.getInfluenceJoints(meshSkin)) == len(

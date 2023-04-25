@@ -120,6 +120,6 @@ class BasicTree(rigamajig2.maya.cmpts.base.Base):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            firstKey, firstItem = self.hierarchyDict.items()[0]
+            firstKey, firstItem = list(self.hierarchyDict.items())[0]
             baseControl = firstItem['control']
             rig_transform.connectOffsetParentMatrix(self.rigParent, baseControl.orig, mo=True)

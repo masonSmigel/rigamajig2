@@ -471,7 +471,7 @@ if __name__ == '__main__':
     try:
         dlg.deleteLater()
     except:
-        print "didnt delete"
+        pass
 
     dlg = BatchExportFBX()
     dlg.show()

@@ -25,7 +25,4 @@ sel = cmds.ls(sl=True)
 
 cdata.gatherDataIterate(sel)
 
-
-print cdata.getData()
-
 cdata.write(CURVE_DATA_PATH)

@@ -85,4 +85,4 @@ def getMostRecentFile():
 if __name__ == '__main__':
     addRecentFile("test7")
 
-    print getRecentFileList()
+    print (getRecentFileList())

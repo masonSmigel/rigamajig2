@@ -194,7 +194,6 @@ class MergeRigsDialog(QtWidgets.QDialog):
 
     def showNewRigFile(self):
         """Show the new rig file"""
-        print self.rigFile
         showInFolder.showInFolder(self.rigFile)
 
 if __name__ == '__main__':

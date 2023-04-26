@@ -83,7 +83,7 @@ def create(base, targets=None, origin='local', deformOrder=None, name=None):
 
 def addTarget(blendshape, target, targetAlias=None, base=None, targetIndex=-1, targetWeight=0.0, topologyCheck=False):
     """
-    Add a new blendshape target to an existing blendshape node
+    Add a new blendshape target from an existing geometry to an existing blendshape node
 
     :param str blendshape: name of the blendshape nnode
     :param str  target: name of the target geometry to add
@@ -121,6 +121,48 @@ def addTarget(blendshape, target, targetAlias=None, base=None, targetIndex=-1, t
     return "{}.{}".format(blendshape, targetName)
 
 
+def addEmptyTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, inbetween=None, topologyCheck=False):
+    """
+    Add an empty blendshape target from an existing blendshape node
+
+    :param str blendshape: name of the blendshape nnode
+    :param str  target: name of the target geometry to add. This will be a blank shape that doesnt exisit in the scene.
+    :param str base: base geometry of the blendshape. If Ommited use the first connected base
+    :param int targetIndex: specified target index of the blendshape
+    :param float inbetween:
+    :param int float targetWeight: set the target weight
+    :param  bool topologyCheck: check the topology of the model before adding the blendshape
+    :return: plug of the new target added
+    :rtype: str
+    """
+    if cmds.objExists(target):
+        raise Exception("The target geometry {} exists. Please use addTarget instead".format(target))
+
+    if not base:
+        base = getBaseGeometry(blendshape)
+    blankTarget = deformer.createCleanGeo(base, name=target)
+
+    if inbetween:
+        plug = addInbetween(blendshape,
+                            targetGeo=blankTarget,
+                            targetName=target,
+                            base=base,
+                            weight=inbetween)
+    else:
+
+        plug = addTarget(blendshape,
+                         target=blankTarget,
+                         base=base,
+                         targetIndex=targetIndex,
+                         targetWeight=targetWeight,
+                         topologyCheck=topologyCheck)
+
+    # delete the blank target geo
+    cmds.delete(blankTarget)
+
+    return plug
+
+
 def addInbetween(blendshape, targetGeo, targetName, base=None, weight=0.5, absolute=True):
     """
     Add a new target inbetween to the specified blendShape target
@@ -139,7 +181,7 @@ def addInbetween(blendshape, targetGeo, targetName, base=None, weight=0.5, absol
     if not cmds.objExists(targetGeo):
         raise Exception("The target geometry {} doesnt exist".format(target))
 
-    if base and not mc.objExists(base):
+    if base and not cmds.objExists(base):
         raise Exception('Base geometry "{}" does not exist!'.format(base))
 
     if not base:
@@ -579,7 +621,6 @@ def getDelta(blendshape, target, inbetween=None, prune=5):
         componentsTarget = common.flattenList(cmds.getAttr("{}.ict".format(inputTargetItemPlug)))
 
         # now we need to compose thos into a delta point dictionary
-
         for point, componentTarget in zip(pointsTarget, componentsTarget):
             vertexId = componentTarget.split('[')[-1].split(']')[0]
 
@@ -588,6 +629,46 @@ def getDelta(blendshape, target, inbetween=None, prune=5):
             deltaPointList[vertexId] = prunedPoint
 
     return deltaPointList
+
+
+def setDelta(blendshape, target, deltaDict, inbetween=None):
+    """
+    Set the delta values on a given blendshape target.
+    By setting the inputPointsTarget  and inputComponentsTarget attributes of a given inputTargetItem Idex attributes
+    we can effectivly add a new blendshape target without requiring a target to be rebuilt.
+
+    :param blendshape: Name of the blendshape node
+    :param target: name of the target to set the delta on
+    :param deltaDict: delta data dictionary of deltas for vertex IDs. Gathered from getDeltas
+    :param inbetween: Specify an inbetween to set the delta for the given target. Otherwise replace
+                      inputTargetItem index 6000.
+    """
+    if not isBlendshape(blendshape):
+        raise Exception("'{}' is not a valid blendshape".format(blendshape))
+
+    targetIndex = getTargetIndex(blendshape, target)
+
+    base = getBaseGeometry(blendshape)
+    baseIndex = getBaseIndex(blendshape, base)
+
+    inputTargetItem = 6000 if not inbetween else inbetweenToIti(inbetween)
+
+    # Theese attributes can get rather unweidly. so we'll do it once here to reuse later.
+    # this attribute accesses the input target item for a given index.
+    inputTargetItemPlug = '{}.it[{}].itg[{}].iti[{}]'.format(blendshape, baseIndex, targetIndex, inputTargetItem)
+    geoTargetPlug = "{}.igt".format(inputTargetItemPlug)
+
+    # first lets check to see if its connected to any input geometry.
+    if len(cmds.listConnections(geoTargetPlug, s=True, d=False) or list()) > 0:
+        raise Warning("{}.{} has a live blendshape connection".format(blendshape, target))
+
+    else:
+        pointsList = [deltaDict[p] for p in list(deltaDict.keys())]
+        componentsList = ["vtx[{}]".format(p) for p in list(deltaDict.keys())]
+
+        # set the inputPointsTarget and inputComponentsTarget
+        cmds.setAttr("{}.ipt".format(inputTargetItemPlug),len(pointsList), *pointsList, type="pointArray")
+        cmds.setAttr("{}.ict".format(inputTargetItemPlug), len(componentsList), *componentsList, type="componentList")
 
 
 def reconstructTargetFromDelta(blendshape, deltaDict, name=None):
@@ -624,7 +705,7 @@ def reconstructTargetFromDelta(blendshape, deltaDict, name=None):
     return targetGeo
 
 
-def regenerateLiveTarget(blendshape, target, inbetween=None):
+def regenerateTarget(blendshape, target, inbetween=None, connect=True):
     """
     regenerate a live target mesh for a given target.
 
@@ -665,6 +746,7 @@ def regenerateLiveTarget(blendshape, target, inbetween=None):
         targetGeo = reconstructTargetFromDelta(blendshape, deltaDict=deltaDict, name=targetGeoName)
 
         targetGeoShape = cmds.listRelatives(targetGeo, s=True)[0]
-        cmds.connectAttr("{}.worldMesh[0]".format(targetGeoShape), "{}.igt".format(inputTargetItemPlug), f=True)
+        if connect:
+            cmds.connectAttr("{}.worldMesh[0]".format(targetGeoShape), "{}.igt".format(inputTargetItemPlug), f=True)
 
         return targetGeo

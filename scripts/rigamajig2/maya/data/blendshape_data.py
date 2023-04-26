@@ -94,9 +94,8 @@ class BlendshapeData(maya_data.MayaData):
                 if target not in blendshape.getTargetList(node):
                     # first we need to recreate the main target. This is available at the index 6000.
                     deltaDict = self._data[node]['targets'][target]['6000']['deltas']
-                    tmpTarget = blendshape.reconstructTargetFromDelta(node, deltaDict=deltaDict, name=target)
-                    blendshape.addTarget(node, target=tmpTarget)
-                    cmds.delete(tmpTarget)
+                    blendshape.addEmptyTarget(node, target=target, )
+                    blendshape.setDelta(node, target, deltaDict=deltaDict)
 
                     addedTargets += 1
 
@@ -109,9 +108,8 @@ class BlendshapeData(maya_data.MayaData):
                         # using the same formula used to set the inputTargetIndex
                         wt = blendshape.itiToInbetween(iti)
                         deltaDict = self._data[node]['targets'][target][iti]['deltas']
-                        tmpTarget = blendshape.reconstructTargetFromDelta(node, deltaDict=deltaDict, name=target)
-                        blendshape.addInbetween(node, targetGeo=tmpTarget, targetName=target, weight=wt)
-                        cmds.delete(tmpTarget)
+                        blendshape.addEmptyTarget(node, target, inbetween=wt)
+                        blendshape.setDelta(node, target, deltaDict=deltaDict, inbetween=wt)
 
                     # finally we can set the target weights
                     if loadWeights:

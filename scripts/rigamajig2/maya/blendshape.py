@@ -217,13 +217,14 @@ def getTargetList(blendshape):
     return common.toList(targetList)
 
 
-def hasTargetGeo(blendShape, target, base=None):
+def hasTargetGeo(blendShape, target, base=None, inbetween=None):
     """
     Check if the specified blendShape target has live target geometry.
 
     :param blendShape: Name of blendShape to query
     :param str target: BlendShape target to query
     :param str base: The base geometry index to check for live target geometry.
+    :param float inbetween: Optional get the input target geo for an inbetween
     """
     # Check blendShape
     if not isBlendshape(blendShape):
@@ -234,19 +235,21 @@ def hasTargetGeo(blendShape, target, base=None):
         raise Exception('BlendShape "' + blendShape + '" has no target "' + target + '"!')
 
     # Check Target Geometry
-    targetGeo = getTargetGeo(blendShape, target, base=base)
+    targetGeo = getTargetGeo(blendShape, target, base=base, inbetween=inbetween)
 
     # Return Result
     return bool(targetGeo)
 
 
-def getTargetGeo(blendShape, target, base=None):
+def getTargetGeo(blendShape, target, base=None, inbetween=None):
     """
     Get the connected target geometry given a blendShape and specified target.
 
     :param str blendShape: BlendShape node to get target geometry from
     :param str target: BlendShape target to get source geometry from
-    :param str base: The base geometry of the blendshape to get the target geometry for. If empty, use base geometry at geomIndex 0.
+    :param str base: The base geometry of the blendshape to get the target geometry for.
+                      If empty, use base geometry at geomIndex 0.
+    :param inbetween: Optional get the input target geo for an inbetween
     """
     # Get Target Index
     targetIndex = getTargetIndex(blendShape, target)
@@ -256,8 +259,7 @@ def getTargetGeo(blendShape, target, base=None):
     if base: geomIndex = deformer.getGeoIndex(baseGeo, blendShape)
 
     # Get Weight Index
-    # !!! Hardcoded to check "inputTargetItem" index 6000. This could be more robust by check all existing multi indexes.
-    wtIndex = 6000
+    wtIndex = 6000 if not inbetween else inbetweenToIti(inbetween)
 
     # Get Connected Target Geometry
     targetGeoAttr = blendShape + '.inputTarget[' + str(geomIndex) + '].inputTargetGroup[' + str(
@@ -521,41 +523,6 @@ def inbetweenToIti(inbetween):
     return int((float(inbetween) * 1000) + 5000)
 
 
-def regenerateTarget(blendshape, target, reconnect=False, ibetween=None):
-    """
-    regenerate a target mesh from a blendshape node.
-
-    :param reconnect:
-    :param blendshape: blendshape node
-    :param target: name of the target to regenerate
-    :return: newly created duplicate
-    """
-
-    # TODO: update this to be more manual
-    if not isBlendshape(blendshape):
-        raise Exception("'{}' is not a valid blendshape".format(blendshape))
-
-    # get the target index
-    targetIndex = getTargetIndex(blendshape, target)
-
-    # using the sculptTarget command we can regenerate the blendshape target
-    # TODO add support for inbetweens.
-    targetMesh = cmds.sculptTarget(blendshape, e=True, regenerate=True, target=targetIndex)
-    # rename the shape node
-    shape = "{}Shape".format(targetMesh[0])
-    tmpshape = cmds.listRelatives(targetMesh, s=True)
-    cmds.rename(tmpshape[0], shape)
-
-    if not reconnect:
-        # list all relatives of the world mesh. This should give us the input targetGeomTarget attr for the target.®®®
-        outMeshAttr = "{}.worldMesh".format(shape)
-        conn = cmds.listConnections(outMeshAttr, s=False, d=True, plugs=True)
-        # it may be under the world mesh instead. so try that too.
-        if conn: cmds.disconnectAttr(outMeshAttr, conn[0])
-
-    return targetMesh
-
-
 def getDelta(blendshape, target, inbetween=None, prune=5):
     """
     Gather
@@ -659,3 +626,37 @@ def reconstructTargetFromDelta(blendshape, deltaDict, name=None):
         cmds.xform("{}.vtx[{}]".format(targetGeo, vtxid), objectSpace=True, translation=absPoint)
 
     return targetGeo
+
+
+def regenerateTarget(blendshape, target, reconnect=False, ibetween=None):
+    """
+    regenerate a target mesh from a blendshape node.
+
+    :param reconnect:
+    :param blendshape: blendshape node
+    :param target: name of the target to regenerate
+    :return: newly created duplicate
+    """
+
+    # TODO: update this to be more manual/ work with inbetweens
+    if not isBlendshape(blendshape):
+        raise Exception("'{}' is not a valid blendshape".format(blendshape))
+
+    # get the target index
+    targetIndex = getTargetIndex(blendshape, target)
+
+    # using the sculptTarget command we can regenerate the blendshape target
+    targetMesh = cmds.sculptTarget(blendshape, e=True, regenerate=True, target=targetIndex)
+    # rename the shape node
+    shape = "{}Shape".format(targetMesh[0])
+    tmpshape = cmds.listRelatives(targetMesh, s=True)
+    cmds.rename(tmpshape[0], shape)
+
+    if not reconnect:
+        # list all relatives of the world mesh. This should give us the input targetGeomTarget attr for the target.®®®
+        outMeshAttr = "{}.worldMesh".format(shape)
+        conn = cmds.listConnections(outMeshAttr, s=False, d=True, plugs=True)
+        # it may be under the world mesh instead. so try that too.
+        if conn: cmds.disconnectAttr(outMeshAttr, conn[0])
+
+    return targetMesh

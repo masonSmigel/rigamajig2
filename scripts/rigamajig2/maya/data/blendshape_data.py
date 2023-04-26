@@ -63,7 +63,7 @@ class BlendshapeData(maya_data.MayaData):
 
                     if blendshape.hasTargetGeo(node, target, inbetween=wt):
                         targetGeo = blendshape.getTargetGeo(node, target, inbetween=wt)
-                        itiDict['deltas'] = targetGeo
+                        itiDict['targetGeo'] = targetGeo
 
                     targetDict[str(iti)] = itiDict
 

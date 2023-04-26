@@ -563,12 +563,11 @@ def getDelta(blendshape, target, inbetween=None, prune=5):
         for i in range(len(targetPoints)):
 
             # get the difference of the base geo and deformed geo
-            offset = om.MPoint(targetPoints[i]) - om.MVector(origPoints[i])
+            offset = om.MVector(targetPoints[i]) - om.MVector(origPoints[i])
 
-            # check if the point is not 0 before adding it.
+            # check if the magnitude is within a very small vector before adding it.
             # This will help us cut down on file sizes.
-            # TODO: cehck the magnitude of the point. Sometimes -0 values can slip in here
-            if offset != om.MPoint(0, 0, 0, 1):
+            if offset.length() >= 0.0001:
                 deltaPointList[str(i)] = round(offset.x, prune), round(offset.y, prune), round(offset.z, prune)
 
     # if we dont have any input geo then we need to gather the target points
@@ -669,4 +668,3 @@ def regenerateLiveTarget(blendshape, target, inbetween=None):
         cmds.connectAttr("{}.worldMesh[0]".format(targetGeoShape), "{}.igt".format(inputTargetItemPlug), f=True)
 
         return targetGeo
-

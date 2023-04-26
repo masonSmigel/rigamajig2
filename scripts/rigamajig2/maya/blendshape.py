@@ -571,6 +571,7 @@ def getDelta(blendshape, target, inbetween=None, prune=5):
 
             # check if the point is not 0 before adding it.
             # This will help us cut down on file sizes.
+            # TODO: cehck the magnitude of the point. Sometimes -0 values can slip in here
             if offset != om.MPoint(0, 0, 0, 1):
                 deltaPointList[str(i)] = round(offset.x, prune), round(offset.y, prune), round(offset.z, prune)
 

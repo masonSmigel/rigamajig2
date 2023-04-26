@@ -495,11 +495,7 @@ def getInputTargetItemList(blendshape, target, base=None):
 
     targetIndex = getTargetIndex(blendshape, target=target)
 
-    # lets assume the baseIndex is 0 as it most often is.
-    # TODO: check to find the base index from a given geometry
-
     if not base: base = getBaseGeometry(blendshape)
-
     # get the base index
     baseIndex = getBaseIndex(blendshape, base)
 

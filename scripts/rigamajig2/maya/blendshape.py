@@ -629,35 +629,48 @@ def reconstructTargetFromDelta(blendshape, deltaDict, name=None):
     return targetGeo
 
 
-def regenerateTarget(blendshape, target, reconnect=False, ibetween=None):
+def regenerateLiveTarget(blendshape, target, inbetween=None):
     """
-    regenerate a target mesh from a blendshape node.
+    regenerate a live target mesh for a given target.
 
-    :param reconnect:
     :param blendshape: blendshape node
     :param target: name of the target to regenerate
+    :param inbetween: value of the inbetween to get
     :return: newly created duplicate
     """
 
-    # TODO: update this to be more manual/ work with inbetweens
     if not isBlendshape(blendshape):
         raise Exception("'{}' is not a valid blendshape".format(blendshape))
 
     # get the target index
     targetIndex = getTargetIndex(blendshape, target)
 
-    # using the sculptTarget command we can regenerate the blendshape target
-    targetMesh = cmds.sculptTarget(blendshape, e=True, regenerate=True, target=targetIndex)
-    # rename the shape node
-    shape = "{}Shape".format(targetMesh[0])
-    tmpshape = cmds.listRelatives(targetMesh, s=True)
-    cmds.rename(tmpshape[0], shape)
+    base = getBaseGeometry(blendshape)
+    baseIndex = getBaseIndex(blendshape, base)
 
-    if not reconnect:
-        # list all relatives of the world mesh. This should give us the input targetGeomTarget attr for the target.®®®
-        outMeshAttr = "{}.worldMesh".format(shape)
-        conn = cmds.listConnections(outMeshAttr, s=False, d=True, plugs=True)
-        # it may be under the world mesh instead. so try that too.
-        if conn: cmds.disconnectAttr(outMeshAttr, conn[0])
+    # get the input target item index
+    inputTargetItem = 6000 if not inbetween else inbetweenToIti(inbetween)
 
-    return targetMesh
+    inputTargetItemPlug = '{}.it[{}].itg[{}].iti[{}]'.format(blendshape, baseIndex, targetIndex, inputTargetItem)
+
+    # check if an inputTargetItem exisits for the given inbetween
+    if inputTargetItem not in getInputTargetItemList(blendshape, target):
+        raise ValueError("No inbetween exists for '{}.{}' at the inbetween {}".format(blendshape, target, inbetween))
+
+    # check if the plug is already connected to geometry
+    if cmds.listConnections("{}.igt".format(inputTargetItemPlug), s=True, d=False, plugs=True):
+        print("{}.{} is already connected to input geometry".format(blendshape, target))
+        return
+
+    # if its not we can reconstruct the delta then connect it to the inputGeometryTarget plug.
+    else:
+        ibName = "{}_ib{}".format(target, str(inbetween).replace(".", "_").replace("-", "neg"))
+        targetGeoName = target if not inbetween else ibName
+        deltaDict = getDelta(blendshape, target, inbetween=inbetween)
+        targetGeo = reconstructTargetFromDelta(blendshape, deltaDict=deltaDict, name=targetGeoName)
+
+        targetGeoShape = cmds.listRelatives(targetGeo, s=True)[0]
+        cmds.connectAttr("{}.worldMesh[0]".format(targetGeoShape), "{}.igt".format(inputTargetItemPlug), f=True)
+
+        return targetGeo
+

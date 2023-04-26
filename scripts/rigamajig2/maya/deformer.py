@@ -217,30 +217,32 @@ def getDeformersForShape(geo, ignoreTypes=None, ignoreTweaks=True):
     return result
 
 
-def getOrigShape(geo, plug=False):
+def getOrigShape(node):
     """
     Get an orig shape from the given geometry node
 
-    :param geo:  geometry name to get the orig shape for
-    :param plug: return the orig shape as a plug or shape
+    :param node:  geometry or deformer name to get the orig shape for
     :return: orig shape or orig shape output plug
     """
-    deformShape = getDeformShape(geo)
+    deformShape = getDeformShape(node)
     origShape = common.getFirstIndex(cmds.deformableShape(deformShape, originalGeometry=True))
-    if not plug:
-        origShape = origShape.split(".")[0]
+
+    origShape = origShape.split(".")[0]
     return origShape
 
 
-def createCleanGeo(geo):
+def createCleanGeo(geo, name=None):
     """
     create a completely clean version of the given geo. To do this we will revert the mesh to the shape of the orig shape
 
     :param geo: name of the geometry to create a clean shape for
+    :param name: name for the newly created clean geometery
     :return:
     """
     dupGeo = cmds.duplicate(geo)[0]
-    dupGeo = cmds.rename(dupGeo, "{}_clean".format(geo))
+    if not name: name = "{}_clean".format(geo)
+
+    dupGeo = cmds.rename(dupGeo, name)
     origShape = getOrigShape(geo)
     shapes = cmds.listRelatives(dupGeo, s=True)
 

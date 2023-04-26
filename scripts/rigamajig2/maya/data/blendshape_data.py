@@ -15,6 +15,8 @@ import maya.cmds as cmds
 
 from rigamajig2.shared import common
 from rigamajig2.maya import blendshape
+from rigamajig2.maya import deformer
+from rigamajig2.maya import mesh
 
 
 class BlendshapeData(maya_data.MayaData):
@@ -39,15 +41,22 @@ class BlendshapeData(maya_data.MayaData):
         data['geometry'] = blendshape.getBaseGeometry(node)
         targets = blendshape.getTargetList(node)
 
-        data['targets'] = targets
+        data['targets'] = dict()
         targetWeightList = list()
         targetGeometryList = list()
         for target in targets:
-            if blendshape.hasTargetGeo(node, target):
-                targetMesh = blendshape.getTargetGeo(node, target)
-            else:
-                targetMesh = None
-            targetGeometryList.append(targetMesh)
+
+            targetDict = OrderedDict()
+            # get the blendshape delta and any inbetweens deltas
+            for iti in blendshape.getInputTargetItemList(node, target):
+                wt = blendshape.itiToInbetween(iti)
+                deltas = blendshape.getDelta(node, target, inbetween=wt)
+                targetDict[str(iti)] = deltas
+
+                # TODO: get the shape if the geometry exists in the scene.
+
+            data['targets'][target] = targetDict
+
             targetWeightList.append(cmds.getAttr("{}.{}".format(node, target)))
         data['targetGeometry'] = targetGeometryList
         data['targetWeights'] = targetWeightList
@@ -57,7 +66,7 @@ class BlendshapeData(maya_data.MayaData):
 
         self._data[node].update(data)
 
-    def applyData(self, nodes, attributes=None):
+    def applyData(self, nodes, attributes=None, loadWeights=False):
         """
         Apply deformation layer data back to the models.
         """
@@ -68,13 +77,30 @@ class BlendshapeData(maya_data.MayaData):
                 geometry = self._data[node]['geometry']
                 blendshape.create(geometry, name=node)
 
-            for i,target in enumerate(self._data[node]['targets']):
+            for i, target in enumerate(self._data[node]['targets']):
+                # rebuild the targets
                 if target not in blendshape.getTargetList(node):
-                    if self._data[node]['targetGeometry'][i]:
-                        blendshape.addTarget(node, target=self._data[node]['targetGeometry'][i])
+                    # first we need to recreate the main target. This is available at the index 6000.
+                    deltaDict = self._data[node]['targets'][target]['6000']
+                    tmpTarget = blendshape.reconstructTargetFromDelta(node, deltaDict=deltaDict,name=target)
+                    blendshape.addTarget(node, target=tmpTarget)
+                    cmds.delete(tmpTarget)
+
+                    # now we can do the same for all the inbetweens
+                    for iti in list(self._data[node]['targets'][target].keys()):
+                        if iti == "6000":
+                            continue
+
+                        # recaulcuate the weight of the inbetween
+                        # using the same formula used to set the inputTargetIndex
+                        wt = blendshape.itiToInbetween(iti)
+                        deltaDict = self._data[node]['targets'][target][iti]
+                        tmpTarget = blendshape.reconstructTargetFromDelta(node, deltaDict=deltaDict, name=target)
+                        blendshape.addInbetween(node, targetGeo=tmpTarget, targetName=target, weight=wt)
+                        cmds.delete(tmpTarget)
+
+                    # finally we can set the target weights
+                    if loadWeights:
                         cmds.setAttr("{}.{}".format(node, target), self._data[node]['targetWeights'][i])
 
             blendshape.setWeights(node, weights=self._data[node]['weights'])
-
-
-

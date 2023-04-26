@@ -20,6 +20,7 @@ from rigamajig2.shared import common
 from rigamajig2.maya import deformer
 from rigamajig2.maya import shape
 from rigamajig2.maya import attr
+from rigamajig2.maya import mesh
 
 
 def isBlendshape(blendshape):
@@ -80,12 +81,13 @@ def create(base, targets=None, origin='local', deformOrder=None, name=None):
     return blendshapeNode
 
 
-def addTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, topologyCheck=False):
+def addTarget(blendshape, target, targetAlias=None, base=None, targetIndex=-1, targetWeight=0.0, topologyCheck=False):
     """
     Add a new blendshape target to an existing blendshape node
 
     :param str blendshape: name of the blendshape nnode
     :param str  target: name of the target geometry to add
+    :param str targetAlias: give the newly created target a different alias
     :param str base: base geometry of the blendshape. If Ommited use the first connected base
     :param int targetIndex: specified target index of the blendshape
     :param int float targetWeight: set the target weight
@@ -112,6 +114,9 @@ def addTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, t
 
     if targetWeight:
         cmds.setAttr("{}.{}".format(blendshape, targetName), targetWeight)
+
+    if targetAlias:
+        renameTarget(blendshape, target, newName=targetAlias)
 
     return "{}.{}".format(blendshape, targetName)
 
@@ -293,6 +298,24 @@ def getTargetIndex(blendshape, target):
     return -1
 
 
+def renameTarget(blendshape, target, newName):
+    """
+    Rename a given blendshape target to a new name. This is accomplished by using the blendshape attribute alias
+
+    :param blendshape:
+    :param target:
+    :param newName:
+    :return:
+    """
+
+    allAliases = cmds.aliasAttr(blendshape, q=True)
+    if not target in allAliases:
+        raise ValueError("BlendShape node '{}' doesn't have an alias '{}'".format(blendshape, target))
+    oldAliasIndex = allAliases.index(target) + 1
+    oldAliasAttr = allAliases[oldAliasIndex]
+    cmds.aliasAttr(newName, '{}.{}'.format(blendshape, oldAliasAttr))
+
+
 def getTargetName(blendshape, targetGeometry):
     """
     Get the target alias for the specified target geometry
@@ -376,7 +399,15 @@ def getWeights(blendshape, targets=None, geometry=None):
         else:
             values = cmds.getAttr(targetAttr)
             values = [round(v, 5) for v in values]
-        weightList[target] = values
+
+        # optimize the value list
+        opimizedDict = dict()
+        for i, v in enumerate(values):
+            # if the weights are almost equal to skip adding them.
+            if not abs(v - 1.0) <= 0.0001:
+                opimizedDict[i] = v
+
+        weightList[target] = opimizedDict
 
     # get the base weights
     targetAttr = '{}.it[0].baseWeights[0:{}]'.format(blendshape, pointCount)
@@ -386,7 +417,15 @@ def getWeights(blendshape, targets=None, geometry=None):
     else:
         values = cmds.getAttr(targetAttr)
         values = [round(v, 5) for v in values]
-    weightList['baseWeights'] = values
+
+    # optimize the value list
+    opimizedDict = dict()
+    for i, v in enumerate(values):
+        # if the weights are almost equal to skip adding them.
+        if not abs(v - 1.0) <= 0.0001:
+            opimizedDict[i] = v
+
+    weightList['baseWeights'] = opimizedDict
 
     return weightList
 
@@ -411,12 +450,34 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
 
     for target in targets:
         if target == 'baseWeights':
+            tmpWeights = list()
+            for i in range(pointCount + 1):
+                # we need to check if there are weights in the dictionary. We can use get to check and return None if
+                # there is not a key for the specified weight. After that we can check if the weight == None. If we does
+                # we replace it with 1.0 since we stripped out any values at 1.0 when we gathered the weights
+                tmpWeight = weights[target].get(i) or weights[target].get(str(i))
+
+                if tmpWeight is None: tmpWeight = 1.0
+                # finally append the weight to the list
+                tmpWeights.append(tmpWeight)
+
             targetAttr = '{}.inputTarget[0].baseWeights[0:{}]'.format(blendshape, pointCount)
-            cmds.setAttr(targetAttr, *weights[target])
+            cmds.setAttr(targetAttr, *tmpWeights)
         else:
+            tmpWeights = list()
+            for i in range(pointCount + 1):
+                # we need to check if there are weights in the dictionary. We can use get to check and return None if
+                # there is not a key for the specified weight. After that we can check if the weight == None. If we does
+                # we replace it with 1.0 since we stripped out any values at 1.0 when we gathered the weights
+                tmpWeight = weights[target].get(i) or weights[target].get(str(i))
+                if tmpWeight is None: tmpWeight = 1.0
+
+                # finally append the weight to the list
+                tmpWeights.append(tmpWeight)
+
             targetIndex = getTargetIndex(blendshape, target)
             targetAttr = '{}.inputTarget[0].itg[{}].tw[0:{}]'.format(blendshape, targetIndex, pointCount)
-            cmds.setAttr(targetAttr, *weights[target])
+            cmds.setAttr(targetAttr, *tmpWeights)
 
 
 def getInputTargetItemList(blendshape, target, base=None):
@@ -450,7 +511,17 @@ def getInputTargetItemList(blendshape, target, base=None):
     return indices
 
 
-def regenerateTarget(blendshape, target, reconnect=False):
+def itiToInbetween(iti):
+    """Convert the inputTargetItem index into float representing the inbetween value"""
+    return float((int(iti) - 5000) / 1000)
+
+
+def inbetweenToIti(inbetween):
+    """Convert the inbtween float an inputTargetItem index"""
+    return int((float(inbetween) * 1000) + 5000)
+
+
+def regenerateTarget(blendshape, target, reconnect=False, ibetween=None):
     """
     regenerate a target mesh from a blendshape node.
 
@@ -459,6 +530,8 @@ def regenerateTarget(blendshape, target, reconnect=False):
     :param target: name of the target to regenerate
     :return: newly created duplicate
     """
+
+    # TODO: update this to be more manual
     if not isBlendshape(blendshape):
         raise Exception("'{}' is not a valid blendshape".format(blendshape))
 
@@ -466,6 +539,7 @@ def regenerateTarget(blendshape, target, reconnect=False):
     targetIndex = getTargetIndex(blendshape, target)
 
     # using the sculptTarget command we can regenerate the blendshape target
+    # TODO add support for inbetweens.
     targetMesh = cmds.sculptTarget(blendshape, e=True, regenerate=True, target=targetIndex)
     # rename the shape node
     shape = "{}Shape".format(targetMesh[0])
@@ -473,7 +547,7 @@ def regenerateTarget(blendshape, target, reconnect=False):
     cmds.rename(tmpshape[0], shape)
 
     if not reconnect:
-        # list all relatives of the world mesh. This should give us the input targetGeomTarget attr for the target.
+        # list all relatives of the world mesh. This should give us the input targetGeomTarget attr for the target.®®®
         outMeshAttr = "{}.worldMesh".format(shape)
         conn = cmds.listConnections(outMeshAttr, s=False, d=True, plugs=True)
         # it may be under the world mesh instead. so try that too.
@@ -482,14 +556,14 @@ def regenerateTarget(blendshape, target, reconnect=False):
     return targetMesh
 
 
-def getDelta(blendshape, target, inputTargetItem=6000):
+def getDelta(blendshape, target, inbetween=None, prune=5):
     """
     Gather
     :param blendshape: name of the blendshape to gather blendshape data from.
     :param target: name of the target to gather the delta information for
-    :param inputTargetItem: inputTargetItem to gather the delta from. By default a blendshape at weight 1 starts at 6000
-                            and uses the equation index = wt * 1000 + 5000 to determine inputTargetItem Indices.
-    :return:
+    :param inbetween: value of the ibetween to gather the delta from. If not set get the base blendshape delta.
+    :param prune: amount of decimal places to prune from delta
+    :return: delta data dictionary of deltas for vertex IDs
     """
     if not isBlendshape(blendshape):
         raise Exception("'{}' is not a valid blendshape".format(blendshape))
@@ -499,21 +573,39 @@ def getDelta(blendshape, target, inputTargetItem=6000):
     base = getBaseGeometry(blendshape)
     baseIndex = getBaseIndex(blendshape, base)
 
-    #
-    # targetItems = getInputTargetItemList(blendshape, target)
+    inputTargetItem = 6000 if not inbetween else inbetweenToIti(inbetween)
+
+    # Theese attributes can get rather unweidly. so we'll do it once here to reuse later.
+    # this attribute accesses the input target item for a given index.
+    inputTargetItemPlug = '{}.it[{}].itg[{}].iti[{}]'.format(blendshape, baseIndex, targetIndex, inputTargetItem)
+    geoTargetPlug = "{}.igt".format(inputTargetItemPlug)
+
+    # define the delta point list to store the delta into.
+    deltaPointList = dict()
 
     # first lets check to see if its connected to any input geometry.
-    inputTargetItemPlug = "{}.it[{}].itg[{}].iti[{}]".format(blendshape, baseIndex, targetIndex, inputTargetItem)
-    geoTargetPlug = "{}.igt".format(inputTargetItemPlug)
     if len(cmds.listConnections(geoTargetPlug, s=True, d=False) or list()) > 0:
         inputShape = cmds.listConnections(geoTargetPlug, s=True, d=False, plugs=True)
-        # get the point positions!
+        # get the shape node of the input shape conenction
+        inputShape = inputShape[0].split(".")[0]
 
-        # get the postions of the base geo
+        # get the point positions for the target shape
+        targetPoints = mesh.getVertPositions(inputShape, world=False)
 
-        # get the difference of the base geo and deformed geo
+        # get the point positions for the orig shape
+        origShape = deformer.getOrigShape(base)
+        origPoints = mesh.getVertPositions(origShape, world=False)
 
-        # remove non moved verticies.
+        deltaPointList = dict()
+        for i in range(len(targetPoints)):
+
+            # get the difference of the base geo and deformed geo
+            offset = om.MPoint(targetPoints[i]) - om.MVector(origPoints[i])
+
+            # check if the point is not 0 before adding it.
+            # This will help us cut down on file sizes.
+            if offset != om.MPoint(0, 0, 0, 1):
+                deltaPointList[str(i)] = round(offset.x, prune), round(offset.y, prune), round(offset.z, prune)
 
     # if we dont have any input geo then we need to gather the target points
     else:
@@ -523,4 +615,47 @@ def getDelta(blendshape, target, inputTargetItem=6000):
         # The order matches that of the pointsTarget list.
         componentsTarget = common.flattenList(cmds.getAttr("{}.ict".format(inputTargetItemPlug)))
 
-        return pointsTarget, componentsTarget
+        # now we need to compose thos into a delta point dictionary
+
+        for point, componentTarget in zip(pointsTarget, componentsTarget):
+            vertexId = componentTarget.split('[')[-1].split(']')[0]
+
+            # add the item to the delta list
+            prunedPoint = round(point[0], prune), round(point[1], prune), round(point[2], prune)
+            deltaPointList[vertexId] = prunedPoint
+
+    return deltaPointList
+
+
+def reconstructTargetFromDelta(blendshape, deltaDict, name=None):
+    """
+    Reconstruct a blendshape target from a given delta dictionary.
+    The deltaDict contains a vertexid and a delta position per item.
+    If no delta exists for the given vertexid default to the position from the orig shape
+
+    :param blendshape: blendshape node to reconstruct the delta for. This is used for gathering the orig shape.
+    :param deltaDict: delta data dictionary of deltas for vertex IDs
+    :param name: name the newly created target
+    :return: New blendshape target mesh from delta
+    """
+    if not isBlendshape(blendshape):
+        raise Exception("'{}' is not a valid blendshape".format(blendshape))
+
+    base = getBaseGeometry(blendshape)
+    origShape = deformer.getOrigShape(base)
+    origShapePoints = mesh.getVertPositions(origShape, world=False)
+
+    targetGeo = deformer.createCleanGeo(base, name=name)
+
+    for vtxid in list(deltaDict.keys()):
+        # calculate the absoute point of the vertex given the orig and delta
+        origPoint = om.MPoint(origShapePoints[int(vtxid)])
+        delta = om.MVector(deltaDict[vtxid])
+
+        absPoint = origPoint + delta
+        absPoint = [absPoint.x, absPoint.y, absPoint.z]
+
+        # now we need to set the vertex to that position
+        cmds.xform("{}.vtx[{}]".format(targetGeo, vtxid), objectSpace=True, translation=absPoint)
+
+    return targetGeo

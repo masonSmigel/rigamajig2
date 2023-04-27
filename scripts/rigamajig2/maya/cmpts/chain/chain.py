@@ -55,6 +55,10 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
 
     def setInitalData(self):
         # if the last joint is an end joint dont include it in the list.
+        if not cmds.objExists(self.input[0]):
+            self.enabled = False
+            return
+
         self.inputList = rigamajig2.maya.joint.getInbetweenJoints(self.input[0], self.input[1])
         if rigamajig2.maya.joint.isEndJoint(self.inputList[-1]):
             self.inputList.remove(self.inputList[-1])

@@ -16,6 +16,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+logger.setLevel(0)
 
 # pylint:disable=too-many-public-methods
 class Base(object):
@@ -32,7 +33,7 @@ class Base(object):
 
     UI_COLOR = (200, 200, 200)
 
-    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
+    def __init__(self, name, input, size=1, rigParent=str(), enabled=True, componentTag=None):
         """
         constructor of the base class.
 
@@ -52,10 +53,12 @@ class Base(object):
         :type size: float
         :param rigParent: node to parent to connect the component to in the heirarchy
         :type rigParent: str
+        :param enabled: If set to false the component will not build
         """
         self.name = name
         self.componentType = self.__module__.split('cmpts.')[-1]
         self.input = input
+        self.enabled = enabled
         self.rigParent = rigParent
         self.componentTag = componentTag
         self.container = self.name + '_container'
@@ -74,6 +77,7 @@ class Base(object):
             size=size,
             rigParent=rigParent,
             componentTag=componentTag,
+            enabled=enabled
             )
 
     def _initalizeComponent(self):
@@ -83,7 +87,7 @@ class Base(object):
         process order:
             self.createContainer
         """
-        if self.getStep() < 1:
+        if self.getStep() < 1 and self.enabled:
             # fullDict = dict(self.metaData, **self.cmptSettings)
             self.setInitalData()
             self.createContainer()
@@ -110,7 +114,7 @@ class Base(object):
         """
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 2:
+        if self.getStep() < 2 and self.enabled:
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.preScript()  # run any pre-build scripts
@@ -133,7 +137,7 @@ class Base(object):
         """
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 3:
+        if self.getStep() < 3 and self.enabled:
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -150,7 +154,7 @@ class Base(object):
         """ connect components within the rig"""
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 4:
+        if self.getStep() < 4 and self.enabled:
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.initConnect()
                 self.connect()
@@ -171,7 +175,7 @@ class Base(object):
         """
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 5:
+        if self.getStep() < 5 and self.enabled:
             self.publishNodes()
             self.publishAttributes()
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -395,8 +399,10 @@ class Base(object):
         infoDict = OrderedDict()
         data = self.cmptSettings
 
-        for key in self.cmptSettings.keys() + ['name', 'type', 'input', 'componentTag']:
+        for key in list(self.cmptSettings.keys()) + ['name', 'type', 'input', 'componentTag']:
             infoDict[key] = data[key]
+
+        logger.debug(infoDict)
         return infoDict
 
     def getComponenetType(self):

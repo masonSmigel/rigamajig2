@@ -573,7 +573,7 @@ class ComponentManager(QtWidgets.QWidget):
 
             sourceValue = sourceData[parameter]
             # check if the source value is a string. if it is try to mirror it.
-            if isinstance(sourceValue, (str, unicode)):
+            if isinstance(sourceValue, (str, common.UNICODE)):
                 # use the mirror name if one exists. otherwise revert back to the source value
                 mirroredValue = common.getMirrorName(sourceValue) if common.getMirrorName(sourceValue) else sourceValue
 

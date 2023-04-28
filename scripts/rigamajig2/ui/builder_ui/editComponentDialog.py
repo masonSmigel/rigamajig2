@@ -189,7 +189,7 @@ class EditComponentDialog(QtWidgets.QDialog):
 
         # add all the new widgets
         for item in self.currentComponent.cmptSettings:
-            if item not in ['name', 'input', 'rigParent', 'type', 'enabled', 'componentTag']:
+            if item not in ['name', 'input', 'rigParent', 'type', 'enabled', 'component_side', 'componentTag']:
                 self.addWidgetFromParameter(
                     parameter=item,
                     container=self.currentComponent.getContainer(),

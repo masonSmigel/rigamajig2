@@ -605,8 +605,12 @@ class Builder(object):
             versionPath = os.path.join(versionDir, versionFile)
 
             # get a list of previous publishes to determine the proper version for this file
-            versionDirContents = os.listdir(versionDir)
-            numberOfPublishes = len([x for x in versionDirContents if x.endswith(".{}".format(fileext))])
+
+            if os.path.exists(versionDir):
+                versionDirContents = os.listdir(versionDir)
+                numberOfPublishes = len([x for x in versionDirContents if x.endswith(".{}".format(fileext))])
+            else:
+                numberOfPublishes = 0
 
             topNodes = cmds.ls(assemblies=True)
             topTransformNodes = cmds.ls(topNodes, exactType='transform')

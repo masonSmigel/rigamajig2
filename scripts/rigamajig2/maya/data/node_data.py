@@ -111,11 +111,14 @@ class NodeData(maya_data.MayaData):
 
                     value = self._data[node][attribute]
                     if isinstance(value, (list, tuple)):
-                        cmds.setAttr("{0}.{1}".format(node, attribute), *value)
+                        try:cmds.setAttr("{0}.{1}".format(node, attribute), *value)
+                        except: cmds.warning("failed to set attribute: '{}.{}'".format(node, attribute))
                     elif isinstance(value, basestring):
-                        cmds.setAttr("{0}.{1}".format(node, attribute), value, type="string")
+                        try: cmds.setAttr("{0}.{1}".format(node, attribute), value, type="string")
+                        except: cmds.warning("failed to set attribute: '{}.{}'".format(node, attribute))
                     else:
-                        cmds.setAttr("{0}.{1}".format(node, attribute), value)
+                        try: cmds.setAttr("{0}.{1}".format(node, attribute), value)
+                        except: cmds.warning("failed to set attribute: '{}.{}'".format(node, attribute))
 
             # clear out attributes if getting from file
             if gatherAttrsFromFile:

@@ -26,6 +26,7 @@ import rigamajig2.maya.meta as meta
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.builder.constants import SKELETON_POS
+from rigamajig2.maya.cmpts.base import GUIDE_STEP
 
 
 # pylint: disable= too-many-instance-attributes
@@ -198,7 +199,25 @@ class JointWidget(QtWidgets.QWidget):
 
     def saveJointPositions(self):
         """ save the joint positions"""
-        # TODO add a check about saving a blank scene.
+
+        isBuilt = False
+        # find the main_container and check if its past the guide step
+        for container in cmds.ls(type="container"):
+            if cmds.getAttr("{}.type".format(container)) == "main.main":
+                if cmds.getAttr("{}.build_step".format(container)) >= GUIDE_STEP:
+                    isBuilt = True
+
+        if isBuilt:
+            result = cmds.confirmDialog(
+                t='Save Joints',
+                message="It looks like the rig is already built. Are you sure you want to continue?",
+                button=['Cancel', 'Continue'],
+                defaultButton='Continue',
+                cancelButton='Cancel')
+
+            if result != 'Continue':
+                return
+
         self.builder.saveJoints(self.jointPositionPathSelector.getPath())
 
     def pinJoints(self):

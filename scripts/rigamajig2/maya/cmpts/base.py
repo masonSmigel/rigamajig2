@@ -18,6 +18,15 @@ logger = logging.getLogger(__name__)
 
 logger.setLevel(0)
 
+UNBUILT_STEP = 0
+INTIALIZE_STEP = 1
+GUIDE_STEP = 2
+BUILD_STEP = 3
+CONNECT_STEP = 4
+FINALIZE_STEP = 5
+OPTIMIZE_STEP = 6
+
+
 # pylint:disable=too-many-public-methods
 class Base(object):
     """
@@ -87,7 +96,7 @@ class Base(object):
         process order:
             self.createContainer
         """
-        if self.getStep() < 1 and self.enabled:
+        if self.getStep() < INTIALIZE_STEP and self.enabled:
             # fullDict = dict(self.metaData, **self.cmptSettings)
             self.setInitalData()
             self.createContainer()
@@ -114,7 +123,7 @@ class Base(object):
         """
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 2 and self.enabled:
+        if self.getStep() < GUIDE_STEP and self.enabled:
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.preScript()  # run any pre-build scripts
@@ -137,7 +146,7 @@ class Base(object):
         """
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 3 and self.enabled:
+        if self.getStep() < BUILD_STEP and self.enabled:
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -154,7 +163,7 @@ class Base(object):
         """ connect components within the rig"""
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 4 and self.enabled:
+        if self.getStep() < CONNECT_STEP and self.enabled:
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.initConnect()
                 self.connect()
@@ -175,7 +184,7 @@ class Base(object):
         """
         self._loadComponentParametersToClass()
 
-        if self.getStep() < 5 and self.enabled:
+        if self.getStep() < FINALIZE_STEP and self.enabled:
             self.publishNodes()
             self.publishAttributes()
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -195,7 +204,7 @@ class Base(object):
         """"""
         self._loadComponentParametersToClass()
 
-        if self.getStep() != 6:
+        if self.getStep() != OPTIMIZE_STEP:
             self.optimize()
             self.setStep(6)
         else:
@@ -322,10 +331,11 @@ class Base(object):
 
         step 0 - unbuilt
         step 1 - initalize component
-        step 2 - build component
-        step 3 - connect component
-        step 4 - finalize component
-        step 5 - optimize component
+        step 2 - guide component
+        step 3 - build component
+        step 4 - connect component
+        step 5 - finalize component
+        step 6 - optimize component
 
         :param step:
         :return:

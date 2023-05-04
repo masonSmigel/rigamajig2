@@ -58,7 +58,7 @@ EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 # pylint: disable = too-many-instance-attributes
 class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
     """ Builder dialog"""
-    WINDOW_TITLE = "Rigamajig2 Builder {}".format(rigamajig2.version)
+    WINDOW_TITLE = "Rigamajig2 Builder  {}".format(rigamajig2.version)
     OBJECT_NAME = "Rigamajig2BuilderObject"
 
     dialogInstance = None

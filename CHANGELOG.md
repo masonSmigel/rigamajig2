@@ -1,5 +1,26 @@
 # Change Log 
 
+## 1.1.2
+Added support for python3 and maya 2022 as default version. 
+
+### Added: 
+* Added a check to `skinCluster` to see if influences are missing on bind.
+* Added an option for `psd.createPsdReader` to be created with a parent other than the hierarchical parent. 
+  This becomes useful for things like the arms where the twist should be factored into the pose.
+* Added a 'main.__version__' attribute to keep track of the versions of the published rig
+* Added an outliner color to component roots. 
+* New set of tools to work with blendshapes and their deltas, (`blendshape.getDeltas`, `blendshape.setDeltas`, 
+ `blendshape.reconstructTargetFromDelta`, `blendshape.regerateTarget`, `blendshape.createEmptyTarget`) 
+* Updated the `blendshape_data` data type to store and load deltas or live shape connections. 
+* Added the option to enable and disable components from building. This can be used to test and itterate on component setups. 
+* Added a check to see if the rig is built before saving joint data 
+
+### Changed: 
+* fixed an issue with the `lookAt.eyeball` component to ensure it scales properly in a spherical shape. 
+* changed the 'connectFaceBits.py' script from the `face` archetype to remove rotation from the connection between
+  the nose and lips
+* added `dailog.deleteUI` Function to delete the dialog and Workspace control. 
+
 ## 1.1.1 
 
 ### Added: 

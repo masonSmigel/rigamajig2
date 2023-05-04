@@ -135,8 +135,8 @@ def addEmptyTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0
     :return: plug of the new target added
     :rtype: str
     """
-    if cmds.objExists(target):
-        raise Exception("The target geometry {} exists. Please use addTarget instead".format(target))
+    # if cmds.objExists(target):
+    #     raise Exception("The target geometry {} exists. Please use addTarget instead".format(target))
 
     if not base:
         base = getBaseGeometry(blendshape)
@@ -155,6 +155,7 @@ def addEmptyTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0
                          base=base,
                          targetIndex=targetIndex,
                          targetWeight=targetWeight,
+                         targetAlias=target,
                          topologyCheck=topologyCheck)
 
     # delete the blank target geo
@@ -283,7 +284,7 @@ def hasTargetGeo(blendShape, target, base=None, inbetween=None):
     return bool(targetGeo)
 
 
-def getTargetGeo(blendShape, target, base=None, inbetween=None):
+def getTargetGeo(blendShape, target, base=None, inbetween=None, plugs=False):
     """
     Get the connected target geometry given a blendShape and specified target.
 
@@ -306,7 +307,7 @@ def getTargetGeo(blendShape, target, base=None, inbetween=None):
     # Get Connected Target Geometry
     targetGeoAttr = blendShape + '.inputTarget[' + str(geomIndex) + '].inputTargetGroup[' + str(
         targetIndex) + '].inputTargetItem[' + str(wtIndex) + '].inputGeomTarget'
-    targetGeoConn = cmds.listConnections(targetGeoAttr, s=True, d=False)
+    targetGeoConn = cmds.listConnections(targetGeoAttr, s=True, d=False, plugs=plugs)
 
     # Check Target Geometry
     if not targetGeoConn: targetGeoConn = ['']

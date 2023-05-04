@@ -62,7 +62,7 @@ class BlendshapeData(maya_data.MayaData):
                     itiDict['deltas'] = deltas
 
                     if blendshape.hasTargetGeo(node, target, inbetween=wt):
-                        targetGeo = blendshape.getTargetGeo(node, target, inbetween=wt)
+                        targetGeo = blendshape.getTargetGeo(node, target, inbetween=wt, plugs=True)
                         itiDict['targetGeo'] = targetGeo
 
                     targetDict[str(iti)] = itiDict
@@ -88,6 +88,10 @@ class BlendshapeData(maya_data.MayaData):
                 geometry = self._data[node]['geometry']
                 blendshape.create(geometry, name=node)
 
+            # get the base
+            base = blendshape.getBaseGeometry(node)
+            baseIndex = blendshape.getBaseIndex(node, base)
+
             addedTargets = 0
             for i, target in enumerate(self._data[node]['targets']):
                 # rebuild the targets
@@ -110,6 +114,17 @@ class BlendshapeData(maya_data.MayaData):
                         deltaDict = self._data[node]['targets'][target][iti]['deltas']
                         blendshape.addEmptyTarget(node, target, inbetween=wt)
                         blendshape.setDelta(node, target, deltaDict=deltaDict, inbetween=wt)
+
+                    # for each target we need to check if the shape exisits
+                    for iti in list(self._data[node]['targets'][target].keys()):
+                        # check if the live shape exists. if it does then reconnect it
+                        geoShape = self._data[node]['targets'][target][iti]['targetGeo']
+                        targetIndex = blendshape.getTargetIndex(node, target)
+                        if cmds.objExists(geoShape):
+                            inputTargetItemPlug = '{}.it[{}].itg[{}].iti[{}]'.format(node, baseIndex, targetIndex, iti)
+                            geoTargetPlug = "{}.igt".format(inputTargetItemPlug)
+                            # reconnect the target plugs
+                            cmds.connectAttr(geoShape, geoTargetPlug)
 
                     # finally we can set the target weights
                     if loadWeights:

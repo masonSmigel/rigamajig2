@@ -86,7 +86,7 @@ def smoothSkinCluster(polyMesh, intensity=0.1, itterations=30):
     layer = layers.add("base weights")
 
     # build settings for the flood
-    settings = ngst.FloodSettings()
+    settings = ngst.PaintModeSettings()
 
     # smoothing does not require current influence
     settings.mode = ngst.PaintMode.smooth
@@ -263,7 +263,7 @@ class DeformationCage(object):
             cmds.parent(shape, cageTransform, r=True, s=True)
             cmds.delete(displayLine)
 
-    def connectToMeshes(self, meshesToBind=None):
+    def connectToMeshes(self, meshesToBind=None, intensity=0.1, itterations=20):
         """
         create the output mesh
         """
@@ -286,7 +286,7 @@ class DeformationCage(object):
         skinCluster.copySkinClusterAndInfluences(lowOutput, highOutput)
 
         # smooth the skin cluster
-        smoothSkinCluster(highOutput, intensity=.1, itterations=20)
+        smoothSkinCluster(highOutput, intensity=intensity, itterations=itterations)
 
         # we also need to connect the bpm joints to the skinclusters before we copy it around
         highSkinCluster = skinCluster.getSkinCluster(highOutput)

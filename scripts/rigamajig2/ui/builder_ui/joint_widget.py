@@ -204,7 +204,7 @@ class JointWidget(QtWidgets.QWidget):
         # find the main_container and check if its past the guide step
         for container in cmds.ls(type="container"):
             if cmds.getAttr("{}.type".format(container)) == "main.main":
-                if cmds.getAttr("{}.build_step".format(container)) >= GUIDE_STEP:
+                if cmds.getAttr("{}.build_step".format(container)) > GUIDE_STEP:
                     isBuilt = True
 
         if isBuilt:

@@ -58,7 +58,7 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
     def setInitalData(self):
         """ Build the joint name attributes"""
 
-        inputBaseNames = [x.rsplit("_", 1)[0] for x in self.input]
+        inputBaseNames = [x.rsplit("_bind", 1)[0] for x in self.input]
         self.controlNameAttrs = list()
         for i in range(len(self.input)):
             jointNameStr = "joint{}Name".format(i)

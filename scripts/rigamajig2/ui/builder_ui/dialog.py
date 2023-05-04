@@ -25,6 +25,7 @@ from shiboken2 import wrapInstance
 from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
 # RIGAMAJIG
+import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.shared import common
@@ -57,7 +58,8 @@ EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 # pylint: disable = too-many-instance-attributes
 class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
     """ Builder dialog"""
-    WINDOW_TITLE = "Rigamajig2 Builder"
+    WINDOW_TITLE = "Rigamajig2 Builder {}".format(rigamajig2.version)
+    OBJECT_NAME = "Rigamajig2BuilderObject"
 
     dialogInstance = None
 
@@ -87,6 +89,7 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.rigBuilder = None
 
         self.setWindowTitle(self.WINDOW_TITLE)
+        self.setObjectName(self.OBJECT_NAME)
         if cmds.about(ntOS=True):
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
         elif cmds.about(macOS=True):
@@ -332,6 +335,17 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         """ Override the close event in order to disable the component manager script node"""
         super(BuilderDialog, self).closeEvent(e)
         self.intalizeWidget.componentManager.setScriptJobEnabled(False)
+
+    def deleteUI(self):
+        """Delete the UI and workspace control"""
+        workspaceControl = self.OBJECT_NAME + "WorkspaceControl"
+        if cmds.workspaceControl(workspaceControl, q=True, exists=True):
+            # first delete the dialog UI
+            self.deleteLater()
+
+            # next we can delete the workspace control
+            cmds.workspaceControl(workspaceControl, e=True, close=True)
+            cmds.deleteUI(workspaceControl, control=True)
 
 
 if __name__ == '__main__':

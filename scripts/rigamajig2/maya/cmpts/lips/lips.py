@@ -56,7 +56,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
     UI_COLOR = (255, 117, 129)
 
     def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, addSdk=False, useJaw=False, jawJoints=None,
-                 addZipperLips=True):
+                 addZipperLips=True, sparseTweakers=True):
         """
         :param name: Component Name
         :param input: a single joint this will be the pivot where the lips rotate around
@@ -68,6 +68,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         :param jawJoints:  If useJaw then provide the following joints to the jaw:
                             [lipsTop, lipsBot, lips_l, lips_r]
         :param addZipperLips: add the setup to do zipper lips
+        :param sparseTweakers: add minimal tweakers. If false add tweakers below the main level controls.
         """
         super(Lips, self).__init__(name, input=input, size=size, rigParent=rigParent)
         self.side = common.getSide(self.name)
@@ -77,6 +78,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['useJaw'] = useJaw
         self.cmptSettings['jawJoints'] = jawJoints or list()
         self.cmptSettings['addZipperLips'] = addZipperLips
+        self.cmptSettings['sparseTweakers'] = sparseTweakers
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['lipsAllName'] = inputBaseNames[0]
@@ -325,6 +327,23 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                                          hideAttrs=['s', 'v'])
             self.subControls.append(ctl)
 
+        # if we want to build the extra tweakers can can do that here
+        self.extraTweakers = list()
+        if not self.sparseTweakers:
+            for guide in self.mainControlGuides[1:4] + self.mainControlGuides[5:8]:
+                guideName = guide.split("_guide")[0] + "Tweak"
+                ctl = control.createAtObject(name=guideName,
+                                             shape='triangle',
+                                             orig=True,
+                                             trs=True,
+                                             parent=self.lipsAll.name,
+                                             shapeAim='y',
+                                             xformObj=guide,
+                                             size=GUIDE_SCALE,
+                                             color='lightblue',
+                                             hideAttrs=['s', 'v'])
+                self.extraTweakers.append(ctl)
+
     def preRigSetup(self):
         """ Setup the joints and curves needed for the setup"""
         # create the upVector
@@ -357,8 +376,10 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                      self.mainControlGuides[7], self.subControlGuides[9], self.mainControlGuides[4]]
 
         # create the two driver curves. The jionts will be bound to this
-        self.topHighCurve = curve.createCurveFromTransform(uppPoints, degree=3, name=topHighCurve, parent=self.curvesHierarchy)
-        self.botHighCurve = curve.createCurveFromTransform(lowPoints, degree=3, name=botHighCurve, parent=self.curvesHierarchy)
+        self.topHighCurve = curve.createCurveFromTransform(uppPoints, degree=3, name=topHighCurve,
+                                                           parent=self.curvesHierarchy)
+        self.botHighCurve = curve.createCurveFromTransform(lowPoints, degree=3, name=botHighCurve,
+                                                           parent=self.curvesHierarchy)
 
         # create the two low curves theese will be affected by the corners and upper/lower lips
         self.topLowCurve = cmds.duplicate(self.topHighCurve, name=topLowCurve)[0]
@@ -564,13 +585,33 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         lipsUtil.noFlipOrient(self.mainControls[6].name, self.mainControls[7].name, self.subControls[8].trs)
         lipsUtil.noFlipOrient(self.mainControls[7].name, self.mainControls[4].name, self.subControls[9].trs)
 
-        # create joints for the high curve
-        uppControlsForJoints = [self.subControls[0], self.subControls[1], self.mainControls[1], self.subControls[2],
-                                self.mainControls[2], self.subControls[3], self.mainControls[3], self.subControls[4],
-                                self.subControls[5]]
-        lowControlsForJoints = [self.subControls[0], self.subControls[6], self.mainControls[5], self.subControls[7],
-                                self.mainControls[6], self.subControls[8], self.mainControls[7], self.subControls[9],
-                                self.subControls[5]]
+        # if we add additionalTweakers we need to parent them to their respective joints(similar to the corners)
+        if not self.sparseTweakers:
+            cmds.parent(self.extraTweakers[0].orig, self.mainControls[1].name)
+            cmds.parent(self.extraTweakers[1].orig, self.mainControls[2].name)
+            cmds.parent(self.extraTweakers[2].orig, self.mainControls[3].name)
+
+            cmds.parent(self.extraTweakers[3].orig, self.mainControls[5].name)
+            cmds.parent(self.extraTweakers[4].orig, self.mainControls[6].name)
+            cmds.parent(self.extraTweakers[5].orig, self.mainControls[7].name)
+
+        # create joints for the high curve. We need to check if we want to use the main controls or the non-sparse
+        # extra tweakers for the inbetweens of the tweakers.
+        if self.sparseTweakers:
+            # setup lists for the upper and lower lip controls.
+            uppControlsForJoints = [self.subControls[0], self.subControls[1], self.mainControls[1],
+                                    self.subControls[2], self.mainControls[2], self.subControls[3],
+                                    self.mainControls[3], self.subControls[4], self.subControls[5]]
+            lowControlsForJoints = [self.subControls[0], self.subControls[6], self.mainControls[5],
+                                    self.subControls[7], self.mainControls[6], self.subControls[8],
+                                    self.mainControls[7], self.subControls[9], self.subControls[5]]
+        else:
+            uppControlsForJoints = [self.subControls[0], self.subControls[1], self.extraTweakers[0],
+                                    self.subControls[2], self.extraTweakers[1], self.subControls[3],
+                                    self.extraTweakers[2], self.subControls[4], self.subControls[5]]
+            lowControlsForJoints = [self.subControls[0], self.subControls[6], self.extraTweakers[3],
+                                    self.subControls[7], self.extraTweakers[4], self.subControls[8],
+                                    self.extraTweakers[5], self.subControls[9], self.subControls[5]]
 
         self.uppSubJoints = self.createJointsForCurve(uppControlsForJoints, suffix='sub')
         self.lowSubJoints = self.createJointsForCurve(lowControlsForJoints[1:-1], suffix='sub')
@@ -585,12 +626,20 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         # finally we need to connect the joints rotation to the control orient
         # here we will use the joint targetLocators to drive the rotation
-        self.uppOrtControls = [self.subControls[0], self.subControls[1], self.mainControls[1], self.subControls[2],
-                               self.mainControls[2], self.subControls[3], self.mainControls[3], self.subControls[4],
-                               self.subControls[5]]
-        self.lowOrtControls = [self.subControls[0], self.subControls[6], self.mainControls[5], self.subControls[7],
-                               self.mainControls[6], self.subControls[8], self.mainControls[7], self.subControls[9],
-                               self.subControls[5]]
+        if self.sparseTweakers:
+            self.uppOrtControls = [self.subControls[0], self.subControls[1], self.mainControls[1],
+                                   self.subControls[2], self.mainControls[2], self.subControls[3],
+                                   self.mainControls[3], self.subControls[4], self.subControls[5]]
+            self.lowOrtControls = [self.subControls[0], self.subControls[6], self.mainControls[5],
+                                   self.subControls[7], self.mainControls[6], self.subControls[8],
+                                   self.mainControls[7], self.subControls[9], self.subControls[5]]
+        else:
+            self.uppOrtControls = [self.subControls[0], self.subControls[1], self.extraTweakers[0],
+                                   self.subControls[2], self.extraTweakers[1], self.subControls[3],
+                                   self.extraTweakers[2], self.subControls[4], self.subControls[5]]
+            self.lowOrtControls = [self.subControls[0], self.subControls[6], self.extraTweakers[3],
+                                   self.subControls[7], self.extraTweakers[4], self.subControls[8],
+                                   self.extraTweakers[5], self.subControls[9], self.subControls[5]]
 
         # do the auto weighting for the lip controls
         lipsUtil.autoWeightOrientation(
@@ -725,6 +774,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         attr.addSeparator(self.lipsAll.name, "----")
         attr.createAttr(self.lipsAll.name, "tweakers", attributeType='bool', value=0, keyable=False, channelBox=True)
         subControls = [x.name for x in self.subControls]
+        # if using non-sparse tweakers add the additional controls
+        if not self.sparseTweakers:
+            subControls += [x.name for x in self.extraTweakers]
         control.connectControlVisiblity(self.lipsAll.name, "tweakers", controls=subControls)
 
         # add the lip zipper to the controls
@@ -739,6 +791,16 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                 falloffAttr = attr.createAttr(ctl.name, "zipperFalloff", "float", value=3, minValue=0, maxValue=10)
                 cmds.connectAttr(falloffAttr, "{}.{}ZipperFalloff".format(self.paramsHierarchy, side))
 
+        # setup some lip curl attributes
+        for side in 'lr':
+            ctl = self.lCorner if side == 'l' else self.rCorner
+            tweaker = self.subControls[5] if side=='l' else self.subControls[0]
+
+            attr.addSeparator(ctl.name, '---')
+            curlAttr = attr.createAttr(ctl.name, "curl", "float", value=0)
+            tweaker.addSdk()
+
+            cmds.connectAttr(curlAttr, "{}.ty".format(tweaker.sdk))
 
     def connect(self):
         """Create the connection to other components """

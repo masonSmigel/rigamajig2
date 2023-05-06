@@ -31,7 +31,7 @@ LAYER_ATTR = 'deformationLayers'
 
 MAIN_NODE_NAME = 'main'
 
-CONNECTION_METHOD_LIST = ['bshp', 'inmesh', 'skin']
+CONNECTION_METHOD_LIST = ['bshp', 'inmesh']
 
 DUMMY_JOINT = 'world_dummy_bind'
 
@@ -102,7 +102,6 @@ class DeformLayer(object):
 
                                  'bshp' - add a world shape blendshape connection
                                  'inmesh' - connect the outmesh of the source to the targets inmesh attrs
-                                 'skin' - bake this into a stacked skin cluster.
 
                                  For now this will all be
                                  handled with a blendshape however at the self.bake step this can be baked into an

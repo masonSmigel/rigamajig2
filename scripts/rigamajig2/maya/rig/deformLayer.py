@@ -64,7 +64,7 @@ class DeformLayer(object):
 
     def __init__(self, model):
         """
-        Constructor fot the defomation Layer class object
+        Constructor for the defomation Layer class object
         :param mesh: source mesh for working with defomation layers on. This will be the final output mesh.
                     Deformation layers will be added BEFORE this mesh.
         """
@@ -205,37 +205,7 @@ class DeformLayer(object):
 
     def deleteDeformationLayer(self, layerIndex):
         """ delete a deformation layer at the given index"""
-        pass
-
-    def connectToModel(self):
-        """
-        Connect the layer hierarchy back to the model.
-        This must be dont after all layers are added so ensure proper deformation layering.
-        :return:
-        """
-
-        if not self.getNumberOfDeformationLayers() > 0:
-            raise Exception("No deformation layers to connect back to render model")
-
-        layers = self.getDeformationLayers()
-        lastLayer = layers[-1]
-
-        blendshapeName = "d_out_{}".format(self.model)
-        blendshapeNode = blendshape.create(base=self.model, targets=None, name=blendshapeName)
-
-        blendshape.addTarget(blendshape=blendshapeNode, target=lastLayer, targetWeight=1.0)
-        # force the blendshape node to be on the bottom of the deformer stack
-        numberDeformers = deformer.getDeformerStack(self.model)
-        if len(numberDeformers) > 1:
-            deformer.reorderToBottom(self.model, blendshapeNode)
-
-        # finally hide all the previous layers
-
-        for layer in layers:
-            cmds.setAttr("{}.v".format(layer), 0)
-
-        # Use a try exept block just incase the render mesh is connected to something.
-        _safeSetVisablity(self.model, 1)
+        raise NotImplementedError ("Deleting deform layers has not yet been implemented")
 
     def stackDeformLayers(self, cleanup=False):
         """
@@ -250,6 +220,8 @@ class DeformLayer(object):
         layers = self.getDeformationLayers()
         for layer in layers:
             skinCluster.stackSkinCluster(layer, self.model, skinName="stacked__" + layer + "_skinCluster")
+
+            # TODO: Copy over blendshapes and other deformers as well
             cmds.setAttr("{}.v".format(layer), 0)
 
         # Use a try exept block just incase the render mesh is connected to something.

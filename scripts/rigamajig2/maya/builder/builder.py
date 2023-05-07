@@ -616,10 +616,9 @@ class Builder(object):
             topTransformNodes = cmds.ls(topNodes, exactType='transform')
             for node in topTransformNodes:
                 # set the version to the number of publishes (plus one) to account for the version we are about to publish
-                cmds.addAttr(node, longName="__version__", attributeType='short', dv=numberOfPublishes+1, k=False)
+                cmds.addAttr(node, longName="__version__", attributeType='short', dv=numberOfPublishes + 1, k=False)
                 cmds.setAttr("{}.__version__".format(node), lock=True)
                 cmds.setAttr("{}.__version__".format(node), cb=True)
-
 
             # make the output directory and save the file. This will also make the directory for the main publish
             rig_path.mkdir(versionDir)

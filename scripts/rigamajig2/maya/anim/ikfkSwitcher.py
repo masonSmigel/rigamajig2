@@ -66,39 +66,40 @@ def getIkFkSwitchNode(controlNode):
     return ikfkGroup
 
 
-def switchSelectedComponent(controlNode=None, ik=None, fk=None):
+def switchSelectedComponent(controlNodes=None, ik=None, fk=None):
     """
     Switch the components ikfk switch from the given control node.
     The user can specify a switch to ik, fk, or a smart switch by leaving both ik and fk at False.
 
-    :param str list controlNode: specify a control to get the component from. if None use the active selection.
+    :param str list controlNodes: specify a control to get the component from. if None use the active selection.
     :param bool ik: if true the component will be switched to ik
     :param bool fk: if true the component will be switched to fk.
     """
 
-    if controlNode is None:
+    if controlNodes is None:
         if len(cmds.ls(sl=True)) > 0:
-            controlNode = cmds.ls(sl=True)[0]
-            # add a warning that only the first node will be matched
-            if len(cmds.ls(sl=True)) > 1:
-                cmds.warning("Only the First control in the selection will be matched.")
+            controlNodes = cmds.ls(sl=True)
+            # # add a warning that only the first node will be matched
+            # if len(cmds.ls(sl=True)) > 1:
+            #     cmds.warning("Only the First control in the selection will be matched.")
         else:
             raise Exception("Please select a control to switch components")
 
     # get the ikfk group
-    ikfkGroup = getIkFkSwitchNode(controlNode=controlNode)
+    for controlNode in controlNodes:
+        ikfkGroup = getIkFkSwitchNode(controlNode=controlNode)
 
-    # create an isntance of the IkFkSwithcer class. with that we can switch the component
-    switcher = IkFkSwitch(ikfkGroup)
-    if ik is None and fk is None:
-        value = not cmds.getAttr("{}.ikfk".format(switcher.ikfkControl))
-    elif ik:
-        value = 0
-    elif fk:
-        value = 1
+        # create an isntance of the IkFkSwithcer class. with that we can switch the component
+        switcher = IkFkSwitch(ikfkGroup)
+        if ik is None and fk is None:
+            value = not cmds.getAttr("{}.ikfk".format(switcher.ikfkControl))
+        elif ik:
+            value = 0
+        elif fk:
+            value = 1
 
-    # do the switch
-    switcher.switch(value=value)
+        # do the switch
+        switcher.switch(value=value)
 
 
 # Here we have duplicate code from the ikfk class.

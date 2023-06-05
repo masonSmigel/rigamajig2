@@ -8,6 +8,8 @@ import sys
 DEBUG = False
 REQUIRED_PLUGINS = ['quatNodes', 'matrixNodes']
 
+BIND = 'bind'
+
 # Side constants
 LEFT = 'l'
 RIGHT = 'r'

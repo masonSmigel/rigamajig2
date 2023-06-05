@@ -9,7 +9,6 @@
 
 """
 
-
 # PYTHON
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -20,6 +19,8 @@ import maya.cmds as cmds
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
+from rigamajig2.maya import decorators
+from rigamajig2.maya import naming
 import rigamajig2.maya.joint
 import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.meta as meta
@@ -48,7 +49,7 @@ class JointWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
 
         self.jointPositionPathSelector = pathSelector.PathSelector(
             "joint pos: ",
@@ -58,7 +59,8 @@ class JointWidget(QtWidgets.QWidget):
             )
         self.loadJointPositionButton = QtWidgets.QPushButton("Load joints")
         self.loadJointPositionButton.setIcon(QtGui.QIcon(common.getIcon("loadJoints.png")))
-        self.saveJointPositionButton = QtWidgets.QPushButton(QtGui.QIcon(common.getIcon("saveJoints.png")), "Save joints")
+        self.saveJointPositionButton = QtWidgets.QPushButton(QtGui.QIcon(common.getIcon("saveJoints.png")),
+                                                             "Save joints")
         self.saveJointPositionButton.setIcon(QtGui.QIcon(common.getIcon("saveJoints.png")))
 
         self.loadJointPositionButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
@@ -98,7 +100,6 @@ class JointWidget(QtWidgets.QWidget):
         self.insertJointsAmountSlider.setRange(1, 10)
         self.insertJointsButton = QtWidgets.QPushButton("Insert Joints")
 
-        self.prepareJointsButton = QtWidgets.QPushButton("Prep Skeleton")
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -118,7 +119,7 @@ class JointWidget(QtWidgets.QWidget):
         jointOrientationLayout.addWidget(self.jointToRotationButton)
         jointOrientationLayout.addWidget(self.jointToOrientationButton)
 
-        # setup the main mirroe axis joint Layout
+        # setup the main mirror axis joint Layout
         jointMirrorAxisLayout = QtWidgets.QHBoxLayout()
         jointMirrorAxisLayout.addWidget(QtWidgets.QLabel("Axis: "))
         jointMirrorAxisLayout.addWidget(self.jointAxisXRadioButton)
@@ -149,19 +150,19 @@ class JointWidget(QtWidgets.QWidget):
         self.skeletonEditWidget.addLayout(mirrorJointLayout)
         self.skeletonEditWidget.addLayout(pinJointsLayout)
         self.skeletonEditWidget.addLayout(insertJointLayout)
-        self.skeletonEditWidget.addWidget(self.prepareJointsButton)
         self.skeletonEditWidget.addSpacing(3)
 
         # add widgets to the main skeleton widget.
-        self.mainCollapseableWidget .addWidget(self.jointPositionPathSelector)
-        self.mainCollapseableWidget .addLayout(saveLoadJointLayout)
-        self.mainCollapseableWidget .addWidget(self.skeletonEditWidget)
+        self.mainCollapseableWidget.addWidget(self.jointPositionPathSelector)
+        self.mainCollapseableWidget.addLayout(saveLoadJointLayout)
+        self.mainCollapseableWidget.addWidget(self.skeletonEditWidget)
 
         # add the widget to the main layout
         self.mainLayout.addWidget(self.mainCollapseableWidget)
 
     def createConnections(self):
         """ Create Connections"""
+        self.cleanSkeletonButton.clicked.connect(self.cleanSkeleton)
         self.loadJointPositionButton.clicked.connect(self.loadJointsPositions)
         self.saveJointPositionButton.clicked.connect(self.saveJointPositions)
         self.jointToRotationButton.clicked.connect(self.jointToRotation)
@@ -171,7 +172,6 @@ class JointWidget(QtWidgets.QWidget):
         self.unpinJointsButton.clicked.connect(self.unpinJoints)
         self.unpinAllJointsButton.clicked.connect(self.unpinAllJoints)
         self.insertJointsButton.clicked.connect(self.insertJoints)
-        self.prepareJointsButton.clicked.connect(self.prepareSkeleton)
 
     def setBuilder(self, builder):
         """ Set a builder for widget"""
@@ -190,7 +190,7 @@ class JointWidget(QtWidgets.QWidget):
     @property
     def isChecked(self):
         """ Check it the widget is checked"""
-        return self.mainCollapseableWidget .isChecked()
+        return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
     def loadJointsPositions(self):
@@ -240,13 +240,43 @@ class JointWidget(QtWidgets.QWidget):
         assert len(selection) == 2, "Must select two joints!"
         rigamajig2.maya.joint.insertJoints(selection[0], selection[-1], amount=jointAmount)
 
-    def prepareSkeleton(self):
+    @decorators.oneUndo
+    def cleanSkeleton(self):
         """
-        Prepare the skeleton for rig build.
-        This ensures channels are all visable and zero out the rotations
+        clean the skeleton
         """
-        joint.addJointOrientToChannelBox(cmds.ls(sl=True))
-        rigamajig2.maya.joint.toOrientation(cmds.ls(sl=True))
+        skeletonRoots = common.toList(meta.getTagged('skeleton_root'))
+
+        if not skeletonRoots:
+            skeletonRoots = cmds.ls(sl=True)
+
+        fullJointList = list()
+        for root in skeletonRoots:
+            # we need to keep track of the full joint paths and their indivual names to check the naming later
+            validJoints = cmds.listRelatives(root, allDescendents=True, type='joint', pa=True) or list()
+            # make the list unique
+            fullJointList += [x for x in validJoints + [root] if x not in fullJointList]
+
+        for jnt in fullJointList:
+            if cmds.listRelatives(jnt, parent=True):
+                if meta.hasTag(jnt, "skeleton_root"):
+                    meta.untag(jnt, "skeleton_root")
+            else:
+                meta.tag(cmds.ls(sl=True), "skeleton_root")
+
+            # check if the joint ends with "_bind"
+            if jnt.endswith(f"_{common.BIND}"):
+                meta.tag(jnt, "bind")
+
+            # freeze the joint scales
+            cmds.makeIdentity(jnt, s=True, r=True, apply=True)
+
+            # add the joint orient to the channel box
+            rigamajig2.maya.joint.addJointOrientToChannelBox(jnt)
+
+            # give a warning if the names arent unique
+            if not naming.isUniqueName(jnt.split("|")[-1]):
+                cmds.warning(f"Joint name is not unique for '{jnt}'")
 
     def mirrorJoint(self):
         """ mirror joint"""

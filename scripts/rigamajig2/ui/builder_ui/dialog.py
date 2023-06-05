@@ -339,7 +339,10 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         if self.actions.devModeAction.isChecked():
             logger.setLevel(logging.DEBUG)
             rigamajig2.reloadModule(log=True)
-            self.actions.reloadRigFile()
+
+            # reload the rig file. This should refresh the builder
+            self.setRigFile(self.rigFile)
+
             logger.info('rigamajig2 modules reloaded')
 
     def closeEvent(self, e):

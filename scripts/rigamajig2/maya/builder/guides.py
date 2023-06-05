@@ -69,7 +69,8 @@ def saveJoints(path=None):
         dataObj = joint_data.JointData()
         for root in skeletonRoots:
             dataObj.gatherData(root)
-            dataObj.gatherDataIterate(cmds.listRelatives(root, allDescendents=True, type='joint'))
+            childJoints = cmds.listRelatives(root, allDescendents=True, type='joint') or list()
+            dataObj.gatherDataIterate(childJoints)
         dataObj.write(path)
     else:
         raise RuntimeError("the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))

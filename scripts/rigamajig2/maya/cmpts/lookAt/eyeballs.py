@@ -20,6 +20,7 @@ from rigamajig2.maya import meta
 from rigamajig2.maya import joint
 from rigamajig2.maya import node
 from rigamajig2.maya import mathUtils
+from rigamajig2.shared import common
 
 IRIS_PERCENT = 0.9
 PUPIL_PERCENT = 0.8
@@ -75,11 +76,11 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
             pupilGuideName = pupilGuide.split("_guide")[0]
 
             # create the joints for the iris
-            irisJoint = cmds.createNode("joint", name="{}_bind".format(irisGuideName), p=inputJoint)
+            irisJoint = cmds.createNode("joint", name="{}_{}".format(irisGuideName, common.BIND), p=inputJoint)
             transform.matchTranslate(irisGuide, irisJoint)
 
             # create the joints for the pupil
-            pupilJoint = cmds.createNode("joint", name="{}_bind".format(pupilGuideName), p=inputJoint)
+            pupilJoint = cmds.createNode("joint", name="{}_{}".format(pupilGuideName, common.BIND), p=inputJoint)
             transform.matchTranslate(pupilGuide, pupilJoint)
 
             # set some attributes on the joint

@@ -189,7 +189,7 @@ class Builder(object):
             if topSkeletonNodes:
                 for topSkeletonNode in topSkeletonNodes:
                     if not cmds.listRelatives(topSkeletonNode, p=True):
-                        cmds.parent(topSkeletonNodes, 'bind')
+                        cmds.parent(topSkeletonNodes, common.BIND)
 
         # if the model group exists. parent the model
         if cmds.objExists('model'):

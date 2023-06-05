@@ -406,8 +406,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
             # tag the new joints as bind joints
             for jnt in uppSpline.getJointList() + lowSpline.getJointList():
-                meta.tag(jnt, "bind")
-            meta.untag([self.input[1], self.input[2]], "bind")
+                meta.tag(jnt, common.BIND)
+            meta.untag([self.input[1], self.input[2]], common.BIND)
 
             aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(self.input[1], allowNegative=True))
             if self.addBendies:

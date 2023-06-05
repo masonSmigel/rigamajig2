@@ -400,10 +400,10 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         for guide in self.upperGuideList + self.lowerGuideList[1:-1]:
             guideName = guide.split("_guide")[0]
 
-            endJoint = cmds.createNode("joint", name="{}_bind".format(guideName), p=self.input[0])
+            endJoint = cmds.createNode("joint", name="{}_{}".format(guideName, common.BIND), p=self.input[0])
             transform.matchTranslate(guide, endJoint)
             joint.setRadius([endJoint], GUIDE_SCALE)
-            meta.tag(endJoint, "bind")
+            meta.tag(endJoint, common.BIND)
 
             targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.targetHierarchy)
             transform.matchTransform(guide, targetLoc)

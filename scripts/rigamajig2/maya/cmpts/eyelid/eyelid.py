@@ -344,7 +344,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             endJoint = cmds.createNode("joint", name="{}_bind".format(guideName), p=baseJoint)
             transform.matchTranslate(guide, endJoint)
             joint.setRadius([baseJoint, endJoint], GUIDE_SCALE)
-            meta.tag(endJoint, "bind")
+            meta.tag(endJoint, common.BIND)
 
             # Orient the joints so that x faces down the chain and y is up. This will be the same on the left AND right side.
             # its not important that the orientation isnt mirrored since the rotation doesnt drive anything
@@ -397,7 +397,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
                 endJoint = cmds.createNode("joint", name="{}_bind".format(guideName), p=self.input[0])
                 transform.matchTranslate(guide, endJoint)
                 joint.setRadius([baseJoint, endJoint], GUIDE_SCALE)
-                meta.tag(endJoint, "bind")
+                meta.tag(endJoint, common.BIND)
 
                 # much like the eyelid we need an offset. Instead of aiming here we will just connect the translate
                 targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.aimLocHierarchy)

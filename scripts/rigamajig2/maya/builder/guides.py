@@ -40,8 +40,8 @@ def loadJoints(path=None):
     dataObj.applyData(dataObj.getKeys())
 
     # tag all bind joints
-    for jnt in cmds.ls("*_bind", type='joint'):
-        meta.tag(jnt, "bind")
+    for jnt in cmds.ls(f"*_{common.BIND}", type='joint'):
+        meta.tag(jnt, common.BIND)
 
     dataObj.getData().keys()
     for node in cmds.ls(dataObj.getKeys(), l=True):

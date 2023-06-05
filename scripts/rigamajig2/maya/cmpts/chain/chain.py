@@ -60,6 +60,8 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
             return
 
         self.inputList = rigamajig2.maya.joint.getInbetweenJoints(self.input[0], self.input[1])
+        if not self.inputList:
+            raise Exception("Input Joints dont exist")
         if rigamajig2.maya.joint.isEndJoint(self.inputList[-1]):
             self.inputList.remove(self.inputList[-1])
 

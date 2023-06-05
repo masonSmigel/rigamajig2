@@ -122,6 +122,7 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         utilsMenu = self.mainMenu.addMenu("Utils")
         utilsMenu.addAction(self.actions.mergeRigFilesAction)
         utilsMenu.addSeparator()
+        utilsMenu.addAction(self.actions.devModeAction)
         utilsMenu.addAction(self.actions.reloadRigamajigModulesAction)
 
         qcMenu = self.mainMenu.addMenu("QC")
@@ -313,6 +314,8 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
             logger.error("No breakpoint selected no steps to run")
             return
 
+        self.initializeDevMode()
+
         startTime = time.time()
 
         # because widgets are added to the ui and the list in oder they can be run sequenctially.
@@ -328,8 +331,16 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
     def runAll(self):
         """ Run builder and update the component manager"""
+        self.initializeDevMode()
         self.rigBuilder.run()
         self.intalizeWidget.componentManager.loadFromScene()
+
+    def initializeDevMode(self):
+        if self.actions.devModeAction.isChecked():
+            logger.setLevel(logging.DEBUG)
+            rigamajig2.reloadModule(log=True)
+            self.actions.reloadRigFile()
+            logger.info('rigamajig2 modules reloaded')
 
     def closeEvent(self, e):
         """ Override the close event in order to disable the component manager script node"""

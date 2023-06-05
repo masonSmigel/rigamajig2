@@ -329,6 +329,7 @@ class Builder(object):
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES))
         controlShapes.loadControlShapes(path, applyColor=applyColor)
+        self.updateMaya()
         logger.info("control shapes -- complete")
 
     def saveControlShapes(self, path=None):
@@ -411,6 +412,17 @@ class Builder(object):
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
         deform.saveDeformLayers(path)
         logger.info("deformation layers saved to: {}".format(path))
+
+    def mergeDeformLayers(self):
+        """Merge all deformation layers for all models"""
+        import rigamajig2.maya.rig.deformLayer as deformLayer
+
+        if len(meta.getTagged("hasDeformLayers"))>0:
+            for model in meta.getTagged("hasDeformLayers"):
+                layer = deformLayer.DeformLayer(model)
+                layer.stackDeformLayers(cleanup=True)
+
+            logger.info("deformation layers merged")
 
     def loadSkinWeights(self, path=None):
         """
@@ -509,14 +521,16 @@ class Builder(object):
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
-    def run(self, publish=False, suffix=None, outputfile=None, assetName=None, fileType=None, versioning=True,
+    def run(self, publish=False, savePublish=True, suffix=None, outputfile=None, assetName=None, fileType=None,
+            versioning=True,
             saveFBX=False):
         """
         Build a rig.
 
         if Publish is True then it will also run the publish steps. See publish for more information.
 
-        :param publish: if True also publish the rig.
+        :param publish: if True also run the publish steps
+        :param savePublish: if True also save the publish file
         :param outputfile: Path for the output file.
         :param assetName: Asset name used to generate a file name.
         :param fileType: File type of the publish file. valid values are 'mb' or 'ma'.
@@ -548,8 +562,10 @@ class Builder(object):
         self.loadDeformationData()
         if publish:
             self.publishScript()
-            self.publish(outputfile=outputfile, suffix=suffix, assetName=assetName, fileType=fileType,
-                         versioning=versioning, saveFBX=saveFBX)
+            self.mergeDeformLayers()
+            if savePublish:
+                self.publish(outputfile=outputfile, suffix=suffix, assetName=assetName, fileType=fileType,
+                             versioning=versioning, saveFBX=saveFBX)
         endTime = time.time()
         finalTime = endTime - startTime
 

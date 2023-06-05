@@ -46,6 +46,8 @@ class PublishWidget(QtWidgets.QWidget):
             fileFilter=ui_constants.MAYA_FILTER,
             fileMode=2
             )
+        self.dryPublishButton = QtWidgets.QPushButton("Dry Publish Rig")
+        # self.dryPublishButton.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
         self.publishButton = QtWidgets.QPushButton("Publish Rig")
         self.publishButton.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
 
@@ -77,6 +79,7 @@ class PublishWidget(QtWidgets.QWidget):
         publishFileLayout.addWidget(self.outFileTypeComboBox)
         self.mainCollapseableWidget.addLayout(publishFileLayout)
         self.mainCollapseableWidget.addWidget(self.outPathSelector)
+        self.mainCollapseableWidget.addWidget(self.dryPublishButton)
         self.mainCollapseableWidget.addWidget(self.publishButton)
         self.mainCollapseableWidget.addWidget(self.saveFBXCheckbox)
 
@@ -84,6 +87,8 @@ class PublishWidget(QtWidgets.QWidget):
 
     def createConnections(self):
         """ Create Connections """
+
+        self.dryPublishButton.clicked.connect(self.dryPublish)
         self.publishButton.clicked.connect(self.publish)
 
     def setBuilder(self, builder):
@@ -126,6 +131,11 @@ class PublishWidget(QtWidgets.QWidget):
         return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
+
+    def dryPublish(self):
+        """ run all the publish steps without saving the file"""
+        self.builder.run(publish=True, savePublish=False)
+
     def publish(self):
         """ publish the rig"""
         confirmPublishMessage = QtWidgets.QMessageBox()

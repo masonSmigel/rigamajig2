@@ -76,6 +76,9 @@ class Actions(object):
         self.mergeRigFilesAction = QtWidgets.QAction("Merge Rig Files", self.dialog)
         self.mergeRigFilesAction.triggered.connect(self.showMergeRigFilesDialog)
 
+        self.devModeAction = QtWidgets.QAction("Dev Mode", self.dialog)
+        self.devModeAction.setCheckable(True)
+
         # TOOLS
         self.runPerformanceTestAction = QtWidgets.QAction("Run Performance Test", self.dialog)
         self.runPerformanceTestAction.triggered.connect(self.runPerformanceTest)

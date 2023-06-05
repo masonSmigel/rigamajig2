@@ -87,7 +87,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParen
     joint = common.getFirstIndex(joint)
     aimJoint = joint
     if not cmds.listRelatives(joint, type="joint"):
-        aimJoint = cmds.listRelatives(joint, type="joint", p=True)
+        aimJoint = cmds.listRelatives(joint, type="joint", p=True)[0]
     if not aimJoint:
         raise RuntimeError("Could not determine axis from joint {}".format(joint))
     if not parent:

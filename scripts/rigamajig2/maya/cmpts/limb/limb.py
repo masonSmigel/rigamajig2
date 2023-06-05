@@ -452,7 +452,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                              value)
 
             # if the module is using the twisty bendy controls then we need to create a visibly control
-            rig_attr.createAttr(self.paramsHierarchy, "bendies", "bool", value=1, keyable=True, channelBox=True)
+            rig_attr.createAttr(self.paramsHierarchy, "bendies", "bool", value=0, keyable=True, channelBox=True)
 
             for bendieCtl in self.bendControls:
                 rig_control.connectControlVisiblity(self.paramsHierarchy, "bendies", bendieCtl)

@@ -49,7 +49,7 @@ def createCageControlPoint(name, side=None, size=1, position=None, color='slateg
 
     # create the bind joint and tag it
     bindJoint = cmds.createNode("joint", name="{}_bind".format(name), parent=ctl.name)
-    meta.tag(bindJoint, common.BIND, type="cage")
+    meta.tag(bindJoint, common.BINDTAG, type="cage")
     meta.createMessageConnection(ctl.name, bindJoint, "bindJoint")
     joint.setRadius(bindJoint, size * 0.5)
 

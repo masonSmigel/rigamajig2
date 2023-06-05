@@ -8,7 +8,9 @@ import sys
 DEBUG = False
 REQUIRED_PLUGINS = ['quatNodes', 'matrixNodes']
 
-BIND = 'bind'
+# really important tags
+BINDTAG = 'bind'
+CONTROLTAG = 'control'
 
 # Side constants
 LEFT = 'l'

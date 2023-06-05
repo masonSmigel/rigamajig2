@@ -265,7 +265,7 @@ class JointWidget(QtWidgets.QWidget):
                 meta.tag(cmds.ls(sl=True), "skeleton_root")
 
             # check if the joint ends with "_bind"
-            if jnt.endswith(f"_{common.BIND}"):
+            if jnt.endswith(f"_{common.BINDTAG}"):
                 meta.tag(jnt, "bind")
 
             # freeze the joint scales

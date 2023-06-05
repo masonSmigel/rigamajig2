@@ -174,7 +174,7 @@ def isControl(control):
     :param control: name of the controller to check
     :return: True if Valid. False is invalid.
     """
-    return meta.hasTag(control, 'control')
+    return meta.hasTag(control, common.CONTROLTAG)
 
 
 # pylint:disable=too-many-arguments
@@ -497,7 +497,7 @@ def tagAsControl(control, type=None):
     :param type: Add a special type
     :return:
     """
-    meta.tag(control, CONTROLTAG, type=type)
+    meta.tag(control, common.CONTROLTAG, type=type)
 
 
 def untagAsControl(control):
@@ -505,7 +505,7 @@ def untagAsControl(control):
     untag specified controls as a control
     :param control: control to remove tag from
     """
-    meta.untag(control, CONTROLTAG)
+    meta.untag(control, common.CONTROLTAG)
 
 
 def getControls(namespace=None):
@@ -515,7 +515,7 @@ def getControls(namespace=None):
     :type namespace: str
     :return:
     """
-    return meta.getTagged(CONTROLTAG, namespace=namespace)
+    return meta.getTagged(common.CONTROLTAG, namespace=namespace)
 
 
 def createDisplayLine(point1, point2, name=None, parent=None, displayType='temp'):

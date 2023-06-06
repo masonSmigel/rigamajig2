@@ -160,7 +160,6 @@ def getDeformerStack(geo, ignoreTypes=None):
     """
 
     ignoreTypes = ignoreTypes or ['tweak']
-
     geo = common.getFirstIndex(geo)
 
     inputs = cmds.ls(cmds.listHistory(geo, pruneDagObjects=True, interestLevel=1), type="geometryFilter")
@@ -392,6 +391,8 @@ def setWeights(deformer, weights, geometry=None):
     pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
 
     geometryIndex = getGeoIndex(deformer, geometry)
+    if geometryIndex is None:
+        raise Exception(f"The geometry '{geometry}' is not part of the deformer set for '{deformer}'")
 
     tmpWeights = list()
     for i in range(pointCount + 1):

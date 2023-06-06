@@ -63,6 +63,8 @@ def getPointCount(shape):
     if shapeType == 'mesh':
         pointCount = cmds.polyEvaluate(shape, v=True)
     if shapeType == 'nurbsCurve':
-        pointCount = int(cmds.ls("{}.cv[*]".format(shapeType))[0].split(":")[1][:-1])
-        pointCount += 1
+        degs = cmds.getAttr('{}.degree'.format(shape))
+        spans = cmds.getAttr('{}.spans'.format(shape))
+
+        pointCount = degs + spans
     return pointCount

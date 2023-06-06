@@ -96,21 +96,6 @@ class DeformationWidget(QtWidgets.QWidget):
         self.copySkinWeightsButton.setIcon(QtGui.QIcon(":copySkinWeight"))
         self.connectBpmsButton = QtWidgets.QPushButton("Connect BPMs on Skins")
 
-        self.psdPathSelector = pathSelector.PathSelector(
-            "psd:",
-            caption="Select a Pose Reader File",
-            fileFilter=constants.JSON_FILTER,
-            fileMode=1)
-
-        self.loadPsdButton = QtWidgets.QPushButton("Load Pose Readers")
-        self.loadPsdButton.setIcon(QtGui.QIcon(common.getIcon("loadPsd.png")))
-        self.savePsdButton = QtWidgets.QPushButton("Save Pose Readers")
-        self.savePsdButton.setIcon(QtGui.QIcon(common.getIcon("loadPsd.png")))
-
-        self.loadPsdButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.savePsdButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.loadPsdButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.savePsdButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
 
         self.SHAPESPathSelector = pathSelector.PathSelector(
             "SHAPES:",
@@ -126,11 +111,6 @@ class DeformationWidget(QtWidgets.QWidget):
         self.saveSHAPESButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
         self.loadSHAPESButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
         self.loadSHAPESButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-
-        self.loadPsdModeCheckbox = QtWidgets.QComboBox()
-        self.loadPsdModeCheckbox.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.loadPsdModeCheckbox.addItem("append")
-        self.loadPsdModeCheckbox.addItem("replace")
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -176,18 +156,6 @@ class DeformationWidget(QtWidgets.QWidget):
         self.skinEditWidget.addWidget(self.connectBpmsButton)
         self.skinEditWidget.addSpacing(4)
 
-        psdButtonLayout = QtWidgets.QHBoxLayout()
-        psdButtonLayout.setContentsMargins(0, 0, 0, 0)
-        psdButtonLayout.setSpacing(4)
-        psdButtonLayout.addWidget(self.loadPsdButton)
-        psdButtonLayout.addWidget(self.savePsdButton)
-        psdButtonLayout.addWidget(self.loadPsdModeCheckbox)
-
-        # add widgets to the collapsable widget.
-        self.mainCollapseableWidget.addSpacing(5)
-        self.mainCollapseableWidget.addWidget(self.psdPathSelector)
-        self.mainCollapseableWidget.addLayout(psdButtonLayout)
-
         self.mainCollapseableWidget.addSpacing(5)
         self.mainCollapseableWidget.addWidget(self.SHAPESPathSelector)
 
@@ -214,8 +182,6 @@ class DeformationWidget(QtWidgets.QWidget):
         self.saveSkinsButton.clicked.connect(self.saveSkin)
         self.copySkinWeightsButton.clicked.connect(self.copySkinWeights)
         self.connectBpmsButton.clicked.connect(self.connectBindPreMatrix)
-        self.loadPsdButton.clicked.connect(self.loadPoseReaders)
-        self.savePsdButton.clicked.connect(self.savePoseReaders)
         self.saveSHAPESButton.clicked.connect(self.saveSHAPESData)
         self.loadSHAPESButton.clicked.connect(self.loadSHAPESData)
 
@@ -225,7 +191,6 @@ class DeformationWidget(QtWidgets.QWidget):
         self.builder = builder
         self.deformLayerPathSelector.setRelativePath(rigEnv)
         self.skinPathSelector.setRelativePath(rigEnv)
-        self.psdPathSelector.setRelativePath(rigEnv)
         self.SHAPESPathSelector.setRelativePath(rigEnv)
 
         # update data within the rig
@@ -235,16 +200,12 @@ class DeformationWidget(QtWidgets.QWidget):
         skinFile = self.builder.getRigData(self.builder.getRigFile(), SKINS)
         self.skinPathSelector.selectPath(skinFile)
 
-        psdFile = self.builder.getRigData(self.builder.getRigFile(), PSD)
-        self.psdPathSelector.selectPath(psdFile)
-
         SHAPESFile = self.builder.getRigData(self.builder.getRigFile(), SHAPES)
         self.SHAPESPathSelector.selectPath(SHAPESFile)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.loadDeformLayers()
-        self.loadPoseReaders()
         self.loadAllSkins()
         self.loadSHAPESData()
 
@@ -277,15 +238,6 @@ class DeformationWidget(QtWidgets.QWidget):
     def saveSkin(self):
         """Save the skin weights"""
         self.builder.saveSkinWeights(path=self.skinPathSelector.getPath())
-
-    def loadPoseReaders(self):
-        """ Save load pose reader setup from json using the builder """
-        self.builder.loadPoseReaders(self.psdPathSelector.getPath(),
-                                     replace=self.loadPsdModeCheckbox.currentIndex())
-
-    def savePoseReaders(self):
-        """ Save pose reader setup to json using the builder """
-        self.builder.savePoseReaders(self.psdPathSelector.getPath())
 
     def copySkinWeights(self):
         """ Copy Skin weights"""

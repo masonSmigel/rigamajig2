@@ -14,11 +14,12 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 # RIGAMAJIG2
+from rigamajig2.shared import common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
-from rigamajig2.maya.builder import constants
+from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
+from rigamajig2.ui.builder_ui import constants
 from rigamajig2.ui.builder_ui import controls_widget
 from rigamajig2.maya.builder import core
-
 
 
 class BuildWidget(QtWidgets.QWidget):
@@ -35,7 +36,7 @@ class BuildWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget  = collapseableWidget.CollapsibleWidget('Build Rig', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Build Rig', addCheckbox=True)
 
         self.completeButton = QtWidgets.QPushButton("Build Rig")
         self.completeButton.setFixedHeight(45)
@@ -43,6 +44,27 @@ class BuildWidget(QtWidgets.QWidget):
         self.buildButton = QtWidgets.QPushButton("Build")
         self.connectButton = QtWidgets.QPushButton("Connect")
         self.finalizeButton = QtWidgets.QPushButton("Finalize")
+
+        self.psdPathSelector = pathSelector.PathSelector(
+            "psd:",
+            caption="Select a Pose Reader File",
+            fileFilter=constants.JSON_FILTER,
+            fileMode=1)
+
+        self.loadPsdButton = QtWidgets.QPushButton("Load Pose Readers")
+        self.loadPsdButton.setIcon(QtGui.QIcon(common.getIcon("loadPsd.png")))
+        self.savePsdButton = QtWidgets.QPushButton("Save Pose Readers")
+        self.savePsdButton.setIcon(QtGui.QIcon(common.getIcon("loadPsd.png")))
+
+        self.loadPsdButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.savePsdButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadPsdButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.savePsdButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+
+        self.loadPsdModeCheckbox = QtWidgets.QComboBox()
+        self.loadPsdModeCheckbox.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadPsdModeCheckbox.addItem("append")
+        self.loadPsdModeCheckbox.addItem("replace")
 
         # Post - script section
         self.postScriptRunner = scriptRunner.ScriptRunner(title="Post-Scripts:")
@@ -60,8 +82,21 @@ class BuildWidget(QtWidgets.QWidget):
         buildLayout.addWidget(self.finalizeButton)
 
         # build_layout.addWidget(self.load_ctls_on_build)
-        self.mainCollapseableWidget .addWidget(self.completeButton)
-        self.mainCollapseableWidget .addLayout(buildLayout)
+        self.mainCollapseableWidget.addWidget(self.completeButton)
+        self.mainCollapseableWidget.addLayout(buildLayout)
+
+        # psd buttons
+        psdButtonLayout = QtWidgets.QHBoxLayout()
+        psdButtonLayout.setContentsMargins(0, 0, 0, 0)
+        psdButtonLayout.setSpacing(4)
+        psdButtonLayout.addWidget(self.loadPsdButton)
+        psdButtonLayout.addWidget(self.savePsdButton)
+        psdButtonLayout.addWidget(self.loadPsdModeCheckbox)
+
+        # add widgets to the collapsable widget.
+        self.mainCollapseableWidget.addSpacing(10)
+        self.mainCollapseableWidget.addWidget(self.psdPathSelector)
+        self.mainCollapseableWidget.addLayout(psdButtonLayout)
 
         # Post Script
         self.mainCollapseableWidget.addSpacing()
@@ -76,29 +111,37 @@ class BuildWidget(QtWidgets.QWidget):
         self.buildButton.clicked.connect(self.executeBuilderBuild)
         self.connectButton.clicked.connect(self.executeBuilderConnect)
         self.finalizeButton.clicked.connect(self.executeBuilderFinalize)
+        self.loadPsdButton.clicked.connect(self.loadPoseReaders)
+        self.savePsdButton.clicked.connect(self.savePoseReaders)
 
     def setBuilder(self, builder):
         """ Set the builder"""
         rigEnv = builder.getRigEnviornment()
         rigFile = builder.getRigFile()
         self.builder = builder
+        self.psdPathSelector.setRelativePath(rigEnv)
 
         # clear the ui
         self.postScriptRunner.clearScript()
 
+        # setup the PSD path reader
+        psdFile = self.builder.getRigData(self.builder.getRigFile(), PSD)
+        self.psdPathSelector.selectPath(psdFile)
+
         # self.postScriptScriptRunner.setRelativeDirectory(rigEnv)
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.POST_SCRIPT, asDict=True)
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT, asDict=True)
         self.postScriptRunner.addScriptsWithRecursionData(scripts)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.completeBuild()
+        self.loadPoseReaders()
         self.postScriptRunner.executeAllScripts()
 
     @property
     def isChecked(self):
         """ return the checked state of the collapseable widget"""
-        return self.mainCollapseableWidget .isChecked()
+        return self.mainCollapseableWidget.isChecked()
 
     def executeBuilderBuild(self):
         """ execute the builder build function """
@@ -111,6 +154,15 @@ class BuildWidget(QtWidgets.QWidget):
     def executeBuilderFinalize(self):
         """ execute the builder finalize function """
         self.builder.finalize()
+
+    def loadPoseReaders(self):
+        """ Save load pose reader setup from json using the builder """
+        self.builder.loadPoseReaders(self.psdPathSelector.getPath(),
+                                     replace=self.loadPsdModeCheckbox.currentIndex())
+
+    def savePoseReaders(self):
+        """ Save pose reader setup to json using the builder """
+        self.builder.savePoseReaders(self.psdPathSelector.getPath())
 
     def completeBuild(self):
         """ Execute a complete rig build (steps intialize - finalize)"""

@@ -448,7 +448,7 @@ def getWeights(blendshape, targets=None, geometry=None):
         # optimize the value list
         opimizedDict = dict()
         for i, v in enumerate(values):
-            # if the weights are almost equal to skip adding them.
+            # if the weights are almost equal to zero skip adding them.
             if not abs(v - 1.0) <= 0.0001:
                 opimizedDict[i] = v
 
@@ -488,6 +488,7 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
     if not isBlendshape(blendshape):
         raise Exception("{} is not a valid blendshape".format(blendshape))
 
+    targets = common.toList(targets)
     if not targets: targets = getTargetList(blendshape) + ['baseWeights']
     if not geometry: geometry = cmds.blendShape(blendshape, q=True, g=True)[0]
 
@@ -500,9 +501,12 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
                 # we need to check if there are weights in the dictionary. We can use get to check and return None if
                 # there is not a key for the specified weight. After that we can check if the weight == None. If we does
                 # we replace it with 1.0 since we stripped out any values at 1.0 when we gathered the weights
-                tmpWeight = weights[target].get(i) or weights[target].get(str(i))
-
-                if tmpWeight is None: tmpWeight = 1.0
+                if weights[target].get(i) is not None:
+                    tmpWeight = weights[target].get(i)
+                elif weights[target].get(str(i)) is not None:
+                    tmpWeight = weights[target].get(str(i))
+                else:
+                    tmpWeight = 1.0
                 # finally append the weight to the list
                 tmpWeights.append(tmpWeight)
 
@@ -514,8 +518,12 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
                 # we need to check if there are weights in the dictionary. We can use get to check and return None if
                 # there is not a key for the specified weight. After that we can check if the weight == None. If we does
                 # we replace it with 1.0 since we stripped out any values at 1.0 when we gathered the weights
-                tmpWeight = weights[target].get(i) or weights[target].get(str(i))
-                if tmpWeight is None: tmpWeight = 1.0
+                if weights[target].get(i) is not None:
+                    tmpWeight = weights[target].get(i)
+                elif weights[target].get(str(i)) is not None:
+                    tmpWeight = weights[target].get(str(i))
+                else:
+                    tmpWeight = 1.0
 
                 # finally append the weight to the list
                 tmpWeights.append(tmpWeight)

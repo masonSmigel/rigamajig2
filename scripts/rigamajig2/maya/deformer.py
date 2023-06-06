@@ -11,7 +11,6 @@ import rigamajig2.maya.shape
 import rigamajig2.maya.mesh
 
 
-
 def isDeformer(deformer):
     """
     Check if the deformer is a valid deformer
@@ -291,7 +290,7 @@ def getAffectedGeo(deformer):
 
     affectedObjects = list()
 
-    deformerObj = omu.getMObject(deformer)
+    deformerObj = omu.getOldMObject(deformer)
     deformFn = oma.MFnGeometryFilter(deformerObj)
 
     outputObjs = om.MObjectArray()
@@ -365,8 +364,14 @@ def getWeights(deformer, geometry=None):
         values = cmds.getAttr(attr)
         values = [round(float(v), 5) for v in values]
 
-    weightList[0] = values
-    return weightList
+    opimizedDict = dict()
+    # optimize the value list
+    for i, v in enumerate(values):
+        # if the weights are almost equal to one skip adding them.
+        if not abs(v - 1.0) <= 0.0001:
+            opimizedDict[i] = v
+
+    return opimizedDict
 
 
 def setWeights(deformer, weights, geometry=None):
@@ -388,8 +393,24 @@ def setWeights(deformer, weights, geometry=None):
 
     geometryIndex = getGeoIndex(deformer, geometry)
 
+    tmpWeights = list()
+    for i in range(pointCount + 1):
+        # we need to check if there are weights in the dictionary. We can use get to check and return None if
+        # there is not a key for the specified weight. After that we can check if the weight == None. If we does
+        # we replace it with 1.0 since we stripped out any values at 1.0 when we gathered the weights
+        if weights.get(i) is not None:
+            tmpWeight = weights.get(i)
+        elif weights.get(str(i)) is not None:
+            tmpWeight = weights.get(str(i))
+        else:
+            tmpWeight = 1.0
+
+        if tmpWeight is None: tmpWeight = 1.0
+        # finally append the weight to the list
+        tmpWeights.append(tmpWeight)
+
     attr = "{}.wl[{}].w[0:{}]".format(deformer, geometryIndex, pointCount)
-    weightList = weights[0]
+    weightList = tmpWeights
     cmds.setAttr(attr, *weightList)
 
 

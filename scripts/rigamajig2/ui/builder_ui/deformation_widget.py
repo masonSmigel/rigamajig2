@@ -55,6 +55,8 @@ class DeformationWidget(QtWidgets.QWidget):
         self.saveDeformLayersButton.setIcon(QtGui.QIcon(common.getIcon("saveDeformLayers.png")))
 
         self.addDeformLayersWidget = collapseableWidget.CollapsibleWidget('Add deformation Layers')
+        self.addDeformLayersWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
+        self.addDeformLayersWidget.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
         self.suffixLineEdit = QtWidgets.QLineEdit()
         self.suffixLineEdit.setPlaceholderText("suffix")
 
@@ -137,8 +139,9 @@ class DeformationWidget(QtWidgets.QWidget):
 
         self.addDeformLayersWidget.addLayout(addDeformLayersLayout)
         self.addDeformLayersWidget.addWidget(self.connectToMainMeshButton)
+        self.addDeformLayersWidget.addSpacing(4)
 
-        self.mainCollapseableWidget.addSpacing(4)
+        self.mainCollapseableWidget.addSpacing(10)
 
         skinButtonLayout = QtWidgets.QHBoxLayout()
         skinButtonLayout.setContentsMargins(0, 0, 0, 0)
@@ -156,7 +159,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.skinEditWidget.addWidget(self.connectBpmsButton)
         self.skinEditWidget.addSpacing(4)
 
-        self.mainCollapseableWidget.addSpacing(5)
+        self.mainCollapseableWidget.addSpacing(10)
         self.mainCollapseableWidget.addWidget(self.SHAPESPathSelector)
 
         # SHAPES layout

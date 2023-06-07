@@ -174,3 +174,23 @@ class AbstractData(object):
         self._filepath = filepath
         self._data = common.convertDictKeys(data['data'])
         return self._data
+
+    @classmethod
+    def getDataType(cls, filepath):
+        """
+        Read a given data file and return the data type of that file
+
+         :param filepath: the path of the file to read
+        :type filepath: str
+        :return: datatype of the given file
+        :rtype: str
+        """
+        f = open(filepath, 'r')
+        if sys.version_info.major == 3:
+            data = json.loads(f.read(), object_pairs_hook=OrderedDict)
+        else:
+            data = json.loads(f.read().decode('utf-8'), object_pairs_hook=OrderedDict)
+        f.close()
+
+        datatype = data['type']
+        return datatype

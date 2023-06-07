@@ -1,5 +1,36 @@
 # Change Log 
 
+## 1.1.3
+
+### Added: 
+* Added the option to include additional tweakers in the `lips.lips' component. 
+* Added a `dryPublish' option to the builder dialog. This is used to test the full build if 
+  needed before saving a publish file.
+* Added `joint.cleanupJoints` function to the builder Dialog. This will properly tag and untag selected joints
+  and their children as 'bind' or 'skeleton_root' as appropriate, freeze the scale and rotate, add the joint orient
+  to the channel box, and check if the naming is unique(and display a warning, fix manually)
+* Changed 'bind' and 'control' tags/suffixes and their uses to be based on a global variable within `common`. NOTE: Some functions
+  look for joint suffixes to assign tags in the skeleton. 
+* Added `deformer_data.DeformerData` data class. This can store important deformer info for some deformer types. More to
+  add in the future. For now supported types are: `ffd`, `cluster`, `tension`, `deltaMush`. This data class stores the 
+  deformerType, attribute values, connected geos and deformer weights. 
+
+### Changed: 
+* general code cleanup in: 
+  * deformlayer.py
+  * deformer.py
+* Made the rig version attribute visible in the channel box. 
+* ikfkSwitcher now switches each selected control (if you select multiple controls in the same 
+  component it will switch once for each!)
+* `limb.limb` and subclasses now build with the bendies hidden by default. 
+* Moved the PSD save and load functions of the builder Dialog to the `build` widget instead of the `deform` widget. This is 
+  to prepare for a more robust data loading system to be implemented.
+
+### Fixed: 
+* Fixed a minor bug in the `psd.createPsdReader` function
+* Fixed `deformer.getWeights` and `deformer.setWeights` to work properly. 
+
+
 ## 1.1.2
 Added support for python3 and maya 2022 as default version. 
 

@@ -46,6 +46,8 @@ class PublishWidget(QtWidgets.QWidget):
             fileFilter=ui_constants.MAYA_FILTER,
             fileMode=2
             )
+        self.mergeDeformLayersButton = QtWidgets.QPushButton("Merge Deform Layers")
+
         self.dryPublishButton = QtWidgets.QPushButton("Dry Publish Rig")
         # self.dryPublishButton.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
         self.publishButton = QtWidgets.QPushButton("Publish Rig")
@@ -71,6 +73,9 @@ class PublishWidget(QtWidgets.QWidget):
         self.mainLayout.setSpacing(0)
 
         self.mainCollapseableWidget.addWidget(self.pubScriptRunner)
+        self.mainCollapseableWidget.addSpacing(4)
+        self.mainCollapseableWidget.addWidget(self.mergeDeformLayersButton)
+
         self.mainCollapseableWidget.addSpacing(10)
         publishFileLayout = QtWidgets.QHBoxLayout()
         publishFileLayout.addWidget(QtWidgets.QLabel("suffix:"))
@@ -87,7 +92,7 @@ class PublishWidget(QtWidgets.QWidget):
 
     def createConnections(self):
         """ Create Connections """
-
+        self.mergeDeformLayersButton.clicked.connect(self.mergeDeformLayers)
         self.dryPublishButton.clicked.connect(self.dryPublish)
         self.publishButton.clicked.connect(self.publish)
 
@@ -124,6 +129,7 @@ class PublishWidget(QtWidgets.QWidget):
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.pubScriptRunner.executeAllScripts()
+        self.mergeDeformLayers()
 
     @property
     def isChecked(self):
@@ -135,6 +141,10 @@ class PublishWidget(QtWidgets.QWidget):
     def dryPublish(self):
         """ run all the publish steps without saving the file"""
         self.builder.run(publish=True, savePublish=False)
+
+    def mergeDeformLayers(self):
+        """Merge the deformation layers"""
+        self.builder.mergeDeformLayers()
 
     def publish(self):
         """ publish the rig"""

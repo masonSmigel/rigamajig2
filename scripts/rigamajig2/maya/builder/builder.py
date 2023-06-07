@@ -521,9 +521,8 @@ class Builder(object):
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
-    def run(self, publish=False, savePublish=True, suffix=None, outputfile=None, assetName=None, fileType=None,
-            versioning=True,
-            saveFBX=False):
+    def run(self, publish=False, savePublish=True, outputfile=None, assetName=None, suffix=None,fileType=None,
+            versioning=True, saveFBX=False):
         """
         Build a rig.
 
@@ -533,6 +532,7 @@ class Builder(object):
         :param savePublish: if True also save the publish file
         :param outputfile: Path for the output file.
         :param assetName: Asset name used to generate a file name.
+        :param suffix: suffix to attatch to the end of the asset name.
         :param fileType: File type of the publish file. valid values are 'mb' or 'ma'.
         :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
                            and store a new version each time the publish file is overwritten.
@@ -564,8 +564,12 @@ class Builder(object):
             self.publishScript()
             self.mergeDeformLayers()
             if savePublish:
-                self.publish(outputfile=outputfile, suffix=suffix, assetName=assetName, fileType=fileType,
-                             versioning=versioning, saveFBX=saveFBX)
+                self.publish(outputfile=outputfile,
+                             suffix=suffix,
+                             assetName=assetName,
+                             fileType=fileType,
+                             versioning=versioning,
+                             saveFBX=saveFBX)
         endTime = time.time()
         finalTime = endTime - startTime
 

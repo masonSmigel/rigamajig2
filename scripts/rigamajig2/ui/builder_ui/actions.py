@@ -139,11 +139,10 @@ class Actions(object):
         newData[constants.SKELETON_POS] = self.dialog.jointWidget.jointPositionPathSelector.getPath(absoultePath=False)
         newData[constants.GUIDES] = self.dialog.intalizeWidget.guidePathSelector.getPath(absoultePath=False)
         newData[constants.COMPONENTS] = self.dialog.intalizeWidget.componentsPathSelector.getPath(absoultePath=False)
+        newData[constants.PSD] = self.dialog.buildWidget.psdPathSelector.getPath(absoultePath=False)
         newData[constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlPathSelector.getPath(absoultePath=False)
-        newData[constants.DEFORM_LAYERS] = self.dialog.deformationWidget.deformLayerPathSelector.getPath(
-            absoultePath=False)
+        newData[constants.DEFORM_LAYERS] = self.dialog.deformationWidget.deformLayerPathSelector.getPath(absoultePath=False)
         newData[constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath(absoultePath=False)
-        newData[constants.PSD] = self.dialog.deformationWidget.psdPathSelector.getPath(absoultePath=False)
         newData[constants.SHAPES] = self.dialog.deformationWidget.SHAPESPathSelector.getPath(absoultePath=False)
         newData[constants.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath(absoultePath=False)
         newData[constants.OUTPUT_RIG_FILE_TYPE] = self.dialog.publishWidget.outFileTypeComboBox.currentText()

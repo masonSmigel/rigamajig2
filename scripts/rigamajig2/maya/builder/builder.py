@@ -390,6 +390,8 @@ class Builder(object):
         """
         self.loadDeformationLayers()
         self.loadSkinWeights()
+
+        # here we need to load additional data
         self.loadSHAPESData()
         logger.info("data loading -- complete")
 

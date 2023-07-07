@@ -445,20 +445,18 @@ class ComponentManager(QtWidgets.QWidget):
 
     def loadFromScene(self):
         """ Load exisiting components from the scene"""
-        self.clearTree()
         components = meta.getTagged('component')
 
         for component in components:
             name = cmds.getAttr("{}.name".format(component))
-            componentType = cmds.getAttr("{}.type".format(component))
             buildStepList = cmds.attributeQuery("build_step", n=component, le=True)[0].split(":")
             buildStep = buildStepList[cmds.getAttr("{}.build_step".format(component))]
             isSubComponent = meta.hasTag(component, "subComponent")
             if not isSubComponent:
-                try:
-                    self.addComponent(name=name, componentType=componentType, buildStep=buildStep, container=component)
-                except:
-                    pass
+                # look through the list of components and update the component build steps
+                componentItem = self.componentTree.findItems(name, QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)[0]
+                componentItem.setText(2, buildStep)
+                componentItem.setData(QtCore.Qt.UserRole, 0, component)
 
     def parseData(self, item):
         """

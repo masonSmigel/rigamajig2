@@ -167,6 +167,8 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
         self.runButton = QtWidgets.QPushButton(QtGui.QIcon(":executeAll.png"), "Run")
         self.runButton.setFixedWidth(80)
+        self.publishButton = QtWidgets.QPushButton(QtGui.QIcon(":newPreset.png"), "Publish")
+        self.publishButton.setFixedWidth(80)
 
         self.closeButton = QtWidgets.QPushButton("Close")
 
@@ -205,8 +207,10 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         # lower persistant buttons (AKA close)
         lowButtonsLayout = QtWidgets.QVBoxLayout()
         runButtonLayout = QtWidgets.QHBoxLayout()
-        runButtonLayout.addWidget(self.runSelectedButton)
+        runButtonLayout.addWidget(self.publishButton)
         runButtonLayout.addWidget(self.runButton)
+        runButtonLayout.addSpacing(80)
+        runButtonLayout.addWidget(self.runSelectedButton)
 
         lowButtonsLayout.addLayout(runButtonLayout)
         lowButtonsLayout.addWidget(self.closeButton)
@@ -254,6 +258,7 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.rigPathSelector.selectPathButton.clicked.connect(self.pathSelectorLoadRigFile)
         self.runSelectedButton.clicked.connect(self.runSelected)
         self.runButton.clicked.connect(self.runAll)
+        self.publishButton.clicked.connect(self.publish)
         self.closeButton.clicked.connect(self.close)
 
     # --------------------------------------------------------------------------------
@@ -334,6 +339,11 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.initializeDevMode()
         self.rigBuilder.run()
         self.intalizeWidget.componentManager.loadFromScene()
+
+    def publish(self):
+        """ Run builder and update the component manager"""
+        self.initializeDevMode()
+        self.publishWidget.publish()
 
     def initializeDevMode(self):
         if self.actions.devModeAction.isChecked():

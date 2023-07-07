@@ -72,11 +72,11 @@ class ScriptRunner(QtWidgets.QWidget):
         self.titleLabel = QtWidgets.QLabel(self.title)
 
         self.executeAllAction = QtWidgets.QAction("Execute All Scripts", self)
-        self.executeAllAction.setIcon(QtGui.QIcon(":play_S_100.png"))
+        self.executeAllAction.setIcon(QtGui.QIcon(":play_hover.png"))
         self.executeAllAction.triggered.connect(self.executeAllScripts)
 
         self.executeSelectedAction = QtWidgets.QAction("Run Script", self)
-        self.executeSelectedAction.setIcon(QtGui.QIcon(":play_S_100.png"))
+        self.executeSelectedAction.setIcon(QtGui.QIcon(":play_hover.png"))
         self.executeSelectedAction.triggered.connect(self.runSelectedScripts)
 
         self.showInFolderAction = QtWidgets.QAction("Show in Folder", self)
@@ -145,32 +145,6 @@ class ScriptRunner(QtWidgets.QWidget):
 
         menu.exec_(self.scriptList.mapToGlobal(position))
 
-    def addScripts(self, scriptsList):
-        """
-        add many scripts using a list of scripts and directories
-        :param scriptsList:
-        :return:
-        """
-        if not isinstance(scriptsList, (list, tuple)):
-            scriptsList = [scriptsList]
-
-        for item in scriptsList:
-            if not item:
-                continue
-
-            # if the item is a script then add it 
-            if rig_path.isFile(item):
-                self._addScriptToWidget(item, color=None)
-
-            # if the item is a directory then add all scripts in the directory
-            if rig_path.isDir(item):
-                for script in runScript.findScripts(item):
-                    self._addScriptToWidget(script)
-
-            # Append the item to the current script list.
-            # This keeps a list of all the current directories and scripts added to the UI
-            self.currentScriptsList.append(item)
-
     def addScriptsWithRecursionData(self, scriptsDict):
         """
         add a list of script while including recusion data in the loaded script data
@@ -180,10 +154,10 @@ class ScriptRunner(QtWidgets.QWidget):
             scriptsList = scriptsDict[recursion]
 
             for script in scriptsList:
-                item = self._addScriptToWidget(script, data=recursion, color=RECURSION_COLORS[recursion])
+                self._addScriptToWidget(script, data=recursion, color=RECURSION_COLORS[recursion])
                 self.currentScriptsList.append(script)
 
-    def _addScriptToWidget(self, script, data=0, color=None):
+    def _addScriptToWidget(self, script, data=0, color=None, top=False):
         """private method to add scripts to the list """
         fileInfo = QtCore.QFileInfo(script)
         if fileInfo.exists():
@@ -205,22 +179,31 @@ class ScriptRunner(QtWidgets.QWidget):
             if color:
                 item.setTextColor(color)
 
-            self.scriptList.addItem(item)
+            # Add the item to the list widget
+            if top:
+                self.scriptList.insertItem(0, item)
+            else:
+                self.scriptList.addItem(item)
 
             return item
 
     def addScriptBrowser(self):
         """add script through a browswer"""
         filePath, selectedFilter = QtWidgets.QFileDialog.getOpenFileName(self, "Select File", "", SCRIPT_FILE_FILTER)
-        self.addScripts(filePath)
+        self._addScriptToWidget(filePath, top=True)
+        if filePath:
+            self.currentScriptsList.append(filePath)
 
     def createNewScript(self):
         """create a new script"""
         filePath, selectedFilter = QtWidgets.QFileDialog.getSaveFileName(self, "Select File", "", SCRIPT_FILE_FILTER)
-        f = open(filePath, "w")
-        f.write("")
-        f.close()
-        self.addScripts(filePath)
+        if filePath:
+            f = open(filePath, "w")
+            f.write("")
+            f.close()
+
+            self._addScriptToWidget(filePath, top=True)
+            self.currentScriptsList.append(filePath)
 
     def clearScript(self):
         """Clear all scripts from the UI"""

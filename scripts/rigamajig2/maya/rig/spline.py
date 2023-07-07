@@ -296,7 +296,7 @@ class SplineBase(object):
         meta.untag(self._ikJointList, "bind")
 
 
-def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=None):
+def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=None, useLegacyNaming=False):
     """
     add twist and bend joints between a start and end joint
     :param start: start joint
@@ -305,6 +305,8 @@ def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=
     :param name: name of the group
     :param bindParent: parent the bind group here
     :param rigParent: parent the rig group
+    :param bool useLegacyNaming: renames the last joint of the chain the name of the end joint. Used in older verisons
+                                of Rigamajig and included for backwards compatability.
     :return: returns a list of targets and a spline object created.
             reminder: to get the first target you must first acess the list. ex addTwistJoints[0][0]
     """
@@ -317,7 +319,8 @@ def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=
     rig_attr.unlock(startJnt, rig_attr.KEYABLE(startJnt))
     # cmds.parent(startJnt, bind_grp)
 
-    endJnt = "{}_{}".format(end, jnts + 1)
+    endJnt = "{}_{}".format(name, jnts + 1)
+    if useLegacyNaming: endJnt = "{}_{}".format(end, jnts + 1)
     cmds.duplicate(end, parentOnly=True, returnRootsOnly=True, name=endJnt)
     rig_attr.unlock(endJnt, rig_attr.KEYABLE(endJnt))
     cmds.parent(endJnt, startJnt)

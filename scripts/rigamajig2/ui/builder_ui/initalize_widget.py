@@ -264,7 +264,8 @@ class ComponentManager(QtWidgets.QWidget):
         self.editComponentDialog = None
 
         # keep track of the script node ID
-        self.scriptJobID = -1
+        self.newSceneScriptJobID = -1
+        self.containerScriptJobID = -1
 
         self.createActions()
         self.createWidgets()
@@ -373,12 +374,20 @@ class ComponentManager(QtWidgets.QWidget):
         Set the state of the script job.
         The script job ensures the widget displays changes when the scene changes
         """
-        if enabled and self.scriptJobID < 0:
-            self.scriptJobID = cmds.scriptJob(event=["NewSceneOpened", partial(self.loadFromScene)],
-                                              protected=True)
-        elif not enabled and self.scriptJobID > 0:
-            cmds.scriptJob(kill=self.scriptJobID, f=True)
-            self.scriptJobID = -1
+        # create a script node for clearing the tree when a new scene is opened
+        if enabled and self.newSceneScriptJobID < 0:
+            self.newSceneScriptJobID = cmds.scriptJob(event=["NewSceneOpened", partial(self.loadFromScene)], protected=True)
+        elif not enabled and self.newSceneScriptJobID > 0:
+            cmds.scriptJob(kill=self.newSceneScriptJobID, f=True)
+            self.newSceneScriptJobID = -1
+
+        # set the script node for the component update Script Job
+        if enabled and self.containerScriptJobID < 0:
+            self.containerScriptJobID = cmds.scriptJob(event=["currentContainerChange", partial(self.loadFromScene)],
+                                                       protected=True)
+        elif not enabled and self.containerScriptJobID > 0:
+            cmds.scriptJob(kill=self.containerScriptJobID, f=True)
+            self.containerScriptJobID = -1
 
     def addComponent(self, name, componentType, buildStep='unbuilt', container=None):
         """ append a new component to the ui """
@@ -447,16 +456,28 @@ class ComponentManager(QtWidgets.QWidget):
         """ Load exisiting components from the scene"""
         components = meta.getTagged('component')
 
+        # check the list of components and see if the components exist and are
+        # the same amount as the builder component list
+        realComponents = [x for x in components if cmds.objExists(x)]
+        if not len(realComponents) == len(self.builder.getComponentList()):
+            self.loadListFromBuilder()
+
+        # if there are NO real components then clear the whole tree
+        if len(realComponents) == 0:
+            self.clearTree()
+
         for component in components:
             name = cmds.getAttr("{}.name".format(component))
             buildStepList = cmds.attributeQuery("build_step", n=component, le=True)[0].split(":")
             buildStep = buildStepList[cmds.getAttr("{}.build_step".format(component))]
             isSubComponent = meta.hasTag(component, "subComponent")
             if not isSubComponent:
-                # look through the list of components and update the component build steps
-                componentItem = self.componentTree.findItems(name, QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)[0]
-                componentItem.setText(2, buildStep)
-                componentItem.setData(QtCore.Qt.UserRole, 0, component)
+                # look through the list of components and update the component build steps.
+                # This is in a try except block because it will sometimes give an runtime error about a delete widget.
+                componentItem = self.componentTree.findItems(name, QtCore.Qt.MatchContains | QtCore.Qt.MatchRecursive)
+                if componentItem:
+                    componentItem[0].setText(2, buildStep)
+                    componentItem[0].setData(QtCore.Qt.UserRole, 0, component)
 
     def parseData(self, item):
         """
@@ -611,15 +632,6 @@ class ComponentManager(QtWidgets.QWidget):
             # apply the mirrored values
             mirrorMetaNode.setData(attr=parameter, value=mirroredValue)
 
-    def buildComponent(self):
-        """ Build a single component"""
-        items = self.getSelectedItem()
-        for item in items:
-            itemDict = self.parseData(item)
-
-            self.builder.buildSingleComponent(itemDict['name'], itemDict['type'])
-            self.updateComponentFromScene(item)
-
     def deleteComponent(self):
         """ Delete a component and the item from the tree widget"""
         items = self.getSelectedItem()
@@ -687,6 +699,7 @@ class ComponentManager(QtWidgets.QWidget):
         try:
             if self.componentTree.topLevelItemCount() > 0:
                 self.componentTree.clear()
+                self.searchCompleterModel.setStringList(list())
         except RuntimeError:
             pass
 
@@ -698,7 +711,6 @@ class ComponentManager(QtWidgets.QWidget):
         """ Load the compoonent list from the builder"""
         # reset the tree and autocompletes
         self.clearTree()
-        self.searchCompleterModel.setStringList(list())
 
         if not self.builder:
             raise RuntimeError("No valid rig builder found")
@@ -709,20 +721,6 @@ class ComponentManager(QtWidgets.QWidget):
             buildStep = buildStepString[cmpt.getStep()]
 
             self.addComponent(name=name, componentType=componentType, buildStep=buildStep)
-
-    def updateComponentFromScene(self, item):
-        """ Update a given list item from its scene data """
-        itemDict = self.parseData(item)
-        container = itemDict['container']
-
-        name = cmds.getAttr("{}.name".format(container))
-        cmpt = cmds.getAttr("{}.type".format(container))
-        buildStepList = cmds.attributeQuery("build_step", n=container, le=True)[0].split(":")
-        buildStep = buildStepList[cmds.getAttr("{}.build_step".format(container))]
-
-        item.setText(0, name)
-        item.setText(1, cmpt)
-        item.setText(2, buildStep)
 
     def showEvent(self, e):
         """ override the show event to add the script job. """

@@ -563,6 +563,7 @@ class Builder(object):
         self.loadControlShapes()
         self.loadDeformationData()
         if publish:
+            # self.optimize()
             self.publishScript()
             self.mergeDeformLayers()
             if savePublish:

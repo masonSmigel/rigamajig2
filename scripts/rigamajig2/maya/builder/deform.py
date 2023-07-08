@@ -156,22 +156,6 @@ def loadSHAPESData(path=None):
         return True
 
 
-    # if rig_path.isFile(path):
-    #     # mel wont source the file if the slashes match windows slashes
-    #     # so we need to search for them and replace them with mel freindly slashes
-    #     melFormmatedPath = path.replace("\\", "/")
-    #     mel.eval('source "{path}";'.format(path=melFormmatedPath))
-    #     return True
-    # if rig_path.isDir(path):
-    #     for f in os.listdir(path):
-    #         name, ext = os.path.splitext(f)
-    #         if ext == '.mel':
-    #             fullPath = os.path.join(path, f)
-    #             melFormmatedPath = fullPath.replace("\\", "/")
-    #             mel.eval('source "{path}";'.format(path=melFormmatedPath))
-    #     return True
-
-
 def saveDeformLayers(path=None):
     """
     Save the deformation layers
@@ -201,3 +185,12 @@ def loadDeformLayers(path=None):
         dataObj.read(path)
         dataObj.applyData(nodes=dataObj.getKeys())
         return True
+
+
+def loadAdditionalDeformation(path=None):
+    """
+    Loads all additional deformation data for the rig.
+    :param path:
+    :return:
+    """
+    pass

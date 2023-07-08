@@ -215,14 +215,14 @@ def _getComponentIcon(cmpt):
 
 def _getComponentColor(cmpt):
     """get the ui color for the component"""
-    tmpComponentObj = getComponentObject(cmpt)
+    tmpComponentObj = _createComponentObject(cmpt)
     uiColor = tmpComponentObj.UI_COLOR
     # after we get the UI color we can delte the tmp component instance
     del tmpComponentObj
     return uiColor
 
 
-def getComponentObject(componentType=None):
+def _createComponentObject(componentType=None):
     """
     Get an instance of the component object based on the componentType
     :param componentType: type of the component to get the class instance from.
@@ -303,7 +303,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.deleteComponentAction.setIcon(QtGui.QIcon(":trash.png"))
         self.deleteComponentAction.triggered.connect(self.deleteComponent)
 
-    def _createContextMenu(self, position):
+    def createContextMenu(self, position):
 
         menu = QtWidgets.QMenu(self.componentTree)
         menu.addAction(self.selectContainerAction)
@@ -349,7 +349,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.componentTree.setColumnWidth(2, 60)
 
         self.componentTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.componentTree.customContextMenuRequested.connect(self._createContextMenu)
+        self.componentTree.customContextMenuRequested.connect(self.createContextMenu)
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -389,11 +389,8 @@ class ComponentManager(QtWidgets.QWidget):
             cmds.scriptJob(kill=self.containerScriptJobID, f=True)
             self.containerScriptJobID = -1
 
-    def addComponent(self, name, componentType, buildStep='unbuilt', container=None):
-        """ append a new component to the ui """
-        # Here we fall into a common pyside pitfall.
-        # if an object falls out of the scope of python it will get delted.
-
+    def createComponentItem(self, name, componentType, buildStep='unbuilt', container=None):
+        """ append a new component to the ui. Used in the createComponent method """
         rowcount = self.componentTree.topLevelItemCount()
         item = QtWidgets.QTreeWidgetItem(rowcount)
         item.setSizeHint(0, QtCore.QSize(item.sizeHint(0).width(), 24))  # set height
@@ -444,10 +441,10 @@ class ComponentManager(QtWidgets.QWidget):
         :param rigParent: component rigParent
         :return:
         """
-        componentObject = getComponentObject(componentType)
+        componentObject = _createComponentObject(componentType)
         cmpt = componentObject(name=name, input=ast.literal_eval(str(input)), rigParent=rigParent)
 
-        self.addComponent(name=name, componentType=componentType, buildStep='unbuilt', container=None)
+        self.createComponentItem(name=name, componentType=componentType, buildStep='unbuilt', container=None)
         self.builder.appendComponents([cmpt])
         cmpt._initalizeComponent()
         return cmpt
@@ -516,6 +513,29 @@ class ComponentManager(QtWidgets.QWidget):
             itemDict = self.parseData(item)
             cmds.select(itemDict['container'], add=True)
 
+    def resetComponentDialogInstance(self):
+        """ Set the instance of the component dialog back to None. This way we know when it must be re-created"""
+        self.editComponentDialog = None
+
+    def setRigBuilder(self, builder):
+        """ Set a new Rig Builder"""
+        self.builder = builder
+
+    def loadListFromBuilder(self):
+        """ Load the compoonent list from the builder"""
+        # reset the tree and autocompletes
+        self.clearTree()
+
+        if not self.builder:
+            raise RuntimeError("No valid rig builder found")
+        for cmpt in self.builder.getComponentList():
+            name = cmpt.name
+            componentType = cmpt.componentType
+            buildStepString = ['unbuilt', 'initalize', 'guide', 'build', 'connect', 'finalize', 'optimize']
+            buildStep = buildStepString[cmpt.getStep()]
+
+            self.createComponentItem(name=name, componentType=componentType, buildStep=buildStep)
+
     def editComponentParameters(self):
         """ Open the Edit component parameters dialog"""
         from rigamajig2.ui.builder_ui import editComponentDialog
@@ -530,10 +550,6 @@ class ComponentManager(QtWidgets.QWidget):
 
         # set dialog to the current item
         self.editComponentDialog.setComponent(self.getComponentObj())
-
-    def resetComponentDialogInstance(self):
-        """ Set the instance of the component dialog back to None. This way we know when it must be re-created"""
-        self.editComponentDialog = None
 
     def createMirroredComponent(self):
         """ Create a mirrored component"""
@@ -703,25 +719,6 @@ class ComponentManager(QtWidgets.QWidget):
         except RuntimeError:
             pass
 
-    def setRigBuilder(self, builder):
-        """ Set a new Rig Builder"""
-        self.builder = builder
-
-    def loadListFromBuilder(self):
-        """ Load the compoonent list from the builder"""
-        # reset the tree and autocompletes
-        self.clearTree()
-
-        if not self.builder:
-            raise RuntimeError("No valid rig builder found")
-        for cmpt in self.builder.getComponentList():
-            name = cmpt.name
-            componentType = cmpt.componentType
-            buildStepString = ['unbuilt', 'initalize', 'guide', 'build', 'connect', 'finalize', 'optimize']
-            buildStep = buildStepString[cmpt.getStep()]
-
-            self.addComponent(name=name, componentType=componentType, buildStep=buildStep)
-
     def showEvent(self, e):
         """ override the show event to add the script job. """
         super(ComponentManager, self).showEvent(e)
@@ -857,7 +854,7 @@ class CreateComponentDialog(QtWidgets.QDialog):
         self.discriptionTextEdit.clear()
 
         componentType = self.componentTypeComboBox.currentText()
-        componentObject = getComponentObject(componentType)
+        componentObject = _createComponentObject(componentType)
 
         classDocs = componentObject.__doc__ or ''
         initDocs = componentObject.__init__.__doc__ or ''

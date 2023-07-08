@@ -355,9 +355,9 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
             logger.info('rigamajig2 modules reloaded')
 
-    def closeEvent(self, e):
+    def dockCloseEventTriggered(self):
         """ Override the close event in order to disable the component manager script node"""
-        super(BuilderDialog, self).closeEvent(e)
+        super(BuilderDialog, self).dockCloseEventTriggered()
         self.intalizeWidget.componentManager.setScriptJobEnabled(False)
 
     def deleteUI(self):

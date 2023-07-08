@@ -378,6 +378,7 @@ class ComponentManager(QtWidgets.QWidget):
         if enabled and self.newSceneScriptJobID < 0:
             self.newSceneScriptJobID = cmds.scriptJob(event=["NewSceneOpened", partial(self.loadFromScene)], protected=True)
         elif not enabled and self.newSceneScriptJobID > 0:
+            print(f"Deleting Script Node: {self.newSceneScriptJobID}")
             cmds.scriptJob(kill=self.newSceneScriptJobID, f=True)
             self.newSceneScriptJobID = -1
 
@@ -386,6 +387,7 @@ class ComponentManager(QtWidgets.QWidget):
             self.containerScriptJobID = cmds.scriptJob(event=["currentContainerChange", partial(self.loadFromScene)],
                                                        protected=True)
         elif not enabled and self.containerScriptJobID > 0:
+            print(f"Deleting Script Node: {self.containerScriptJobID}")
             cmds.scriptJob(kill=self.containerScriptJobID, f=True)
             self.containerScriptJobID = -1
 

@@ -29,7 +29,7 @@ import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.shared import common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, loggerWidget
 from rigamajig2.ui.builder_ui import model_widget
 from rigamajig2.ui.builder_ui import joint_widget
 from rigamajig2.ui.builder_ui import controls_widget
@@ -166,12 +166,14 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
                             self.publishWidget]
 
         self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
+        self.runSelectedButton.setFixedSize(120, 22)
         self.runButton = QtWidgets.QPushButton(QtGui.QIcon(":executeAll.png"), "Run")
-        self.runButton.setFixedWidth(80)
+        self.runButton.setFixedSize(80, 22)
         self.publishButton = QtWidgets.QPushButton(QtGui.QIcon(":newPreset.png"), "Publish")
-        self.publishButton.setFixedWidth(80)
+        self.publishButton.setFixedSize(80, 22)
 
         self.closeButton = QtWidgets.QPushButton("Close")
+        self.loggerWidget = loggerWidget.LoggerWidget()
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -207,14 +209,16 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
         # lower persistant buttons (AKA close)
         lowButtonsLayout = QtWidgets.QVBoxLayout()
+        lowButtonsLayout.setContentsMargins(0,0,0,0)
         runButtonLayout = QtWidgets.QHBoxLayout()
         runButtonLayout.addWidget(self.publishButton)
         runButtonLayout.addWidget(self.runButton)
-        runButtonLayout.addSpacing(80)
+        runButtonLayout.addStretch()
         runButtonLayout.addWidget(self.runSelectedButton)
 
         lowButtonsLayout.addLayout(runButtonLayout)
-        lowButtonsLayout.addWidget(self.closeButton)
+        # lowButtonsLayout.addWidget(self.closeButton)
+        lowButtonsLayout.addWidget(self.loggerWidget)
 
         # scrollable area
         bodyWidget = QtWidgets.QWidget()

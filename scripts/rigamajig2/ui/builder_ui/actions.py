@@ -25,6 +25,7 @@ from shiboken2 import wrapInstance
 # RIGAMJIG
 from rigamajig2.maya.builder import constants
 import rigamajig2.maya.qc as qc
+from rigamajig2.maya import loggers
 import rigamajig2.maya.data.abstract_data as abstract_data
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
 import rigamajig2.maya.builder
@@ -75,6 +76,16 @@ class Actions(object):
 
         self.mergeRigFilesAction = QtWidgets.QAction("Merge Rig Files", self.dialog)
         self.mergeRigFilesAction.triggered.connect(self.showMergeRigFilesDialog)
+
+        self.setLoggingLevelMenu = QtWidgets.QMenu("Set Logging Level", self.dialog)
+
+        # Add actions to the menu to set the logging level to each stage
+        level = 10
+        for levels in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
+            loggingLevelAction = QtWidgets.QAction(levels, self.setLoggingLevelMenu)
+            loggingLevelAction.triggered.connect(partial(loggers.setLoggingLevel, level))
+            self.setLoggingLevelMenu.addAction(loggingLevelAction)
+            level += 10
 
         self.devModeAction = QtWidgets.QAction("Dev Mode", self.dialog)
         self.devModeAction.setCheckable(True)
@@ -141,7 +152,8 @@ class Actions(object):
         newData[constants.COMPONENTS] = self.dialog.intalizeWidget.componentsPathSelector.getPath(absoultePath=False)
         newData[constants.PSD] = self.dialog.buildWidget.psdPathSelector.getPath(absoultePath=False)
         newData[constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlPathSelector.getPath(absoultePath=False)
-        newData[constants.DEFORM_LAYERS] = self.dialog.deformationWidget.deformLayerPathSelector.getPath(absoultePath=False)
+        newData[constants.DEFORM_LAYERS] = self.dialog.deformationWidget.deformLayerPathSelector.getPath(
+            absoultePath=False)
         newData[constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath(absoultePath=False)
         newData[constants.SHAPES] = self.dialog.deformationWidget.SHAPESPathSelector.getPath(absoultePath=False)
         newData[constants.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath(absoultePath=False)

@@ -51,11 +51,13 @@ class PathSelector(QtWidgets.QWidget):
         self.selectPathButton = QtWidgets.QPushButton("...")
         self.selectPathButton.setFixedSize(24, 19)
         self.selectPathButton.setToolTip(self.caption)
+        self.selectPathButton.setFlat(True)
         self.selectPathButton.clicked.connect(self.pickPath)
 
         self.showInFolderButton = QtWidgets.QPushButton(QtGui.QIcon(":fileOpen.png"), "")
         self.showInFolderButton.setFixedSize(24, 19)
         self.showInFolderButton.setToolTip("Show in Folder")
+        self.showInFolderButton.setFlat(True)
         self.showInFolderButton.clicked.connect(self.showInFolder)
 
         self.mainLayout = QtWidgets.QHBoxLayout(self)

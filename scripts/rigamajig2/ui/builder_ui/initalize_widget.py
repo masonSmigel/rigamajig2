@@ -36,6 +36,8 @@ from rigamajig2.maya.builder.constants import GUIDES, COMPONENTS
 
 ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 
+COMPONENT_ROW_HEIGHT = 20
+
 
 class InitializeWidget(QtWidgets.QWidget):
     """ Initalize layout for the builder UI """
@@ -330,6 +332,18 @@ class ComponentManager(QtWidgets.QWidget):
         self.searchBar = QtWidgets.QLineEdit()
         self.searchBar.setPlaceholderText("find a component")
 
+        # add the expand and contract widget buttons!
+        self.expandWidgetButton = QtWidgets.QPushButton()
+        self.expandWidgetButton.setIcon(QtGui.QIcon(":nodeGrapherArrowDown.png"))
+        self.expandWidgetButton.setFlat(True)
+        self.expandWidgetButton.setFixedSize(20, 20)
+        self.expandWidgetButton.setToolTip("Expand Component Manager")
+        self.contractWidgetButton = QtWidgets.QPushButton()
+        self.contractWidgetButton.setIcon(QtGui.QIcon(":nodeGrapherArrowUp.png"))
+        self.contractWidgetButton.setFlat(True)
+        self.contractWidgetButton.setFixedSize(20, 20)
+        self.expandWidgetButton.setToolTip("Contract Component Manager")
+
         self.searchCompleter = QtWidgets.QCompleter(self)
         self.searchCompleterModel = QtCore.QStringListModel(list(), self)
         self.searchCompleter.setModel(self.searchCompleterModel)
@@ -362,12 +376,17 @@ class ComponentManager(QtWidgets.QWidget):
         searchBarLayout = QtWidgets.QHBoxLayout()
         searchBarLayout.addWidget(self.search_icon)
         searchBarLayout.addWidget(self.searchBar)
+        searchBarLayout.addSpacing(20)
+        searchBarLayout.addWidget(self.expandWidgetButton)
+        searchBarLayout.addWidget(self.contractWidgetButton)
 
         self.mainLayout.addLayout(searchBarLayout)
         self.mainLayout.addWidget(self.componentTree)
 
     def createConnections(self):
         self.searchBar.returnPressed.connect(self.searchForComponent)
+        self.expandWidgetButton.clicked.connect(partial(self.changeTreeWidgetSize, 40))
+        self.contractWidgetButton.clicked.connect(partial(self.changeTreeWidgetSize, -40))
 
     def setScriptJobEnabled(self, enabled):
         """
@@ -376,7 +395,8 @@ class ComponentManager(QtWidgets.QWidget):
         """
         # create a script node for clearing the tree when a new scene is opened
         if enabled and self.newSceneScriptJobID < 0:
-            self.newSceneScriptJobID = cmds.scriptJob(event=["NewSceneOpened", partial(self.loadFromScene)], protected=True)
+            self.newSceneScriptJobID = cmds.scriptJob(event=["NewSceneOpened", partial(self.loadFromScene)],
+                                                      protected=True)
         elif not enabled and self.newSceneScriptJobID > 0:
             print(f"Deleting Script Node: {self.newSceneScriptJobID}")
             cmds.scriptJob(kill=self.newSceneScriptJobID, f=True)
@@ -395,11 +415,14 @@ class ComponentManager(QtWidgets.QWidget):
         """ append a new component to the ui. Used in the createComponent method """
         rowcount = self.componentTree.topLevelItemCount()
         item = QtWidgets.QTreeWidgetItem(rowcount)
-        item.setSizeHint(0, QtCore.QSize(item.sizeHint(0).width(), 24))  # set height
+        item.setSizeHint(0, QtCore.QSize(0, COMPONENT_ROW_HEIGHT))  # set height
 
         # set the nessesary text.
         item.setText(0, name)
-        item.setFont(0, QtGui.QFont())
+        # create a font to set it to bold
+        font = QtGui.QFont()
+        font.setBold(True)
+        item.setFont(0, font)
 
         item.setText(1, componentType)
         item.setText(2, buildStep)
@@ -720,6 +743,13 @@ class ComponentManager(QtWidgets.QWidget):
                 self.searchCompleterModel.setStringList(list())
         except RuntimeError:
             pass
+
+    def changeTreeWidgetSize(self, size):
+        """Change the size of the component tree widget to expand or contract and fit more items"""
+
+        widgetSize = self.frameGeometry()
+        newSize = widgetSize.height() + size
+        self.setFixedHeight(newSize)
 
     def showEvent(self, e):
         """ override the show event to add the script job. """

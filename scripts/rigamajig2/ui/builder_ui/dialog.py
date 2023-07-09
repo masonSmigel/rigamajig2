@@ -174,6 +174,7 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
         self.closeButton = QtWidgets.QPushButton("Close")
         self.loggerWidget = loggerWidget.LoggerWidget()
+        self.loggerWidget.setText(f"# Rigamajig2 Builder Version {rigamajig2.version} #")
 
     def createLayouts(self):
         """ Create Layouts"""

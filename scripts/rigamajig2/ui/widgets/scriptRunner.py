@@ -16,10 +16,13 @@ import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
 import rigamajig2.shared.runScript as runScript
+import rigamajig2.shared.common as common
 from rigamajig2.ui import showInFolder
 import rigamajig2.shared.path as rig_path
 
 SCRIPT_FILE_FILTER = "Python (*.py) ;; Mel (*.mel)"
+
+ITEM_HEIGHT = 18
 
 
 def mayaMainWindow():
@@ -105,6 +108,7 @@ class ScriptRunner(QtWidgets.QWidget):
         self.scriptList.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.scriptList.setFixedHeight(155)
         self.scriptList.setDragDropMode(QtWidgets.QListWidget.InternalMove)
+        self.scriptList.setAlternatingRowColors(True)
 
         self.scriptList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.scriptList.customContextMenuRequested.connect(self._createContextMenu)
@@ -163,6 +167,7 @@ class ScriptRunner(QtWidgets.QWidget):
         if fileInfo.exists():
             fileName = fileInfo.fileName()
             item = QtWidgets.QListWidgetItem(fileName)
+            item.setSizeHint(QtCore.QSize(0, ITEM_HEIGHT))  # set height
 
             # set the data
             item.setData(QtCore.Qt.UserRole, fileInfo.filePath())
@@ -173,7 +178,10 @@ class ScriptRunner(QtWidgets.QWidget):
                 # item.setData(QtCore.Qt.ItemDataRole, data)
 
             # set the icon
-            item.setIcon(QtGui.QIcon(":fileNew.png"))
+            if script.endswith(".py"):
+                item.setIcon(QtGui.QIcon(":py_tab.png"))
+            else:
+                item.setIcon(QtGui.QIcon(":mel_tab.png"))
 
             # set the text color
             if color:

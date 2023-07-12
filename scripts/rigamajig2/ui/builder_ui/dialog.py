@@ -351,6 +351,10 @@ class BuilderDialog(DockableUI):
 
     def hideEvent(self, e):
         """override the hide event to delete the scripts jobs from the initialize widget"""
+        # this is a bit of a pain instead of using the close event but since we're using
+        # the workspace control the closeEvent is now owned by Maya. This is a nice work around to
+        # ensure the script jobs are deleted when the main window is hidden (done my closing the 'X' button)
+        # however when in development you should manually call the close() method BEFORE deleting the workspace control.
         super(BuilderDialog, self).hideEvent(e)
         self.intalizeWidget.componentManager.setScriptJobEnabled(False)
 

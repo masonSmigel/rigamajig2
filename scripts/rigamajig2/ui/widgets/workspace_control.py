@@ -63,13 +63,10 @@ class WorkspaceControl(object):
         return cmds.workspaceControl(self.name, q=True, collapse=True)
 
 
-
 class DockableUI(QtWidgets.QWidget):
-
     WINDOW_TITLE = "DockableUI"
 
     ui_instance = None
-
 
     @classmethod
     def display(cls):
@@ -90,7 +87,6 @@ class DockableUI(QtWidgets.QWidget):
 
         ui_script = "from {0} import {1}\n{1}.display()".format(module_name, cls.__name__)
         return ui_script
-
 
     def __init__(self):
         super(DockableUI, self).__init__()
@@ -124,6 +120,4 @@ class DockableUI(QtWidgets.QWidget):
 
     def show_workspace_control(self):
         self.workspace_control_instance.set_visible(True)
-
-
 

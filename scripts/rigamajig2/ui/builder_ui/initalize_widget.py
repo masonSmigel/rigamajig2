@@ -481,7 +481,8 @@ class ComponentManager(QtWidgets.QWidget):
         # check the list of components and see if the components exist and are
         # the same amount as the builder component list
         realComponents = [x for x in components if cmds.objExists(x)]
-        if not len(realComponents) == len(self.builder.getComponentList()):
+        predictedComponents = len(self.builder.getComponentList()) or 0
+        if not len(realComponents) == predictedComponents:
             self.loadListFromBuilder()
 
         # if there are NO real components then clear the whole tree

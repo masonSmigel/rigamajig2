@@ -62,7 +62,6 @@ EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 class BuilderDialog(DockableUI):
     """ Builder dialog"""
     WINDOW_TITLE = "Rigamajig2 Builder  {}".format(rigamajig2.version)
-    OBJECT_NAME = "Rigamajig2BuilderObject"
 
     def __init__(self, rigFile=None):
         """ Constructor for the builder dialog"""
@@ -73,12 +72,12 @@ class BuilderDialog(DockableUI):
         self.rigBuilder = None
 
         self.setWindowTitle(self.WINDOW_TITLE)
-        self.setObjectName(self.OBJECT_NAME)
         if cmds.about(ntOS=True):
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
         elif cmds.about(macOS=True):
             self.setProperty("saveWindowPref", True)
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+
         self.setMinimumSize(420, 600)
 
         # with the maya mixin stuff the window comes in at a weird size. This ensures its not a weird size.
@@ -199,7 +198,7 @@ class BuilderDialog(DockableUI):
 
         # lower persistant buttons (AKA close)
         lowButtonsLayout = QtWidgets.QVBoxLayout()
-        lowButtonsLayout.setContentsMargins(0,0,0,0)
+        lowButtonsLayout.setContentsMargins(0, 0, 0, 0)
         runButtonLayout = QtWidgets.QHBoxLayout()
         runButtonLayout.addWidget(self.publishButton)
         runButtonLayout.addWidget(self.runButton)
@@ -350,33 +349,17 @@ class BuilderDialog(DockableUI):
 
             logger.info('rigamajig2 modules reloaded')
 
-    def dockCloseEventTriggered(self):
-        """ Override the close event in order to disable the component manager script node"""
-        super(BuilderDialog, self).dockCloseEventTriggered()
+    def hideEvent(self, e):
+        """override the hide event to delete the scripts jobs from the initialize widget"""
+        super(BuilderDialog, self).hideEvent(e)
         self.intalizeWidget.componentManager.setScriptJobEnabled(False)
-
-    def deleteUI(self):
-        """Delete the UI and workspace control"""
-        workspaceControl = self.OBJECT_NAME + "WorkspaceControl"
-        if cmds.workspaceControl(workspaceControl, q=True, exists=True):
-            # first delete the dialog UI
-            self.deleteLater()
-
-            # next we can delete the workspace control
-            cmds.workspaceControl(workspaceControl, e=True, close=True)
-            cmds.deleteUI(workspaceControl, control=True)
 
 
 if __name__ == '__main__':
+    workspace_control_name = BuilderDialog.get_workspace_control_name()
+    if cmds.window(workspace_control_name, exists=True):
+        test_dialog.close()
+        cmds.deleteUI(workspace_control_name)
 
-    try:
-        dialog.close()
-        dialog.deleteLater()
-    except:
-        pass
-    # pylint: disable = invalid-name
-    dialog = BuilderDialog()
-    dialog.show()
-
-    dialog.setRigFile(
-        path='/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/biped.rig')
+    BuilderDialog.module_name_override = "dialog"
+    test_dialog = BuilderDialog()

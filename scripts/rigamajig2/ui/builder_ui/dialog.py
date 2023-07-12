@@ -22,14 +22,17 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
-from maya.app.general.mayaMixin import MayaQWidgetDockableMixin
 
 # RIGAMAJIG
 import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.shared import common
+from rigamajig2.ui.widgets.workspace_control import DockableUI
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, loggerWidget
+from rigamajig2.ui.builder_ui import recent_files
+
+# Import the main widgets for the builder dialog
 from rigamajig2.ui.builder_ui import model_widget
 from rigamajig2.ui.builder_ui import joint_widget
 from rigamajig2.ui.builder_ui import controls_widget
@@ -56,33 +59,14 @@ EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 
 # this is a long function allow more instance attributes for the widgets.
 # pylint: disable = too-many-instance-attributes
-class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
+class BuilderDialog(DockableUI):
     """ Builder dialog"""
     WINDOW_TITLE = "Rigamajig2 Builder  {}".format(rigamajig2.version)
     OBJECT_NAME = "Rigamajig2BuilderObject"
 
-    dialogInstance = None
-
-    @classmethod
-    def showDialog(cls):
-        """ Show the Builder Dialog """
-        if not cls.dialogInstance:
-            cls.dialogInstance = BuilderDialog()
-
-        if cls.dialogInstance.isHidden():
-            cls.dialogInstance.show(dockable=True, uiScript="pass")
-        else:
-            cls.dialogInstance.raise_()
-            cls.dialogInstance.activateWindow()
-
-    def __init__(self):
+    def __init__(self, rigFile=None):
         """ Constructor for the builder dialog"""
-        if sys.version_info.major < 3:
-            mayaMainWindow = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
-        else:
-            mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
-
-        super(BuilderDialog, self).__init__(mayaMainWindow)
+        super(BuilderDialog, self).__init__()
 
         # Store a rig enviornment and rig builder variables.
         self.rigEnviornment = None
@@ -104,6 +88,11 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
         self.createWidgets()
         self.createLayouts()
         self.createConnections()
+
+        # if we dont provide a rig file load the most recent one from the recent files list
+        recentFile = recent_files.getMostRecentFile()
+        if recentFile:
+            self.setRigFile(recentFile)
 
     def createMenus(self):
         """create menu actions"""
@@ -174,7 +163,7 @@ class BuilderDialog(MayaQWidgetDockableMixin, QtWidgets.QDialog):
 
         self.closeButton = QtWidgets.QPushButton("Close")
         self.loggerWidget = loggerWidget.LoggerWidget()
-        self.loggerWidget.setText(f"# Rigamajig2 Builder Version {rigamajig2.version} #")
+        self.loggerWidget.setMessage(f"# Rigamajig2 Builder Version {rigamajig2.version} #")
 
     def createLayouts(self):
         """ Create Layouts"""

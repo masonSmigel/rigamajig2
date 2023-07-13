@@ -59,6 +59,10 @@ class CollapsibleHeader(QtWidgets.QWidget):
         """ Set the header text"""
         self.textLabel.setText("<b>{0}<b>".format(text))
 
+    def setChecked(self, checked):
+        """Set the checkbox to true or false"""
+        self.checkbox.setChecked(checked)
+
     def setBackgroundColor(self, color=None):
         """ Set the header background"""
         if not color:

@@ -17,6 +17,7 @@ from collections import OrderedDict
 
 # MAYA
 import maya.cmds as cmds
+import maya.mel as mel
 import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -29,7 +30,7 @@ from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.shared import common
 from rigamajig2.ui.widgets.workspace_control import DockableUI
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, loggerWidget
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
 from rigamajig2.ui.builder_ui import recent_files
 
 # Import the main widgets for the builder dialog
@@ -54,8 +55,6 @@ JSON_FILTER = "Json Files (*.json)"
 LARGE_BTN_HEIGHT = 35
 EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 
-
-# this module uses multiple inheritance to add docking functionality to an existing widget.
 
 # this is a long function allow more instance attributes for the widgets.
 # pylint: disable = too-many-instance-attributes
@@ -160,9 +159,17 @@ class BuilderDialog(DockableUI):
         self.publishButton = QtWidgets.QPushButton(QtGui.QIcon(":newPreset.png"), "Publish")
         self.publishButton.setFixedSize(80, 22)
 
-        self.closeButton = QtWidgets.QPushButton("Close")
-        self.loggerWidget = loggerWidget.LoggerWidget()
-        self.loggerWidget.setMessage(f"# Rigamajig2 Builder Version {rigamajig2.version} #")
+        self.openScriptEditorButton = QtWidgets.QPushButton()
+        self.openScriptEditorButton.setFixedSize(18, 18)
+        self.openScriptEditorButton.setFlat(True)
+        self.openScriptEditorButton.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
+
+        self.rigamajigVersionLabel = QtWidgets.QLabel(f"Rigamajig2 version {rigamajig2.version}")
+
+        versionFont = QtGui.QFont()
+        versionFont.setPointSize(10)
+
+        self.rigamajigVersionLabel.setFont(versionFont)
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -205,9 +212,13 @@ class BuilderDialog(DockableUI):
         runButtonLayout.addStretch()
         runButtonLayout.addWidget(self.runSelectedButton)
 
+        statusLineLayout = QtWidgets.QHBoxLayout()
+        statusLineLayout.addWidget(self.rigamajigVersionLabel)
+        statusLineLayout.addStretch()
+        statusLineLayout.addWidget(self.openScriptEditorButton)
+
         lowButtonsLayout.addLayout(runButtonLayout)
-        # lowButtonsLayout.addWidget(self.closeButton)
-        lowButtonsLayout.addWidget(self.loggerWidget)
+        lowButtonsLayout.addLayout(statusLineLayout)
 
         # scrollable area
         bodyWidget = QtWidgets.QWidget()
@@ -253,7 +264,7 @@ class BuilderDialog(DockableUI):
         self.runSelectedButton.clicked.connect(self.runSelected)
         self.runButton.clicked.connect(self.runAll)
         self.publishButton.clicked.connect(self.publish)
-        self.closeButton.clicked.connect(self.close)
+        self.openScriptEditorButton.clicked.connect(self.openScriptEditor)
 
     # --------------------------------------------------------------------------------
     # Connections
@@ -348,6 +359,14 @@ class BuilderDialog(DockableUI):
             self.setRigFile(self.rigFile)
 
             logger.info('rigamajig2 modules reloaded')
+
+    def openScriptEditor(self):
+        """Open the script Editor"""
+
+        if cmds.pluginInfo("CharcoalEditor2", q=True, loaded=True):
+            mel.eval("charcoalEditor2;")
+        else:
+            mel.eval("ScriptEditor;")
 
     def hideEvent(self, e):
         """override the hide event to delete the scripts jobs from the initialize widget"""

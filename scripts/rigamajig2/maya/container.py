@@ -255,6 +255,9 @@ def sainityCheck():
     # set 'show at top' OFF in the channel box editor
     cmds.channelBox('mainChannelBox', e=True, containerAtTop=False)
 
+    # set asset centric selection to be OFF in the maya preferences
+    cmds.selectPref(containerCentricSelection=False)
+
     # set asset display is to 'under parent'
     outliners = cmds.getPanel(typ='outlinerPanel')
     for outlinerPanel in outliners:

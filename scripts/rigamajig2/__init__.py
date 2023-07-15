@@ -14,7 +14,7 @@ import sys
 
 VERSION_MAJOR = 1
 VERSION_MINOR = 1
-VERSION_PATCH = 3
+VERSION_PATCH = 4
 
 # pylint: disable = invalid-name
 version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)

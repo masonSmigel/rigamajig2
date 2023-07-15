@@ -1,5 +1,34 @@
 # Change Log 
 
+## 1.1.4
+General updates and UI imporvements 
+
+### Added: 
+* `abstractData.getDataType` to return the type of data of a given file. 
+* A button to merge deform layers to the builder UI
+* Added the option to change the logging level of all rigamajig loggers in the builder UI. This is super helpful for debugging. 
+* Removed the close button from the bottom of the UI and added a status line instead. The status line gives info about 
+  the sucess or failure of the build and will open the script editor when clicked to inspect the full output log. 
+
+### Changes: 
+* Changed the last joint of the joint changes created with `spline.addTwistJoints()` to match the name of the other joints. 
+  This can be disabled with the 'useLegacyNaming' attribute
+* Moved the PSD load and edit widgets to the build widget instead of deform widget. This will keep a better separation 
+  of rig related and defomation related data. 
+* Changed the way components are loaded into the component manager from the scene. This update keeps the components in the 
+  order of the component.json file. 
+* Updated the way controls are published to the containers. Now instead of using the class varrianble controllers, nodes
+  within the container are filtered and only controls are added durring the `publishNodes()` step of the component build
+
+### Fixed: 
+* Updated implementation of Builder docking and fixed a bug causing the scriptnodes for the component manager 
+  to NOT be deleted with the UI closes. 
+* Updated the `container.sanityCheck` to include setting the selection prefs to turn off "useAssetBasedSelection". 
+
+### Removed: 
+* several un-implemented Data files. 
+
+
 ## 1.1.3
 
 ### Added: 

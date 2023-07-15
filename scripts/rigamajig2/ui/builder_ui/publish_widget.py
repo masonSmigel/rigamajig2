@@ -167,4 +167,11 @@ class PublishWidget(QtWidgets.QWidget):
             suffix = self.outFileSuffix.text()
             saveFBX = self.saveFBXCheckbox.isChecked()
 
-            self.builder.run(publish=True, outputfile=outputfile, suffix=suffix, assetName=None, fileType=fileType, saveFBX=saveFBX)
+            result, finalTime = self.builder.run(publish=True,
+                                                 outputfile=outputfile,
+                                                 suffix=suffix,
+                                                 assetName=None,
+                                                 fileType=fileType,
+                                                 saveFBX=saveFBX)
+
+        return result, finalTime

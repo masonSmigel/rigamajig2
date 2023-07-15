@@ -17,7 +17,6 @@ from collections import OrderedDict
 
 # MAYA
 import maya.cmds as cmds
-import maya.mel as mel
 import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -30,7 +29,7 @@ from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.shared import common
 from rigamajig2.ui.widgets.workspace_control import DockableUI
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, statusLine
 from rigamajig2.ui.builder_ui import recent_files
 
 # Import the main widgets for the builder dialog
@@ -153,10 +152,15 @@ class BuilderDialog(DockableUI):
                             self.publishWidget]
 
         self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
+        self.runSelectedButton.setToolTip("Run Rig steps up to the break point")
         self.runSelectedButton.setFixedSize(120, 22)
+
         self.runButton = QtWidgets.QPushButton(QtGui.QIcon(":executeAll.png"), "Run")
+        self.runButton.setToolTip("Run all build steps.")
         self.runButton.setFixedSize(80, 22)
+
         self.publishButton = QtWidgets.QPushButton(QtGui.QIcon(":newPreset.png"), "Publish")
+        self.publishButton.setToolTip("Publish the rig. This will build the rig and save it.")
         self.publishButton.setFixedSize(80, 22)
 
         self.openScriptEditorButton = QtWidgets.QPushButton()
@@ -164,12 +168,8 @@ class BuilderDialog(DockableUI):
         self.openScriptEditorButton.setFlat(True)
         self.openScriptEditorButton.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
 
-        self.rigamajigVersionLabel = QtWidgets.QLabel(f"Rigamajig2 version {rigamajig2.version}")
-
-        versionFont = QtGui.QFont()
-        versionFont.setPointSize(10)
-
-        self.rigamajigVersionLabel.setFont(versionFont)
+        self.statusLine = statusLine.StatusLine()
+        self.statusLine.setStatusMessage(f"Rigamajig2 version {rigamajig2.version}", "info")
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -212,13 +212,8 @@ class BuilderDialog(DockableUI):
         runButtonLayout.addStretch()
         runButtonLayout.addWidget(self.runSelectedButton)
 
-        statusLineLayout = QtWidgets.QHBoxLayout()
-        statusLineLayout.addWidget(self.rigamajigVersionLabel)
-        statusLineLayout.addStretch()
-        statusLineLayout.addWidget(self.openScriptEditorButton)
-
         lowButtonsLayout.addLayout(runButtonLayout)
-        lowButtonsLayout.addLayout(statusLineLayout)
+        lowButtonsLayout.addWidget(self.statusLine)
 
         # scrollable area
         bodyWidget = QtWidgets.QWidget()
@@ -264,7 +259,6 @@ class BuilderDialog(DockableUI):
         self.runSelectedButton.clicked.connect(self.runSelected)
         self.runButton.clicked.connect(self.runAll)
         self.publishButton.clicked.connect(self.publish)
-        self.openScriptEditorButton.clicked.connect(self.openScriptEditor)
 
     # --------------------------------------------------------------------------------
     # Connections
@@ -292,7 +286,8 @@ class BuilderDialog(DockableUI):
             return
 
         # setup ui Data
-        self.assetNameLineEdit.setText(self.rigBuilder.getRigData(self.rigFile, constants.RIG_NAME))
+        self.rigName = self.rigBuilder.getRigData(self.rigFile, constants.RIG_NAME)
+        self.assetNameLineEdit.setText(self.rigName)
 
         # set the text of the archetype to the archetype. We need to check if its a string and update the formatting
         archetype = self.rigBuilder.getRigData(self.rigFile, constants.BASE_ARCHETYPE)
@@ -342,13 +337,31 @@ class BuilderDialog(DockableUI):
     def runAll(self):
         """ Run builder and update the component manager"""
         self.initializeDevMode()
-        self.rigBuilder.run()
-        self.intalizeWidget.componentManager.loadFromScene()
+
+        # for the rig build we can put the publish into a try except block
+        # if the publish fails we can add a message to the status line before raising the exception
+        try:
+            result, finalTime = self.rigBuilder.run()
+            self.intalizeWidget.componentManager.loadFromScene()
+            self.statusLine.setStatusMessage(
+                f"Rig Build Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}", "success")
+        except Exception as e:
+            self.statusLine.setStatusMessage(f"Rig Build Failed: '{self.rigName}'", "failed")
+            raise e
 
     def publish(self):
         """ Run builder and update the component manager"""
         self.initializeDevMode()
-        self.publishWidget.publish()
+        # for the rig build we can put the publish into a try except block
+        # if the publish fails we can add a message to the status line before raising the exception
+        try:
+            result, finalTime = self.publishWidget.publish()
+            self.intalizeWidget.componentManager.loadFromScene()
+            self.statusLineEdit.setStatusMessage(
+                f"Rig Publish Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}", "success")
+        except Exception as e:
+            self.statusLineEdit.setStatusMessage(f"Rig Publish Failed: '{self.rigName}'", "failed")
+            raise e
 
     def initializeDevMode(self):
         if self.actions.devModeAction.isChecked():
@@ -359,14 +372,6 @@ class BuilderDialog(DockableUI):
             self.setRigFile(self.rigFile)
 
             logger.info('rigamajig2 modules reloaded')
-
-    def openScriptEditor(self):
-        """Open the script Editor"""
-
-        if cmds.pluginInfo("CharcoalEditor2", q=True, loaded=True):
-            mel.eval("charcoalEditor2;")
-        else:
-            mel.eval("ScriptEditor;")
 
     def hideEvent(self, e):
         """override the hide event to delete the scripts jobs from the initialize widget"""

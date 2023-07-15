@@ -419,7 +419,7 @@ class Builder(object):
         """Merge all deformation layers for all models"""
         import rigamajig2.maya.rig.deformLayer as deformLayer
 
-        if len(meta.getTagged("hasDeformLayers"))>0:
+        if len(meta.getTagged("hasDeformLayers")) > 0:
             for model in meta.getTagged("hasDeformLayers"):
                 layer = deformLayer.DeformLayer(model)
                 layer.stackDeformLayers(cleanup=True)
@@ -523,7 +523,7 @@ class Builder(object):
         logger.info("publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
-    def run(self, publish=False, savePublish=True, outputfile=None, assetName=None, suffix=None,fileType=None,
+    def run(self, publish=False, savePublish=True, outputfile=None, assetName=None, suffix=None, fileType=None,
             versioning=True, saveFBX=False):
         """
         Build a rig.
@@ -577,6 +577,8 @@ class Builder(object):
         finalTime = endTime - startTime
 
         print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
+        # if the build is sucessful return a true result
+        return True, finalTime
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
     def publish(self, outputfile=None, suffix=None, assetName=None, fileType=None, versioning=True, saveFBX=False):
@@ -600,7 +602,6 @@ class Builder(object):
         suffix = suffix or self.getRigData(self.rigFile, constants.OUTPUT_FILE_SUFFIX)
 
         suffix = suffix or str()
-
         # check if the provided path is a file path.
         # if so use the file naming and extension from the provided path
         if rig_path.isFile(outputfile):

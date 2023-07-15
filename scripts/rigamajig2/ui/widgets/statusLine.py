@@ -40,12 +40,22 @@ class StatusLine(QtWidgets.QWidget):
         super(StatusLine, self).__init__()
 
         self.messageLabel = QtWidgets.QLabel()
+
+        font = QtGui.QFont()
+        font.setPointSize(11)
+        self.messageLabel.setFont(font)
         self.iconLabel = QtWidgets.QLabel()
 
-        mainLayout = QtWidgets.QHBoxLayout(self)
-        mainLayout.setContentsMargins(0, 0, 0, 0)
+        # style the base widget
         self.setToolTip("Status line. Click to open Script Editor.")
 
+        self.setAutoFillBackground(True)
+        palette = QtGui.QPalette()
+        palette.setColor(palette.Background, QtGui.QColor(56, 56, 56))
+        self.setPalette(palette)
+
+        mainLayout = QtWidgets.QHBoxLayout(self)
+        mainLayout.setContentsMargins(2, 2, 2, 2)
         mainLayout.addWidget(self.iconLabel)
         mainLayout.addWidget(self.messageLabel)
 
@@ -64,6 +74,18 @@ class StatusLine(QtWidgets.QWidget):
                 self.iconLabel.setFixedSize(15, 15)
             else:
                 raise ValueError("f{icon} is not a valid icon type")
+
+    # def paintEvent(self, *args, **kwargs):
+    #     """
+    #     this is just a bit of a fun thing to add rounded corners to the widget. Every time the paint event is called we
+    #     create a roundedRectMask for the widget and paint it accordingly.
+    #     """
+    #     super(StatusLine, self).paintEvent(*args, **kwargs)
+    #     radius = 10
+    #     path = QtGui.QPainterPath()
+    #     path.addRoundedRect(self.rect(), radius, radius)
+    #     mask = QtGui.QRegion(path.toFillPolygon().toPolygon())
+    #     self.setMask(mask)
 
     def openScriptEditor(self):
         """Open the script Editor"""

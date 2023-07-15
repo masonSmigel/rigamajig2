@@ -29,7 +29,7 @@ from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.shared import common
 from rigamajig2.ui.widgets.workspace_control import DockableUI
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, statusLine
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, statusLine, QLine
 from rigamajig2.ui.builder_ui import recent_files
 
 # Import the main widgets for the builder dialog
@@ -212,7 +212,9 @@ class BuilderDialog(DockableUI):
         runButtonLayout.addStretch()
         runButtonLayout.addWidget(self.runSelectedButton)
 
+        lowButtonsLayout.addWidget(QLine.QLine())
         lowButtonsLayout.addLayout(runButtonLayout)
+        # lowButtonsLayout.addWidget(QLine.QLine())
         lowButtonsLayout.addWidget(self.statusLine)
 
         # scrollable area

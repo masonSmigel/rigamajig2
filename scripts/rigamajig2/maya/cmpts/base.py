@@ -11,6 +11,7 @@ import rigamajig2.maya.meta
 import rigamajig2.maya.color
 import rigamajig2.maya.data.joint_data as joint_data
 import rigamajig2.maya.transform as transform
+from rigamajig2.maya.rig.control import CONTROLTAG
 
 import logging
 
@@ -293,7 +294,12 @@ class Base(object):
         """Publush nodes. implement in subclass"""
         rigamajig2.maya.container.addParentAnchor(self.rootHierarchy, container=self.container)
         rigamajig2.maya.container.addChildAnchor(self.rootHierarchy, container=self.container)
-        rigamajig2.maya.container.addPublishNodes(self.controlers)
+
+        # for the containers we need to publish all controls within a container.
+        allNodes = rigamajig2.maya.container.getNodesInContainer(self.container, getSubContained=True)
+        for currentNode in allNodes:
+            if rigamajig2.maya.meta.hasTag(currentNode, CONTROLTAG):
+                rigamajig2.maya.container.addPublishNodes(currentNode)
 
     def publishAttributes(self):
         """publish attributes. implement in subclass"""

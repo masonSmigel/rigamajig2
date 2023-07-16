@@ -359,10 +359,10 @@ class BuilderDialog(DockableUI):
         try:
             result, finalTime = self.publishWidget.publish()
             self.intalizeWidget.componentManager.loadFromScene()
-            self.statusLineEdit.setStatusMessage(
+            self.statusLine.setStatusMessage(
                 f"Rig Publish Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}", "success")
         except Exception as e:
-            self.statusLineEdit.setStatusMessage(f"Rig Publish Failed: '{self.rigName}'", "failed")
+            self.statusLine.setStatusMessage(f"Rig Publish Failed: '{self.rigName}'", "failed")
             raise e
 
     def initializeDevMode(self):

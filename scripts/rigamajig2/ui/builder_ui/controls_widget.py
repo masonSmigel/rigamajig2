@@ -19,7 +19,7 @@ from rigamajig2.shared import common
 from rigamajig2.maya import meta
 import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, overrideColorer
+from rigamajig2.ui.widgets import dataLoader, collapseableWidget, overrideColorer
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.builder.constants import CONTROL_SHAPES
 
@@ -41,11 +41,13 @@ class ControlsWidget(QtWidgets.QWidget):
     def createWidgets(self):
         """ Create Widgets """
         self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Controls', addCheckbox=True)
-        self.controlPathSelector = pathSelector.PathSelector(
+        self.controlDataLoader = dataLoader.DataLoader(
             "Controls:",
             caption="Select a Control Shape file",
             fileFilter=constants.JSON_FILTER,
-            fileMode=1
+            fileMode=1,
+            dataFilteringEnabled=True,
+            dataFilter=["CurveData"]
             )
         self.loadColorCheckBox = QtWidgets.QCheckBox()
         self.loadColorCheckBox.setChecked(True)
@@ -92,7 +94,7 @@ class ControlsWidget(QtWidgets.QWidget):
         self.mainLayout.setSpacing(0)
 
         # MAIN CONTROL LAYOUT
-        self.mainCollapseableWidget.addWidget(self.controlPathSelector)
+        self.mainCollapseableWidget.addWidget(self.controlDataLoader)
 
         # create the load color checkbox
         loadColorLabel = QtWidgets.QLabel("Load Color:")
@@ -153,11 +155,12 @@ class ControlsWidget(QtWidgets.QWidget):
         """ Set a builder for intialize widget"""
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
-        self.controlPathSelector.setRelativePath(rigEnv)
+        self.controlDataLoader.clear()
+        self.controlDataLoader.setRelativePath(rigEnv)
 
         # update data within the rig
-        controlFile = self.builder.getRigData(self.builder.getRigFile(), CONTROL_SHAPES)
-        self.controlPathSelector.selectPath(controlFile)
+        controlFiles = self.builder.getRigData(self.builder.getRigFile(), CONTROL_SHAPES)
+        self.controlDataLoader.selectPaths(controlFiles)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
@@ -177,7 +180,7 @@ class ControlsWidget(QtWidgets.QWidget):
     # CONNECTIONS
     def loadControlShapes(self):
         """ Load controlshapes from json using the builder """
-        self.builder.loadControlShapes(self.controlPathSelector.getPath(), self.loadColorCheckBox.isChecked())
+        self.builder.loadControlShapes(self.controlDataLoader.getFileList(), self.loadColorCheckBox.isChecked())
 
     def saveControlShapes(self):
         """ Save controlshapes to json using the builder """
@@ -194,7 +197,7 @@ class ControlsWidget(QtWidgets.QWidget):
             if result != 'Continue':
                 return
 
-        self.builder.saveControlShapes(self.controlPathSelector.getPath())
+        self.builder.saveControlShapes(self.controlDataLoader.getPath())
 
     def mirrorControl(self):
         """ Mirror a control shape """

@@ -102,6 +102,7 @@ class PathSelector(QtWidgets.QWidget):
             else:
                 # if we dont select a new path cancel the action by returning.
                 return
+
             # next select the new path.
             self.selectPath(newPath)
 

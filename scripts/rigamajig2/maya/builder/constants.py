@@ -13,6 +13,7 @@ import os
 
 
 CMPT_PATH = os.path.abspath(os.path.join(__file__, '../../cmpts'))
+DATA_PATH = os.path.abspath(os.path.join(__file__, '../../data'))
 _EXCLUDED_FOLDERS = ['face']
 _EXCLUDED_FILES = ['__init__.py', 'base.py']
 
@@ -31,6 +32,7 @@ DEFORM_LAYERS = "deform_layers"
 SKINS = 'skins'
 PSD = 'psd'
 SHAPES = 'SHAPES'
+DEFORMERSLIST = 'deformers'
 OUTPUT_RIG = 'output_file'
 OUTPUT_RIG_FILE_TYPE = 'output_file_type'
 OUTPUT_FILE_SUFFIX = 'output_file_suffix'

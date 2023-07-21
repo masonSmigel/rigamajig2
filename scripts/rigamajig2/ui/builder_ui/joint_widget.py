@@ -24,7 +24,7 @@ from rigamajig2.maya import naming
 import rigamajig2.maya.joint
 import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.meta as meta
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp
+from rigamajig2.ui.widgets import dataLoader, collapseableWidget, sliderGrp
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.builder.constants import SKELETON_POS
 from rigamajig2.maya.cmpts.base import GUIDE_STEP
@@ -51,11 +51,13 @@ class JointWidget(QtWidgets.QWidget):
         """ Create Widgets"""
         self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
 
-        self.jointPositionPathSelector = pathSelector.PathSelector(
+        self.jointPositionDataLoader = dataLoader.DataLoader(
             "joint pos: ",
             caption="Select a Skeleton position file",
             fileFilter=constants.JSON_FILTER,
-            fileMode=1
+            fileMode=1,
+            dataFilteringEnabled=True,
+            dataFilter=["JointData"]
             )
         self.loadJointPositionButton = QtWidgets.QPushButton("Load joints")
         self.loadJointPositionButton.setIcon(QtGui.QIcon(common.getIcon("loadJoints.png")))
@@ -153,7 +155,7 @@ class JointWidget(QtWidgets.QWidget):
         self.skeletonEditWidget.addSpacing(3)
 
         # add widgets to the main skeleton widget.
-        self.mainCollapseableWidget.addWidget(self.jointPositionPathSelector)
+        self.mainCollapseableWidget.addWidget(self.jointPositionDataLoader)
         self.mainCollapseableWidget.addLayout(saveLoadJointLayout)
         self.mainCollapseableWidget.addWidget(self.skeletonEditWidget)
 
@@ -177,11 +179,12 @@ class JointWidget(QtWidgets.QWidget):
         """ Set a builder for widget"""
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
-        self.jointPositionPathSelector.setRelativePath(rigEnv)
+        self.jointPositionDataLoader.clear()
+        self.jointPositionDataLoader.setRelativePath(rigEnv)
 
         # update data within the rig
-        jointFile = self.builder.getRigData(self.builder.getRigFile(), SKELETON_POS)
-        self.jointPositionPathSelector.selectPath(jointFile)
+        jointFiles = self.builder.getRigData(self.builder.getRigFile(), SKELETON_POS)
+        self.jointPositionDataLoader.selectPaths(jointFiles)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
@@ -195,7 +198,7 @@ class JointWidget(QtWidgets.QWidget):
     # CONNECTIONS
     def loadJointsPositions(self):
         """ load joints and positions"""
-        self.builder.loadJoints(self.jointPositionPathSelector.getPath())
+        self.builder.loadJoints(self.jointPositionDataLoader.getFileList())
 
     def saveJointPositions(self):
         """ save the joint positions"""
@@ -218,7 +221,7 @@ class JointWidget(QtWidgets.QWidget):
             if result != 'Continue':
                 return
 
-        self.builder.saveJoints(self.jointPositionPathSelector.getPath())
+        self.builder.saveJoints(self.jointPositionDataLoader.getPath())
 
     def pinJoints(self):
         """ Pin selected joints"""

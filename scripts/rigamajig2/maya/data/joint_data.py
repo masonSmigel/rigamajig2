@@ -43,10 +43,10 @@ class JointData(node_data.NodeData):
 
         self._data[node].update(data)
 
-    def applyData(self, nodes):
+    def applyData(self, nodes, worldSpace=False):
         """
-
-        :param nodes:
+        :param nodes: Array of nodes to apply the data to
+        :param worldSpace: If True apply translate and rotate in world space.
         :return:
         """
         for node in nodes:
@@ -61,4 +61,4 @@ class JointData(node_data.NodeData):
                     if self._data[node]["parent"] not in parents:
                         cmds.parent(node, self._data[node]["parent"])
 
-        super(JointData, self).applyData(nodes)
+        super(JointData, self).applyData(nodes, worldSpace=worldSpace)

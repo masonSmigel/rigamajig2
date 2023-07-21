@@ -30,7 +30,7 @@ from rigamajig2.maya import attr as attr
 from rigamajig2.maya import naming as naming
 from rigamajig2.maya import container as rig_container
 from rigamajig2.maya.builder import builder
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp
+from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp, dataLoader
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.builder.constants import GUIDES, COMPONENTS
 
@@ -58,10 +58,12 @@ class InitializeWidget(QtWidgets.QWidget):
     def createWidgets(self):
         """ Create Widgets """
         self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Initialize Rig', addCheckbox=True)
-        self.componentsPathSelector = pathSelector.PathSelector("cmpts:",
-                                                                caption="Select a Component File",
-                                                                fileFilter=constants.JSON_FILTER,
-                                                                fileMode=1)
+        self.componentsDataLoader = dataLoader.DataLoader("Components:",
+                                                          caption="Select a Component File",
+                                                          fileFilter=constants.JSON_FILTER,
+                                                          fileMode=1,
+                                                          dataFilteringEnabled=True,
+                                                          dataFilter=["AbstractData"])
         self.loadComponentsButton = QtWidgets.QPushButton("Load Cmpts")
         self.loadComponentsButton.setIcon(QtGui.QIcon(common.getIcon("loadComponents.png")))
         self.appendComponentsButton = QtWidgets.QPushButton("Append Cmpts")
@@ -81,10 +83,12 @@ class InitializeWidget(QtWidgets.QWidget):
 
         self.initalizeBuildButton = QtWidgets.QPushButton("Guide Components")
         self.initalizeBuildButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.guidePathSelector = pathSelector.PathSelector("guides:",
-                                                           caption="Select a guide file",
-                                                           fileFilter=constants.JSON_FILTER,
-                                                           fileMode=1)
+        self.guideDataLoader = dataLoader.DataLoader("guides:",
+                                                     caption="Select a guide file",
+                                                     fileFilter=constants.JSON_FILTER,
+                                                     fileMode=1,
+                                                     dataFilteringEnabled=True,
+                                                     dataFilter=["JointData", "GuideData"])
         self.loadGuidesButton = QtWidgets.QPushButton("Load Guides")
         self.saveGuidesButton = QtWidgets.QPushButton("Save Guides")
 
@@ -103,7 +107,7 @@ class InitializeWidget(QtWidgets.QWidget):
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(0)
 
-        self.mainCollapseableWidget.addWidget(self.componentsPathSelector)
+        self.mainCollapseableWidget.addWidget(self.componentsDataLoader)
 
         componentButtonLayout = QtWidgets.QHBoxLayout()
         componentButtonLayout.setSpacing(4)
@@ -121,7 +125,7 @@ class InitializeWidget(QtWidgets.QWidget):
         self.mainCollapseableWidget.addWidget(self.componentManager)
         self.mainCollapseableWidget.addWidget(self.initalizeBuildButton)
         self.mainCollapseableWidget.addLayout(componentButtonLayout)
-        self.mainCollapseableWidget.addWidget(self.guidePathSelector)
+        self.mainCollapseableWidget.addWidget(self.guideDataLoader)
         self.mainCollapseableWidget.addLayout(guideLoadLayout)
 
         # add the widget to the main layout
@@ -141,19 +145,22 @@ class InitializeWidget(QtWidgets.QWidget):
         """ Set a builder for intialize widget"""
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
-        self.componentsPathSelector.setRelativePath(rigEnv)
-        self.guidePathSelector.setRelativePath(rigEnv)
+        self.componentsDataLoader.setRelativePath(rigEnv)
+
+        self.guideDataLoader.clear()
+        self.guideDataLoader.setRelativePath(rigEnv)
+
         self.componentManager.setRigBuilder(self.builder)
 
         # reset the UI
         self.componentManager.clearTree()
 
         # update data within the rig
-        cmptsFile = self.builder.getRigData(self.builder.getRigFile(), COMPONENTS)
-        self.componentsPathSelector.selectPath(cmptsFile)
+        cmptsFiles = self.builder.getRigData(self.builder.getRigFile(), COMPONENTS)
+        self.componentsDataLoader.selectPaths(cmptsFiles)
 
-        guidesFile = self.builder.getRigData(self.builder.getRigFile(), GUIDES)
-        self.guidePathSelector.selectPath(guidesFile)
+        guidesFiles = self.builder.getRigData(self.builder.getRigFile(), GUIDES)
+        self.guideDataLoader.selectPaths(guidesFiles)
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
@@ -170,21 +177,22 @@ class InitializeWidget(QtWidgets.QWidget):
         """ Load component setup from json using the builder """
         self.builder.setComponents(list())
         # load the compoonents from the file. then initialize them
-        self.builder.loadComponents(self.componentsPathSelector.getPath())
+        componentFiles = self.componentsDataLoader.getFileList()
+        self.builder.loadComponents(componentFiles)
         self.builder.initalize()
         # load the component settings from the file.
-        self.builder.loadComponentSettings(self.componentsPathSelector.getPath())
+        self.builder.loadComponentSettings(componentFiles)
         self.componentManager.loadListFromBuilder()
 
     def saveComponents(self):
         """ Save component setup from json using the builder """
         self.builder.loadMetadataToComponentSettings()
-        self.builder.saveComponents(self.componentsPathSelector.getPath())
+        self.builder.saveComponents(self.componentsDataLoader.getPath())
 
     def loadGuides(self):
         """ Load guide setup to json using the builder """
 
-        self.builder.loadGuideData(self.guidePathSelector.getPath())
+        self.builder.loadGuideData(self.guideDataLoader.getFileList())
 
     def saveGuides(self):
         """ Save guides setup to json using the builder """
@@ -201,7 +209,7 @@ class InitializeWidget(QtWidgets.QWidget):
             if result != 'Continue':
                 return
 
-        self.builder.saveGuideData(self.guidePathSelector.getPath())
+        self.builder.saveGuideData(self.guideDataLoader.getPath())
 
     def initalizeRig(self):
         """Run the comppnent intialize on the builder and update the UI """

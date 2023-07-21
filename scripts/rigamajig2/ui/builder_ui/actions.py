@@ -147,11 +147,11 @@ class Actions(object):
         newData[constants.RIG_NAME] = self.dialog.assetNameLineEdit.text()
 
         newData[constants.MODEL_FILE] = self.dialog.modelWidget.modelPathSelector.getPath(absoultePath=False)
-        newData[constants.SKELETON_POS] = self.dialog.jointWidget.jointPositionPathSelector.getPath(absoultePath=False)
-        newData[constants.GUIDES] = self.dialog.intalizeWidget.guidePathSelector.getPath(absoultePath=False)
-        newData[constants.COMPONENTS] = self.dialog.intalizeWidget.componentsPathSelector.getPath(absoultePath=False)
-        newData[constants.PSD] = self.dialog.buildWidget.psdPathSelector.getPath(absoultePath=False)
-        newData[constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlPathSelector.getPath(absoultePath=False)
+        newData[constants.SKELETON_POS] = self.dialog.jointWidget.jointPositionDataLoader.getFileList()
+        newData[constants.GUIDES] = self.dialog.intalizeWidget.guideDataLoader.getFileList()
+        newData[constants.COMPONENTS] = self.dialog.intalizeWidget.componentsDataLoader.getFileList()
+        newData[constants.PSD] = self.dialog.buildWidget.psdDataLoader.getFileList()
+        newData[constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlDataLoader.getFileList()
         newData[constants.DEFORM_LAYERS] = self.dialog.deformationWidget.deformLayerPathSelector.getPath(
             absoultePath=False)
         newData[constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath(absoultePath=False)

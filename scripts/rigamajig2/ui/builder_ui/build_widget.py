@@ -15,7 +15,7 @@ from PySide2 import QtWidgets
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
+from rigamajig2.ui.widgets import dataLoader, collapseableWidget, scriptRunner
 from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.ui.builder_ui import controls_widget
@@ -45,11 +45,13 @@ class BuildWidget(QtWidgets.QWidget):
         self.connectButton = QtWidgets.QPushButton("Connect")
         self.finalizeButton = QtWidgets.QPushButton("Finalize")
 
-        self.psdPathSelector = pathSelector.PathSelector(
+        self.psdDataLoader = dataLoader.DataLoader(
             "psd:",
             caption="Select a Pose Reader File",
             fileFilter=constants.JSON_FILTER,
-            fileMode=1)
+            fileMode=1,
+            dataFilteringEnabled=True,
+            dataFilter=["PSDData"])
 
         self.loadPsdButton = QtWidgets.QPushButton("Load Pose Readers")
         self.loadPsdButton.setIcon(QtGui.QIcon(common.getIcon("loadPsd.png")))
@@ -95,7 +97,7 @@ class BuildWidget(QtWidgets.QWidget):
 
         # add widgets to the collapsable widget.
         self.mainCollapseableWidget.addSpacing(10)
-        self.mainCollapseableWidget.addWidget(self.psdPathSelector)
+        self.mainCollapseableWidget.addWidget(self.psdDataLoader)
         self.mainCollapseableWidget.addLayout(psdButtonLayout)
 
         # Post Script
@@ -119,14 +121,15 @@ class BuildWidget(QtWidgets.QWidget):
         rigEnv = builder.getRigEnviornment()
         rigFile = builder.getRigFile()
         self.builder = builder
-        self.psdPathSelector.setRelativePath(rigEnv)
+        self.psdDataLoader.clear()
+        self.psdDataLoader.setRelativePath(rigEnv)
 
         # clear the ui
         self.postScriptRunner.clearScript()
 
         # setup the PSD path reader
-        psdFile = self.builder.getRigData(self.builder.getRigFile(), PSD)
-        self.psdPathSelector.selectPath(psdFile)
+        psdFiles = self.builder.getRigData(self.builder.getRigFile(), PSD)
+        self.psdDataLoader.selectPaths(psdFiles)
 
         # self.postScriptScriptRunner.setRelativeDirectory(rigEnv)
         scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT, asDict=True)
@@ -157,12 +160,11 @@ class BuildWidget(QtWidgets.QWidget):
 
     def loadPoseReaders(self):
         """ Save load pose reader setup from json using the builder """
-        self.builder.loadPoseReaders(self.psdPathSelector.getPath(),
-                                     replace=self.loadPsdModeCheckbox.currentIndex())
+        self.builder.loadPoseReaders(self.psdDataLoader.getFileList(), replace=self.loadPsdModeCheckbox.currentIndex())
 
     def savePoseReaders(self):
         """ Save pose reader setup to json using the builder """
-        self.builder.savePoseReaders(self.psdPathSelector.getPath())
+        self.builder.savePoseReaders(self.psdDataLoader.getPath())
 
     def completeBuild(self):
         """ Execute a complete rig build (steps intialize - finalize)"""

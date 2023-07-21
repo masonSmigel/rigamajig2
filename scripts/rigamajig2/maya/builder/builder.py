@@ -37,6 +37,8 @@ from rigamajig2.maya.builder import constants
 logger = logging.getLogger(__name__)
 
 
+# TODO: All loads and Saves must be converted to using a list!! Save should save to the last item in the list.
+
 # pylint:disable=too-many-public-methods
 class Builder(object):
     """
@@ -89,6 +91,7 @@ class Builder(object):
         """
         if path:
             path = common.getFirstIndex(path)
+            # TODO: add in a check if this is a single file or multipleFiles
             return os.path.realpath(os.path.join(self.path, path))
 
     # --------------------------------------------------------------------------------
@@ -104,15 +107,18 @@ class Builder(object):
         model.importModel(path)
         logger.info("Model loaded")
 
-    def loadJoints(self, path=None):
+    def loadJoints(self, paths=None):
         """
          Load the joint Data to a json file
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param str paths: list of paths Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKELETON_POS))
-        guides.loadJoints(path)
-        logger.info("Joints loaded")
+        paths = paths or self.getRigData(self.rigFile, constants.SKELETON_POS)
+
+        for path in common.toList(paths):
+            absPath = self.getAbsoultePath(path)
+            guides.loadJoints(absPath)
+            logger.info(f"Joints loaded : {path}")
 
     def saveJoints(self, path=None):
         """
@@ -120,6 +126,7 @@ class Builder(object):
 
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
+        # TODO:
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKELETON_POS))
         guides.saveJoints(path)
         logger.info("Joint positions saved to: {}".format(path))
@@ -253,65 +260,77 @@ class Builder(object):
         componentDataObj.write(path)
         logger.info("Components saved to: {}".format(path))
 
-    def loadComponents(self, path=None):
+    def loadComponents(self, paths=None):
         """
         Load components from a json file. This will only load the component settings and objects.
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param str paths: Path to the json file. if none is provided use the data from the rigFile
         """
-        if not path:
-            path = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
-        componentDataObje = abstract_data.AbstractData()
-        componentDataObje.read(path)
-        componentData = componentDataObje.getData()
+        paths = paths or self.getRigData(self.rigFile, constants.COMPONENTS)
 
         self.setComponents(list())
-        for cmpt in list(componentData.keys()):
+        for path in common.toList(paths):
+            # make the path an absoulte
+            path = self.getAbsoultePath(path)
 
-            # dynamically load component module into python
-            moduleName = componentData[cmpt]['type']
+            componentDataObje = abstract_data.AbstractData()
+            componentDataObje.read(path)
+            componentData = componentDataObje.getData()
 
-            cmptDict = self.getComponentRefDict()
-            if moduleName not in list(cmptDict.keys()):
-                # This is a work around to account for the fact that some old .rig files use the cammel cased components
-                module, cls = moduleName.split('.')
-                newClass = cls[0].lower() + cls[1:]
-                tempModuleName = module + "." + newClass
-                if tempModuleName in list(cmptDict.keys()):
-                    moduleName = tempModuleName
+            for cmpt in list(componentData.keys()):
 
-            modulePath = cmptDict[moduleName][0]
-            className = cmptDict[moduleName][1]
-            moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
+                # dynamically load component module into python
+                moduleName = componentData[cmpt]['type']
 
-            componentClass = getattr(moduleObject, className)
-            instance = componentClass(
-                name=componentData[cmpt]['name'],
-                input=componentData[cmpt]['input'],
-                rigParent=componentData[cmpt]['rigParent']
-                )
-            self.appendComponents(instance)
-            self.loadComponentsFromFile = True
+                cmptDict = self.getComponentRefDict()
+                if moduleName not in list(cmptDict.keys()):
+                    # This is a work around to account for the fact that some old .rig files use the cammel cased components
+                    module, cls = moduleName.split('.')
+                    newClass = cls[0].lower() + cls[1:]
+                    tempModuleName = module + "." + newClass
+                    if tempModuleName in list(cmptDict.keys()):
+                        moduleName = tempModuleName
+
+                modulePath = cmptDict[moduleName][0]
+                className = cmptDict[moduleName][1]
+                moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
+
+                componentClass = getattr(moduleObject, className)
+                instance = componentClass(
+                    name=componentData[cmpt]['name'],
+                    input=componentData[cmpt]['input'],
+                    rigParent=componentData[cmpt]['rigParent']
+                    )
+
+                # we only want to add components with a new name. Each component should have a unique name
+                if instance.name not in [c.name for c in self.componentList]:
+                    self.appendComponents(instance)
+                    self.loadComponentsFromFile = True
 
         logger.info("components loaded -- complete")
 
-    def loadComponentSettings(self, path=None):
+    def loadComponentSettings(self, paths=None):
         """
         loadSettings component settings from the rig builder
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param str paths: Path to the json file. if none is provided use the data from the rigFile
         """
-        if not path:
-            path = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
+        if not paths:
+            paths = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
 
         if self.loadComponentsFromFile:
-            componentDataObj = abstract_data.AbstractData()
-            componentDataObj.read(path)
-            componentData = componentDataObj.getData()
-            for cmpt in self.componentList:
-                # here we can use get to return an empty list of the key doesnt exist.
-                # This doest happen often but can occur if the component was renamed
-                cmpt.loadSettings(componentData.get(cmpt.name, dict()))
+
+            for path in common.toList(paths):
+                # make the path an absoulte
+                path = self.getAbsoultePath(path)
+
+                componentDataObj = abstract_data.AbstractData()
+                componentDataObj.read(path)
+                componentData = componentDataObj.getData()
+                for cmpt in self.componentList:
+                    # here we can use get to return an empty list of the key doesnt exist.
+                    # This doest happen often but can occur if the component was renamed
+                    cmpt.loadSettings(componentData.get(cmpt.name, dict()))
 
     def loadMetadataToComponentSettings(self):
         """
@@ -320,17 +339,22 @@ class Builder(object):
         for cmpt in self.componentList:
             cmpt._loadComponentParametersToClass()
 
-    def loadControlShapes(self, path=None, applyColor=True):
+    def loadControlShapes(self, paths=None, applyColor=True):
         """
         Load the control shapes
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param list paths: Path to the json file. if none is provided use the data from the rigFile
         :param bool applyColor: Apply the control colors.
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES))
-        controlShapes.loadControlShapes(path, applyColor=applyColor)
-        self.updateMaya()
-        logger.info("control shapes -- complete")
+        paths = paths or self.getRigData(self.rigFile, constants.CONTROL_SHAPES)
+
+        for path in common.toList(paths):
+            # make the path an absoulte
+
+            absPath = self.getAbsoultePath(path)
+            controlShapes.loadControlShapes(absPath, applyColor=applyColor)
+            self.updateMaya()
+            logger.info(f"control shapes loaded: {path}")
 
     def saveControlShapes(self, path=None):
         """
@@ -338,19 +362,24 @@ class Builder(object):
 
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES))
+        rigFileData = common.toList(self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES)))[-1]
+        path = path or rigFileData
+
         controlShapes.saveControlShapes(path)
         logger.info("control shapes saved to: {}".format(path))
 
-    def loadGuideData(self, path=None):
+    def loadGuideData(self, paths=None):
         """
         Load guide data
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param list paths: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES))
-        if guides.loadGuideData(path):
-            logger.info("guides loaded")
+        paths = paths or self.getRigData(self.rigFile, constants.GUIDES)
+
+        for path in common.toList(paths):
+            absPath = self.getAbsoultePath(path)
+            if guides.loadGuideData(absPath):
+                logger.info(f"guides loaded: {path}")
 
     def saveGuideData(self, path=None):
         """
@@ -358,21 +387,24 @@ class Builder(object):
 
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES))
+        rigFileData = common.toList(self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES)))[-1]
+        path = path or rigFileData
         guides.saveGuideData(path)
         logger.info("guides saved to: {}".format(path))
 
-    def loadPoseReaders(self, path=None, replace=True):
+    def loadPoseReaders(self, paths=None, replace=True):
         """
         Load pose readers
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param list paths: Path to the json file. if none is provided use the data from the rigFile
         :param replace: Replace existing pose readers.
         """
+        paths = paths or self.getRigData(self.rigFile, constants.PSD) or ''
 
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD)) or ''
-        if deform.loadPoseReaders(path, replace=replace):
-            logger.info("pose readers loaded")
+        for path in common.toList(paths):
+            absPath = self.getAbsoultePath(path)
+            if deform.loadPoseReaders(absPath, replace=replace):
+                logger.info(f"pose readers loaded: {path}")
 
     def savePoseReaders(self, path=None):
         """
@@ -766,7 +798,7 @@ class Builder(object):
     @staticmethod
     def getRigData(rigFile, key):
         """
-        read the data from the self.rig_file
+        read the data from the self.rig_file. Kept here for compatability of old code. Should probably be deleted!
 
         :param rigFile: path to thr rig file to get date from
         :param key: name of the dictionary key to get the data from

@@ -15,6 +15,7 @@ import glob
 import shutil
 import logging
 import inspect
+import pathlib
 
 # MAYA
 import maya.cmds as cmds
@@ -25,7 +26,8 @@ from rigamajig2.shared.logger import Logger
 from rigamajig2.shared import common
 from rigamajig2.shared import path as rig_path
 from rigamajig2.shared import runScript
-from rigamajig2.maya.data import abstract_data as abstract_data
+from rigamajig2.maya.builder.constants import DATA_PATH
+from rigamajig2.maya.data import abstract_data
 
 logger = logging.getLogger(__name__)
 
@@ -33,6 +35,11 @@ CMPT_ROOT_MODULE = 'cmpts'
 
 SCRIPT_FOLDER_CONSTANTS = ['pre_scripts', 'post_scripts', 'pub_scripts']
 
+DATA_EXCLUDE_FILES = ['__init__.py']
+DATA_EXCLUDE_FOLDERS = []
+
+
+# Component Utilities
 
 def findComponents(path, excludedFolders, excludedFiles):
     """
@@ -117,6 +124,77 @@ def validateComponent(filePath):
     return False
 
 
+# Data Type Utilities
+
+def getDataModules(path=None):
+    """
+    get a dictionary of data type and data module.
+    This can be used to create instances of each data module to use in data loading.
+    :return:
+    """
+
+    if not path: path = DATA_PATH
+    path = rig_path.cleanPath(path)
+
+    pathObj = pathlib.Path(path)
+
+    # here we can find a python root to use later when creating python paths to load the modules
+    pythonPaths = [p for p in sys.path if p in path]
+    rigamajigRootPyPath = max(pythonPaths, key=len)
+
+    # Using path lib we can list all files and directories than filter out only the files
+    files = [f for f in pathObj.iterdir() if f.is_file()]
+
+    toReturn = dict()
+    for file in files:
+        filePath = pathlib.Path(os.path.join(path, file.name))
+
+        # check the extension of the files.
+        if filePath.suffix == '.py' and filePath.name not in DATA_EXCLUDE_FILES:
+            # get the path local to the python path
+            relPath = pathlib.Path(filePath.relative_to(rigamajigRootPyPath))
+
+            # convert the path into a python module path (separated by ".")
+            # ie: path/to/module --> path.to.module
+
+            # split the file name into parts.
+            # then join them back together minus the suffix
+            pathSplit = relPath.parts
+            pythonModulePath = ".".join([p.removesuffix(".py") for p in pathSplit])
+
+            # next lets import the module to get an instance of it
+            moduleObject = __import__(pythonModulePath, globals(), locals(), ["*"], 0)
+            classesInModule = inspect.getmembers(moduleObject, inspect.isclass)
+
+            # now we can look through each class and find the subclasses of the abstract Data Class
+            for className, classObj in classesInModule:
+                if issubclass(classObj, abstract_data.AbstractData):
+                    classDict = dict()
+                    classDict[className] = [pythonModulePath, className]
+                    toReturn.update(classDict)
+
+    return toReturn
+
+
+def createDataClassInstance(dataType=None):
+    """
+    Create a new and usable instance of a given data type to be activly used when loading new data
+    :param dataType:
+    :return:
+    """
+    dataTypeInfo = getDataModules().get(dataType)
+    if not dataTypeInfo:
+        return False
+
+    modulePath = dataTypeInfo[0]
+    className = dataTypeInfo[1]
+
+    moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
+    classInstance = getattr(moduleObject, className)
+
+    return classInstance
+
+
 def loadRequiredPlugins():
     """
     loadSettings required plugins
@@ -129,6 +207,8 @@ def loadRequiredPlugins():
         if plugin not in loadedPlugins:
             cmds.loadPlugin(plugin)
 
+
+# Script List Utilities
 
 def validateScriptList(scriptsList=None):
     """
@@ -171,23 +251,6 @@ def runAllScripts(scripts=None):
     fileScripts.reverse()
     for script in fileScripts:
         runScript.runScript(script)
-
-
-def getAvailableArchetypes():
-    """
-    get a list of avaible archetypes. Archetypes are defined as a folder containng a .rig file.
-    :return: list of archetypes
-    """
-    archetypeList = list()
-
-    pathContents = os.listdir(common.ARCHETYPES_PATH)
-    for archetype in pathContents:
-        archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
-        if archetype.startswith("."):
-            continue
-        if findRigFile(archetypePath):
-            archetypeList.append(archetype)
-    return archetypeList
 
 
 class GetCompleteScriptList(object):
@@ -255,11 +318,11 @@ class GetCompleteScriptList(object):
         archetypeList = common.toList(baseArchetype)
         for baseArchetype in archetypeList:
             if baseArchetype and baseArchetype in getAvailableArchetypes():
-
                 archetypePath = os.sep.join([common.ARCHETYPES_PATH, baseArchetype])
                 archetypeRigFile = findRigFile(archetypePath)
 
                 cls.findScripts(archetypeRigFile, scriptType=scriptType, recursionLevel=recursionLevel + 1)
+
 
 #
 # class GetCompleteScriptList(object):
@@ -315,6 +378,24 @@ class GetCompleteScriptList(object):
 #                 archetypeRigFile = findRigFile(archetypePath)
 #
 #                 cls.findScripts(archetypeRigFile, scriptType=scriptType)
+
+# Archetype Utilities
+
+def getAvailableArchetypes():
+    """
+    get a list of avaible archetypes. Archetypes are defined as a folder containng a .rig file.
+    :return: list of archetypes
+    """
+    archetypeList = list()
+
+    pathContents = os.listdir(common.ARCHETYPES_PATH)
+    for archetype in pathContents:
+        archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
+        if archetype.startswith("."):
+            continue
+        if findRigFile(archetypePath):
+            archetypeList.append(archetype)
+    return archetypeList
 
 
 def findRigFile(path):
@@ -400,6 +481,8 @@ def createRigEnviornment(sourceEnviornment, targetEnviornment, rigName):
     logger.info("New rig environment created: {}".format(tgtEnvPath))
     return os.path.join(tgtEnvPath, rigFile)
 
+
+# Rig File Utilities
 
 def getRigData(rigFile, key):
     """

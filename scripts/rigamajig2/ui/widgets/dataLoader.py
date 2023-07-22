@@ -26,6 +26,7 @@ from shiboken2 import wrapInstance
 
 from rigamajig2.ui import showInFolder
 from rigamajig2.maya.builder.constants import DATA_PATH
+from rigamajig2.maya.builder import core
 from rigamajig2.maya.data import abstract_data
 from rigamajig2.shared import path as rig_path
 from rigamajig2.shared import common
@@ -42,78 +43,6 @@ LOADABLE_TYPES = ['AnimData',
                   'PSDData',
                   'SHAPESData, '
                   'SkinData']
-
-EXCLUDE_FILES = ['__init__.py']
-EXCLUDE_FOLDERS = []
-
-
-def getDataModules(path=None):
-    """
-    get a dictionary of data type and data module.
-    This can be used to create instances of each data module to use in data loading.
-    :return:
-    """
-
-    if not path: path = DATA_PATH
-    path = rig_path.cleanPath(path)
-
-    pathObj = pathlib.Path(path)
-
-    # here we can find a python root to use later when creating python paths to load the modules
-    pythonPaths = [p for p in sys.path if p in path]
-    rigamajigRootPyPath = max(pythonPaths, key=len)
-
-    # Using path lib we can list all files and directories than filter out only the files
-    files = [f for f in pathObj.iterdir() if f.is_file()]
-
-    toReturn = dict()
-    for file in files:
-        filePath = pathlib.Path(os.path.join(path, file.name))
-
-        # check the extension of the files.
-        if filePath.suffix == '.py' and filePath.name not in EXCLUDE_FILES:
-            # get the path local to the python path
-            relPath = pathlib.Path(filePath.relative_to(rigamajigRootPyPath))
-
-            # convert the path into a python module path (separated by ".")
-            # ie: path/to/module --> path.to.module
-
-            # split the file name into parts.
-            # then join them back together minus the suffix
-            pathSplit = relPath.parts
-            pythonModulePath = ".".join([p.removesuffix(".py") for p in pathSplit])
-
-            # next lets import the module to get an instance of it
-            moduleObject = __import__(pythonModulePath, globals(), locals(), ["*"], 0)
-            classesInModule = inspect.getmembers(moduleObject, inspect.isclass)
-
-            # now we can look through each class and find the subclasses of the abstract Data Class
-            for className, classObj in classesInModule:
-                if issubclass(classObj, abstract_data.AbstractData):
-                    classDict = dict()
-                    classDict[className] = [pythonModulePath, className]
-                    toReturn.update(classDict)
-
-    return toReturn
-
-
-def createDataClassInstance(dataType=None):
-    """
-    Create a new and usable instance of a given data type to be activly used when loading new data
-    :param dataType:
-    :return:
-    """
-    dataTypeInfo = getDataModules().get(dataType)
-    if not dataTypeInfo:
-        return False
-
-    modulePath = dataTypeInfo[0]
-    className = dataTypeInfo[1]
-
-    moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
-    classInstance = getattr(moduleObject, className)
-
-    return classInstance
 
 
 class DataLoader(QtWidgets.QWidget):
@@ -300,7 +229,7 @@ class DataLoader(QtWidgets.QWidget):
         """Here we want to create actions for each datatype and return the action so they can be added to a menu.
         This is used in both the add button and add context menu"""
         actions = list()
-        for dataType in getDataModules():
+        for dataType in core.getDataModules():
             # if we want to use filtering check to see if the data is in the filter.
             if self.dataFilteringEnabled and dataType not in self.dataFilter:
                 continue
@@ -472,7 +401,7 @@ class DataLoader(QtWidgets.QWidget):
         """
         if pathlib.Path(path).exists() and pathlib.Path(path).is_file():
             dataType = abstract_data.AbstractData().getDataType(path)
-            dataClassInstance = createDataClassInstance(dataType=dataType)
+            dataClassInstance = core.createDataClassInstance(dataType=dataType)
 
             # initialize the data class instance
             dataClass = dataClassInstance()

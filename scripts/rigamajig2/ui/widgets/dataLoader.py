@@ -12,6 +12,8 @@ import os
 import sys
 import pathlib
 import inspect
+import platform
+import subprocess
 from functools import partial
 
 from PySide2 import QtCore
@@ -162,8 +164,29 @@ class DataLoader(QtWidgets.QWidget):
         self.createConnections()
 
     def createActions(self):
-        # TODO: create popup menu
-        pass
+        self.loadAllDataAction = QtWidgets.QAction("Load All Data", self)
+        self.loadAllDataAction.setIcon(QtGui.QIcon(":newLayerEmpty.png"))
+        self.loadAllDataAction.triggered.connect(self.loadAllData)
+
+        self.loadSelectedDataAction = QtWidgets.QAction("Load Selected Data", self)
+        self.loadSelectedDataAction.setIcon(QtGui.QIcon(":newLayerEmpty.png"))
+        self.loadSelectedDataAction.triggered.connect(self.loadSelectedData)
+
+        self.showInFolderAction = QtWidgets.QAction("Show in Folder", self)
+        self.showInFolderAction.setIcon(QtGui.QIcon(":fileOpen.png"))
+        self.showInFolderAction.triggered.connect(self.showInFolder)
+
+        self.openFileAction = QtWidgets.QAction("Open Data File", self)
+        self.openFileAction.setIcon(QtGui.QIcon(":openScript.png"))
+        self.openFileAction.triggered.connect(self.openScript)
+
+        self.addExistingAction = QtWidgets.QAction("Add Existing Data File", self)
+        self.addExistingAction.setIcon(QtGui.QIcon(":newPreset.png"))
+        self.addExistingAction.triggered.connect(self.pickPath)
+
+        self.deleteFileAction = QtWidgets.QAction("Delete Data File", self)
+        self.deleteFileAction.setIcon(QtGui.QIcon(":trash.png"))
+        self.deleteFileAction.triggered.connect(self.deleteSelectedItems)
 
     def createWidgets(self):
         self.pathLabel = QtWidgets.QLabel()
@@ -177,8 +200,9 @@ class DataLoader(QtWidgets.QWidget):
         self.pathTreeWidget.setUniformRowHeights(True)
         self.pathTreeWidget.setColumnWidth(0, 160)
         self.pathTreeWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
-        # self.pathTreeWidget.setUniformItemSizes(True)
-        # self.pathLineEdit.setPlaceholderText("path/to/file/or/folder")
+
+        self.pathTreeWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
+        self.pathTreeWidget.customContextMenuRequested.connect(self._createContextMenu)
 
         self.selectPathButton = QtWidgets.QPushButton("...")
         self.selectPathButton.setFixedSize(19, 15)
@@ -233,26 +257,61 @@ class DataLoader(QtWidgets.QWidget):
 
     def createConnections(self):
         self.addPathButtton.clicked.connect(self.showAddDataContextMenu)
-        self.selectPathButton.clicked.connect(self.selectPath)
+        self.selectPathButton.clicked.connect(self.pickPath)
         self.showInFolderButton.clicked.connect(self.showInFolder)
         self.expandWidgetButton.clicked.connect(partial(self.changeTreeWidgetSize, 20))
         self.contractWidgetButton.clicked.connect(partial(self.changeTreeWidgetSize, -20))
 
+    def _createContextMenu(self, position):
+        """Create the right click context menu"""
+
+        menu = QtWidgets.QMenu(self.pathTreeWidget)
+        menu.addAction(self.loadAllDataAction)
+        menu.addAction(self.loadSelectedDataAction)
+        menu.addSeparator()
+        menu.addAction(self.showInFolderAction)
+        menu.addAction(self.openFileAction)
+        menu.addAction(self.addExistingAction)
+
+        addNewMenu = QtWidgets.QMenu("Add New Data File")
+        addNewMenu.setIcon(QtGui.QIcon(":addCreateGeneric.png"))
+        for action in self.__getAddEmptyDatatypeActions():
+            addNewMenu.addAction(action)
+
+        menu.addMenu(addNewMenu)
+        menu.addSeparator()
+        menu.addAction(self.deleteFileAction)
+        # menu.addAction(self.deleteScriptAction)
+
+        # menu .addSeparator()
+        # menu .addAction(self.deleteScriptAction)
+
+        menu.exec_(self.pathTreeWidget.mapToGlobal(position))
+
     def showAddDataContextMenu(self):
         dataTypeMenu = QtWidgets.QMenu()
-        for dataType in getDataModules():
+        for action in self.__getAddEmptyDatatypeActions():
+            dataTypeMenu.addAction(action)
 
+        pos = QtGui.QCursor.pos()
+        dataTypeMenu.exec_(pos)
+
+    def __getAddEmptyDatatypeActions(self):
+        """Here we want to create actions for each datatype and return the action so they can be added to a menu.
+        This is used in both the add button and add context menu"""
+        actions = list()
+        for dataType in getDataModules():
             # if we want to use filtering check to see if the data is in the filter.
             if self.dataFilteringEnabled and dataType not in self.dataFilter:
                 continue
             action = QtWidgets.QAction(dataType, self)
-            dataTypeMenu.addAction(action)
+            action.setIcon(QtGui.QIcon(":fileNew.png"))
             action.triggered.connect(partial(self.addEmptyFile, dataType))
+            actions.append(action)
+        return actions
 
-        pos = self.addPathButtton.mapToGlobal(QtCore.QPoint(0, self.addPathButtton.height()))
-        dataTypeMenu.exec_(pos)
+        # UI Utilities
 
-    # UI Utilities
     def getSelectedItems(self):
         """ get the selected items in the component tree"""
         return [item for item in self.pathTreeWidget.selectedItems()]
@@ -290,6 +349,10 @@ class DataLoader(QtWidgets.QWidget):
         Get a list of all files used in this widget.
         :return:
         """
+        # check if there are items to get
+        if not self.pathTreeWidget.topLevelItemCount() > 0:
+            return False
+
         fileList = list()
         for item in self.getAllItems():
             path = item.data(0, QtCore.Qt.UserRole)
@@ -305,31 +368,21 @@ class DataLoader(QtWidgets.QWidget):
         self.pathTreeWidget.clear()
 
     # Widget Specific
-    def selectPath(self, path=None):
+    def pickPath(self, path=None):
         # popup browser to select a file type.
         # if filtering is enabled then we can check the selected type to ensure it matches the given type
 
-        # if a path was provided check that it is absoulte. If its not make it absoulte
         if path:
-            path = pathlib.Path(path)
-            if path.is_absolute():
-                newPath = path
-            else:
-                print("IS NOT ABSOULTE")
-                newPath = path.joinpath(self.relativePath, path)
-                newPath = str(newPath.resolve())
-
+            newPath = path
         # if no path was provided birng up a fileDialog to select the file
         else:
             # try to find a good current path
             lastItem = self.getLastitem()
-            currentPath = pathlib.Path.cwd()
+            currentPath = cmds.workspace(q=True, dir=True)
             if lastItem:
-                currentPath = lastItem.data(0, QtCore.Qt.UserRole)
-
-            fileInfo = QtCore.QFileInfo(currentPath)
-            if not fileInfo.exists():
-                currentPath = cmds.workspace(q=True, dir=True)
+                lastPath = lastItem.data(0, QtCore.Qt.UserRole)
+                fileInfo = QtCore.QFileInfo(lastPath)
+                currentPath = lastPath
 
             newPath = cmds.fileDialog2(
                 ds=2,
@@ -345,7 +398,24 @@ class DataLoader(QtWidgets.QWidget):
                 # if we dont select a new path cancel the action by returning.
                 return
 
-        print(newPath)
+        self.selectPath(newPath)
+
+    def selectPath(self, path):
+        """
+        Select a path
+        :param path:
+        :return:
+        """
+        if path is None:
+            return
+
+        path = pathlib.Path(path)
+        if path.is_absolute():
+            newPath = str(path)
+        else:
+            newPath = path.joinpath(self.relativePath, path)
+            newPath = str(newPath.resolve())
+
         # get the data type of the file and try to filter it.
         newPathDataType = abstract_data.AbstractData().getDataType(newPath)
         if self.dataFilteringEnabled and newPathDataType not in self.dataFilter:
@@ -374,10 +444,26 @@ class DataLoader(QtWidgets.QWidget):
 
     def showInFolder(self):
         """Show the selected file(s) in the finder/explorer"""
-        item = self.getSelectedItems()[-1]
-        if item:
+        items = self.getSelectedItems()
+        if items:
+            item = items[-1]
             path = item.data(0, QtCore.Qt.UserRole)
             showInFolder.showInFolder(path)
+
+    def openScript(self):
+        items = self.getSelectedItems()
+
+        for item in items:
+            filePath = item.data(0, QtCore.Qt.UserRole)
+            # macOS
+            if platform.system() == 'Darwin':
+                subprocess.check_call(['open', filePath])
+            # Windows
+            elif platform.system() == 'Windows':
+                os.startfile(filePath)
+            # Linux
+            else:
+                subprocess.check_call(['xdg-open', filePath])
 
     def loadDataFromFile(self, path):
         """
@@ -402,6 +488,22 @@ class DataLoader(QtWidgets.QWidget):
             self.loadDataFromFile(itemFilePath)
 
             print(f"loading: {itemFilePath}")
+
+    def loadSelectedData(self):
+        """Load only data from the selected object"""
+        selectedItems = self.getSelectedItems()
+        if not selectedItems:
+            return
+
+        for item in selectedItems:
+            itemFilePath = item.data(0, QtCore.Qt.UserRole)
+            self.loadDataFromFile(itemFilePath)
+
+    def deleteSelectedItems(self):
+        """ delete """
+        items = self.getSelectedItems()
+        for item in items:
+            self.pathTreeWidget.takeTopLevelItem(self.pathTreeWidget.indexOfTopLevelItem(item))
 
     def addItem(self, path=None):
         """
@@ -433,10 +535,17 @@ class DataLoader(QtWidgets.QWidget):
         item = QtWidgets.QTreeWidgetItem()
         item.setText(0, fileName)
         item.setText(1, dataType)
-        item.setToolTip(0, fileInfo.filePath())
+
+        # get a data object and read the keys so we can add them to the UI
+        d = abstract_data.AbstractData()
+        d.read(fileInfo.filePath())
+
+        tooltipFormatting = f"""{fileInfo.filePath()}\n\nKeys: {d.getKeys()}"""
+
+        item.setToolTip(0, tooltipFormatting)
 
         # icon
-        item.setIcon(0,  QtGui.QIcon(":fileNew.png"))
+        item.setIcon(0, QtGui.QIcon(":fileNew.png"))
 
         # we can set the data of the item to the relative path.
         item.setData(0, QtCore.Qt.UserRole, fileInfo.filePath())

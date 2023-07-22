@@ -145,6 +145,7 @@ class InitializeWidget(QtWidgets.QWidget):
         """ Set a builder for intialize widget"""
         rigEnv = builder.getRigEnviornment()
         self.builder = builder
+        self.componentsDataLoader.clear()
         self.componentsDataLoader.setRelativePath(rigEnv)
 
         self.guideDataLoader.clear()

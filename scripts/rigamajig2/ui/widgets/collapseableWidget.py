@@ -55,6 +55,7 @@ class CollapsibleHeader(QtWidgets.QWidget):
         self.setText(text)
         self.setExpanded(False)
 
+
     def setText(self, text):
         """ Set the header text"""
         self.textLabel.setText("<b>{0}<b>".format(text))

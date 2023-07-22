@@ -46,7 +46,7 @@ class BuildWidget(QtWidgets.QWidget):
         self.finalizeButton = QtWidgets.QPushButton("Finalize")
 
         self.psdDataLoader = dataLoader.DataLoader(
-            "psd:",
+            "PSD Readers:",
             caption="Select a Pose Reader File",
             fileFilter=constants.JSON_FILTER,
             fileMode=1,

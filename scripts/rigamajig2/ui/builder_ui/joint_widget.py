@@ -52,7 +52,7 @@ class JointWidget(QtWidgets.QWidget):
         self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
 
         self.jointPositionDataLoader = dataLoader.DataLoader(
-            "joint pos: ",
+            "Joint Positions: ",
             caption="Select a Skeleton position file",
             fileFilter=constants.JSON_FILTER,
             fileMode=1,
@@ -101,7 +101,6 @@ class JointWidget(QtWidgets.QWidget):
         self.insertJointsAmountSlider.setValue(1)
         self.insertJointsAmountSlider.setRange(1, 10)
         self.insertJointsButton = QtWidgets.QPushButton("Insert Joints")
-
 
     def createLayouts(self):
         """ Create Layouts"""

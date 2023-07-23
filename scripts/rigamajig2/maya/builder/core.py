@@ -19,6 +19,7 @@ import pathlib
 
 # MAYA
 import maya.cmds as cmds
+import maya.api.OpenMaya as om2
 
 # RIGAMAJIG
 from rigamajig2.maya.builder import constants
@@ -37,6 +38,8 @@ SCRIPT_FOLDER_CONSTANTS = ['pre_scripts', 'post_scripts', 'pub_scripts']
 
 DATA_EXCLUDE_FILES = ['__init__.py']
 DATA_EXCLUDE_FOLDERS = []
+
+DATA_MERGE_METHODS = ['new', 'merge', 'overwrite']
 
 
 # Component Utilities
@@ -192,7 +195,127 @@ def createDataClassInstance(dataType=None):
     moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
     classInstance = getattr(moduleObject, className)
 
-    return classInstance
+    # initialize the class when returning it to return it as a NEW instance.
+    return classInstance()
+
+
+def performLayeredSave(dataToSave, fileStack, dataType, appendMethod="merge", appendFile=None, popupInfo=True):
+    """
+    Perform a layered data save. This can be used on nearly any node data class to save a list of data into the
+    source files where they originally came from. If the node data appears in mutliple files it will be saved in the
+    lowest file to preserve inheritance.
+
+    There are several methods to append new node data that has been added since the previous save.
+
+    new - new data is added to a new file at the bottom of the file stack
+    merge - new data is merged onto the file at the bottom of the file stack
+    overwrite - all data is saved into a new file at the bottom of the file stack
+
+    :param dataToSave: List of nodes to save data from
+    :param fileStack: list of file from which we're currently reading data from
+    :param dataType: Datatype to save.
+    :param appendMethod: method to append new data. Available options are [new, merge, overwrite]
+    :param appendFile: if using new file method provide a file to save new data to
+    :param popupInfo: if maya is running this will give a popup with some basic info about the scene
+    :return:
+    """
+    if dataType not in getDataModules(DATA_PATH).keys():
+        raise Exception(f"Data type {dataType} is not valid")
+
+    if appendMethod not in ['new', 'merge', 'overwrite']:
+        raise Exception(f"Merge method '{appendMethod}' is not valid. Use {DATA_MERGE_METHODS}")
+
+    fileStack = common.toList(fileStack)
+
+    # sometimes we may want to save other data types into a different data loader.
+    # Here we need to filter only files of the data type we want
+    fileStack = [dataFile for dataFile in fileStack if abstract_data.AbstractData.getDataType(dataFile) == dataType]
+
+    # first lets get a list of all the nodes that has been previously saved
+    # we can save that into a dictionary with the file they came from and a list to compare to the new data.
+    # (check for deleted/missing nodes)
+    sourceNodesDict = dict()
+    sourceNodesList = set()
+    for dataFile in fileStack:
+        dataClass = createDataClassInstance(dataType=dataType)
+        dataClass.read(dataFile)
+        nodes = dataClass.getKeys()
+        sourceNodesDict[dataFile] = nodes
+
+        sourceNodesList.update(nodes)
+
+    # since we want to replace values from the bottom of the stack first we need to reverse our filestack
+    searchFileStack = fileStack.copy()
+    searchFileStack.reverse()
+
+    # work on saving the node data of nodes that have been saved first. build a source dictionary to save this data to
+    saveDataDict = dict()
+    for dataFile in fileStack:
+        saveDataDict[dataFile] = list()
+
+    # we also need to build a list of nodes that we have already saved.
+    previouslySavedNodes = list()
+    for node in dataToSave:
+        for dataFile in searchFileStack:
+            nodesPreviouslyInFile = sourceNodesDict[dataFile]
+            if node in nodesPreviouslyInFile:
+                # append the node to the list
+                saveDataDict[dataFile].append(node)
+                previouslySavedNodes.append(node)
+
+    # get the difference of lists for the unsaved nodes and deleted nodes
+    unsavedNodes = set(dataToSave) - set(previouslySavedNodes)
+    deletedNodes = sourceNodesList - set(dataToSave)
+
+    # now we need to do something with the new nodes!
+    if appendMethod == 'new':
+
+        # if there is not a new file type
+        if not appendFile:
+            raise Exception("Please provide a file path to save data to a new file")
+
+        saveDataDict[appendFile] = unsavedNodes
+
+    if appendMethod == 'merge':
+        saveDataDict[searchFileStack[0]] += unsavedNodes
+
+    if appendMethod == 'override':
+        raise NotImplemented()
+
+    # check if the maya UI is running. It SHOULD always be if we're saving data but theres a chance its not.
+    # if there is lets build a confrm dialog to double check info before its aved
+    if not om2.MGlobal.mayaState() and popupInfo:
+        message = f"Save {len(dataToSave)} nodes to {len(saveDataDict.keys())} files\n\n"
+
+        for dataFile in saveDataDict.keys():
+            message += f"\n {os.path.basename(dataFile)}: {len(saveDataDict[dataFile])} nodes"
+
+        message += f"\n\nNew Nodes: {len(unsavedNodes)}"
+        message += f"\nDeleted Nodes: {len(deletedNodes)}"
+        message += f"\n\n Check the script editor for more info"
+
+        logger.info(f"New Nodes: {unsavedNodes}")
+        logger.info(f"Deleted Nodes: {deletedNodes}")
+
+        confirmDialog = cmds.confirmDialog(
+            title=f"Save {dataType}",
+            message=message,
+            button=['Save', 'Cancel'],
+            defaultButton='Save',
+            cancelButton='Cancel',
+            dismissString='Cancel')
+
+        if confirmDialog == "Cancel":
+            return
+
+    # Save the data
+    for dataFile in saveDataDict:
+        dataClass = createDataClassInstance(dataType=dataType)
+        dataClass.gatherDataIterate(saveDataDict[dataFile])
+        dataClass.write(dataFile)
+        logger.info(f"{dataType} saved to {dataFile}")
+
+    return saveDataDict
 
 
 def loadRequiredPlugins():

@@ -319,7 +319,7 @@ class Builder(object):
                 # we only want to add components with a new name. Each component should have a unique name
                 if instance.name not in [c.name for c in self.componentList]:
                     self.appendComponents(instance)
-                    self.loadComponentsFromFile = True
+                self.loadComponentsFromFile = True
 
         logger.info("components loaded -- complete")
 
@@ -330,7 +330,7 @@ class Builder(object):
         :param str paths: Path to the json file. if none is provided use the data from the rigFile
         """
         if not paths:
-            paths = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
+            paths = paths or self.getRigData(self.rigFile, constants.COMPONENTS)
 
         if self.loadComponentsFromFile:
 

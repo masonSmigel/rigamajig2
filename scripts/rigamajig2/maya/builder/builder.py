@@ -245,26 +245,34 @@ class Builder(object):
             self.updateMaya()
         logger.info("optimize -- complete")
 
-    def saveComponents(self, path=None):
+    def saveComponents(self, fileStack=None):
         """
         Save out components to a file.
         This only saves compoonent settings such as name, inputs, spaces and names.
 
-        :param str path: path to the component data file
+        :param str fileStack: path to the component data file
         """
 
-        # TODO: refactor this! maybe make a component Data class?
-        if not path:
-            path = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
+        cmptList = [c.name for c in self.componentList]
+        saveDict = core.performLayeredSave(dataToSave=cmptList,
+                                           fileStack=fileStack,
+                                           dataType="AbstractData",
+                                           appendMethod="merge",
+                                           doSave=False)
 
-        componentData = OrderedDict()
-        componentDataObj = abstract_data.AbstractData()
-        for cmpt in self.componentList:
-            componentData[cmpt.name] = cmpt.getComponentData()
+        for dataFile in saveDict:
+            componentData = OrderedDict()
+            componentDataObj = abstract_data.AbstractData()
 
-        componentDataObj.setData(componentData)
-        componentDataObj.write(path)
-        logger.info("Components saved to: {}".format(path))
+            # loop through the list of component names
+            for componentName in saveDict[dataFile]:
+                cmpt = self.findComponent(name=componentName)
+                componentData[componentName] = cmpt.getComponentData()
+            componentDataObj.setData(componentData)
+            componentDataObj.write(dataFile)
+            logger.info(f"Component Data saved to {dataFile}")
+
+        logger.info("Components Saved -- Complete")
 
     def loadComponents(self, paths=None):
         """
@@ -426,7 +434,6 @@ class Builder(object):
         # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
 
         allPsds = deform.gatherPoseReaders()
-        print(allPsds)
         core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", appendMethod="merge")
         # deform.savePoseReaders(path)
         logger.info("Pose Readers Save -- Complete")
@@ -742,7 +749,7 @@ class Builder(object):
 
         return self.findComponent(name, componentType)
 
-    def findComponent(self, name, type):
+    def findComponent(self, name, type=None):
         """
         Find a component within the self.componentList.
         :param name: name of the component to find
@@ -753,7 +760,9 @@ class Builder(object):
             _name = cmpt.name
             _type = cmpt.componentType
             if name == _name:
-                if type == _type:
+                if not type:
+                    return cmpt
+                elif type == _type:
                     return cmpt
         logger.warning("No component: {} with type: {} found within current build".format(name, type))
         return None

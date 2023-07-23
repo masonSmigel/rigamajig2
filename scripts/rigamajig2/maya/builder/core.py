@@ -199,7 +199,7 @@ def createDataClassInstance(dataType=None):
     return classInstance()
 
 
-def performLayeredSave(dataToSave, fileStack, dataType, appendMethod="merge", appendFile=None, popupInfo=True):
+def performLayeredSave(dataToSave, fileStack, dataType, appendMethod="merge", appendFile=None, popupInfo=True, doSave=True):
     """
     Perform a layered data save. This can be used on nearly any node data class to save a list of data into the
     source files where they originally came from. If the node data appears in mutliple files it will be saved in the
@@ -217,6 +217,7 @@ def performLayeredSave(dataToSave, fileStack, dataType, appendMethod="merge", ap
     :param appendMethod: method to append new data. Available options are [new, merge, overwrite]
     :param appendFile: if using new file method provide a file to save new data to
     :param popupInfo: if maya is running this will give a popup with some basic info about the scene
+    :param doSave: If False the save will not be performed. Useful when only the data dictionary is needed.
     :return:
     """
     if dataType not in getDataModules(DATA_PATH).keys():
@@ -309,11 +310,12 @@ def performLayeredSave(dataToSave, fileStack, dataType, appendMethod="merge", ap
             return
 
     # Save the data
-    for dataFile in saveDataDict:
-        dataClass = createDataClassInstance(dataType=dataType)
-        dataClass.gatherDataIterate(saveDataDict[dataFile])
-        dataClass.write(dataFile)
-        logger.info(f"{dataType} saved to {dataFile}")
+    if doSave:
+        for dataFile in saveDataDict:
+            dataClass = createDataClassInstance(dataType=dataType)
+            dataClass.gatherDataIterate(saveDataDict[dataFile])
+            dataClass.write(dataFile)
+            logger.info(f"{dataType} saved to {dataFile}")
 
     return saveDataDict
 

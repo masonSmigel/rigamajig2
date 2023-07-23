@@ -73,7 +73,34 @@ def saveJoints(path=None):
             dataObj.gatherDataIterate(childJoints)
         dataObj.write(path)
     else:
-        raise RuntimeError("the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))
+        raise RuntimeError(
+            "the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))
+
+
+def gatherJoints():
+    """
+    gather all joints in the scene to save.
+    :return: list of all joints in the scene that should be saved.
+    """
+
+    # find all skeleton roots and get the positions of their children
+    skeletonRoots = common.toList(meta.getTagged('skeleton_root'))
+
+    if not skeletonRoots:
+        skeletonRoots = cmds.ls(sl=True)
+
+    allJoints = list()
+    if skeletonRoots:
+        for root in skeletonRoots:
+            childJoints = cmds.listRelatives(root, allDescendents=True, type='joint') or list()
+            allJoints.append(root)
+            for eachJoint in childJoints:
+                allJoints.append(eachJoint)
+    else:
+        raise RuntimeError(
+            "the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))
+
+    return allJoints
 
 
 def loadGuideData(path=None):
@@ -107,3 +134,11 @@ def saveGuideData(path=None):
     dataObj = guide_data.GuideData()
     dataObj.gatherDataIterate(meta.getTagged("guide"))
     dataObj.write(path)
+
+
+def gatherGuides():
+    """
+    Gather all guides in the scene
+    :return: a list of all guides in the scene
+    """
+    return meta.getTagged("guide")

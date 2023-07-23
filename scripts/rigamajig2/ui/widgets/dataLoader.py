@@ -44,6 +44,8 @@ LOADABLE_TYPES = ['AnimData',
                   'SHAPESData, '
                   'SkinData']
 
+JSON_FILTER = "Json Files (*.json)"
+
 
 class DataLoader(QtWidgets.QWidget):
     """ Widget to select valid file or folder paths """
@@ -51,7 +53,7 @@ class DataLoader(QtWidgets.QWidget):
     def __init__(self,
                  label=None,
                  caption='Select a file or Folder',
-                 fileFilter="All Files (*.*)",
+                 fileFilter=JSON_FILTER,
                  fileMode=1,
                  widgetHeight=102,
                  relativePath=None,
@@ -113,7 +115,7 @@ class DataLoader(QtWidgets.QWidget):
         self.addExistingAction.setIcon(QtGui.QIcon(":newPreset.png"))
         self.addExistingAction.triggered.connect(self.pickPath)
 
-        self.deleteFileAction = QtWidgets.QAction("Delete Data File", self)
+        self.deleteFileAction = QtWidgets.QAction("Remove Data File", self)
         self.deleteFileAction.setIcon(QtGui.QIcon(":trash.png"))
         self.deleteFileAction.triggered.connect(self.deleteSelectedItems)
 
@@ -239,7 +241,7 @@ class DataLoader(QtWidgets.QWidget):
             actions.append(action)
         return actions
 
-        # UI Utilities
+    # UI Utilities
 
     def getSelectedItems(self):
         """ get the selected items in the component tree"""
@@ -305,13 +307,6 @@ class DataLoader(QtWidgets.QWidget):
             newPath = path
         # if no path was provided birng up a fileDialog to select the file
         else:
-            # try to find a good current path
-            lastItem = self.getLastitem()
-            currentPath = cmds.workspace(q=True, dir=True)
-            if lastItem:
-                lastPath = lastItem.data(0, QtCore.Qt.UserRole)
-                fileInfo = QtCore.QFileInfo(lastPath)
-                currentPath = lastPath
 
             newPath = cmds.fileDialog2(
                 ds=2,
@@ -319,7 +314,7 @@ class DataLoader(QtWidgets.QWidget):
                 ff=self.fileFilter,
                 fm=self.fileMode,
                 okc='Select',
-                dir=currentPath
+                dir=self.__getCurrentPath()
                 )
             if newPath:
                 newPath = newPath[0]
@@ -348,8 +343,7 @@ class DataLoader(QtWidgets.QWidget):
         # get the data type of the file and try to filter it.
         newPathDataType = abstract_data.AbstractData().getDataType(newPath)
         if self.dataFilteringEnabled and newPathDataType not in self.dataFilter:
-            # TODO: should I keep the raise Warnings?
-            raise Warning(f"{pathlib.Path(newPath).name}'s data type does not match filter {self.dataFilter}")
+            cmds.warning(f"{pathlib.Path(newPath).name}'s data type does not match filter {self.dataFilter}")
 
         self.addItem(newPath)
 
@@ -365,11 +359,29 @@ class DataLoader(QtWidgets.QWidget):
         # select the data type you would like to save. this could be based on the data folder structure.
         # there should also be some filtering of the data types so that some widgets only allow cirtian data types ("only abstract, no deformers etc")
 
-        # TODO: Implement
-        print(datatype)
-        # TODO: add a confirm box to show the name of the file,  type and path BEFORE creating it!
+        newPath = cmds.fileDialog2(
+            ds=2,
+            cap=self.caption,
+            ff=self.fileFilter,
+            fm=0,  # Any file weither it exists or not
+            okc='Select',
+            dir=self.__getCurrentPath()
+            )
 
-        # create a new file relative to the setRelative path. (if a relative path is set. Otherwise select a full path
+        if newPath:
+            newData = core.createDataClassInstance(dataType=datatype)
+            newData.write(filepath=newPath[0])
+
+            self.addItem(newPath[0])
+
+    def __getCurrentPath(self):
+
+        lastItem = self.getLastitem()
+        currentPath = cmds.workspace(q=True, dir=True)
+        if lastItem:
+            lastPath = lastItem.data(0, QtCore.Qt.UserRole)
+            currentPath = os.path.dirname(lastPath)
+        return currentPath
 
     def showInFolder(self):
         """Show the selected file(s) in the finder/explorer"""
@@ -401,10 +413,8 @@ class DataLoader(QtWidgets.QWidget):
         """
         if pathlib.Path(path).exists() and pathlib.Path(path).is_file():
             dataType = abstract_data.AbstractData().getDataType(path)
-            dataClassInstance = core.createDataClassInstance(dataType=dataType)
+            dataClass = core.createDataClassInstance(dataType=dataType)
 
-            # initialize the data class instance
-            dataClass = dataClassInstance()
             # read the data and apply all keys
             dataClass.read(filepath=path)
             dataClass.applyData(dataClass.getKeys())

@@ -120,16 +120,20 @@ class Builder(object):
             guides.loadJoints(absPath)
             logger.info(f"Joints loaded : {path}")
 
-    def saveJoints(self, path=None):
+    def saveJoints(self, fileStack=None):
         """
         Save the joint Data to a json file
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
         """
-        # TODO:
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKELETON_POS))
-        guides.saveJoints(path)
-        logger.info("Joint positions saved to: {}".format(path))
+        #
+        # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKELETON_POS))
+        # guides.saveJoints(path)
+
+        fileStack = common.toList(fileStack)
+        dataToSave = guides.gatherJoints()
+        core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData")
+        logger.info("Joint positions Saved -- complete")
 
     def initalize(self):
         """
@@ -248,6 +252,8 @@ class Builder(object):
 
         :param str path: path to the component data file
         """
+
+        # TODO: refactor this! maybe make a component Data class?
         if not path:
             path = self.getAbsoultePath(self.getRigData(self.rigFile, constants.COMPONENTS))
 
@@ -356,17 +362,20 @@ class Builder(object):
             self.updateMaya()
             logger.info(f"control shapes loaded: {path}")
 
-    def saveControlShapes(self, path=None):
+    def saveControlShapes(self, fileStack=None):
         """
         Save the control shapes
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
         """
-        rigFileData = common.toList(self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES)))[-1]
-        path = path or rigFileData
+        # rigFileData = common.toList(self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES)))[-1]
+        # path = path or rigFileData
 
-        controlShapes.saveControlShapes(path)
-        logger.info("control shapes saved to: {}".format(path))
+        allControls = controlShapes.gatherControlShapes()
+        core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", appendMethod="merge")
+
+        # controlShapes.saveControlShapes(path)
+        logger.info("Control Shapes Save -- Complete")
 
     def loadGuideData(self, paths=None):
         """
@@ -381,16 +390,18 @@ class Builder(object):
             if guides.loadGuideData(absPath):
                 logger.info(f"guides loaded: {path}")
 
-    def saveGuideData(self, path=None):
+    def saveGuideData(self, fileStack=None):
         """
         Save guides data
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
         """
-        rigFileData = common.toList(self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES)))[-1]
-        path = path or rigFileData
-        guides.saveGuideData(path)
-        logger.info("guides saved to: {}".format(path))
+        # rigFileData = common.toList(self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES)))[-1]
+        # path = path or rigFileData
+        fileStack = common.toList(fileStack)
+        dataToSave = guides.gatherGuides()
+        core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData")
+        logger.info("Guides Save  -- complete")
 
     def loadPoseReaders(self, paths=None, replace=True):
         """
@@ -406,15 +417,19 @@ class Builder(object):
             if deform.loadPoseReaders(absPath, replace=replace):
                 logger.info(f"pose readers loaded: {path}")
 
-    def savePoseReaders(self, path=None):
+    def savePoseReaders(self, fileStack=None):
         """
         Save out pose readers
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile.
+        :param str fileStack: Path to the json file. if none is provided use the data from the rigFile.
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
-        deform.savePoseReaders(path)
-        logger.info("pose readers saved to: {}".format(path))
+        # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
+
+        allPsds = deform.gatherPoseReaders()
+        print(allPsds)
+        core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", appendMethod="merge")
+        # deform.savePoseReaders(path)
+        logger.info("Pose Readers Save -- Complete")
 
     def loadDeformationData(self):
         """

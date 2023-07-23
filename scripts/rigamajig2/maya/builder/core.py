@@ -292,10 +292,10 @@ def performLayeredSave(dataToSave, fileStack, dataType, appendMethod="merge", ap
 
         message += f"\n\nNew Nodes: {len(unsavedNodes)}"
         message += f"\nDeleted Nodes: {len(deletedNodes)}"
-        message += f"\n\n Check the script editor for more info"
+        # message += f"\n\n Check the script editor for more info"
 
-        logger.info(f"New Nodes: {unsavedNodes}")
-        logger.info(f"Deleted Nodes: {deletedNodes}")
+        # logger.info(f"New Nodes: {unsavedNodes}")
+        # logger.info(f"Deleted Nodes: {deletedNodes}")
 
         confirmDialog = cmds.confirmDialog(
             title=f"Save {dataType}",

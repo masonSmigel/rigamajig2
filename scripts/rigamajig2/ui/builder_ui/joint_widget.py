@@ -26,6 +26,9 @@ import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.meta as meta
 from rigamajig2.ui.widgets import dataLoader, collapseableWidget, sliderGrp
 from rigamajig2.ui.builder_ui import constants
+from rigamajig2.maya.builder import guides
+from rigamajig2.maya.builder import core
+
 from rigamajig2.maya.builder.constants import SKELETON_POS
 from rigamajig2.maya.cmpts.base import GUIDE_STEP
 
@@ -220,7 +223,7 @@ class JointWidget(QtWidgets.QWidget):
             if result != 'Continue':
                 return
 
-        self.builder.saveJoints(self.jointPositionDataLoader.getPath())
+        self.builder.saveJoints(self.jointPositionDataLoader.getFileList(True))
 
     def pinJoints(self):
         """ Pin selected joints"""

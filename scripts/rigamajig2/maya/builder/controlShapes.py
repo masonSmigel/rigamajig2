@@ -43,3 +43,8 @@ def saveControlShapes(path=None):
     curveDataObj = curve_data.CurveData()
     curveDataObj.gatherDataIterate(meta.getTagged("control"))
     curveDataObj.write(path)
+
+
+def gatherControlShapes():
+    """gather controls from the scene"""
+    return meta.getTagged("control")

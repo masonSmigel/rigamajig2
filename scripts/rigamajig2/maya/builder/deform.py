@@ -25,6 +25,7 @@ from rigamajig2.maya.data import skin_data
 from rigamajig2.maya.data import deformLayer_data
 from rigamajig2.maya.data import SHAPES_data
 from rigamajig2.maya import skinCluster
+from rigamajig2.maya import psd
 
 logger = logging.getLogger(__name__)
 
@@ -39,6 +40,14 @@ def savePoseReaders(path=None):
     dataObj = psd_data.PSDData()
     dataObj.gatherDataIterate(meta.getTagged("poseReader"))
     dataObj.write(path)
+
+
+def gatherPoseReaders():
+    """
+    gather Pose readers from the scene
+    :return:
+    """
+    return [psd.getAssociateJoint(p) for p in meta.getTagged("poseReader")]
 
 
 def loadPoseReaders(path=None, replace=True):
@@ -193,4 +202,5 @@ def loadAdditionalDeformation(path=None):
     :param path:
     :return:
     """
+    # TODO: load additional deformation
     pass

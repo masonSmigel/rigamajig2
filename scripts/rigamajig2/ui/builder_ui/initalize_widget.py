@@ -30,6 +30,7 @@ from rigamajig2.maya import attr as attr
 from rigamajig2.maya import naming as naming
 from rigamajig2.maya import container as rig_container
 from rigamajig2.maya.builder import builder
+from rigamajig2.maya.builder import core
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp, dataLoader
 from rigamajig2.ui.builder_ui import constants
 from rigamajig2.maya.builder.constants import GUIDES, COMPONENTS
@@ -210,7 +211,7 @@ class InitializeWidget(QtWidgets.QWidget):
             if result != 'Continue':
                 return
 
-        self.builder.saveGuideData(self.guideDataLoader.getPath())
+        self.builder.saveGuideData(self.guideDataLoader.getFileList(absoulte=True))
 
     def initalizeRig(self):
         """Run the comppnent intialize on the builder and update the UI """

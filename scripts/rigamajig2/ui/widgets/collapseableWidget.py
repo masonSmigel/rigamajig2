@@ -55,7 +55,6 @@ class CollapsibleHeader(QtWidgets.QWidget):
         self.setText(text)
         self.setExpanded(False)
 
-
     def setText(self, text):
         """ Set the header text"""
         self.textLabel.setText("<b>{0}<b>".format(text))
@@ -115,6 +114,10 @@ class CollapsibleWidget(QtWidgets.QWidget):
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.addWidget(self.headerWidget)
         self.mainLayout.addWidget(self.bodyWidget)
+
+        # set the size policy so collapseable widgets size correctly
+        # when parented to another collapseable widget
+        self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
 
         self.setExpanded(False)
 

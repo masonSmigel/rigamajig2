@@ -332,15 +332,7 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
 
     # Save the data
     if doSave:
-
-        # we can create a data object of all Deleted nodes to ensure they are removed from all newly saved data
-        deletedDataObj = createDataClassInstance(dataType=dataType)
-        deletedDataObj.gatherDataIterate(deletedNodes)
-
         for dataFile in saveDataDict:
-            # check if the filesData is empty. If it is we can skip it.
-            if not saveDataDict[dataFile]:
-                continue
 
             # read all the old data. Anything that is NOT updated it will stay the same as the previous file.
             oldDataObj = createDataClassInstance(dataType=dataType)
@@ -350,9 +342,15 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
             newDataObj = createDataClassInstance(dataType=dataType)
             newDataObj.gatherDataIterate(saveDataDict[dataFile])
 
-            # remove all delted nodes and add the two data objects.
-            oldDataCleanObj = oldDataObj - deletedDataObj
-            mergedDataObj = oldDataCleanObj + newDataObj
+            # remove deleted nodes from the old dictionary
+            oldData = oldDataObj.getData()
+            for key in deletedNodes:
+                if key in oldDataObj.getKeys():
+                    oldData.pop(key)
+            oldDataObj.setData(oldData)
+
+            # add the two data objects.
+            mergedDataObj = oldDataObj + newDataObj
 
             # write out the file
             mergedDataObj.write(dataFile)

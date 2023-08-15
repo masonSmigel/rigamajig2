@@ -76,7 +76,7 @@ class JointWidget(QtWidgets.QWidget):
 
         self.skeletonEditWidget = collapseableWidget.CollapsibleWidget('Edit Skeleton')
         self.skeletonEditWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
-        self.skeletonEditWidget.setWidgetBackground(style.EDIT_BG_WIDGET_COLOR)
+        self.skeletonEditWidget.setDarkPallete()
 
         self.jointToRotationButton = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Rotation")
         self.jointToOrientationButton = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Orientation")

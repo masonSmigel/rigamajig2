@@ -57,7 +57,7 @@ class DeformationWidget(QtWidgets.QWidget):
 
         self.addDeformLayersWidget = collapseableWidget.CollapsibleWidget('Add deformation Layers')
         self.addDeformLayersWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
-        self.addDeformLayersWidget.setWidgetBackground(style.EDIT_BG_WIDGET_COLOR)
+        self.addDeformLayersWidget.setDarkPallete()
         self.suffixLineEdit = QtWidgets.QLineEdit()
         self.suffixLineEdit.setPlaceholderText("suffix")
 
@@ -93,7 +93,7 @@ class DeformationWidget(QtWidgets.QWidget):
 
         self.skinEditWidget = collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
         self.skinEditWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
-        self.skinEditWidget.setWidgetBackground(style.EDIT_BG_WIDGET_COLOR)
+        self.skinEditWidget.setDarkPallete()
 
         self.copySkinWeightsButton = QtWidgets.QPushButton("Copy Skin Weights and Influences")
         self.copySkinWeightsButton.setIcon(QtGui.QIcon(":copySkinWeight"))

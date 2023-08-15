@@ -64,7 +64,7 @@ class ControlsWidget(QtWidgets.QWidget):
 
         self.editControlsWidget = collapseableWidget.CollapsibleWidget('Edit Controls')
         self.editControlsWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
-        self.editControlsWidget.setWidgetBackground(style.EDIT_BG_WIDGET_COLOR)
+        self.editControlsWidget.setDarkPallete()
 
         self.controlAxisXRadioButton = QtWidgets.QRadioButton('x')
         self.controlAxisXRadioButton.setChecked(True)

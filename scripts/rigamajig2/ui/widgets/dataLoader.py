@@ -479,7 +479,7 @@ class DataLoader(QtWidgets.QWidget):
         d = abstract_data.AbstractData()
         d.read(fileInfo.filePath())
 
-        tooltipFormatting = f"""{fileInfo.filePath()}\n\nKeys: {d.getKeys()}"""
+        tooltipFormatting = fileInfo.filePath()
 
         item.setToolTip(0, tooltipFormatting)
 

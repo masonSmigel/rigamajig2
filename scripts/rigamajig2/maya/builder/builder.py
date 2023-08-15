@@ -257,7 +257,7 @@ class Builder(object):
         saveDict = core.performLayeredSave(dataToSave=cmptList,
                                            fileStack=fileStack,
                                            dataType="AbstractData",
-                                           appendMethod="merge",
+                                           method="merge",
                                            doSave=False)
 
         for dataFile in saveDict:
@@ -380,7 +380,7 @@ class Builder(object):
         # path = path or rigFileData
 
         allControls = controlShapes.gatherControlShapes()
-        core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", appendMethod="merge")
+        core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", method="merge")
 
         # controlShapes.saveControlShapes(path)
         logger.info("Control Shapes Save -- Complete")
@@ -434,7 +434,7 @@ class Builder(object):
         # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
 
         allPsds = deform.gatherPoseReaders()
-        core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", appendMethod="merge")
+        core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method="merge")
         # deform.savePoseReaders(path)
         logger.info("Pose Readers Save -- Complete")
 

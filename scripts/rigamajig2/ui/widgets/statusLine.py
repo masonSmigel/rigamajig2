@@ -75,17 +75,17 @@ class StatusLine(QtWidgets.QWidget):
             else:
                 raise ValueError("f{icon} is not a valid icon type")
 
-    # def paintEvent(self, *args, **kwargs):
-    #     """
-    #     this is just a bit of a fun thing to add rounded corners to the widget. Every time the paint event is called we
-    #     create a roundedRectMask for the widget and paint it accordingly.
-    #     """
-    #     super(StatusLine, self).paintEvent(*args, **kwargs)
-    #     radius = 10
-    #     path = QtGui.QPainterPath()
-    #     path.addRoundedRect(self.rect(), radius, radius)
-    #     mask = QtGui.QRegion(path.toFillPolygon().toPolygon())
-    #     self.setMask(mask)
+    def paintEvent(self, *args, **kwargs):
+        """
+        this is just a bit of a fun thing to add rounded corners to the widget. Every time the paint event is called we
+        create a roundedRectMask for the widget and paint it accordingly.
+        """
+        super(StatusLine, self).paintEvent(*args, **kwargs)
+        radius = 10
+        path = QtGui.QPainterPath()
+        path.addRoundedRect(self.rect(), radius, radius)
+        mask = QtGui.QRegion(path.toFillPolygon().toPolygon())
+        self.setMask(mask)
 
     def openScriptEditor(self):
         """Open the script Editor"""

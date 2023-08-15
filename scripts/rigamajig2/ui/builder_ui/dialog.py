@@ -32,6 +32,7 @@ from rigamajig2.shared import common
 from rigamajig2.ui.widgets.workspace_control import DockableUI
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, statusLine, QLine
 from rigamajig2.ui.builder_ui import recent_files
+from rigamajig2.ui.builder_ui import style
 
 # Import the main widgets for the builder dialog
 from rigamajig2.ui.builder_ui import model_widget
@@ -203,6 +204,7 @@ class BuilderDialog(DockableUI):
 
         buildGroup = QtWidgets.QGroupBox('Build')
         buildGroup.setLayout(buildLayout)
+        #buildGroup.setAutoFillBackground(False)
 
         # lower persistant buttons (AKA close)
         lowButtonsLayout = QtWidgets.QVBoxLayout()

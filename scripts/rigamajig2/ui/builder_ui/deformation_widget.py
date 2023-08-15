@@ -15,9 +15,10 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 # RIGAMAJIG2
+import rigamajig2.maya.builder.constants
 from rigamajig2.shared import common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget
-from rigamajig2.ui.builder_ui import constants
+from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES, DEFORM_LAYERS
 from rigamajig2.maya.rig import deformLayer
 from rigamajig2.maya import skinCluster
@@ -46,7 +47,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.deformLayerPathSelector = pathSelector.PathSelector(
             "layers:",
             caption='Select a deformationLayer file',
-            fileFilter=constants.JSON_FILTER,
+            fileFilter=common.JSON_FILTER,
             fileMode=1)
 
         self.loadDeformLayersButton = QtWidgets.QPushButton("Load Deform Layers")
@@ -55,8 +56,8 @@ class DeformationWidget(QtWidgets.QWidget):
         self.saveDeformLayersButton.setIcon(QtGui.QIcon(common.getIcon("saveDeformLayers.png")))
 
         self.addDeformLayersWidget = collapseableWidget.CollapsibleWidget('Add deformation Layers')
-        self.addDeformLayersWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
-        self.addDeformLayersWidget.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
+        self.addDeformLayersWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
+        self.addDeformLayersWidget.setWidgetBackground(style.EDIT_BG_WIDGET_COLOR)
         self.suffixLineEdit = QtWidgets.QLineEdit()
         self.suffixLineEdit.setPlaceholderText("suffix")
 
@@ -69,7 +70,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.skinPathSelector = pathSelector.PathSelector(
             "skin:",
             caption="Select the skin weight folder",
-            fileFilter=constants.JSON_FILTER,
+            fileFilter=common.JSON_FILTER,
             fileMode=2)
         self.loadAllSkinButton = QtWidgets.QPushButton("Load All Skins")
         self.loadAllSkinButton.setIcon(QtGui.QIcon(common.getIcon("loadSkincluster.png")))
@@ -78,21 +79,21 @@ class DeformationWidget(QtWidgets.QWidget):
         self.saveSkinsButton = QtWidgets.QPushButton("Save Skin")
         self.saveSkinsButton.setIcon(QtGui.QIcon(common.getIcon("saveSkincluster.png")))
 
-        self.loadDeformLayersButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.saveDeformLayersButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.loadAllSkinButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.loadSingleSkinButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.saveSkinsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadDeformLayersButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.saveDeformLayersButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.loadAllSkinButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.loadSingleSkinButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.saveSkinsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
 
-        self.loadAllSkinButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.loadSingleSkinButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.saveSkinsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.loadDeformLayersButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.saveDeformLayersButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.loadAllSkinButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.loadSingleSkinButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.saveSkinsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.loadDeformLayersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.saveDeformLayersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
         self.skinEditWidget = collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
-        self.skinEditWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
-        self.skinEditWidget.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
+        self.skinEditWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
+        self.skinEditWidget.setWidgetBackground(style.EDIT_BG_WIDGET_COLOR)
 
         self.copySkinWeightsButton = QtWidgets.QPushButton("Copy Skin Weights and Influences")
         self.copySkinWeightsButton.setIcon(QtGui.QIcon(":copySkinWeight"))
@@ -102,17 +103,17 @@ class DeformationWidget(QtWidgets.QWidget):
         self.SHAPESPathSelector = pathSelector.PathSelector(
             "SHAPES:",
             caption="Select a SHAPES Node Setup",
-            fileFilter=constants.MEL_FILTER,
+            fileFilter=rigamajig2.shared.common.MEL_FILTER,
             fileMode=2)
         self.saveSHAPESButton = QtWidgets.QPushButton("Save SHAPES Setup")
         self.saveSHAPESButton.setIcon(QtGui.QIcon(common.getIcon("saveShapesSetup.png")))
         self.loadSHAPESButton = QtWidgets.QPushButton("Load SHAPES Setup")
         self.loadSHAPESButton.setIcon(QtGui.QIcon(common.getIcon("loadShapesSetup.png")))
 
-        self.saveSHAPESButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.saveSHAPESButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.loadSHAPESButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.loadSHAPESButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.saveSHAPESButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.saveSHAPESButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.loadSHAPESButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.loadSHAPESButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -233,7 +234,10 @@ class DeformationWidget(QtWidgets.QWidget):
     def loadSingleSkin(self):
         """Load a single skin file"""
         from rigamajig2.maya.builder import deform
-        path = cmds.fileDialog2(ds=2, cap="Select a skin file", ff=constants.JSON_FILTER, okc="Select",
+        path = cmds.fileDialog2(dialogStyle=2,
+                                caption="Select a skin file",
+                                fileFilter=common.JSON_FILTER,
+                                okc="Select",
                                 dir=self.skinPathSelector.getPath())
         if path:
             deform.loadSingleSkin(path[0])

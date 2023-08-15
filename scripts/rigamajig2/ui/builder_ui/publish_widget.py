@@ -14,8 +14,9 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 # RIGAMAJIG2
+from rigamajig2.shared import common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
-from rigamajig2.ui.builder_ui import constants as ui_constants
+from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 
@@ -43,15 +44,15 @@ class PublishWidget(QtWidgets.QWidget):
         self.outPathSelector = pathSelector.PathSelector(
             "out file:",
             caption="Select a location to save",
-            fileFilter=ui_constants.MAYA_FILTER,
+            fileFilter=common.MAYA_FILTER,
             fileMode=2
             )
         self.mergeDeformLayersButton = QtWidgets.QPushButton("Merge Deform Layers")
 
         self.dryPublishButton = QtWidgets.QPushButton("Dry Publish Rig")
-        # self.dryPublishButton.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
+        # self.dryPublishButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.publishButton = QtWidgets.QPushButton("Publish Rig")
-        self.publishButton.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
+        self.publishButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
 
         self.outFileTypeComboBox = QtWidgets.QComboBox()
         self.outFileTypeComboBox.addItem('ma')

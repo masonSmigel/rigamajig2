@@ -302,3 +302,8 @@ def getIcon(icon):
     """
     iconPath = ICONS_PATH + "/" + icon
     return iconPath
+
+
+MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
+JSON_FILTER = "Json Files (*.json)"
+MEL_FILTER = "Mel Files (*.mel)"

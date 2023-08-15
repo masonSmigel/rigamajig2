@@ -17,9 +17,11 @@ from PySide2 import QtWidgets
 import maya.cmds as cmds
 
 # RIGAMAJIG2
+import rigamajig2.maya.builder.constants
+import rigamajig2.shared.common
 from rigamajig2.shared import common
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
-from rigamajig2.ui.builder_ui import constants as ui_constants
+from rigamajig2.ui.builder_ui import style as ui_constants
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 
@@ -42,7 +44,7 @@ class ModelWidget(QtWidgets.QWidget):
         self.modelPathSelector = pathSelector.PathSelector(
             "model:",
             caption="Select a Model file",
-            fileFilter=ui_constants.MAYA_FILTER,
+            fileFilter=rigamajig2.shared.common.MAYA_FILTER,
             fileMode=1
             )
         self.importModelButton = QtWidgets.QPushButton('Import Model')

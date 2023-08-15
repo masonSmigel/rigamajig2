@@ -17,7 +17,7 @@ from PySide2 import QtWidgets
 from rigamajig2.shared import common
 from rigamajig2.ui.widgets import dataLoader, collapseableWidget, scriptRunner
 from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
-from rigamajig2.ui.builder_ui import constants
+from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui import controls_widget
 from rigamajig2.maya.builder import core
 
@@ -48,7 +48,7 @@ class BuildWidget(QtWidgets.QWidget):
         self.psdDataLoader = dataLoader.DataLoader(
             "PSD Readers:",
             caption="Select a Pose Reader File",
-            fileFilter=constants.JSON_FILTER,
+            fileFilter=common.JSON_FILTER,
             fileMode=1,
             dataFilteringEnabled=True,
             dataFilter=["PSDData"])
@@ -58,13 +58,13 @@ class BuildWidget(QtWidgets.QWidget):
         self.savePsdButton = QtWidgets.QPushButton("Save Pose Readers")
         self.savePsdButton.setIcon(QtGui.QIcon(common.getIcon("loadPsd.png")))
 
-        self.loadPsdButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.savePsdButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.loadPsdButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.savePsdButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.loadPsdButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.savePsdButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.loadPsdButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.savePsdButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
         self.loadPsdModeCheckbox = QtWidgets.QComboBox()
-        self.loadPsdModeCheckbox.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.loadPsdModeCheckbox.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.loadPsdModeCheckbox.addItem("append")
         self.loadPsdModeCheckbox.addItem("replace")
 

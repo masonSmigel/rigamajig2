@@ -25,11 +25,12 @@ import rigamajig2.maya.joint
 import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.meta as meta
 from rigamajig2.ui.widgets import dataLoader, collapseableWidget, sliderGrp
-from rigamajig2.ui.builder_ui import constants
+from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder import guides
 from rigamajig2.maya.builder import core
 
 from rigamajig2.maya.builder.constants import SKELETON_POS
+from rigamajig2.shared.common import JSON_FILTER
 from rigamajig2.maya.cmpts.base import GUIDE_STEP
 
 
@@ -57,7 +58,7 @@ class JointWidget(QtWidgets.QWidget):
         self.jointPositionDataLoader = dataLoader.DataLoader(
             "Joint Positions: ",
             caption="Select a Skeleton position file",
-            fileFilter=constants.JSON_FILTER,
+            fileFilter=common.JSON_FILTER,
             fileMode=1,
             dataFilteringEnabled=True,
             dataFilter=["JointData"]
@@ -68,14 +69,14 @@ class JointWidget(QtWidgets.QWidget):
                                                              "Save joints")
         self.saveJointPositionButton.setIcon(QtGui.QIcon(common.getIcon("saveJoints.png")))
 
-        self.loadJointPositionButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.saveJointPositionButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.loadJointPositionButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.saveJointPositionButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.loadJointPositionButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.saveJointPositionButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.loadJointPositionButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.saveJointPositionButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
         self.skeletonEditWidget = collapseableWidget.CollapsibleWidget('Edit Skeleton')
-        self.skeletonEditWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
-        self.skeletonEditWidget.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
+        self.skeletonEditWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
+        self.skeletonEditWidget.setWidgetBackground(style.EDIT_BG_WIDGET_COLOR)
 
         self.jointToRotationButton = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Rotation")
         self.jointToOrientationButton = QtWidgets.QPushButton(QtGui.QIcon(":orientJoint"), "To Orientation")

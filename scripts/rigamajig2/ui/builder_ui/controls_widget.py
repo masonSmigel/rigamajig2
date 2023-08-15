@@ -20,7 +20,7 @@ from rigamajig2.maya import meta
 import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
 from rigamajig2.ui.widgets import dataLoader, collapseableWidget, overrideColorer
-from rigamajig2.ui.builder_ui import constants
+from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import CONTROL_SHAPES
 
 
@@ -44,7 +44,7 @@ class ControlsWidget(QtWidgets.QWidget):
         self.controlDataLoader = dataLoader.DataLoader(
             "Controls:",
             caption="Select a Control Shape file",
-            fileFilter=constants.JSON_FILTER,
+            fileFilter=common.JSON_FILTER,
             fileMode=1,
             dataFilteringEnabled=True,
             dataFilter=["CurveData"]
@@ -54,17 +54,17 @@ class ControlsWidget(QtWidgets.QWidget):
         self.loadColorCheckBox.setFixedWidth(25)
         self.loadControlsButton = QtWidgets.QPushButton("Load Controls")
         self.loadControlsButton.setIcon(QtGui.QIcon(common.getIcon("loadControls.png")))
-        self.loadControlsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.loadControlsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.loadControlsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.loadControlsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
         self.saveControlsButton = QtWidgets.QPushButton("Save Controls")
         self.saveControlsButton.setIcon(QtGui.QIcon(common.getIcon("saveControls.png")))
-        self.saveControlsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.saveControlsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.saveControlsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.saveControlsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
         self.editControlsWidget = collapseableWidget.CollapsibleWidget('Edit Controls')
-        self.editControlsWidget.setHeaderBackground(constants.EDIT_BG_HEADER_COLOR)
-        self.editControlsWidget.setWidgetBackground(constants.EDIT_BG_WIDGET_COLOR)
+        self.editControlsWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
+        self.editControlsWidget.setWidgetBackground(style.EDIT_BG_WIDGET_COLOR)
 
         self.controlAxisXRadioButton = QtWidgets.QRadioButton('x')
         self.controlAxisXRadioButton.setChecked(True)

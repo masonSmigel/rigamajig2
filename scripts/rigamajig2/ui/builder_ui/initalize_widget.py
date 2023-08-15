@@ -32,7 +32,7 @@ from rigamajig2.maya import container as rig_container
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import core
 from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp, dataLoader
-from rigamajig2.ui.builder_ui import constants
+from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import GUIDES, COMPONENTS
 
 ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
@@ -61,7 +61,7 @@ class InitializeWidget(QtWidgets.QWidget):
         self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Initialize Rig', addCheckbox=True)
         self.componentsDataLoader = dataLoader.DataLoader("Components:",
                                                           caption="Select a Component File",
-                                                          fileFilter=constants.JSON_FILTER,
+                                                          fileFilter=common.JSON_FILTER,
                                                           fileMode=1,
                                                           dataFilteringEnabled=True,
                                                           dataFilter=["AbstractData"])
@@ -73,20 +73,20 @@ class InitializeWidget(QtWidgets.QWidget):
         self.addComponentsButton = QtWidgets.QPushButton("Add Components")
         self.addComponentsButton.setIcon(QtGui.QIcon(":freeformOff.png"))
 
-        self.loadComponentsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.saveComponentsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.addComponentsButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.loadComponentsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.saveComponentsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.addComponentsButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.loadComponentsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.saveComponentsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.addComponentsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.loadComponentsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.saveComponentsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.addComponentsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
         self.componentManager = ComponentManager()
 
         self.initalizeBuildButton = QtWidgets.QPushButton("Guide Components")
-        self.initalizeBuildButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
+        self.initalizeBuildButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.guideDataLoader = dataLoader.DataLoader("guides:",
                                                      caption="Select a guide file",
-                                                     fileFilter=constants.JSON_FILTER,
+                                                     fileFilter=common.JSON_FILTER,
                                                      fileMode=1,
                                                      dataFilteringEnabled=True,
                                                      dataFilter=["JointData", "GuideData"])
@@ -96,10 +96,10 @@ class InitializeWidget(QtWidgets.QWidget):
         self.loadGuidesButton.setIcon(QtGui.QIcon(common.getIcon("loadGuides.png")))
         self.saveGuidesButton.setIcon(QtGui.QIcon(common.getIcon("saveGuides.png")))
 
-        self.loadGuidesButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.saveGuidesButton.setFixedHeight(constants.LARGE_BTN_HEIGHT)
-        self.loadGuidesButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
-        self.saveGuidesButton.setIconSize(constants.LARGE_BTN_ICON_SIZE)
+        self.loadGuidesButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.saveGuidesButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.loadGuidesButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.saveGuidesButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
     def createLayouts(self):
         """ Create Layouts"""

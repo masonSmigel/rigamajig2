@@ -261,6 +261,9 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
         for dataFile in searchFileStack:
             nodesPreviouslyInFile = sourceNodesDict[dataFile]
             if node in nodesPreviouslyInFile:
+                # if we have already saved the node we can skip it!
+                if node in previouslySavedNodes:
+                    continue
                 # append the node to the list
                 saveDataDict[dataFile].append(node)
                 previouslySavedNodes.append(node)
@@ -316,9 +319,6 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
         message += f"\nDeleted Nodes: {len(deletedNodes)}"
         # message += f"\n\n Check the script editor for more info"
 
-        # logger.info(f"New Nodes: {unsavedNodes}")
-        # logger.info(f"Deleted Nodes: {deletedNodes}")
-
         confirmDialog = cmds.confirmDialog(
             title=f"Save {dataType}",
             message=message,
@@ -332,10 +332,30 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
 
     # Save the data
     if doSave:
+
+        # we can create a data object of all Deleted nodes to ensure they are removed from all newly saved data
+        deletedDataObj = createDataClassInstance(dataType=dataType)
+        deletedDataObj.gatherDataIterate(deletedNodes)
+
         for dataFile in saveDataDict:
-            dataClass = createDataClassInstance(dataType=dataType)
-            dataClass.gatherDataIterate(saveDataDict[dataFile])
-            dataClass.write(dataFile)
+            # check if the filesData is empty. If it is we can skip it.
+            if not saveDataDict[dataFile]:
+                continue
+
+            # read all the old data. Anything that is NOT updated it will stay the same as the previous file.
+            oldDataObj = createDataClassInstance(dataType=dataType)
+            oldDataObj.read(dataFile)
+
+            # create a dictonary with data that is updated from our scene
+            newDataObj = createDataClassInstance(dataType=dataType)
+            newDataObj.gatherDataIterate(saveDataDict[dataFile])
+
+            # remove all delted nodes and add the two data objects.
+            oldDataCleanObj = oldDataObj - deletedDataObj
+            mergedDataObj = oldDataCleanObj + newDataObj
+
+            # write out the file
+            mergedDataObj.write(dataFile)
             logger.info(f"{dataType} saved to {dataFile}")
 
     return saveDataDict

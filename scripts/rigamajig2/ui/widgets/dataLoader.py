@@ -275,7 +275,7 @@ class DataLoader(QtWidgets.QWidget):
         """ Set the label text"""
         self.pathLabel.setText(text)
 
-    def getFileList(self, absoulte=False):
+    def getFileList(self, absolute=False, ):
         """
         Get a list of all files used in this widget.
         :return:
@@ -289,11 +289,29 @@ class DataLoader(QtWidgets.QWidget):
             path = item.data(0, QtCore.Qt.UserRole)
             path = pathlib.Path(path)
 
-            if self.relativePath and absoulte == False:
+            if self.relativePath and absolute == False:
                 path = path.relative_to(self.relativePath)
             fileList.append(str(path))
 
         return fileList
+
+    def getSelectedFiles(self, absolute=False):
+        """ Get a list of the selected files"""
+
+        if not self.pathTreeWidget.topLevelItemCount() >0:
+            return False
+
+        fileList = list()
+        for item in self.getSelectedItems():
+            path = item.data(0, QtCore.Qt.UserRole)
+            path = pathlib.Path(path)
+
+            if self.relativePath and absolute == False:
+                path = path.relative_to(self.relativePath)
+            fileList.append(str(path))
+
+        return fileList
+
 
     def clear(self):
         self.pathTreeWidget.clear()

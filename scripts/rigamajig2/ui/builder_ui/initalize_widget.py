@@ -189,7 +189,10 @@ class InitializeWidget(QtWidgets.QWidget):
     def saveComponents(self):
         """ Save component setup from json using the builder """
         self.builder.loadMetadataToComponentSettings()
-        self.builder.saveComponents(self.componentsDataLoader.getFileList(absoulte=True))
+
+        fileList = (self.componentsDataLoader.getSelectedFiles(absolute=True) or
+                    self.componentsDataLoader.getFileList(absolute=True))
+        self.builder.saveComponents(fileStack=fileList)
 
     def loadGuides(self):
         """ Load guide setup to json using the builder """
@@ -211,7 +214,7 @@ class InitializeWidget(QtWidgets.QWidget):
             if result != 'Continue':
                 return
 
-        self.builder.saveGuideData(self.guideDataLoader.getFileList(absoulte=True))
+        self.builder.saveGuideData(self.guideDataLoader.getFileList(absolute=True))
 
     def initalizeRig(self):
         """Run the comppnent intialize on the builder and update the UI """

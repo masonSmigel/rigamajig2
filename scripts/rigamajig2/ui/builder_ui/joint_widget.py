@@ -222,8 +222,9 @@ class JointWidget(QtWidgets.QWidget):
 
             if result != 'Continue':
                 return
-
-        self.builder.saveJoints(self.jointPositionDataLoader.getFileList(True))
+        fileList = (self.jointPositionDataLoader.getSelectedFiles(absolute=True) or
+                    self.jointPositionDataLoader.getFileList(absolute=True))
+        self.builder.saveJoints(fileStack=fileList)
 
     def pinJoints(self):
         """ Pin selected joints"""

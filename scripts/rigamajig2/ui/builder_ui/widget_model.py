@@ -2,14 +2,13 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: model_widget.py
+    file: widget_model.py
     author: masonsmigel
     date: 07/2022
     discription: 
 
 """
 # PYTHON
-from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
@@ -20,7 +19,7 @@ import maya.cmds as cmds
 import rigamajig2.maya.builder.constants
 import rigamajig2.shared.common
 from rigamajig2.shared import common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
+from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget, scriptRunner
 from rigamajig2.ui.builder_ui import style as ui_constants
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core

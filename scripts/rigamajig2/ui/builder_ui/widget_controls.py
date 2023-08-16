@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: controls_widget.py
+    file: widget_controls.py
     author: masonsmigel
     date: 07/2022
     discription: 
@@ -19,7 +19,7 @@ from rigamajig2.shared import common
 from rigamajig2.maya import meta
 import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
-from rigamajig2.ui.widgets import dataLoader, collapseableWidget, overrideColorer
+from rigamajig2.ui.builder_ui.widgets import dataLoader, collapseableWidget, overrideColorer
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import CONTROL_SHAPES
 

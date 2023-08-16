@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: initalize_widget.py
+    file: widget_initialize.py
     author: masonsmigel
     date: 07/2022
     discription: 
@@ -31,7 +31,7 @@ from rigamajig2.maya import naming as naming
 from rigamajig2.maya import container as rig_container
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import core
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, sliderGrp, dataLoader
+from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget, sliderGrp, dataLoader
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import GUIDES, COMPONENTS
 

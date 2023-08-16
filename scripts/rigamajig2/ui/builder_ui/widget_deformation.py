@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: deformation_widget.py
+    file: widget_deformation.py
     author: masonsmigel
     date: 07/2022
     discription: 
@@ -17,7 +17,7 @@ from PySide2 import QtWidgets
 # RIGAMAJIG2
 import rigamajig2.maya.builder.constants
 from rigamajig2.shared import common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget
+from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES, DEFORM_LAYERS
 from rigamajig2.maya.rig import deformLayer

@@ -15,10 +15,9 @@ from PySide2 import QtWidgets
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
-from rigamajig2.ui.widgets import dataLoader, collapseableWidget, scriptRunner
+from rigamajig2.ui.builder_ui.widgets import dataLoader, collapseableWidget, scriptRunner
 from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
 from rigamajig2.ui.builder_ui import style
-from rigamajig2.ui.builder_ui import controls_widget
 from rigamajig2.maya.builder import core
 
 

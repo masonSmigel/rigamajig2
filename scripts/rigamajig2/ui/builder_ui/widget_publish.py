@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: publish_widget.py
+    file: widget_publish.py
     author: masonsmigel
     date: 07/2022
     discription: 
@@ -10,12 +10,11 @@
 """
 # PYTHON
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
+from rigamajig2.ui.builder_ui.widgets import pathSelector,collapseableWidget, scriptRunner
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core

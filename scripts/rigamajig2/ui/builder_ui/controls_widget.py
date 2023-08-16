@@ -196,9 +196,8 @@ class ControlsWidget(QtWidgets.QWidget):
 
             if result != 'Continue':
                 return
-        fileList = (self.controlDataLoader.getSelectedFiles(absolute=True) or
-                    self.controlDataLoader.getFileList(absolute=True))
-        self.builder.saveControlShapes(fileStack=fileList)
+
+        self.builder.saveControlShapes(self.controlDataLoader.getFileList(absolute=True))
 
     def mirrorControl(self):
         """ Mirror a control shape """

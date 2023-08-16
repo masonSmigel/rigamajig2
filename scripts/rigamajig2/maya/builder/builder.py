@@ -120,11 +120,13 @@ class Builder(object):
             guides.loadJoints(absPath)
             logger.info(f"Joints loaded : {path}")
 
-    def saveJoints(self, fileStack=None):
+    def saveJoints(self, fileStack=None, method="merge"):
+
         """
         Save the joint Data to a json file
 
         :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
+        :param str method: method of data merging to apply. Default is "merge"
         """
         #
         # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKELETON_POS))
@@ -132,7 +134,7 @@ class Builder(object):
 
         fileStack = common.toList(fileStack)
         dataToSave = guides.gatherJoints()
-        core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData")
+        core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData", method=method)
         logger.info("Joint positions Saved -- complete")
 
     def initalize(self):
@@ -245,19 +247,20 @@ class Builder(object):
             self.updateMaya()
         logger.info("optimize -- complete")
 
-    def saveComponents(self, fileStack=None):
+    def saveComponents(self, fileStack=None, method="merge"):
         """
         Save out components to a file.
         This only saves compoonent settings such as name, inputs, spaces and names.
 
         :param str fileStack: path to the component data file
+        :param str method: method of data merging to apply. Default is "merge"
         """
 
         cmptList = [c.name for c in self.componentList]
         saveDict = core.performLayeredSave(dataToSave=cmptList,
                                            fileStack=fileStack,
                                            dataType="AbstractData",
-                                           method="merge",
+                                           method=method,
                                            doSave=False)
 
         for dataFile in saveDict:
@@ -370,17 +373,16 @@ class Builder(object):
             self.updateMaya()
             logger.info(f"control shapes loaded: {path}")
 
-    def saveControlShapes(self, fileStack=None):
+    def saveControlShapes(self, fileStack=None, method='merge'):
         """
         Save the control shapes
 
         :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
+        :param str method: method of data merging to apply. Default is "merge"
         """
-        # rigFileData = common.toList(self.getAbsoultePath(self.getRigData(self.rigFile, constants.CONTROL_SHAPES)))[-1]
-        # path = path or rigFileData
 
         allControls = controlShapes.gatherControlShapes()
-        core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", method="merge")
+        core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", method=method)
 
         # controlShapes.saveControlShapes(path)
         logger.info("Control Shapes Save -- Complete")
@@ -398,17 +400,18 @@ class Builder(object):
             if guides.loadGuideData(absPath):
                 logger.info(f"guides loaded: {path}")
 
-    def saveGuideData(self, fileStack=None):
+    def saveGuideData(self, fileStack=None, method="merge"):
         """
         Save guides data
 
         :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
+        :param str method: method of data merging to apply. Default is "merge"
         """
         # rigFileData = common.toList(self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES)))[-1]
         # path = path or rigFileData
         fileStack = common.toList(fileStack)
         dataToSave = guides.gatherGuides()
-        core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData")
+        core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData", method=method)
         logger.info("Guides Save  -- complete")
 
     def loadPoseReaders(self, paths=None, replace=True):
@@ -425,16 +428,17 @@ class Builder(object):
             if deform.loadPoseReaders(absPath, replace=replace):
                 logger.info(f"pose readers loaded: {path}")
 
-    def savePoseReaders(self, fileStack=None):
+    def savePoseReaders(self, fileStack=None, method="merge"):
         """
         Save out pose readers
 
         :param str fileStack: Path to the json file. if none is provided use the data from the rigFile.
+        :param str method: method of data merging to apply. Default is "merge"
         """
         # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
 
         allPsds = deform.gatherPoseReaders()
-        core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method="merge")
+        core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method=method)
         # deform.savePoseReaders(path)
         logger.info("Pose Readers Save -- Complete")
 

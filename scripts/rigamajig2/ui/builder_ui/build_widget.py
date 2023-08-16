@@ -164,9 +164,7 @@ class BuildWidget(QtWidgets.QWidget):
 
     def savePoseReaders(self):
         """ Save pose reader setup to json using the builder """
-        fileList = (self.psdDataLoader.getSelectedFiles(absolute=True) or
-                    self.psdDataLoader.getFileList(absolute=True))
-        self.builder.savePoseReaders(paths=fileList)
+        self.builder.savePoseReaders(self.psdDataLoader.getFileList(absolute=True))
 
     def completeBuild(self):
         """ Execute a complete rig build (steps intialize - finalize)"""

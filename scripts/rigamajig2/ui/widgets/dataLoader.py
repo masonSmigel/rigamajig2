@@ -95,27 +95,27 @@ class DataLoader(QtWidgets.QWidget):
         self.createConnections()
 
     def createActions(self):
-        self.loadAllDataAction = QtWidgets.QAction("Load All Data", self)
-        self.loadAllDataAction.setIcon(QtGui.QIcon(":newLayerEmpty.png"))
-        self.loadAllDataAction.triggered.connect(self.loadAllData)
-
-        self.loadSelectedDataAction = QtWidgets.QAction("Load Selected Data", self)
+        self.loadSelectedDataAction = QtWidgets.QAction("Load Selected", self)
         self.loadSelectedDataAction.setIcon(QtGui.QIcon(":newLayerEmpty.png"))
         self.loadSelectedDataAction.triggered.connect(self.loadSelectedData)
+
+        self.saveSelectedAction = QtWidgets.QAction("Save Selected", self)
+        self.saveSelectedAction.setIcon(QtGui.QIcon(":save.png"))
+        self.saveSelectedAction.triggered.connect(self.saveSelectedData)
 
         self.showInFolderAction = QtWidgets.QAction("Show in Folder", self)
         self.showInFolderAction.setIcon(QtGui.QIcon(":fileOpen.png"))
         self.showInFolderAction.triggered.connect(self.showInFolder)
 
-        self.openFileAction = QtWidgets.QAction("Open Data File", self)
+        self.openFileAction = QtWidgets.QAction("Open Data", self)
         self.openFileAction.setIcon(QtGui.QIcon(":openScript.png"))
         self.openFileAction.triggered.connect(self.openScript)
 
-        self.addExistingAction = QtWidgets.QAction("Add Existing Data File", self)
+        self.addExistingAction = QtWidgets.QAction("Add Existing Data", self)
         self.addExistingAction.setIcon(QtGui.QIcon(":newPreset.png"))
         self.addExistingAction.triggered.connect(self.pickPath)
 
-        self.deleteFileAction = QtWidgets.QAction("Remove Data File", self)
+        self.deleteFileAction = QtWidgets.QAction("Remove Data", self)
         self.deleteFileAction.setIcon(QtGui.QIcon(":trash.png"))
         self.deleteFileAction.triggered.connect(self.deleteSelectedItems)
 
@@ -197,8 +197,9 @@ class DataLoader(QtWidgets.QWidget):
         """Create the right click context menu"""
 
         menu = QtWidgets.QMenu(self.pathTreeWidget)
-        menu.addAction(self.loadAllDataAction)
         menu.addAction(self.loadSelectedDataAction)
+        menu.addSeparator()
+        menu.addAction(self.saveSelectedAction)
         menu.addSeparator()
         menu.addAction(self.showInFolderAction)
         menu.addAction(self.openFileAction)
@@ -298,7 +299,7 @@ class DataLoader(QtWidgets.QWidget):
     def getSelectedFiles(self, absolute=False):
         """ Get a list of the selected files"""
 
-        if not self.pathTreeWidget.topLevelItemCount() >0:
+        if not self.pathTreeWidget.topLevelItemCount() > 0:
             return False
 
         fileList = list()
@@ -311,7 +312,6 @@ class DataLoader(QtWidgets.QWidget):
             fileList.append(str(path))
 
         return fileList
-
 
     def clear(self):
         self.pathTreeWidget.clear()
@@ -444,8 +444,6 @@ class DataLoader(QtWidgets.QWidget):
             itemFilePath = item.data(0, QtCore.Qt.UserRole)
             self.loadDataFromFile(itemFilePath)
 
-            print(f"loading: {itemFilePath}")
-
     def loadSelectedData(self):
         """Load only data from the selected object"""
         selectedItems = self.getSelectedItems()
@@ -455,6 +453,29 @@ class DataLoader(QtWidgets.QWidget):
         for item in selectedItems:
             itemFilePath = item.data(0, QtCore.Qt.UserRole)
             self.loadDataFromFile(itemFilePath)
+
+    def saveSelectedData(self):
+        """Load only data from the selected object"""
+        items = self.getSelectedItems()
+        item = items[-1] if items else None
+
+        if not item:
+            return
+
+        sceneSelection = cmds.ls(sl=True)
+
+        dataFile = item.data(0, QtCore.Qt.UserRole)
+        dataType = abstract_data.AbstractData.getDataType(dataFile)
+
+        # read the current data into the data object
+        dataObj = core.createDataClassInstance(dataType)
+        dataObj.read(dataFile)
+
+        # gather data from the new selection
+        dataObj.gatherDataIterate(sceneSelection)
+
+        dataObj.write(dataFile)
+        print(f"Saved: {sceneSelection} into {dataFile}")
 
     def deleteSelectedItems(self):
         """ delete """

@@ -189,10 +189,7 @@ class InitializeWidget(QtWidgets.QWidget):
     def saveComponents(self):
         """ Save component setup from json using the builder """
         self.builder.loadMetadataToComponentSettings()
-
-        fileList = (self.componentsDataLoader.getSelectedFiles(absolute=True) or
-                    self.componentsDataLoader.getFileList(absolute=True))
-        self.builder.saveComponents(fileStack=fileList)
+        self.builder.saveComponents(self.componentsDataLoader.getFileList(absolute=True))
 
     def loadGuides(self):
         """ Load guide setup to json using the builder """

@@ -507,7 +507,7 @@ def connectExistingBPMs(skinCluster, influences=None):
             cmds.connectAttr("{}.worldInverseMatrix".format(bpmInfluence),
                              "{}.bindPreMatrix[{}]".format(skinCluster, index), f=True)
         else:
-            raise Exception("No Bpm exists for {}".format(influence))
+            cmds.warning("No Bpm exists for {}".format(influence))
 
 
 def localize(skinclusters, transform):

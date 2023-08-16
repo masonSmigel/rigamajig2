@@ -134,8 +134,10 @@ class Builder(object):
 
         fileStack = common.toList(fileStack)
         dataToSave = guides.gatherJoints()
-        core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData", method=method)
-        logger.info("Joint positions Saved -- complete")
+        saveDict = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData", method=method)
+        if saveDict:
+            logger.info("Joint positions Saved -- complete")
+            return saveDict
 
     def initalize(self):
         """
@@ -275,7 +277,9 @@ class Builder(object):
             componentDataObj.write(dataFile)
             logger.info(f"Component Data saved to {dataFile}")
 
-        logger.info("Components Saved -- Complete")
+        if saveDict:
+            logger.info("Components Saved -- Complete")
+            return saveDict
 
     def loadComponents(self, paths=None):
         """
@@ -382,10 +386,10 @@ class Builder(object):
         """
 
         allControls = controlShapes.gatherControlShapes()
-        core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", method=method)
-
-        # controlShapes.saveControlShapes(path)
-        logger.info("Control Shapes Save -- Complete")
+        saveDict = core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", method=method)
+        if saveDict:
+            logger.info("Control Shapes Save -- Complete")
+            return saveDict
 
     def loadGuideData(self, paths=None):
         """
@@ -411,8 +415,10 @@ class Builder(object):
         # path = path or rigFileData
         fileStack = common.toList(fileStack)
         dataToSave = guides.gatherGuides()
-        core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData", method=method)
-        logger.info("Guides Save  -- complete")
+        saveDict = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData", method=method)
+        if saveDict:
+            logger.info("Guides Save  -- complete")
+            return saveDict
 
     def loadPoseReaders(self, paths=None, replace=True):
         """
@@ -438,9 +444,11 @@ class Builder(object):
         # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
 
         allPsds = deform.gatherPoseReaders()
-        core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method="merge")
+        saveDict = core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method="merge")
         # deform.savePoseReaders(path)
-        logger.info("Pose Readers Save -- Complete")
+        if saveDict:
+            logger.info("Pose Readers Save -- Complete")
+            return saveDict
 
     def loadDeformationData(self):
         """

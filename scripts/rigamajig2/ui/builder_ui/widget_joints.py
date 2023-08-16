@@ -24,6 +24,7 @@ import rigamajig2.maya.joint
 import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.meta as meta
 from rigamajig2.ui.builder_ui.widgets import sliderGrp, dataLoader, collapseableWidget
+from rigamajig2.ui.widgets import QPushButton
 from rigamajig2.ui.builder_ui import style
 
 from rigamajig2.maya.builder.constants import SKELETON_POS
@@ -61,9 +62,10 @@ class JointWidget(QtWidgets.QWidget):
             )
         self.loadJointPositionButton = QtWidgets.QPushButton("Load joints")
         self.loadJointPositionButton.setIcon(QtGui.QIcon(common.getIcon("loadJoints.png")))
-        self.saveJointPositionButton = QtWidgets.QPushButton(QtGui.QIcon(common.getIcon("saveJoints.png")),
-                                                             "Save joints")
+        self.saveJointPositionButton = QPushButton.RightClickableButton("Save joints")
         self.saveJointPositionButton.setIcon(QtGui.QIcon(common.getIcon("saveJoints.png")))
+        self.saveJointPositionButton.setToolTip("Left Click: Save joints into their source file. (new data appended to last item)"
+                                                "\nRight Click: Save all joints to a new file overriding parents")
 
         self.loadJointPositionButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.saveJointPositionButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
@@ -166,6 +168,7 @@ class JointWidget(QtWidgets.QWidget):
         self.cleanSkeletonButton.clicked.connect(self.cleanSkeleton)
         self.loadJointPositionButton.clicked.connect(self.loadJointsPositions)
         self.saveJointPositionButton.clicked.connect(self.saveJointPositions)
+        self.saveJointPositionButton.rightClicked.connect(self.saveJointPositionAsOverride)
         self.jointToRotationButton.clicked.connect(self.jointToRotation)
         self.jointToOrientationButton.clicked.connect(self.jointToOrientation)
         self.mirrorJointsButton.clicked.connect(self.mirrorJoint)
@@ -199,7 +202,7 @@ class JointWidget(QtWidgets.QWidget):
         """ load joints and positions"""
         self.builder.loadJoints(self.jointPositionDataLoader.getFileList())
 
-    def saveJointPositions(self):
+    def saveJointPositions(self, *args, method="merge"):
         """ save the joint positions"""
 
         isBuilt = False
@@ -220,7 +223,16 @@ class JointWidget(QtWidgets.QWidget):
             if result != 'Continue':
                 return
 
-        self.builder.saveJoints(self.jointPositionDataLoader.getFileList(absolute=True))
+        return self.builder.saveJoints(self.jointPositionDataLoader.getFileList(absolute=True), method=method)
+
+    def saveJointPositionAsOverride(self):
+        saveDict = self.saveJointPositions(method="overwrite")
+        currentFiles = self.jointPositionDataLoader.getFileList(absolute=True)
+        if saveDict:
+            savedFiles = list(saveDict.keys())
+            for savedFile in savedFiles:
+                if savedFile not in currentFiles:
+                    self.jointPositionDataLoader.selectPath(savedFile)
 
     def pinJoints(self):
         """ Pin selected joints"""

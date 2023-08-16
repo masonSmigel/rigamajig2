@@ -20,6 +20,7 @@ from rigamajig2.maya import meta
 import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
 from rigamajig2.ui.builder_ui.widgets import dataLoader, collapseableWidget, overrideColorer
+from rigamajig2.ui.widgets import QPushButton
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import CONTROL_SHAPES
 
@@ -57,10 +58,12 @@ class ControlsWidget(QtWidgets.QWidget):
         self.loadControlsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.loadControlsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
-        self.saveControlsButton = QtWidgets.QPushButton("Save Controls")
+        self.saveControlsButton = QPushButton.RightClickableButton("Save Controls")
         self.saveControlsButton.setIcon(QtGui.QIcon(common.getIcon("saveControls.png")))
         self.saveControlsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.saveControlsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.saveControlsButton.setToolTip("Left Click: Save controls into their source file (new data appended to last item)"
+                                           " \nRight Click: Save all controls to a new file overriding parents")
 
         self.editControlsWidget = collapseableWidget.CollapsibleWidget('Edit Controls')
         self.editControlsWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
@@ -147,6 +150,7 @@ class ControlsWidget(QtWidgets.QWidget):
         """ Create Connections"""
         self.loadControlsButton.clicked.connect(self.loadControlShapes)
         self.saveControlsButton.clicked.connect(self.saveControlShapes)
+        self.saveControlsButton.rightClicked.connect(self.saveControlShapesAsOverwrite)
         self.mirrorControlButton.clicked.connect(self.mirrorControl)
         self.setControlShapeButton.clicked.connect(self.setControlShape)
         self.replaceControlButton.clicked.connect(self.replaceControlShape)
@@ -182,7 +186,7 @@ class ControlsWidget(QtWidgets.QWidget):
         """ Load controlshapes from json using the builder """
         self.builder.loadControlShapes(self.controlDataLoader.getFileList(), self.loadColorCheckBox.isChecked())
 
-    def saveControlShapes(self):
+    def saveControlShapes(self, *args, method="merge"):
         """ Save controlshapes to json using the builder """
 
         # check if there are controls in the scene before saving.
@@ -197,7 +201,16 @@ class ControlsWidget(QtWidgets.QWidget):
             if result != 'Continue':
                 return
 
-        self.builder.saveControlShapes(self.controlDataLoader.getFileList(absolute=True))
+        return self.builder.saveControlShapes(self.controlDataLoader.getFileList(absolute=True), method=method)
+
+    def saveControlShapesAsOverwrite(self):
+        saveDict = self.saveControlShapes(method="overwrite")
+        currentFiles = self.controlDataLoader.getFileList(absolute=True)
+        if saveDict:
+            savedFiles = list(saveDict.keys())
+            for savedFile in savedFiles:
+                if savedFile not in currentFiles:
+                    self.controlDataLoader.selectPath(savedFile)
 
     def mirrorControl(self):
         """ Mirror a control shape """

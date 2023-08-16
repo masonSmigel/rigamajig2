@@ -304,11 +304,14 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
         # save the data to the new filename
         if not fileName:
             return
-        saveDataDict = dict()
+        # next we need to clear out the data from all other keys
+        for key in saveDataDict:
+            saveDataDict[key] = []
+
         saveDataDict[fileName] = dataToSave
 
     # check if the maya UI is running. It SHOULD always be if we're saving data but theres a chance its not.
-    # if there is lets build a confrm dialog to double check info before its aved
+    # if there is lets build a confrm dialog to double check info before its saved
     if not om2.MGlobal.mayaState() and popupInfo:
         message = f"Save {len(dataToSave)} nodes to {len(saveDataDict.keys())} files\n\n"
 
@@ -336,7 +339,8 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
 
             # read all the old data. Anything that is NOT updated it will stay the same as the previous file.
             oldDataObj = createDataClassInstance(dataType=dataType)
-            oldDataObj.read(dataFile)
+            if os.path.exists(dataFile):
+                oldDataObj.read(dataFile)
 
             # create a dictonary with data that is updated from our scene
             newDataObj = createDataClassInstance(dataType=dataType)

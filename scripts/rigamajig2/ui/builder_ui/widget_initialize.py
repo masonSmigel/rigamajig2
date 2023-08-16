@@ -32,6 +32,7 @@ from rigamajig2.maya import container as rig_container
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import core
 from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget, sliderGrp, dataLoader
+from rigamajig2.ui.widgets import QPushButton
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import GUIDES, COMPONENTS
 
@@ -91,10 +92,11 @@ class InitializeWidget(QtWidgets.QWidget):
                                                      dataFilteringEnabled=True,
                                                      dataFilter=["JointData", "GuideData"])
         self.loadGuidesButton = QtWidgets.QPushButton("Load Guides")
-        self.saveGuidesButton = QtWidgets.QPushButton("Save Guides")
-
         self.loadGuidesButton.setIcon(QtGui.QIcon(common.getIcon("loadGuides.png")))
+        self.saveGuidesButton = QPushButton.RightClickableButton("Save Guides")
         self.saveGuidesButton.setIcon(QtGui.QIcon(common.getIcon("saveGuides.png")))
+        self.saveGuidesButton.setToolTip("Left Click: Save guides into their source file. (new data appended to last item)"
+                                         "\nRight Click: Save all guides to a new file overriding parents")
 
         self.loadGuidesButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.saveGuidesButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
@@ -136,6 +138,7 @@ class InitializeWidget(QtWidgets.QWidget):
         """ Create Connections"""
         self.loadGuidesButton.clicked.connect(self.loadGuides)
         self.saveGuidesButton.clicked.connect(self.saveGuides)
+        self.saveGuidesButton.rightClicked.connect(self.saveGuidesAsOverride)
         self.loadComponentsButton.clicked.connect(self.loadComponents)
         self.saveComponentsButton.clicked.connect(self.saveComponents)
 
@@ -196,7 +199,7 @@ class InitializeWidget(QtWidgets.QWidget):
 
         self.builder.loadGuideData(self.guideDataLoader.getFileList())
 
-    def saveGuides(self):
+    def saveGuides(self, *args, method="merge"):
         """ Save guides setup to json using the builder """
 
         # check if there are controls in the scene before saving.
@@ -211,7 +214,17 @@ class InitializeWidget(QtWidgets.QWidget):
             if result != 'Continue':
                 return
 
-        self.builder.saveGuideData(self.guideDataLoader.getFileList(absolute=True))
+        return self.builder.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method=method)
+
+    def saveGuidesAsOverride(self):
+        """ Save all guide data as an override"""
+        saveDict = self.saveGuides(method="overwrite")
+        currentFiles = self.guideDataLoader.getFileList(absolute=True)
+        if saveDict:
+            savedFiles = list(saveDict.keys())
+            for savedFile in savedFiles:
+                if savedFile not in currentFiles:
+                    self.guideDataLoader.selectPath(savedFile)
 
     def initalizeRig(self):
         """Run the comppnent intialize on the builder and update the UI """

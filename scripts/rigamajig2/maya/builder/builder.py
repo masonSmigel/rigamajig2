@@ -438,7 +438,7 @@ class Builder(object):
         # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
 
         allPsds = deform.gatherPoseReaders()
-        core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method=method)
+        core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method="merge")
         # deform.savePoseReaders(path)
         logger.info("Pose Readers Save -- Complete")
 

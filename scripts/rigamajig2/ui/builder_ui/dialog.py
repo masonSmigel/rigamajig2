@@ -9,43 +9,33 @@
 
 """
 # PYTHON
-import pathlib
-import sys
 import time
 import logging
-import os
-from collections import OrderedDict
 
 # MAYA
 import maya.cmds as cmds
-import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
-from shiboken2 import wrapInstance
 
 # RIGAMAJIG
 import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
-from rigamajig2.shared import common
 from rigamajig2.ui.widgets.workspace_control import DockableUI
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner, statusLine, QLine
+from rigamajig2.ui.widgets import statusLine, QLine
+from rigamajig2.ui.builder_ui.widgets import pathSelector
 from rigamajig2.ui.builder_ui import recent_files
-from rigamajig2.ui.builder_ui import style
 
 # Import the main widgets for the builder dialog
-from rigamajig2.ui.builder_ui import model_widget
-from rigamajig2.ui.builder_ui import joint_widget
-from rigamajig2.ui.builder_ui import controls_widget
-from rigamajig2.ui.builder_ui import deformation_widget
-from rigamajig2.ui.builder_ui import initalize_widget
-from rigamajig2.ui.builder_ui import build_widget
-from rigamajig2.ui.builder_ui import publish_widget
+from rigamajig2.ui.builder_ui import widget_model
+from rigamajig2.ui.builder_ui import widget_joints
+from rigamajig2.ui.builder_ui import widget_controls
+from rigamajig2.ui.builder_ui import widget_deformation
+from rigamajig2.ui.builder_ui import widget_initialize
+from rigamajig2.ui.builder_ui import widget_build
+from rigamajig2.ui.builder_ui import widget_publish
 from rigamajig2.ui.builder_ui import actions
-
-import rigamajig2.maya.data.abstract_data as abstract_data
-from rigamajig2.maya.builder import deform
 
 logger = logging.getLogger(__name__)
 logger.setLevel(5)
@@ -137,13 +127,13 @@ class BuilderDialog(DockableUI):
 
         self.mainWidgets = list()
 
-        self.modelWidget = model_widget.ModelWidget(self.rigBuilder)
-        self.jointWidget = joint_widget.JointWidget(self.rigBuilder)
-        self.controlsWidget = controls_widget.ControlsWidget(self.rigBuilder)
-        self.intalizeWidget = initalize_widget.InitializeWidget(self.rigBuilder)
-        self.buildWidget = build_widget.BuildWidget(self.rigBuilder)
-        self.deformationWidget = deformation_widget.DeformationWidget(self.rigBuilder)
-        self.publishWidget = publish_widget.PublishWidget(self.rigBuilder)
+        self.modelWidget = widget_model.ModelWidget(self.rigBuilder)
+        self.jointWidget = widget_joints.JointWidget(self.rigBuilder)
+        self.controlsWidget = widget_controls.ControlsWidget(self.rigBuilder)
+        self.intalizeWidget = widget_initialize.InitializeWidget(self.rigBuilder)
+        self.buildWidget = widget_build.BuildWidget(self.rigBuilder)
+        self.deformationWidget = widget_deformation.DeformationWidget(self.rigBuilder)
+        self.publishWidget = widget_publish.PublishWidget(self.rigBuilder)
 
         self.mainWidgets = [self.modelWidget,
                             self.jointWidget,

@@ -14,7 +14,7 @@ from shiboken2 import wrapInstance
 import rigamajig2.maya.decorators
 import rigamajig2.maya.transform
 import rigamajig2.maya.data.abstract_data as abstract_data
-from rigamajig2.ui.widgets import pathSelector
+from rigamajig2.ui.builder_ui.widgets import pathSelector
 
 logger = logging.getLogger(__name__)
 

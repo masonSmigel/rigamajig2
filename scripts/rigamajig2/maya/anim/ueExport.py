@@ -31,7 +31,7 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
-from rigamajig2.ui.widgets import pathSelector
+from rigamajig2.ui.builder_ui.widgets import pathSelector
 
 UPAXIS_DICT = {"x": [0, 0, 90],
                "y": [0, 0, 0],

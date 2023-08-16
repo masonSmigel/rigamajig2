@@ -10,24 +10,17 @@
 """
 # PYTHON
 import sys
-import time
-import logging
-import os
-from collections import OrderedDict
 
 # MAYA
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 import maya.OpenMayaUI as omui
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
 # RIGAMJIG
-from rigamajig2.ui.widgets import mayaListWidget
-from rigamajig2.ui.widgets import mayaDictWidget
-from rigamajig2.ui.widgets import mayaStringWidget
+from rigamajig2.ui.builder_ui.widgets import mayaListWidget, mayaDictWidget, mayaStringWidget
 
 from rigamajig2.maya import meta
 

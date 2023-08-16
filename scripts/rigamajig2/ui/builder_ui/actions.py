@@ -27,7 +27,7 @@ from rigamajig2.maya.builder import constants
 import rigamajig2.maya.qc as qc
 from rigamajig2.maya import loggers
 import rigamajig2.maya.data.abstract_data as abstract_data
-from rigamajig2.ui.widgets import pathSelector, collapseableWidget, scriptRunner
+from rigamajig2.ui.builder_ui.widgets import pathSelector
 import rigamajig2.maya.builder
 import rigamajig2.maya.builder.builder as builder
 import rigamajig2.ui.builder_ui.recent_files as recent_files
@@ -214,9 +214,9 @@ class Actions(object):
 
     def showMergeRigFilesDialog(self):
         """ Show the merge rig files dialog"""
-        from rigamajig2.ui.builder_ui import mergeRigs_dialog
+        from rigamajig2.ui.builder_ui import mergeRigsDialog
 
-        mergeRigs_dialog.MergeRigsDialog.showDialog()
+        mergeRigsDialog.MergeRigsDialog.showDialog()
 
     # SHOW HELP
     def showDocumentation(self):

@@ -27,10 +27,11 @@ import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
 
 # BUILDER
+import rigamajig2.maya.builder.data
 from rigamajig2.maya.builder import model
-from rigamajig2.maya.builder import guides
-from rigamajig2.maya.builder import controlShapes
-from rigamajig2.maya.builder import deform
+# from rigamajig2.maya.builder import guides
+# from rigamajig2.maya.builder import controlShapes
+# from rigamajig2.maya.builder import deform
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder import constants
 
@@ -117,7 +118,7 @@ class Builder(object):
 
         for path in common.toList(paths):
             absPath = self.getAbsoultePath(path)
-            guides.loadJoints(absPath)
+            rigamajig2.maya.builder.data.loadJoints(absPath)
             logger.info(f"Joints loaded : {path}")
 
     def saveJoints(self, fileStack=None, method="merge"):
@@ -133,7 +134,7 @@ class Builder(object):
         # guides.saveJoints(path)
 
         fileStack = common.toList(fileStack)
-        dataToSave = guides.gatherJoints()
+        dataToSave = rigamajig2.maya.builder.data.gatherJoints()
         saveDict = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData", method=method)
         if saveDict:
             logger.info("Joint positions Saved -- complete")
@@ -373,7 +374,7 @@ class Builder(object):
             # make the path an absoulte
 
             absPath = self.getAbsoultePath(path)
-            controlShapes.loadControlShapes(absPath, applyColor=applyColor)
+            rigamajig2.maya.builder.data.loadControlShapes(absPath, applyColor=applyColor)
             self.updateMaya()
             logger.info(f"control shapes loaded: {path}")
 
@@ -385,7 +386,7 @@ class Builder(object):
         :param str method: method of data merging to apply. Default is "merge"
         """
 
-        allControls = controlShapes.gatherControlShapes()
+        allControls = rigamajig2.maya.builder.data.gatherControlShapes()
         saveDict = core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", method=method)
         if saveDict:
             logger.info("Control Shapes Save -- Complete")
@@ -401,7 +402,7 @@ class Builder(object):
 
         for path in common.toList(paths):
             absPath = self.getAbsoultePath(path)
-            if guides.loadGuideData(absPath):
+            if rigamajig2.maya.builder.data.loadGuideData(absPath):
                 logger.info(f"guides loaded: {path}")
 
     def saveGuideData(self, fileStack=None, method="merge"):
@@ -414,7 +415,7 @@ class Builder(object):
         # rigFileData = common.toList(self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES)))[-1]
         # path = path or rigFileData
         fileStack = common.toList(fileStack)
-        dataToSave = guides.gatherGuides()
+        dataToSave = rigamajig2.maya.builder.data.gatherGuides()
         saveDict = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData", method=method)
         if saveDict:
             logger.info("Guides Save  -- complete")
@@ -431,7 +432,7 @@ class Builder(object):
 
         for path in common.toList(paths):
             absPath = self.getAbsoultePath(path)
-            if deform.loadPoseReaders(absPath, replace=replace):
+            if rigamajig2.maya.builder.data.loadPoseReaders(absPath, replace=replace):
                 logger.info(f"pose readers loaded: {path}")
 
     def savePoseReaders(self, fileStack=None, method="merge"):
@@ -443,7 +444,7 @@ class Builder(object):
         """
         # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
 
-        allPsds = deform.gatherPoseReaders()
+        allPsds = rigamajig2.maya.builder.data.gatherPoseReaders()
         saveDict = core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method="merge")
         # deform.savePoseReaders(path)
         if saveDict:
@@ -468,7 +469,7 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
-        if deform.loadDeformLayers(path):
+        if rigamajig2.maya.builder.data.loadDeformLayers(path):
             logger.info("deformation layers loaded")
 
     def saveDeformationLayers(self, path=None):
@@ -478,7 +479,7 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
-        deform.saveDeformLayers(path)
+        rigamajig2.maya.builder.data.saveDeformLayers(path)
         logger.info("deformation layers saved to: {}".format(path))
 
     def mergeDeformLayers(self):
@@ -499,7 +500,7 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
-        if deform.loadSkinWeights(path):
+        if rigamajig2.maya.builder.data.loadSkinWeights(path):
             logger.info("skin weights loaded")
 
     def saveSkinWeights(self, path=None):
@@ -509,17 +510,17 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
-        deform.saveSkinWeights(path)
+        rigamajig2.maya.builder.data.saveSkinWeights(path)
 
     def saveSHAPESData(self, path=None):
         """ Save SHAPES data """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
-        deform.saveSHAPESData(path)
+        rigamajig2.maya.builder.data.saveSHAPESData(path)
 
     def loadSHAPESData(self, path=None):
         """ Load data from SHAPES file"""
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
-        if deform.loadSHAPESData(path):
+        if rigamajig2.maya.builder.data.loadSHAPESData(path):
             logger.info("SHAPES data loaded")
 
     def deleteComponents(self, clearList=True):

@@ -233,14 +233,14 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def loadSingleSkin(self):
         """Load a single skin file"""
-        from rigamajig2.maya.builder import deform
+        import rigamajig2.maya.builder.data
         path = cmds.fileDialog2(dialogStyle=2,
                                 caption="Select a skin file",
                                 fileFilter=common.JSON_FILTER,
                                 okc="Select",
                                 dir=self.skinPathSelector.getPath())
         if path:
-            deform.loadSingleSkin(path[0])
+            rigamajig2.maya.builder.data.loadSingleSkin(path[0])
 
     def saveSkin(self):
         """Save the skin weights"""

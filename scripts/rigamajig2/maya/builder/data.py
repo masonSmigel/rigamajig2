@@ -2,32 +2,177 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: deform.py
+    file: data.py
     author: masonsmigel
-    date: 07/2022
+    date: 08/2023
     discription: 
 
 """
-# PYTHON
-import os
 import logging
+import os
 
-# MAYA
-import maya.cmds as cmds
-import maya.mel as mel
-import maya.api.OpenMaya as om2
+from maya import cmds as cmds
+from maya.api import OpenMaya as om2
 
-# RIGAMAJIG
-import rigamajig2.shared.path as rig_path
-from rigamajig2.maya import meta
-from rigamajig2.maya.data import psd_data
-from rigamajig2.maya.data import skin_data
-from rigamajig2.maya.data import deformLayer_data
-from rigamajig2.maya.data import SHAPES_data
-from rigamajig2.maya import skinCluster
-from rigamajig2.maya import psd
+from rigamajig2.maya import meta, psd, skinCluster, meta as meta, joint as joint
+from rigamajig2.maya.data import psd_data, skin_data, SHAPES_data, deformLayer_data, joint_data, curve_data, guide_data
+from rigamajig2.shared import path as rig_path, common as common
 
-logger = logging.getLogger(__name__)
+
+# Joints
+def loadJoints(path=None):
+    """
+    Load all joints for the builder
+    :param path: path to joint file
+    :return:
+    """
+    if not path:
+        return
+
+    if not os.path.exists(path):
+        return
+
+    dataObj = joint_data.JointData()
+    dataObj.read(path)
+    dataObj.applyData(dataObj.getKeys())
+
+    # tag all bind joints
+    for jnt in cmds.ls(f"*_{common.BINDTAG}", type='joint'):
+        meta.tag(jnt, common.BINDTAG)
+
+    dataObj.getData().keys()
+    for node in cmds.ls(dataObj.getKeys(), l=True):
+        # add the joint orient to all joints in the file.
+        joint.addJointOrientToChannelBox(node)
+
+        # find joints without a parent and make them a root
+        if not len(node.split('|')) > 2:
+            meta.tag(node, 'skeleton_root')
+
+
+def saveJoints(path=None):
+    """
+    save the joints
+    :param path: path to save joints
+    """
+
+    # find all skeleton roots and get the positions of their children
+    skeletonRoots = common.toList(meta.getTagged('skeleton_root'))
+
+    if not skeletonRoots:
+        skeletonRoots = cmds.ls(sl=True)
+
+    if skeletonRoots:
+        dataObj = joint_data.JointData()
+        for root in skeletonRoots:
+            dataObj.gatherData(root)
+            childJoints = cmds.listRelatives(root, allDescendents=True, type='joint') or list()
+            dataObj.gatherDataIterate(childJoints)
+        dataObj.write(path)
+    else:
+        raise RuntimeError(
+            "the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))
+
+
+def gatherJoints():
+    """
+    gather all joints in the scene to save.
+    :return: list of all joints in the scene that should be saved.
+    """
+
+    # find all skeleton roots and get the positions of their children
+    skeletonRoots = common.toList(meta.getTagged('skeleton_root'))
+
+    if not skeletonRoots:
+        skeletonRoots = cmds.ls(sl=True)
+
+    allJoints = list()
+    if skeletonRoots:
+        for root in skeletonRoots:
+            childJoints = cmds.listRelatives(root, allDescendents=True, type='joint') or list()
+            allJoints.append(root)
+            for eachJoint in childJoints:
+                allJoints.append(eachJoint)
+    else:
+        raise RuntimeError(
+            "the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))
+
+    return allJoints
+
+
+# Guides
+def loadGuideData(path=None):
+    """
+    Load guide data
+    :param path: path to guide data to save
+    :return:
+    """
+    if not path:
+        return
+
+    if path and not os.path.exists(path):
+        return
+
+    try:
+        dataObj = guide_data.GuideData()
+        dataObj.read(path)
+        dataObj.applyData(nodes=dataObj.getKeys())
+        return True
+    except Exception as e:
+        raise e
+        # return False
+
+
+def saveGuideData(path=None):
+    """
+    Save guides data
+    :param path: path to guide data to save
+    :return:
+    """
+    dataObj = guide_data.GuideData()
+    dataObj.gatherDataIterate(meta.getTagged("guide"))
+    dataObj.write(path)
+
+
+def gatherGuides():
+    """
+    Gather all guides in the scene
+    :return: a list of all guides in the scene
+    """
+    return meta.getTagged("guide")
+
+
+# CONTROL SHAPES
+def loadControlShapes(path=None, applyColor=True):
+    """
+    Load the control shapes
+    :param path: path to control shape
+    :param applyColor: Apply the control colors.
+    :return:
+    """
+    if not path:
+        return
+
+    if not os.path.exists(path):
+        raise Exception("Path does no exist {}".format(path))
+
+    curveDataObj = curve_data.CurveData()
+    curveDataObj.read(path)
+
+    controls = [ctl for ctl in curveDataObj.getKeys() if cmds.objExists(ctl)]
+    curveDataObj.applyData(controls, create=True, applyColor=applyColor)
+
+
+def saveControlShapes(path=None):
+    """save the control shapes"""
+    curveDataObj = curve_data.CurveData()
+    curveDataObj.gatherDataIterate(meta.getTagged("control"))
+    curveDataObj.write(path)
+
+
+def gatherControlShapes():
+    """gather controls from the scene"""
+    return meta.getTagged("control")
 
 
 # POSE SPACE DEFORMERS

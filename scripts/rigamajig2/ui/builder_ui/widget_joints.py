@@ -11,6 +11,7 @@
 
 # PYTHON
 from PySide2 import QtGui
+from PySide2 import QtCore
 from PySide2 import QtWidgets
 
 # MAYA
@@ -64,8 +65,9 @@ class JointWidget(QtWidgets.QWidget):
         self.loadJointPositionButton.setIcon(QtGui.QIcon(common.getIcon("loadJoints.png")))
         self.saveJointPositionButton = QPushButton.RightClickableButton("Save joints")
         self.saveJointPositionButton.setIcon(QtGui.QIcon(common.getIcon("saveJoints.png")))
-        self.saveJointPositionButton.setToolTip("Left Click: Save joints into their source file. (new data appended to last item)"
-                                                "\nRight Click: Save all joints to a new file overriding parents")
+        self.saveJointPositionButton.setToolTip(
+            "Left Click: Save joints into their source file. (new data appended to last item)"
+            "\nRight Click: Save all joints to a new file overriding parents")
 
         self.loadJointPositionButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.saveJointPositionButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
@@ -197,14 +199,26 @@ class JointWidget(QtWidgets.QWidget):
         """ Check it the widget is checked"""
         return self.mainCollapseableWidget.isChecked()
 
-    # CONNECTIONS
+    @QtCore.Slot()
     def loadJointsPositions(self):
         """ load joints and positions"""
         self.builder.loadJoints(self.jointPositionDataLoader.getFileList())
 
-    def saveJointPositions(self, *args, method="merge"):
+    @QtCore.Slot()
+    def saveJointPositions(self):
         """ save the joint positions"""
+        self._doSaveJointPositions(method="merge")
 
+    @QtCore.Slot()
+    def saveJointPositionAsOverride(self):
+        savedFiles = self._doSaveJointPositions(method="overwrite")
+        currentFiles = self.jointPositionDataLoader.getFileList(absolute=True)
+        if savedFiles:
+            for savedFile in savedFiles:
+                if savedFile not in currentFiles:
+                    self.jointPositionDataLoader.selectPath(savedFile)
+
+    def _doSaveJointPositions(self, method="merge"):
         isBuilt = False
         # find the main_container and check if its past the guide step
         for container in cmds.ls(type="container"):
@@ -216,7 +230,7 @@ class JointWidget(QtWidgets.QWidget):
             result = cmds.confirmDialog(
                 t='Save Joints',
                 message="It looks like the rig is already built. Are you sure you want to continue?",
-                button=['Cancel', 'Continue'],
+                button=['Continue', 'Cancel'],
                 defaultButton='Continue',
                 cancelButton='Cancel')
 
@@ -225,28 +239,23 @@ class JointWidget(QtWidgets.QWidget):
 
         return self.builder.saveJoints(self.jointPositionDataLoader.getFileList(absolute=True), method=method)
 
-    def saveJointPositionAsOverride(self):
-        saveDict = self.saveJointPositions(method="overwrite")
-        currentFiles = self.jointPositionDataLoader.getFileList(absolute=True)
-        if saveDict:
-            savedFiles = list(saveDict.keys())
-            for savedFile in savedFiles:
-                if savedFile not in currentFiles:
-                    self.jointPositionDataLoader.selectPath(savedFile)
-
+    @QtCore.Slot()
     def pinJoints(self):
         """ Pin selected joints"""
         live.pin()
 
+    @QtCore.Slot()
     def unpinJoints(self):
         """ Unpin selected joints"""
         live.unpin()
 
+    @QtCore.Slot()
     def unpinAllJoints(self):
         """ Unpin all joints"""
         pinnedNodes = meta.getTagged("isPinned")
         live.unpin(pinnedNodes)
 
+    @QtCore.Slot()
     def insertJoints(self):
         """ insert joints between two selected joints"""
         jointAmount = self.insertJointsAmountSlider.getValue()
@@ -254,6 +263,7 @@ class JointWidget(QtWidgets.QWidget):
         assert len(selection) == 2, "Must select two joints!"
         rigamajig2.maya.joint.insertJoints(selection[0], selection[-1], amount=jointAmount)
 
+    @QtCore.Slot()
     @decorators.oneUndo
     def cleanSkeleton(self):
         """
@@ -273,14 +283,14 @@ class JointWidget(QtWidgets.QWidget):
 
         for jnt in fullJointList:
             if cmds.listRelatives(jnt, parent=True):
-                if meta.hasTag(jnt, "skeleton_root"):
-                    meta.untag(jnt, "skeleton_root")
+                if meta.hasTag(jnt, tag="skeleton_root"):
+                    meta.untag(jnt, tag="skeleton_root")
             else:
-                meta.tag(cmds.ls(sl=True), "skeleton_root")
+                meta.tag(cmds.ls(sl=True), tag="skeleton_root")
 
             # check if the joint ends with "_bind"
             if jnt.endswith(f"_{common.BINDTAG}"):
-                meta.tag(jnt, "bind")
+                meta.tag(jnt, tag="bind")
 
             # freeze the joint scales
             cmds.makeIdentity(jnt, s=True, r=True, apply=True)
@@ -292,6 +302,7 @@ class JointWidget(QtWidgets.QWidget):
             if not naming.isUniqueName(jnt.split("|")[-1]):
                 cmds.warning(f"Joint name is not unique for '{jnt}'")
 
+    @QtCore.Slot()
     def mirrorJoint(self):
         """ mirror joint"""
         axis = 'x'
@@ -302,13 +313,15 @@ class JointWidget(QtWidgets.QWidget):
 
         mirrorMode = self.mirrorJointModeCheckbox.currentText()
         for joint in cmds.ls(sl=True):
-            joints = cmds.listRelatives(cmds.ls(sl=True, type='joint'), ad=True, type='joint') or []
+            joints = cmds.listRelatives(cmds.ls(sl=True, type='joint'), allDescendents=True, type='joint') or []
             rigamajig2.maya.joint.mirror(joints + [joint], axis=axis, mode=mirrorMode)
 
+    @QtCore.Slot()
     def jointToRotation(self):
         """ Convert joint transformation to rotation"""
         rigamajig2.maya.joint.toRotation(cmds.ls(sl=True, type='joint'))
 
+    @QtCore.Slot()
     def jointToOrientation(self):
         """ Convert joint transformation to orientation"""
         rigamajig2.maya.joint.toOrientation(cmds.ls(sl=True, type='joint'))

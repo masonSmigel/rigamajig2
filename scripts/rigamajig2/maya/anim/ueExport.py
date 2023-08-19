@@ -419,7 +419,7 @@ class BatchExportFBX(QtWidgets.QDialog):
         result = cmds.confirmDialog(
             t='Clean Gross Transformation',
             message="Cleaning Gross Transformations is a distuctive Process. Are you sure you want to continue?!",
-            button=['Cancel', 'Continue'],
+            button=['Continue', 'Cancel'],
             defaultButton='Continue',
             cancelButton='Cancel')
 
@@ -445,7 +445,7 @@ class BatchExportFBX(QtWidgets.QDialog):
         result = cmds.confirmDialog(
             t='Bake All Controls',
             message="Baking all controls is a distuctive Process. Are you sure you want to continue?!",
-            button=['Cancel', 'Continue'],
+            button=['Continue', 'Cancel'],
             defaultButton='Continue',
             cancelButton='Cancel')
 

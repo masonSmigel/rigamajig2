@@ -135,10 +135,10 @@ class Builder(object):
 
         fileStack = common.toList(fileStack)
         dataToSave = rigamajig2.maya.builder.data.gatherJoints()
-        saveDict = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData", method=method)
-        if saveDict:
+        savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData", method=method)
+        if savedFiles:
             logger.info("Joint positions Saved -- complete")
-            return saveDict
+            return savedFiles
 
     def initalize(self):
         """
@@ -387,10 +387,10 @@ class Builder(object):
         """
 
         allControls = rigamajig2.maya.builder.data.gatherControlShapes()
-        saveDict = core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", method=method)
-        if saveDict:
+        savedFiles = core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", method=method)
+        if savedFiles:
             logger.info("Control Shapes Save -- Complete")
-            return saveDict
+            return savedFiles
 
     def loadGuideData(self, paths=None):
         """
@@ -416,10 +416,10 @@ class Builder(object):
         # path = path or rigFileData
         fileStack = common.toList(fileStack)
         dataToSave = rigamajig2.maya.builder.data.gatherGuides()
-        saveDict = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData", method=method)
-        if saveDict:
+        savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData", method=method)
+        if savedFiles:
             logger.info("Guides Save  -- complete")
-            return saveDict
+            return savedFiles
 
     def loadPoseReaders(self, paths=None, replace=True):
         """
@@ -445,11 +445,11 @@ class Builder(object):
         # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
 
         allPsds = rigamajig2.maya.builder.data.gatherPoseReaders()
-        saveDict = core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method="merge")
+        savedFiles = core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method="merge")
         # deform.savePoseReaders(path)
-        if saveDict:
+        if savedFiles:
             logger.info("Pose Readers Save -- Complete")
-            return saveDict
+            return savedFiles
 
     def loadDeformationData(self):
         """

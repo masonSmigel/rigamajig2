@@ -199,15 +199,28 @@ class InitializeWidget(QtWidgets.QWidget):
 
         self.builder.loadGuideData(self.guideDataLoader.getFileList())
 
-    def saveGuides(self, *args, method="merge"):
+    @QtCore.Slot()
+    def saveGuides(self):
         """ Save guides setup to json using the builder """
+        self._doSaveGuideData(method="merge")
 
+    @QtCore.Slot()
+    def saveGuidesAsOverride(self):
+        """ Save all guide data as an override"""
+        savedFiles = self._doSaveGuideData(method="overwrite")
+        currentFiles = self.guideDataLoader.getFileList(absolute=True)
+        if savedFiles:
+            for savedFile in savedFiles:
+                if savedFile not in currentFiles:
+                    self.guideDataLoader.selectPath(savedFile)
+
+    def _doSaveGuideData(self, method='merge'):
         # check if there are controls in the scene before saving.
         if len(meta.getTagged("guide")) < 1:
             result = cmds.confirmDialog(
                 t='Save Guides',
                 message="There are no guides in the scene. Are you sure you want to continue?",
-                button=['Cancel', 'Continue'],
+                button=['Continue', 'Cancel'],
                 defaultButton='Continue',
                 cancelButton='Cancel')
 
@@ -215,16 +228,6 @@ class InitializeWidget(QtWidgets.QWidget):
                 return
 
         return self.builder.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method=method)
-
-    def saveGuidesAsOverride(self):
-        """ Save all guide data as an override"""
-        saveDict = self.saveGuides(method="overwrite")
-        currentFiles = self.guideDataLoader.getFileList(absolute=True)
-        if saveDict:
-            savedFiles = list(saveDict.keys())
-            for savedFile in savedFiles:
-                if savedFile not in currentFiles:
-                    self.guideDataLoader.selectPath(savedFile)
 
     def initalizeRig(self):
         """Run the comppnent intialize on the builder and update the UI """

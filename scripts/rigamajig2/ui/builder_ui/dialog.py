@@ -194,7 +194,6 @@ class BuilderDialog(DockableUI):
 
         buildGroup = QtWidgets.QGroupBox('Build')
         buildGroup.setLayout(buildLayout)
-        #buildGroup.setAutoFillBackground(False)
 
         # lower persistant buttons (AKA close)
         lowButtonsLayout = QtWidgets.QVBoxLayout()
@@ -207,7 +206,6 @@ class BuilderDialog(DockableUI):
 
         lowButtonsLayout.addWidget(QLine.QLine())
         lowButtonsLayout.addLayout(runButtonLayout)
-        # lowButtonsLayout.addWidget(QLine.QLine())
         lowButtonsLayout.addWidget(self.statusLine)
 
         # scrollable area
@@ -339,9 +337,9 @@ class BuilderDialog(DockableUI):
             result, finalTime = self.rigBuilder.run()
             self.intalizeWidget.componentManager.loadFromScene()
             self.statusLine.setStatusMessage(
-                f"Rig Build Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}", "success")
+                message=f"Rig Build Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}", icon="success")
         except Exception as e:
-            self.statusLine.setStatusMessage(f"Rig Build Failed: '{self.rigName}'", "failed")
+            self.statusLine.setStatusMessage(message=f"Rig Build Failed: '{self.rigName}'", icon="failed")
             raise e
 
     def publish(self):
@@ -353,9 +351,9 @@ class BuilderDialog(DockableUI):
             result, finalTime = self.publishWidget.publish()
             self.intalizeWidget.componentManager.loadFromScene()
             self.statusLine.setStatusMessage(
-                f"Rig Publish Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}", "success")
+                message=f"Rig Publish Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}", icon="success")
         except Exception as e:
-            self.statusLine.setStatusMessage(f"Rig Publish Failed: '{self.rigName}'", "failed")
+            self.statusLine.setStatusMessage(message=f"Rig Publish Failed: '{self.rigName}'", icon="failed")
             raise e
 
     def initializeDevMode(self):

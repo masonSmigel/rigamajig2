@@ -360,7 +360,9 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
             mergedDataObj.write(dataFile)
             logger.info(f"{dataType} saved to {dataFile}")
 
-    return saveDataDict
+    # Get a list of all the files saved.
+    filesSaved = list(saveDataDict.keys())
+    return filesSaved
 
 
 def loadRequiredPlugins():

@@ -186,15 +186,28 @@ class ControlsWidget(QtWidgets.QWidget):
         """ Load controlshapes from json using the builder """
         self.builder.loadControlShapes(self.controlDataLoader.getFileList(), self.loadColorCheckBox.isChecked())
 
-    def saveControlShapes(self, *args, method="merge"):
+    @QtCore.Slot()
+    def saveControlShapes(self):
         """ Save controlshapes to json using the builder """
+        self._doSaveControlShapes(method="merge")
+
+    @QtCore.Slot()
+    def saveControlShapesAsOverwrite(self):
+        savedFiles = self._doSaveControlShapes(method="overwrite")
+        currentFiles = self.controlDataLoader.getFileList(absolute=True)
+        if savedFiles:
+            for savedFile in savedFiles:
+                if savedFile not in currentFiles:
+                    self.controlDataLoader.selectPath(savedFile)
+
+    def _doSaveControlShapes(self, method='merge'):
 
         # check if there are controls in the scene before saving.
         if len(meta.getTagged("control")) < 1:
             result = cmds.confirmDialog(
-                t='Save Control Shapes',
+                title='Save Control Shapes',
                 message="There are no controls in the scene. Are you sure you want to continue?",
-                button=['Cancel', 'Continue'],
+                button=['Continue', 'Cancel'],
                 defaultButton='Continue',
                 cancelButton='Cancel')
 
@@ -202,15 +215,6 @@ class ControlsWidget(QtWidgets.QWidget):
                 return
 
         return self.builder.saveControlShapes(self.controlDataLoader.getFileList(absolute=True), method=method)
-
-    def saveControlShapesAsOverwrite(self):
-        saveDict = self.saveControlShapes(method="overwrite")
-        currentFiles = self.controlDataLoader.getFileList(absolute=True)
-        if saveDict:
-            savedFiles = list(saveDict.keys())
-            for savedFile in savedFiles:
-                if savedFile not in currentFiles:
-                    self.controlDataLoader.selectPath(savedFile)
 
     def mirrorControl(self):
         """ Mirror a control shape """

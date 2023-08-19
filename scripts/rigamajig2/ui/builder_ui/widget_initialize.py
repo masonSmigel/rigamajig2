@@ -59,7 +59,7 @@ class InitializeWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget(text='Initialize Rig', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget(text='Setup Rig', addCheckbox=True)
         self.componentsDataLoader = dataLoader.DataLoader(label="Components:",
                                                           caption="Select a Component File",
                                                           fileFilter=common.JSON_FILTER,

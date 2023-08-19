@@ -11,6 +11,7 @@
 # PYTHON
 from PySide2 import QtCore
 from PySide2 import QtWidgets
+from PySide2 import QtCore
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
@@ -129,7 +130,7 @@ class PublishWidget(QtWidgets.QWidget):
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.pubScriptRunner.executeAllScripts()
-        self.mergeDeformLayers()
+        self.builder.mergeDeformLayers()
 
     @property
     def isChecked(self):
@@ -138,14 +139,17 @@ class PublishWidget(QtWidgets.QWidget):
 
     # CONNECTIONS
 
+    @QtCore.Slot()
     def dryPublish(self):
         """ run all the publish steps without saving the file"""
         self.builder.run(publish=True, savePublish=False)
 
+    @QtCore.Slot()
     def mergeDeformLayers(self):
         """Merge the deformation layers"""
         self.builder.mergeDeformLayers()
 
+    @QtCore.Slot()
     def publish(self):
         """ publish the rig"""
         confirmPublishMessage = QtWidgets.QMessageBox()

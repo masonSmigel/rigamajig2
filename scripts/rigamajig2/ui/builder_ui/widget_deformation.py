@@ -209,9 +209,9 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
-        self.loadDeformLayers()
-        self.loadAllSkins()
-        self.loadSHAPESData()
+        self.builder.loadDeformationLayers(self.deformLayerPathSelector.getPath())
+        self.builder.loadSkinWeights(self.skinPathSelector.getPath())
+        self.builder.loadSHAPESData(self.SHAPESPathSelector.getPath())
 
     @property
     def isChecked(self):
@@ -219,18 +219,22 @@ class DeformationWidget(QtWidgets.QWidget):
         return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
+    @QtCore.Slot()
     def loadDeformLayers(self):
         """ Save load pose reader setup from json using the builder """
         self.builder.loadDeformationLayers(self.deformLayerPathSelector.getPath())
 
+    @QtCore.Slot()
     def saveDeformLayers(self):
         """ Save pose reader setup to json using the builder """
         self.builder.saveDeformationLayers(self.deformLayerPathSelector.getPath())
 
+    @QtCore.Slot()
     def loadAllSkins(self):
         """Load all skin weights in the given folder"""
         self.builder.loadSkinWeights(self.skinPathSelector.getPath())
 
+    @QtCore.Slot()
     def loadSingleSkin(self):
         """Load a single skin file"""
         import rigamajig2.maya.builder.data
@@ -242,16 +246,19 @@ class DeformationWidget(QtWidgets.QWidget):
         if path:
             rigamajig2.maya.builder.data.loadSingleSkin(path[0])
 
+    @QtCore.Slot()
     def saveSkin(self):
         """Save the skin weights"""
         self.builder.saveSkinWeights(path=self.skinPathSelector.getPath())
 
+    @QtCore.Slot()
     def copySkinWeights(self):
         """ Copy Skin weights"""
         src = cmds.ls(sl=True)[0]
         dst = cmds.ls(sl=True)[1:]
         skinCluster.copySkinClusterAndInfluences(src, dst)
 
+    @QtCore.Slot()
     def connectBindPreMatrix(self):
         """
         Connect influence joints to their respective bindPreMatrix
@@ -260,12 +267,15 @@ class DeformationWidget(QtWidgets.QWidget):
             sc = skinCluster.getSkinCluster(mesh)
             skinCluster.connectExistingBPMs(sc)
 
+    @QtCore.Slot()
     def loadSHAPESData(self):
         self.builder.loadSHAPESData(self.SHAPESPathSelector.getPath())
 
+    @QtCore.Slot()
     def saveSHAPESData(self):
         self.builder.saveSHAPESData(self.SHAPESPathSelector.getPath())
 
+    @QtCore.Slot()
     def addDeformLayer(self):
         """
         add a new deformation layer to the selected object
@@ -279,6 +289,7 @@ class DeformationWidget(QtWidgets.QWidget):
             layers = deformLayer.DeformLayer(node)
             layers.createDeformLayer(suffix=suffix, connectionMethod=connectionMethod)
 
+    @QtCore.Slot()
     def connectDeformMesh(self):
         """
         Connect deformation layers to the main deform layer

@@ -59,8 +59,8 @@ class InitializeWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Initialize Rig', addCheckbox=True)
-        self.componentsDataLoader = dataLoader.DataLoader("Components:",
+        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget(text='Initialize Rig', addCheckbox=True)
+        self.componentsDataLoader = dataLoader.DataLoader(label="Components:",
                                                           caption="Select a Component File",
                                                           fileFilter=common.JSON_FILTER,
                                                           fileMode=1,
@@ -85,7 +85,7 @@ class InitializeWidget(QtWidgets.QWidget):
 
         self.initalizeBuildButton = QtWidgets.QPushButton("Guide Components")
         self.initalizeBuildButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
-        self.guideDataLoader = dataLoader.DataLoader("guides:",
+        self.guideDataLoader = dataLoader.DataLoader(label="Guides:",
                                                      caption="Select a guide file",
                                                      fileFilter=common.JSON_FILTER,
                                                      fileMode=1,
@@ -95,8 +95,9 @@ class InitializeWidget(QtWidgets.QWidget):
         self.loadGuidesButton.setIcon(QtGui.QIcon(common.getIcon("loadGuides.png")))
         self.saveGuidesButton = QPushButton.RightClickableButton("Save Guides")
         self.saveGuidesButton.setIcon(QtGui.QIcon(common.getIcon("saveGuides.png")))
-        self.saveGuidesButton.setToolTip("Left Click: Save guides into their source file. (new data appended to last item)"
-                                         "\nRight Click: Save all guides to a new file overriding parents")
+        self.saveGuidesButton.setToolTip(
+            "Left Click: Save guides into their source file. (new data appended to last item)"
+            "\nRight Click: Save all guides to a new file overriding parents")
 
         self.loadGuidesButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.saveGuidesButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
@@ -178,6 +179,7 @@ class InitializeWidget(QtWidgets.QWidget):
         return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
+    @QtCore.Slot()
     def loadComponents(self):
         """ Load component setup from json using the builder """
         self.builder.setComponents(list())
@@ -189,11 +191,13 @@ class InitializeWidget(QtWidgets.QWidget):
         self.builder.loadComponentSettings(componentFiles)
         self.componentManager.loadListFromBuilder()
 
+    @QtCore.Slot()
     def saveComponents(self):
         """ Save component setup from json using the builder """
         self.builder.loadMetadataToComponentSettings()
         self.builder.saveComponents(self.componentsDataLoader.getFileList(absolute=True))
 
+    @QtCore.Slot()
     def loadGuides(self):
         """ Load guide setup to json using the builder """
 
@@ -229,6 +233,7 @@ class InitializeWidget(QtWidgets.QWidget):
 
         return self.builder.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method=method)
 
+    @QtCore.Slot()
     def initalizeRig(self):
         """Run the comppnent intialize on the builder and update the UI """
         self.builder.guide()
@@ -558,6 +563,7 @@ class ComponentManager(QtWidgets.QWidget):
         cmpt = self.builder.findComponent(itemDict['name'], itemDict['type'])
         return cmpt
 
+    @QtCore.Slot()
     def selectContainer(self):
         """ Select the container node of the selected components """
         cmds.select(cl=True)
@@ -588,6 +594,7 @@ class ComponentManager(QtWidgets.QWidget):
 
             self.createComponentItem(name=name, componentType=componentType, buildStep=buildStep)
 
+    @QtCore.Slot()
     def editComponentParameters(self):
         """ Open the Edit component parameters dialog"""
         from rigamajig2.ui.builder_ui import editComponentDialog
@@ -603,6 +610,7 @@ class ComponentManager(QtWidgets.QWidget):
         # set dialog to the current item
         self.editComponentDialog.setComponent(self.getComponentObj())
 
+    @QtCore.Slot()
     def createMirroredComponent(self):
         """ Create a mirrored component"""
         selectedComponent = self.getComponentObj()
@@ -630,6 +638,7 @@ class ComponentManager(QtWidgets.QWidget):
         # update the ui
         self.loadFromScene()
 
+    @QtCore.Slot()
     def mirrorComponentParameters(self, sourceComponent=None):
         """
         Mirror the component parameters for the selected parameter
@@ -700,6 +709,7 @@ class ComponentManager(QtWidgets.QWidget):
             # apply the mirrored values
             mirrorMetaNode.setData(attr=parameter, value=mirroredValue)
 
+    @QtCore.Slot()
     def deleteComponent(self):
         """ Delete a component and the item from the tree widget"""
         items = self.getSelectedItem()
@@ -711,6 +721,7 @@ class ComponentManager(QtWidgets.QWidget):
 
             self.builder.componentList.remove(component)
 
+    @QtCore.Slot()
     def renameComponent(self):
         items = self.getSelectedItem()
 
@@ -754,6 +765,7 @@ class ComponentManager(QtWidgets.QWidget):
 
             self.searchCompleterModel.setStringList(stringList)
 
+    @QtCore.Slot()
     def searchForComponent(self):
         searchedText = self.searchBar.text()
 
@@ -771,6 +783,7 @@ class ComponentManager(QtWidgets.QWidget):
         except RuntimeError:
             pass
 
+    @QtCore.Slot(int)
     def changeTreeWidgetSize(self, size):
         """Change the size of the component tree widget to expand or contract and fit more items"""
 

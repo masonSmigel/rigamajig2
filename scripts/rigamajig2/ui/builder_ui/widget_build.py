@@ -5,8 +5,7 @@
     file: builder_widget.py
     author: masonsmigel
     date: 07/2022
-    discription: 
-
+    description:
 """
 # PYTHON
 from PySide2 import QtCore
@@ -34,8 +33,8 @@ class BuildWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        """ Create Widgets"""
-        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Build Rig', addCheckbox=True)
+        """ Create Widgets """
+        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget(text='Build Rig', addCheckbox=True)
 
         self.completeButton = QtWidgets.QPushButton("Build Rig")
         self.completeButton.setFixedHeight(45)
@@ -45,7 +44,7 @@ class BuildWidget(QtWidgets.QWidget):
         self.finalizeButton = QtWidgets.QPushButton("Finalize")
 
         self.psdDataLoader = dataLoader.DataLoader(
-            "PSD Readers:",
+            label="PSD Readers:",
             caption="Select a Pose Reader File",
             fileFilter=common.JSON_FILTER,
             fileMode=1,
@@ -64,15 +63,12 @@ class BuildWidget(QtWidgets.QWidget):
 
         self.loadPsdModeCheckbox = QtWidgets.QComboBox()
         self.loadPsdModeCheckbox.setFixedHeight(style.LARGE_BTN_HEIGHT)
-        self.loadPsdModeCheckbox.addItem("append")
-        self.loadPsdModeCheckbox.addItem("replace")
+        self.loadPsdModeCheckbox.addItems(["append", "replace"])
 
-        # Post - script section
         self.postScriptRunner = scriptRunner.ScriptRunner(title="Post-Scripts:")
 
     def createLayouts(self):
-        """ Create Layouts"""
-        # setup the main layout.
+        """ Create Layouts """
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(0)
@@ -82,11 +78,9 @@ class BuildWidget(QtWidgets.QWidget):
         buildLayout.addWidget(self.connectButton)
         buildLayout.addWidget(self.finalizeButton)
 
-        # build_layout.addWidget(self.load_ctls_on_build)
         self.mainCollapseableWidget.addWidget(self.completeButton)
         self.mainCollapseableWidget.addLayout(buildLayout)
 
-        # psd buttons
         psdButtonLayout = QtWidgets.QHBoxLayout()
         psdButtonLayout.setContentsMargins(0, 0, 0, 0)
         psdButtonLayout.setSpacing(4)
@@ -94,82 +88,76 @@ class BuildWidget(QtWidgets.QWidget):
         psdButtonLayout.addWidget(self.savePsdButton)
         psdButtonLayout.addWidget(self.loadPsdModeCheckbox)
 
-        # add widgets to the collapsable widget.
         self.mainCollapseableWidget.addSpacing(10)
         self.mainCollapseableWidget.addWidget(self.psdDataLoader)
         self.mainCollapseableWidget.addLayout(psdButtonLayout)
 
-        # Post Script
         self.mainCollapseableWidget.addSpacing()
         self.mainCollapseableWidget.addWidget(self.postScriptRunner)
 
-        # add the widget to the main layout
         self.mainLayout.addWidget(self.mainCollapseableWidget)
 
     def createConnections(self):
         """ Create Connections """
         self.completeButton.clicked.connect(self.completeBuild)
-        self.buildButton.clicked.connect(self.executeBuilderBuild)
-        self.connectButton.clicked.connect(self.executeBuilderConnect)
-        self.finalizeButton.clicked.connect(self.executeBuilderFinalize)
+        self.buildButton.clicked.connect(self.doBuilderBuild)
+        self.connectButton.clicked.connect(self.doBuilderConnect)
+        self.finalizeButton.clicked.connect(self.doBuilderFinalize)
         self.loadPsdButton.clicked.connect(self.loadPoseReaders)
         self.savePsdButton.clicked.connect(self.savePoseReaders)
 
     def setBuilder(self, builder):
-        """ Set the builder"""
+        """ Set the builder """
         rigEnv = builder.getRigEnviornment()
-        rigFile = builder.getRigFile()
         self.builder = builder
         self.psdDataLoader.clear()
         self.psdDataLoader.setRelativePath(rigEnv)
 
-        # clear the ui
         self.postScriptRunner.clearScript()
-
-        # setup the PSD path reader
-        psdFiles = self.builder.getRigData(self.builder.getRigFile(), PSD)
-        self.psdDataLoader.selectPaths(psdFiles)
-
-        # self.postScriptScriptRunner.setRelativeDirectory(rigEnv)
         scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT, asDict=True)
         self.postScriptRunner.addScriptsWithRecursionData(scripts)
 
     def runWidget(self):
-        """ Run this widget from the builder breakpoint runner"""
+        """ Run this widget from the builder breakpoint runner """
         self.completeBuild()
         self.loadPoseReaders()
         self.postScriptRunner.executeAllScripts()
 
     @property
     def isChecked(self):
-        """ return the checked state of the collapseable widget"""
+        """ Return the checked state of the collapsible widget """
         return self.mainCollapseableWidget.isChecked()
 
-    def executeBuilderBuild(self):
-        """ execute the builder build function """
+    @QtCore.Slot()
+    def doBuilderBuild(self):
+        """ Execute the builder build function """
         self.builder.build()
 
-    def executeBuilderConnect(self):
-        """ execute the builder connect function """
+    @QtCore.Slot()
+    def doBuilderConnect(self):
+        """ Execute the builder connect function """
         self.builder.connect()
 
-    def executeBuilderFinalize(self):
-        """ execute the builder finalize function """
+    @QtCore.Slot()
+    def doBuilderFinalize(self):
+        """ Execute the builder finalize function """
         self.builder.finalize()
 
+    @QtCore.Slot()
     def loadPoseReaders(self):
-        """ Save load pose reader setup from json using the builder """
+        """ Load pose reader setup from JSON using the builder """
         self.builder.loadPoseReaders(self.psdDataLoader.getFileList(), replace=self.loadPsdModeCheckbox.currentIndex())
 
+    @QtCore.Slot()
     def savePoseReaders(self):
-        """ Save pose reader setup to json using the builder """
+        """ Save pose reader setup to JSON using the builder """
         self.builder.savePoseReaders(self.psdDataLoader.getFileList(absolute=True))
 
+    @QtCore.Slot()
     def completeBuild(self):
-        """ Execute a complete rig build (steps intialize - finalize)"""
+        """ Execute a complete rig build (steps initialize - finalize) """
         self.builder.initalize()
         self.builder.loadComponentSettings()
         self.builder.build()
         self.builder.connect()
         self.builder.finalize()
-        # self.cmpt_manager.loadFromScene()

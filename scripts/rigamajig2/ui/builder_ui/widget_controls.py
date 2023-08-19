@@ -63,7 +63,7 @@ class ControlsWidget(QtWidgets.QWidget):
         self.saveControlsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.saveControlsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
         self.saveControlsButton.setToolTip("Left Click: Save controls into their source file (new data appended to last item)"
-                                           " \nRight Click: Save all controls to a new file overriding parents")
+                                           "\nRight Click: Save all controls to a new file overriding parents")
 
         self.editControlsWidget = collapseableWidget.CollapsibleWidget('Edit Controls')
         self.editControlsWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
@@ -182,6 +182,7 @@ class ControlsWidget(QtWidgets.QWidget):
             self.controlShapeCheckbox.addItem(controlShape)
 
     # CONNECTIONS
+    @QtCore.Slot()
     def loadControlShapes(self):
         """ Load controlshapes from json using the builder """
         self.builder.loadControlShapes(self.controlDataLoader.getFileList(), self.loadColorCheckBox.isChecked())
@@ -216,6 +217,7 @@ class ControlsWidget(QtWidgets.QWidget):
 
         return self.builder.saveControlShapes(self.controlDataLoader.getFileList(absolute=True), method=method)
 
+    @QtCore.Slot()
     def mirrorControl(self):
         """ Mirror a control shape """
         axis = 'x'
@@ -226,12 +228,14 @@ class ControlsWidget(QtWidgets.QWidget):
         mirrorMode = self.mirrorControlModeComboBox.currentText()
         rigamajig2.maya.curve.mirror(cmds.ls(sl=True, type='transform'), axis=axis, mode=mirrorMode)
 
+    @QtCore.Slot()
     def setControlShape(self):
         """Set the control shape of the selected node"""
         shape = self.controlShapeCheckbox.currentText()
         for node in cmds.ls(sl=True, type='transform'):
             rigamajig2.maya.rig.control.setControlShape(node, shape)
 
+    @QtCore.Slot()
     def replaceControlShape(self):
         """Replace the control shape"""
         selection = cmds.ls(sl=True, type='transform')

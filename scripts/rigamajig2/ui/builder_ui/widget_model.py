@@ -5,12 +5,12 @@
     file: widget_model.py
     author: masonsmigel
     date: 07/2022
-    discription: 
-
+    description:
 """
 # PYTHON
 from PySide2 import QtGui
 from PySide2 import QtWidgets
+from PySide2 import QtCore
 
 # MAYA
 import maya.cmds as cmds
@@ -38,10 +38,10 @@ class ModelWidget(QtWidgets.QWidget):
         self.createConnections()
 
     def createWidgets(self):
-        """ Create Widgets"""
-        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Model/ Setup Scene', addCheckbox=True)
+        """ Create Widgets """
+        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget(text='Model/ Setup Scene', addCheckbox=True)
         self.modelPathSelector = pathSelector.PathSelector(
-            "model:",
+            label="model:",
             caption="Select a Model file",
             fileFilter=rigamajig2.shared.common.MAYA_FILTER,
             fileMode=1
@@ -52,17 +52,14 @@ class ModelWidget(QtWidgets.QWidget):
         self.openModelButton.setIcon(QtGui.QIcon(common.getIcon('openCharacter.png')))
         self.openModelButton.setFixedWidth(100)
 
-        self.importModelButton.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
-        self.importModelButton.setIconSize(ui_constants.LARGE_BTN_ICON_SIZE)
-        self.openModelButton.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
-        self.openModelButton.setIconSize(ui_constants.LARGE_BTN_ICON_SIZE)
+        for button in [self.importModelButton, self.openModelButton]:
+            button.setFixedHeight(ui_constants.LARGE_BTN_HEIGHT)
+            button.setIconSize(ui_constants.LARGE_BTN_ICON_SIZE)
 
-        # pre script
         self.preScriptRunner = scriptRunner.ScriptRunner(title="Pre-Scripts:")
 
     def createLayouts(self):
-        """ Create Layouts"""
-        # setup the main layout.
+        """ Create Layouts """
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(0)
@@ -90,9 +87,8 @@ class ModelWidget(QtWidgets.QWidget):
         self.openModelButton.clicked.connect(self.openModel)
 
     def setBuilder(self, builder):
-        """ Set a builder for model widget"""
+        """ Set a builder for the model widget """
         rigEnv = builder.getRigEnviornment()
-        rigFile = builder.getRigFile()
         self.builder = builder
         self.modelPathSelector.setRelativePath(rigEnv)
 
@@ -107,21 +103,23 @@ class ModelWidget(QtWidgets.QWidget):
         scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PRE_SCRIPT, asDict=True)
         self.preScriptRunner.addScriptsWithRecursionData(scripts)
 
+    @QtCore.Slot()
     def runWidget(self):
-        """ Run this widget from the builder breakpoint runner"""
+        """ Run this widget from the builder breakpoint runner """
         self.preScriptRunner.executeAllScripts()
-        self.importModel()
+        self.builder.importModel(self.modelPathSelector.getPath())
 
     @property
     def isChecked(self):
-        """ Check it the widget is checked"""
+        """ Check if the widget is checked """
         return self.mainCollapseableWidget.isChecked()
 
-    # CONNECTIONS
+    @QtCore.Slot()
     def importModel(self):
-        """Import model from builder"""
+        """ Import model from builder """
         self.builder.importModel(self.modelPathSelector.getPath())
 
+    @QtCore.Slot()
     def openModel(self):
         """ Open the model file """
         cmds.file(self.modelPathSelector.getPath(), o=True, f=True)

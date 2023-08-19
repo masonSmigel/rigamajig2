@@ -117,6 +117,9 @@ class BuildWidget(QtWidgets.QWidget):
         scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT, asDict=True)
         self.postScriptRunner.addScriptsWithRecursionData(scripts)
 
+        psdFiles = self.builder.getRigData(self.builder.getRigFile(), PSD)
+        self.psdDataLoader.selectPaths(psdFiles)
+
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner """
         self.completeBuild()

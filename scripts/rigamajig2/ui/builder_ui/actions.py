@@ -148,7 +148,7 @@ class Actions(object):
         newData[constants.DEFORM_LAYERS] = self.dialog.deformationWidget.deformLayerPathSelector.getPath(
             absoultePath=False)
         newData[constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath(absoultePath=False)
-        newData[constants.SHAPES] = self.dialog.deformationWidget.SHAPESPathSelector.getPath(absoultePath=False)
+        newData[constants.DEFORMERS] = self.dialog.deformationWidget.deformersDataLoader.getFileList()
         newData[constants.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath(absoultePath=False)
         newData[constants.OUTPUT_RIG_FILE_TYPE] = self.dialog.publishWidget.outFileTypeComboBox.currentText()
         newData[constants.OUTPUT_FILE_SUFFIX] = self.dialog.publishWidget.outFileSuffix.text()
@@ -163,6 +163,10 @@ class Actions(object):
         newData[constants.PRE_SCRIPT] = preScripts
         newData[constants.POST_SCRIPT] = postScripts
         newData[constants.PUB_SCRIPT] = pubScripts
+
+        # In older files we explictly had a slot for SHAPES data. We have now replaced that with the deformers key.
+        # to avoid adding shapes files twice we can re-set the shapes data here:
+        newData[constants.SHAPES] = None
 
         data.setData(newData)
         data.write(self.dialog.rigFile)

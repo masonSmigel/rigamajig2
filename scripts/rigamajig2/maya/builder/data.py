@@ -15,8 +15,10 @@ from maya import cmds as cmds
 from maya.api import OpenMaya as om2
 
 from rigamajig2.maya import meta, psd, skinCluster, meta as meta, joint as joint
-from rigamajig2.maya.data import psd_data, skin_data, SHAPES_data, deformLayer_data, joint_data, curve_data, guide_data
+from rigamajig2.maya.data import psd_data, skin_data, SHAPES_data, deformLayer_data, joint_data, curve_data, guide_data, abstract_data
 from rigamajig2.shared import path as rig_path, common as common
+from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder.constants import  DEFORMER_DATA_TYPES
 
 
 # Joints
@@ -341,11 +343,23 @@ def loadDeformLayers(path=None):
         return True
 
 
-def loadAdditionalDeformation(path=None):
+def loadDeformer(path=None):
     """
     Loads all additional deformation data for the rig.
     :param path:
     :return:
     """
-    # TODO: load additional deformation
-    pass
+    if not path:
+        return
+    if not os.path.exists(path):
+        return
+
+    if path and rig_path.isFile(path):
+        dataType = abstract_data.AbstractData().getDataType(path)
+        if dataType not in DEFORMER_DATA_TYPES:
+            raise ValueError(f"{os.path.basename(path)} is not a type of deformer data")
+
+        dataObj = core.createDataClassInstance(dataType)
+        dataObj.read(path)
+        dataObj.applyData(nodes=dataObj.getKeys())
+        return True

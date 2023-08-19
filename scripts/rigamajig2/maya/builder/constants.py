@@ -32,7 +32,10 @@ DEFORM_LAYERS = "deform_layers"
 SKINS = 'skins'
 PSD = 'psd'
 SHAPES = 'SHAPES'
-DEFORMERSLIST = 'deformers'
+DEFORMERS = 'deformers'
 OUTPUT_RIG = 'output_file'
 OUTPUT_RIG_FILE_TYPE = 'output_file_type'
 OUTPUT_FILE_SUFFIX = 'output_file_suffix'
+
+
+DEFORMER_DATA_TYPES = ["BlendshapeData", "DeformerData", "SkinData", "SHAPESData"]

@@ -451,7 +451,7 @@ class Builder(object):
             logger.info("Pose Readers Save -- Complete")
             return savedFiles
 
-    def loadDeformationData(self):
+    def loadAllDeformationData(self):
         """
         Load other data, this is stuff like skinweights, blendshapes, clusters etc.
         """
@@ -459,7 +459,7 @@ class Builder(object):
         self.loadSkinWeights()
 
         # here we need to load additional data
-        self.loadSHAPESData()
+        self.loadDeformers()
         logger.info("data loading -- complete")
 
     def loadDeformationLayers(self, path=None):
@@ -512,16 +512,32 @@ class Builder(object):
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
         rigamajig2.maya.builder.data.saveSkinWeights(path)
 
-    def saveSHAPESData(self, path=None):
-        """ Save SHAPES data """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
-        rigamajig2.maya.builder.data.saveSHAPESData(path)
+    # def saveSHAPESData(self, path=None):
+    #     """ Save SHAPES data """
+    #     path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
+    #     rigamajig2.maya.builder.data.saveSHAPESData(path)
+    #
+    # def loadSHAPESData(self, path=None):
+    #     """ Load data from SHAPES file"""
+    #     path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
+    #     if rigamajig2.maya.builder.data.loadSHAPESData(path):
+    #         logger.info("SHAPES data loaded")
 
-    def loadSHAPESData(self, path=None):
-        """ Load data from SHAPES file"""
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
-        if rigamajig2.maya.builder.data.loadSHAPESData(path):
-            logger.info("SHAPES data loaded")
+    def loadDeformers(self, paths=None):
+        """ Load additional deformers
+        :param list paths: Path to the json file. if none is provided use the data from the rigFile
+        """
+        deformerPaths = paths or self.getRigData(self.rigFile, constants.DEFORMERS)
+        shapesPaths = paths or self.getRigData(self.rigFile, constants.SHAPES)
+
+        # if we have both deformerPaths and shapesPaths we need to join the two paths
+        if deformerPaths and shapesPaths:
+            paths = common.toList(shapesPaths) + common.toList(deformerPaths)
+
+        for path in common.toList(paths):
+            absPath = self.getAbsoultePath(path)
+            if rigamajig2.maya.builder.data.loadDeformer(absPath):
+                logger.info(f"deformers loaded: {path}")
 
     def deleteComponents(self, clearList=True):
         """
@@ -628,7 +644,7 @@ class Builder(object):
         self.loadPoseReaders()
         self.postScript()
         self.loadControlShapes()
-        self.loadDeformationData()
+        self.loadAllDeformationData()
         if publish:
             # self.optimize()
             self.publishScript()

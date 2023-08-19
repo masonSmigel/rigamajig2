@@ -43,7 +43,7 @@ class ControlsWidget(QtWidgets.QWidget):
         """ Create Widgets """
         self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Controls', addCheckbox=True)
         self.controlDataLoader = dataLoader.DataLoader(
-            "Controls:",
+            label="Controls:",
             caption="Select a Control Shape file",
             fileFilter=common.JSON_FILTER,
             fileMode=1,

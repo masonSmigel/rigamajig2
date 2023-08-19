@@ -17,9 +17,9 @@ from PySide2 import QtWidgets
 # RIGAMAJIG2
 import rigamajig2.maya.builder.constants
 from rigamajig2.shared import common
-from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget
+from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget, dataLoader
 from rigamajig2.ui.builder_ui import style
-from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES, DEFORM_LAYERS
+from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES, DEFORMERS, DEFORM_LAYERS, DEFORMER_DATA_TYPES
 from rigamajig2.maya.rig import deformLayer
 from rigamajig2.maya import skinCluster
 
@@ -99,21 +99,26 @@ class DeformationWidget(QtWidgets.QWidget):
         self.copySkinWeightsButton.setIcon(QtGui.QIcon(":copySkinWeight"))
         self.connectBpmsButton = QtWidgets.QPushButton("Connect BPMs on Skins")
 
+        self.deformersDataLoader = dataLoader.DataLoader(
+            label="Deformers:",
+            caption="Select a Deformer file",
+            fileFilter=common.JSON_FILTER,
+            fileMode=1,
+            dataFilteringEnabled=True,
+            dataFilter=DEFORMER_DATA_TYPES)
 
-        self.SHAPESPathSelector = pathSelector.PathSelector(
-            "SHAPES:",
-            caption="Select a SHAPES Node Setup",
-            fileFilter=rigamajig2.shared.common.MEL_FILTER,
-            fileMode=2)
-        self.saveSHAPESButton = QtWidgets.QPushButton("Save SHAPES Setup")
-        self.saveSHAPESButton.setIcon(QtGui.QIcon(common.getIcon("saveShapesSetup.png")))
-        self.loadSHAPESButton = QtWidgets.QPushButton("Load SHAPES Setup")
-        self.loadSHAPESButton.setIcon(QtGui.QIcon(common.getIcon("loadShapesSetup.png")))
+        # grow the widget a little bit. We will be loading alot of data.
+        self.deformersDataLoader.changeTreeWidgetSize(40)
 
-        self.saveSHAPESButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
-        self.saveSHAPESButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
-        self.loadSHAPESButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
-        self.loadSHAPESButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+        self.saveDeformersButton = QtWidgets.QPushButton("Save Deformer")
+        self.saveDeformersButton.setIcon(QtGui.QIcon(common.getIcon("saveDeformers.png")))
+        self.saveDeformersButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.saveDeformersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
+
+        self.loadDeformersButton = QtWidgets.QPushButton("Load Deformers")
+        self.loadDeformersButton.setIcon(QtGui.QIcon(common.getIcon("loadDeformers.png")))
+        self.loadDeformersButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
+        self.loadDeformersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -161,15 +166,17 @@ class DeformationWidget(QtWidgets.QWidget):
         self.skinEditWidget.addSpacing(4)
 
         self.mainCollapseableWidget.addSpacing(10)
-        self.mainCollapseableWidget.addWidget(self.SHAPESPathSelector)
+        # self.mainCollapseableWidget.addWidget(self.SHAPESPathSelector)
 
         # SHAPES layout
-        SHAPESButtonLayout = QtWidgets.QHBoxLayout()
-        SHAPESButtonLayout.setContentsMargins(0, 0, 0, 0)
-        SHAPESButtonLayout.setSpacing(4)
-        SHAPESButtonLayout.addWidget(self.loadSHAPESButton)
-        SHAPESButtonLayout.addWidget(self.saveSHAPESButton)
-        self.mainCollapseableWidget.addLayout(SHAPESButtonLayout)
+        deformersButtonLayout = QtWidgets.QHBoxLayout()
+        deformersButtonLayout.setContentsMargins(0, 0, 0, 0)
+        deformersButtonLayout.setSpacing(4)
+        deformersButtonLayout.addWidget(self.loadDeformersButton)
+        deformersButtonLayout.addWidget(self.saveDeformersButton)
+
+        self.mainCollapseableWidget.addWidget(self.deformersDataLoader)
+        self.mainCollapseableWidget.addLayout(deformersButtonLayout)
 
         # add the widget to the main layout
         self.mainLayout.addWidget(self.mainCollapseableWidget)
@@ -186,8 +193,8 @@ class DeformationWidget(QtWidgets.QWidget):
         self.saveSkinsButton.clicked.connect(self.saveSkin)
         self.copySkinWeightsButton.clicked.connect(self.copySkinWeights)
         self.connectBpmsButton.clicked.connect(self.connectBindPreMatrix)
-        self.saveSHAPESButton.clicked.connect(self.saveSHAPESData)
-        self.loadSHAPESButton.clicked.connect(self.loadSHAPESData)
+        self.saveDeformersButton.clicked.connect(self.saveDeformerData)
+        self.loadDeformersButton.clicked.connect(self.loadDeformerData)
 
     def setBuilder(self, builder):
         """ Set a builder for intialize widget"""
@@ -195,7 +202,9 @@ class DeformationWidget(QtWidgets.QWidget):
         self.builder = builder
         self.deformLayerPathSelector.setRelativePath(rigEnv)
         self.skinPathSelector.setRelativePath(rigEnv)
-        self.SHAPESPathSelector.setRelativePath(rigEnv)
+
+        self.deformersDataLoader.clear()
+        self.deformersDataLoader.setRelativePath(rigEnv)
 
         # update data within the rig
         deformLayerFile = self.builder.getRigData(self.builder.getRigFile(), DEFORM_LAYERS)
@@ -204,14 +213,19 @@ class DeformationWidget(QtWidgets.QWidget):
         skinFile = self.builder.getRigData(self.builder.getRigFile(), SKINS)
         self.skinPathSelector.selectPath(skinFile)
 
+        # here in older files we sometimes used a different Key for Shapes. So we need to load SHapes keys BEFORE
+        # loading the deformers key into the data loader
         SHAPESFile = self.builder.getRigData(self.builder.getRigFile(), SHAPES)
-        self.SHAPESPathSelector.selectPath(SHAPESFile)
+        self.deformersDataLoader.selectPath(SHAPESFile)
+
+        DeformerFiles = self.builder.getRigData(self.builder.getRigFile(), DEFORMERS)
+        self.deformersDataLoader.selectPaths(common.toList(DeformerFiles))
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.builder.loadDeformationLayers(self.deformLayerPathSelector.getPath())
         self.builder.loadSkinWeights(self.skinPathSelector.getPath())
-        self.builder.loadSHAPESData(self.SHAPESPathSelector.getPath())
+        self.builder.loadDeformers(self.deformersDataLoader.getFileList())
 
     @property
     def isChecked(self):
@@ -268,12 +282,12 @@ class DeformationWidget(QtWidgets.QWidget):
             skinCluster.connectExistingBPMs(sc)
 
     @QtCore.Slot()
-    def loadSHAPESData(self):
-        self.builder.loadSHAPESData(self.SHAPESPathSelector.getPath())
+    def loadDeformerData(self):
+        self.builder.loadDeformers(self.deformersDataLoader.getFileList(absolute=False))
 
     @QtCore.Slot()
-    def saveSHAPESData(self):
-        self.builder.saveSHAPESData(self.SHAPESPathSelector.getPath())
+    def saveDeformerData(self):
+        raise NotImplementedError
 
     @QtCore.Slot()
     def addDeformLayer(self):

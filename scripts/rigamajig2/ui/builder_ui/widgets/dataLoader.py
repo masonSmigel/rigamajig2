@@ -155,12 +155,12 @@ class DataLoader(QtWidgets.QWidget):
         self.expandWidgetButton.setIcon(QtGui.QIcon(":nodeGrapherArrowDown.png"))
         self.expandWidgetButton.setFlat(True)
         self.expandWidgetButton.setFixedSize(15, 10)
-        self.expandWidgetButton.setToolTip("Expand Component Manager")
+        self.expandWidgetButton.setToolTip("Expand Data Loader")
         self.contractWidgetButton = QtWidgets.QPushButton()
         self.contractWidgetButton.setIcon(QtGui.QIcon(":nodeGrapherArrowUp.png"))
         self.contractWidgetButton.setFlat(True)
         self.contractWidgetButton.setFixedSize(15, 10)
-        self.contractWidgetButton.setToolTip("Contract Component Manager")
+        self.contractWidgetButton.setToolTip("Contract Data Loader")
         # self.showInFolderButton.clicked.connect(self.showInFolder)
 
     def createLayouts(self):
@@ -500,8 +500,8 @@ class DataLoader(QtWidgets.QWidget):
         if self.pathTreeWidget.topLevelItemCount() > 0:
             allPaths = [p.data(0, QtCore.Qt.UserRole) for p in self.getAllItems()]
             if path in allPaths:
-                # TODO: should I keep the raise Warnings?
-                raise Warning(f"Path '{path}' is already added to the dataLoader")
+                cmds.warning(f"Path '{path}' is already added to the dataLoader")
+                return
 
         dataType = abstract_data.AbstractData.getDataType(fileInfo.filePath())
 

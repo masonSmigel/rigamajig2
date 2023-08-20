@@ -3,6 +3,8 @@ import maya.cmds as cmds
 import inspect
 import os
 
+from rigamajig2.shared import common
+
 SCRIPT_TYPES = [
     "Demand",
     "Open/Close",
@@ -23,6 +25,7 @@ if __name__ == '__main__':
     {call}
 """
 
+DEFAULT_IMPORTS = 'import maya.cmds as cmds'
 
 def isScriptNode(name):
     """
@@ -37,7 +40,7 @@ def isScriptNode(name):
     return True
 
 
-def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None, afterScript=None):
+def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None, afterScript=None, extraImports=None):
     """
     Create a new script node.
 
@@ -46,6 +49,7 @@ def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None
     :param str scriptType: Specified when the script is executed.
     :param str function beforeScript: The script executed during file load. Use a string or a python function.
     :param str function afterScript: The script executed when the script node is deleted. Use a string or a python function.
+    :param list extraImports: Additional stuff to import into the file
     :return: the name of the script node created
     :rtype: str
     """
@@ -59,10 +63,17 @@ def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None
         raise RuntimeError("Object {} already exists. Cannot create a scriptNode with that name".format(name))
 
     # check if the before or after script is callable. if it is turn it into a string.
+
+    imports = DEFAULT_IMPORTS
+    if extraImports:
+        extraImports = common.toList(extraImports)
+        for line in extraImports:
+            imports += f"\n{line}"
+
     if callable(beforeScript):
-        beforeScript = validateScriptString(beforeScript, defaultImports='import maya.cmds as cmds')
+        beforeScript = validateScriptString(beforeScript, defaultImports=imports)
     if callable(afterScript):
-        afterScript = validateScriptString(afterScript, defaultImports='import maya.cmds as cmds')
+        afterScript = validateScriptString(afterScript, defaultImports=imports)
 
     # if the before and after script is None then ensure it wont throw a syntax error
     if not beforeScript: beforeScript = 'pass' if sourceType == 'python' else ''

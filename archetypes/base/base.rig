@@ -11,7 +11,8 @@
             "pre_scripts/initalize_scene.py"
         ], 
         "post_script": [
-            "post_scripts/finalize_scene.py"
+            "post_scripts/finalize_scene.py",
+            "post_scripts/setup_rig_callbacks.py"
         ], 
         "pub_script": [
             "pub_scripts/addContainerScriptNode.py",

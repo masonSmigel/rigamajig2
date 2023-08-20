@@ -41,7 +41,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
     # pylint:disable=too-many-arguments
     def __init__(self, name, input, size=1, ikSpaces=None, pvSpaces=None,
-                 useProxyAttrs=True, useScale=True, addTwistJoints=True, addBendies=True,
+                 useProxyAttrs=True, useCallbackSwitch=True, useScale=True, addTwistJoints=True, addBendies=True,
                  rigParent=str()):
         """
         Create a limb component. (This component is most often used as a subclass)
@@ -73,6 +73,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         # initalize cmpt settings.
         self.cmptSettings['useProxyAttrs'] = useProxyAttrs
+        self.cmptSettings['useCallbackSwitch'] = useCallbackSwitch
         self.cmptSettings['useScale'] = useScale
         self.cmptSettings['addTwistJoints'] = addTwistJoints
         self.cmptSettings['addBendies'] = addBendies
@@ -235,10 +236,24 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 hideAttrs=['t', 'r', 's', 'v'],
                 size=self.size,
                 color='lightorange',
-                shape='peakedCube',
+                shape='peakedCube' if not self.useCallbackSwitch else None,
                 xformObj=self.input[3],
                 parent=self.controlHierarchy,
                 shapeAim='x')
+
+            if self.useCallbackSwitch:
+                self.ikfkProxySwitch = rig_control.createAtObject(
+                    self.name + "_selection_proxy",
+                    orig=True,
+                    hideAttrs=['t', 'r', 's', 'v'],
+                    size=self.size,
+                    color='lightorange',
+                    shape='peakedCube',
+                    xformObj=self.input[3],
+                    parent=self.controlHierarchy,
+                    shapeAim='x')
+
+                rig_transform.matchTransform(self.input[0], self.ikfkControl.orig)
 
         if self.addTwistJoints and self.addBendies:
             self.bendControlHierarchy = cmds.createNode(
@@ -368,10 +383,6 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         cmds.addAttr(self.paramsHierarchy, ln='twist', at='float', k=True)
         cmds.connectAttr("{}.{}".format(self.paramsHierarchy, 'twist'), "{}.{}".format(self.ikfk.getHandle(), 'twist'))
 
-        # if not using proxy attributes then setup our ikfk controller
-        if not self.useProxyAttrs:
-            rig_transform.connectOffsetParentMatrix(self.input[3], self.ikfkControl.orig)
-
         if self.addTwistJoints:
             self.twistHierarchy = cmds.createNode("transform", n="{}_twist".format(self.name), p=self.rootHierarchy)
 
@@ -389,7 +400,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             cmds.addAttr(self.paramsHierarchy, ln='uppCounterTwist', at='float', k=True, dv=1, min=0, max=1)
 
             blendMatrix = cmds.createNode("blendMatrix", name="{}_conterTwist".format(uppSpline._startTwist))
-            cmds.connectAttr("{}.matrixSum".format(twistMultMatrix),"{}.target[0].targetMatrix".format(blendMatrix))
+            cmds.connectAttr("{}.matrixSum".format(twistMultMatrix), "{}.target[0].targetMatrix".format(blendMatrix))
             cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.inputMatrix".format(twistDecompose), f=True)
 
             cmds.connectAttr("{}.uppCounterTwist".format(self.paramsHierarchy), "{}.envelope".format(blendMatrix))
@@ -509,6 +520,17 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     def connect(self):
         """Create the connection"""
 
+        # if not using proxy attributes then setup our ikfk controller
+        if not self.useProxyAttrs:
+            if self.useCallbackSwitch:
+                rig_transform.connectOffsetParentMatrix(self.input[3], self.ikfkProxySwitch.orig)
+                meta.createMessageConnection(self.ikfkProxySwitch.name,
+                                             self.ikfkControl.name,
+                                             sourceAttr="selectionOverride",
+                                             destAttr="selectionOverridden")
+            else:
+                rig_transform.connectOffsetParentMatrix(self.input[3], self.ikfkControl.orig)
+
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.limbBase.orig, s=False, sh=False, mo=True)
@@ -560,9 +582,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # add required data to the ikFkSwitchGroup
         # give the node that will store the ikfkSwitch attribute
         if not self.useProxyAttrs:
-            meta.createMessageConnection(self.ikfk.getGroup(), self.ikfkControl.name, "ikfkControl")
-        meta.createMessageConnection(self.ikfk.getGroup(), fkJointsMatchList, 'fkMatchList', 'matchNode')
-        meta.createMessageConnection(self.ikfk.getGroup(), self.ikJnts, 'ikMatchList', 'matchNode')
-        meta.createMessageConnection(self.ikfk.getGroup(), self.fkControls, 'fkControls', 'matchNode')
-        meta.createMessageConnection(self.ikfk.getGroup(), self.ikControls, 'ikControls', 'matchNode')
-
+            meta.createMessageConnection(self.ikfk.getGroup(), self.ikfkControl.name, sourceAttr="ikfkControl")
+        meta.createMessageConnection(self.ikfk.getGroup(), fkJointsMatchList, sourceAttr='fkMatchList', destAttr='matchNode')
+        meta.createMessageConnection(self.ikfk.getGroup(), self.ikJnts, sourceAttr='ikMatchList', destAttr='matchNode')
+        meta.createMessageConnection(self.ikfk.getGroup(), self.fkControls, sourceAttr='fkControls', destAttr='matchNode')
+        meta.createMessageConnection(self.ikfk.getGroup(), self.ikControls, sourceAttr='ikControls', destAttr='matchNode')

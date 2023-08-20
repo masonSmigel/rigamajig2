@@ -48,7 +48,10 @@ def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
         nodes = [nodes]
 
     for node in nodes:
-        keyables = [x for x in cmds.listAttr(node, k=True) if cmds.getAttr("{}.{}".format(node, x), type=True) not in SKIPS]
+        keyableAttrs = cmds.listAttr(node, k=True)
+        if not keyableAttrs:
+            continue
+        keyables = [x for x in keyableAttrs if cmds.getAttr("{}.{}".format(node, x), type=True) not in SKIPS]
 
         translates = cmds.attributeQuery("translate", node=node, listChildren=True)
         rotates = cmds.attributeQuery("rotate", node=node, listChildren=True)

@@ -149,7 +149,7 @@ class ControlsWidget(QtWidgets.QWidget):
     def createConnections(self):
         """ Create Connections"""
         self.loadControlsButton.clicked.connect(self.loadControlShapes)
-        self.saveControlsButton.clicked.connect(self.saveControlShapes)
+        self.saveControlsButton.leftClicked.connect(self.saveControlShapes)
         self.saveControlsButton.rightClicked.connect(self.saveControlShapesAsOverwrite)
         self.mirrorControlButton.clicked.connect(self.mirrorControl)
         self.setControlShapeButton.clicked.connect(self.setControlShape)

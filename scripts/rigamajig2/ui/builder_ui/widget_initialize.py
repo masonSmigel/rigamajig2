@@ -138,7 +138,7 @@ class InitializeWidget(QtWidgets.QWidget):
     def createConnections(self):
         """ Create Connections"""
         self.loadGuidesButton.clicked.connect(self.loadGuides)
-        self.saveGuidesButton.clicked.connect(self.saveGuides)
+        self.saveGuidesButton.leftClicked.connect(self.saveGuides)
         self.saveGuidesButton.rightClicked.connect(self.saveGuidesAsOverride)
         self.loadComponentsButton.clicked.connect(self.loadComponents)
         self.saveComponentsButton.clicked.connect(self.saveComponents)

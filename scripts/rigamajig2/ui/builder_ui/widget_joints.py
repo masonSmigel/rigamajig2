@@ -169,7 +169,7 @@ class JointWidget(QtWidgets.QWidget):
         """ Create Connections"""
         self.cleanSkeletonButton.clicked.connect(self.cleanSkeleton)
         self.loadJointPositionButton.clicked.connect(self.loadJointsPositions)
-        self.saveJointPositionButton.clicked.connect(self.saveJointPositions)
+        self.saveJointPositionButton.leftClicked.connect(self.saveJointPositions)
         self.saveJointPositionButton.rightClicked.connect(self.saveJointPositionAsOverride)
         self.jointToRotationButton.clicked.connect(self.jointToRotation)
         self.jointToOrientationButton.clicked.connect(self.jointToOrientation)

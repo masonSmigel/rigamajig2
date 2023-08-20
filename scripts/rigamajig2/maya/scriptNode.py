@@ -2,8 +2,12 @@
 import maya.cmds as cmds
 import inspect
 import os
+import logging
 
 from rigamajig2.shared import common
+
+
+logger = logging.getLogger(__name__)
 
 SCRIPT_TYPES = [
     "Demand",
@@ -85,7 +89,7 @@ def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None
                                  beforeScript=beforeScript,
                                  afterScript=afterScript,
                                  )
-    print("New script node {} created".format(name))
+    logger.info("New script node {} created".format(name))
     return scriptNode
 
 

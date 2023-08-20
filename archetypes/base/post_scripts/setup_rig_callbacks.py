@@ -26,3 +26,4 @@ if len(nodesForSelectionOverride) > 0:
                                  beforeScript=rigcallbacks.setupSelectionOverrideCallback,
                                  extraImports="import maya.api.OpenMaya as om2")
 
+    print("Created selection Override callback and scriptnode")

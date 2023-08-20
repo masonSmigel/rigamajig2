@@ -131,14 +131,3 @@ class CurveData(node_data.NodeData):
                                                                 "overrideColorRGB", "overrideColor"])
         return result
 
-
-if __name__ == '__main__':
-    # d = CurveData()
-    # for obj in cmds.ls(sl=True):
-    #     print obj
-    #     d.gatherData(obj)
-    # d.write('/Users/masonsmigel/Documents/projects/2021/neko/libby_rig/Rig/ctls/libby_ctls.json')
-
-    d = CurveData()
-    d.read('/Users/masonsmigel/Documents/projects/2021/neko/libby_rig/Rig/ctls/libby_ctls.json')
-    d.applyData(cmds.ls(sl=True), create=True)

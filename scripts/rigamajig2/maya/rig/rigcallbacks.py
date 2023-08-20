@@ -16,7 +16,10 @@ SELECTION_OVERRIDE = "selectionOverride"
 
 def setupSelectionOverrideCallback():
     """
-    Look at the scene and decide what callbacks need to be created. They can then be added to a script job to create on scene open.
+    Setup a callback for the selection override.
+
+    This checks on nodes if they have a "SelectionOverride" message attribute. If it does when that node is selected
+    it switches to select the selection override instead.
     :return:
     """
 

@@ -65,6 +65,9 @@ class ScriptRunner(QtWidgets.QWidget):
         self.title = title
         self.currentScriptsList = list()
 
+        # setup parameters for drag and drop.
+        self.setAcceptDrops(True)
+
         self.createActions()
         self.createWidgets()
         self.createLayouts()
@@ -198,8 +201,8 @@ class ScriptRunner(QtWidgets.QWidget):
     def addScriptBrowser(self):
         """add script through a browswer"""
         filePath, selectedFilter = QtWidgets.QFileDialog.getOpenFileName(self, "Select File", "", SCRIPT_FILE_FILTER)
-        self._addScriptToWidget(filePath, top=True)
         if filePath:
+            self._addScriptToWidget(filePath, top=True)
             self.currentScriptsList.append(filePath)
 
     def createNewScript(self):
@@ -294,3 +297,26 @@ class ScriptRunner(QtWidgets.QWidget):
             # Linux
             else:
                 subprocess.check_call(['xdg-open', filePath])
+
+    def dragEnterEvent(self, event):
+        """ Reimplementing event to accept plain text, """
+        if event.mimeData().hasUrls:
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        """ Reimplementing event to accept plain text, """
+        if event.mimeData().hasUrls:
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        """ """
+        if event.mimeData().hasUrls:
+            for url in event.mimeData().urls():
+                filePath = url.path()
+                if filePath:
+                    self._addScriptToWidget(filePath, top=True)
+                    self.currentScriptsList.append(filePath)

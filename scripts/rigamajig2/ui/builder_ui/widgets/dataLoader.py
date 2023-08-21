@@ -83,11 +83,13 @@ class DataLoader(QtWidgets.QWidget):
         self.relativePath = relativePath
         self.label = label
 
-        # TODO: implement theese to filter out the various data types and only allow some types
         self.dataFilteringEnabled = dataFilteringEnabled
         self.dataFilter = dataFilter or list()
 
         self.setFixedHeight(self.widgetHeight)
+
+        # setup parameters for drag and drop.
+        self.setAcceptDrops(True)
 
         self.createActions()
         self.createWidgets()
@@ -348,7 +350,7 @@ class DataLoader(QtWidgets.QWidget):
         :param path:
         :return:
         """
-        if path is None:
+        if not path:
             return
 
         path = pathlib.Path(path)
@@ -357,6 +359,10 @@ class DataLoader(QtWidgets.QWidget):
         else:
             newPath = path.joinpath(self.relativePath, path)
             newPath = str(newPath.resolve())
+
+        # check to make sure the path is a file math
+        if os.path.isdir(newPath):
+            return
 
         # get the data type of the file and try to filter it.
         newPathDataType = abstract_data.AbstractData().getDataType(newPath)
@@ -542,6 +548,27 @@ class DataLoader(QtWidgets.QWidget):
         if newSize < self.widgetHeight: newSize = self.widgetHeight
         self.setFixedHeight(newSize)
 
+    def dragEnterEvent(self, event):
+        """ Reimplementing event to accept plain text, """
+        if event.mimeData().hasUrls:
+            event.accept()
+        else:
+            event.ignore()
+
+    def dragMoveEvent(self, event):
+        """ Reimplementing event to accept plain text, """
+        if event.mimeData().hasUrls:
+            event.accept()
+        else:
+            event.ignore()
+
+    def dropEvent(self, event):
+        """ """
+        if event.mimeData().hasUrls:
+            for url in event.mimeData().urls():
+                filePath = url.path()
+                if filePath:
+                   self.selectPath(filePath)
 
 class TestDialog(QtWidgets.QDialog):
     """

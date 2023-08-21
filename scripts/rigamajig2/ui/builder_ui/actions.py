@@ -67,6 +67,9 @@ class Actions(object):
         self.reloadRigamajigModulesAction = QtWidgets.QAction("Reload Rigamajig2 Modules", self.dialog)
         self.reloadRigamajigModulesAction.triggered.connect(self.reloadRigamajigModules)
 
+        self.removeRigamajigCallbacksAction = QtWidgets.QAction("Remove Rigamajig Callbacks", self.dialog)
+        self.removeRigamajigCallbacksAction.triggered.connect(self.removeRigamajigCallbacks)
+
         self.mergeRigFilesAction = QtWidgets.QAction("Merge Rig Files", self.dialog)
         self.mergeRigFilesAction.triggered.connect(self.showMergeRigFilesDialog)
 
@@ -208,6 +211,10 @@ class Actions(object):
         """ Reload riamajig modules"""
         import rigamajig2
         rigamajig2.reloadModule(log=True)
+
+    def removeRigamajigCallbacks(self):
+        from rigamajig2.maya.rig import rigcallbacks
+        rigcallbacks.clearRigamajigCallbacks()
 
     def showMergeRigFilesDialog(self):
         """ Show the merge rig files dialog"""

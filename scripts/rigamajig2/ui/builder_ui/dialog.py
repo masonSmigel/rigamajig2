@@ -101,7 +101,9 @@ class BuilderDialog(DockableUI):
         utilsMenu.addAction(self.actions.mergeRigFilesAction)
         utilsMenu.addSeparator()
         utilsMenu.addMenu(self.actions.setLoggingLevelMenu)
-        utilsMenu.addAction(self.actions.devModeAction)
+        #utilsMenu.addAction(self.actions.devModeAction)
+        utilsMenu.addSeparator()
+        utilsMenu.addAction(self.actions.removeRigamajigCallbacksAction)
         utilsMenu.addAction(self.actions.reloadRigamajigModulesAction)
 
         qcMenu = self.mainMenu.addMenu("QC")

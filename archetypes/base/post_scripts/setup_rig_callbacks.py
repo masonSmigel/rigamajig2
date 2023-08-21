@@ -21,7 +21,9 @@ if len(nodesForSelectionOverride) > 0:
     rigcallbacks.setupSelectionOverrideCallback()
 
     # then create a script job to set it up as well.
-    callback = scriptNode.create("rigamajig2_selectionOverride",
-                                 scriptType="Open/Close",
-                                 beforeScript=rigcallbacks.setupSelectionOverrideCallback,
-                                 extraImports="import maya.api.OpenMaya as om2")
+    if not cmds.objExists("rigamajig2_selectionOverride"):
+        callback = scriptNode.create(
+            "rigamajig2_selectionOverride",
+             scriptType="Open/Close",
+             beforeScript=rigcallbacks.setupSelectionOverrideCallback,
+             extraImports="import maya.api.OpenMaya as om2")

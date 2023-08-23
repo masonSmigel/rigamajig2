@@ -250,7 +250,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                     color='lightorange',
                     shape='peakedCube',
                     xformObj=self.input[3],
-                    parent=self.controlHierarchy,
+                    parent=self.ikfkControl.name,
                     shapeAim='x')
 
                 rig_transform.matchTransform(self.input[0], self.ikfkControl.orig)

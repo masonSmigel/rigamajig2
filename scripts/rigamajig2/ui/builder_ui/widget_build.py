@@ -34,7 +34,7 @@ class BuildWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget(text='Build Rig', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.BuilderHeader(text='Build Rig', addCheckbox=True)
 
         self.completeButton = QtWidgets.QPushButton("Build Rig")
         self.completeButton.setFixedHeight(45)

@@ -42,7 +42,7 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Deformations', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.BuilderHeader('Deformations', addCheckbox=True)
 
         self.deformLayerPathSelector = pathSelector.PathSelector(
             "layers:",

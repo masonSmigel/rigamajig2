@@ -51,7 +51,7 @@ class JointWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Skeleton', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.BuilderHeader('Skeleton', addCheckbox=True)
 
         self.jointPositionDataLoader = dataLoader.DataLoader(
             "Joint Positions: ",

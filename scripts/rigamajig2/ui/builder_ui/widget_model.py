@@ -39,7 +39,7 @@ class ModelWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget(text='Model/ Setup Scene', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.BuilderHeader(text='Model/ Setup Scene', addCheckbox=True)
         self.modelPathSelector = pathSelector.PathSelector(
             label="model:",
             caption="Select a Model file",

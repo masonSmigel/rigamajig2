@@ -41,7 +41,7 @@ class ControlsWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Controls', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.BuilderHeader('Controls', addCheckbox=True)
         self.controlDataLoader = dataLoader.DataLoader(
             label="Controls:",
             caption="Select a Control Shape file",

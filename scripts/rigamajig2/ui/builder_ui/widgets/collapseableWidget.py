@@ -11,6 +11,77 @@ from shiboken2 import wrapInstance
 import maya.cmds as cmds
 import maya.OpenMayaUI as omui
 
+from rigamajig2.shared import common
+
+darkPalette = QtGui.QPalette()
+
+# base
+darkPalette.setColor(QtGui.QPalette.WindowText, QtGui.QColor(180, 180, 180))
+darkPalette.setColor(QtGui.QPalette.Button, QtGui.QColor(66, 66, 66))
+darkPalette.setColor(QtGui.QPalette.Light, QtGui.QColor(180, 180, 180))
+darkPalette.setColor(QtGui.QPalette.Midlight, QtGui.QColor(90, 90, 90))
+darkPalette.setColor(QtGui.QPalette.Dark, QtGui.QColor(35, 35, 35))
+darkPalette.setColor(QtGui.QPalette.Text, QtGui.QColor(180, 180, 180))
+darkPalette.setColor(QtGui.QPalette.BrightText, QtGui.QColor(180, 180, 180))
+darkPalette.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(180, 180, 180))
+darkPalette.setColor(QtGui.QPalette.Base, QtGui.QColor(42, 42, 42))
+darkPalette.setColor(QtGui.QPalette.Window, QtGui.QColor(53, 53, 53))
+darkPalette.setColor(QtGui.QPalette.Shadow, QtGui.QColor(20, 20, 20))
+darkPalette.setColor(QtGui.QPalette.Link, QtGui.QColor(56, 252, 196))
+darkPalette.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(72, 72, 72))
+darkPalette.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(53, 53, 53))
+darkPalette.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(180, 180, 180))
+darkPalette.setColor(QtGui.QPalette.LinkVisited, QtGui.QColor(80, 80, 80))
+
+# disabled
+darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtGui.QColor(127, 127, 127))
+darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(127, 127, 127))
+darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtGui.QColor(127, 127, 127))
+darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Highlight, QtGui.QColor(80, 80, 80))
+darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.HighlightedText, QtGui.QColor(127, 127, 127))
+
+
+class breakpointCheckbox(QtWidgets.QCheckBox):
+
+    def __init__(self, *args, **kwargs):
+        super(breakpointCheckbox, self).__init__(*args, **kwargs)
+
+        styleSheet = (f"""
+                    QCheckBox {{
+                        spacing: 5px;
+                    }}
+                    
+                    QCheckBox::indicator {{
+                        width: 13px;
+                        height: 13px;
+                    }}
+                    
+                    QCheckBox::indicator:unchecked {{
+                        image: url({common.ICONS_PATH}/breakpoint_unchecked.png);
+                    }}
+                    
+                    QCheckBox::indicator:unchecked:hover {{
+                        image: url({common.ICONS_PATH}/breakpoint_hover.png);
+                    }}
+                    
+                    QCheckBox::indicator:unchecked:pressed {{
+                        image: url({common.ICONS_PATH}/breakpoint_checkedPress.png);
+                    }}
+                    
+                    QCheckBox::indicator:checked {{
+                        image: url({common.ICONS_PATH}/breakpoint_checked.png);
+                    }}
+                    
+                    QCheckBox::indicator:checked:hover {{
+                        image: url({common.ICONS_PATH}/breakpoint_checked.png);
+                    }}
+                    
+                    QCheckBox::indicator:checked:pressed {{
+                        image: url({common.ICONS_PATH}/breakpoint_checkedPress.png);
+                    }}
+                    """)
+        self.setStyleSheet(styleSheet)
+
 
 class CollapsibleHeader(QtWidgets.QWidget):
     """
@@ -39,7 +110,7 @@ class CollapsibleHeader(QtWidgets.QWidget):
         self.iconLabel.setFixedWidth(self.COLLASPED_PIXMAP.width())
 
         if addCheckbox:
-            self.checkbox = QtWidgets.QCheckBox()
+            self.checkbox = breakpointCheckbox()
 
         self.textLabel = QtWidgets.QLabel()
         self.textLabel.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
@@ -163,29 +234,19 @@ class CollapsibleWidget(QtWidgets.QWidget):
         return False
 
 
-darkPalette = QtGui.QPalette()
+class BuilderHeader(CollapsibleWidget):
 
-# base
-darkPalette.setColor(QtGui.QPalette.WindowText, QtGui.QColor(180, 180, 180))
-darkPalette.setColor(QtGui.QPalette.Button, QtGui.QColor(66, 66, 66))
-darkPalette.setColor(QtGui.QPalette.Light, QtGui.QColor(180, 180, 180))
-darkPalette.setColor(QtGui.QPalette.Midlight, QtGui.QColor(90, 90, 90))
-darkPalette.setColor(QtGui.QPalette.Dark, QtGui.QColor(35, 35, 35))
-darkPalette.setColor(QtGui.QPalette.Text, QtGui.QColor(180, 180, 180))
-darkPalette.setColor(QtGui.QPalette.BrightText, QtGui.QColor(180, 180, 180))
-darkPalette.setColor(QtGui.QPalette.ButtonText, QtGui.QColor(180, 180, 180))
-darkPalette.setColor(QtGui.QPalette.Base, QtGui.QColor(42, 42, 42))
-darkPalette.setColor(QtGui.QPalette.Window, QtGui.QColor(53, 53, 53))
-darkPalette.setColor(QtGui.QPalette.Shadow, QtGui.QColor(20, 20, 20))
-darkPalette.setColor(QtGui.QPalette.Link, QtGui.QColor(56, 252, 196))
-darkPalette.setColor(QtGui.QPalette.AlternateBase, QtGui.QColor(72, 72, 72))
-darkPalette.setColor(QtGui.QPalette.ToolTipBase, QtGui.QColor(53, 53, 53))
-darkPalette.setColor(QtGui.QPalette.ToolTipText, QtGui.QColor(180, 180, 180))
-darkPalette.setColor(QtGui.QPalette.LinkVisited, QtGui.QColor(80, 80, 80))
+    headerCheckedColor = QtGui.QColor(78, 116, 125)
+    headerDefaultColor = QtWidgets.QPushButton().palette().color(QtGui.QPalette.Button)
 
-# disabled
-darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.WindowText, QtGui.QColor(127, 127, 127))
-darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Text, QtGui.QColor(127, 127, 127))
-darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.ButtonText, QtGui.QColor(127, 127, 127))
-darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Highlight, QtGui.QColor(80, 80, 80))
-darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.HighlightedText, QtGui.QColor(127, 127, 127))
+    def __init__(self, text, parent=None, addCheckbox=False):
+        super(BuilderHeader, self).__init__(text, parent, addCheckbox)
+
+        # set the check of the header to set-checked method.
+        self.headerWidget.checkbox.clicked.connect(self.setChecked)
+
+    def setChecked(self, checked):
+        super(BuilderHeader, self).setChecked(checked)
+
+        color = self.headerCheckedColor if checked else self.headerDefaultColor
+        self.setHeaderBackground(color=color)

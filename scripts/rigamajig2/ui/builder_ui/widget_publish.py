@@ -35,7 +35,7 @@ class PublishWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget = collapseableWidget.CollapsibleWidget('Publish', addCheckbox=True)
+        self.mainCollapseableWidget = collapseableWidget.BuilderHeader('Publish', addCheckbox=True)
         self.pubScriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
 
         self.outFileSuffix = QtWidgets.QLineEdit()

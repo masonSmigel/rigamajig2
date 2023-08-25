@@ -1,5 +1,31 @@
 # Change Log 
 
+## 1.2.0 
+Layered Data loading 
+
+### Added: 
+* Added support for layered loading. This allows the user to pass several files into a data key to load in order. 
+  * Adding several files with the same keys will use to the last file with that key
+  * When saving data new information will automatically be saved into the topmost file, keeping your overrides sparse! 
+    * The main work of this system takes place in the `core.performLayeredSave` funciton. 
+* Added a new UI widget called the `dataLoader` for managing layered data. This has been implemented on the Joints, Guides, Components and Controls. 
+  * left clicking the save button will save changes into the file the key originates from. new data will be appended to the last file. 
+  * right clicking will save all data into a new file at the top of the layer stack.
+* UI Improvements: 
+  * Custom icon for breakpoints on headers in the builder UI 
+  * Internally refactored widgets 
+  * Added file drop support to the `scriptRunner` and `dataLoader`
+* implemented a callback proxy for IKFK controls on `limb.limb` components and subclasses.This provides no difference to the 
+animator but will eliminate a cycle caused by placing the IKFK control at the end of the chain. Using a scriptnode to setup a callback
+the selecting the proxy_selector will instead select the main ikfk control (located at a position safer for the eval graph)
+* Implemented a system to register and store rigamajig2 created callbacks and delete them all. This can be accessed from 
+  the `Builder>Utils>Remove Rigamajig Callbacks` menu item
+* Added the `localOrientIK` flag to the `limb.limb` component and subclasses. 
+
+### Changes:
+* collapsed all builder files that worked with data into a single `builder.data` file 
+
+
 ## 1.1.4
 General updates and UI imporvements 
 

@@ -42,7 +42,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     # pylint:disable=too-many-arguments
     def __init__(self, name, input, size=1, ikSpaces=None, pvSpaces=None,
                  useProxyAttrs=True, useCallbackSwitch=True, useScale=True, addTwistJoints=True, addBendies=True,
-                 rigParent=str()):
+                 localOrientIK=False, rigParent=str()):
         """
         Create a limb component. (This component is most often used as a subclass)
 
@@ -77,6 +77,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['useScale'] = useScale
         self.cmptSettings['addTwistJoints'] = addTwistJoints
         self.cmptSettings['addBendies'] = addBendies
+        self.cmptSettings['localOrientIK'] = localOrientIK
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.cmptSettings['limbBaseName'] = inputBaseNames[0]
@@ -198,10 +199,11 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             color='blue',
             parent=self.controlHierarchy,
             shape='cube',
-            position=cmds.xform(self.input[3], q=True, ws=True, t=True)
+            position=cmds.xform(self.input[3], q=True, ws=True, t=True),
+            rotation=cmds.xform(self.input[3], q=True, ws=True, ro=True) if self.localOrientIK else None
             )
 
-        self.limbGimbleIk = rig_control.create(
+        self.limbGimbleIk = rig_control.createAtObject(
             self.gimble_ikName,
             self.side,
             orig=True,
@@ -210,7 +212,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             color='blue',
             parent=self.limbIk.name,
             shape='sphere',
-            position=cmds.xform(self.input[3], q=True, ws=True, t=True)
+            xformObj=self.limbIk.name
             )
 
         # pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:4], magnitude=0)

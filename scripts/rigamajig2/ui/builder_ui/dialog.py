@@ -389,8 +389,10 @@ class BuilderDialog(DockableUI):
 
 def confirmBuildRig():
     """
-    Check if the scene has unsaved changes. if it does then ask before doing the opperation.
+    This is to check if the scene is safe for a rig rebuild.
+    Check if the scene has unsaved changes. If it does give the user a prompt to see if its safe to clear the scene.
 
+    :return: Returns True or False depending on the scene state and user input
     """
 
     modified = cmds.file(q=True, anyModified=True)

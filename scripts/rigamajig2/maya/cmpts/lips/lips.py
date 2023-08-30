@@ -126,9 +126,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         # create the main controls
         upperLipMain = self.createControlGuides(uppGuideCurve, mainControlNames[:5], mainControlParams[:5],
-                                                controlHierarchy)
+                                                controlHierarchy, size=self.size)
         lowerLipMain = self.createControlGuides(lowGuideCurve, mainControlNames[5:], mainControlParams[5:],
-                                                controlHierarchy)
+                                                controlHierarchy, size=self.size)
         self.mainControlGuides = upperLipMain + lowerLipMain
 
         # create the sub controls
@@ -143,9 +143,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         # create the upperControlGuides
         upperSubControls = self.createControlGuides(uppGuideCurve, uppSubControlNames, subControlParams,
-                                                    parent=subControlHierarchy, color='lightorange', size=0.5)
+                                                    parent=subControlHierarchy, color='lightorange', size=0.5 * self.size)
         lowerSubControls = self.createControlGuides(lowGuideCurve, lowSubControlNames, subControlParams,
-                                                    parent=subControlHierarchy, color='lightorange', size=0.5)
+                                                    parent=subControlHierarchy, color='lightorange', size=0.5 * self.size)
 
         self.subControlGuides = [upperLipMain[0]] + upperSubControls + [upperLipMain[-1]] + lowerSubControls
 
@@ -182,7 +182,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                 # build a position array for the guides
                 translateX = (-midpoint + x) * (GUIDE_SCALE * 2)
                 translateY = 1 if section == 'upper' else -1
-                guideSize = self.size * GUIDE_SCALE
+                guideSize = GUIDE_SCALE
                 localPos = (translateX, translateY, 0)
                 guidePos = mathUtils.addVector(localPos, lipsPos)
 

@@ -153,7 +153,7 @@ class BuilderDialog(DockableUI):
         self.runButton.setToolTip("Run all build steps.")
         self.runButton.setFixedSize(80, 22)
 
-        self.publishButton = QtWidgets.QPushButton(QtGui.QIcon(":newPreset.png"), "Publish")
+        self.publishButton = QtWidgets.QPushButton(QtGui.QIcon(":sourceScript.png"), "Publish")
         self.publishButton.setToolTip("Publish the rig. This will build the rig and save it.")
         self.publishButton.setFixedSize(80, 22)
 

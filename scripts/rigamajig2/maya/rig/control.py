@@ -715,7 +715,7 @@ def createGuide(name, side=None, shape="loc", type=None, parent=None, joint=Fals
         cmds.setAttr("{}.localScale".format(loc), size, size, size, type="double3")
     elif shape != "joint":
         setControlShape(guide, shape)
-        scaleShapes(guide, (size, size, size))
+        scaleShapes(guide, scale=(size, size, size))
 
     if not joint:
         cmds.setAttr("{}.drawStyle".format(guide), 2)

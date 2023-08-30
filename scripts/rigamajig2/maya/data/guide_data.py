@@ -12,6 +12,7 @@ from collections import OrderedDict
 import rigamajig2.maya.data.node_data as node_data
 import maya.cmds as cmds
 import rigamajig2.maya.attr
+import rigamajig2.maya.joint
 import sys
 
 if sys.version_info.major >= 3:
@@ -36,11 +37,16 @@ class GuideData(node_data.NodeData):
         super(GuideData, self).gatherData(node)
 
         data = OrderedDict()
+
+        # if the guide is a joint we can gather the joint orient as well.
+        if rigamajig2.maya.joint.isJoint(node):
+            data['jointOrient'] = [round(value, 4) for value in cmds.getAttr("{0}.jo".format(node))[0]]
+
         attrs = cmds.listAttr(node, ud=True)
         for attr in attrs:
             if attr.startswith("__"):
                 continue
-            data[attr] = rigamajig2.maya.attr .getPlugValue("{}.{}".format(node, attr))
+            data[attr] = rigamajig2.maya.attr.getPlugValue("{}.{}".format(node, attr))
 
         self._data[node].update(data)
 

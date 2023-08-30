@@ -320,13 +320,17 @@ class ComponentManager(QtWidgets.QWidget):
         self.renameComponentAction.setIcon(QtGui.QIcon(":quickRename.png"))
         self.renameComponentAction.triggered.connect(self.renameComponent)
 
-        self.createSymetricalComponent = QtWidgets.QAction("Create Mirrored Component")
-        self.createSymetricalComponent.setIcon(QtGui.QIcon(":kinMirrorJoint_S.png"))
-        self.createSymetricalComponent.triggered.connect(self.createMirroredComponent)
+        self.mirrorComponentAction = QtWidgets.QAction("Mirror Component")
+        self.mirrorComponentAction.setIcon(QtGui.QIcon(":QR_mirrorGuidesRightToLeft.png"))
+        self.mirrorComponentAction.triggered.connect(self.mirrorComponent)
 
-        self.mirrorComponentSettingsAction = QtWidgets.QAction("Mirror Component Parameters")
-        self.mirrorComponentSettingsAction.setIcon(QtGui.QIcon(":QR_mirrorGuidesRightToLeft.png"))
-        self.mirrorComponentSettingsAction.triggered.connect(self.mirrorComponentParameters)
+        # self.createSymetricalComponent = QtWidgets.QAction("Create Mirrored Component")
+        # self.createSymetricalComponent.setIcon(QtGui.QIcon(":kinMirrorJoint_S.png"))
+        # self.createSymetricalComponent.triggered.connect(self.createMirroredComponent)
+
+        # self.mirrorComponentSettingsAction = QtWidgets.QAction("Mirror Component Parameters")
+        # self.mirrorComponentSettingsAction.setIcon(QtGui.QIcon(":QR_mirrorGuidesRightToLeft.png"))
+        # self.mirrorComponentSettingsAction.triggered.connect(self.mirrorComponentParameters)
 
         self.reloadComponentAction = QtWidgets.QAction("Reload Cmpts from Scene", self)
         self.reloadComponentAction.setIcon(QtGui.QIcon(":refresh.png"))
@@ -343,8 +347,7 @@ class ComponentManager(QtWidgets.QWidget):
         menu.addAction(self.editComponentSettingsAction)
         menu.addAction(self.renameComponentAction)
         menu.addSeparator()
-        menu.addAction(self.createSymetricalComponent)
-        menu.addAction(self.mirrorComponentSettingsAction)
+        menu.addAction(self.mirrorComponentAction)
         menu.addSeparator()
         menu.addAction(self.reloadComponentAction)
         menu.addAction(self.deleteComponentAction)
@@ -610,30 +613,40 @@ class ComponentManager(QtWidgets.QWidget):
         # set dialog to the current item
         self.editComponentDialog.setComponent(self.getComponentObj())
 
-    @QtCore.Slot()
-    def createMirroredComponent(self):
-        """ Create a mirrored component"""
+    def mirrorComponent(self):
+
         selectedComponent = self.getComponentObj()
 
         guessMirrorName = common.getMirrorName(selectedComponent.name)
-        componentType = selectedComponent.componentType
+        componentNameList = [comp.name for comp in self.builder.componentList]
+        if guessMirrorName in componentNameList:
+            self.mirrorComponentParameters(selectedComponent)
+            builder.logger.info(f"Mirrored component Parameters: '{selectedComponent.name}' -> '{guessMirrorName}'")
+        else:
+            self.createMirroredComponent(selectedComponent)
+            builder.logger.info(f"Created Mirrored component: '{guessMirrorName}'")
+
+    def createMirroredComponent(self, component):
+        """ Create a mirrored component"""
+
+        guessMirrorName = common.getMirrorName(component.name)
+        componentType = component.componentType
 
         # mirror the input
         mirroredInput = list()
-        for x in selectedComponent.input:
+        for x in component.input:
             value = common.getMirrorName(x) if common.getMirrorName(x) else x
             mirroredInput.append(value)
 
         # get a mirrored rigParent
-        sourceRigParent = selectedComponent.rigParent
-        mirroredRigParent = common.getMirrorName(sourceRigParent) if common.getMirrorName(
-            sourceRigParent) else sourceRigParent
+        sourceRigParent = component.rigParent
+        mirroredRigParent = common.getMirrorName(sourceRigParent) or sourceRigParent
 
         mirroredComponent = self.createComponent(guessMirrorName, componentType, mirroredInput, mirroredRigParent)
 
         # We need to force the component to intialize so we can mirror stuff
         mirroredComponent._initalizeComponent()
-        self.mirrorComponentParameters(selectedComponent)
+        self.mirrorComponentParameters(component)
 
         # update the ui
         self.loadFromScene()

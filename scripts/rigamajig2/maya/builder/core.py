@@ -325,12 +325,12 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
         confirmDialog = cmds.confirmDialog(
             title=f"Save {dataType}",
             message=message,
-            button=['Save', 'Cancel'],
-            defaultButton='Save',
-            cancelButton='Cancel',
-            dismissString='Cancel')
+            button=["Save", "Don't Save", "Cancel"],
+            defaultButton="Save",
+            cancelButton="Cancel",
+            dismissString="Cancel")
 
-        if confirmDialog == "Cancel":
+        if confirmDialog == "Cancel" or confirmDialog == "Don't Save":
             return
 
     # Save the data

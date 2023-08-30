@@ -101,7 +101,7 @@ class BuilderDialog(DockableUI):
         utilsMenu.addAction(self.actions.mergeRigFilesAction)
         utilsMenu.addSeparator()
         utilsMenu.addMenu(self.actions.setLoggingLevelMenu)
-        #utilsMenu.addAction(self.actions.devModeAction)
+        # utilsMenu.addAction(self.actions.devModeAction)
         utilsMenu.addSeparator()
         utilsMenu.addAction(self.actions.removeRigamajigCallbacksAction)
         utilsMenu.addAction(self.actions.reloadRigamajigModulesAction)
@@ -314,6 +314,9 @@ class BuilderDialog(DockableUI):
             logger.error("No breakpoint selected no steps to run")
             return
 
+        if not confirmBuildRig():
+            return
+
         self.initializeDevMode()
 
         startTime = time.time()
@@ -333,10 +336,14 @@ class BuilderDialog(DockableUI):
         """ Run builder and update the component manager"""
         self.initializeDevMode()
 
+        # add the confirm dialog
+        if not confirmBuildRig():
+            return
+
         # for the rig build we can put the publish into a try except block
         # if the publish fails we can add a message to the status line before raising the exception
         try:
-            result, finalTime = self.rigBuilder.run()
+            finalTime = self.rigBuilder.run()
             self.intalizeWidget.componentManager.loadFromScene()
             self.statusLine.setStatusMessage(
                 message=f"Rig Build Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}", icon="success")
@@ -350,10 +357,12 @@ class BuilderDialog(DockableUI):
         # for the rig build we can put the publish into a try except block
         # if the publish fails we can add a message to the status line before raising the exception
         try:
-            result, finalTime = self.publishWidget.publish()
-            self.intalizeWidget.componentManager.loadFromScene()
-            self.statusLine.setStatusMessage(
-                message=f"Rig Publish Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}", icon="success")
+            finalTime = self.publishWidget.publish()
+            if finalTime:
+                self.intalizeWidget.componentManager.loadFromScene()
+                self.statusLine.setStatusMessage(
+                    message=f"Rig Publish Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}",
+                    icon="success")
         except Exception as e:
             self.statusLine.setStatusMessage(message=f"Rig Publish Failed: '{self.rigName}'", icon="failed")
             raise e
@@ -376,6 +385,39 @@ class BuilderDialog(DockableUI):
         # however when in development you should manually call the close() method BEFORE deleting the workspace control.
         super(BuilderDialog, self).hideEvent(e)
         self.intalizeWidget.componentManager.setScriptJobEnabled(False)
+
+
+def confirmBuildRig():
+    """
+    Check if the scene has unsaved changes. if it does then ask before doing the opperation.
+
+    """
+
+    modified = cmds.file(q=True, anyModified=True)
+    if modified:
+        confirmPublishMessage = QtWidgets.QMessageBox()
+        confirmPublishMessage.setText("Run Rig Build")
+
+        confirmPublishMessage.setInformativeText(
+            "Proceeding will rebuild the rig based on data you've saved. Unsaved in-scene changes will be lost!"
+            )
+        confirmPublishMessage.setStandardButtons(
+            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel
+            )
+
+        helpPixmap = QtGui.QIcon(":helpModal.png").pixmap(QtCore.QSize(64, 64))
+        confirmPublishMessage.setIconPixmap(helpPixmap)
+
+        confirmPublishMessage.setDefaultButton(QtWidgets.QMessageBox.Ok)
+        res = confirmPublishMessage.exec_()
+
+        if res == QtWidgets.QMessageBox.Ok:
+            return True
+        else:
+            return False
+
+    return True
+
 
 
 if __name__ == '__main__':

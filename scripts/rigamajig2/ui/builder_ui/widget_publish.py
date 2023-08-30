@@ -11,11 +11,11 @@
 # PYTHON
 from PySide2 import QtCore
 from PySide2 import QtWidgets
-from PySide2 import QtCore
+from PySide2 import QtGui
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
-from rigamajig2.ui.builder_ui.widgets import pathSelector,collapseableWidget, scriptRunner
+from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget, scriptRunner
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
@@ -156,11 +156,14 @@ class PublishWidget(QtWidgets.QWidget):
         confirmPublishMessage.setText("Publish the rig")
 
         confirmPublishMessage.setInformativeText(
-            "Proceeding will rebuild a fresh rig from saved data overwriting any existing any published rigs."
+            "Proceeding will rebuild a fresh rig from saved data overwriting any existing published rigs."
             )
         confirmPublishMessage.setStandardButtons(
             QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel
             )
+
+        pixmap = QtGui.QIcon(":warningModal.png").pixmap(QtCore.QSize(64, 64))
+        confirmPublishMessage.setIconPixmap(pixmap)
 
         confirmPublishMessage.setDefaultButton(QtWidgets.QMessageBox.Save)
         res = confirmPublishMessage.exec_()
@@ -171,11 +174,11 @@ class PublishWidget(QtWidgets.QWidget):
             suffix = self.outFileSuffix.text()
             saveFBX = self.saveFBXCheckbox.isChecked()
 
-            result, finalTime = self.builder.run(publish=True,
-                                                 outputfile=outputfile,
-                                                 suffix=suffix,
-                                                 assetName=None,
-                                                 fileType=fileType,
-                                                 saveFBX=saveFBX)
+            finalTime = self.builder.run(publish=True,
+                                         outputfile=outputfile,
+                                         suffix=suffix,
+                                         assetName=None,
+                                         fileType=fileType,
+                                         saveFBX=saveFBX)
 
-        return result, finalTime
+            return finalTime

@@ -660,7 +660,7 @@ class Builder(object):
 
         print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
         # if the build is sucessful return a true result
-        return True, finalTime
+        return finalTime
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
     def publish(self, outputfile=None, suffix=None, assetName=None, fileType=None, versioning=True, saveFBX=False):

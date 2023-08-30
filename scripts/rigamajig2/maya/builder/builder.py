@@ -527,11 +527,12 @@ class Builder(object):
         """ Load additional deformers
         :param list paths: Path to the json file. if none is provided use the data from the rigFile
         """
-        deformerPaths = paths or self.getRigData(self.rigFile, constants.DEFORMERS) or []
-        shapesPaths = paths or self.getRigData(self.rigFile, constants.SHAPES) or []
+        if not paths:
+            deformerPaths = self.getRigData(self.rigFile, constants.DEFORMERS) or []
+            shapesPaths = self.getRigData(self.rigFile, constants.SHAPES) or []
 
-        # if we have both deformerPaths and shapesPaths we need to join the two paths
-        paths = common.toList(shapesPaths) + common.toList(deformerPaths)
+            # if we have both deformerPaths and shapesPaths we need to join the two paths
+            paths = common.toList(shapesPaths) + common.toList(deformerPaths)
 
         for path in common.toList(paths):
             absPath = self.getAbsoultePath(path)

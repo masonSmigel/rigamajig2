@@ -402,16 +402,16 @@ def confirmBuildRig():
             "Proceeding will rebuild the rig based on data you've saved. Unsaved in-scene changes will be lost!"
             )
         confirmPublishMessage.setStandardButtons(
-            QtWidgets.QMessageBox.Ok | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
             )
 
         helpPixmap = QtGui.QIcon(":helpModal.png").pixmap(QtCore.QSize(64, 64))
         confirmPublishMessage.setIconPixmap(helpPixmap)
 
-        confirmPublishMessage.setDefaultButton(QtWidgets.QMessageBox.Ok)
+        confirmPublishMessage.setDefaultButton(QtWidgets.QMessageBox.Yes)
         res = confirmPublishMessage.exec_()
 
-        if res == QtWidgets.QMessageBox.Ok:
+        if res == QtWidgets.QMessageBox.Yes:
             return True
         else:
             return False

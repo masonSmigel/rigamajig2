@@ -16,6 +16,7 @@ from PySide2 import QtGui
 # RIGAMAJIG2
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget, scriptRunner
+from rigamajig2.ui.widgets import mayaMessageBox
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
@@ -152,8 +153,9 @@ class PublishWidget(QtWidgets.QWidget):
     @QtCore.Slot()
     def publish(self):
         """ publish the rig"""
-        confirmPublishMessage = QtWidgets.QMessageBox()
+        confirmPublishMessage = mayaMessageBox.MayaMessageBox()
         confirmPublishMessage.setText("Publish the rig")
+        confirmPublishMessage.setWarning()
 
         confirmPublishMessage.setInformativeText(
             "Proceeding will rebuild a fresh rig from saved data overwriting any existing published rigs."
@@ -161,9 +163,6 @@ class PublishWidget(QtWidgets.QWidget):
         confirmPublishMessage.setStandardButtons(
             QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel
             )
-
-        pixmap = QtGui.QIcon(":warningModal.png").pixmap(QtCore.QSize(64, 64))
-        confirmPublishMessage.setIconPixmap(pixmap)
 
         confirmPublishMessage.setDefaultButton(QtWidgets.QMessageBox.Save)
         res = confirmPublishMessage.exec_()

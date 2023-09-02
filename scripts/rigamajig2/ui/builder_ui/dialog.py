@@ -23,7 +23,7 @@ import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.ui.widgets.workspace_control import DockableUI
-from rigamajig2.ui.widgets import statusLine, QLine
+from rigamajig2.ui.widgets import statusLine, QLine, mayaMessageBox
 from rigamajig2.ui.builder_ui.widgets import pathSelector
 from rigamajig2.ui.builder_ui import recent_files
 
@@ -397,8 +397,9 @@ def confirmBuildRig():
 
     modified = cmds.file(q=True, anyModified=True)
     if modified:
-        confirmPublishMessage = QtWidgets.QMessageBox()
+        confirmPublishMessage = mayaMessageBox.MayaMessageBox()
         confirmPublishMessage.setText("Run Rig Build")
+        confirmPublishMessage.setHelp()
 
         confirmPublishMessage.setInformativeText(
             "Proceeding will rebuild the rig based on data you've saved. Unsaved in-scene changes will be lost!"
@@ -406,9 +407,6 @@ def confirmBuildRig():
         confirmPublishMessage.setStandardButtons(
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
             )
-
-        helpPixmap = QtGui.QIcon(":helpModal.png").pixmap(QtCore.QSize(64, 64))
-        confirmPublishMessage.setIconPixmap(helpPixmap)
 
         confirmPublishMessage.setDefaultButton(QtWidgets.QMessageBox.Yes)
         res = confirmPublishMessage.exec_()

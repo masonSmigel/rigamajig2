@@ -85,7 +85,6 @@ class GitDialog(mayaDialog.MayaDialog):
         self.repoLabel.setDisabled(True)
 
         # Files Changed Since Last Commit section
-        # todo: add the option to add a file/directory from here to the gitIgnore (ie ngSkin files/temp proxies)
         self.filesChangedList = QtWidgets.QListWidget()
         self.filesChangedList.setAlternatingRowColors(True)
         self.filesChangedList.setUniformItemSizes(True)

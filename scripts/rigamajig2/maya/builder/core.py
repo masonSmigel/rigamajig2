@@ -43,7 +43,6 @@ DATA_MERGE_METHODS = ['new', 'merge', 'overwrite']
 
 
 # Component Utilities
-
 def findComponents(path, excludedFolders, excludedFiles):
     """
     Find all valid components within a folder
@@ -135,7 +134,7 @@ def getDataModules(path=None):
     This can be used to create instances of each data module to use in data loading.
     :return:
     """
-
+    print(path)
     if not path: path = DATA_PATH
     path = rig_path.cleanPath(path)
 
@@ -221,8 +220,10 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
     :param doSave: If False the save will not be performed. Useful when only the data dictionary is needed.
     :return:
     """
-    if dataType not in getDataModules(DATA_PATH).keys():
-        raise Exception(f"Data type {dataType} is not valid")
+
+    dataModules  = list(getDataModules(DATA_PATH).keys())
+    if dataType not in dataModules:
+        raise Exception(f"Data type {dataType} is not valid. Valid Types are {dataModules}")
 
     if method not in ['new', 'merge', 'overwrite']:
         raise Exception(f"Merge method '{method}' is not valid. Use {DATA_MERGE_METHODS}")

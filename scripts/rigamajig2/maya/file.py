@@ -181,7 +181,7 @@ def import_(path=None, useNamespace=False, namespace=None, force=False):
         namespace = namespace or os.path.basename(path).split('.')[0]
         kwargs["ns"] = namespace
 
-    file = cmds.file(path, **kwargs)
+    file = cmds.file(path, ignoreVersion=True,  **kwargs)
     return file
 
 

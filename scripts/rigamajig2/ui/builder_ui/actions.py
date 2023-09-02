@@ -87,6 +87,9 @@ class Actions(object):
         self.devModeAction.setCheckable(True)
 
         # TOOLS
+        self.openGitVersionControlAction = QtWidgets.QAction("Git Version Control", self.dialog)
+        self.openGitVersionControlAction.triggered.connect(self.openGitVersionControlDialog)
+
         self.runPerformanceTestAction = QtWidgets.QAction("Run Performance Test", self.dialog)
         self.runPerformanceTestAction.triggered.connect(self.runPerformanceTest)
 
@@ -207,6 +210,14 @@ class Actions(object):
     def openEvaluationToolkit(self):
         mel.eval("openEvaluationToolkit;")
 
+    def openGitVersionControlDialog(self):
+        from rigamajig2.ui.builder_ui import gitDialog
+        rigEnv = self.dialog.rigEnviornment
+        gitDialog.GitDialog.showDialog()
+
+        # set the rig repo
+        gitDialog.GitDialog.dlg_instance.setRepo(rigEnv)
+
     def reloadRigamajigModules(self):
         """ Reload riamajig modules"""
         import rigamajig2
@@ -230,5 +241,3 @@ class Actions(object):
     def showAbout(self):
         """ Show about"""
         pass
-
-

@@ -282,9 +282,6 @@ class GitDialog(mayaDialog.MayaDialog):
 
     def revertToCommit(self, commitId, mode="hard"):
 
-        confirmPublishMessage = mayaMessageBox.MayaMessageBox()
-        confirmPublishMessage.setWarning()
-
         if mode == "hard":
             title = "Hard Revert Changes"
             message = ("Hard Reverting will erease all changes in your default changelist. "
@@ -294,13 +291,9 @@ class GitDialog(mayaDialog.MayaDialog):
             message = ("Soft Reverting will move unsaved changes into the default changelist.  "
                        "Are you sure you want to proceed?")
 
-        confirmPublishMessage.setText(title)
-        confirmPublishMessage.setInformativeText(message)
-        confirmPublishMessage.setStandardButtons(
-            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
-            )
+        confirmPublishMessage = mayaMessageBox.MayaMessageBox(title=title, message=message, icon="warning")
+        confirmPublishMessage.setButtonsYesNoCancel()
 
-        confirmPublishMessage.setDefaultButton(QtWidgets.QMessageBox.Save)
         res = confirmPublishMessage.exec_()
 
         if res == QtWidgets.QMessageBox.Yes:
@@ -384,34 +377,24 @@ class GitDialog(mayaDialog.MayaDialog):
         isUntracked = file not in self.repo.untracked_files
 
         if isUntracked:
-            confirmRevert = mayaMessageBox.MayaMessageBox()
-            confirmRevert.setText(f"Revert Changes to: {file}")
-            confirmRevert.setWarning()
+            confirmRevert = mayaMessageBox.MayaMessageBox(
+                title=f"Revert Changes to: {file}",
+                message="Reverting will undo all changes. Are you sure you want to proceed?",
+                icon="warning")
+            confirmRevert.setButtonsYesNoCancel()
 
-            confirmRevert.setInformativeText(
-                "Reverting will undo all changes that are not saved into a commit. Are you sure you want to proceed?"
-                )
-            confirmRevert.setStandardButtons(
-                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
-                )
-
-            confirmRevert.setDefaultButton(QtWidgets.QMessageBox.Save)
             res = confirmRevert.exec_()
 
             if res == QtWidgets.QMessageBox.Yes:
                 self.repo.git.checkout(file)
                 print(f"Reverted changes for {file}")
         else:
-            confirmDelete = mayaMessageBox.MayaMessageBox()
-            confirmDelete.setText(f"Delete Untracked File: {file}")
-            confirmDelete.setError()
+            confirmDelete = mayaMessageBox.MayaMessageBox(
+                title=f"Delete Untracked File: {file}",
+                message="This file is untracked by Git. Would you like to delete it?",
+                icon="error")
+            confirmDelete.setButtonsYesNoCancel()
 
-            confirmDelete.setInformativeText("This file is untracked by Git. Would you like to delete it?")
-            confirmDelete.setStandardButtons(
-                QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
-                )
-
-            confirmDelete.setDefaultButton(QtWidgets.QMessageBox.Save)
             res = confirmDelete.exec_()
 
             if res == QtWidgets.QMessageBox.Yes:

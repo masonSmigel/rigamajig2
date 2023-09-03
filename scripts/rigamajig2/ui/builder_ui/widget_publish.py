@@ -153,21 +153,15 @@ class PublishWidget(QtWidgets.QWidget):
     @QtCore.Slot()
     def publish(self):
         """ publish the rig"""
-        confirmPublishMessage = mayaMessageBox.MayaMessageBox()
-        confirmPublishMessage.setText("Publish the rig")
-        confirmPublishMessage.setWarning()
+        confirmPublishMessage = mayaMessageBox.MayaMessageBox(
+            title="Publish the Rig",
+            message="Proceeding will rebuild a fresh rig from saved data overwriting any existing published rigs.",
+            icon="warning")
+        confirmPublishMessage.setButtonsSaveDiscardCancel()
 
-        confirmPublishMessage.setInformativeText(
-            "Proceeding will rebuild a fresh rig from saved data overwriting any existing published rigs."
-            )
-        confirmPublishMessage.setStandardButtons(
-            QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel
-            )
-
-        confirmPublishMessage.setDefaultButton(QtWidgets.QMessageBox.Save)
         res = confirmPublishMessage.exec_()
 
-        if res == QtWidgets.QMessageBox.Save:
+        if res == confirmPublishMessage.Save:
             outputfile = self.outPathSelector.getPath()
             fileType = self.outFileTypeComboBox.currentText()
             suffix = self.outFileSuffix.text()

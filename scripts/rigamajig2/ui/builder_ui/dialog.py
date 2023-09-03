@@ -399,27 +399,21 @@ def confirmBuildRig():
 
     modified = cmds.file(q=True, anyModified=True)
     if modified:
-        confirmPublishMessage = mayaMessageBox.MayaMessageBox()
-        confirmPublishMessage.setText("Run Rig Build")
-        confirmPublishMessage.setHelp()
-
-        confirmPublishMessage.setInformativeText(
-            "Proceeding will rebuild the rig based on data you've saved. Unsaved in-scene changes will be lost!"
-            )
-        confirmPublishMessage.setStandardButtons(
-            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
-            )
-
-        confirmPublishMessage.setDefaultButton(QtWidgets.QMessageBox.Yes)
+        confirmPublishMessage = mayaMessageBox.MayaMessageBox(
+            title="Run Rig Build",
+            message="Proceeding will rebuild the rig based on data you've saved. Unsaved in-scene changes will be lost!",
+            icon="help")
+        confirmPublishMessage.setButtonsYesNoCancel()
         res = confirmPublishMessage.exec_()
 
-        if res == QtWidgets.QMessageBox.Yes:
+        if res == confirmPublishMessage.Yes:
+            # if the scene has been modified but the user wants to rebuild return true
             return True
         else:
+            # otherwise return false
             return False
-
+    # if the scene has not been modified we can return true
     return True
-
 
 
 if __name__ == '__main__':

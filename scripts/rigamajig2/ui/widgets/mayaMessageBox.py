@@ -15,6 +15,15 @@ from PySide2 import QtCore
 
 
 class MayaMessageBox(QtWidgets.QMessageBox):
+    def __init__(self, title=None, message=None, icon=None):
+        super().__init__()
+
+        if title:
+            self.setText(title)
+        if message:
+            self.setInformativeText(message)
+        if icon:
+            self.setMayaIcon(icon=icon)
 
     def setMayaIcon(self, icon):
         iconToUse = None
@@ -43,3 +52,24 @@ class MayaMessageBox(QtWidgets.QMessageBox):
     def setError(self):
         self.setMayaIcon("error")
 
+    def setButtonsSaveDiscardCancel(self):
+        """
+        Set the standard buttons to:
+            QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel
+
+        with the default button to:
+            QtWidgets.QMessageBox.Save
+        """
+        self.setStandardButtons(QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+        self.setDefaultButton(QtWidgets.QMessageBox.Save)
+
+    def setButtonsYesNoCancel(self):
+        """
+        Set the standard buttons to:
+            QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
+
+        with the default button to:
+            QtWidgets.QMessageBox.Yes
+        """
+        self.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel)
+        self.setDefaultButton(QtWidgets.QMessageBox.Yes)

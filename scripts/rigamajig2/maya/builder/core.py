@@ -30,6 +30,9 @@ from rigamajig2.shared import runScript
 from rigamajig2.maya.builder.constants import DATA_PATH
 from rigamajig2.maya.data import abstract_data
 
+# import the message box popup and buttons
+from rigamajig2.ui.widgets import mayaMessageBox
+
 logger = logging.getLogger(__name__)
 
 CMPT_ROOT_MODULE = 'cmpts'
@@ -221,7 +224,7 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
     :return:
     """
 
-    dataModules  = list(getDataModules(DATA_PATH).keys())
+    dataModules = list(getDataModules(DATA_PATH).keys())
     if dataType not in dataModules:
         raise Exception(f"Data type {dataType} is not valid. Valid Types are {dataModules}")
 
@@ -323,15 +326,12 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
         message += f"\nDeleted Nodes: {len(deletedNodes)}"
         # message += f"\n\n Check the script editor for more info"
 
-        confirmDialog = cmds.confirmDialog(
-            title=f"Save {dataType}",
-            message=message,
-            button=["Save", "Don't Save", "Cancel"],
-            defaultButton="Save",
-            cancelButton="Cancel",
-            dismissString="Cancel")
+        popupConfirm = mayaMessageBox.MayaMessageBox(title=f"Save {dataType}", message=message, icon="info")
+        popupConfirm.setButtonsSaveDiscardCancel()
 
-        if confirmDialog == "Cancel" or confirmDialog == "Don't Save":
+        res = popupConfirm.exec_()
+
+        if res != popupConfirm.Save:
             return
 
     # Save the data

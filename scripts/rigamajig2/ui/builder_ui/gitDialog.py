@@ -84,6 +84,11 @@ class GitDialog(mayaDialog.MayaDialog):
         self.repoLabel = QtWidgets.QLineEdit()
         self.repoLabel.setDisabled(True)
 
+        self.refreshAllButton = QtWidgets.QPushButton()
+        self.refreshAllButton.setIcon(QtGui.QIcon(":refresh.png"))
+        self.refreshAllButton.setMaximumSize(20, 20)
+        self.refreshAllButton.setFlat(True)
+
         # Files Changed Since Last Commit section
         self.filesChangedList = QtWidgets.QListWidget()
         self.filesChangedList.setAlternatingRowColors(True)
@@ -114,11 +119,17 @@ class GitDialog(mayaDialog.MayaDialog):
 
         gitRepoLabel = QtWidgets.QLabel("Git Repo:")
         layout.addWidget(gitRepoLabel)
-        layout.addWidget(self.repoLabel)
+
+        repoLayout = QtWidgets.QHBoxLayout()
+        repoLayout.setContentsMargins(0, 0, 0, 0)
+        repoLayout.setSpacing(0)
+        repoLayout.addWidget(self.repoLabel)
+        repoLayout.addWidget(self.refreshAllButton)
+        layout.addLayout(repoLayout)
 
         layout.addSpacing(10)
 
-        filesChangedLabel = QtWidgets.QLabel("Files Changed Since Last Commit:")
+        filesChangedLabel = QtWidgets.QLabel("Default Changelist:")
         layout.addWidget(filesChangedLabel)
         layout.addWidget(self.filesChangedList)
 
@@ -134,6 +145,7 @@ class GitDialog(mayaDialog.MayaDialog):
         layout.addWidget(self.commitHistory)
 
     def createConnections(self):
+        self.refreshAllButton.clicked.connect(self.loadFilesChangedSinceLastCommit)
         self.commitButton.clicked.connect(self.commitChanges)
         self.watcher.fileChanged.connect(self.loadFilesChangedSinceLastCommit)
 
@@ -271,12 +283,19 @@ class GitDialog(mayaDialog.MayaDialog):
     def revertToCommit(self, commitId, mode="hard"):
 
         confirmPublishMessage = mayaMessageBox.MayaMessageBox()
-        confirmPublishMessage.setText("Revert Changes")
         confirmPublishMessage.setWarning()
 
-        confirmPublishMessage.setInformativeText(
-            "Reverting will undo all changes that are not saved into a commit. Are you sure you want to proceed?"
-            )
+        if mode == "hard":
+            title = "Hard Revert Changes"
+            message = ("Hard Reverting will erease all changes in your default changelist. "
+                       "Are you sure you want to proceed?")
+        else:
+            title = "Soft Revert Changes"
+            message = ("Soft Reverting will move unsaved changes into the default changelist.  "
+                       "Are you sure you want to proceed?")
+
+        confirmPublishMessage.setText(title)
+        confirmPublishMessage.setInformativeText(message)
         confirmPublishMessage.setStandardButtons(
             QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
             )
@@ -299,20 +318,22 @@ class GitDialog(mayaDialog.MayaDialog):
         self.loadFilesChangedSinceLastCommit()  # Refresh the list of files changed since the last commit
 
     def showCommitContextMenu(self, pos):
-        item = self.commitHistory.selectedItems()[0]
-        if item:
-            menu = QtWidgets.QMenu(self.commitHistory)
-            revertAction = QtWidgets.QAction(" Hard Revert to Commit", self)
-            revertAction.triggered.connect(
-                lambda: self.revertToCommit(item.text().split()[0], mode="hard"))  # Extract commit ID
+        items = self.commitHistory.selectedItems()
+        item = items[0] if items else None
 
-            softRevertAction = QtWidgets.QAction("Soft Revert to Commit", self)
-            softRevertAction.triggered.connect(
-                lambda: self.revertToCommit(item.text().split()[0], mode="soft"))  # Extract commit ID
+        menu = QtWidgets.QMenu(self.commitHistory)
+        revertAction = QtWidgets.QAction(" Hard Revert to Commit", self)
+        revertAction.setIcon(QtGui.QIcon(":undo_s.png"))
 
-            menu.addAction(revertAction)
-            menu.addAction(softRevertAction)
-            menu.exec_(self.commitHistory.mapToGlobal(pos))
+        softRevertAction = QtWidgets.QAction("Soft Revert to Commit", self)
+        softRevertAction.setIcon(QtGui.QIcon(":undo_s.png"))
+        # Extract commit ID
+        softRevertAction.triggered.connect(lambda: self.revertToCommit(item.text().split()[0], mode="soft"))
+        revertAction.triggered.connect(lambda: self.revertToCommit(item.text().split()[0], mode="hard"))
+
+        menu.addAction(revertAction)
+        menu.addAction(softRevertAction)
+        menu.exec_(self.commitHistory.mapToGlobal(pos))
 
     def showFileChangelistContextMenu(self, pos):
         items = self.filesChangedList.selectedItems()
@@ -320,9 +341,16 @@ class GitDialog(mayaDialog.MayaDialog):
 
         menu = QtWidgets.QMenu(self.filesChangedList)
         revertFileAction = QtWidgets.QAction("Revert", self)
+        revertFileAction.setIcon(QtGui.QIcon(":undo_s.png"))
+
         printDiffAction = QtWidgets.QAction("Print Diff to Script Editor", self)
+        printDiffAction.setIcon(QtGui.QIcon(":list.svg"))
+
         addFileToGitIgnore = QtWidgets.QAction("Add File to .gitignore", self)
+        addFileToGitIgnore.setIcon(QtGui.QIcon(":nodeGrapherClose.png"))
+
         addDirToGitIgnore = QtWidgets.QAction("Add Dir to .gitignore", self)
+        addDirToGitIgnore.setIcon(QtGui.QIcon(":nodeGrapherClose.png"))
 
         revertFileAction.triggered.connect(lambda: self.revertSingleFile(item.text()))
         printDiffAction.triggered.connect(lambda: self.getDifferencesBetweenLocalAndHead(item.text(), printIt=True))
@@ -378,9 +406,7 @@ class GitDialog(mayaDialog.MayaDialog):
             confirmDelete.setText(f"Delete Untracked File: {file}")
             confirmDelete.setError()
 
-            confirmDelete.setInformativeText(
-                "This file is untracked by Git. Would you like to delete it?"
-                )
+            confirmDelete.setInformativeText("This file is untracked by Git. Would you like to delete it?")
             confirmDelete.setStandardButtons(
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
                 )

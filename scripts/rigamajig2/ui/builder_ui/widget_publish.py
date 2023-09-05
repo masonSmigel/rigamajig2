@@ -74,9 +74,9 @@ class PublishWidget(QtWidgets.QWidget):
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(0)
 
-        self.mainCollapseableWidget.addWidget(self.pubScriptRunner)
-        self.mainCollapseableWidget.addSpacing(4)
         self.mainCollapseableWidget.addWidget(self.mergeDeformLayersButton)
+        self.mainCollapseableWidget.addSpacing(4)
+        self.mainCollapseableWidget.addWidget(self.pubScriptRunner)
 
         self.mainCollapseableWidget.addSpacing(10)
         publishFileLayout = QtWidgets.QHBoxLayout()
@@ -130,8 +130,8 @@ class PublishWidget(QtWidgets.QWidget):
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
-        self.pubScriptRunner.executeAllScripts()
         self.builder.mergeDeformLayers()
+        self.pubScriptRunner.executeAllScripts()
 
     @property
     def isChecked(self):

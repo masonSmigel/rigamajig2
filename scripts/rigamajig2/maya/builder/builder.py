@@ -647,8 +647,8 @@ class Builder(object):
         self.loadAllDeformationData()
         if publish:
             # self.optimize()
-            self.publishScript()
             self.mergeDeformLayers()
+            self.publishScript()
             if savePublish:
                 self.publish(outputfile=outputfile,
                              suffix=suffix,

@@ -137,7 +137,6 @@ def getDataModules(path=None):
     This can be used to create instances of each data module to use in data loading.
     :return:
     """
-    print(path)
     if not path: path = DATA_PATH
     path = rig_path.cleanPath(path)
 
@@ -189,7 +188,7 @@ def createDataClassInstance(dataType=None):
     """
     dataTypeInfo = getDataModules().get(dataType)
     if not dataTypeInfo:
-        return False
+        raise ValueError(f"Data type {dataType} is not valid. Valid Types are {dataModules}")
 
     modulePath = dataTypeInfo[0]
     className = dataTypeInfo[1]
@@ -226,10 +225,10 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
 
     dataModules = list(getDataModules(DATA_PATH).keys())
     if dataType not in dataModules:
-        raise Exception(f"Data type {dataType} is not valid. Valid Types are {dataModules}")
+        raise ValueError(f"Data type {dataType} is not valid. Valid Types are {dataModules}")
 
     if method not in ['new', 'merge', 'overwrite']:
-        raise Exception(f"Merge method '{method}' is not valid. Use {DATA_MERGE_METHODS}")
+        raise ValueError(f"Merge method '{method}' is not valid. Use {DATA_MERGE_METHODS}")
 
     fileStack = common.toList(fileStack)
 

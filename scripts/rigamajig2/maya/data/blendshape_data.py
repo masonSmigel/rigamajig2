@@ -86,20 +86,21 @@ class BlendshapeData(maya_data.MayaData):
         for node in nodes:
             if not cmds.objExists(node):
                 geometry = self._data[node]['geometry']
-                blendshape.create(geometry, name=node)
+                blendshapeNode = blendshape.create(geometry, name=node, deformOrder="foc")
+            else: blendshapeNode = node
 
             # get the base
-            base = blendshape.getBaseGeometry(node)
-            baseIndex = blendshape.getBaseIndex(node, base)
+            base = blendshape.getBaseGeometry(blendshapeNode)
+            baseIndex = blendshape.getBaseIndex(blendshapeNode, base)
 
             addedTargets = 0
             for i, target in enumerate(self._data[node]['targets']):
                 # rebuild the targets
-                if target not in blendshape.getTargetList(node):
+                if target not in blendshape.getTargetList(blendshapeNode):
                     # first we need to recreate the main target. This is available at the index 6000.
                     deltaDict = self._data[node]['targets'][target]['6000']['deltas']
-                    blendshape.addEmptyTarget(node, target=target, )
-                    blendshape.setDelta(node, target, deltaDict=deltaDict)
+                    blendshape.addEmptyTarget(blendshapeNode, target=target, )
+                    blendshape.setDelta(blendshapeNode, target, deltaDict=deltaDict)
 
                     addedTargets += 1
 
@@ -112,15 +113,15 @@ class BlendshapeData(maya_data.MayaData):
                         # using the same formula used to set the inputTargetIndex
                         wt = blendshape.itiToInbetween(iti)
                         deltaDict = self._data[node]['targets'][target][iti]['deltas']
-                        blendshape.addEmptyTarget(node, target, inbetween=wt)
-                        blendshape.setDelta(node, target, deltaDict=deltaDict, inbetween=wt)
+                        blendshape.addEmptyTarget(blendshapeNode, target, inbetween=wt)
+                        blendshape.setDelta(blendshapeNode, target, deltaDict=deltaDict, inbetween=wt)
 
                     # for each target we need to check if the shape exisits
                     for iti in list(self._data[node]['targets'][target].keys()):
                         # check if the live shape exists. if it does then reconnect it
                         geoShape = self._data[node]['targets'][target][iti]['targetGeo']
-                        targetIndex = blendshape.getTargetIndex(node, target)
-                        if cmds.objExists(geoShape):
+                        targetIndex = blendshape.getTargetIndex(blendshapeNode, target)
+                        if geoShape and cmds.objExists(geoShape):
                             inputTargetItemPlug = '{}.it[{}].itg[{}].iti[{}]'.format(node, baseIndex, targetIndex, iti)
                             geoTargetPlug = "{}.igt".format(inputTargetItemPlug)
                             # reconnect the target plugs
@@ -128,9 +129,9 @@ class BlendshapeData(maya_data.MayaData):
 
                     # finally we can set the target weights
                     if loadWeights:
-                        cmds.setAttr("{}.{}".format(node, target), self._data[node]['targetWeights'][i])
+                        cmds.setAttr("{}.{}".format(blendshapeNode, target), self._data[node]['targetWeights'][i])
 
-            blendshape.setWeights(node, weights=self._data[node]['weights'])
+            blendshape.setWeights(blendshapeNode, weights=self._data[node]['weights'])
 
             # print a log
             logger.info("Loaded blendshape'{}' with {} targets".format(node, addedTargets))

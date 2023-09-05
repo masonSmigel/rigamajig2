@@ -21,6 +21,7 @@ from rigamajig2.maya import deformer
 from rigamajig2.maya import shape
 from rigamajig2.maya import attr
 from rigamajig2.maya import mesh
+from rigamajig2.maya import connection
 
 
 def isBlendshape(blendshape):
@@ -121,7 +122,8 @@ def addTarget(blendshape, target, targetAlias=None, base=None, targetIndex=-1, t
     return "{}.{}".format(blendshape, targetName)
 
 
-def addEmptyTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, inbetween=None, topologyCheck=False):
+def addEmptyTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0.0, inbetween=None,
+                   topologyCheck=False):
     """
     Add an empty blendshape target from an existing blendshape node
 
@@ -140,7 +142,7 @@ def addEmptyTarget(blendshape, target, base=None, targetIndex=-1, targetWeight=0
 
     if not base:
         base = getBaseGeometry(blendshape)
-    blankTarget = deformer.createCleanGeo(base, name=target)
+    blankTarget = deformer.createCleanGeo(base, name=f"tmp_{blendshape}_blendshapeNode")
 
     if inbetween:
         plug = addInbetween(blendshape,
@@ -488,17 +490,21 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
     if not isBlendshape(blendshape):
         raise Exception("{} is not a valid blendshape".format(blendshape))
 
-    targets = common.toList(targets)
     if not targets: targets = getTargetList(blendshape) + ['baseWeights']
     if not geometry: geometry = cmds.blendShape(blendshape, q=True, g=True)[0]
+
+    targets = common.toList(targets)
 
     pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
 
     for target in targets:
+        if not target:
+            continue
+
         if target == 'baseWeights':
             tmpWeights = list()
             for i in range(pointCount + 1):
-                # we need to check if there are weights in the dictionary. We can use get to check and return None if
+                # we need to check if there are weights in the dictionary. We can use get to check and return -1 if
                 # there is not a key for the specified weight. After that we can check if the weight == None. If we does
                 # we replace it with 1.0 since we stripped out any values at 1.0 when we gathered the weights
                 if weights[target].get(i) is not None:
@@ -515,9 +521,10 @@ def setWeights(blendshape, weights, targets=None, geometry=None):
         else:
             tmpWeights = list()
             for i in range(pointCount + 1):
-                # we need to check if there are weights in the dictionary. We can use get to check and return None if
+                # we need to check if there are weights in the dictionary. We can use get to check and return -1 if
                 # there is not a key for the specified weight. After that we can check if the weight == None. If we does
                 # we replace it with 1.0 since we stripped out any values at 1.0 when we gathered the weights
+
                 if weights[target].get(i) is not None:
                     tmpWeight = weights[target].get(i)
                 elif weights[target].get(str(i)) is not None:
@@ -676,7 +683,7 @@ def setDelta(blendshape, target, deltaDict, inbetween=None):
         componentsList = ["vtx[{}]".format(p) for p in list(deltaDict.keys())]
 
         # set the inputPointsTarget and inputComponentsTarget
-        cmds.setAttr("{}.ipt".format(inputTargetItemPlug),len(pointsList), *pointsList, type="pointArray")
+        cmds.setAttr("{}.ipt".format(inputTargetItemPlug), len(pointsList), *pointsList, type="pointArray")
         cmds.setAttr("{}.ict".format(inputTargetItemPlug), len(componentsList), *componentsList, type="componentList")
 
 
@@ -759,3 +766,71 @@ def regenerateTarget(blendshape, target, inbetween=None, connect=True):
             cmds.connectAttr("{}.worldMesh[0]".format(targetGeoShape), "{}.igt".format(inputTargetItemPlug), f=True)
 
         return targetGeo
+
+
+def transferBlendshape(blendshape, targetMesh, blendshapeName=None, copyConnections=True):
+    """
+    Transfer a blendshape from one node to another.
+
+    :param blendshape: Blendshape to copy to another mesh
+    :param targetMesh: mesh to transfer the blendshape to
+    :param blendshapeName: name of the new blendshape
+    :param copyConnections: copy input and output connections
+    :return:
+    """
+
+    if not isBlendshape(blendshape):
+        raise Exception("'{}' is not a valid blendshape".format(blendshape))
+
+    # get the base mesh
+    base = getBaseGeometry(blendshape)
+
+    blendshapeName = blendshapeName or "transfer__" + blendshape
+
+    # create the new blendshape
+    targetBlendshape = create(targetMesh, name=blendshapeName)
+
+    # transfer the targets
+    targetList = getTargetList(blendshape)
+    for target in targetList:
+
+        # get the base delta
+        baseDelta = getDelta(blendshape=blendshape, target=target)
+
+        # create a new base target with the same name
+        addEmptyTarget(blendshape=targetBlendshape, target=target)
+        # set the base delta
+        setDelta(blendshape=targetBlendshape, target=target, deltaDict=baseDelta)
+
+        # transfer each inbetween
+        for iti in getInputTargetItemList(blendshape=blendshape, target=target, base=base):
+            # if the index is the base (6000) we can skip it since we already transfered it.
+            if iti == 6000:
+                continue
+
+            wt = itiToInbetween(iti)
+
+            # get the inbetween delta
+            inbetweenDelta = getDelta(blendshape=blendshape, target=target, inbetween=wt)
+            # add a new inbetween target and set the delta
+            addEmptyTarget(blendshape=targetBlendshape, target=target, inbetween=wt)
+            setDelta(blendshape=targetBlendshape, target=target, deltaDict=inbetweenDelta, inbetween=wt)
+
+        # set the target value
+        targetValue = cmds.getAttr(f"{blendshape}.{target}")
+        cmds.setAttr(f"{targetBlendshape}.{target}", targetValue)
+
+        if copyConnections:
+            # get the source value or input connection
+            input = connection.getPlugInput(f"{blendshape}.{target}")
+            if input:
+                cmds.connectAttr(input[-1], f"{targetBlendshape}.{target}", f=True)
+            # set the target value or input connection
+            outputs = connection.getPlugOutput(f"{blendshape}.{target}")
+            for output in outputs:
+                cmds.connectAttr(f"{targetBlendshape}.{target}", output, f=True)
+
+    # get the blendshape weights
+    weights = getWeights(blendshape=blendshape, geometry=base)
+    # set the blendshape weights
+    setWeights(blendshape=targetBlendshape, weights=weights, geometry=targetMesh)

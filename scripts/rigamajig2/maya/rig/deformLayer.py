@@ -31,6 +31,8 @@ LAYER_ATTR = 'deformationLayers'
 
 MAIN_NODE_NAME = 'main'
 
+DEFORM_LAYER_BSHP_TAG = "deformLayerBshp"
+
 CONNECTION_METHOD_LIST = ['bshp', 'inmesh']
 
 DUMMY_JOINT = 'world_dummy_bind'
@@ -180,6 +182,8 @@ class DeformLayer(object):
 
             blendshape.addTarget(blendshape=blendshapeNode, target=previousLayer, targetWeight=1.0)
 
+            # add a tag to makr the blendshape as NOT part of the deformation chain.
+            meta.tag(blendshapeNode, tag=DEFORM_LAYER_BSHP_TAG)
             # hide the previous layer
             cmds.setAttr("{}.v".format(previousLayer), 0)
 
@@ -218,17 +222,37 @@ class DeformLayer(object):
             return
 
         layers = self.getDeformationLayers()
+        deformerCount = 0
         for layer in layers:
-            skinCluster.stackSkinCluster(layer, self.model, skinName="stacked__" + layer + "_skinCluster")
+            # get a list of all deformers on a layer
+            deformerStack = deformer.getDeformerStack(layer)
 
-            # TODO: Copy over blendshapes and other deformers as well
+            # we need to reverse the deformer stack to transfer it. That way we can copy from the bottom
+            # to the top as we transfer
+            deformerStack.reverse()
+
+            for layerDeformer in deformerStack:
+                if blendshape.isBlendshape(layerDeformer):
+                    # if the blendshape is the input blendshape from the previous layer, Skip it.
+                    if meta.hasTag(layerDeformer, DEFORM_LAYER_BSHP_TAG):
+                        continue
+                    blendshapeName = "stacked__" + layer
+                    blendshape.transferBlendshape(layerDeformer, self.model, blendshapeName, copyConnections=True)
+                elif skinCluster.isSkinCluster(layerDeformer):
+                    skinCluster.stackSkinCluster(layer, self.model, skinName="stacked__" + layer + "_skinCluster")
+                elif deformer.isDeformer(layerDeformer):
+                    # TODO: Implement 
+                    print(f"Transfer Deformer: {layerDeformer}")
+
+                deformerCount += 1
+
             cmds.setAttr("{}.v".format(layer), 0)
 
         # Use a try exept block just incase the render mesh is connected to something.
         _safeSetVisablity(self.model, 1)
 
         # send out a message that the stack was sucessful
-        logger.info("deform layers succesfully stacked for: {} ({} layers)".format(self.model, len(layers)))
+        logger.info(f"'{self.model}' deform layers succesfully stacked ({len(layers)} layers, {deformerCount} deformers)")
 
         # if we want to cleanup delete the deformation layers after stacking the skinClusters
         if cleanup:

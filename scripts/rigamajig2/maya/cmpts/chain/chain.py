@@ -31,7 +31,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
     UI_COLOR = (109, 208, 159)
 
     def __init__(self, name, input, size=1, useScale=False, addFKSpace=False, addSdk=True,
-                 useProxyAttrs=True, rigParent=str()):
+                 useProxyAttrs=True, addBpm=False, rigParent=str()):
         """"
         :param str name: name of the components
         :param list input: list of two joints. A start and an end joint
@@ -48,6 +48,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         self.cmptSettings['useScale'] = useScale
         self.cmptSettings['addSdk'] = addSdk
         self.cmptSettings['addFKSpace'] = addFKSpace
+        self.cmptSettings['addBpm'] = addBpm
 
         # noinspection PyTypeChecker
         if len(self.input) != 2:
@@ -103,6 +104,16 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         """Add the rig setup"""
         rigamajig2.maya.joint.connectChains(self.controlers, self.inputList)
 
+        if self.addBpm:
+            # if needed we will add a bind pre matrix joint.
+            self.bpmHierarchy = cmds.createNode("transform", name="{}_bpm_hrc".format(self.name),
+                                                parent=self.rootHierarchy)
+
+            bpmJointName = [x.rsplit("_", 1)[0] + "_bpm" for x in self.inputList]
+            self.bpmJointList = rigamajig2.maya.joint.duplicateChain(self.inputList, parent=self.bpmHierarchy, names=bpmJointName)
+
+            rigamajig2.maya.joint.hideJoints(self.bpmJointList)
+
     def connect(self):
         """Create the connection"""
         # connect the rig to is rigParent
@@ -116,4 +127,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
             if cmds.objExists('trs_motion'):
                 spaces.addSpace(self.fkControlList[0].spaces, ['trs_motion'], nameList=['world'],
                                 constraintType='orient')
+
+        if self.addBpm:
+            rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
 

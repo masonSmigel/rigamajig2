@@ -768,7 +768,7 @@ def regenerateTarget(blendshape, target, inbetween=None, connect=True):
         return targetGeo
 
 
-def transferBlendshape(blendshape, targetMesh, blendshapeName=None, copyConnections=True):
+def transferBlendshape(blendshape, targetMesh, blendshapeName=None, copyConnections=True, deformOrder="foc"):
     """
     Transfer a blendshape from one node to another.
 
@@ -776,6 +776,7 @@ def transferBlendshape(blendshape, targetMesh, blendshapeName=None, copyConnecti
     :param targetMesh: mesh to transfer the blendshape to
     :param blendshapeName: name of the new blendshape
     :param copyConnections: copy input and output connections
+    :param deformOrder: Override the deform order of the blendshape. default is "FrontOfChain"
     :return:
     """
 
@@ -788,7 +789,7 @@ def transferBlendshape(blendshape, targetMesh, blendshapeName=None, copyConnecti
     blendshapeName = blendshapeName or "transfer__" + blendshape
 
     # create the new blendshape
-    targetBlendshape = create(targetMesh, name=blendshapeName)
+    targetBlendshape = create(targetMesh, name=blendshapeName, deformOrder=deformOrder)
 
     # transfer the targets
     targetList = getTargetList(blendshape)

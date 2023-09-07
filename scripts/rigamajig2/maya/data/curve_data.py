@@ -85,9 +85,10 @@ class CurveData(node_data.NodeData):
                     form = 'Open'
                     if 'shapes' not in self._data[node]:
                         continue
+
+                    connections = None
                     for shape in self._data[node]['shapes'].keys():
                         created = False
-                        connections = None
                         if create:
                             # if the node does not exist in the scene. Create it.
                             if not cmds.objExists(node):

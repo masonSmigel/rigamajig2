@@ -447,3 +447,30 @@ def removeGeoFromDeformer(deformer, geo):
         return
     cmds.deformer(deformer, e=True, rm=True, g=geo)
 
+
+def transferDeformer(deformer, sourceMesh, targetMesh):
+    """
+    Transfer a deformer to another targetMesh.
+
+    This will add the deformer to the new targetMesh and copy the weights. from the source mesh to the target.
+
+    :param str deformer: name of the deformer to transfer
+    :param str sourceMesh: source mesh to copy the deformer weights from
+    :param str targetMesh: target mesh to transfer the deformer to
+    :return:
+    """
+    if not isDeformer(deformer):
+        cmds.error("object '{}' is not a deformer".format(deformer))
+        return
+    if not cmds.objExists(targetMesh):
+        cmds.error("object '{}' does not exist".format(geo))
+        return
+
+    if not rigamajig2.maya.shape.getPointCount(sourceMesh) == rigamajig2.maya.shape.getPointCount(targetMesh):
+        cmds.error(f"'{sourceMesh}' and '{targetMesh}' meshes do not match vertex count")
+
+    addGeoToDeformer(deformer=deformer, geo=targetMesh)
+
+    weights = getWeights(deformer=deformer, geometry=sourceMesh)
+    setWeights(deformer=deformer, weights=weights, geometry=targetMesh)
+

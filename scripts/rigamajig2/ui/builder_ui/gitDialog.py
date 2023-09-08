@@ -92,6 +92,7 @@ class GitDialog(mayaDialog.MayaDialog):
         # Files Changed Since Last Commit section
         self.filesChangedList = QtWidgets.QListWidget()
         self.filesChangedList.setAlternatingRowColors(True)
+        self.filesChangedList.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.filesChangedList.setUniformItemSizes(True)
         self.filesChangedList.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
         self.filesChangedList.customContextMenuRequested.connect(self.showFileChangelistContextMenu)
@@ -345,7 +346,7 @@ class GitDialog(mayaDialog.MayaDialog):
         addDirToGitIgnore = QtWidgets.QAction("Add Dir to .gitignore", self)
         addDirToGitIgnore.setIcon(QtGui.QIcon(":nodeGrapherClose.png"))
 
-        revertFileAction.triggered.connect(lambda: self.revertSingleFile(item.text()))
+        revertFileAction.triggered.connect(lambda: self.revertSingleFile(items))
         printDiffAction.triggered.connect(lambda: self.getDifferencesBetweenLocalAndHead(item.text(), printIt=True))
         addFileToGitIgnore.triggered.connect(self.addFileToGitIgnore)
         addDirToGitIgnore.triggered.connect(self.addDirectoryToGitIgnore)
@@ -371,36 +372,40 @@ class GitDialog(mayaDialog.MayaDialog):
             addToGitIgnore(self.repo.working_tree_dir, items_to_ignore=[directory])
             self.loadFilesChangedSinceLastCommit()
 
-    def revertSingleFile(self, file):
+    def revertSingleFile(self, items):
         # Use the `git.checkout` method to revert a single file
 
-        isUntracked = file not in self.repo.untracked_files
+        files = [item.text() for item in items]
 
-        if isUntracked:
-            confirmRevert = mayaMessageBox.MayaMessageBox(
-                title=f"Revert Changes to: {file}",
-                message="Reverting will undo all changes. Are you sure you want to proceed?",
-                icon="warning")
-            confirmRevert.setButtonsYesNoCancel()
+        for file in files:
 
-            res = confirmRevert.exec_()
+            isUntracked = file not in self.repo.untracked_files
 
-            if res == QtWidgets.QMessageBox.Yes:
-                self.repo.git.checkout(file)
-                print(f"Reverted changes for {file}")
-        else:
-            confirmDelete = mayaMessageBox.MayaMessageBox(
-                title=f"Delete Untracked File: {file}",
-                message="This file is untracked by Git. Would you like to delete it?",
-                icon="error")
-            confirmDelete.setButtonsYesNoCancel()
+            if isUntracked:
+                confirmRevert = mayaMessageBox.MayaMessageBox(
+                    title=f"Revert Changes to: {file}",
+                    message="Reverting will undo all changes. Are you sure you want to proceed?",
+                    icon="warning")
+                confirmRevert.setButtonsYesNoCancel()
 
-            res = confirmDelete.exec_()
+                res = confirmRevert.exec_()
 
-            if res == QtWidgets.QMessageBox.Yes:
-                absoultePath = os.path.join(self.repo.working_tree_dir, file)
-                os.remove(absoultePath)
-                print(f"Deleted untracked file: {absoultePath}")
+                if res == QtWidgets.QMessageBox.Yes:
+                    self.repo.git.checkout(file)
+                    print(f"Reverted changes for {file}")
+            else:
+                confirmDelete = mayaMessageBox.MayaMessageBox(
+                    title=f"Delete Untracked File: {file}",
+                    message="This file is untracked by Git. Would you like to delete it?",
+                    icon="error")
+                confirmDelete.setButtonsYesNoCancel()
+
+                res = confirmDelete.exec_()
+
+                if res == QtWidgets.QMessageBox.Yes:
+                    absoultePath = os.path.join(self.repo.working_tree_dir, file)
+                    os.remove(absoultePath)
+                    print(f"Deleted untracked file: {absoultePath}")
 
             self.loadFilesChangedSinceLastCommit()
 

@@ -9,6 +9,7 @@
 
 """
 import os.path
+import uuid
 from collections import OrderedDict
 import maya.cmds as cmds
 import maya.mel as mel
@@ -37,6 +38,8 @@ class SHAPESData(maya_data.MayaData):
                      "shapesLoadScripts;")
 
         self.filepath = None
+
+        self.gatheredItems = []
 
     def __validateSHAPES(self):
         """validate that the SHAPES plugin is available and loaded"""
@@ -85,6 +88,8 @@ class SHAPESData(maya_data.MayaData):
             self._data[blendshapeNode]['setupFile'] = None
             self._data[blendshapeNode]['useDeltas'] = useDeltas
             self._data[blendshapeNode]['deltasFile'] = None
+
+            self.gatheredItems.append(blendshapeNode)
 
     def applyData(self, nodes, attributes=None, autoLocalize=True, rebuild=True):
         """
@@ -142,10 +147,11 @@ class SHAPESData(maya_data.MayaData):
 
         baseFolder = os.path.dirname(filepath)
 
-        for blendshapeNode in self.getKeys():
+        # keep a list of items gathered within this instance of the SHAPES file. Only write shapes files for those items!
+        for blendshapeNode in self.gatheredItems:
             # for each blendshape export its setup and a optionally a delta's file
             setupPath = os.sep.join([baseFolder, SUBFOLDER_PATH])
-            exportCompleteSetup(mesh=self._data[blendshapeNode]['mesh'], filePath=setupPath)
+            exportCompleteSetup(mesh=self._data[blendshapeNode]['mesh'], filePath=setupPath, specifyBlendshape=blendshapeNode)
 
             # set the setup file data to be the path to the mel file for the blendshape!
             filename = "{}.mel".format(blendshapeNode)
@@ -181,7 +187,7 @@ class SHAPESData(maya_data.MayaData):
 # Blend shape setup export and import.
 # ----------------------------------------------------------------------
 
-def exportCompleteSetup(mesh, filePath, rebuild=False):
+def exportCompleteSetup(mesh, filePath, specifyBlendshape=None, rebuild=False, forceFileType="mayaAscii"):
     """Exports all blend shape nodes from the given mesh with their
     respective setup.
     The rebuild of the setup is optional.
@@ -190,8 +196,11 @@ def exportCompleteSetup(mesh, filePath, rebuild=False):
     :type mesh: str
     :param filePath: The path to export to.
     :type filePath: str
+    :param specifyBlendshape: Specify a single blendshape to export instead of all connected shapes.
     :param rebuild: True, if the setup should be rebuilt.
     :type rebuild: bool
+    :param forceFileType: Force the exported Shapes files to be in a certian type. Generally we want these as an Ascii
+    so the changes are human readable in a diff.
     """
     # query the active selection
     activeSelection = cmds.ls(sl=True)
@@ -204,6 +213,10 @@ def exportCompleteSetup(mesh, filePath, rebuild=False):
     options["SHAPESUseCustomNodeDataExportPath"] = cmds.optionVar(query="SHAPESUseCustomNodeDataExportPath")
     options["SHAPESCustomNodeDataExportPath"] = cmds.optionVar(query="SHAPESCustomNodeDataExportPath")
     options["SHAPESExportOptions"] = cmds.optionVar(query="SHAPESExportOptions")
+
+    # Shapes will also check for the current maya file type. To force this we can set the filetype of the unsaved file
+    currentFileType = cmds.file(q=True, type=True)[0]
+    cmds.file(type=forceFileType)
 
     # Set the preferences for the export.
     cmds.optionVar(intValue=("SHAPESFileType", 0))
@@ -224,8 +237,15 @@ def exportCompleteSetup(mesh, filePath, rebuild=False):
     mel.eval("shapesMain_getMeshSelection 1")
     # Get the blend shape node.
     bsNode = mel.eval("string $temp = $gShapes_bsNode")
+
     # Get all blend shape nodes from the mesh.
     nodeList = blendshape.getBlendshapeNodes(mesh)
+
+    # if we want to get a specific blendshape then we can check if that blendshape is in the nodeList.
+    # if it use replace the nodeList with only that shape
+    if specifyBlendshape:
+        if specifyBlendshape in nodeList:
+            nodeList = common.toList(specifyBlendshape)
 
     for node in nodeList:
         cmds.optionMenu("shpUI_bsOption", edit=True, value=node)
@@ -252,6 +272,8 @@ def exportCompleteSetup(mesh, filePath, rebuild=False):
 
     # reselect the selected nodes
     cmds.select(activeSelection, r=True)
+    # reset the maye file type
+    cmds.file(type=currentFileType)
 
 
 def rebuildSetup(filePath):
@@ -343,7 +365,13 @@ def localizeSHAPESFile(melFile):
     :rtype: string
     """
     baseDirectory = os.path.dirname(melFile)
-    tmpMelFilename = "tmp_{}_localized.mel".format(os.path.basename(melFile).split(".")[0])
+    baseFileName = os.path.basename(melFile).split(".")[0]
+
+    # Maya will sometimes cache out a mel file if it loads the same file from the same place. This can cause discrepency
+    # if the source file was updated. To avoid this we can add a uuid to the end of the file name to ensure
+    # it is reloaded fresh every time. We'll use uuid1 to generate the UUID based on the computer time to avoid
+    # the very slight chance that an identical random uuid was generated within the maya session.
+    tmpMelFilename = f"tmp_{baseFileName}_localized_{uuid.uuid1()}.mel"
     outputFile = os.path.join(baseDirectory, tmpMelFilename)
 
     lookup1 = "// import shapes"
@@ -376,7 +404,7 @@ def localizeSHAPESFile(melFile):
         newFilePath = os.path.join(baseDirectory, fileName)
 
         ext = fileName.split('.')[-1]
-        mayaFileType = 'mayaAscii' if ext == "ma" else 'mayaBinary'
+        mayaFileType = 'mayaBinary' if ext == "mb" else 'mayaAscii'
 
         # fix the path because mel likes to mess up the paths
         melFormmatedPath = newFilePath.replace("\\", "//")

@@ -131,7 +131,10 @@ class DataLoader(QtWidgets.QWidget):
         self.pathTreeWidget.setIndentation(5)
         self.pathTreeWidget.setColumnCount(2)
         self.pathTreeWidget.setUniformRowHeights(True)
-        self.pathTreeWidget.setColumnWidth(0, 160)
+        self.pathTreeWidget.setColumnWidth(1, 120)
+        header = self.pathTreeWidget.header()
+        header.setStretchLastSection(False)
+        header.setSectionResizeMode(0, QtWidgets.QHeaderView.Stretch)
         self.pathTreeWidget.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
 
         self.pathTreeWidget.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)

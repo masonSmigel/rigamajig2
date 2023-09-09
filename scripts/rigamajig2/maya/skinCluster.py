@@ -88,37 +88,55 @@ def getMfnSkin(skinCluster):
     return oma2.MFnSkinCluster(skinClusterObj)
 
 
-def getMfnMesh(mesh):
+def getMfnShape(mesh):
     """
      Get a mesh function set from the skin cluster name
 
-    :param str mesh: name of the mesh to get the Mfn mesh object from
-    :return: MFnMesh
+    :param str mesh: name of the mesh or nurbsCurve to get the Mfn object from
+    :return: MFnMesh | MFnNurbsCurve
     """
-    mesh = rigamajig2.maya.openMayaUtils.getMObject(mesh)
-    return om2.MFnMesh(mesh)
+    mObj = rigamajig2.maya.openMayaUtils.getMObject(mesh)
+    dependNode = om2.MFnDependencyNode(mObj)
+
+    if cmds.nodeType(dependNode.name()) == "mesh":
+        return om2.MFnMesh(mObj)
+    elif cmds.nodeType(dependNode.name()) == "nurbsCurve":
+        return om2.MFnNurbsCurve(mObj)
 
 
-def getCompleteComponents(mesh):
+def getCompleteComponents(shape):
     """
     Wrapper to get the complete component data from a mesh
 
-    :param str mesh: mesh to get the component data from
+    :param str shape: shape to get the component data from
     :return: complete component data
     """
-    if not isinstance(mesh, om2.MFnMesh):
-        mesh = getMfnMesh(mesh)
-    indexedComponent = om2.MFnSingleIndexedComponent()
-    completeComponentData = indexedComponent.create(om2.MFn.kMeshVertComponent)
-    indexedComponent.setCompleteData(mesh.numVertices)
-    return completeComponentData
+
+    if isinstance(shape, om2.MFnMesh):
+        nodeType = "mesh"
+    elif isinstance(shape, om2.MFnNurbsCurve):
+        nodeType = "nurbsCurve"
+    else:
+        nodeType = cmds.nodeType(shape)
+        shape = getMfnShape(shape)
+
+    if nodeType == "mesh":
+        indexedComponent = om2.MFnSingleIndexedComponent()
+        completeComponentData = indexedComponent.create(om2.MFn.kMeshVertComponent)
+        indexedComponent.setCompleteData(shape.numVertices)
+        return completeComponentData
+    elif nodeType == "nurbsCurve":
+        indexedComponent = om2.MFnSingleIndexedComponent()
+        completeComponentData = indexedComponent.create(om2.MFn.kCurveCVComponent)
+        indexedComponent.setCompleteData(shape.numCVs)
+        return completeComponentData
 
 
 def getWeights(mesh):
     """
     Return a list of all skincluster weights on a mesh
 
-    :param mesh: mesh to get the weights on
+    :param mesh: mesh (or NurbsCurve) to get the weights on
     :return: weight dictionary and vertex count. {"influence":[]}
     :rtype: list
     """
@@ -130,8 +148,8 @@ def getWeights(mesh):
 
     meshDag = rigamajig2.maya.openMayaUtils.getDagPath(mesh)
     skinMfn = getMfnSkin(meshSkin)
-    meshMfn = getMfnMesh(meshShape)
-    components = getCompleteComponents(meshMfn)
+    shapeMfn = getMfnShape(meshShape)
+    components = getCompleteComponents(shapeMfn)
 
     weights, influenceCount = skinMfn.getWeights(meshDag, components)
 
@@ -160,7 +178,7 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
     """
     Set the skin cluster weights of a given mesh
 
-    :param mesh: mesh to set the weights on
+    :param mesh: mesh (or NurbsCurve) to set the weights on
     :param skincluster: skin cluster node to hold the weights
     :param weightDict: skin cluster dict holding weight values for each influence
     :param compressed: if the weights are compressed or not
@@ -168,9 +186,9 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
 
     skinMfn = getMfnSkin(skincluster)
-    meshMfn = getMfnMesh(meshShape)
+    shapeMfn = getMfnShape(meshShape)
     meshDag = rigamajig2.maya.openMayaUtils.getDagPath(meshShape)
-    components = getCompleteComponents(meshMfn)
+    components = getCompleteComponents(shapeMfn)
 
     weights, influenceCount = skinMfn.getWeights(meshDag, components)
     weightList = weights
@@ -204,7 +222,7 @@ def getBlendWeights(mesh):
     """
     Get the DQ blended weights
 
-    :param mesh: mesh to get weights on
+    :param mesh: mesh (or NurbsCurve) to get weights on
     :return: list of blendede weights
     :rtype: list
     """
@@ -216,8 +234,8 @@ def getBlendWeights(mesh):
 
     meshDag = rigamajig2.maya.openMayaUtils.getDagPath(mesh)
     skinMfn = getMfnSkin(meshSkin)
-    meshMfn = getMfnMesh(meshShape)
-    components = getCompleteComponents(meshMfn)
+    shapeMfn = getMfnShape(meshShape)
+    components = getCompleteComponents(shapeMfn)
 
     weights = skinMfn.getBlendWeights(meshDag, components)
     # round the weights down. This should be safe on Dual Quat blends
@@ -235,7 +253,7 @@ def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
     """
     Set the Blended weights
 
-    :param mesh: name of the mesh to set the blended weights on
+    :param mesh: name of the mesh (or NurbsCurve) to set the blended weights on
     :param skincluster: name of the skincluster to set the blended weights on
     :param weightDict: input weight dictionary
     :param bool compressed: if the data is compressed
@@ -244,9 +262,9 @@ def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
     meshShape = rigamajig2.maya.deformer.getDeformShape(mesh)
 
     skinMfn = getMfnSkin(skincluster)
-    meshMfn = getMfnMesh(meshShape)
+    shapeMfn = getMfnShape(meshShape)
     meshDag = rigamajig2.maya.openMayaUtils.getDagPath(meshShape)
-    components = getCompleteComponents(meshMfn)
+    components = getCompleteComponents(shapeMfn)
 
     numVerts = skinMfn.getBlendWeights(meshDag, components)
     blendedWeights = om2.MDoubleArray(range(len(numVerts)))
@@ -265,7 +283,7 @@ def getMatrixConnections(mesh, attribute='bindPreMatrix'):
     """
     Get a list of the the nodes or values set on the prebind matrix of each influence joint
 
-    :param mesh: mesh to get weights on
+    :param mesh: mesh (or NurbsCurve) to get matrix connections from
     :param attribute: Matrix attribute to get the values of.
     :return: A dictionary  of influence joints and the connection or value
     """
@@ -288,7 +306,7 @@ def getMatrixValues(mesh, attribute='bindPreMatrix'):
     """
     Get a list of the the nodes or values set on the prebind matrix of each influence joint
 
-    :param mesh: mesh to get weights on
+    :param mesh: mesh (or NurbsCurve) to get matrix values from
     :param attribute: Matrix attribute to get the values of.
     :return: A dictionary  of influence joints and the connection or value
     """
@@ -311,9 +329,9 @@ def setMatrixConnections(skinCluster, connectionsList, attribute='bindPreMatrix'
     """
     Set the preBind Matrix connections of a skin cluster
 
-    :param attribute:
     :param skinCluster: skin cluster to set the pre bind matrix connections on
     :param connectionsList: dictonary of influences and bind pre matrix connections
+    :param attribute: attribute to set the matrix connections for
     """
     for i, bindInput in enumerate(connectionsList):
         if bindInput:
@@ -373,7 +391,12 @@ def getInfluenceIndex(skinCluster, influence):
 
 def copySkinWeights(sourceMesh, targetMesh, targetSkin):
     """
-    Copy our skinweights
+    Copy our skinweights for identical meshes. Rather than a typical copy opperation this will rebuild the joint
+    matrix connections
+
+    :param sourceMesh: source mesh to copy the skinning from
+    :param targetMesh: target mesh to copy the skinning to
+    :param targetSkin: target skinCluster to copy the values to
     """
     sourceSkinCluster = getSkinCluster(sourceMesh)
 
@@ -474,10 +497,10 @@ def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestP
             value = cmds.getAttr("{}.{}".format(srcSkinCluster, attr))
             cmds.setAttr("{}.{}".format(tgtSkinCluster, attr), value)
 
-        kwargs = {"sa": surfaceMode, "ia":influenceMode}
+        kwargs = {"sa": surfaceMode, "ia": influenceMode}
         if uvSpace:
-            sourceUVSet = cmds.polyUVSet(sourceMesh,q=True, currentUVSet=True)[0]
-            DestUvSet = cmds.polyUVSet(tgtMesh,q=True, currentUVSet=True)[0]
+            sourceUVSet = cmds.polyUVSet(sourceMesh, q=True, currentUVSet=True)[0]
+            DestUvSet = cmds.polyUVSet(tgtMesh, q=True, currentUVSet=True)[0]
 
             kwargs["uv"] = [sourceUVSet, DestUvSet]
 

@@ -14,20 +14,20 @@ class WorkspaceControl(object):
         self.name = name
         self.widget = None
 
-    def create(self, label, widget, ui_script=None):
+    def create(self, label, widget, uiScript=None):
 
         cmds.workspaceControl(self.name, label=label)
 
-        if ui_script:
-            cmds.workspaceControl(self.name, e=True, uiScript=ui_script)
+        if uiScript:
+            cmds.workspaceControl(self.name, e=True, uiScript=uiScript)
 
-        self.add_widget_to_layout(widget)
-        self.set_visible(True)
+        self.addWidgetToLayout(widget)
+        self.setVisible(True)
 
     def restore(self, widget):
-        self.add_widget_to_layout(widget)
+        self.addWidgetToLayout(widget)
 
-    def add_widget_to_layout(self, widget):
+    def addWidgetToLayout(self, widget):
         if widget:
             self.widget = widget
             self.widget.setAttribute(QtCore.Qt.WA_DontCreateNativeAncestors)
@@ -44,22 +44,22 @@ class WorkspaceControl(object):
     def exists(self):
         return cmds.workspaceControl(self.name, q=True, exists=True)
 
-    def is_visible(self):
+    def isVisible(self):
         return cmds.workspaceControl(self.name, q=True, visible=True)
 
-    def set_visible(self, visible):
+    def setVisible(self, visible):
         if visible:
             cmds.workspaceControl(self.name, e=True, restore=True)
         else:
             cmds.workspaceControl(self.name, e=True, visible=False)
 
-    def set_label(self, label):
+    def setLabel(self, label):
         cmds.workspaceControl(self.name, e=True, label=label)
 
-    def is_floating(self):
+    def isFloating(self):
         return cmds.workspaceControl(self.name, q=True, floating=True)
 
-    def is_collapsed(self):
+    def isCollapsed(self):
         return cmds.workspaceControl(self.name, q=True, collapse=True)
 
 
@@ -69,18 +69,19 @@ class DockableUI(QtWidgets.QWidget):
     ui_instance = None
 
     @classmethod
-    def display(cls):
+    def showDialog(cls):
         if cls.ui_instance:
-            cls.ui_instance.show_workspace_control()
+            cls.ui_instance.showWorkspaceControl()
         else:
             cls.ui_instance = cls()
+            cls.ui_instance.showWorkspaceControl()
 
     @classmethod
     def get_workspace_control_name(cls):
         return "{0}WorkspaceControl".format(cls.__name__)
 
     @classmethod
-    def get_ui_script(cls):
+    def getUiScript(cls):
         module_name = cls.__module__
         if module_name == "__main__":
             module_name = cls.module_name_override
@@ -93,31 +94,32 @@ class DockableUI(QtWidgets.QWidget):
 
         self.setObjectName(self.__class__.__name__)
 
-        self.create_actions()
-        self.create_widgets()
-        self.create_layout()
-        self.create_connections()
-        self.create_workspace_control()
+        self.createActions()
+        self.createMenus()
+        self.createWidgets()
+        self.createLayouts()
+        self.createConnections()
+        self.createWorkspaceControl()
 
-    def create_actions(self):
+    def createActions(self):
         pass
 
-    def create_widgets(self):
+    def createWidgets(self):
         pass
 
-    def create_layout(self):
+    def createLayouts(self):
         pass
 
-    def create_connections(self):
+    def createConnections(self):
         pass
 
-    def create_workspace_control(self):
-        self.workspace_control_instance = WorkspaceControl(self.get_workspace_control_name())
-        if self.workspace_control_instance.exists():
-            self.workspace_control_instance.restore(self)
+    def createWorkspaceControl(self):
+        self.workspaceControlInstance = WorkspaceControl(self.get_workspace_control_name())
+        if self.workspaceControlInstance.exists():
+            self.workspaceControlInstance.restore(self)
         else:
-            self.workspace_control_instance.create(self.WINDOW_TITLE, self, ui_script=self.get_ui_script())
+            self.workspaceControlInstance.create(self.WINDOW_TITLE, self, uiScript=self.getUiScript())
 
-    def show_workspace_control(self):
-        self.workspace_control_instance.set_visible(True)
+    def showWorkspaceControl(self):
+        self.workspaceControlInstance.setVisible(True)
 

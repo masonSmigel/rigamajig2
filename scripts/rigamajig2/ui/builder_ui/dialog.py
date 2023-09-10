@@ -55,11 +55,12 @@ class BuilderDialog(DockableUI):
 
     def __init__(self, rigFile=None):
         """ Constructor for the builder dialog"""
-        super(BuilderDialog, self).__init__()
 
         # Store a rig enviornment and rig builder variables.
         self.rigEnviornment = None
         self.rigBuilder = None
+
+        super(BuilderDialog, self).__init__()
 
         self.setWindowTitle(self.WINDOW_TITLE)
         if cmds.about(ntOS=True):
@@ -72,11 +73,6 @@ class BuilderDialog(DockableUI):
 
         # with the maya mixin stuff the window comes in at a weird size. This ensures its not a weird size.
         self.resize(420, 800)
-
-        self.createMenus()
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
 
         # if we dont provide a rig file load the most recent one from the recent files list
         recentFile = recent_files.getMostRecentFile()

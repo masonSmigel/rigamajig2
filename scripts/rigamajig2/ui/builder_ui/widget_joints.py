@@ -24,8 +24,8 @@ from rigamajig2.maya import naming
 import rigamajig2.maya.joint
 import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.meta as meta
-from rigamajig2.ui.builder_ui.widgets import sliderGrp, dataLoader, collapseableWidget
-from rigamajig2.ui.widgets import QPushButton
+from rigamajig2.ui.builder_ui.widgets import dataLoader, collapseableWidget
+from rigamajig2.ui.widgets import QPushButton, sliderGrp
 from rigamajig2.ui.builder_ui import style
 
 from rigamajig2.maya.builder.constants import SKELETON_POS

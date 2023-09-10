@@ -62,13 +62,6 @@ class BuilderDialog(DockableUI):
 
         super(BuilderDialog, self).__init__()
 
-        self.setWindowTitle(self.WINDOW_TITLE)
-        if cmds.about(ntOS=True):
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        elif cmds.about(macOS=True):
-            self.setProperty("saveWindowPref", True)
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-
         self.setMinimumSize(420, 600)
 
         # with the maya mixin stuff the window comes in at a weird size. This ensures its not a weird size.

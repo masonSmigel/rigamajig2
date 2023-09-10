@@ -69,7 +69,7 @@ class DockableUI(QtWidgets.QWidget):
     ui_instance = None
 
     @classmethod
-    def showDialog(cls):
+    def display(cls):
         if cls.ui_instance:
             cls.ui_instance.showWorkspaceControl()
         else:
@@ -93,6 +93,13 @@ class DockableUI(QtWidgets.QWidget):
         super(DockableUI, self).__init__()
 
         self.setObjectName(self.__class__.__name__)
+
+        if cmds.about(ntOS=True):
+            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+        elif cmds.about(macOS=True):
+            self.setProperty("saveWindowPref", True)
+            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+        self.setMinimumSize(300, 250)
 
         self.createActions()
         self.createMenus()
@@ -122,4 +129,3 @@ class DockableUI(QtWidgets.QWidget):
 
     def showWorkspaceControl(self):
         self.workspaceControlInstance.setVisible(True)
-

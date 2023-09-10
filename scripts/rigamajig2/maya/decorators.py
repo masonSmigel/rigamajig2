@@ -83,7 +83,7 @@ def suspendViewport(func):
     return wrap
 
 
-def timeFunction(func):
+def timeFunction(func, message=None):
     """
     Wrap the function to suspend the viewport
 
@@ -104,7 +104,9 @@ def timeFunction(func):
         finally:
             endTime = time.time()
             finalTime = endTime - startTime
-
-            print("Function {} completed in {}".format(func, finalTime))
+            if not message:
+                print("Function {} completed in {}".format(func, finalTime))
+            else:
+                print(f"{message} \t -- time elapsed {finalTime}")
 
     return wrap

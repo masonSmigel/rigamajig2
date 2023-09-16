@@ -5,6 +5,7 @@ import math
 import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 
+import rigamajig2.maya.attr
 import rigamajig2.maya.hierarchy as dag
 import rigamajig2.shared.common as common
 import rigamajig2.maya.matrix as matrix
@@ -57,6 +58,20 @@ def matchRotate(source, target):
 
     angles = [math.degrees(angle) for angle in (eulerRot.x, eulerRot.y, eulerRot.z)]
     cmds.xform(target, ws=True, rotation=angles)
+
+
+def matchScale(source, target):
+    """
+    Match the scale of one object to another
+
+    :param str source: Source transfrom
+    :param str target:  Target transform to match
+    :return:
+    """
+    localOffsetMatrix = localOffset(source)
+    decomposedScale = matrix.getScale(localOffsetMatrix)
+
+    cmds.xform(target, ws=True, scale=decomposedScale)
 
 
 def freezeToParentOffset(nodes):
@@ -112,10 +127,18 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
         raise RuntimeError("OffsetParentMatrix is only available in Maya 2020 and beyond")
     drivens = common.toList(driven)
 
+    driverIsAttr = True if rigamajig2.maya.attr.isAttr(driver) else False
+
+    if not driverIsAttr:
+        driverAttr = "{}.{}".format(driver, 'worldMatrix')
+    else:
+        driverAttr = driver
+        driver = driver.split('.')[0]
+
     for driven in drivens:
         offset = list()
         if mo:
-            offset = offsetMatrix(driver, driven)
+            offset = offsetMatrix(driverAttr, driven)
 
         parentList = cmds.listRelatives(driven, parent=True, path=True)
         parent = parentList[0] if parentList else None
@@ -127,7 +150,7 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
             if offset:
                 cmds.setAttr("{}.{}".format(multMatrix, "matrixIn[0]"), offset, type='matrix')
 
-            cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(multMatrix, 'matrixIn[1]'), f=True)
+            cmds.connectAttr(driverAttr, "{}.{}".format(multMatrix, 'matrixIn[1]'), f=True)
 
             if parent:
                 cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'),
@@ -261,8 +284,12 @@ def offsetMatrix(node1, node2):
     :return: relative offset matrix between node1 and node2
     :rtype: MMatrix
     """
-    node1Matrix = om2.MMatrix(cmds.getAttr("{}.{}".format(node1, 'worldMatrix')))
-    node2Matrix = om2.MMatrix(cmds.getAttr("{}.{}".format(node2, 'worldMatrix')))
+
+    node1Attr = node1 if rigamajig2.maya.attr.isAttr(node1) else f"{node1}.worldMatrix"
+    node2Attr = node2 if rigamajig2.maya.attr.isAttr(node2) else f"{node2}.worldMatrix"
+
+    node1Matrix = om2.MMatrix(cmds.getAttr(node1Attr))
+    node2Matrix = om2.MMatrix(cmds.getAttr(node2Attr))
 
     # invert the parent matrix
     node1Inverted = om2.MTransformationMatrix(node1Matrix).asMatrixInverse()

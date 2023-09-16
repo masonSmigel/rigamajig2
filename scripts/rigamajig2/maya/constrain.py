@@ -198,7 +198,7 @@ def uvPin(meshVertex):
     return "{}.outputMatrix[{}]".format(uvPinNode, index)
 
 
-def uvPinConstraint(target, meshName):
+def uvPinConstraint(target, meshName, mo=False):
     """
     Create a uv pin constraint between the target and the mesh
 
@@ -251,20 +251,7 @@ def uvPinConstraint(target, meshName):
     index = plug.evaluateNumElements() - 1
     outputPlug = "{}.outputMatrix[{}]".format(uvPinNode, index)
 
-    parent = cmds.listRelatives(target, p=True) or None
-
-    if parent:
-        parent = common.getFirstIndex(parent)
-        multMatrix = cmds.createNode("multMatrix", name="{}_{}_uvPin_mm".format(target, parent))
-
-        cmds.connectAttr(outputPlug, "{}.matrixIn[1]".format(multMatrix))
-        cmds.connectAttr("{}.{}".format(parent, "worldInverseMatrix"), "{}.matrixIn[2]".format(multMatrix))
-        cmds.connectAttr("{}.matrixSum".format(multMatrix), "{}.offsetParentMatrix".format(target))
-    else:
-        cmds.connectAttr(outputPlug, "{}.offsetParentMatrix".format(target))
-
-    # reset the transform values
-    transform.resetTransformations(target)
+    transform.connectOffsetParentMatrix(outputPlug, driven=target, mo=mo, s=False, sh=False)
 
     # return the uv pin node and the output plug
     return uvPinNode, outputPlug

@@ -31,8 +31,9 @@ def isAttr(plug):
     """
     node = plug.split('.')[0]
     attr = plug.replace(node + '.', '')
+    attrNoCompound = attr.split("[")[0]
 
-    if cmds.attributeQuery(attr, node=node, exists=True):
+    if cmds.attributeQuery(attrNoCompound, node=node, exists=True):
         return True
     return False
 

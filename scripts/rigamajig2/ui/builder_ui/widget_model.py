@@ -17,6 +17,7 @@ import maya.cmds as cmds
 
 # RIGAMAJIG2
 import rigamajig2.maya.builder.constants
+import rigamajig2.maya.file as file
 import rigamajig2.shared.common
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget, scriptRunner
@@ -122,4 +123,4 @@ class ModelWidget(QtWidgets.QWidget):
     @QtCore.Slot()
     def openModel(self):
         """ Open the model file """
-        cmds.file(self.modelPathSelector.getPath(), o=True, f=True)
+        file.open_(self.modelPathSelector.getPath(), f=True)

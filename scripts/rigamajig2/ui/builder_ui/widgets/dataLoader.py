@@ -25,7 +25,6 @@ import maya.OpenMayaUI as omui
 from shiboken2 import wrapInstance
 
 from rigamajig2.ui import showInFolder
-from rigamajig2.maya.builder.constants import DATA_PATH
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.data import abstract_data
 from rigamajig2.shared import path as rig_path
@@ -50,6 +49,7 @@ JSON_FILTER = "Json Files (*.json)"
 class DataLoader(QtWidgets.QWidget):
     """ Widget to select valid file or folder paths """
 
+    DATA_TYPE_LIST = core.getDataModules()
     def __init__(self,
                  label=None,
                  caption='Select a file or Folder',
@@ -237,7 +237,7 @@ class DataLoader(QtWidgets.QWidget):
         """Here we want to create actions for each datatype and return the action so they can be added to a menu.
         This is used in both the add button and add context menu"""
         actions = list()
-        for dataType in core.getDataModules():
+        for dataType in self.DATA_TYPE_LIST:
             # if we want to use filtering check to see if the data is in the filter.
             if self.dataFilteringEnabled and dataType not in self.dataFilter:
                 continue

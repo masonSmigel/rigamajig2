@@ -51,7 +51,7 @@ def open_(path=None, f=False):
     """
     if not path:
         path = _pathDialog(cap='Open', acceptCaption='Open', )
-    cmds.file(path, o=True, f=f)
+    cmds.file(path, o=True, f=f, ignoreVersion=True)
 
 
 def save(log=True):

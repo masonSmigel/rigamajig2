@@ -49,7 +49,6 @@ class MayaDialog(QtWidgets.QDialog):
         elif cmds.about(macOS=True):
             self.setProperty("saveWindowPref", True)
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        self.setMinimumSize(300, 250)
 
         self.createWidgets()
         self.createLayouts()

@@ -330,8 +330,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             # aim the controls down the chain
             bendAimList = [b.orig for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]]
             aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(self.input[1], allowNegative=True))
-            rig_transform.aimChain(bendAimList, aimVector=aimVector, upVector=(0, 0, 1),
-                                   worldUpObject=self.limbPv.orig)
+            rig_transform.aimChain(bendAimList, aimVector=aimVector, upVector=(0, 0, 1), worldUpObject=self.limbPv.orig)
 
             self.bendControls = [b.name for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]]
 
@@ -373,13 +372,24 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # TODO: think about a way to take this out. use OffsetParentMatrix instead
         cmds.orientConstraint(self.limbGimbleIk.name, self.ikfk.getIkJointList()[-1], mo=True)
 
-        # decompose the scale of the gimble control
-        worldMatrix = "{}.worldMatrix[0]".format(self.limbIk.name)
-        parentInverse = "{}.worldInverseMatrix[0]".format(self.ikfk.getIkJointList()[-2])
-        offset = rig_transform.offsetMatrix(self.limbIk.name, self.ikfk.getIkJointList()[-1])
-        rigamajig2.maya.node.multMatrix([list(om2.MMatrix(offset)), worldMatrix, parentInverse],
-                                        self.ikfk.getIkJointList()[-1], s=True,
-                                        name='{}_scale'.format(self.ikfk.getIkJointList()[-1]))
+        # create the upperArmLength
+        upperArmLenTrs = cmds.createNode("transform", name=f"{self.joint2Fk.name}_len_trs")
+        rig_transform.matchTransform(self.joint2Fk.name, upperArmLenTrs)
+        rig_transform.matchRotate(self.joint1Fk.name, upperArmLenTrs)
+        cmds.parent(upperArmLenTrs, self.joint1Fk.name)
+        cmds.parent(self.joint2Fk.orig, upperArmLenTrs)
+        self.__connectFkLimbStretch(self.joint1Fk.name, upperArmLenTrs)
+
+        # create the lowerLimbLength Attr
+        lowerArmLenTrs = cmds.createNode("transform", name=f"{self.joint3Fk.name}_len_trs")
+        rig_transform.matchTransform(self.joint3Fk.name, lowerArmLenTrs)
+        rig_transform.matchRotate(self.joint2Fk.name, lowerArmLenTrs)
+        cmds.parent(lowerArmLenTrs, self.joint2Fk.name)
+        cmds.parent(self.joint3Fk.orig, lowerArmLenTrs)
+        self.__connectFkLimbStretch(self.joint2Fk.name, lowerArmLenTrs)
+
+        # decompose the scale of the ik control
+        rig_transform.decomposeScale(self.limbIk.name, self.ikfk.getIkJointList()[-1])
 
         # connect twist of ikHandle to ik arm
         cmds.addAttr(self.paramsHierarchy, ln='twist', at='float', k=True)
@@ -394,28 +404,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                                                           bindParent=self.input[2], rigParent=self.twistHierarchy)
 
             # calculate an inverted rotation to negate the upp twist start.
-            # This gives a more natural twist down the limb
-            twistMultMatrix, twistDecompose = rigamajig2.maya.node.multMatrix(
-                ["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(self.input[0])],
-                outputs=[""], name="{}_invStartTist".format(uppSpline._startTwist))
-            # add in a blendMatrix to allow us to
-            cmds.addAttr(self.paramsHierarchy, ln='uppCounterTwist', at='float', k=True, dv=1, min=0, max=1)
-
-            blendMatrix = cmds.createNode("blendMatrix", name="{}_conterTwist".format(uppSpline._startTwist))
-            cmds.connectAttr("{}.matrixSum".format(twistMultMatrix), "{}.target[0].targetMatrix".format(blendMatrix))
-            cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.inputMatrix".format(twistDecompose), f=True)
-
-            cmds.connectAttr("{}.uppCounterTwist".format(self.paramsHierarchy), "{}.envelope".format(blendMatrix))
-
-            if "-" not in rig_transform.getAimAxis(self.input[1]):
-                rigamajig2.maya.node.unitConversion("{}.outputRotate".format(twistDecompose),
-                                                    output="{}.r".format(uppSpline._startTwist),
-                                                    conversionFactor=-1,
-                                                    name="{}_invStartTwistRev".format(self.input[1]))
-                ro = [5, 3, 4, 1, 2, 0][cmds.getAttr('{}.rotateOrder'.format(self.input[1]))]
-                cmds.setAttr("{}.{}".format(uppSpline._startTwist, 'rotateOrder'), ro)
-            else:
-                cmds.connectAttr("{}.outputRotate".format(twistDecompose), "{}.r".format(uppSpline._startTwist))
+            self.__negateUpperLimbTwist(uppSpline)
 
             # tag the new joints as bind joints
             for jnt in uppSpline.getJointList() + lowSpline.getJointList():
@@ -450,19 +439,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             cmds.connectAttr(volumePlug, "{}.{}".format(uppSpline.getGroup(), "volumeFactor"))
             cmds.connectAttr(volumePlug, "{}.{}".format(lowSpline.getGroup(), "volumeFactor"))
 
-            # re-create a smoother interpolation:
-            scaleList = list(uppSpline._ikJointList)
-            for i in range(len(scaleList)):
-                percent = i / float(len(scaleList) - 1)
-                value = mathUtils.lerp(0, 1, percent)
-                cmds.setAttr("{}.scale_{}".format(uppSpline._group, uppSpline._ikJointList.index(scaleList[i])), value)
-
-            scaleList = list(lowSpline._ikJointList)
-            for i in range(len(scaleList)):
-                percent = i / float(len(scaleList) - 1)
-                value = mathUtils.lerp(1, 0, percent)
-                cmds.setAttr("{}.scale_{}".format(lowSpline._group, lowSpline._ikJointList.index(scaleList[i])),
-                             value)
+            self.__unifyBendiesInterp(uppSpline, lowSpline)
 
             # if the module is using the twisty bendy controls then we need to create a visibly control
             rig_attr.createAttr(self.paramsHierarchy, "bendies", "bool", value=0, keyable=True, channelBox=True)
@@ -470,7 +447,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             for bendieCtl in self.bendControls:
                 rig_control.connectControlVisiblity(self.paramsHierarchy, "bendies", bendieCtl)
 
-        self.createIkFkMatchSetup()
+        self.__createIkFkMatchSetup()
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
@@ -513,11 +490,13 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 rig_attr.driveAttribute('uppCounterTwist', self.paramsHierarchy, self.ikfkControl.name)
 
         # create a visability control for the ikGimble control
-        rig_attr.createAttr(self.limbIk.name, "gimble", attributeType='bool', value=0, keyable=False, channelBox=True)
-        rig_control.connectControlVisiblity(self.limbIk.name, "gimble", controls=self.limbGimbleIk.name)
+        rig_attr.createAttr(self.limbIk.name, longName="gimble", attributeType='bool', value=0, keyable=False,
+                            channelBox=True)
+        rig_control.connectControlVisiblity(self.limbIk.name, driverAttr="gimble", controls=self.limbGimbleIk.name)
 
-        rig_attr.createAttr(self.joint3Fk.name, "gimble", attributeType='bool', value=0, keyable=False, channelBox=True)
-        rig_control.connectControlVisiblity(self.joint3Fk.name, "gimble", controls=self.joint3GimbleFk.name)
+        rig_attr.createAttr(self.joint3Fk.name, longName="gimble", attributeType='bool', value=0, keyable=False,
+                            channelBox=True)
+        rig_control.connectControlVisiblity(self.joint3Fk.name, driverAttr="gimble", controls=self.joint3GimbleFk.name)
 
     def connect(self):
         """Create the connection"""
@@ -574,7 +553,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     # --------------------------------------------------------------------------------
     # helper functions to shorten functions.
     # --------------------------------------------------------------------------------
-    def createIkFkMatchSetup(self):
+    def __createIkFkMatchSetup(self):
         """Setup the ikFKMatching"""
         wristIkOffset = cmds.createNode('transform', name="{}_ikMatch".format(self.input[3]), p=self.fkJnts[-1])
         fkJointsMatchList = self.fkJnts[:-1] + [wristIkOffset]
@@ -585,7 +564,60 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # give the node that will store the ikfkSwitch attribute
         if not self.useProxyAttrs:
             meta.createMessageConnection(self.ikfk.getGroup(), self.ikfkControl.name, sourceAttr="ikfkControl")
-        meta.createMessageConnection(self.ikfk.getGroup(), fkJointsMatchList, sourceAttr='fkMatchList', destAttr='matchNode')
+        meta.createMessageConnection(self.ikfk.getGroup(), fkJointsMatchList, sourceAttr='fkMatchList',
+                                     destAttr='matchNode')
         meta.createMessageConnection(self.ikfk.getGroup(), self.ikJnts, sourceAttr='ikMatchList', destAttr='matchNode')
-        meta.createMessageConnection(self.ikfk.getGroup(), self.fkControls, sourceAttr='fkControls', destAttr='matchNode')
-        meta.createMessageConnection(self.ikfk.getGroup(), self.ikControls, sourceAttr='ikControls', destAttr='matchNode')
+        meta.createMessageConnection(self.ikfk.getGroup(), self.fkControls, sourceAttr='fkControls',
+                                     destAttr='matchNode')
+        meta.createMessageConnection(self.ikfk.getGroup(), self.ikControls, sourceAttr='ikControls',
+                                     destAttr='matchNode')
+
+    def __connectFkLimbStretch(self, attrHolder, lenTrs):
+        """ Connect the FK limb stretch"""
+        lenAttr = rig_attr.createAttr(attrHolder, longName="length", attributeType="float", value=1, minValue=0.001)
+        aimAxis = rig_transform.getAimAxis(attrHolder, allowNegative=False)
+
+        defaultLength = cmds.getAttr(f"{lenTrs}.t{aimAxis}")
+
+        rigamajig2.maya.node.multDoubleLinear(input1=defaultLength, input2=lenAttr,
+                                              output=f"{lenTrs}.t{aimAxis}", name=f"{lenTrs}_lengthScale")
+
+    def __negateUpperLimbTwist(self, uppSpline):
+        # calculate an inverted rotation to negate the upp twist start.
+        # This gives a more natural twist down the limb
+        twistMultMatrix, twistDecompose = rigamajig2.maya.node.multMatrix(
+            ["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(self.input[0])],
+            outputs=[""], name="{}_invStartTist".format(uppSpline._startTwist))
+        # add in a blendMatrix to allow us to
+        cmds.addAttr(self.paramsHierarchy, ln='uppCounterTwist', at='float', k=True, dv=1, min=0, max=1)
+
+        blendMatrix = cmds.createNode("blendMatrix", name="{}_conterTwist".format(uppSpline._startTwist))
+        cmds.connectAttr("{}.matrixSum".format(twistMultMatrix), "{}.target[0].targetMatrix".format(blendMatrix))
+        cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.inputMatrix".format(twistDecompose), f=True)
+
+        cmds.connectAttr("{}.uppCounterTwist".format(self.paramsHierarchy), "{}.envelope".format(blendMatrix))
+
+        if "-" not in rig_transform.getAimAxis(self.input[1]):
+            rigamajig2.maya.node.unitConversion("{}.outputRotate".format(twistDecompose),
+                                                output="{}.r".format(uppSpline._startTwist),
+                                                conversionFactor=-1,
+                                                name="{}_invStartTwistRev".format(self.input[1]))
+            ro = [5, 3, 4, 1, 2, 0][cmds.getAttr('{}.rotateOrder'.format(self.input[1]))]
+            cmds.setAttr("{}.{}".format(uppSpline._startTwist, 'rotateOrder'), ro)
+        else:
+            cmds.connectAttr("{}.outputRotate".format(twistDecompose), "{}.r".format(uppSpline._startTwist))
+
+    def __unifyBendiesInterp(self, uppSpline, lowSpline):
+        # re-create a smoother interpolation:
+        scaleList = list(uppSpline._ikJointList)
+        for i in range(len(scaleList)):
+            percent = i / float(len(scaleList) - 1)
+            value = mathUtils.lerp(0, 1, percent)
+            cmds.setAttr("{}.scale_{}".format(uppSpline._group, uppSpline._ikJointList.index(scaleList[i])), value)
+
+        scaleList = list(lowSpline._ikJointList)
+        for i in range(len(scaleList)):
+            percent = i / float(len(scaleList) - 1)
+            value = mathUtils.lerp(1, 0, percent)
+            cmds.setAttr("{}.scale_{}".format(lowSpline._group, lowSpline._ikJointList.index(scaleList[i])),
+                         value)

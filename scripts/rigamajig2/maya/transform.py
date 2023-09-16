@@ -534,6 +534,31 @@ def decomposeRotation(node, twistAxis='x'):
     return ["{}.decompose{}".format(node, axis) for axis in 'XYZ']
 
 
+def decomposeScale(driver, driven):
+    """
+    Create a simple node network to decompose the scale of a transform onto another
+    :param str driver: transform to drive the scale
+    :param str driven: transform to be driven by the scale
+    :return:
+    """
+
+    parentList = cmds.listRelatives(driven, parent=True, path=True)
+    parent = parentList[0] if parentList else None
+
+    offset = offsetMatrix(driver, driven)
+
+    multMatrix = cmds.createNode("multMatrix", name=f'{driven}_scale_mm')
+    decompMatrix = cmds.createNode("decomposeMatrix", name=f"{driven}_scale_decomp")
+
+    cmds.setAttr("{}.{}".format(multMatrix, "matrixIn[0]"), offset, type='matrix')
+    cmds.connectAttr(f"{driver}.worldMatrix[0]", "{}.{}".format(multMatrix, 'matrixIn[1]'), f=True)
+
+    if parent:
+        cmds.connectAttr(f"{parent}.worldInverseMatrix[0]", "{}.{}".format(multMatrix, 'matrixIn[2]'), f=True)
+    cmds.connectAttr(f"{multMatrix}.matrixSum", f"{decompMatrix}.inputMatrix")
+
+    cmds.connectAttr(f'{decompMatrix}.outputScale', f"{driven}.scale", f=True)
+
 def aimChain(chain, aimVector, upVector, worldUpObject=None, worldUpType='object', worldUpVector=(0, 1, 0)):
     """
     aim a series of transforms at its child.

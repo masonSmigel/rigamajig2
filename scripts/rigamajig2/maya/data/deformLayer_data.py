@@ -15,6 +15,7 @@ import maya.cmds as cmds
 
 from rigamajig2.shared import common
 from rigamajig2.maya.rig import deformLayer
+from rigamajig2.maya import meta
 
 
 class DeformLayerData(maya_data.MayaData):
@@ -27,12 +28,19 @@ class DeformLayerData(maya_data.MayaData):
         :param node: Node to gather data from
         :type node: str
         """
+        # make sure we have the render mesh to gather the data from
+        if cmds.objExists(f"{node}.{deformLayer.LAYER_ATTR}"):
+            node = meta.getMessageConnection(f"{node}.{deformLayer.LAYER_ATTR}")
+
         super(DeformLayerData, self).gatherData(node)
 
         data = OrderedDict()
+        if cmds.objExists("{}.deformLayerGroup".format(node)):
+            data["deformLayerGroup"] = cmds.getAttr("{}.deformLayerGroup".format(node))
+        else:
+            data["deformLayerGroup"] = None
 
         deformLayerObj = deformLayer.DeformLayer(node)
-
         layers = deformLayerObj.getDeformationLayers()
 
         if layers:
@@ -51,10 +59,15 @@ class DeformLayerData(maya_data.MayaData):
 
         nodes = common.toList(nodes)
         for node in nodes:
-            deformLayerObj = deformLayer.DeformLayer(node)
+
+            # we need to ensure the key for this exisits since it may not in some old files!
+            layerGroup = None
+            if "deformLayerGroup" in self._data[node]:
+                layerGroup = self._data[node]["deformLayerGroup"]
+            deformLayerObj = deformLayer.DeformLayer(node, layerGroup=layerGroup)
 
             for layer in list(self._data[node].keys()):
-                if layer == 'dagPath':
+                if layer == 'dagPath' or layer == "deformLayerGroup":
                     continue
 
                 deformLayerObj.createDeformLayer(

@@ -26,8 +26,9 @@ from rigamajig2.maya import blendshape
 from rigamajig2.maya import skinCluster
 
 LAYER_HRC = 'deformLayers'
-
-LAYER_ATTR = 'deformationLayers'
+LAYERS_ATTR = 'deformationLayers'
+LAYER_ATTR = 'deformationLayer'
+LAYER_GROUP_ATTR = "deformLayerGroup"
 
 MAIN_NODE_NAME = 'main'
 
@@ -63,7 +64,7 @@ class DeformLayer(object):
     Connections to deformationlayers will be stored through a message array on the source mesh.
     """
 
-    def __init__(self, model):
+    def __init__(self, model, layerGroup=None):
         """
         Constructor for the defomation Layer class object
         :param mesh: source mesh for working with defomation layers on. This will be the final output mesh.
@@ -78,6 +79,13 @@ class DeformLayer(object):
 
         # tag the model as one that has deformation layers
         meta.tag(self.model, tag='hasDeformLayers')
+
+        # all layers MUST belong to a layer group, so if one is not assigned, assign it to "main"
+
+        if not cmds.objExists(f"{self.model}.{LAYER_GROUP_ATTR}"):
+            layerGroup = layerGroup or "main"
+            attr.createAttr(self.model, longName=LAYER_GROUP_ATTR, attributeType="string", value=layerGroup)
+            attr.lock(self.model, attrs=LAYER_GROUP_ATTR)
 
     def _intialzeLayersSetup(self):
         """
@@ -94,12 +102,23 @@ class DeformLayer(object):
             if cmds.objExists(MAIN_NODE_NAME):
                 cmds.parent(LAYER_HRC, MAIN_NODE_NAME)
 
+    def setDeformLayerGroup(self, layerGroup):
+        """
+        set the deform layer group.
+        :param layerGroup: name of the layer group to set.
+        :return:
+        """
+
+        attr.unlock(self.model, attrs=LAYER_GROUP_ATTR)
+        attr.setPlugValue(f"{self.model}.{LAYER_GROUP_ATTR}", layerGroup)
+        attr.lock(self.model, attrs=LAYER_GROUP_ATTR)
+
     def createDeformLayer(self, suffix=None, connectionMethod='bshp'):
         """
         Create a  new deformation Layer
         :param suffix: optional name to add to the deformation layer mesh name.
         :param connectionMethod: method to connect to the next blendshape.
-                                 valid Values are 'bshp', 'inmesh', and 'skin'.
+                                 valid Values are 'bshp', 'inmesh'
 
                                  'bshp' - add a world shape blendshape connection
                                  'inmesh' - connect the outmesh of the source to the targets inmesh attrs
@@ -142,6 +161,9 @@ class DeformLayer(object):
         cmds.rename(tmpDup, meshDup)
         cmds.parent(meshDup, deformLayerName)
         meta.untag(meshDup, tag='hasDeformLayers')
+        if cmds.objExists(f"{meshDup}.{LAYER_GROUP_ATTR}"):
+            attr.unlock(meshDup, attrs=LAYER_GROUP_ATTR)
+            cmds.deleteAttr(meshDup, attribute=LAYER_GROUP_ATTR)
 
         # rename the shapes
         shape = deformer.getDeformShape(meshDup)
@@ -154,11 +176,11 @@ class DeformLayer(object):
         # cleanup the new mesh
         mesh.cleanShapes(meshDup)
         attr.unlock(meshDup, attr.TRANSFORMS)
-        if cmds.objExists("{}.{}".format(meshDup, LAYER_ATTR)):
-            cmds.deleteAttr("{}.{}".format(meshDup, LAYER_ATTR))
+        if cmds.objExists("{}.{}".format(meshDup, LAYERS_ATTR)):
+            cmds.deleteAttr("{}.{}".format(meshDup, LAYERS_ATTR))
 
         # setup connections from the model to the layer
-        meta.addMessageListConnection(self.model, [meshDup], LAYER_ATTR, "DeformationLayer")
+        meta.addMessageListConnection(self.model, [meshDup], LAYERS_ATTR, LAYER_ATTR)
 
         # add additional metadata
         attr.createAttr(meshDup, longName='suffix', attributeType='string', value=suffix, locked=True)
@@ -189,15 +211,15 @@ class DeformLayer(object):
     def getDeformationLayers(self):
         """ return the names of all the deformation layers on a given model"""
 
-        layers = meta.getMessageConnection("{}.{}".format(self.model, LAYER_ATTR))
+        layers = meta.getMessageConnection("{}.{}".format(self.model, LAYERS_ATTR))
         return sorted(common.toList(layers)) if layers else None
 
     def getNumberOfDeformationLayers(self):
         """ return the number of deformation layers on a given node"""
         # get the index of the layer
-        if cmds.objExists("{}.{}".format(self.model, LAYER_ATTR)):
+        if cmds.objExists("{}.{}".format(self.model, LAYERS_ATTR)):
 
-            mPlug = attr._getPlug("{}.{}".format(self.model, LAYER_ATTR))
+            mPlug = attr._getPlug("{}.{}".format(self.model, LAYERS_ATTR))
             numberLayers = mPlug.evaluateNumElements()
 
         else:
@@ -208,6 +230,16 @@ class DeformLayer(object):
     def deleteDeformationLayer(self, layerIndex):
         """ delete a deformation layer at the given index"""
         raise NotImplementedError("Deleting deform layers has not yet been implemented")
+
+    def setLayerVisability(self, value, layerIndex):
+        """Set the current layer to be visable and the other to be hidden"""
+        deformLayerMeshes = self.getDeformationLayers()
+
+        for i, deformLayerMesh in enumerate(deformLayerMeshes):
+
+            cmds.setAttr(f"{deformLayerMesh}.v", False)
+            if value and i == layerIndex:
+                cmds.setAttr(f"{deformLayerMesh}.v", True)
 
     def stackDeformLayers(self, cleanup=False):
         """

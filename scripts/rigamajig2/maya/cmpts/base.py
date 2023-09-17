@@ -27,6 +27,8 @@ CONNECT_STEP = 4
 FINALIZE_STEP = 5
 OPTIMIZE_STEP = 6
 
+METADATA_NODE_TYPE = "network"
+
 
 # pylint:disable=too-many-public-methods
 class Base(object):
@@ -43,17 +45,9 @@ class Base(object):
 
     UI_COLOR = (200, 200, 200)
 
-    def __init__(self, name, input, size=1, rigParent=str(), enabled=True, componentTag=None):
+    def __init__(self, name, input, size=1, rigParent=None, componentTag=None, enabled=True):
         """
         constructor of the base class.
-
-        An important note about rigamajig is that it has several
-        'magic variables' such as self.bindJoints, self.controlers, self.input.
-        These should always be available within the classes and can be used within subclasses.
-
-        Other varriables stored within the self.CmptSettings are published
-        into the class as parameters so they can be acessed through
-        self.myVariable within the the class.
 
         :param name: name of the components
         :type name: str
@@ -65,30 +59,55 @@ class Base(object):
         :type rigParent: str
         :param enabled: If set to false the component will not build
         """
-        self.name = name
+        self._componentParameters = {}
+
         self.componentType = self.__module__.split('cmpts.')[-1]
+        self.name = name
         self.input = input
         self.enabled = enabled
-        self.rigParent = rigParent
-        self.componentTag = componentTag
+        self.size = size
+        self.rigParent = rigParent or str()
+        self.componentTag = componentTag or str()
+
+        # important global nodes
         self.container = self.name + '_container'
-        self.metaNode = None
 
-        # element lists
-        self.bindjoints = list()
-        self.controlers = list()
-        self.guidesHierarchy = None
+        # we will always need the container if it does not exist.
+        if not cmds.objExists(self.container):
+            self.createContainer()
+            self.createMetaNode(metaNodeName=self.container + "_metadata")
+            logger.debug(f"Component '{name}' container created.")
 
-        # node metaData
-        self.cmptSettings = OrderedDict(
-            name=name,
-            type=self.componentType,
-            input=self.input,
-            size=size,
-            rigParent=rigParent,
-            componentTag=componentTag,
-            enabled=enabled
-            )
+        self.metadataNode = self.getMetaDataNode()
+
+        # define component parameters
+        self.defineParameter(parameter="name", value=self.name, dataType="string")
+        self.defineParameter(parameter="type", value=self.componentType, dataType="type")
+        self.defineParameter(parameter="input", value=self.input, dataType="complex")
+        self.defineParameter(parameter="enabled", value=self.enabled, dataType="bool")
+        self.defineParameter(parameter="size", value=self.size, dataType="int")
+        self.defineParameter(parameter="rigParent", value=self.rigParent, dataType="string")
+        self.defineParameter(parameter="componentTag", value=self.componentTag, dataType="string")
+
+    @classmethod
+    def fromContainer(cls, container):
+        """ Create a component instance from a container"""
+        metaNode = rigamajig2.maya.meta.MetaNode(container)
+        name = metaNode.getData("name")
+        input = metaNode.getData("input")
+        enabled = metaNode.getData("enabled")
+        size = metaNode.getData("size")
+        rigParent = metaNode.getData("rigParent")
+        componentTag = metaNode.getData("componentTag")
+
+        componentInstance = cls(name=name,
+                                input=input,
+                                enabled=enabled,
+                                size=size,
+                                rigParent=rigParent,
+                                componentTag=componentTag)
+
+        return componentInstance
 
     def _initalizeComponent(self):
         """
@@ -100,15 +119,6 @@ class Base(object):
         if self.getStep() < INTIALIZE_STEP and self.enabled:
             # fullDict = dict(self.metaData, **self.cmptSettings)
             self.setInitalData()
-            self.createContainer()
-
-            # Store to component node
-            self.metaNode = rigamajig2.maya.meta.MetaNode(self.container)
-            # self.metaNode.setDataDict(data=self.cmptData, hide=True)
-            self.metaNode.setDataDict(data=self.cmptSettings, hide=True)
-
-            rigamajig2.maya.attr.lock(self.container, ["name", "type"])
-
             self.setStep(1)
 
         else:
@@ -127,7 +137,6 @@ class Base(object):
         if self.getStep() < GUIDE_STEP and self.enabled:
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
-                self.preScript()  # run any pre-build scripts
                 self.createJoints()
                 self.createBuildGuides()
             self.setStep(2)
@@ -183,7 +192,7 @@ class Base(object):
             self.finalize
             self.postScripts
         """
-        self._loadComponentParametersToClass()
+        # self._loadComponentParametersToClass()
 
         if self.getStep() < FINALIZE_STEP and self.enabled:
             self.publishNodes()
@@ -191,7 +200,6 @@ class Base(object):
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self.finalize()
                 self.setAttrs()
-                self.postScript()
 
             # if we added a component tag build that now!
             if self.componentTag:
@@ -203,7 +211,7 @@ class Base(object):
 
     def _optimizeComponent(self):
         """"""
-        self._loadComponentParametersToClass()
+        # self._loadComponentParametersToClass()
 
         if self.getStep() != OPTIMIZE_STEP:
             self.optimize()
@@ -242,9 +250,14 @@ class Base(object):
                                             locked=True
                                             )
 
-    def preScript(self):
-        """run a prescript"""
-        pass
+    def createMetaNode(self, metaNodeName):
+        """Create the metadata node. This will store any data we need to transfer across steps"""
+        if not cmds.objExists(metaNodeName):
+            self.metadataNode = cmds.createNode(METADATA_NODE_TYPE, name=metaNodeName)
+            rigamajig2.maya.meta.createMessageConnection(self.container, self.metadataNode,
+                                                         sourceAttr="metaDataNetworkNode")
+
+            rigamajig2.maya.container.addNodes(self.metadataNode, self.container, force=True)
 
     def initialHierarchy(self):
         """Setup the inital Hirarchy. implement in subclass"""
@@ -313,10 +326,6 @@ class Base(object):
         """Set attributes. implement in subclass"""
         pass
 
-    def postScript(self):
-        """run a post script"""
-        pass
-
     def optimize(self):
         """Optimize a component. implement in subclass"""
         pass
@@ -363,6 +372,72 @@ class Base(object):
             return cmds.getAttr("{}.{}".format(self.container, 'build_step'))
         return 0
 
+    def defineParameter(self, parameter, value, dataType=None, hide=True, lock=False):
+        """
+        Define a parameter component. This makes up the core data structure of a component.
+        This defines parameters and behaviors and is used to build the rest of the functionality but should NOT define the structre.
+
+        :param str parameter: name of the parameter, This will be accessible through self.parameter in the class
+        :param any value: the value of the parameter
+        :param dataType: the type of data stored in the value. Default is derived from the value.
+        :param bool hide: hide the added parameter from the channel box
+        :param bool lock: lock the added parameter
+        """
+
+        if not dataType:
+            dataType = rigamajig2.maya.meta.validateDataType(value)
+
+        logger.debug(f"adding component parameter {parameter}, {value} ({dataType})")
+        self._componentParameters[parameter] = {"value": value, "dataType": dataType}
+
+        metaData = rigamajig2.maya.meta.MetaNode(self.container)
+        metaData.setData(attr=parameter, value=value, attrType=dataType, hide=hide, lock=lock)
+
+        setattr(self.__class__, parameter, value)
+
+    def _getLocalComponentVariables(self):
+        """Get a list of class variables"""
+
+        localComponentVariables = list()
+        allClassVariables = self.__dict__.keys()
+
+        for var in allClassVariables:
+            # ensure the variable is valid.
+            if var in self._componentParameters: continue
+            if var.startswith("_"): continue
+            if var in ["container", "metadataNode", "metaDataNetworkNode", "componentType"]: continue
+
+            localComponentVariables.append(var)
+
+        return localComponentVariables
+
+    def _stashLocalVariablesToMetadata(self):
+        localComponentVariables = self._getLocalComponentVariables()
+
+        localComponentDataDict = {}
+
+        for localVariable in localComponentVariables:
+            localComponentDataDict[localVariable] = self.__getattribute__(localVariable)
+
+        metaNode = rigamajig2.maya.meta.MetaNode(self.metadataNode)
+        metaNode.setDataDict(localComponentDataDict)
+
+    def _retreiveLocalVariablesFromMetadata(self):
+        """
+        This function will rebuild the properties based on the data added to the metanode.
+        :return:
+        """
+        metaNode = rigamajig2.maya.meta.MetaNode(self.metadataNode)
+        dataDict = metaNode.getAllData()
+
+        for key in dataDict.keys():
+            if key in ["metaDataNetworkNode"]:
+                continue
+            attrPlug = f"{self.metadataNode}.{key}"
+
+            # # TODO: come back to this
+            setattr(self.__class__, key, dataDict[key])
+
     def loadSettings(self, data):
         """
         Load setting data onto the self.metaNode
@@ -371,25 +446,28 @@ class Base(object):
         """
         keysToRemove = ['name', 'type', 'input']
         newDict = {key: val for key, val in data.items() if key not in keysToRemove}
-        if self.metaNode:
-            self.metaNode.setDataDict(newDict)
+
+        metaNode = rigamajig2.maya.meta.MetaNode(self.container)
+        metaNode.setDataDict(newDict)
 
     def _loadComponentParametersToClass(self):
         """
         loadSettings meta data from the settings node into a dictionary
         """
         newComponentData = OrderedDict()
-        for key in self.cmptSettings.keys():
-            if self.metaNode:
-                data = self.metaNode.getAllData()
-            else:
-                data = self.cmptSettings
+        for key in self._componentParameters.keys():
+
+            metaNode = rigamajig2.maya.meta.MetaNode(self.container)
+            data = metaNode.getAllData()
+
+            if not data:
+                data = self._componentParameters
 
             if key in data.keys():
                 setattr(self, key, data[key])
                 newComponentData[key] = data[key]
 
-        self.cmptSettings.update(newComponentData)
+        self._componentParameters.update(newComponentData)
 
     # GET
     def getContainer(self):
@@ -404,19 +482,18 @@ class Base(object):
         """Get component name"""
         return self.name
 
-    def getInputs(self):
-        """Get component inputs"""
-        return self.input
+    def getMetaDataNode(self):
+        return rigamajig2.maya.meta.getMessageConnection(f"{self.container}.metaDataNetworkNode")
 
     def getComponentData(self):
         """Get all component Data """
         # create an info dictionary with the important component settings.
         # This is used to save the component to a file
         infoDict = OrderedDict()
-        data = self.cmptSettings
+        data = self._componentParameters
 
-        for key in list(self.cmptSettings.keys()) + ['name', 'type', 'input', 'componentTag']:
-            infoDict[key] = data[key]
+        for key in list(self._componentParameters.keys()):
+            infoDict[key] = data[key]["value"]
 
         logger.debug(infoDict)
         return infoDict
@@ -426,10 +503,6 @@ class Base(object):
         return self.componentType
 
     # SET
-    def setInputs(self, value):
-        """Set the component input"""
-        self.input = value
-
     def setName(self, value):
         """Set the component name"""
         self.name = value
@@ -437,7 +510,28 @@ class Base(object):
     def setContainer(self, value):
         """Set the component container"""
         self.container = value
-        self.metaNode = rigamajig2.maya.meta.MetaNode(self.container)
+
+    # @staticmethod
+    # def __getPropertyValue(propertyPlug):
+    #     """used to dynamically get the value of a property"""
+    #     propertyHolderNode, propertyAttr = propertyPlug.split(".")
+    #
+    #     def getter(self):
+    #         metaNode = rigamajig2.maya.meta.MetaNode(propertyHolderNode)
+    #         return metaNode.getData(propertyAttr)
+    #
+    #     return getter
+    #
+    # @staticmethod
+    # def __setPropertyValue(propertyPlug):
+    #     """Used to dynamically set the value of a propery"""
+    #     propertyHolderNode, propertyAttr = propertyPlug.split(".")
+    #
+    #     def setter(self, value):
+    #         metaNode = rigamajig2.maya.meta.MetaNode(propertyHolderNode)
+    #         return metaNode.setData(propertyAttr, value=value)
+    #
+    #     return setter
 
     @classmethod
     def testBuild(cls, cmpt):

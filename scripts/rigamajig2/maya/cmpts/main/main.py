@@ -29,13 +29,13 @@ class Main(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (48, 150, 225)
 
-    def __init__(self, name, input=None, size=1, rigParent=None):
+    def __init__(self, name, input=None, size=1, rigParent=None, componentTag=None):
         """
         :param name: name of the component
         :param input: inputs to the component. This is ignored in the component but is required for base component.
         :param rigParent:
         """
-        super(Main, self).__init__(name=name, input=input, size=size)
+        super(Main, self).__init__(name=name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
 
     def initialHierarchy(self):
         """Build the initial hirarchy"""
@@ -62,7 +62,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         cmds.reorder(self.trsGlobal.name, f=True)
 
         # add nodes to the container
-        self.controlers += [self.trsGlobal.name, self.trsShot.name, self.trsMotion.name]
+        self.controlers = [self.trsGlobal.name, self.trsShot.name, self.trsMotion.name]
 
     def rigSetup(self):
         """Add the self.rig setup"""

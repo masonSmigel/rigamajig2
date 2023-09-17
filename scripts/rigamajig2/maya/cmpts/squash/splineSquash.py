@@ -38,7 +38,7 @@ class SplineSquash(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (39, 189, 46)
 
-    def __init__(self, name, input, size=1, rigParent=str(), createBpm=True):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param str name: name of the components
         :param list input:  A start and end joint (similar to the chain component)
@@ -46,14 +46,13 @@ class SplineSquash(rigamajig2.maya.cmpts.base.Base):
         :param str rigParent: node to parent to connect the component to in the heirarchy
         :param createBpm: create a duplicate bind pre matrix setup to ensure proper layered skinning
         """
-        super(SplineSquash, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(SplineSquash, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
-        self.cmptSettings['component_side'] = self.side
 
-        self.cmptSettings['createBpm'] = createBpm
-        self.cmptSettings['topControlName'] = "{}Top".format(self.name)
-        self.cmptSettings['midControlName'] = "{}Mid".format(self.name)
-        self.cmptSettings['botControlName'] = "{}Bot".format(self.name)
+        self.defineParameter(parameter="createBpm", value=True, dataType="bool")
+        self.defineParameter(parameter="topControlName", value=f"{self.name}Top", dataType="string")
+        self.defineParameter(parameter="midControlName", value=f"{self.name}Mid", dataType="string")
+        self.defineParameter(parameter="botControlName", value=f"{self.name}Bot", dataType="string")
 
     def createBuildGuides(self):
         """Create the build guides"""

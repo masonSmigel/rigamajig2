@@ -19,7 +19,8 @@ import rigamajig2.maya.meta as meta
 
 HEAD_PERCENT = 0.7
 
-#pylint:disable = too-many-instance-attributes
+
+# pylint:disable = too-many-instance-attributes
 class Neck(rigamajig2.maya.cmpts.base.Base):
     """
     Neck component
@@ -35,7 +36,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (47, 177, 161)
 
-    def __init__(self, name, input, size=1, headSpaces=None, neckSpaces=None, rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param str name: name of the component
         :param list input: list of input joints. Starting with the base of the neck and ending with the head.
@@ -45,22 +46,17 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         :param str rigParent: connect the component to a rigParent.
         """
 
-        super(Neck, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Neck, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        if headSpaces is None:
-            headSpaces = dict()
-        if neckSpaces is None:
-            neckSpaces = dict()
-
-        self.cmptSettings['neck_name'] = 'neck'
-        self.cmptSettings['head_name'] = 'head'
-        self.cmptSettings['headGimble_name'] = 'headGimble'
-        self.cmptSettings['headTangent_name'] = 'headTan'
-        self.cmptSettings['neckTangent_name'] = 'neckTan'
-        self.cmptSettings['skull_name'] = 'skull'
-        self.cmptSettings['neckSpaces'] = neckSpaces
-        self.cmptSettings['headSpaces'] = headSpaces
+        self.defineParameter(parameter="neck_name", value="neck", dataType="string")
+        self.defineParameter(parameter="head_name", value="head", dataType="string")
+        self.defineParameter(parameter="headGimble_name", value="headGimble", dataType="string")
+        self.defineParameter(parameter="headTangent_name", value="headTan", dataType="string")
+        self.defineParameter(parameter="neckTangent_name", value="neckTan", dataType="string")
+        self.defineParameter(parameter="skull_name", value="skull", dataType="string")
+        self.defineParameter(parameter="neckSpaces", value=dict(), dataType="complex")
+        self.defineParameter(parameter="headSpaces", value=dict(), dataType="complex")
 
     def createBuildGuides(self):
         """Create the build guides"""
@@ -220,4 +216,3 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
     def finalize(self):
         rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
         rig_attr.lockAndHide(self.paramsHierarchy, rig_attr.TRANSFORMS + ['v'])
-

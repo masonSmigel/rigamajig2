@@ -26,7 +26,7 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (198, 167, 255)
 
-    def __init__(self, name, input, size=1, rigParent=str(), lookAtSpaces=None, rigParentList=None):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param str name: name of the components
         :param list input: list of input joints to aim at a target. the aim axis is determined by the direction of the child
@@ -37,20 +37,19 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
                                    This can be useful for things like eyes where each input should have a different rig parent.
         """
 
-        super(LookAt, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(LookAt, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        if lookAtSpaces is None:
-            lookAtSpaces = dict()
-
-        self.cmptSettings['aimTargetName'] = self.name + "_aim"
-        self.cmptSettings['lookAtSpaces'] = lookAtSpaces
-        self.cmptSettings['rigParentList'] = rigParentList or list()
-        self.cmptSettings['upAxis'] = "y"
+        self.defineParameter(parameter="aimTargetName", value=self.name + "_aim", dataType="string")
+        self.defineParameter(parameter="lookAtSpaces", value=dict(), dataType="dict")
+        self.defineParameter(parameter="rigParentList", value=list(), dataType="list")
+        self.defineParameter(parameter="upAxis", value="y", dataType="string")
 
         for input in self.input:
             if cmds.objExists(input):
-                self.cmptSettings['{}Name'.format(input)] = '_'.join(input.split("_")[:-1])
+                parameterName = '{}Name'.format(input)
+                parameterValue = '_'.join(input.split("_")[:-1])
+                self.defineParameter(parameter=parameterName, value=parameterValue, dataType="string")
 
     def createBuildGuides(self):
         """ create build guides_hrc """

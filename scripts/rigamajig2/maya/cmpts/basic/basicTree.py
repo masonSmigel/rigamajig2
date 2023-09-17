@@ -56,10 +56,11 @@ class BasicTree(rigamajig2.maya.cmpts.base.Base):
             skipJoints = list()
 
         self.side = common.getSide(name)
-        self.cmptSettings['controlShape'] = controlShape
-        self.cmptSettings['addTrs'] = addTrs
-        self.cmptSettings['addSdk'] = addSdk
-        self.cmptSettings['skipJoints'] = skipJoints
+
+        self.defineParameter(parameter="controlShape", value=controlShape, dataType="string")
+        self.defineParameter(parameter="addTrs", value=False, dataType="bool")
+        self.defineParameter(parameter="addSdk", value=False, dataType="bool")
+        self.defineParameter(parameter="skipJoints", value=None, dataType="list")
 
     def initialHierarchy(self):
         """ build the inital hierarchy"""

@@ -29,6 +29,7 @@ GUIDE_SCALE = 0.2
 
 WIRE_DROPOFF = 1000
 
+
 class Brow(rigamajig2.maya.cmpts.base.Base):
     """
     A brow component.
@@ -49,7 +50,7 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (151, 219, 175)
 
-    def __init__(self, name, input, size=1, rigParent=str(), browSpans=8):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param name: Component Name
         :param input: a single joint that will be used to move the whole eyebrow around
@@ -57,13 +58,13 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
         :param rigParent: connect the component to a rigParent
         :param browSpans: The number of spans from the inner brow to the outer brow.
         """
-        super(Brow, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Brow, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings['browSpans'] = browSpans
+        self.defineParameter(parameter="browSpans", value=8, dataType="int")
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
-        self.cmptSettings['browAllName'] = inputBaseNames[0]
+        self.defineParameter(parameter="browAllName", value=inputBaseNames[0], dataType="string")
 
     def createBuildGuides(self):
         """Create the build guides"""
@@ -164,7 +165,6 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
                                        parent=self.browControls[0].name)
         transform.matchTransform(self.browControls[0].name, self.tiltTrs)
 
-
     def preRigSetup(self):
         """ Setup the joints and curves needed for the brow setup"""
 
@@ -215,8 +215,6 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
                 cmds.setAttr("{}.tz".format(tiltJoint), 0.01)
 
                 cmds.orientConstraint(self.tiltTrs, tiltJoint, mo=True)
-
-
 
     def rigSetup(self):
         """ create the main rig setup """
@@ -280,7 +278,6 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
         if cmds.objExists(self.rigParent):
             # connect the browAll
             transform.connectOffsetParentMatrix(self.rigParent, self.browAll.orig, mo=True)
-
 
     def finalize(self):
         """ Finalize the rig setup """

@@ -40,9 +40,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
     UI_COLOR = (109, 189, 224)
 
     # pylint:disable=too-many-arguments
-    def __init__(self, name, input, size=1, ikSpaces=None, pvSpaces=None,
-                 useProxyAttrs=True, useCallbackSwitch=True, useScale=True, addTwistJoints=True, addBendies=True,
-                 localOrientIK=False, rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         Create a limb component. (This component is most often used as a subclass)
 
@@ -61,43 +59,36 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         :param useScale: use scale on the controls
         :type useScale: bool
         """
-        super(Limb, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Limb, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
-        self.cmptSettings['component_side'] = self.side
-
-        if ikSpaces is None:
-            ikSpaces = dict()
-
-        if pvSpaces is None:
-            pvSpaces = dict()
 
         # initalize cmpt settings.
-        self.cmptSettings['useProxyAttrs'] = useProxyAttrs
-        self.cmptSettings['useCallbackSwitch'] = useCallbackSwitch
-        self.cmptSettings['useScale'] = useScale
-        self.cmptSettings['addTwistJoints'] = addTwistJoints
-        self.cmptSettings['addBendies'] = addBendies
-        self.cmptSettings['localOrientIK'] = localOrientIK
+        self.defineParameter(parameter="useProxyAttrs", value=False, dataType="bool")
+        self.defineParameter(parameter="useCallbackSwitch", value=True, dataType="bool")
+        self.defineParameter(parameter="useScale", value=True, dataType="bool")
+        self.defineParameter(parameter="addTwistJoints", value=True, dataType="bool")
+        self.defineParameter(parameter="addBendies", value=True, dataType="bool")
+        self.defineParameter(parameter="localOrientIK", value=False, dataType="bool")
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
-        self.cmptSettings['limbBaseName'] = inputBaseNames[0]
-        self.cmptSettings['limbSwingName'] = inputBaseNames[1] + "Swing"
-        self.cmptSettings['joint1_fkName'] = inputBaseNames[1] + "_fk"
-        self.cmptSettings['joint2_fkName'] = inputBaseNames[2] + "_fk"
-        self.cmptSettings['joint3_fkName'] = inputBaseNames[3] + "_fk"
-        self.cmptSettings['gimble_fkName'] = inputBaseNames[3] + "Gimble_fk"
-        self.cmptSettings['limb_ikName'] = self.name.split("_")[0] + "_ik"
-        self.cmptSettings['gimble_ikName'] = self.name.split("_")[0] + "Gimble_ik"
-        self.cmptSettings['limb_pvName'] = self.name.split("_")[0] + "_pv"
+        self.defineParameter(parameter="limbBaseName", value=inputBaseNames[0], dataType="string")
+        self.defineParameter(parameter="limbSwingName", value=inputBaseNames[1] + "Swing", dataType="string")
+        self.defineParameter(parameter="joint1_fkName", value=inputBaseNames[1] + "_fk", dataType="string")
+        self.defineParameter(parameter="joint2_fkName", value=inputBaseNames[2] + "_fk", dataType="string")
+        self.defineParameter(parameter="joint3_fkName", value=inputBaseNames[3] + "_fk", dataType="string")
+        self.defineParameter(parameter="gimble_fkName", value=inputBaseNames[3] + "Gimble_fk", dataType="string")
+        self.defineParameter(parameter="limb_ikName", value=self.name.split("_")[0] + "_ik", dataType="string")
+        self.defineParameter(parameter="gimble_ikName", value=self.name.split("_")[0] + "Gimble_ik", dataType="string")
+        self.defineParameter(parameter="limb_pvName", value=self.name.split("_")[0] + "_pv", dataType="string")
 
-        self.cmptSettings['bend1Name'] = self.name.split("_")[0] + "_1_bend"
-        self.cmptSettings['bend2Name'] = self.name.split("_")[0] + "_2_bend"
-        self.cmptSettings['bend3Name'] = self.name.split("_")[0] + "_3_bend"
-        self.cmptSettings['bend4Name'] = self.name.split("_")[0] + "_4_bend"
-        self.cmptSettings['bend5Name'] = self.name.split("_")[0] + "_5_bend"
+        self.defineParameter(parameter="bend1Name", value=self.name.split("_")[0] + "_1_bend", dataType="string")
+        self.defineParameter(parameter="bend2Name", value=self.name.split("_")[0] + "_2_bend", dataType="string")
+        self.defineParameter(parameter="bend3Name", value=self.name.split("_")[0] + "_3_bend", dataType="string")
+        self.defineParameter(parameter="bend4Name", value=self.name.split("_")[0] + "_4_bend", dataType="string")
+        self.defineParameter(parameter="bend5Name", value=self.name.split("_")[0] + "_5_bend", dataType="string")
 
-        self.cmptSettings['ikSpaces'] = ikSpaces
-        self.cmptSettings['pvSpaces'] = pvSpaces
+        self.defineParameter(parameter="ikSpaces", value=dict(), dataType="complex")
+        self.defineParameter(parameter="pvSpaces", value=dict(), dataType="complex")
 
     def createBuildGuides(self):
         """Show Advanced Proxy"""
@@ -337,7 +328,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # add the controls to our controller list
         self.fkControls = [self.joint1Fk.name, self.joint2Fk.name, self.joint3Fk.name, self.joint3GimbleFk.name]
         self.ikControls = [self.limbIk.name, self.limbGimbleIk.name, self.limbPv.name]
-        self.controlers += [self.limbBase.name, self.limbSwing.name] + self.fkControls + self.ikControls
+        self.controlers = [self.limbBase.name, self.limbSwing.name] + self.fkControls + self.ikControls
 
     # pylint:disable=too-many-statements
     def rigSetup(self):

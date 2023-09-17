@@ -36,27 +36,27 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (254, 66, 129)
 
-    def __init__(self, name, input, size=1, rigParent=str(), addLipControls=True):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param name: Component Name
         :param input: specific list of joints. [jaw, muppet,  lipsTop, lipsBot, lips_l, lips_r]
         :param size: default size of the controls
         :param rigParent: connect the component to a rigParent
         """
-        super(Jaw, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Jaw, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings["addLipControls"] = addLipControls
+        self.defineParameter(parameter="addLipControls", value=True, dataType="bool")
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
-        self.cmptSettings['jawName'] = inputBaseNames[0]
-        self.cmptSettings['muppetName'] = inputBaseNames[1]
-        self.cmptSettings['lipsTopName'] = inputBaseNames[2]
-        self.cmptSettings['lipsBotName'] = inputBaseNames[3]
-        self.cmptSettings['lips_lName'] = inputBaseNames[4] + "_l"
-        self.cmptSettings['lips_rName'] = inputBaseNames[5] + "_r"
-        self.cmptSettings['jawOpenTyOffset'] = -0.2
-        self.cmptSettings['jawOpenTzOffset'] = -0.4
+        self.defineParameter(parameter="jawName", value=inputBaseNames[0], dataType="string")
+        self.defineParameter(parameter="muppetName", value=inputBaseNames[1], dataType="string")
+        self.defineParameter(parameter="lipsTopName", value=inputBaseNames[2], dataType="string")
+        self.defineParameter(parameter="lipsBotName", value=inputBaseNames[3], dataType="string")
+        self.defineParameter(parameter="lips_lName", value=inputBaseNames[4] + "_l", dataType="string")
+        self.defineParameter(parameter="lips_rName", value=inputBaseNames[5] + "_r", dataType="string")
+        self.defineParameter(parameter="jawOpenTyOffset", value=-0.2, dataType="int")
+        self.defineParameter(parameter="jawOpenTzOffset", value=-0.4, dataType="int")
 
     def initialHierarchy(self):
         """Build the inital rig hierarchy"""

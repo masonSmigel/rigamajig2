@@ -29,9 +29,7 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (255, 201, 115)
 
-    def __init__(self, name, input, size=1, rigParent=str(),
-                 addSpaces=False, addTrs=False, addSdk=False, addBpm=False,
-                 controlShape='cube', worldOrient=False):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
        :param name: Component name. To add a side use a side token
        :param input: Single input joint
@@ -44,16 +42,16 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
        :param controlShape: Control shape to apply. Default: "cube"
        :param worldOrient: Orient the control to the world. Default: False
        """
-        super(BasicArray, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(BasicArray, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings['controlName'] = name
-        self.cmptSettings['controlShape'] = controlShape
-        self.cmptSettings['worldOrient'] = worldOrient
-        self.cmptSettings['addSpaces'] = addSpaces
-        self.cmptSettings['addTrs'] = addTrs
-        self.cmptSettings['addSdk'] = addSdk
-        self.cmptSettings['addBpm'] = addBpm
+        self.defineParameter(parameter="controlName", value=name, dataType="string")
+        self.defineParameter(parameter="controlShape", value="cube", dataType="string")
+        self.defineParameter(parameter="worldOrient", value=False, dataType="bool")
+        self.defineParameter(parameter="addSpaces", value=False, dataType="bool")
+        self.defineParameter(parameter="addTrs", value=False, dataType="bool")
+        self.defineParameter(parameter="addSdk", value=False, dataType="bool")
+        self.defineParameter(parameter="addBpm", value=False, dataType="bool")
 
     def setInitalData(self):
         """ Build the joint name attributes"""
@@ -63,7 +61,7 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
         for i in range(len(self.input)):
             jointNameStr = "joint{}Name".format(i)
             self.controlNameAttrs.append(jointNameStr)
-            self.cmptSettings[jointNameStr] = inputBaseNames[i]
+            self.defineParameter(parameter=jointNameStr, value=inputBaseNames[i], dataType="string")
 
     def initialHierarchy(self):
         """ Build the inital hierarchy"""
@@ -76,16 +74,13 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
             else:
                 componentName = getattr(self, self.controlNameAttrs[i])
 
-            component = basic.Basic(
-                name=componentName,
-                input=[self.input[i]],
-                rigParent=self.rigParent,
-                controlShape=self.controlShape,
-                worldOrient=self.worldOrient,
-                addSpaces=self.addSpaces,
-                addTrs=self.addTrs,
-                addSdk=self.addSdk,
-                addBpm=self.addBpm)
+            component = basic.Basic(name=componentName, input=[self.input[i]], rigParent=self.rigParent)
+            component.defineParameter("controlShape", self.controlShape)
+            component.defineParameter("worldOrient", self.worldOrient)
+            component.defineParameter("addSpaces", self.addSpaces)
+            component.defineParameter("addTrs", self.addTrs)
+            component.defineParameter("addSdk", self.addSdk)
+            component.defineParameter("addBpm", self.addBpm)
 
             component._initalizeComponent()
             cmds.container(self.container, e=True, f=True, addNode=component.getContainer())

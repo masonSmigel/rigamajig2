@@ -11,6 +11,7 @@ import rigamajig2.shared.common as common
 import rigamajig2.maya.attr as rig_attr
 
 logger = logging.getLogger(__name__)
+logger.setLevel(10)
 
 EXCLUDED_JSON_ATTRS = ['attributeAliasList']
 
@@ -210,6 +211,7 @@ def validateDataType(val):
 
 class MetaNode(object):
     """Meta Node class"""
+
     def __init__(self, node):
         """
         Constructor for mayaJson.
@@ -241,7 +243,8 @@ class MetaNode(object):
             try:
                 value = self.deserializeComplex(value)  # if the data is a string try to deserialize it.
             except:
-                logger.debug('string {} is not json deserializable'.format(value))
+                pass
+                # logger.debug('string {} is not json deserializable'.format(value))
         return value
 
     def getAllData(self, excludedAttrs=None):
@@ -261,7 +264,7 @@ class MetaNode(object):
             data[attr] = self.getData(attr)
         return data
 
-    def setData(self, attr, value, hide=True, lock=False):
+    def setData(self, attr, value, attrType=None, hide=True, lock=False):
         """
         Add data to a node. Stored as serialized json data
 
@@ -281,9 +284,10 @@ class MetaNode(object):
                         'enum': {'at': 'enum'},
                         'complex': {'dt': 'string'}}
 
-        attrType = validateDataType(value)
-        if attrType is None:
-            return
+        if not attrType or attrType not in dataTypeDict:
+            attrType = validateDataType(value)
+            if attrType is None:
+                return
 
         if attrType == 'complex':
             value = self.serializeComplex(value)

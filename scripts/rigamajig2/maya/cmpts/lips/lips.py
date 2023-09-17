@@ -55,8 +55,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (255, 117, 129)
 
-    def __init__(self, name, input, size=1, rigParent=str(), lipSpans=17, addSdk=False, useJaw=False, jawJoints=None,
-                 addZipperLips=True, sparseTweakers=True):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param name: Component Name
         :param input: a single joint this will be the pivot where the lips rotate around
@@ -70,18 +69,18 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         :param addZipperLips: add the setup to do zipper lips
         :param sparseTweakers: add minimal tweakers. If false add tweakers below the main level controls.
         """
-        super(Lips, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Lips, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings['lipSpans'] = lipSpans
-        self.cmptSettings['addSdk'] = addSdk
-        self.cmptSettings['useJaw'] = useJaw
-        self.cmptSettings['jawJoints'] = jawJoints or list()
-        self.cmptSettings['addZipperLips'] = addZipperLips
-        self.cmptSettings['sparseTweakers'] = sparseTweakers
+        self.defineParameter(parameter="lipSpans", value=17, dataType="int")
+        self.defineParameter(parameter="addSdk", value=False, dataType="bool")
+        self.defineParameter(parameter="useJaw", value=False, dataType="bool")
+        self.defineParameter(parameter="jawJoints", value=list(), dataType="list")
+        self.defineParameter(parameter="addZipperLips", value=True, dataType="bool")
+        self.defineParameter(parameter="sparseTweakers", value=True, dataType="bool")
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
-        self.cmptSettings['lipsAllName'] = inputBaseNames[0]
+        self.defineParameter(parameter="lipsAllName", value=inputBaseNames[0], dataType="string")
 
     def createBuildGuides(self):
         """ create all build guides"""

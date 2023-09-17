@@ -38,31 +38,26 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (140, 215, 122)
 
-    def __init__(self, name, input, size=1, rigParent=str(), addSpineMid=False, chestSpaces=None):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param str name: name of the component
         :param list input: list of input joints. Starting with the base of the neck and ending with the head.
         :param float int size: default size of the controls.
         :param str rigParent: connect the component to a rigParent.
         """
-
-        if chestSpaces is None:
-            chestSpaces = dict()
-
-        super(Spine, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Spine, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings['addSpineMid'] = addSpineMid
-        self.cmptSettings['hipsSwing_name'] = 'hip_swing'
-        self.cmptSettings['torso_name'] = 'torso'
-        self.cmptSettings['spineMid_name'] = 'spineMid'
-        self.cmptSettings['chest_name'] = 'chest'
-        self.cmptSettings['chestTop_name'] = 'chestTop'
-        self.cmptSettings['hipTanget_name'] = 'hipTan'
-        self.cmptSettings['chestTanget_name'] = 'chestTan'
-
-        self.cmptSettings['chestSpaces'] = chestSpaces
-
+        self.defineParameter(parameter="addSpineMid", value=True, dataType="bool")
+        self.defineParameter(parameter="hipsSwing_name", value="hip_swing", dataType="string")
+        self.defineParameter(parameter="torso_name", value="torso", dataType="string")
+        self.defineParameter(parameter="spineMid_name", value="spineMid", dataType="string")
+        self.defineParameter(parameter="chest_name", value="chest", dataType="string")
+        self.defineParameter(parameter="chestTop_name", value="chestTop", dataType="string")
+        self.defineParameter(parameter="hipTanget_name", value="hipTan", dataType="string")
+        self.defineParameter(parameter="chestTanget_name", value="chestTan", dataType="string")
+        self.defineParameter(parameter="chestSpaces", value=dict(), dataType="dict")
+       
     def createBuildGuides(self):
         """Create the build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))

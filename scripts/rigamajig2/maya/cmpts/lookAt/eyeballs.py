@@ -38,9 +38,8 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, rigParent=str(), lookAtSpaces=None, rigParentList=None):
-        super(Eyeballs, self).__init__(name=name, input=input, size=size, rigParent=rigParent,
-                                       lookAtSpaces=lookAtSpaces, rigParentList=rigParentList)
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
+        super(Eyeballs, self).__init__(name=name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
 
     def createBuildGuides(self):
         super(Eyeballs, self).createBuildGuides()

@@ -30,8 +30,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (109, 208, 159)
 
-    def __init__(self, name, input, size=1, useScale=False, addFKSpace=False, addSdk=True,
-                 useProxyAttrs=True, addBpm=False, rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """"
         :param str name: name of the components
         :param list input: list of two joints. A start and an end joint
@@ -39,16 +38,14 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         :param bool addFKSpace: add a world/local space switch to the base of the fk chain
         :param str rigParent: node to parent to connect the component to in the heirarchy
         """
-        super(Chain, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Chain, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings['component_side'] = self.side
-        # initalize cmpt settings.
-        self.cmptSettings['useProxyAttrs'] = useProxyAttrs
-        self.cmptSettings['useScale'] = useScale
-        self.cmptSettings['addSdk'] = addSdk
-        self.cmptSettings['addFKSpace'] = addFKSpace
-        self.cmptSettings['addBpm'] = addBpm
+        self.defineParameter(parameter="useProxyAttrs", value=False, dataType="bool")
+        self.defineParameter(parameter="useScale", value=False, dataType="bool")
+        self.defineParameter(parameter="addSdk", value=True, dataType="bool")
+        self.defineParameter(parameter="addFKSpace", value=False, dataType="bool")
+        self.defineParameter(parameter="addBpm", value=False, dataType="bool")
 
         # noinspection PyTypeChecker
         if len(self.input) != 2:
@@ -73,7 +70,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         for i in range(len(self.inputList)):
             jointNameStr = ("joint{}Name".format(i))
             self.controlNameList.append(jointNameStr)
-            self.cmptSettings[jointNameStr] = inputBaseNames[i] + "_fk"
+            self.defineParameter(parameter=jointNameStr, value=inputBaseNames[i] + "_fk", dataType="string")
 
     def initialHierarchy(self):
         """Build the initial hirarchy"""
@@ -110,7 +107,8 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
                                                 parent=self.rootHierarchy)
 
             bpmJointName = [x.rsplit("_", 1)[0] + "_bpm" for x in self.inputList]
-            self.bpmJointList = rigamajig2.maya.joint.duplicateChain(self.inputList, parent=self.bpmHierarchy, names=bpmJointName)
+            self.bpmJointList = rigamajig2.maya.joint.duplicateChain(self.inputList, parent=self.bpmHierarchy,
+                                                                     names=bpmJointName)
 
             rigamajig2.maya.joint.hideJoints(self.bpmJointList)
 
@@ -130,4 +128,3 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
 
         if self.addBpm:
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
-

@@ -51,8 +51,7 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (109, 228, 189)
 
-    def __init__(self, name, input, size=1, numberMainControls=4, closed=True, aimAxis=None, upAxis=None,
-                 rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """"
         :param str name: name of the components
         :param list input: list of two joints. A start and an end joint
@@ -64,19 +63,14 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         :param str rigParent: node to parent to connect the component to in the heirarchy
         """
 
-        super(ChainSpline, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(ChainSpline, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings['component_side'] = self.side
         # initalize cmpt settings.
-        self.cmptSettings['numberMainControls'] = numberMainControls
-        self.cmptSettings['closed'] = closed
-
-        self.cmptSettings['aimAxis'] = aimAxis or "x"
-        self.cmptSettings['upAxis'] = upAxis or "y"
-
-        if not closed:
-            raise NotImplemented("This has yet to be implemented into rigamajig.")
+        self.defineParameter(parameter="numberMainControls", value=4, dataType="int")
+        self.defineParameter(parameter="closed", value=False, dataType="bool")
+        self.defineParameter(parameter="aimAxis", value="x", dataType="string")
+        self.defineParameter(parameter="upAxis", value="y", dataType="string")
 
         # noinspection PyTypeChecker
         if len(self.input) != 2:
@@ -89,11 +83,11 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         for i in range(self.numberMainControls):
             controlName = ("mainControl{}Name".format(i))
             self.controlNameList.append(controlName)
-            self.cmptSettings[controlName] = "{}Driver_{}".format(self.name, i)
+            self.defineParameter(parameter=controlName, value="{}Driver_{}".format(self.name, i))
 
         # here we need to forcibly save the new component settings and load the parameters back to the class
         # to manaully add the componentSettings we just added
-        self.loadSettings(self.cmptSettings)
+        # self.loadSettings(self.cmptSettings)
         self._loadComponentParametersToClass()
 
     def createBuildGuides(self):

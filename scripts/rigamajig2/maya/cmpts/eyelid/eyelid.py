@@ -49,9 +49,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (116, 189, 224)
 
-    def __init__(self, name, input, size=1, rigParent=str(), eyelidSpans=8, addCrease=True,
-                 addFleshyEye=True, eyeballJoint=str(),
-                 useCreaseFollow=False, uppCreaseDriver=str(), lowCreaseDriver=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param name: Component Name
         :param input: A single joint located at the center of the eyeball. This will become the eyeRoot.
@@ -66,20 +64,20 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         :param uppCreaseDriver: The other driver for the upper crease follow. Only the first idex is used.
         :param uppCreaseFollow: The other driver for the lower crease follow. Only the first idex is used.
         """
-        super(Eyelid, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Eyelid, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings['eyelidSpans'] = eyelidSpans
-        self.cmptSettings['addCrease'] = addCrease
-        self.cmptSettings['addFleshyEye'] = addFleshyEye
-        self.cmptSettings['eyeballJoint'] = eyeballJoint
+        self.defineParameter(parameter="eyelidSpans", value=8, dataType="int")
+        self.defineParameter(parameter="addCrease", value=True, dataType="bool")
+        self.defineParameter(parameter="addFleshyEye", value=True, dataType="bool")
+        self.defineParameter(parameter="eyeballJoint", value=str(), dataType="string")
 
-        self.cmptSettings['useCreaseFollow'] = useCreaseFollow
-        self.cmptSettings['uppCreaseDriver'] = uppCreaseDriver
-        self.cmptSettings['lowCreaseDriver'] = lowCreaseDriver
+        self.defineParameter(parameter="useCreaseFollow", value=False, dataType="bool")
+        self.defineParameter(parameter="uppCreaseDriver", value=str(), dataType="string")
+        self.defineParameter(parameter="lowCreaseDriver", value=str(), dataType="string")
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
-        self.cmptSettings['eyeSocketName'] = inputBaseNames[0]
+        self.defineParameter(parameter="eyeSocketName", value=inputBaseNames[0], dataType="string")
 
     def createBuildGuides(self):
         """Create all build guides"""

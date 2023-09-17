@@ -40,8 +40,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (0, 107, 185)
 
-    def __init__(self, name, input, size=1, rigParent=str(),
-                 useProxyAttrs=True, useScale=False, addFKSpace=False, useSubMeta=True, useFirstAsThumb=True):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param name: name of the components
         :type name: str
@@ -57,14 +56,14 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         :param bool useSubMeta: use th subMeta controls between the meta and the first finger joint
         :param bool useFirstAsThumb: use the first input as a thumb. (it has special rules)
         """
-        super(Hand, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Hand, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings['useProxyAttrs'] = useProxyAttrs
-        self.cmptSettings['useScale'] = useScale
-        self.cmptSettings['addFKSpace'] = addFKSpace
-        self.cmptSettings['useSubMeta'] = useSubMeta
-        self.cmptSettings['useFirstAsThumb'] = useFirstAsThumb
+        self.defineParameter(parameter="useProxyAttrs", value=False, dataType="bool")
+        self.defineParameter(parameter="useScale", value=False, dataType="bool")
+        self.defineParameter(parameter="addFKSpace", value=False, dataType="bool")
+        self.defineParameter(parameter="useSubMeta", value=True, dataType="bool")
+        self.defineParameter(parameter="useFirstAsThumb", value=True, dataType="bool")
 
         # initalize some other variables we need
         self.fingerComponentList = list()
@@ -105,11 +104,10 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
             fingerComponent = rigamajig2.maya.cmpts.chain.chain.Chain(
                 fingerName,
                 input=[self.input[i], endJoint],
-                useScale=self.useScale,
-                addSdk=True,
-                addFKSpace=self.addFKSpace,
-                rigParent=self.wrist.name
-                )
+                rigParent=self.wrist.name)
+            fingerComponent.defineParameter("useScale", self.useScale)
+            fingerComponent.defineParameter("addSdk", True)
+            fingerComponent.defineParameter("addFKSpace", self.addFKSpace)
 
             fingerComponent._initalizeComponent()
             cmds.container(self.container, e=True, f=True, addNode=fingerComponent.getContainer())
@@ -245,8 +243,6 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         # navigate around container parenting since we have already parented the containers to the hand container
         for cmpt in self.fingerComponentList:
             cmpt.finalize()
-            cmpt.setAttrs()
-            cmpt.postScript()
 
     def optimize(self):
         """Optimize the component"""

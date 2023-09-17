@@ -32,7 +32,7 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (243, 115, 58)
 
-    def __init__(self, name, input, size=1, bindToInput=False, rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param str name: name of the components
         :param list input: list of one joint. typically the hips.
@@ -41,13 +41,13 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
         :param bool bindToInput: connect the output position of the COG cmpt to the input.
                             This should be False in most rigs as the hips will be controlled by the spine.
         """
-        super(Cog, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Cog, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
 
-        self.cmptSettings['bind_to_input'] = bindToInput
-        self.cmptSettings['cog_control_shape'] = 'cube'
-        self.cmptSettings['cog_name'] = 'hips'
-        self.cmptSettings['cogGimble_name'] = 'hipsGimble'
-        self.cmptSettings['cogPivot_name'] = 'hips_pivot'
+        self.defineParameter(parameter="bindToInput", value=False, dataType="bool")
+        self.defineParameter(parameter="cogControlShape", value="cube", dataType="string")
+        self.defineParameter(parameter="cog_name", value="hips", dataType="string")
+        self.defineParameter(parameter="cogGimble_name", value="hipsGimble", dataType="string")
+        self.defineParameter(parameter="cogPivot_name", value="hips_pivot", dataType="string")
 
     def initialHierarchy(self):
         """Build the initial hirarchy"""
@@ -61,7 +61,7 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
             pos = (0, 0, 0)
         self.cog = control.create(self.cog_name,
                                   hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                  parent=self.controlHierarchy, shape=self.cog_control_shape, shapeAim='x',
+                                  parent=self.controlHierarchy, shape=self.cogControlShape, shapeAim='x',
                                   position=pos)
         self.cogPivot = control.create(self.cogPivot_name,
                                        hideAttrs=['s', 'v'], size=self.size, color='yellow',
@@ -69,7 +69,7 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
                                        position=pos)
         self.cogGimble = control.create(self.cogGimble_name,
                                         hideAttrs=['s', 'v'], size=self.size, color='yellow',
-                                        parent=self.cog.name, shape=self.cog_control_shape, shapeAim='x',
+                                        parent=self.cog.name, shape=self.cogControlShape, shapeAim='x',
                                         position=pos)
         self.cogGimble.addTrs("neg")
 
@@ -81,7 +81,7 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
         constrain.parentConstraint(driver=self.cogPivot.name, driven=negativeTrs)
 
         constrain.negate(self.cogPivot.name, self.cogGimble.trs, t=True)
-        if self.bind_to_input and len(self.input) >= 1:
+        if self.bindToInput and len(self.input) >= 1:
             self.inputTrs = hierarchy.create(self.cogGimble.name, ['{}_trs'.format(self.input[0])], above=False)[0]
             rig_transform.matchTransform(self.input[0], self.inputTrs)
             joint.connectChains(self.inputTrs, self.input[0])
@@ -101,4 +101,3 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
     def connect(self):
         if cmds.objExists(self.rigParent):
             cmds.parentConstraint(self.rigParent, self.cog[0], mo=True)
-

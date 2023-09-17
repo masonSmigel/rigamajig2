@@ -29,8 +29,7 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, ikSpaces=None, pvSpaces=None,
-                 useProxyAttrs=True, useScale=True, rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param str name: component name. To add a side use a side token
         :param list input: list of 4 joints starting with the clavical and ending with the wrist.
@@ -40,25 +39,19 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
         :param dict pvSpaces: dictionary of key and space for the pv control. formated as {"attrName": object}
         :param bool useProxyAttrs: use proxy attributes instead of an ikfk control
         """
-        if ikSpaces is None:
-            ikSpaces = dict()
-
-        if pvSpaces is None:
-            pvSpaces = dict()
-
         # noinspection PyTypeChecker
         if len(input) != 4:
             raise RuntimeError('Input list must have a length of 4')
 
-        super(Arm, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces,
-                                  useProxyAttrs=useProxyAttrs, useScale=useScale, rigParent=rigParent)
+        super(Arm, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+
+        self.defineParameter(parameter='limb_autoWristName', value=self.name.split("_")[0] + "_autoWrist",dataType="string")
 
     def setInitalData(self):
-        side = "_{}".format(self.side) if self.side else ""
-        self.cmptSettings['ikSpaces']['shoulder'] = self.cmptSettings['limbSwingName'] + side
-        self.cmptSettings['pvSpaces']['hand'] = self.cmptSettings['limb_ikName'] + side
-
-        self.cmptSettings['limb_autoWristName'] = self.name.split("_")[0] + "_autoWrist"
+        # side = "_{}".format(self.side) if self.side else ""
+        # self.cmptSettings['ikSpaces']['shoulder'] = self.cmptSettings['limbSwingName'] + side
+        # self.cmptSettings['pvSpaces']['hand'] = self.cmptSettings['limb_ikName'] + side
+        pass
 
     def initialHierarchy(self):
         """Build the initial hirarchy"""

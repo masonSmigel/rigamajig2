@@ -71,7 +71,7 @@ class StickyControls(rigamajig2.maya.cmpts.base.Base):
         :return:
         """
         super(StickyControls, self).loadSettings(data)
-        
+
         # store the number of controls before loading stuff from the class.
         numberofControls = self.cmptSettings['numControls']
         self._loadComponentParametersToClass()
@@ -143,8 +143,6 @@ class StickyControls(rigamajig2.maya.cmpts.base.Base):
             # set the controler scale here
             cmds.xform(controlObj.orig, s=[1 * controlSize, 1 * controlSize, 1 * controlSize])
 
-            self.controlers.append(controlObj.name)
-
             if controlMirror:
                 mirroredControlName = common.getMirrorName(controlName)
 
@@ -164,8 +162,6 @@ class StickyControls(rigamajig2.maya.cmpts.base.Base):
 
                 # set the negative scale here
                 cmds.xform(mirroredControlObj.orig, s=[1 * controlSize, 1 * controlSize, -1 * controlSize])
-
-                self.controlers.append(mirroredControlObj.name)
 
     def connect(self):
         """

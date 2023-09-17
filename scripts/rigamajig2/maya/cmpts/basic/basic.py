@@ -30,9 +30,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (204, 194, 109)
 
-    def __init__(self, name, input, size=1, rigParent=str(),
-                 addSpaces=False,  addTrs=False, addSdk=False, addBpm=False,
-                 controlShape='cube', worldOrient=False, spaceType='orient'):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param name: Component name. To add a side use a side token
         :param input: Single input joint
@@ -46,18 +44,18 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         :param worldOrient: Orient the control to the world. Default: False
         :param spaceType: Control the type of space switch added. Valud values are "orient" or "parent"
         """
-        super(Basic, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(Basic, self).__init__(name, input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
-        self.cmptSettings['controlName'] = inputBaseNames[0]
-        self.cmptSettings['controlShape'] = controlShape
-        self.cmptSettings['worldOrient'] = worldOrient
-        self.cmptSettings['addSpaces'] = addSpaces
-        self.cmptSettings['spaceType'] = spaceType
-        self.cmptSettings['addTrs'] = addTrs
-        self.cmptSettings['addSdk'] = addSdk
-        self.cmptSettings['addBpm'] = addBpm
+        self.defineParameter(parameter="controlName", value=inputBaseNames[0], dataType="string")
+        self.defineParameter(parameter="controlShape", value="sphere", dataType="string")
+        self.defineParameter(parameter="worldOrient", value=False, dataType="bool")
+        self.defineParameter(parameter="addSpaces", value=False, dataType="bool")
+        self.defineParameter(parameter="spaceType", value="orient", dataType="string")
+        self.defineParameter(parameter="addTrs", value=False, dataType="bool")
+        self.defineParameter(parameter="addSdk", value=False, dataType="bool")
+        self.defineParameter(parameter="addBpm", value=False, dataType="bool")
 
     def initialHierarchy(self):
         super(Basic, self).initialHierarchy()

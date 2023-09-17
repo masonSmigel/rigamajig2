@@ -34,7 +34,7 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (149, 228, 189)
 
-    def __init__(self, name, input, size=1, rigParent=str(), numControls=4, addFKSpace=False):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param str name: name of the components
         :param list input: list of two joints. A start and an end joint
@@ -42,17 +42,15 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         :param int numControls: number of controls to add along the spline
         :param bool addFKSpace: add a world/local space switch to the fk chain
         """
-        super(SplineFK, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(SplineFK, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
-        self.cmptSettings['component_side'] = self.side
 
         # initalize cmpt settings
-        self.cmptSettings['numControls'] = numControls
+        self.defineParameter(parameter="numControls", value=4, dataType="int")
 
-        self.cmptSettings['fkControlName'] = "{}_fk_0".format(self.name)
-        self.cmptSettings['ikControlName'] = "{}_ik_0".format(self.name)
-
-        self.cmptSettings['addFKSpace'] = addFKSpace
+        self.defineParameter(parameter="fkControlName", value=f"{self.name}_fk_0", dataType="bool")
+        self.defineParameter(parameter="ikControlName", value=f"{self.name}_ik_0", dataType="bool")
+        self.defineParameter(parameter="addFKSpace", value=False, dataType="bool")
 
         self.inputList = rigamajig2.maya.joint.getInbetweenJoints(self.input[0], self.input[1])
 

@@ -46,7 +46,7 @@ def create(name, nodes=None, dagContainer=False):
     return containerNode
 
 
-def addNodes(nodes, container, addShape=True):
+def addNodes(nodes, container, addShape=True, force=False):
     """
     Add nodes to a container.
 
@@ -59,14 +59,14 @@ def addNodes(nodes, container, addShape=True):
     if not isContainer(container):
         raise Exception("{} is not a container.".format(container))
 
-    cmds.container(container, e=True, addNode=nodes)
+    cmds.container(container, e=True, addNode=nodes, force=force)
     if addShape:
         nodes = common.toList(nodes)
         for node in nodes:
             shapes = cmds.listRelatives(node, s=True)
             if shapes:
                 for shape in shapes:
-                    cmds.container(container, e=True, addNode=shape)
+                    cmds.container(container, e=True, addNode=shape, force=force)
     return nodes
 
 

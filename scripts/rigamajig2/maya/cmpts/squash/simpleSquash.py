@@ -29,7 +29,7 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (39, 189, 46)
 
-    def __init__(self, name, input, size=1, useProxyAttrs=True, rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param str name: name of the components
         :param list input:  Single input joint
@@ -37,14 +37,13 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         :param bool addFKSpace: add a world/local space switch to the base of the fk chain
         :param str rigParent: node to parent to connect the component to in the heirarchy
         """
-        super(SimpleSquash, self).__init__(name, input=input, size=size, rigParent=rigParent)
+        super(SimpleSquash, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.cmptSettings['component_side'] = self.side
         # initalize cmpt settings.
-        self.cmptSettings['useProxyAttrs'] = useProxyAttrs
-        self.cmptSettings['startControlName'] = "{}Start".format(self.name)
-        self.cmptSettings['endControlName'] = "{}End".format(self.name)
+        self.defineParameter(parameter="useProxyAttrs", value=False, dataType="bool")
+        self.defineParameter(parameter="startControlName", value=f"{self.name}Start", dataType="string")
+        self.defineParameter(parameter="endControlName", value=f"{self.name}End", dataType="string")
 
         # noinspection PyTypeChecker
         if len(self.input) != 1:

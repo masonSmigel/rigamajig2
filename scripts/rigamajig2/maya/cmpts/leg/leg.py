@@ -32,8 +32,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
     version = '%i.%i.%i' % version_info
     __version__ = version
 
-    def __init__(self, name, input, size=1, ikSpaces=None, pvSpaces=None, useProxyAttrs=True, useScale=True,
-                 rigParent=str()):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param str  name: component name. To add a side use a side token
         :param list input: list of 6 joints starting with the pelvis and ending with the toes.
@@ -43,27 +42,21 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         :param dict pvSpaces: dictionary of key and space for the pv control. formated as {"attrName": object}
         :param bool useProxyAttrs: use proxy attributes instead of an ikfk control
         """
-        if ikSpaces is None:
-            ikSpaces = dict()
+        super(Leg, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
 
-        if pvSpaces is None:
-            pvSpaces = dict()
+        self.defineParameter(parameter="toes_fkName", value="toes_fk", dataType="string")
+        self.defineParameter(parameter="toes_ikName", value="toes_ik", dataType="string")
+        self.defineParameter(parameter="ball_ikName", value="ball_ik", dataType="string")
+        self.defineParameter(parameter="heel_ikName", value="heel_ik", dataType="string")
 
-        super(Leg, self).__init__(name, input=input, size=size, ikSpaces=ikSpaces, pvSpaces=pvSpaces,
-                                  useProxyAttrs=useProxyAttrs, useScale=useScale, rigParent=rigParent)
-
-        self.cmptSettings['toes_fkName'] = 'toes_fk'
-        self.cmptSettings['toes_ikName'] = 'toes_ik'
-        self.cmptSettings['ball_ikName'] = 'ball_ik'
-        self.cmptSettings['heel_ikName'] = 'heel_ik'
         # noinspection PyTypeChecker
         if len(self.input) != 6:
             raise RuntimeError('Input list must have a length of 6')
 
     def setInitalData(self):
         side = "_{}".format(self.side) if self.side else ""
-        self.cmptSettings['ikSpaces']['hip'] = self.cmptSettings['limbSwingName'] + side
-        self.cmptSettings['pvSpaces']['foot'] = self.cmptSettings['limb_ikName'] + side
+        # self.cmptSettings['ikSpaces']['hip'] = self.cmptSettings['limbSwingName'] + side
+        # self.cmptSettings['pvSpaces']['foot'] = self.cmptSettings['limb_ikName'] + side
 
     def createBuildGuides(self):
         """ create build guides_hrc """
@@ -138,7 +131,8 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
                                       heelPivot=self.heelGuide, innPivot=self.innGuide, outPivot=self.outGuide)
         self.footikfk.setGroup(self.ikfk.getGroup())
         self.footikfk.create(params=self.paramsHierarchy)
-        ikfk.IkFkFoot.createFootRoll(self.footikfk.getPivotDict(), self.footikfk.getGroup(), params=self.paramsHierarchy)
+        ikfk.IkFkFoot.createFootRoll(self.footikfk.getPivotDict(), self.footikfk.getGroup(),
+                                     params=self.paramsHierarchy)
 
         # connect the Foot IKFK to the ankle IK
         cmds.parent(self._ikEndTgt, self.footikfk.getPivotDict()['ankle'])
@@ -198,4 +192,3 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
     def finalize(self):
         """ Lock some attributes we dont want to see"""
         super(Leg, self).finalize()
-

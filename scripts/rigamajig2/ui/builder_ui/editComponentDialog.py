@@ -181,12 +181,12 @@ class EditComponentDialog(QtWidgets.QDialog):
             self.componentFormLayout.itemAt(i).widget().deleteLater()
 
         # add all the new widgets
-        for item in self.currentComponent.cmptSettings:
-            if item not in ['name', 'input', 'rigParent', 'type', 'enabled', 'component_side', 'componentTag']:
+        for key in self.currentComponent._componentParameters.keys():
+            if key not in ['name', 'input', 'rigParent', 'type', 'enabled', 'component_side', 'componentTag']:
                 self.addWidgetFromParameter(
-                    parameter=item,
+                    parameter=key,
                     container=self.currentComponent.getContainer(),
-                    parameterType=type(component.cmptSettings[item])
+                    parameterType=type(component._componentParameters[key])
                     )
 
     def addWidgetFromParameter(self, parameter, container, parameterType):

@@ -83,7 +83,7 @@ class Base(object):
         # define component parameters
         self.defineParameter(parameter="name", value=self.name, dataType="string")
         self.defineParameter(parameter="type", value=self.componentType, dataType="type")
-        self.defineParameter(parameter="input", value=self.input, dataType="complex")
+        self.defineParameter(parameter="input", value=self.input, dataType="list")
         self.defineParameter(parameter="enabled", value=self.enabled, dataType="bool")
         self.defineParameter(parameter="size", value=self.size, dataType="int")
         self.defineParameter(parameter="rigParent", value=self.rigParent, dataType="string")

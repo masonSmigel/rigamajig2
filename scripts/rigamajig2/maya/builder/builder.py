@@ -295,9 +295,9 @@ class Builder(object):
             # make the path an absoulte
             path = self.getAbsoultePath(path)
 
-            componentDataObje = abstract_data.AbstractData()
-            componentDataObje.read(path)
-            componentData = componentDataObje.getData()
+            componentDataObj = abstract_data.AbstractData()
+            componentDataObj.read(path)
+            componentData = componentDataObj.getData()
 
             for cmpt in list(componentData.keys()):
 
@@ -318,11 +318,7 @@ class Builder(object):
                 moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
 
                 componentClass = getattr(moduleObject, className)
-                instance = componentClass(
-                    name=componentData[cmpt]['name'],
-                    input=componentData[cmpt]['input'],
-                    rigParent=componentData[cmpt]['rigParent']
-                    )
+                instance = componentClass.fromData(componentData[cmpt])
 
                 # we only want to add components with a new name. Each component should have a unique name
                 if instance.name not in [c.name for c in self.componentList]:
@@ -331,35 +327,35 @@ class Builder(object):
 
         logger.info("components loaded -- complete")
 
-    def loadComponentSettings(self, paths=None):
-        """
-        loadSettings component settings from the rig builder
-
-        :param str paths: Path to the json file. if none is provided use the data from the rigFile
-        """
-        if not paths:
-            paths = paths or self.getRigData(self.rigFile, constants.COMPONENTS)
-
-        if self.loadComponentsFromFile:
-
-            for path in common.toList(paths):
-                # make the path an absoulte
-                path = self.getAbsoultePath(path)
-
-                componentDataObj = abstract_data.AbstractData()
-                componentDataObj.read(path)
-                componentData = componentDataObj.getData()
-                for cmpt in self.componentList:
-                    # here we can use get to return an empty list of the key doesnt exist.
-                    # This doest happen often but can occur if the component was renamed
-                    cmpt.loadSettings(componentData.get(cmpt.name, dict()))
+    # def loadComponentSettings(self, paths=None):
+    #     """
+    #     loadSettings component settings from the rig builder
+    #
+    #     :param str paths: Path to the json file. if none is provided use the data from the rigFile
+    #     """
+    #     if not paths:
+    #         paths = paths or self.getRigData(self.rigFile, constants.COMPONENTS)
+    #
+    #     if self.loadComponentsFromFile:
+    #
+    #         for path in common.toList(paths):
+    #             # make the path an absoulte
+    #             path = self.getAbsoultePath(path)
+    #
+    #             componentDataObj = abstract_data.AbstractData()
+    #             componentDataObj.read(path)
+    #             componentData = componentDataObj.getData()
+    #             for cmpt in self.componentList:
+    #                 # here we can use get to return an empty list of the key doesnt exist.
+    #                 # This doest happen often but can occur if the component was renamed
+    #                 cmpt.loadSettings(componentData.get(cmpt.name, dict()))
 
     def loadMetadataToComponentSettings(self):
         """
         Load the metadata stored on the container attributes to the component objects.
         """
         for cmpt in self.componentList:
-            cmpt._loadComponentParametersToClass()
+            cmpt._updateClassParameters()
 
     def loadControlShapes(self, paths=None, applyColor=True):
         """
@@ -636,7 +632,6 @@ class Builder(object):
         self.loadJoints()
         self.loadComponents()
         self.initalize()
-        self.loadComponentSettings()
         self.guide()
         self.build()
         self.connect()

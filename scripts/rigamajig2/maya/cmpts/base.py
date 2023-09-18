@@ -109,6 +109,41 @@ class Base(object):
 
         return componentInstance
 
+    @classmethod
+    def fromData(cls, data):
+        """
+        Create a class instance from a dictionary of data
+        :param data: data file containing all important dictionary keys
+        :return: a new class instance
+        """
+
+        REQUIRED_PARAMETERS = ["name", "input", "rigParent"]
+        try:
+            name = data.get("name")
+            input = data.get("input")
+            rigParent = data.get("rigParent") or None
+            size = data.get("size") or 1
+            componentTag = data.get("componentTag") or None
+
+        except KeyError as e:
+            raise KeyError(f"failed to gather data from: {data}", e)
+
+        componentInstance = cls(name=name,
+                                input=input,
+                                rigParent=rigParent,
+                                size=size,
+                                componentTag=componentTag)
+
+        # gather other data from the class
+        for key in componentInstance._componentParameters:
+            if key not in REQUIRED_PARAMETERS:
+                value = data.get(key)
+                if not value:
+                    continue
+                componentInstance.defineParameter(parameter=key, value=data[key])
+
+        return componentInstance
+
     def _initalizeComponent(self):
         """
         setup all intialize functions for the component
@@ -132,7 +167,7 @@ class Base(object):
             self.createJoints
             self.createBuildGuides
         """
-        self._loadComponentParametersToClass()
+        self._updateClassParameters()
 
         if self.getStep() < GUIDE_STEP and self.enabled:
             # anything that manages or creates nodes should set the active container
@@ -154,7 +189,7 @@ class Base(object):
             self.rigSetup
             self.postRigSetup
         """
-        self._loadComponentParametersToClass()
+        self._updateClassParameters()
 
         if self.getStep() < BUILD_STEP and self.enabled:
 
@@ -171,7 +206,7 @@ class Base(object):
 
     def _connectComponent(self):
         """ connect components within the rig"""
-        self._loadComponentParametersToClass()
+        self._updateClassParameters()
 
         if self.getStep() < CONNECT_STEP and self.enabled:
             with rigamajig2.maya.container.ActiveContainer(self.container):
@@ -192,7 +227,7 @@ class Base(object):
             self.finalize
             self.postScripts
         """
-        # self._loadComponentParametersToClass()
+        # self._updateClassParameters()
 
         if self.getStep() < FINALIZE_STEP and self.enabled:
             self.publishNodes()
@@ -211,7 +246,7 @@ class Base(object):
 
     def _optimizeComponent(self):
         """"""
-        # self._loadComponentParametersToClass()
+        # self._updateClassParameters()
 
         if self.getStep() != OPTIMIZE_STEP:
             self.optimize()
@@ -438,19 +473,7 @@ class Base(object):
             # # TODO: come back to this
             setattr(self.__class__, key, dataDict[key])
 
-    def loadSettings(self, data):
-        """
-        Load setting data onto the self.metaNode
-        :param data: data to store on the self.metaNode
-        :return:
-        """
-        keysToRemove = ['name', 'type', 'input']
-        newDict = {key: val for key, val in data.items() if key not in keysToRemove}
-
-        metaNode = rigamajig2.maya.meta.MetaNode(self.container)
-        metaNode.setDataDict(newDict)
-
-    def _loadComponentParametersToClass(self):
+    def _updateClassParameters(self):
         """
         loadSettings meta data from the settings node into a dictionary
         """

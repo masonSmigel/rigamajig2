@@ -186,8 +186,7 @@ class InitializeWidget(QtWidgets.QWidget):
         componentFiles = self.componentsDataLoader.getFileList()
         self.builder.loadComponents(componentFiles)
         self.builder.initalize()
-        # load the component settings from the file.
-        self.builder.loadComponentSettings(componentFiles)
+
         self.componentManager.loadListFromBuilder()
 
     @QtCore.Slot()
@@ -236,7 +235,6 @@ class InitializeWidget(QtWidgets.QWidget):
     def initalizeRig(self):
         """Run the comppnent intialize on the builder and update the UI """
         self.builder.guide()
-        self.builder.loadComponentSettings()
         self.componentManager.loadFromScene()
 
 
@@ -765,7 +763,7 @@ class ComponentManager(QtWidgets.QWidget):
             component.setContainer(newContainerName)
 
             # reload the component parameters back into the class
-            component._loadComponentParametersToClass()
+            component._updateClassParameters()
 
             # rename the component in the UI
             item.setText(0, newName)

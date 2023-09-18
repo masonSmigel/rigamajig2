@@ -88,7 +88,7 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         # here we need to forcibly save the new component settings and load the parameters back to the class
         # to manaully add the componentSettings we just added
         # self.loadSettings(self.cmptSettings)
-        self._loadComponentParametersToClass()
+        self._updateClassParameters()
 
     def createBuildGuides(self):
 

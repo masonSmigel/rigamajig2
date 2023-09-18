@@ -161,7 +161,7 @@ class EditComponentDialog(QtWidgets.QDialog):
             raise RuntimeError("Component is not initalized. Please initalize the component to continue.")
 
         # ensure all maya component level changes are loaded onto the class
-        self.currentComponent._loadComponentParametersToClass()
+        self.currentComponent._updateClassParameters()
 
         # set the title of the window to reflect the active component
         title = self.WINDOW_TITLE + " " + self.currentComponent.name

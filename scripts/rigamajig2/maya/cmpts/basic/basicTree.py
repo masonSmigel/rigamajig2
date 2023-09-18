@@ -38,8 +38,7 @@ class BasicTree(rigamajig2.maya.cmpts.base.Base):
 
     UI_COLOR = (208, 132, 67)
 
-    def __init__(self, name, input, size=1, rigParent=str(), controlShape='cube',
-                 addTrs=False, addSdk=False, skipJoints=None):
+    def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param name: Component name. To add a side use a side token
         :param input: Single input joint, all joints below it will be added to the tree
@@ -50,17 +49,15 @@ class BasicTree(rigamajig2.maya.cmpts.base.Base):
         :param sdkGrp: add an sdk group
         :param skipJoints: List of joints to skip from adding a control to. They must be an end joint.
         """
-        super(BasicTree, self).__init__(name=name, input=input, size=size, rigParent=rigParent)
-
-        if not skipJoints:
-            skipJoints = list()
+        super(BasicTree, self).__init__(name=name, input=input, size=size, rigParent=rigParent,
+                                        componentTag=componentTag)
 
         self.side = common.getSide(name)
 
-        self.defineParameter(parameter="controlShape", value=controlShape, dataType="string")
+        self.defineParameter(parameter="controlShape", value="cube", dataType="string")
         self.defineParameter(parameter="addTrs", value=False, dataType="bool")
         self.defineParameter(parameter="addSdk", value=False, dataType="bool")
-        self.defineParameter(parameter="skipJoints", value=None, dataType="list")
+        self.defineParameter(parameter="skipJoints", value=[], dataType="list")
 
     def initialHierarchy(self):
         """ build the inital hierarchy"""

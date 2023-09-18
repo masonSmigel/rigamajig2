@@ -160,7 +160,6 @@ class BuildWidget(QtWidgets.QWidget):
     def completeBuild(self):
         """ Execute a complete rig build (steps initialize - finalize) """
         self.builder.initalize()
-        self.builder.loadComponentSettings()
         self.builder.build()
         self.builder.connect()
         self.builder.finalize()

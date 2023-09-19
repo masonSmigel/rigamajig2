@@ -508,6 +508,8 @@ def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestP
         cmds.copySkinWeights(ss=srcSkinCluster, ds=tgtSkinCluster, nm=True, **kwargs)
         logger.info("weights copied: {}({}) -> {}({})".format(sourceMesh, srcSkinCluster, tgtMesh, tgtSkinCluster))
 
+        return tgtSkinCluster
+
 
 def connectExistingBPMs(skinCluster, influences=None):
     """

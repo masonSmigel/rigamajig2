@@ -54,6 +54,47 @@ def _safeSetVisablity(node, value):
         pass
 
 
+def transferAllDeformerTypes(deformerName, sourceGeo, targetGeo, override=False):
+    """
+   Transfer a deformer of any tupe to another geometry
+
+   :param deformerName: name of the deformer to transfer
+   :param str sourceGeo: name of the geometry copy from
+   :param str targetGeo: name of the geometry to transfer to
+   :param bool override: If True override the existing skin cluster
+   :return: name of the transfered deformer
+   """
+
+    if deformerName not in deformer.getDeformerStack(sourceGeo):
+        raise ValueError(f"'{deformerName}' is not part of the deformer stack for {sourceGeo}")
+
+    if blendshape.isBlendshape(deformerName):
+        layerId = targetGeo.split("_")[0]
+        newDeformer = blendshape.transferBlendshape(
+            blendshape=deformerName,
+            targetMesh=targetGeo,
+            blendshapeName=f"{layerId}_{deformerName}",
+            copyConnections=True,
+            deformOrder="before")  # We will need to apply the blendshape before the skin cluster to avoid bad deformation stacking.
+        cmds.delete(deformerName)
+
+    elif skinCluster.isSkinCluster(deformerName):
+        if skinCluster.getSkinCluster(targetGeo) and not override:
+            logger.warning(f"{deformerName} was not transfered because it would override the skincluster")
+            return None
+        newDeformer = skinCluster.copySkinClusterAndInfluences(sourceMesh=sourceGeo, targetMeshes=targetGeo)
+        cmds.skinCluster(deformerName, e=True, unbind=True, unbindKeepHistory=False)
+
+    elif deformer.isDeformer(deformerName):
+        newDeformer = deformer.transferDeformer(deformer=deformerName, sourceMesh=sourceGeo, targetMesh=targetGeo)
+        deformer.removeGeoFromDeformer(deformerName, geo=sourceGeo)
+
+    else:
+        logger.warning(f"{deformer_} is not stackable.")
+        return None
+    return newDeformer
+
+
 class DeformLayer(object):
     """
     This class is a manager for deformation layers.
@@ -298,3 +339,20 @@ class DeformLayer(object):
         if cleanup:
             # delete all the deformation layers
             cmds.delete(layers)
+
+    def transferDeformer(self, deformerName, sourceLayer, targetLayer, override=True):
+        """
+        Transfer a deformer to the geometry on the target layer index
+
+        :param deformerName: name of the deformer to transfer
+        :param int str sourceLayer: name of the geometry or index in the deform layers stack to copy from
+        :param int str targetLayer: name of the geometry or index in the deform layers stack to transfer to
+        :return: name of the transfered deformer
+        """
+
+        if isinstance(sourceLayer, int):
+            sourceLayer = self.getDeformationLayers()[sourceLayer]
+        if isinstance(targetLayer, int):
+            targetLayer = self.getDeformationLayers()[targetLayer]
+
+        transferAllDeformerTypes(deformerName, sourceLayer, targetLayer, override)

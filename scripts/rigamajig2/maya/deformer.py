@@ -474,3 +474,5 @@ def transferDeformer(deformer, sourceMesh, targetMesh):
     weights = getWeights(deformer=deformer, geometry=sourceMesh)
     setWeights(deformer=deformer, weights=weights, geometry=targetMesh)
 
+    return deformer
+

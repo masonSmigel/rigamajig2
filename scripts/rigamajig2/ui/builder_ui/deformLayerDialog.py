@@ -15,6 +15,8 @@ from PySide2 import QtGui
 from PySide2 import QtCore
 import maya.cmds as cmds
 
+from functools import partial
+
 from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox
 from rigamajig2.shared import common
 
@@ -126,6 +128,7 @@ class DeformerTreeWidgetItem(QtWidgets.QTreeWidgetItem):
     def __init__(self, deformerName, parent=None):
         super(DeformerTreeWidgetItem, self).__init__(parent)
 
+        self.deformerName = deformerName
         self.setFlags(self.flags() | QtCore.Qt.ItemIsEditable)
 
         self.setText(0, deformerName)
@@ -137,6 +140,18 @@ class DeformerTreeWidgetItem(QtWidgets.QTreeWidgetItem):
         else:
             self.setIcon(0, QtGui.QIcon(f":{deformerType}.png"))
 
+        # set the envelope
+        self.setEnvelope(cmds.getAttr(f"{self.deformerName}.envelope"))
+
+    def setEnvelope(self, value):
+        """ Set the envelope value"""
+        if value:
+            cmds.setAttr(f"{self.deformerName}.envelope", True)
+            self.setTextColor(0, QtWidgets.QTreeWidget().palette().color(QtGui.QPalette.Text) )
+        else:
+            cmds.setAttr(f"{self.deformerName}.envelope", False)
+            self.setTextColor(0, QtGui.QColor(100, 100, 100))
+
 
 class DeformLayerDialog(mayaDialog.MayaDialog):
     WINDOW_TITLE = "Deform Layer Manager"
@@ -147,6 +162,34 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         self.layerGroupLookupDict = {}
 
         self.updateLayerGroups()
+
+    def createActions(self):
+        self.selectNodeAction = QtWidgets.QAction("Select Node")
+        self.selectNodeAction.setIcon(QtGui.QIcon(":selectModel.png"))
+        self.selectNodeAction.triggered.connect(self.selectNode)
+
+        self.selectGeometryAction = QtWidgets.QAction("Select Geometry")
+        self.selectGeometryAction.setIcon(QtGui.QIcon(":selectModel.png"))
+        self.selectGeometryAction.triggered.connect(self.selectGeometryNode)
+
+        self.toggleDeformerAction = QtWidgets.QAction("Toggle Envelope")
+        self.toggleDeformerAction.triggered.connect(self.performToggleDeformer)
+
+        self.moveDeformerUp = QtWidgets.QAction("Move Deformer Up")
+        self.moveDeformerUp.setIcon(QtGui.QIcon(":moveUVUp.png"))
+        self.moveDeformerUp.triggered.connect(partial(self.performReorderDeformer, opperation="up"))
+
+        self.moveDeformerDown = QtWidgets.QAction("Move Deformer Down")
+        self.moveDeformerDown.setIcon(QtGui.QIcon(":moveUVDown.png"))
+        self.moveDeformerDown.triggered.connect(partial(self.performReorderDeformer, opperation="down"))
+
+        self.moveDeformerToTop = QtWidgets.QAction("Move Deformer to Top")
+        self.moveDeformerToTop.setIcon(QtGui.QIcon(":moveLayerUp.png"))
+        self.moveDeformerToTop.triggered.connect(partial(self.performReorderDeformer, opperation="top"))
+
+        self.moveDeformerToBottom = QtWidgets.QAction("Move Deformer to Bottom")
+        self.moveDeformerToBottom.setIcon(QtGui.QIcon(":moveLayerDown.png"))
+        self.moveDeformerToBottom.triggered.connect(partial(self.performReorderDeformer, opperation="bottom"))
 
     def createWidgets(self):
 
@@ -205,19 +248,58 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         self.deformLayersTree.itemChanged.connect(self.handleDeformLayerTree)
         self.addDeformLayerButton.clicked.connect(self.addDeformLayer)
 
-    def _deformLayerTreeContextMenu(self, pos):
+    def _deformLayerTreeContextMenu(self, position):
 
         items = self.deformLayersTree.selectedItems()
         if items:
             item = items[-1]
 
-            # Todo: Implement popup: (select Node), (moveDeformerUp, MoveDeformerDown), (transfer to layer)
+            menu = QtWidgets.QMenu(self.deformLayersTree)
+            menu.addAction(self.selectNodeAction)
+
+            # define actions depending on the context of the current selection
             if isinstance(item, LayerHeaderTreeWidgetItem):
-                print("selection is a header")
+                pass
+
             if isinstance(item, DeformLayerMeshTreeItem):
-                print ("selection is a mesh")
+                pass
+
             if isinstance(item, DeformerTreeWidgetItem):
-                print ("selection is a deformer")
+                menu.addAction(self.selectGeometryAction)
+                menu.addSeparator()
+                menu.addAction(self.toggleDeformerAction)
+                menu.addSeparator()
+                menu.addAction(self.moveDeformerUp)
+                menu.addAction(self.moveDeformerDown)
+                menu.addAction(self.moveDeformerToTop)
+                menu.addAction(self.moveDeformerToBottom)
+
+                # next we need to build a menu to transfer a deformer to another layer.
+                transferMenu = QtWidgets.QMenu(menu)
+                transferMenu.setTitle("Transfer to Layer...")
+                menu.addSeparator()
+                menu.addMenu(transferMenu)
+
+                #
+                mainGeo = item.parent().data(0, QtCore.Qt.UserRole)
+                deformLayers = deformLayer.DeformLayer(mainGeo).getDeformationLayers()
+                deformLayers.pop(deformLayers.index(item.parent().text(0)))  # remove the current item
+
+                for otherDeformLayer in deformLayers:
+                    transferAction = QtWidgets.QAction(otherDeformLayer)
+                    transferAction.setIcon(QtGui.QIcon(":mesh.svg"))
+
+                    # find the target item by filtering the names
+                    deformLayerMeshItems = self.getTreeWidgetItemsByType(DeformLayerMeshTreeItem)
+                    targetItem = None
+                    for eachTargetItem in deformLayerMeshItems:
+                        if eachTargetItem.text(0) == otherDeformLayer:
+                            targetItem = eachTargetItem
+
+                    transferAction.triggered.connect(partial(self.performTransferDeformer, item, targetItem))
+                    transferMenu.addAction(transferAction)
+
+            menu.exec_(self.deformLayersTree.mapToGlobal(position))
 
     def addDeformLayer(self):
         """
@@ -324,6 +406,15 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         self.updateTreeWidgetFromLayerGroup(self.layerGroupComboBox.currentText())
         self.filterButton.setChecked(False)
 
+    def selectedItems(self):
+        items = self.deformLayersTree.selectedItems() or list()
+        return items
+
+    def lastSelectedItem(self):
+        if self.selectedItems():
+            return self.selectedItems()[-1]
+        return None
+
     def toggleFilteredTreeWidget(self):
 
         if self.filterButton.isChecked():
@@ -406,3 +497,131 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             nodes.extend(self.getSubtreeNodes(childItem))
 
         return nodes
+
+    def getTreeWidgetItemsByType(self, type):
+        """
+        Get a list of all treeWidget items by the type
+        :param type: base classes to itterate through
+        :return:
+        """
+
+        returnList = set()
+
+        for item in self.getAllDeformLayerTreeItems():
+            if isinstance(item, type):
+                returnList.add(item)
+        return list(returnList)
+
+    def selectNode(self):
+        """
+        Select a node based on the currently selected Item
+        """
+        item = self.lastSelectedItem()
+        if not item:
+            return
+
+        node = item.text(0)
+        if cmds.objExists(node):
+            cmds.select(node, replace=True)
+        else:
+            cmds.warning(f"Cannot find the node: '{node}' in your scene")
+
+    def selectGeometryNode(self):
+        item = self.lastSelectedItem()
+        if not item:
+            return
+
+        node = item.parent().text(0)
+        if cmds.objExists(node):
+            cmds.select(node, replace=True)
+        else:
+            cmds.warning(f"Cannot find the node: '{node}' in your scene")
+
+    def performReorderDeformer(self, opperation="up"):
+        """
+        Reorder the given deformer up or down
+        :return:
+        """
+        item = self.lastSelectedItem()
+        if not item: return
+
+        parentItem = item.parent()
+
+        deformerName = item.text(0)
+        geometryName = item.parent().text(0)
+
+        index = item.parent().indexOfChild(item)
+
+        if opperation == "up":
+            deformer.reorderSlide(geometry=geometryName, deformer=deformerName, up=True)
+            newIndex = index - 1
+            if newIndex != -1:
+                parentItem.removeChild(item)
+                parentItem.insertChild(newIndex, item)
+        if opperation == "down":
+            deformer.reorderSlide(geometry=geometryName, deformer=deformerName, up=False)
+            newIndex = index + 1
+            if index != parentItem.childCount() - 1:
+                parentItem.removeChild(item)
+                parentItem.insertChild(newIndex, item)
+        if opperation == "top":
+            deformer.reorderToTop(geometry=geometryName, deformer=deformerName)
+            newIndex = 0
+            parentItem.removeChild(item)
+            parentItem.insertChild(newIndex, item)
+        if opperation == "bottom":
+            deformer.reorderToBottom(geometry=geometryName, deformer=deformerName)
+            if index != parentItem.childCount() - 1:
+                parentItem.removeChild(item)
+                parentItem.addChild(item)
+
+        self.deformLayersTree.setCurrentItem(item)
+
+    def performTransferDeformer(self, item, targetItem):
+        """
+        Transfer the given deformer from one layer to another.
+
+        :param item:
+        :param targetItem:
+        """
+
+        if not isinstance(item, DeformerTreeWidgetItem):
+            raise ValueError("Source Item must be of type 'DeformerTreeWidgetItem'")
+
+        if not isinstance(targetItem, DeformLayerMeshTreeItem):
+            raise ValueError("Source Item must be of type 'DeformLayerMeshTreeItem'")
+
+        # perform the deformer transfer
+        deformerName = item.text(0)
+        sourceMesh = item.parent().text(0)
+        targetMesh = targetItem.text(0)
+        newDeformer = deformLayer.transferAllDeformerTypes(deformerName=deformerName,
+                                                           sourceGeo=sourceMesh,
+                                                           targetGeo=targetMesh)
+
+        newDeformerItem = DeformerTreeWidgetItem(newDeformer)
+        targetItem.insertChild(0, newDeformerItem)
+
+        # remove the old item
+        item.parent().removeChild(item)
+
+    def performToggleDeformer(self):
+        """
+        Toggle the envelope of a deformer
+        :param item: Item to toggle the envelope of
+        :return:
+        """
+        item = self.lastSelectedItem()
+        if not item: return
+
+        if not isinstance(item, DeformerTreeWidgetItem):
+            raise ValueError(f"{item} must be of type 'DeformerTreeWidgetItem'")
+
+        deformer = item.text(0)
+
+        envelope = cmds.getAttr(f"{deformer}.envelope")
+
+        if envelope:
+            item.setEnvelope(False)
+        else:
+            item.setEnvelope(True)

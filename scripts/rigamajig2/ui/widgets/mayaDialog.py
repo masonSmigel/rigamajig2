@@ -50,9 +50,14 @@ class MayaDialog(QtWidgets.QDialog):
             self.setProperty("saveWindowPref", True)
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
 
+        self.createActions()
         self.createWidgets()
         self.createLayouts()
         self.createConnections()
+
+    def createActions(self):
+        """ Create Actions """
+        pass
 
     def createWidgets(self):
         """Create widgets"""

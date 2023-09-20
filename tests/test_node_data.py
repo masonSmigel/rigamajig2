@@ -61,8 +61,6 @@ class TestNodeData(TestCase):
         """
         file_path = self.getTempFilename("test_node_data.json")
         self.create_source_locator(file_path)
-        # Check if the file was created
-        # self.assertTrue(os.path.exists(file_path))
 
         # Create a new locator and attemp to apply data from it.
         loc = common.getFirstIndex(cmds.spaceLocator(n='loc'))

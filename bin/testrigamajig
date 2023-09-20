@@ -86,7 +86,7 @@ def create_clean_maya_app_dir(directory=None):
 
 def main():
     parser = ArgumentParser('Run unit tests for a maya module')
-    parser.add_argument('-m', '--maya', help='Maya Version', type=int, default='2020')
+    parser.add_argument('-m', '--maya', help='Maya Version', type=int, default='2023')
     parser.add_argument('-mad', '--maya-app-dir', help='Just create a clean MAYA_APP_DIR')
 
     pargs = parser.parse_args()

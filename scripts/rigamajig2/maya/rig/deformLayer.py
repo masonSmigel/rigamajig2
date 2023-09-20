@@ -73,10 +73,13 @@ def transferAllDeformerTypes(deformerName, sourceGeo, targetGeo, override=False)
         newDeformer = blendshape.transferBlendshape(
             blendshape=deformerName,
             targetMesh=targetGeo,
-            blendshapeName=f"{layerId}_{deformerName}",
+            blendshapeName=f"{deformerName}",
             copyConnections=True,
             deformOrder="before")  # We will need to apply the blendshape before the skin cluster to avoid bad deformation stacking.
+
         cmds.delete(deformerName)
+        cmds.rename(newDeformer, deformerName)
+        newDeformer = deformerName
 
     elif skinCluster.isSkinCluster(deformerName):
         if skinCluster.getSkinCluster(targetGeo) and not override:
@@ -93,6 +96,23 @@ def transferAllDeformerTypes(deformerName, sourceGeo, targetGeo, override=False)
         logger.warning(f"{deformer_} is not stackable.")
         return None
     return newDeformer
+
+
+def getRenderModelFromLayer(mesh):
+    """
+    Get a render model from the given mesh if is a rendermesh layer.
+    :param mesh: name of deform layer mesh
+    :return:
+    """
+    if not cmds.objExists(mesh):
+        raise RuntimeError(f"Mesh with the name {mesh} does not exist in the scene")
+    if not cmds.objExists(f"{mesh}.{LAYER_ATTR}"):
+        raise RuntimeError(f"Mesh '{mesh}' is not a deform layer")
+
+    if cmds.objExists(f"{mesh}.{LAYERS_ATTR}"):
+        return mesh
+
+    return meta.getMessageConnection(f"{mesh}.{LAYER_ATTR}")
 
 
 class DeformLayer(object):

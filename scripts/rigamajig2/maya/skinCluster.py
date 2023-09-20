@@ -389,7 +389,7 @@ def getInfluenceIndex(skinCluster, influence):
     return skinClusterFn.indexForInfluenceObject(influencePath)
 
 
-def copySkinWeights(sourceMesh, targetMesh, targetSkin):
+def transferSkinCluster(sourceMesh, targetMesh, targetSkin):
     """
     Copy our skinweights for identical meshes. Rather than a typical copy opperation this will rebuild the joint
     matrix connections
@@ -453,7 +453,7 @@ def stackSkinCluster(sourceMesh, targetMesh, skinName=None):
     cmds.setAttr("{}.weightDistribution".format(targetSkin), 1)
 
     # copy the skinweights and data
-    copySkinWeights(sourceMesh, targetMesh=targetMesh, targetSkin=targetSkin)
+    transferSkinCluster(sourceMesh, targetMesh=targetMesh, targetSkin=targetSkin)
 
     # finally recache the bind matricies
     cmds.skinCluster(targetSkin, e=True, recacheBindMatrices=True)

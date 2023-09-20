@@ -77,11 +77,11 @@ class DeformLayersTreeWidget(QtWidgets.QTreeWidget):
         self.setAlternatingRowColors(True)
 
 
-class LayerHeaderTreeWidgetItem(QtWidgets.QTreeWidgetItem):
+class DeformLayerHeaderTreeItem(QtWidgets.QTreeWidgetItem):
     """Class for layer headers in the treeWidgetItem"""
 
     def __init__(self, name, parent=None):
-        super(LayerHeaderTreeWidgetItem, self).__init__(parent)
+        super(DeformLayerHeaderTreeItem, self).__init__(parent)
         self.setFlags(
             QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled | QtCore.Qt.ItemIsTristate)
         self.setCheckState(0, QtCore.Qt.PartiallyChecked)
@@ -99,12 +99,12 @@ class LayerHeaderTreeWidgetItem(QtWidgets.QTreeWidgetItem):
         self.setSizeHint(0, QtCore.QSize(0, 22))
 
     def addChild(self, child):
-        super(LayerHeaderTreeWidgetItem, self).addChild(child)
+        super(DeformLayerHeaderTreeItem, self).addChild(child)
         self.child_items.append(child)
 
 
 class DeformLayerMeshTreeItem(QtWidgets.QTreeWidgetItem):
-    "Class for deformLayerMeshes in the tree Widget"
+    """Class for deformLayerMeshes in the tree Widget"""
 
     def __init__(self, deformLayerMesh, model, parent=None):
         super(DeformLayerMeshTreeItem, self).__init__(parent)
@@ -122,11 +122,11 @@ class DeformLayerMeshTreeItem(QtWidgets.QTreeWidgetItem):
         self.setData(0, QtCore.Qt.UserRole, model)
 
 
-class DeformerTreeWidgetItem(QtWidgets.QTreeWidgetItem):
+class DeformerTreeItem(QtWidgets.QTreeWidgetItem):
     """ Class for deformers in the treeWidget"""
 
     def __init__(self, deformerName, parent=None):
-        super(DeformerTreeWidgetItem, self).__init__(parent)
+        super(DeformerTreeItem, self).__init__(parent)
 
         self.deformerName = deformerName
         self.setFlags(self.flags() | QtCore.Qt.ItemIsEditable)
@@ -147,7 +147,7 @@ class DeformerTreeWidgetItem(QtWidgets.QTreeWidgetItem):
         """ Set the envelope value"""
         if value:
             cmds.setAttr(f"{self.deformerName}.envelope", True)
-            self.setTextColor(0, QtWidgets.QTreeWidget().palette().color(QtGui.QPalette.Text) )
+            self.setTextColor(0, QtWidgets.QTreeWidget().palette().color(QtGui.QPalette.Text))
         else:
             cmds.setAttr(f"{self.deformerName}.envelope", False)
             self.setTextColor(0, QtGui.QColor(100, 100, 100))
@@ -166,7 +166,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
     def createActions(self):
         self.selectNodeAction = QtWidgets.QAction("Select Node")
         self.selectNodeAction.setIcon(QtGui.QIcon(":selectModel.png"))
-        self.selectNodeAction.triggered.connect(self.selectNode)
+        self.selectNodeAction.triggered.connect(self.selectNodes)
 
         self.selectGeometryAction = QtWidgets.QAction("Select Geometry")
         self.selectGeometryAction.setIcon(QtGui.QIcon(":selectModel.png"))
@@ -258,13 +258,13 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             menu.addAction(self.selectNodeAction)
 
             # define actions depending on the context of the current selection
-            if isinstance(item, LayerHeaderTreeWidgetItem):
+            if isinstance(item, DeformLayerHeaderTreeItem):
                 pass
 
             if isinstance(item, DeformLayerMeshTreeItem):
                 pass
 
-            if isinstance(item, DeformerTreeWidgetItem):
+            if isinstance(item, DeformerTreeItem):
                 menu.addAction(self.selectGeometryAction)
                 menu.addSeparator()
                 menu.addAction(self.toggleDeformerAction)
@@ -310,10 +310,30 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         suffix = self.suffixLineEdit.text()
         connectionMethod = self.combineMthodComboBox.currentText()
 
-        # create a new deformation layer
-        for node in cmds.ls(sl=True):
-            layers = deformLayer.DeformLayer(node)
-            layers.createDeformLayer(suffix=suffix, connectionMethod=connectionMethod)
+        selection = cmds.ls(sl=True)
+        if not selection:
+            selectedItems = self.selectedItems()
+            selection = []
+            meshItems = self.getTreeWidgetItemsByType(DeformLayerMeshTreeItem)
+            for item in selectedItems:
+                if item in meshItems:
+                    selection.append(item.text(0))
+
+        confirm = mayaMessageBox.MayaMessageBox(
+            title="Add new Deform Layers",
+            message=f"Are you sure you want to add new deform layers to {len(selection)} meshes",
+            icon="help")
+        confirm.setButtonsYesNoCancel()
+        result = confirm.exec_()
+
+        if result == confirm.Yes:
+            for node in selection:
+                renderModel = deformLayer.getRenderModelFromLayer(node)
+                layers = deformLayer.DeformLayer(renderModel)
+                layers.createDeformLayer(suffix=suffix, connectionMethod=connectionMethod)
+
+        # update the treeWidget with the new stuff
+        self.refreshButtonClicked()
 
     def insertDeformLayer(self, index):
         """
@@ -321,7 +341,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         :param index:
         :return:
         """
-        # Todo:Implement
+        raise NotImplementedError
 
     def updateLayerGroups(self):
         meshWithDeformLayers = meta.getTagged("hasDeformLayers")
@@ -374,7 +394,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
 
         topLevelItemsList = []
         for i in range(numberOfLayers):
-            item = LayerHeaderTreeWidgetItem(name=f"deformLayer_{i}")
+            item = DeformLayerHeaderTreeItem(name=f"deformLayer_{i}")
 
             topLevelItemsList.append(item)
             self.deformLayersTree.addTopLevelItem(item)
@@ -399,7 +419,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
                     # check to see if this is part of the deform layer chain (a blendshape connecting the previous layer)
                     if meta.hasTag(eachDeformer, tag=deformLayer.DEFORM_LAYER_BSHP_TAG):
                         continue
-                    deformerItem = DeformerTreeWidgetItem(deformerName=eachDeformer)
+                    deformerItem = DeformerTreeItem(deformerName=eachDeformer)
                     deformLayerMeshItem.addChild(deformerItem)
 
     def refreshButtonClicked(self):
@@ -512,19 +532,14 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
                 returnList.add(item)
         return list(returnList)
 
-    def selectNode(self):
+    def selectNodes(self):
         """
         Select a node based on the currently selected Item
         """
-        item = self.lastSelectedItem()
-        if not item:
-            return
+        items = self.selectedItems()
 
-        node = item.text(0)
-        if cmds.objExists(node):
-            cmds.select(node, replace=True)
-        else:
-            cmds.warning(f"Cannot find the node: '{node}' in your scene")
+        nodes = [item.text(0) for item in items]
+        cmds.select(nodes, replace=True)
 
     def selectGeometryNode(self):
         item = self.lastSelectedItem()
@@ -585,7 +600,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         :param targetItem:
         """
 
-        if not isinstance(item, DeformerTreeWidgetItem):
+        if not isinstance(item, DeformerTreeItem):
             raise ValueError("Source Item must be of type 'DeformerTreeWidgetItem'")
 
         if not isinstance(targetItem, DeformLayerMeshTreeItem):
@@ -599,7 +614,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
                                                            sourceGeo=sourceMesh,
                                                            targetGeo=targetMesh)
 
-        newDeformerItem = DeformerTreeWidgetItem(newDeformer)
+        newDeformerItem = DeformerTreeItem(newDeformer)
         targetItem.insertChild(0, newDeformerItem)
 
         # remove the old item
@@ -614,7 +629,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         item = self.lastSelectedItem()
         if not item: return
 
-        if not isinstance(item, DeformerTreeWidgetItem):
+        if not isinstance(item, DeformerTreeItem):
             raise ValueError(f"{item} must be of type 'DeformerTreeWidgetItem'")
 
         deformer = item.text(0)

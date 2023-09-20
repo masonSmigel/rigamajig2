@@ -251,6 +251,9 @@ class TestCase(unittest.TestCase):
         for a, b in zip(first, second):
             self.assertAlmostEqual(a, b, places, msg, delta)
 
+    def assertFileExists(self, filePath):
+        self.assertTrue(os.path.exists(filePath), f"The file '{filePath}' does not exist.")
+
     def tearDown(self):
         if Settings.file_new and RIGMAJIG_TEST_VAR not in os.environ.keys():
             # If running tests without the custom runner, like with PyCharm, the file new of the TestResult class isn't

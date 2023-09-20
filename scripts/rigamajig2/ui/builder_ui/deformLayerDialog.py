@@ -17,7 +17,7 @@ import maya.cmds as cmds
 
 from functools import partial
 
-from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox
+from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox, collapseableWidget
 from rigamajig2.shared import common
 
 from rigamajig2.maya.rig import deformLayer
@@ -221,6 +221,9 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             self.combineMthodComboBox.addItem(item)
         self.addDeformLayerButton = QtWidgets.QPushButton("Add Deform Layer")
 
+        self.deformerUtilsHeader = collapseableWidget.CollapsibleWidget("Deformer Utilities")
+        self.connectBpmsButton = QtWidgets.QPushButton("Connect BPMs on Skins")
+
     def createLayouts(self):
         mainLayout = QtWidgets.QVBoxLayout(self)
 
@@ -238,8 +241,10 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         addLayerLayout.addWidget(self.suffixLineEdit)
         addLayerLayout.addWidget(self.combineMthodComboBox)
         addLayerLayout.addWidget(self.addDeformLayerButton)
-
         mainLayout.addLayout(addLayerLayout)
+
+        mainLayout.addWidget(self.deformerUtilsHeader)
+        self.deformerUtilsHeader.addWidget(self.connectBpmsButton)
 
     def createConnections(self):
         self.filterButton.clicked.connect(self.toggleFilteredTreeWidget)
@@ -247,6 +252,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         self.layerGroupComboBox.currentTextChanged.connect(self.updateTreeWidgetFromLayerGroup)
         self.deformLayersTree.itemChanged.connect(self.handleDeformLayerTree)
         self.addDeformLayerButton.clicked.connect(self.addDeformLayer)
+        self.connectBpmsButton.clicked.connect(self.connectBindPreMatrix)
 
     def _deformLayerTreeContextMenu(self, position):
 
@@ -351,6 +357,9 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         layerGroupsList = set()
         for mesh in meshWithDeformLayers:
             # get the layer group
+            if not cmds.objExists(f"{mesh}.{deformLayer.LAYER_GROUP_ATTR}"):
+                continue
+
             layerGroup = cmds.getAttr(f"{mesh}.{deformLayer.LAYER_GROUP_ATTR}")
             layerGroupsList.add(layerGroup)
             if layerGroup in self.layerGroupLookupDict:
@@ -592,6 +601,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
 
         self.deformLayersTree.setCurrentItem(item)
 
+    @QtCore.Slot()
     def performTransferDeformer(self, item, targetItem):
         """
         Transfer the given deformer from one layer to another.
@@ -620,6 +630,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         # remove the old item
         item.parent().removeChild(item)
 
+    @QtCore.Slot()
     def performToggleDeformer(self):
         """
         Toggle the envelope of a deformer
@@ -640,3 +651,12 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             item.setEnvelope(False)
         else:
             item.setEnvelope(True)
+
+    @QtCore.Slot()
+    def connectBindPreMatrix(self):
+        """
+        Connect influence joints to their respective bindPreMatrix
+        """
+        for mesh in cmds.ls(sl=True):
+            sc = skinCluster.getSkinCluster(mesh)
+            skinCluster.connectExistingBPMs(sc)

@@ -30,7 +30,7 @@ from rigamajig2.maya import attr as attr
 from rigamajig2.maya import naming as naming
 from rigamajig2.maya import container as rig_container
 from rigamajig2.maya.builder import builder
-from rigamajig2.ui.builder_ui.widgets import collapseableWidget, dataLoader
+from rigamajig2.ui.builder_ui.widgets import builderHeader, dataLoader
 from rigamajig2.ui.widgets import QPushButton
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import GUIDES, COMPONENTS
@@ -58,7 +58,7 @@ class InitializeWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = collapseableWidget.BuilderHeader(text='Setup Rig', addCheckbox=True)
+        self.mainCollapseableWidget = builderHeader.BuilderHeader(text='Setup Rig', addCheckbox=True)
         self.componentsDataLoader = dataLoader.DataLoader(label="Components:",
                                                           caption="Select a Component File",
                                                           fileFilter=common.JSON_FILTER,

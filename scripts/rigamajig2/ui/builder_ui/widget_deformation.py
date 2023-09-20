@@ -17,7 +17,7 @@ from PySide2 import QtWidgets
 # RIGAMAJIG2
 import rigamajig2.maya.builder.constants
 from rigamajig2.shared import common
-from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget, dataLoader
+from rigamajig2.ui.builder_ui.widgets import pathSelector, builderHeader, dataLoader
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES, DEFORMERS, DEFORM_LAYERS, DEFORMER_DATA_TYPES
 from rigamajig2.maya.rig import deformLayer
@@ -42,7 +42,7 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget = collapseableWidget.BuilderHeader('Deformations', addCheckbox=True)
+        self.mainCollapseableWidget = builderHeader.BuilderHeader('Deformations', addCheckbox=True)
 
         self.deformLayerPathSelector = pathSelector.PathSelector(
             "layers:",
@@ -83,7 +83,7 @@ class DeformationWidget(QtWidgets.QWidget):
         self.saveDeformLayersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
         self.manageDeformLayersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
-        self.skinEditWidget = collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
+        self.skinEditWidget = rigamajig2.ui.widgets.collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
         self.skinEditWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
         self.skinEditWidget.setDarkPallete()
 

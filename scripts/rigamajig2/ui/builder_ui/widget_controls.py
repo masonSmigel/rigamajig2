@@ -19,7 +19,7 @@ from rigamajig2.shared import common
 from rigamajig2.maya import meta
 import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
-from rigamajig2.ui.builder_ui.widgets import dataLoader, collapseableWidget, overrideColorer
+from rigamajig2.ui.builder_ui.widgets import dataLoader, builderHeader, overrideColorer
 from rigamajig2.ui.widgets import QPushButton
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder.constants import CONTROL_SHAPES
@@ -41,7 +41,7 @@ class ControlsWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = collapseableWidget.BuilderHeader('Controls', addCheckbox=True)
+        self.mainCollapseableWidget = builderHeader.BuilderHeader('Controls', addCheckbox=True)
         self.controlDataLoader = dataLoader.DataLoader(
             label="Controls:",
             caption="Select a Control Shape file",
@@ -65,7 +65,7 @@ class ControlsWidget(QtWidgets.QWidget):
         self.saveControlsButton.setToolTip("Left Click: Save controls into their source file (new data appended to last item)"
                                            "\nRight Click: Save all controls to a new file overriding parents")
 
-        self.editControlsWidget = collapseableWidget.CollapsibleWidget('Edit Controls')
+        self.editControlsWidget = rigamajig2.ui.widgets.collapseableWidget.CollapsibleWidget('Edit Controls')
         self.editControlsWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
         self.editControlsWidget.setDarkPallete()
 

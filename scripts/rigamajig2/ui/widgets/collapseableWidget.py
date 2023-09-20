@@ -1,17 +1,14 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 """
-Collapseable Widget
+    project: rigamajig2
+    file: builderHeader.py
+    author: masonsmigel
+    date: 09/2023
+    discription: 
+
 """
-import sys
-
-from PySide2 import QtCore
-from PySide2 import QtGui
-from PySide2 import QtWidgets
-from shiboken2 import wrapInstance
-
-import maya.cmds as cmds
-import maya.OpenMayaUI as omui
-
-from rigamajig2.shared import common
+from PySide2 import QtWidgets, QtGui, QtCore
 
 darkPalette = QtGui.QPalette()
 
@@ -41,48 +38,6 @@ darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.Highlight, QtGui.QC
 darkPalette.setColor(QtGui.QPalette.Disabled, QtGui.QPalette.HighlightedText, QtGui.QColor(127, 127, 127))
 
 
-class breakpointCheckbox(QtWidgets.QCheckBox):
-
-    def __init__(self, *args, **kwargs):
-        super(breakpointCheckbox, self).__init__(*args, **kwargs)
-
-        styleSheet = (f"""
-                    QCheckBox {{
-                        spacing: 5px;
-                    }}
-                    
-                    QCheckBox::indicator {{
-                        width: 13px;
-                        height: 13px;
-                    }}
-                    
-                    QCheckBox::indicator:unchecked {{
-                        image: url({common.ICONS_PATH}/breakpoint_unchecked.png);
-                    }}
-                    
-                    QCheckBox::indicator:unchecked:hover {{
-                        image: url({common.ICONS_PATH}/breakpoint_hover.png);
-                    }}
-                    
-                    QCheckBox::indicator:unchecked:pressed {{
-                        image: url({common.ICONS_PATH}/breakpoint_checkedPress.png);
-                    }}
-                    
-                    QCheckBox::indicator:checked {{
-                        image: url({common.ICONS_PATH}/breakpoint_checked.png);
-                    }}
-                    
-                    QCheckBox::indicator:checked:hover {{
-                        image: url({common.ICONS_PATH}/breakpoint_checked.png);
-                    }}
-                    
-                    QCheckBox::indicator:checked:pressed {{
-                        image: url({common.ICONS_PATH}/breakpoint_checkedPress.png);
-                    }}
-                    """)
-        self.setStyleSheet(styleSheet)
-
-
 class CollapsibleHeader(QtWidgets.QWidget):
     """
     Collapsible Header. Used in the collapseable widget.
@@ -109,8 +64,9 @@ class CollapsibleHeader(QtWidgets.QWidget):
         self.iconLabel = QtWidgets.QLabel()
         self.iconLabel.setFixedWidth(self.COLLASPED_PIXMAP.width())
 
+        self.checkbox = None
         if addCheckbox:
-            self.checkbox = breakpointCheckbox()
+            self.checkbox = QtWidgets.QCheckBox()
 
         self.textLabel = QtWidgets.QLabel()
         self.textLabel.setAttribute(QtCore.Qt.WA_TransparentForMouseEvents)
@@ -181,6 +137,12 @@ class CollapsibleWidget(QtWidgets.QWidget):
         self.bodyLayout.setContentsMargins(4, 2, 4, 2)
         self.bodyLayout.setSpacing(5)
 
+        # set the background color
+        self.setAutoFillBackground(True)
+        pallete = self.palette()
+        pallete.setColor(self.backgroundRole(), pallete.color(QtGui.QPalette.Background).lighter(110))
+        self.setPalette(pallete)
+
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.addWidget(self.headerWidget)
@@ -232,21 +194,3 @@ class CollapsibleWidget(QtWidgets.QWidget):
             if self.headerWidget.checkbox.isChecked():
                 return True
         return False
-
-
-class BuilderHeader(CollapsibleWidget):
-
-    headerCheckedColor = QtGui.QColor(78, 116, 125)
-    headerDefaultColor = QtWidgets.QPushButton().palette().color(QtGui.QPalette.Button)
-
-    def __init__(self, text, parent=None, addCheckbox=False):
-        super(BuilderHeader, self).__init__(text, parent, addCheckbox)
-
-        # set the check of the header to set-checked method.
-        self.headerWidget.checkbox.clicked.connect(self.setChecked)
-
-    def setChecked(self, checked):
-        super(BuilderHeader, self).setChecked(checked)
-
-        color = self.headerCheckedColor if checked else self.headerDefaultColor
-        self.setHeaderBackground(color=color)

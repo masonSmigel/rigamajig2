@@ -20,7 +20,7 @@ import rigamajig2.maya.builder.constants
 import rigamajig2.maya.file as file
 import rigamajig2.shared.common
 from rigamajig2.shared import common
-from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget, scriptRunner
+from rigamajig2.ui.builder_ui.widgets import pathSelector, builderHeader, scriptRunner
 from rigamajig2.ui.builder_ui import style as ui_constants
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
@@ -40,7 +40,7 @@ class ModelWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = collapseableWidget.BuilderHeader(text='Model/ Setup Scene', addCheckbox=True)
+        self.mainCollapseableWidget = builderHeader.BuilderHeader(text='Model/ Setup Scene', addCheckbox=True)
         self.modelPathSelector = pathSelector.PathSelector(
             label="model:",
             caption="Select a Model file",

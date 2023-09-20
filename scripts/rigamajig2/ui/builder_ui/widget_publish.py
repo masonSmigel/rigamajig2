@@ -15,7 +15,7 @@ from PySide2 import QtGui
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
-from rigamajig2.ui.builder_ui.widgets import pathSelector, collapseableWidget, scriptRunner
+from rigamajig2.ui.builder_ui.widgets import pathSelector, builderHeader, scriptRunner
 from rigamajig2.ui.widgets import mayaMessageBox
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder import constants
@@ -36,7 +36,7 @@ class PublishWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget = collapseableWidget.BuilderHeader('Publish', addCheckbox=True)
+        self.mainCollapseableWidget = builderHeader.BuilderHeader('Publish', addCheckbox=True)
         self.pubScriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
 
         self.outFileSuffix = QtWidgets.QLineEdit()

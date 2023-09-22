@@ -350,7 +350,12 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             sceneSelectionAddLayerAction.setIcon(QtGui.QIcon(":QR_add.png"))
             sceneSelectionAddLayerAction.triggered.connect(partial(self.performAddLayer, True))
 
+            expandAllAction = QtWidgets.QAction("Expand All")
+            expandAllAction.triggered.connect(partial(self.deformLayersTree.expandAll))
+
             menu.addAction(sceneSelectionAddLayerAction)
+            menu.addSeparator()
+            menu.addAction(expandAllAction)
 
         menu.exec_(self.deformLayersTree.mapToGlobal(position))
 
@@ -394,7 +399,8 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
                 layers.createDeformLayer(suffix=suffix, connectionMethod=connectionMethod)
 
         # update the treeWidget with the new stuff
-        self.refreshButtonClicked()
+        currentLayerGroup = self.layerGroupComboBox.currentText()
+        self.updateTreeWidgetFromLayerGroup(currentLayerGroup)
 
     def insertDeformLayer(self, index):
         """
@@ -784,3 +790,8 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
 
         self.updateLayerGroups()
         self.layerGroupComboBox.setCurrentText(layerGroup)
+
+    def showEvent(self, e):
+        """ When the window is shown reset it"""
+        super(DeformLayerDialog, self).showEvent(e)
+        self.updateLayerGroups()

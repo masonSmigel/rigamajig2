@@ -24,7 +24,7 @@ from rigamajig2.maya import naming
 import rigamajig2.maya.joint
 import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.meta as meta
-from rigamajig2.ui.builder_ui.widgets import dataLoader, collapseableWidget
+from rigamajig2.ui.builder_ui.widgets import dataLoader, builderHeader
 from rigamajig2.ui.widgets import QPushButton, sliderGrp
 from rigamajig2.ui.builder_ui import style
 
@@ -51,7 +51,7 @@ class JointWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget = collapseableWidget.BuilderHeader('Skeleton', addCheckbox=True)
+        self.mainCollapseableWidget = builderHeader.BuilderHeader('Skeleton', addCheckbox=True)
 
         self.jointPositionDataLoader = dataLoader.DataLoader(
             "Joint Positions: ",
@@ -74,7 +74,7 @@ class JointWidget(QtWidgets.QWidget):
         self.loadJointPositionButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
         self.saveJointPositionButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
-        self.skeletonEditWidget = collapseableWidget.CollapsibleWidget('Edit Skeleton')
+        self.skeletonEditWidget = rigamajig2.ui.widgets.collapseableWidget.CollapsibleWidget('Edit Skeleton')
         self.skeletonEditWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
         self.skeletonEditWidget.setDarkPallete()
 

@@ -14,7 +14,7 @@ from PySide2 import QtWidgets
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
-from rigamajig2.ui.builder_ui.widgets import dataLoader, collapseableWidget, scriptRunner
+from rigamajig2.ui.builder_ui.widgets import dataLoader, builderHeader, scriptRunner
 from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder import core
@@ -34,7 +34,7 @@ class BuildWidget(QtWidgets.QWidget):
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = collapseableWidget.BuilderHeader(text='Build Rig', addCheckbox=True)
+        self.mainCollapseableWidget = builderHeader.BuilderHeader(text='Build Rig', addCheckbox=True)
 
         self.completeButton = QtWidgets.QPushButton("Build Rig")
         self.completeButton.setFixedHeight(45)

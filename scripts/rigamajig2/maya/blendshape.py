@@ -835,3 +835,5 @@ def transferBlendshape(blendshape, targetMesh, blendshapeName=None, copyConnecti
     weights = getWeights(blendshape=blendshape, geometry=base)
     # set the blendshape weights
     setWeights(blendshape=targetBlendshape, weights=weights, geometry=targetMesh)
+
+    return targetBlendshape

@@ -417,6 +417,10 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             else:
                 self.layerGroupLookupDict[layerGroup] = [mesh]
 
+        # we can add main if no layer groups exist in the scene. Since it will be the default that we add to.
+        if not layerGroupsList:
+            layerGroupsList.add("main")
+            self.layerGroupLookupDict["main"] = []
         # add the items to the combo box
         for layerGroup in layerGroupsList:
             self.layerGroupComboBox.addItem(layerGroup)
@@ -436,11 +440,6 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
 
         # get the number of layers to add
         if len(meshList) == 0:
-            return
-
-        numberOfLayers = max(deformLayer.DeformLayer(mesh).getNumberOfDeformationLayers() for mesh in meshList)
-
-        if numberOfLayers == 0:
             item = QtWidgets.QTreeWidgetItem()
             item.setText(0, "No deform Layers in the scene ... ")
             disabledColor = QtWidgets.QTreeWidget().palette().color(QtGui.QPalette.Foreground)

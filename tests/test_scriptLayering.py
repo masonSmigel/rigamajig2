@@ -28,27 +28,15 @@ class TestBuilderScriptLayering(TestCase):
         """
         Ensure the script layering is resulting in two lists of equal length
         """
-        pass
-        # with logger.DisableLogger():
-        #     tempDir = mayaunittest.Settings.temp_dir
-        #     rigFile = core.newRigEnviornmentFromArchetype(tempDir, "biped", "tempRig")
-        #
-        # for scriptType in [constants.PRE_SCRIPT, constants.POST_SCRIPT, constants.PUB_SCRIPT]:
-        #     archetypeScriptList = core.GetCompleteScriptList.getScriptList(rigFile, scriptType=scriptType)
-        #
-        #     scriptLocalPath = core.getRigData(rigFile, scriptType)
-        #
-        #     # manually build a list to compare to.
-        #     baseScriptsPath = os.path.join(common.ARCHETYPES_PATH, 'base', scriptLocalPath[0])
-        #     baseScriptList = core.validateScriptList(baseScriptsPath)
-        #
-        #     bipedScriptsPath = os.path.join(common.ARCHETYPES_PATH, 'biped', scriptLocalPath[0])
-        #     bipedScriptList = core.validateScriptList(bipedScriptsPath)
-        #
-        #     combinedCheckList = bipedScriptList + baseScriptList
-        #
-        #     # check if the lists are equal.
-        #     self.assertEqual(len(archetypeScriptList), len(combinedCheckList))
+
+        with logger.DisableLogger():
+            tempDir = mayaunittest.Settings.temp_dir
+            rigFile = core.newRigEnviornmentFromArchetype(tempDir, "biped", "tempRig")
+
+        for scriptType in [constants.PRE_SCRIPT, constants.POST_SCRIPT, constants.PUB_SCRIPT]:
+            archetypeScriptList = core.GetCompleteScriptList.getScriptList(rigFile, scriptType=scriptType)
+
+            self.assertTrue(len(archetypeScriptList))
 
 
 if __name__ == '__main__':

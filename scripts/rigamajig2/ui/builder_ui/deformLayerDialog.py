@@ -375,7 +375,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         layerGroupMenu.addActions(actionsToAdd)
         return layerGroupMenu
 
-    def addDeformLayer(self, nodes):
+    def addDeformLayer(self, node):
         """
         add a new deformation layer to the selected object
         :return:
@@ -384,23 +384,11 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         connectionMethod = self.combineMthodComboBox.currentText()
         layerGroup = self.layerGroupComboBox.currentText()
 
-        confirm = mayaMessageBox.MayaMessageBox(
-            title="Add new Deform Layers",
-            message=f"Are you sure you want to add new deform layers to {len(nodes)} meshes",
-            icon="help")
-        confirm.setButtonsYesNoCancel()
-        result = confirm.exec_()
-
-        if result == confirm.Yes:
-            for node in nodes:
-                # try to see if the node is already connected to a deformLayer
-                renderModel = deformLayer.getRenderModelFromLayer(node) or node
-                layers = deformLayer.DeformLayer(renderModel, layerGroup=layerGroup)
-                layers.createDeformLayer(suffix=suffix, connectionMethod=connectionMethod)
-
-        # update the treeWidget with the new stuff
-        currentLayerGroup = self.layerGroupComboBox.currentText()
-        self.updateTreeWidgetFromLayerGroup(currentLayerGroup)
+        # try to see if the node is already connected to a deformLayer
+        renderModel = deformLayer.getRenderModelFromLayer(node) or node
+        layers = deformLayer.DeformLayer(renderModel, layerGroup=layerGroup)
+        newLayer = layers.createDeformLayer(suffix=suffix, connectionMethod=connectionMethod)
+        return newLayer
 
     def insertDeformLayer(self, index):
         """
@@ -465,7 +453,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         for mesh in meshList:
 
             renderMeshItem = DeformerRenderMeshTreeItem(mesh)
-            self.deformLayersTree.addTopLevelItem(renderMeshItem)
+            self.deformLayersTree.insertTopLevelItem(0, renderMeshItem)
 
             deformerStack = deformer.getDeformerStack(mesh)
             # add any deformers that are on the main render mesh
@@ -749,22 +737,51 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         """ add layers from the selected nodes"""
         items = self.selectedItems()
 
-        renderNodes = set()
+        renderModels = set()
         for item in items:
-            topItem = self.getTopLevelItem(item).text(0)
-            renderNodes.add(topItem)
+            topItemText = self.getTopLevelItem(item).text(0)
+            renderModels.add(topItemText)
 
         sceneSelection = cmds.ls(sl=True)
         if sceneSelection and allowSceneSelection:
             for s in sceneSelection:
-                print("Add Scene stuff")
                 # ensure the selected node is not a deform layer
                 if cmds.objExists(f"{s}.{deformLayer.LAYER_ATTR}"):
                     continue
 
-                renderNodes.add(s)
+                renderModels.add(s)
 
-        self.addDeformLayer(renderNodes)
+        confirm = mayaMessageBox.MayaMessageBox(
+            title="Add new Deform Layers",
+            message=f"Are you sure you want to add new deform layers to {len(renderModels)} meshes",
+            icon="help")
+        confirm.setButtonsYesNoCancel()
+        result = confirm.exec_()
+
+        if result != confirm.Yes:
+            return None
+
+        for renderModel in renderModels:
+            # find the top level item findTopLevel
+            topLevelItems = self.getTreeWidgetItemsByType(DeformerRenderMeshTreeItem)
+
+            foundTopLevelItem = None
+            for topLevelItem in topLevelItems:
+                if topLevelItem.text(0) == renderModel:
+                    foundTopLevelItem = topLevelItem
+                    break
+
+            # add the new layer
+            deformLayerName = self.addDeformLayer(renderModel)
+
+            # then see how we should handle the UI
+            if foundTopLevelItem:
+                deformLayerItem = DeformLayerMeshTreeItem(deformLayerName, model=renderModel)
+                foundTopLevelItem.addChild(deformLayerItem)
+            else:
+                currentLayer = self.layerGroupComboBox.currentText()
+                self.updateLayerGroups()
+                self.layerGroupComboBox.setCurrentText(currentLayer)
 
     @QtCore.Slot()
     def performSetNewLayerGroup(self):

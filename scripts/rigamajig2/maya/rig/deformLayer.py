@@ -211,7 +211,7 @@ class DeformLayer(object):
                                  For now this will all be
                                  handled with a blendshape however at the self.bake step this can be baked into an
                                  optimized setup.
-        :return:
+        :return: name of the layer created
         """
         self._intialzeLayersSetup()
 
@@ -292,6 +292,8 @@ class DeformLayer(object):
             meta.tag(blendshapeNode, tag=DEFORM_LAYER_BSHP_TAG)
             # hide the previous layer
             cmds.setAttr("{}.v".format(previousLayer), 0)
+
+        return meshDup
 
     def getDeformationLayers(self):
         """ return the names of all the deformation layers on a given model"""

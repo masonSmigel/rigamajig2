@@ -106,13 +106,31 @@ def getRenderModelFromLayer(mesh):
     """
     if not cmds.objExists(mesh):
         raise RuntimeError(f"Mesh with the name {mesh} does not exist in the scene")
-    if not cmds.objExists(f"{mesh}.{LAYER_ATTR}"):
-        raise RuntimeError(f"Mesh '{mesh}' is not a deform layer")
 
     if cmds.objExists(f"{mesh}.{LAYERS_ATTR}"):
         return mesh
 
+    if not cmds.objExists(f"{mesh}.{LAYER_ATTR}"):
+        return None
+
     return meta.getMessageConnection(f"{mesh}.{LAYER_ATTR}")
+
+
+def getLayerGroups():
+    """
+    get a list of all layer groups in a scene
+    :return: return a list of layer groups in the scene
+    """
+    meshWithDeformLayers = meta.getTagged("hasDeformLayers")
+
+    layerGroupsList = set()
+    for mesh in meshWithDeformLayers:
+        # get the layer group
+        deformLayerObj = DeformLayer(mesh)
+        layerGroup = deformLayerObj.getDeformLayerGroup()
+
+        layerGroupsList.add(layerGroup)
+    return list(layerGroupsList)
 
 
 class DeformLayer(object):
@@ -173,6 +191,12 @@ class DeformLayer(object):
         attr.unlock(self.model, attrs=LAYER_GROUP_ATTR)
         attr.setPlugValue(f"{self.model}.{LAYER_GROUP_ATTR}", layerGroup)
         attr.lock(self.model, attrs=LAYER_GROUP_ATTR)
+
+    def getDeformLayerGroup(self):
+        """Get the name of the deform layer group"""
+        if cmds.objExists(f"{self.model}.{LAYER_GROUP_ATTR}"):
+            return cmds.getAttr(f"{self.model}.{LAYER_GROUP_ATTR}")
+        return None
 
     def createDeformLayer(self, suffix=None, connectionMethod='bshp'):
         """

@@ -228,7 +228,8 @@ class DeformationWidget(QtWidgets.QWidget):
     @QtCore.Slot()
     def openDeformLayerDialog(self):
         from rigamajig2.ui.builder_ui import deformLayerDialog
-        deformLayerDialog.DeformLayerDialog.showDialog()
+        dialogInstance = deformLayerDialog.DeformLayerDialog()
+        dialogInstance.show()
 
     @QtCore.Slot()
     def loadAllSkins(self):

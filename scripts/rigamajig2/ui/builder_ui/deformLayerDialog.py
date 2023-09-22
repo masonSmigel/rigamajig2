@@ -777,6 +777,8 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             if foundTopLevelItem:
                 deformLayerItem = DeformLayerMeshTreeItem(deformLayerName, model=renderModel)
                 foundTopLevelItem.addChild(deformLayerItem)
+                # ensure that the deformLayer visability is handled when adding items this way.
+                self.handleDeformLayerTree(deformLayerItem, 0)
             else:
                 currentLayer = self.layerGroupComboBox.currentText()
                 self.updateLayerGroups()

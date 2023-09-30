@@ -36,8 +36,6 @@ from rigamajig2.maya.builder import constants
 logger = logging.getLogger(__name__)
 
 
-# TODO: All loads and Saves must be converted to using a list!! Save should save to the last item in the list.
-
 # pylint:disable=too-many-public-methods
 class Builder(object):
     """
@@ -51,11 +49,9 @@ class Builder(object):
         """
         self.path = None
 
-        # # reset the enviornment varriables when a new class is initialized
-        # os.environ['RIGAMJIG_FILE'] = str()
-        # os.environ['RIGAMJIG_ENV'] = str()
+        if rigFile:
+            self.setRigFile(rigFile)
 
-        self.setRigFile(rigFile)
         self.componentList = list()
 
         self._availableComponents = core.findComponents()
@@ -756,10 +752,6 @@ class Builder(object):
 
         :param rigFile: Path of the rig file to set.
         """
-        if not rigFile:
-            self.rigFile = None
-            return
-
         if not os.path.exists(rigFile):
             raise RuntimeError("'{0}' does not exist".format(rigFile))
         self.rigFile = rigFile

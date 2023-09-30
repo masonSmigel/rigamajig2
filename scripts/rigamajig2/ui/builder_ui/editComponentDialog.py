@@ -186,7 +186,7 @@ class EditComponentDialog(QtWidgets.QDialog):
                 self.addWidgetFromParameter(
                     parameter=key,
                     container=self.currentComponent.getContainer(),
-                    parameterType=type(component._componentParameters[key])
+                    parameterType=type(component._componentParameters[key]["value"])
                     )
 
     def addWidgetFromParameter(self, parameter, container, parameterType):

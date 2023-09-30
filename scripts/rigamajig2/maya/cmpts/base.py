@@ -89,23 +89,24 @@ class Base(object):
         self.defineParameter(parameter="rigParent", value=self.rigParent, dataType="string")
         self.defineParameter(parameter="componentTag", value=self.componentTag, dataType="string")
 
+    def help(self):
+        """
+        """
+        returnString = "-" * 80
+        returnString += f"\nRigamajig Component: <{self.__class__.__module__} object at {hex(id(self))}>\n"
+        for key in self._componentParameters:
+            returnString += f"\t{key} = {self._componentParameters[key]['value']}\n"
+
+        returnString += "-" * 80
+        print(returnString)
+
     @classmethod
     def fromContainer(cls, container):
         """ Create a component instance from a container"""
         metaNode = rigamajig2.maya.meta.MetaNode(container)
-        name = metaNode.getData("name")
-        input = metaNode.getData("input")
-        enabled = metaNode.getData("enabled")
-        size = metaNode.getData("size")
-        rigParent = metaNode.getData("rigParent")
-        componentTag = metaNode.getData("componentTag")
+        containerData = metaNode.getAllData()
 
-        componentInstance = cls(name=name,
-                                input=input,
-                                enabled=enabled,
-                                size=size,
-                                rigParent=rigParent,
-                                componentTag=componentTag)
+        componentInstance = cls.fromData(containerData)
 
         return componentInstance
 
@@ -475,9 +476,10 @@ class Base(object):
 
     def _updateClassParameters(self):
         """
-        loadSettings meta data from the settings node into a dictionary
+        loadSettings meta data from the settings node into a dictionary.
+        Only updates the value of the component parameters
         """
-        newComponentData = OrderedDict()
+        newComponentData = self._componentParameters.copy()
         for key in self._componentParameters.keys():
 
             metaNode = rigamajig2.maya.meta.MetaNode(self.container)
@@ -488,7 +490,7 @@ class Base(object):
 
             if key in data.keys():
                 setattr(self, key, data[key])
-                newComponentData[key] = data[key]
+                newComponentData[key]["value"] = data[key]
 
         self._componentParameters.update(newComponentData)
 
@@ -510,13 +512,18 @@ class Base(object):
 
     def getComponentData(self):
         """Get all component Data """
-        # create an info dictionary with the important component settings.
-        # This is used to save the component to a file
-        infoDict = OrderedDict()
-        data = self._componentParameters
+        # ensure we are saving the most up to date versions of our code
+        self._updateClassParameters()
 
-        for key in list(self._componentParameters.keys()):
-            infoDict[key] = data[key]["value"]
+        # create an info dictionary with the important component settings.
+        infoDict = OrderedDict()
+
+        for key in self._componentParameters.keys():
+            # Check if the value associated with the key is a dictionary
+            if isinstance(self._componentParameters[key], dict):
+                value = self._componentParameters[key].get("value")
+                if value is not None:
+                    infoDict[key] = value
 
         logger.debug(infoDict)
         return infoDict

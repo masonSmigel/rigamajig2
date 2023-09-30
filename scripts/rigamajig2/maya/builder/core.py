@@ -27,7 +27,6 @@ from rigamajig2.shared.logger import Logger
 from rigamajig2.shared import common
 from rigamajig2.shared import path as rig_path
 from rigamajig2.shared import runScript
-from rigamajig2.maya.builder.constants import DATA_PATH
 from rigamajig2.maya.data import abstract_data
 
 # import the message box popup and buttons
@@ -35,10 +34,14 @@ from rigamajig2.ui.widgets import mayaMessageBox
 
 logger = logging.getLogger(__name__)
 
+CMPT_PATH = os.path.abspath(os.path.join(__file__, '../../cmpts'))
+_EXCLUDED_FOLDERS = ['face']
+_EXCLUDED_FILES = ['__init__.py', 'base.py']
 CMPT_ROOT_MODULE = 'cmpts'
 
 SCRIPT_FOLDER_CONSTANTS = ['pre_scripts', 'post_scripts', 'pub_scripts']
 
+DATA_PATH = os.path.abspath(os.path.join(__file__, '../../data'))
 DATA_EXCLUDE_FILES = ['__init__.py']
 DATA_EXCLUDE_FOLDERS = []
 
@@ -46,7 +49,7 @@ DATA_MERGE_METHODS = ['new', 'merge', 'overwrite']
 
 
 # Component Utilities
-def findComponents(path, excludedFolders, excludedFiles):
+def findComponents(path=CMPT_PATH, excludedFolders=_EXCLUDED_FOLDERS, excludedFiles=_EXCLUDED_FILES):
     """
     Find all valid components within a folder
     :param path: path to search for components
@@ -127,6 +130,30 @@ def validateComponent(filePath):
             return resultDict
 
     return False
+
+
+def createComponentClassInstance(componentType):
+    """
+    Get an instance of the component object based on the componentType
+    :param componentType: type of the component to get the class instance from.
+    :return:
+    """
+    componentLookupDict = findComponents(CMPT_PATH, _EXCLUDED_FOLDERS, _EXCLUDED_FILES)
+
+    if componentType not in list(componentLookupDict.keys()):
+        # HACK: this is a work around to account for the fact that some old .rig files use the cammel cased components
+        module, cls = componentType.split('.')
+        newClass = cls[0].lower() + cls[1:]
+        tempModuleName = module + "." + newClass
+        if tempModuleName in list(componentLookupDict.keys()):
+            componentType = tempModuleName
+
+    modulePath = componentLookupDict[componentType][0]
+    className = componentLookupDict[componentType][1]
+    moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
+    classInstance = getattr(moduleObject, className)
+
+    return classInstance
 
 
 # Data Type Utilities
@@ -234,14 +261,18 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
 
     # sometimes we may want to save other data types into a different data loader.
     # Here we need to filter only files of the data type we want
-    fileStack = [dataFile for dataFile in fileStack if abstract_data.AbstractData.getDataType(dataFile) == dataType]
+    filteredFileStack = []
+    for dataFile in fileStack:
+        dataFileType = abstract_data.AbstractData.getDataType(dataFile)
+        if dataFileType == dataType or dataFileType == "AbstractData":
+            filteredFileStack.append(dataFile)
 
     # first lets get a list of all the nodes that has been previously saved
     # we can save that into a dictionary with the file they came from and a list to compare to the new data.
     # (check for deleted/missing nodes)
     sourceNodesDict = dict()
     sourceNodesList = set()
-    for dataFile in fileStack:
+    for dataFile in filteredFileStack:
         dataClass = createDataClassInstance(dataType=dataType)
         dataClass.read(dataFile)
         nodes = dataClass.getKeys()
@@ -250,12 +281,12 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
         sourceNodesList.update(nodes)
 
     # since we want to replace values from the bottom of the stack first we need to reverse our filestack
-    searchFileStack = fileStack.copy()
+    searchFileStack = filteredFileStack.copy()
     searchFileStack.reverse()
 
     # work on saving the node data of nodes that have been saved first. build a source dictionary to save this data to
     saveDataDict = dict()
-    for dataFile in fileStack:
+    for dataFile in filteredFileStack:
         saveDataDict[dataFile] = list()
 
     # we also need to build a list of nodes that we have already saved.

@@ -23,15 +23,13 @@ import maya.api.OpenMaya as om2
 import rigamajig2.shared.common as common
 import rigamajig2.shared.path as rig_path
 import rigamajig2.maya.data.abstract_data as abstract_data
+import rigamajig2.maya.data.component_data as component_data
 import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
 
 # BUILDER
 import rigamajig2.maya.builder.data
 from rigamajig2.maya.builder import model
-# from rigamajig2.maya.builder import guides
-# from rigamajig2.maya.builder import controlShapes
-# from rigamajig2.maya.builder import deform
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder import constants
 
@@ -60,15 +58,10 @@ class Builder(object):
         self.setRigFile(rigFile)
         self.componentList = list()
 
-        self._availableComponents = core.findComponents(
-            constants.CMPT_PATH,
-            constants._EXCLUDED_FOLDERS,
-            constants._EXCLUDED_FILES
-            )
+        self._availableComponents = core.findComponents()
 
         # varibles we need
         self.topSkeletonNodes = list()
-        self.loadComponentsFromFile = False
 
         # turn off the logger
         if log is False:
@@ -77,12 +70,6 @@ class Builder(object):
     def getAvailableComponents(self):
         """ Get all available components"""
         return self._availableComponents
-
-    def getComponentRefDict(self):
-        """
-        Get the component reference dictionary
-        """
-        return core.findComponents(constants.CMPT_PATH, constants._EXCLUDED_FOLDERS, constants._EXCLUDED_FILES)
 
     def getAbsoultePath(self, path):
         """
@@ -135,7 +122,8 @@ class Builder(object):
 
         fileStack = common.toList(fileStack)
         dataToSave = rigamajig2.maya.builder.data.gatherJoints()
-        savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData", method=method)
+        savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData",
+                                             method=method)
         if savedFiles:
             logger.info("Joint positions Saved -- complete")
             return savedFiles
@@ -259,28 +247,32 @@ class Builder(object):
         :param str method: method of data merging to apply. Default is "merge"
         """
 
-        cmptList = [c.name for c in self.componentList]
-        saveDict = core.performLayeredSave(dataToSave=cmptList,
+        # because component data is gathered from the class but saved with the name as a key
+        # this needs to be done in steps. First we can define our save dictionaries using the layered save...
+        componentNameList = [c.name for c in self.componentList]
+        saveDict = core.performLayeredSave(dataToSave=componentNameList,
                                            fileStack=fileStack,
-                                           dataType="AbstractData",
+                                           dataType="ComponentData",
                                            method=method,
                                            doSave=False)
 
+        # if we escape from the save then we can return
+        if not saveDict:
+            return
+
+        # ... next loop throught the save dict and gather component data based on the component name.
         for dataFile in saveDict:
-            componentData = OrderedDict()
-            componentDataObj = abstract_data.AbstractData()
+            componentDataObj = component_data.ComponentData()
 
             # loop through the list of component names
             for componentName in saveDict[dataFile]:
                 cmpt = self.findComponent(name=componentName)
-                componentData[componentName] = cmpt.getComponentData()
-            componentDataObj.setData(componentData)
+                componentDataObj.gatherData(cmpt)
             componentDataObj.write(dataFile)
             logger.info(f"Component Data saved to {dataFile}")
 
         if saveDict:
             logger.info("Components Saved -- Complete")
-            return saveDict
 
     def loadComponents(self, paths=None):
         """
@@ -295,67 +287,19 @@ class Builder(object):
             # make the path an absoulte
             path = self.getAbsoultePath(path)
 
-            componentDataObj = abstract_data.AbstractData()
+            componentDataObj = component_data.ComponentData()
             componentDataObj.read(path)
             componentData = componentDataObj.getData()
 
             for cmpt in list(componentData.keys()):
-
-                # dynamically load component module into python
-                moduleName = componentData[cmpt]['type']
-
-                cmptDict = self.getComponentRefDict()
-                if moduleName not in list(cmptDict.keys()):
-                    # This is a work around to account for the fact that some old .rig files use the cammel cased components
-                    module, cls = moduleName.split('.')
-                    newClass = cls[0].lower() + cls[1:]
-                    tempModuleName = module + "." + newClass
-                    if tempModuleName in list(cmptDict.keys()):
-                        moduleName = tempModuleName
-
-                modulePath = cmptDict[moduleName][0]
-                className = cmptDict[moduleName][1]
-                moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
-
-                componentClass = getattr(moduleObject, className)
-                instance = componentClass.fromData(componentData[cmpt])
+                instance = common.getFirstIndex(componentDataObj.applyData(cmpt))
 
                 # we only want to add components with a new name. Each component should have a unique name
-                if instance.name not in [c.name for c in self.componentList]:
-                    self.appendComponents(instance)
-                self.loadComponentsFromFile = True
+                componentNameList = [c.name for c in self.componentList]
+                if instance.name not in componentNameList:
+                    self.componentList.append(instance)
 
         logger.info("components loaded -- complete")
-
-    # def loadComponentSettings(self, paths=None):
-    #     """
-    #     loadSettings component settings from the rig builder
-    #
-    #     :param str paths: Path to the json file. if none is provided use the data from the rigFile
-    #     """
-    #     if not paths:
-    #         paths = paths or self.getRigData(self.rigFile, constants.COMPONENTS)
-    #
-    #     if self.loadComponentsFromFile:
-    #
-    #         for path in common.toList(paths):
-    #             # make the path an absoulte
-    #             path = self.getAbsoultePath(path)
-    #
-    #             componentDataObj = abstract_data.AbstractData()
-    #             componentDataObj.read(path)
-    #             componentData = componentDataObj.getData()
-    #             for cmpt in self.componentList:
-    #                 # here we can use get to return an empty list of the key doesnt exist.
-    #                 # This doest happen often but can occur if the component was renamed
-    #                 cmpt.loadSettings(componentData.get(cmpt.name, dict()))
-
-    def loadMetadataToComponentSettings(self):
-        """
-        Load the metadata stored on the container attributes to the component objects.
-        """
-        for cmpt in self.componentList:
-            cmpt._updateClassParameters()
 
     def loadControlShapes(self, paths=None, applyColor=True):
         """
@@ -383,7 +327,8 @@ class Builder(object):
         """
 
         allControls = rigamajig2.maya.builder.data.gatherControlShapes()
-        savedFiles = core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData", method=method)
+        savedFiles = core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData",
+                                             method=method)
         if savedFiles:
             logger.info("Control Shapes Save -- Complete")
             return savedFiles
@@ -412,7 +357,8 @@ class Builder(object):
         # path = path or rigFileData
         fileStack = common.toList(fileStack)
         dataToSave = rigamajig2.maya.builder.data.gatherGuides()
-        savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData", method=method)
+        savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData",
+                                             method=method)
         if savedFiles:
             logger.info("Guides Save  -- complete")
             return savedFiles
@@ -441,7 +387,8 @@ class Builder(object):
         # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
 
         allPsds = rigamajig2.maya.builder.data.gatherPoseReaders()
-        savedFiles = core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData", method="merge")
+        savedFiles = core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData",
+                                             method="merge")
         # deform.savePoseReaders(path)
         if savedFiles:
             logger.info("Pose Readers Save -- Complete")
@@ -507,17 +454,6 @@ class Builder(object):
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
         rigamajig2.maya.builder.data.saveSkinWeights(path)
-
-    # def saveSHAPESData(self, path=None):
-    #     """ Save SHAPES data """
-    #     path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
-    #     rigamajig2.maya.builder.data.saveSHAPESData(path)
-    #
-    # def loadSHAPESData(self, path=None):
-    #     """ Load data from SHAPES file"""
-    #     path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SHAPES)) or ''
-    #     if rigamajig2.maya.builder.data.loadSHAPESData(path):
-    #         logger.info("SHAPES data loaded")
 
     def loadDeformers(self, paths=None):
         """ Load additional deformers

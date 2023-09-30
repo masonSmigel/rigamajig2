@@ -30,10 +30,11 @@ from rigamajig2.maya import attr as attr
 from rigamajig2.maya import naming as naming
 from rigamajig2.maya import container as rig_container
 from rigamajig2.maya.builder import builder
+from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import constants
 from rigamajig2.ui.builder_ui.widgets import builderHeader, dataLoader
 from rigamajig2.ui.widgets import QPushButton
 from rigamajig2.ui.builder_ui import style
-from rigamajig2.maya.builder.constants import GUIDES, COMPONENTS
 
 ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 
@@ -64,7 +65,7 @@ class InitializeWidget(QtWidgets.QWidget):
                                                           fileFilter=common.JSON_FILTER,
                                                           fileMode=1,
                                                           dataFilteringEnabled=True,
-                                                          dataFilter=["AbstractData"])
+                                                          dataFilter=["AbstractData", "ComponentData"])
         self.loadComponentsButton = QtWidgets.QPushButton("Load Cmpts")
         self.loadComponentsButton.setIcon(QtGui.QIcon(common.getIcon("loadComponents.png")))
         self.appendComponentsButton = QtWidgets.QPushButton("Append Cmpts")
@@ -161,10 +162,10 @@ class InitializeWidget(QtWidgets.QWidget):
         self.componentManager.clearTree()
 
         # update data within the rig
-        cmptsFiles = self.builder.getRigData(self.builder.getRigFile(), COMPONENTS)
+        cmptsFiles = self.builder.getRigData(self.builder.getRigFile(), constants.COMPONENTS)
         self.componentsDataLoader.selectPaths(cmptsFiles)
 
-        guidesFiles = self.builder.getRigData(self.builder.getRigFile(), GUIDES)
+        guidesFiles = self.builder.getRigData(self.builder.getRigFile(), constants.GUIDES)
         self.guideDataLoader.selectPaths(guidesFiles)
 
     def runWidget(self):
@@ -192,7 +193,7 @@ class InitializeWidget(QtWidgets.QWidget):
     @QtCore.Slot()
     def saveComponents(self):
         """ Save component setup from json using the builder """
-        self.builder.loadMetadataToComponentSettings()
+        # self.builder.loadMetadataToComponentSettings()
         self.builder.saveComponents(self.componentsDataLoader.getFileList(absolute=True))
 
     @QtCore.Slot()
@@ -245,36 +246,11 @@ def _getComponentIcon(cmpt):
 
 def _getComponentColor(cmpt):
     """get the ui color for the component"""
-    tmpComponentObj = _createComponentObject(cmpt)
+    tmpComponentObj = core.createComponentClassInstance(cmpt)
     uiColor = tmpComponentObj.UI_COLOR
     # after we get the UI color we can delte the tmp component instance
     del tmpComponentObj
     return uiColor
-
-
-def _createComponentObject(componentType=None):
-    """
-    Get an instance of the component object based on the componentType
-    :param componentType: type of the component to get the class instance from.
-    :return:
-    """
-    tempBuilder = builder.Builder()
-    cmptDict = tempBuilder.getComponentRefDict()
-
-    if componentType not in list(cmptDict.keys()):
-        # HACK: this is a work around to account for the fact that some old .rig files use the cammel cased components
-        module, cls = componentType.split('.')
-        newClass = cls[0].lower() + cls[1:]
-        tempModuleName = module + "." + newClass
-        if tempModuleName in list(cmptDict.keys()):
-            componentType = tempModuleName
-
-    modulePath = cmptDict[componentType][0]
-    className = cmptDict[componentType][1]
-    moduleObject = __import__(modulePath, globals(), locals(), ["*"], 0)
-    classInstance = getattr(moduleObject, className)
-
-    return classInstance
 
 
 # pylint: disable=too-many-public-methods
@@ -497,11 +473,11 @@ class ComponentManager(QtWidgets.QWidget):
         :param rigParent: component rigParent
         :return:
         """
-        componentObject = _createComponentObject(componentType)
+        componentObject = core.createComponentClassInstance(componentType)
         cmpt = componentObject(name=name, input=ast.literal_eval(str(input)), rigParent=rigParent)
 
         self.createComponentItem(name=name, componentType=componentType, buildStep='unbuilt', container=None)
-        self.builder.appendComponents([cmpt])
+        self.builder.componentList.append(cmpt)
         cmpt._initalizeComponent()
         return cmpt
 
@@ -936,7 +912,7 @@ class CreateComponentDialog(QtWidgets.QDialog):
         self.discriptionTextEdit.clear()
 
         componentType = self.componentTypeComboBox.currentText()
-        componentObject = _createComponentObject(componentType)
+        componentObject = core.createComponentClassInstance(componentType)
 
         classDocs = componentObject.__doc__ or ''
         initDocs = componentObject.__init__.__doc__ or ''

@@ -27,12 +27,6 @@ class PSDData(maya_data.MayaData):
         """gather data from node"""
 
         node = psd.getAssociateJoint(node)
-        # # first check what node we got. it should be the joint.
-        # if not cmds.objExists("{}.poseReaderRoot".format(node)):
-        #     raise RuntimeError("'{}' does not have a pose reader assiciated with it.".format(node))
-        # if meta.hasTag(node, "poseReader"):
-        #     node = meta.getMessageConnection("{}.poseReaderRoot".format(node))
-        #     node = common.getFirstIndex(node)
 
         super(PSDData, self).gatherData(node)
 

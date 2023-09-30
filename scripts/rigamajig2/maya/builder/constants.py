@@ -8,14 +8,6 @@
     discription: 
 
 """
-import os
-# BUILD ENVIORNMENT GLOBLALS
-
-
-CMPT_PATH = os.path.abspath(os.path.join(__file__, '../../cmpts'))
-DATA_PATH = os.path.abspath(os.path.join(__file__, '../../data'))
-_EXCLUDED_FOLDERS = ['face']
-_EXCLUDED_FILES = ['__init__.py', 'base.py']
 
 # RIG FILE KEYS
 BASE_ARCHETYPE = 'archetype_parent'

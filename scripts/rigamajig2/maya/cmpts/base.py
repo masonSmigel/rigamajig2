@@ -1,19 +1,17 @@
 """
 base component
 """
-import maya.cmds as cmds
-import maya.mel as mel
+import logging
 from collections import OrderedDict
 
-import rigamajig2.maya.container
-import rigamajig2.maya.attr
-import rigamajig2.maya.meta
-import rigamajig2.maya.color
-import rigamajig2.maya.data.joint_data as joint_data
-import rigamajig2.maya.transform as transform
-from rigamajig2.maya.rig.control import CONTROLTAG
+import maya.cmds as cmds
+import maya.mel as mel
 
-import logging
+import rigamajig2.maya.attr
+import rigamajig2.maya.color
+import rigamajig2.maya.container
+import rigamajig2.maya.meta
+from rigamajig2.maya.rig.control import CONTROLTAG
 
 logger = logging.getLogger(__name__)
 
@@ -95,7 +93,9 @@ class Base(object):
         returnString = "-" * 80
         returnString += f"\nRigamajig Component: <{self.__class__.__module__} object at {hex(id(self))}>\n"
         for key in self._componentParameters:
-            returnString += f"\t{key} = {self._componentParameters[key]['value']}\n"
+            tooltip = self._componentParameters[key].get('tooltip')
+            tooltip_string = f"\t({tooltip})" if tooltip else ""
+            returnString += f"\t{key} = {self._componentParameters[key]['value']} {tooltip_string}\n"
 
         returnString += "-" * 80
         print(returnString)
@@ -140,8 +140,8 @@ class Base(object):
             if key not in REQUIRED_PARAMETERS:
                 value = data.get(key)
                 if not value:
-                    continue
-                componentInstance.defineParameter(parameter=key, value=data[key])
+                    logger.warning(f"{componentInstance.name}: Failed to get value for: {key}")
+                componentInstance.defineParameter(parameter=key, value=value)
 
         return componentInstance
 
@@ -344,14 +344,14 @@ class Base(object):
         rigamajig2.maya.container.addParentAnchor(self.rootHierarchy, container=self.container)
         rigamajig2.maya.container.addChildAnchor(self.rootHierarchy, container=self.container)
 
-        # for the containers we need to publish all controls within a container.
+        # for the containers we need to _publish all controls within a container.
         allNodes = rigamajig2.maya.container.getNodesInContainer(self.container, getSubContained=True)
         for currentNode in allNodes:
             if rigamajig2.maya.meta.hasTag(currentNode, CONTROLTAG):
                 rigamajig2.maya.container.addPublishNodes(currentNode)
 
     def publishAttributes(self):
-        """publish attributes. implement in subclass"""
+        """_publish attributes. implement in subclass"""
         pass
 
     def finalize(self):
@@ -408,7 +408,7 @@ class Base(object):
             return cmds.getAttr("{}.{}".format(self.container, 'build_step'))
         return 0
 
-    def defineParameter(self, parameter, value, dataType=None, hide=True, lock=False):
+    def defineParameter(self, parameter, value, dataType=None, hide=True, lock=False, tooltip=None):
         """
         Define a parameter component. This makes up the core data structure of a component.
         This defines parameters and behaviors and is used to build the rest of the functionality but should NOT define the structre.
@@ -418,6 +418,7 @@ class Base(object):
         :param dataType: the type of data stored in the value. Default is derived from the value.
         :param bool hide: hide the added parameter from the channel box
         :param bool lock: lock the added parameter
+        :param bool tooltip: Define a tooltip for the parameter. Shows up in the UI.
         """
 
         if not dataType:
@@ -425,6 +426,9 @@ class Base(object):
 
         logger.debug(f"adding component parameter {parameter}, {value} ({dataType})")
         self._componentParameters[parameter] = {"value": value, "dataType": dataType}
+
+        if tooltip:
+            self._componentParameters[parameter].update({"tooltip": tooltip})
 
         metaData = rigamajig2.maya.meta.MetaNode(self.container)
         metaData.setData(attr=parameter, value=value, attrType=dataType, hide=hide, lock=lock)

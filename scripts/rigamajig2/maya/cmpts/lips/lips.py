@@ -9,25 +9,22 @@
 
 """
 import maya.cmds as cmds
+
 import rigamajig2.maya.cmpts.base
-from rigamajig2.shared import common
-from rigamajig2.maya.rig import control
-from rigamajig2.maya.rig import spaces
-from rigamajig2.maya.rig import live
 from rigamajig2.maya import attr
-from rigamajig2.maya import transform
-from rigamajig2.maya import joint
-from rigamajig2.maya import meta
-from rigamajig2.maya import node
-from rigamajig2.maya import curve
-from rigamajig2.maya import hierarchy
-from rigamajig2.maya import mathUtils
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import constrain
-from rigamajig2.maya import skinCluster
-from rigamajig2.maya import sdk
-from rigamajig2.maya import connection
+from rigamajig2.maya import curve
+from rigamajig2.maya import hierarchy
+from rigamajig2.maya import joint
+from rigamajig2.maya import mathUtils
+from rigamajig2.maya import meta
+from rigamajig2.maya import node
+from rigamajig2.maya import transform
 from rigamajig2.maya.cmpts.lips import lipsUtil
+from rigamajig2.maya.rig import control
+from rigamajig2.maya.rig import live
+from rigamajig2.shared import common
 
 GUIDE_SCALE = 0.2
 
@@ -142,9 +139,11 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         # create the upperControlGuides
         upperSubControls = self.createControlGuides(uppGuideCurve, uppSubControlNames, subControlParams,
-                                                    parent=subControlHierarchy, color='lightorange', size=0.5 * self.size)
+                                                    parent=subControlHierarchy, color='lightorange',
+                                                    size=0.5 * self.size)
         lowerSubControls = self.createControlGuides(lowGuideCurve, lowSubControlNames, subControlParams,
-                                                    parent=subControlHierarchy, color='lightorange', size=0.5 * self.size)
+                                                    parent=subControlHierarchy, color='lightorange',
+                                                    size=0.5 * self.size)
 
         self.subControlGuides = [upperLipMain[0]] + upperSubControls + [upperLipMain[-1]] + lowerSubControls
 
@@ -784,16 +783,18 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                 ctl = self.lCorner if side == 'l' else self.rCorner
                 attr.addSeparator(ctl.name, '---')
 
-                zipAttr = attr.createAttr(ctl.name, "zip", "float", value=0, minValue=0, maxValue=10)
+                zipAttr = attr.createAttr(ctl.name, longName="zip", attributeType="float", value=0, minValue=0,
+                                          maxValue=10)
                 cmds.connectAttr(zipAttr, "{}.{}Zipper".format(self.paramsHierarchy, side))
 
-                falloffAttr = attr.createAttr(ctl.name, "zipperFalloff", "float", value=3, minValue=0, maxValue=10)
+                falloffAttr = attr.createAttr(ctl.name, longName="zipperFalloff", attributeType="float", value=3,
+                                              minValue=0, maxValue=10)
                 cmds.connectAttr(falloffAttr, "{}.{}ZipperFalloff".format(self.paramsHierarchy, side))
 
         # setup some lip curl attributes
         for side in 'lr':
             ctl = self.lCorner if side == 'l' else self.rCorner
-            tweaker = self.subControls[5] if side=='l' else self.subControls[0]
+            tweaker = self.subControls[5] if side == 'l' else self.subControls[0]
 
             attr.addSeparator(ctl.name, '---')
             curlAttr = attr.createAttr(ctl.name, "curl", "float", value=0)

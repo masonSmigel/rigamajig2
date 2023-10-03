@@ -2,8 +2,8 @@
 Functions for working with containers
 """
 import maya.cmds as cmds
+
 import rigamajig2.shared.common as common
-from functools import wraps
 
 
 def isContainer(name):
@@ -132,12 +132,12 @@ def addPublishAttr(attr, assetAttrName=None, bind=True):
     """
     Publish an attribute
 
-    :param str attr: contained node attribute to publish. Attribute should be listed as a plug:
+    :param str attr: contained node attribute to _publish. Attribute should be listed as a plug:
     :param str assetAttrName: Name used on the container. if node it will be auto generated from the node and attr name
-    :param bool bind: bind the publish node to the container
+    :param bool bind: bind the _publish node to the container
     """
     if not cmds.objExists(attr):
-        raise RuntimeError("Attribute {} does not exist. Cannot publish attribute".format(attr))
+        raise RuntimeError("Attribute {} does not exist. Cannot _publish attribute".format(attr))
 
     if not assetAttrName: assetAttrName = attr.replace('.', '_')
 
@@ -154,14 +154,14 @@ def addPublishNodes(nodes, container=None, bind=True):
     """
     Publish a node.
 
-    :param str list nodes: contained node to publish.
+    :param str list nodes: contained node to _publish.
     :param str container: Optional- specify a container to add nodes to if nodes are not in a container
-    :param bool bind: bind the publish node to the container
+    :param bool bind: bind the _publish node to the container
     """
     nodes = common.toList(nodes)
     for node in nodes:
         if not cmds.objExists(node):
-            raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
+            raise RuntimeError("Node {} does not exist. Cannot _publish Node".format(node))
 
         assetNodeName = node
 
@@ -189,7 +189,7 @@ def addParentAnchor(node, container=None, assetNodeName=None):
     """
     node = common.getFirstIndex(node)
     if not cmds.objExists(node):
-        raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
+        raise RuntimeError("Node {} does not exist. Cannot _publish Node".format(node))
 
     if not assetNodeName: assetNodeName = 'parent'
 
@@ -212,7 +212,7 @@ def addChildAnchor(node, container=None, assetNodeName=None):
     """
     node = common.getFirstIndex(node)
     if not cmds.objExists(node):
-        raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
+        raise RuntimeError("Node {} does not exist. Cannot _publish Node".format(node))
 
     if not assetNodeName: assetNodeName = 'child'
 

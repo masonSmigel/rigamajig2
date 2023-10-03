@@ -12,12 +12,12 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
+from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
 # RIGAMAJIG2
 from rigamajig2.shared import common
-from rigamajig2.ui.builder_ui.widgets import dataLoader, builderHeader, scriptRunner
-from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
 from rigamajig2.ui.builder_ui import style
-from rigamajig2.maya.builder import core
+from rigamajig2.ui.builder_ui.widgets import dataLoader, builderHeader, scriptRunner
 
 
 class BuildWidget(QtWidgets.QWidget):
@@ -99,12 +99,12 @@ class BuildWidget(QtWidgets.QWidget):
 
     def createConnections(self):
         """ Create Connections """
-        self.completeButton.clicked.connect(self.completeBuild)
-        self.buildButton.clicked.connect(self.doBuilderBuild)
-        self.connectButton.clicked.connect(self.doBuilderConnect)
-        self.finalizeButton.clicked.connect(self.doBuilderFinalize)
-        self.loadPsdButton.clicked.connect(self.loadPoseReaders)
-        self.savePsdButton.clicked.connect(self.savePoseReaders)
+        self.completeButton.clicked.connect(self._completeBuild)
+        self.buildButton.clicked.connect(self._doBuilderBuild)
+        self.connectButton.clicked.connect(self._doBuilderConnect)
+        self.finalizeButton.clicked.connect(self._doBuilderFinalize)
+        self.loadPsdButton.clicked.connect(self._loadPoseReaders)
+        self.savePsdButton.clicked.connect(self._savePoseReaders)
 
     def setBuilder(self, builder):
         """ Set the builder """
@@ -122,42 +122,37 @@ class BuildWidget(QtWidgets.QWidget):
 
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner """
-        self.completeBuild()
-        self.loadPoseReaders()
+        self._completeBuild()
+        self._loadPoseReaders()
         self.postScriptRunner.executeAllScripts()
 
-    @property
-    def isChecked(self):
-        """ Return the checked state of the collapsible widget """
-        return self.mainCollapseableWidget.isChecked()
-
     @QtCore.Slot()
-    def doBuilderBuild(self):
+    def _doBuilderBuild(self):
         """ Execute the builder build function """
         self.builder.build()
 
     @QtCore.Slot()
-    def doBuilderConnect(self):
+    def _doBuilderConnect(self):
         """ Execute the builder connect function """
         self.builder.connect()
 
     @QtCore.Slot()
-    def doBuilderFinalize(self):
+    def _doBuilderFinalize(self):
         """ Execute the builder finalize function """
         self.builder.finalize()
 
     @QtCore.Slot()
-    def loadPoseReaders(self):
+    def _loadPoseReaders(self):
         """ Load pose reader setup from JSON using the builder """
         self.builder.loadPoseReaders(self.psdDataLoader.getFileList(), replace=self.loadPsdModeCheckbox.currentIndex())
 
     @QtCore.Slot()
-    def savePoseReaders(self):
+    def _savePoseReaders(self):
         """ Save pose reader setup to JSON using the builder """
         self.builder.savePoseReaders(self.psdDataLoader.getFileList(absolute=True))
 
     @QtCore.Slot()
-    def completeBuild(self):
+    def _completeBuild(self):
         """ Execute a complete rig build (steps initialize - finalize) """
         self.builder.initalize()
         self.builder.build()

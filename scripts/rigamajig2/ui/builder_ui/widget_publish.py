@@ -11,15 +11,14 @@
 # PYTHON
 from PySide2 import QtCore
 from PySide2 import QtWidgets
-from PySide2 import QtGui
 
-# RIGAMAJIG2
-from rigamajig2.shared import common
-from rigamajig2.ui.builder_ui.widgets import pathSelector, builderHeader, scriptRunner
-from rigamajig2.ui.widgets import mayaMessageBox
-from rigamajig2.ui.builder_ui import style
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
+# RIGAMAJIG2
+from rigamajig2.shared import common
+from rigamajig2.ui.builder_ui import style
+from rigamajig2.ui.builder_ui.widgets import pathSelector, builderHeader, scriptRunner
+from rigamajig2.ui.widgets import mayaMessageBox
 
 
 class PublishWidget(QtWidgets.QWidget):
@@ -142,7 +141,7 @@ class PublishWidget(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def dryPublish(self):
-        """ run all the publish steps without saving the file"""
+        """ run all the _publish steps without saving the file"""
         self.builder.run(publish=True, savePublish=False)
 
     @QtCore.Slot()
@@ -152,7 +151,7 @@ class PublishWidget(QtWidgets.QWidget):
 
     @QtCore.Slot()
     def publish(self):
-        """ publish the rig"""
+        """ _publish the rig"""
         confirmPublishMessage = mayaMessageBox.MayaMessageBox(
             title="Publish the Rig",
             message="Proceeding will rebuild a fresh rig from saved data overwriting any existing published rigs.",

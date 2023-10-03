@@ -8,9 +8,9 @@
     discription: This module contains the main dialog for the builder UI
 
 """
+import logging
 # PYTHON
 import time
-import logging
 
 # MAYA
 import maya.cmds as cmds
@@ -22,20 +22,19 @@ from PySide2 import QtWidgets
 import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
-from rigamajig2.ui.widgets.workspace_control import DockableUI
-from rigamajig2.ui.widgets import statusLine, QLine, mayaMessageBox
-from rigamajig2.ui.builder_ui.widgets import pathSelector
+from rigamajig2.ui.builder_ui import actions
 from rigamajig2.ui.builder_ui import recent_files
-
-# Import the main widgets for the builder dialog
-from rigamajig2.ui.builder_ui import widget_model
-from rigamajig2.ui.builder_ui import widget_joints
+from rigamajig2.ui.builder_ui import widget_build
 from rigamajig2.ui.builder_ui import widget_controls
 from rigamajig2.ui.builder_ui import widget_deformation
 from rigamajig2.ui.builder_ui import widget_initialize
-from rigamajig2.ui.builder_ui import widget_build
+from rigamajig2.ui.builder_ui import widget_joints
+# Import the main widgets for the builder dialog
+from rigamajig2.ui.builder_ui import widget_model
 from rigamajig2.ui.builder_ui import widget_publish
-from rigamajig2.ui.builder_ui import actions
+from rigamajig2.ui.builder_ui.widgets import pathSelector
+from rigamajig2.ui.widgets import statusLine, QLine, mayaMessageBox
+from rigamajig2.ui.widgets.workspace_control import DockableUI
 
 logger = logging.getLogger(__name__)
 logger.setLevel(5)
@@ -70,7 +69,7 @@ class BuilderDialog(DockableUI):
         # if we dont provide a rig file load the most recent one from the recent files list
         recentFile = recent_files.getMostRecentFile()
         if recentFile:
-            self.setRigFile(recentFile)
+            self._setRigFile(recentFile)
 
     def createMenus(self):
         """create menu actions"""
@@ -227,36 +226,38 @@ class BuilderDialog(DockableUI):
         # setup each widget with a connection to uncheck all over widgets when one is checked.
         # This ensures all setups until a breakpoint are run
         self.modelWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.updateWidgetChecks(self.modelWidget))
+            lambda x: self._updateWidgetChecks(self.modelWidget))
         self.jointWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.updateWidgetChecks(self.jointWidget))
+            lambda x: self._updateWidgetChecks(self.jointWidget))
         self.intalizeWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.updateWidgetChecks(self.intalizeWidget))
+            lambda x: self._updateWidgetChecks(self.intalizeWidget))
         self.buildWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.updateWidgetChecks(self.buildWidget))
+            lambda x: self._updateWidgetChecks(self.buildWidget))
         self.controlsWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.updateWidgetChecks(self.controlsWidget))
+            lambda x: self._updateWidgetChecks(self.controlsWidget))
         self.deformationWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.updateWidgetChecks(self.deformationWidget))
+            lambda x: self._updateWidgetChecks(self.deformationWidget))
         self.publishWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.updateWidgetChecks(self.publishWidget))
+            lambda x: self._updateWidgetChecks(self.publishWidget))
 
-        self.rigPathSelector.selectPathButton.clicked.connect(self.pathSelectorLoadRigFile)
-        self.runSelectedButton.clicked.connect(self.runSelected)
-        self.runButton.clicked.connect(self.runAll)
-        self.publishButton.clicked.connect(self.publish)
+        self.rigPathSelector.selectPathButton.clicked.connect(self._pathSelectorLoadRigFile)
+        self.runSelectedButton.clicked.connect(self._runSelected)
+        self.runButton.clicked.connect(self._runAll)
+        self.publishButton.clicked.connect(self._publish)
 
     # --------------------------------------------------------------------------------
     # Connections
     # --------------------------------------------------------------------------------
 
-    def pathSelectorLoadRigFile(self):
+    @QtCore.Slot()
+    def _pathSelectorLoadRigFile(self):
         """ Load a rig file from the path selector """
         newPath = self.rigPathSelector.getPath()
         if newPath:
             self.actions.loadRecentRigFile(newPath)
 
-    def setRigFile(self, path=None):
+    @QtCore.Slot()
+    def _setRigFile(self, path=None):
         """
         Set the rig file to the given path
         :param path: rig file to set
@@ -286,13 +287,14 @@ class BuilderDialog(DockableUI):
             widget.setBuilder(builder=self.rigBuilder)
 
     # BULDER FUNCTIONS
-    def updateWidgetChecks(self, selectedWidget):
+    def _updateWidgetChecks(self, selectedWidget):
         """ This function ensures only one build step is selected at a time. it is run whenever a checkbox is toggled."""
         for widget in self.mainWidgets:
             if widget is not selectedWidget:
                 widget.mainCollapseableWidget.setChecked(False)
 
-    def runSelected(self):
+    @QtCore.Slot()
+    def _runSelected(self):
         """run selected steps"""
 
         # ensure at least one breakpoint is selected
@@ -308,8 +310,6 @@ class BuilderDialog(DockableUI):
         if not confirmBuildRig():
             return
 
-        self.initializeDevMode()
-
         startTime = time.time()
 
         # because widgets are added to the ui and the list in oder they can be run sequenctially.
@@ -323,16 +323,13 @@ class BuilderDialog(DockableUI):
         runTime = time.time() - startTime
         print("Time Elapsed: {}".format(str(runTime)))
 
-    def runAll(self):
+    @QtCore.Slot()
+    def _runAll(self):
         """ Run builder and update the component manager"""
-        self.initializeDevMode()
 
-        # add the confirm dialog
         if not confirmBuildRig():
             return
 
-        # for the rig build we can put the publish into a try except block
-        # if the publish fails we can add a message to the status line before raising the exception
         try:
             finalTime = self.rigBuilder.run()
             self.intalizeWidget.componentManager.loadFromScene()
@@ -342,11 +339,11 @@ class BuilderDialog(DockableUI):
             self.statusLine.setStatusMessage(message=f"Rig Build Failed: '{self.rigName}'", icon="failed")
             raise e
 
-    def publish(self):
+    @QtCore.Slot()
+    def _publish(self):
         """ Run builder and update the component manager"""
-        self.initializeDevMode()
-        # for the rig build we can put the publish into a try except block
-        # if the publish fails we can add a message to the status line before raising the exception
+        # for the rig build we can put the _publish into a try except block
+        # if the _publish fails we can add a message to the status line before raising the exception
         try:
             finalTime = self.publishWidget.publish()
             if finalTime:
@@ -357,16 +354,6 @@ class BuilderDialog(DockableUI):
         except Exception as e:
             self.statusLine.setStatusMessage(message=f"Rig Publish Failed: '{self.rigName}'", icon="failed")
             raise e
-
-    def initializeDevMode(self):
-        if self.actions.devModeAction.isChecked():
-            logger.setLevel(logging.DEBUG)
-            rigamajig2.reloadModule(log=True)
-
-            # reload the rig file. This should refresh the builder
-            self.setRigFile(self.rigFile)
-
-            logger.info('rigamajig2 modules reloaded')
 
     def hideEvent(self, e):
         """override the hide event to delete the scripts jobs from the initialize widget"""

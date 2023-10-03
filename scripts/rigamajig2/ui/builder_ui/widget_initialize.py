@@ -15,26 +15,26 @@ import re
 import sys
 from functools import partial
 
+import maya.OpenMayaUI as omui
 # MAYA
 import maya.cmds as cmds
-from shiboken2.shiboken2 import wrapInstance
-import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
+from shiboken2.shiboken2 import wrapInstance
 
 # RIGAMAJIG2
 import rigamajig2.shared.common as common
-from rigamajig2.maya import meta as meta
 from rigamajig2.maya import attr as attr
-from rigamajig2.maya import naming as naming
 from rigamajig2.maya import container as rig_container
+from rigamajig2.maya import meta as meta
+from rigamajig2.maya import naming as naming
 from rigamajig2.maya.builder import builder
-from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder import constants
+from rigamajig2.maya.builder import core
+from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import builderHeader, dataLoader
 from rigamajig2.ui.widgets import QPushButton
-from rigamajig2.ui.builder_ui import style
 
 ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 
@@ -283,27 +283,23 @@ class ComponentManager(QtWidgets.QWidget):
         """ Create Actions"""
         self.selectContainerAction = QtWidgets.QAction("Select Container", self)
         self.selectContainerAction.setIcon(QtGui.QIcon(":out_container.png"))
-        self.selectContainerAction.triggered.connect(self.selectContainer)
+        self.selectContainerAction.triggered.connect(self._selectContainer)
 
         self.editComponentSettingsAction = QtWidgets.QAction("Edit Component Parameters")
         self.editComponentSettingsAction.setIcon(QtGui.QIcon(":toolSettings.png"))
-        self.editComponentSettingsAction.triggered.connect(self.editComponentParameters)
+        self.editComponentSettingsAction.triggered.connect(self._editComponentParameters)
 
         self.renameComponentAction = QtWidgets.QAction("Rename Component", self)
         self.renameComponentAction.setIcon(QtGui.QIcon(":quickRename.png"))
-        self.renameComponentAction.triggered.connect(self.renameComponent)
+        self.renameComponentAction.triggered.connect(self._renameComponent)
+
+        self.componentHelpAction = QtWidgets.QAction("Help", self)
+        self.componentHelpAction.setIcon(QtGui.QIcon(":help.png"))
+        self.componentHelpAction.triggered.connect(self._getComponentHelp)
 
         self.mirrorComponentAction = QtWidgets.QAction("Mirror Component")
         self.mirrorComponentAction.setIcon(QtGui.QIcon(":QR_mirrorGuidesRightToLeft.png"))
-        self.mirrorComponentAction.triggered.connect(self.mirrorComponent)
-
-        # self.createSymetricalComponent = QtWidgets.QAction("Create Mirrored Component")
-        # self.createSymetricalComponent.setIcon(QtGui.QIcon(":kinMirrorJoint_S.png"))
-        # self.createSymetricalComponent.triggered.connect(self.createMirroredComponent)
-
-        # self.mirrorComponentSettingsAction = QtWidgets.QAction("Mirror Component Parameters")
-        # self.mirrorComponentSettingsAction.setIcon(QtGui.QIcon(":QR_mirrorGuidesRightToLeft.png"))
-        # self.mirrorComponentSettingsAction.triggered.connect(self.mirrorComponentParameters)
+        self.mirrorComponentAction.triggered.connect(self._mirrorComponent)
 
         self.reloadComponentAction = QtWidgets.QAction("Reload Cmpts from Scene", self)
         self.reloadComponentAction.setIcon(QtGui.QIcon(":refresh.png"))
@@ -311,14 +307,14 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.deleteComponentAction = QtWidgets.QAction("Delete Cmpt", self)
         self.deleteComponentAction.setIcon(QtGui.QIcon(":trash.png"))
-        self.deleteComponentAction.triggered.connect(self.deleteComponent)
+        self.deleteComponentAction.triggered.connect(self._deleteComponent)
 
     def createContextMenu(self, position):
-
         menu = QtWidgets.QMenu(self.componentTree)
         menu.addAction(self.selectContainerAction)
         menu.addAction(self.editComponentSettingsAction)
         menu.addAction(self.renameComponentAction)
+        menu.addAction(self.componentHelpAction)
         menu.addSeparator()
         menu.addAction(self.mirrorComponentAction)
         menu.addSeparator()
@@ -391,9 +387,9 @@ class ComponentManager(QtWidgets.QWidget):
         self.mainLayout.addWidget(self.componentTree)
 
     def createConnections(self):
-        self.searchBar.returnPressed.connect(self.searchForComponent)
-        self.expandWidgetButton.clicked.connect(partial(self.changeTreeWidgetSize, 40))
-        self.contractWidgetButton.clicked.connect(partial(self.changeTreeWidgetSize, -40))
+        self.searchBar.returnPressed.connect(self._searchForComponent)
+        self.expandWidgetButton.clicked.connect(partial(self.__changeTreeWidgetSize, 40))
+        self.contractWidgetButton.clicked.connect(partial(self.__changeTreeWidgetSize, -40))
 
     def setScriptJobEnabled(self, enabled):
         """
@@ -539,14 +535,6 @@ class ComponentManager(QtWidgets.QWidget):
         cmpt = self.builder.findComponent(itemDict['name'], itemDict['type'])
         return cmpt
 
-    @QtCore.Slot()
-    def selectContainer(self):
-        """ Select the container node of the selected components """
-        cmds.select(cl=True)
-        for item in self.getSelectedItem():
-            itemDict = self.parseData(item)
-            cmds.select(itemDict['container'], add=True)
-
     def resetComponentDialogInstance(self):
         """ Set the instance of the component dialog back to None. This way we know when it must be re-created"""
         self.editComponentDialog = None
@@ -571,7 +559,15 @@ class ComponentManager(QtWidgets.QWidget):
             self.createComponentItem(name=name, componentType=componentType, buildStep=buildStep)
 
     @QtCore.Slot()
-    def editComponentParameters(self):
+    def _selectContainer(self):
+        """ Select the container node of the selected components """
+        cmds.select(cl=True)
+        for item in self.getSelectedItem():
+            itemDict = self.parseData(item)
+            cmds.select(itemDict['container'], add=True)
+
+    @QtCore.Slot()
+    def _editComponentParameters(self):
         """ Open the Edit component parameters dialog"""
         from rigamajig2.ui.builder_ui import editComponentDialog
 
@@ -586,20 +582,21 @@ class ComponentManager(QtWidgets.QWidget):
         # set dialog to the current item
         self.editComponentDialog.setComponent(self.getComponentObj())
 
-    def mirrorComponent(self):
+    @QtCore.Slot()
+    def _mirrorComponent(self):
 
         selectedComponent = self.getComponentObj()
 
         guessMirrorName = common.getMirrorName(selectedComponent.name)
         componentNameList = [comp.name for comp in self.builder.componentList]
         if guessMirrorName in componentNameList:
-            self.mirrorComponentParameters(selectedComponent)
+            self._mirrorComponentParameters(selectedComponent)
             builder.logger.info(f"Mirrored component Parameters: '{selectedComponent.name}' -> '{guessMirrorName}'")
         else:
-            self.createMirroredComponent(selectedComponent)
+            self._createMirroredComponent(selectedComponent)
             builder.logger.info(f"Created Mirrored component: '{guessMirrorName}'")
 
-    def createMirroredComponent(self, component):
+    def _createMirroredComponent(self, component):
         """ Create a mirrored component"""
 
         guessMirrorName = common.getMirrorName(component.name)
@@ -619,13 +616,13 @@ class ComponentManager(QtWidgets.QWidget):
 
         # We need to force the component to intialize so we can mirror stuff
         mirroredComponent._initalizeComponent()
-        self.mirrorComponentParameters(component)
+        self._mirrorComponentParameters(component)
 
         # update the ui
         self.loadFromScene()
 
     @QtCore.Slot()
-    def mirrorComponentParameters(self, sourceComponent=None):
+    def _mirrorComponentParameters(self, sourceComponent=None):
         """
         Mirror the component parameters for the selected parameter
 
@@ -696,7 +693,7 @@ class ComponentManager(QtWidgets.QWidget):
             mirrorMetaNode.setData(attr=parameter, value=mirroredValue)
 
     @QtCore.Slot()
-    def deleteComponent(self):
+    def _deleteComponent(self):
         """ Delete a component and the item from the tree widget"""
         items = self.getSelectedItem()
         for item in items:
@@ -708,7 +705,7 @@ class ComponentManager(QtWidgets.QWidget):
             self.builder.componentList.remove(component)
 
     @QtCore.Slot()
-    def renameComponent(self):
+    def _renameComponent(self):
         items = self.getSelectedItem()
 
         if not len(items) > 0:
@@ -752,7 +749,16 @@ class ComponentManager(QtWidgets.QWidget):
             self.searchCompleterModel.setStringList(stringList)
 
     @QtCore.Slot()
-    def searchForComponent(self):
+    def _getComponentHelp(self):
+        """ Print component help to the script editor"""
+        items = self.getSelectedItem()
+
+        for item in items:
+            component = self.getComponentObj(item)
+            component.help()
+
+    @QtCore.Slot()
+    def _searchForComponent(self):
         searchedText = self.searchBar.text()
 
         for item in self.getAll():
@@ -770,7 +776,7 @@ class ComponentManager(QtWidgets.QWidget):
             pass
 
     @QtCore.Slot(int)
-    def changeTreeWidgetSize(self, size):
+    def __changeTreeWidgetSize(self, size):
         """Change the size of the component tree widget to expand or contract and fit more items"""
 
         widgetSize = self.frameGeometry()

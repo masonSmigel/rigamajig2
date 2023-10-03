@@ -13,17 +13,17 @@ from functools import partial
 
 # MAYA
 import maya.mel as mel
-from PySide2 import QtWidgets
 from PySide2 import QtGui
+from PySide2 import QtWidgets
 
+import rigamajig2.maya.builder.builder as builder
+import rigamajig2.maya.data.abstract_data as abstract_data
+import rigamajig2.maya.qc as qc
+import rigamajig2.ui.builder_ui.recent_files as recent_files
+from rigamajig2.maya import loggers
 # RIGAMJIG
 from rigamajig2.maya.builder import constants
-import rigamajig2.maya.qc as qc
-from rigamajig2.maya import loggers
-import rigamajig2.maya.data.abstract_data as abstract_data
 from rigamajig2.ui.builder_ui.newRigFileDialog import CreateRigEnvDialog
-import rigamajig2.maya.builder.builder as builder
-import rigamajig2.ui.builder_ui.recent_files as recent_files
 
 
 class Actions(object):
@@ -112,7 +112,7 @@ class Actions(object):
     def createRigEnviornment(self):
         """ Create Rig Enviornment"""
         createDialog = CreateRigEnvDialog()
-        createDialog.newRigEnviornmentCreated.connect(self.dialog.setRigFile)
+        createDialog.newRigEnviornmentCreated.connect(self.dialog._setRigFile)
         createDialog.showDialog()
 
     def loadRigFile(self):
@@ -125,12 +125,12 @@ class Actions(object):
 
         if result:
             rigfile = fileDialog.selectedFiles()[0]
-            self.dialog.setRigFile(rigfile)
+            self.dialog._setRigFile(rigfile)
             recent_files.addRecentFile(rigfile)
             self.updateRecentFiles()
 
     def loadRecentRigFile(self, rigfile):
-        self.dialog.setRigFile(rigfile)
+        self.dialog._setRigFile(rigfile)
 
         # lets re-add the recent file. This will just move it to the top of the list. Then update the list
         recent_files.addRecentFile(rigfile)
@@ -180,7 +180,7 @@ class Actions(object):
 
     def reloadRigFile(self):
         """ Reload rig file"""
-        self.dialog.setRigFile(self.dialog.rigFile)
+        self.dialog._setRigFile(self.dialog.rigFile)
 
     def updateRecentFiles(self):
         """Update the recent file menu based on our recent file list"""

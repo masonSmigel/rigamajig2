@@ -9,29 +9,27 @@
                  It acts as a wrapper to manage all functions of the rig_builder.
 """
 
+import logging
 # PYTHON
 import os
 import time
-import logging
-from collections import OrderedDict
 
+import maya.api.OpenMaya as om2
 # MAYA
 import maya.cmds as cmds
-import maya.api.OpenMaya as om2
 
-# RIGAMAJIG
-import rigamajig2.shared.common as common
-import rigamajig2.shared.path as rig_path
+# BUILDER
+import rigamajig2.maya.builder.data
 import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.data.component_data as component_data
 import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
-
-# BUILDER
-import rigamajig2.maya.builder.data
-from rigamajig2.maya.builder import model
-from rigamajig2.maya.builder import core
+# RIGAMAJIG
+import rigamajig2.shared.common as common
+import rigamajig2.shared.path as rig_path
 from rigamajig2.maya.builder import constants
+from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import model
 
 logger = logging.getLogger(__name__)
 
@@ -280,14 +278,14 @@ class Builder(object):
 
         self.setComponents(list())
         for path in common.toList(paths):
-            # make the path an absoulte
             path = self.getAbsoultePath(path)
 
             componentDataObj = component_data.ComponentData()
             componentDataObj.read(path)
-            componentData = componentDataObj.getData()
 
-            for cmpt in list(componentData.keys()):
+            # look through each component and add it to the builder list
+            # check before adding it so only one instance of each exists in the list
+            for cmpt in componentDataObj.getKeys():
                 instance = common.getFirstIndex(componentDataObj.applyData(cmpt))
 
                 # we only want to add components with a new name. Each component should have a unique name
@@ -385,7 +383,7 @@ class Builder(object):
         allPsds = rigamajig2.maya.builder.data.gatherPoseReaders()
         savedFiles = core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData",
                                              method="merge")
-        # deform.savePoseReaders(path)
+        # deform._savePoseReaders(path)
         if savedFiles:
             logger.info("Pose Readers Save -- Complete")
             return savedFiles
@@ -531,7 +529,7 @@ class Builder(object):
         """ Run pre scripts. use  through the PUB SCRIPT path"""
         scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PUB_SCRIPT)
         core.runAllScripts(scripts)
-        logger.info("publish scripts -- complete")
+        logger.info("_publish scripts -- complete")
 
     # ULITITY FUNCTION TO BUILD THE ENTIRE RIG
     def run(self, publish=False, savePublish=True, outputfile=None, assetName=None, suffix=None, fileType=None,
@@ -539,21 +537,21 @@ class Builder(object):
         """
         Build a rig.
 
-        if Publish is True then it will also run the publish steps. See publish for more information.
+        if Publish is True then it will also run the _publish steps. See _publish for more information.
 
-        :param publish: if True also run the publish steps
-        :param savePublish: if True also save the publish file
+        :param publish: if True also run the _publish steps
+        :param savePublish: if True also save the _publish file
         :param outputfile: Path for the output file.
         :param assetName: Asset name used to generate a file name.
         :param suffix: suffix to attatch to the end of the asset name.
-        :param fileType: File type of the publish file. valid values are 'mb' or 'ma'.
-        :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
-                           and store a new version each time the publish file is overwritten.
+        :param fileType: File type of the _publish file. valid values are 'mb' or 'ma'.
+        :param versioning: Enable versioning. Versioning will create a separate file within the _publish directory
+                           and store a new version each time the _publish file is overwritten.
                            This allows the user to keep a log of files approved to be published.
         :param saveFBX: Save an FBX of the rig for use as a skeletal mesh in Unreal
         """
         if not self.path:
-            logger.error('you must provide a build enviornment path. Use Bulder.setRigFile()')
+            logger.error('you must provide a build enviornment path. Use Bulder._setRigFile()')
             return
 
         startTime = time.time()
@@ -595,14 +593,14 @@ class Builder(object):
         """
         Publish a rig.
 
-        This will run the whole builder as well as create a publish file.
+        This will run the whole builder as well as create a _publish file.
 
         :param outputfile: Path for the output file
         :param suffix: the file suffix to add to the rig file
         :param assetName: Asset name used to generate a file name
-        :param fileType: File type of the publish file. valid values are 'mb' or 'ma'
-        :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
-                           and store a new version each time the publish file is overwritten.
+        :param fileType: File type of the _publish file. valid values are 'mb' or 'ma'
+        :param versioning: Enable versioning. Versioning will create a separate file within the _publish directory
+                           and store a new version each time the _publish file is overwritten.
                            This allows the user to keep a log of files approved to be published.
        :param saveFBX: Save an FBX of the rig for use as a skeletal mesh in Unreal
         """
@@ -625,7 +623,7 @@ class Builder(object):
                 rigName = self.getRigData(self.rigFile, constants.RIG_NAME)
                 fileName = "{}{}.{}".format(rigName, suffix, fileType)
             else:
-                raise RuntimeError("Must select an output path or character name to publish a rig")
+                raise RuntimeError("Must select an output path or character name to _publish a rig")
 
         # if we want to save a version as well
         if versioning:
@@ -649,12 +647,12 @@ class Builder(object):
             topNodes = cmds.ls(assemblies=True)
             topTransformNodes = cmds.ls(topNodes, exactType='transform')
             for node in topTransformNodes:
-                # set the version to the number of publishes (plus one) to account for the version we are about to publish
+                # set the version to the number of publishes (plus one) to account for the version we are about to _publish
                 cmds.addAttr(node, longName="__version__", attributeType='short', dv=numberOfPublishes + 1, k=False)
                 cmds.setAttr("{}.__version__".format(node), lock=True)
                 cmds.setAttr("{}.__version__".format(node), cb=True)
 
-            # make the output directory and save the file. This will also make the directory for the main publish
+            # make the output directory and save the file. This will also make the directory for the main _publish
             rig_path.mkdir(versionDir)
             versionPath = file.incrimentSave(versionPath, log=False)
             logger.info("out rig versioned: {}   ({})".format(os.path.basename(versionPath), versionPath))
@@ -664,7 +662,7 @@ class Builder(object):
         file.saveAs(publishPath, log=False)
         logger.info("out rig published: {}  ({})".format(fileName, publishPath))
 
-        # if we have the save FBX box checked we can also save and FBX on publish.
+        # if we have the save FBX box checked we can also save and FBX on _publish.
         if saveFBX:
             from rigamajig2.maya.anim import ueExport
             fbxFileName = "{}{}.{}".format(rigName, suffix, "fbx")

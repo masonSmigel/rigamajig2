@@ -17,25 +17,17 @@ from rigamajig2.maya.builder import core
 # RIGAMAJIG2
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
-from rigamajig2.ui.builder_ui.widgets import pathSelector, builderHeader, scriptRunner
-from rigamajig2.ui.widgets import mayaMessageBox
+from rigamajig2.ui.builder_ui.widgets import builderSection, scriptRunner
+from rigamajig2.ui.widgets import mayaMessageBox, pathSelector
 
 
-class PublishWidget(QtWidgets.QWidget):
+class PublishWidget(builderSection.BuilderSection):
     """ Publish layout for the builder UI """
 
-    def __init__(self, builder=None):
-        super(PublishWidget, self).__init__()
-
-        self.builder = builder
-
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
+    WIDGET_TITLE = "Publish"
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget = builderHeader.BuilderHeader('Publish', addCheckbox=True)
         self.pubScriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
 
         self.outFileSuffix = QtWidgets.QLineEdit()
@@ -60,36 +52,23 @@ class PublishWidget(QtWidgets.QWidget):
 
         self.saveFBXCheckbox = QtWidgets.QCheckBox("Export FBX Skeletal Mesh")
 
-        # self.runSelectedButton = QtWidgets.QPushButton("Run Selected")
-        # self.runButton = QtWidgets.QPushButton("Run")
-        # self.runButton.setFixedWidth(80)
-        #
-        # self.closeButton = QtWidgets.QPushButton("Close")
-
     def createLayouts(self):
         """ Create Layouts"""
-        # setup the main layout.
-        self.mainLayout = QtWidgets.QVBoxLayout(self)
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setSpacing(0)
+        self.mainWidget.addWidget(self.mergeDeformLayersButton)
+        self.mainWidget.addSpacing(4)
+        self.mainWidget.addWidget(self.pubScriptRunner)
 
-        self.mainCollapseableWidget.addWidget(self.mergeDeformLayersButton)
-        self.mainCollapseableWidget.addSpacing(4)
-        self.mainCollapseableWidget.addWidget(self.pubScriptRunner)
-
-        self.mainCollapseableWidget.addSpacing(10)
+        self.mainWidget.addSpacing(10)
         publishFileLayout = QtWidgets.QHBoxLayout()
         publishFileLayout.addWidget(QtWidgets.QLabel("suffix:"))
         publishFileLayout.addWidget(self.outFileSuffix)
         publishFileLayout.addSpacing(60)
         publishFileLayout.addWidget(self.outFileTypeComboBox)
-        self.mainCollapseableWidget.addLayout(publishFileLayout)
-        self.mainCollapseableWidget.addWidget(self.outPathSelector)
-        self.mainCollapseableWidget.addWidget(self.dryPublishButton)
-        self.mainCollapseableWidget.addWidget(self.publishButton)
-        self.mainCollapseableWidget.addWidget(self.saveFBXCheckbox)
-
-        self.mainLayout.addWidget(self.mainCollapseableWidget)
+        self.mainWidget.addLayout(publishFileLayout)
+        self.mainWidget.addWidget(self.outPathSelector)
+        self.mainWidget.addWidget(self.dryPublishButton)
+        self.mainWidget.addWidget(self.publishButton)
+        self.mainWidget.addWidget(self.saveFBXCheckbox)
 
     def createConnections(self):
         """ Create Connections """
@@ -99,10 +78,8 @@ class PublishWidget(QtWidgets.QWidget):
 
     def setBuilder(self, builder):
         """ Set the active builder """
-        rigEnv = builder.getRigEnviornment()
-        rigFile = builder.getRigFile()
-        self.builder = builder
-        self.outPathSelector.setRelativePath(rigEnv)
+        super().setBuilder(builder)
+        self.outPathSelector.setRelativePath(self.builder.getRigEnviornment())
 
         # clear the ui
         self.pubScriptRunner.clearScript()
@@ -116,14 +93,14 @@ class PublishWidget(QtWidgets.QWidget):
         self.pubScriptRunner.addScriptsWithRecursionData(scripts)
 
         # set the default output file type
-        fileTypeText = self.builder.getRigData(rigFile, constants.OUTPUT_RIG_FILE_TYPE)
+        fileTypeText = self.builder.getRigData(self.builder.getRigFile(), constants.OUTPUT_RIG_FILE_TYPE)
         index = self.outFileTypeComboBox.findText(fileTypeText, QtCore.Qt.MatchFixedString)
         if index >= 0:
             self.outFileTypeComboBox.setCurrentIndex(index)
 
         # set the file selector
         self.outFileSuffix.clear()
-        fileSuffix = self.builder.getRigData(rigFile, constants.OUTPUT_FILE_SUFFIX)
+        fileSuffix = self.builder.getRigData(self.builder.getRigFile(), constants.OUTPUT_FILE_SUFFIX)
         if fileSuffix:
             self.outFileSuffix.setText(fileSuffix)
 
@@ -131,11 +108,6 @@ class PublishWidget(QtWidgets.QWidget):
         """ Run this widget from the builder breakpoint runner"""
         self.builder.mergeDeformLayers()
         self.pubScriptRunner.executeAllScripts()
-
-    @property
-    def isChecked(self):
-        """ return the checked state of the collapseable widget"""
-        return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
 

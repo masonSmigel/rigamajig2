@@ -11,19 +11,18 @@
 # PYTHON
 import sys
 
+import maya.OpenMayaUI as omui
 # MAYA
 import maya.cmds as cmds
-import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
-# WIDGETS
-from rigamajig2.ui.builder_ui.widgets import pathSelector
-from rigamajig2.ui import showInFolder
-
 # RIGAMAJIG
 from rigamajig2.maya.builder import merge
+from rigamajig2.ui import showInFolder
+# WIDGETS
+from rigamajig2.ui.widgets import pathSelector
 
 
 class MergeRigsDialog(QtWidgets.QDialog):

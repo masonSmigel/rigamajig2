@@ -32,8 +32,7 @@ from rigamajig2.ui.builder_ui import widget_joints
 # Import the main widgets for the builder dialog
 from rigamajig2.ui.builder_ui import widget_model
 from rigamajig2.ui.builder_ui import widget_publish
-from rigamajig2.ui.builder_ui.widgets import pathSelector
-from rigamajig2.ui.widgets import statusLine, QLine, mayaMessageBox
+from rigamajig2.ui.widgets import statusLine, QLine, mayaMessageBox, pathSelector
 from rigamajig2.ui.widgets.workspace_control import DockableUI
 
 logger = logging.getLogger(__name__)
@@ -117,23 +116,24 @@ class BuilderDialog(DockableUI):
 
         self.archetypeBaseLabel = QtWidgets.QLabel("None")
 
-        self.mainWidgets = list()
+        self.builderSections = list()
 
-        self.modelWidget = widget_model.ModelWidget(self.rigBuilder)
-        self.jointWidget = widget_joints.JointWidget(self.rigBuilder)
-        self.controlsWidget = widget_controls.ControlsWidget(self.rigBuilder)
-        self.intalizeWidget = widget_initialize.InitializeWidget(self.rigBuilder)
-        self.buildWidget = widget_build.BuildWidget(self.rigBuilder)
-        self.deformationWidget = widget_deformation.DeformationWidget(self.rigBuilder)
-        self.publishWidget = widget_publish.PublishWidget(self.rigBuilder)
+        self.modelWidget = widget_model.ModelWidget()
+        self.jointWidget = widget_joints.JointWidget()
+        self.controlsWidget = widget_controls.ControlsWidget()
+        self.intalizeWidget = widget_initialize.InitializeWidget()
+        self.buildWidget = widget_build.BuildWidget()
+        self.deformationWidget = widget_deformation.DeformationWidget()
+        self.publishWidget = widget_publish.PublishWidget()
+        self.publishWidget = widget_publish.PublishWidget()
 
-        self.mainWidgets = [self.modelWidget,
-                            self.jointWidget,
-                            self.intalizeWidget,
-                            self.buildWidget,
-                            self.controlsWidget,
-                            self.deformationWidget,
-                            self.publishWidget]
+        self.builderSections = [self.modelWidget,
+                                self.jointWidget,
+                                self.intalizeWidget,
+                                self.buildWidget,
+                                self.controlsWidget,
+                                self.deformationWidget,
+                                self.publishWidget]
 
         self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
         self.runSelectedButton.setToolTip("Run Rig steps up to the break point")
@@ -225,20 +225,20 @@ class BuilderDialog(DockableUI):
 
         # setup each widget with a connection to uncheck all over widgets when one is checked.
         # This ensures all setups until a breakpoint are run
-        self.modelWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self._updateWidgetChecks(self.modelWidget))
-        self.jointWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self._updateWidgetChecks(self.jointWidget))
-        self.intalizeWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self._updateWidgetChecks(self.intalizeWidget))
-        self.buildWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self._updateWidgetChecks(self.buildWidget))
-        self.controlsWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self._updateWidgetChecks(self.controlsWidget))
-        self.deformationWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self._updateWidgetChecks(self.deformationWidget))
-        self.publishWidget.mainCollapseableWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self._updateWidgetChecks(self.publishWidget))
+        self.modelWidget.mainWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.__handleSectionBreakpoints(self.modelWidget))
+        self.jointWidget.mainWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.__handleSectionBreakpoints(self.jointWidget))
+        self.intalizeWidget.mainWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.__handleSectionBreakpoints(self.intalizeWidget))
+        self.buildWidget.mainWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.__handleSectionBreakpoints(self.buildWidget))
+        self.controlsWidget.mainWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.__handleSectionBreakpoints(self.controlsWidget))
+        self.deformationWidget.mainWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.__handleSectionBreakpoints(self.deformationWidget))
+        self.publishWidget.mainWidget.headerWidget.checkbox.clicked.connect(
+            lambda x: self.__handleSectionBreakpoints(self.publishWidget))
 
         self.rigPathSelector.selectPathButton.clicked.connect(self._pathSelectorLoadRigFile)
         self.runSelectedButton.clicked.connect(self._runSelected)
@@ -283,15 +283,15 @@ class BuilderDialog(DockableUI):
         self.archetypeBaseLabel.setText(str(archetype))
 
         # set paths and widgets relative to the rig env
-        for widget in self.mainWidgets:
+        for widget in self.builderSections:
             widget.setBuilder(builder=self.rigBuilder)
 
     # BULDER FUNCTIONS
-    def _updateWidgetChecks(self, selectedWidget):
+    def __handleSectionBreakpoints(self, selectedWidget):
         """ This function ensures only one build step is selected at a time. it is run whenever a checkbox is toggled."""
-        for widget in self.mainWidgets:
-            if widget is not selectedWidget:
-                widget.mainCollapseableWidget.setChecked(False)
+        for section in self.builderSections:
+            if section is not selectedWidget:
+                section.setChecked(False)
 
     @QtCore.Slot()
     def _runSelected(self):
@@ -299,8 +299,8 @@ class BuilderDialog(DockableUI):
 
         # ensure at least one breakpoint is selected
         breakpointSelected = False
-        for widget in self.mainWidgets:
-            if widget.mainCollapseableWidget.isChecked():
+        for section in self.builderSections:
+            if section.isChecked():
                 breakpointSelected = True
 
         if not breakpointSelected:
@@ -314,10 +314,11 @@ class BuilderDialog(DockableUI):
 
         # because widgets are added to the ui and the list in oder they can be run sequenctially.
         # when we hit a widget that is checked then the loop stops.
-        for widget in self.mainWidgets:
+        for widget in self.builderSections:
             widget.runWidget()
 
-            if widget.isChecked:
+            if widget.isChecked():
+                print(widget)
                 break
 
         runTime = time.time() - startTime
@@ -362,7 +363,10 @@ class BuilderDialog(DockableUI):
         # ensure the script jobs are deleted when the main window is hidden (done my closing the 'X' button)
         # however when in development you should manually call the close() method BEFORE deleting the workspace control.
         super(BuilderDialog, self).hideEvent(e)
-        self.intalizeWidget.componentManager.setScriptJobEnabled(False)
+
+        # TODO: call close event in each sub widget.
+        for section in self.builderSections:
+            section.closeEvent()
 
 
 def confirmBuildRig():

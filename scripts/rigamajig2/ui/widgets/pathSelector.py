@@ -3,11 +3,10 @@ This module contains the file selector widget
 """
 import os
 
+import maya.cmds as cmds
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
-
-import maya.cmds as cmds
 
 from rigamajig2.ui import showInFolder
 

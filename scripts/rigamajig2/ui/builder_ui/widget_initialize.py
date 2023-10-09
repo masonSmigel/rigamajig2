@@ -33,7 +33,7 @@ from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 from rigamajig2.ui.builder_ui import style
-from rigamajig2.ui.builder_ui.widgets import builderHeader, dataLoader
+from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
 from rigamajig2.ui.widgets import QPushButton
 
 ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
@@ -41,25 +41,13 @@ ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 COMPONENT_ROW_HEIGHT = 20
 
 
-class InitializeWidget(QtWidgets.QWidget):
+class InitializeWidget(builderSection.BuilderSection):
     """ Initalize layout for the builder UI """
 
-    def __init__(self, builder=None):
-        """
-        Constructor for the initalize widget
-        :param builder: builder to connect to the ui
-        """
-        super(InitializeWidget, self).__init__()
-
-        self.builder = builder
-
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
+    WIDGET_TITLE = "Setup Rig"
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = builderHeader.BuilderHeader(text='Setup Rig', addCheckbox=True)
         self.componentsDataLoader = dataLoader.DataLoader(label="Components:",
                                                           caption="Select a Component File",
                                                           fileFilter=common.JSON_FILTER,
@@ -107,11 +95,7 @@ class InitializeWidget(QtWidgets.QWidget):
     def createLayouts(self):
         """ Create Layouts"""
         # setup the main layout.
-        self.mainLayout = QtWidgets.QVBoxLayout(self)
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setSpacing(0)
-
-        self.mainCollapseableWidget.addWidget(self.componentsDataLoader)
+        self.mainWidget.addWidget(self.componentsDataLoader)
 
         componentButtonLayout = QtWidgets.QHBoxLayout()
         componentButtonLayout.setSpacing(4)
@@ -124,16 +108,13 @@ class InitializeWidget(QtWidgets.QWidget):
         loadComponentsLayout.addWidget(self.loadComponentsButton)
         loadComponentsLayout.addWidget(self.saveComponentsButton)
         loadComponentsLayout.addWidget(self.addComponentsButton)
-        self.mainCollapseableWidget.addLayout(loadComponentsLayout)
+        self.mainWidget.addLayout(loadComponentsLayout)
 
-        self.mainCollapseableWidget.addWidget(self.componentManager)
-        self.mainCollapseableWidget.addWidget(self.initalizeBuildButton)
-        self.mainCollapseableWidget.addLayout(componentButtonLayout)
-        self.mainCollapseableWidget.addWidget(self.guideDataLoader)
-        self.mainCollapseableWidget.addLayout(guideLoadLayout)
-
-        # add the widget to the main layout
-        self.mainLayout.addWidget(self.mainCollapseableWidget)
+        self.mainWidget.addWidget(self.componentManager)
+        self.mainWidget.addWidget(self.initalizeBuildButton)
+        self.mainWidget.addLayout(componentButtonLayout)
+        self.mainWidget.addWidget(self.guideDataLoader)
+        self.mainWidget.addLayout(guideLoadLayout)
 
     def createConnections(self):
         """ Create Connections"""
@@ -148,18 +129,15 @@ class InitializeWidget(QtWidgets.QWidget):
 
     def setBuilder(self, builder):
         """ Set a builder for intialize widget"""
-        rigEnv = builder.getRigEnviornment()
-        self.builder = builder
+        super().setBuilder(builder)
+
         self.componentsDataLoader.clear()
-        self.componentsDataLoader.setRelativePath(rigEnv)
-
         self.guideDataLoader.clear()
-        self.guideDataLoader.setRelativePath(rigEnv)
-
-        self.componentManager.setRigBuilder(self.builder)
-
-        # reset the UI
         self.componentManager.clearTree()
+
+        self.componentsDataLoader.setRelativePath(self.builder.getRigEnviornment())
+        self.guideDataLoader.setRelativePath(self.builder.getRigEnviornment())
+        self.componentManager.setRigBuilder(self.builder)
 
         # update data within the rig
         cmptsFiles = self.builder.getRigData(self.builder.getRigFile(), constants.COMPONENTS)
@@ -172,11 +150,6 @@ class InitializeWidget(QtWidgets.QWidget):
         """ Run this widget from the builder breakpoint runner"""
         self.loadComponents()
         self.initalizeRig()
-
-    @property
-    def isChecked(self):
-        """ Check it the widget is checked"""
-        return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
     @QtCore.Slot()
@@ -237,6 +210,9 @@ class InitializeWidget(QtWidgets.QWidget):
         """Run the comppnent intialize on the builder and update the UI """
         self.builder.guide()
         self.componentManager.loadFromScene()
+
+    def closeEvent(self, *args, **kwargs):
+        self.componentManager.setScriptJobEnabled(False)
 
 
 def _getComponentIcon(cmpt):

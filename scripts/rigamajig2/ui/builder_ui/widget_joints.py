@@ -9,50 +9,35 @@
 
 """
 
-# PYTHON
-from PySide2 import QtGui
-from PySide2 import QtCore
-from PySide2 import QtWidgets
-
 # MAYA
 import maya.cmds as cmds
+from PySide2 import QtCore
+# PYTHON
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
-# RIGAMAJIG2
-from rigamajig2.shared import common
+import rigamajig2.maya.joint
+import rigamajig2.maya.meta as meta
+import rigamajig2.maya.rig.live as live
 from rigamajig2.maya import decorators
 from rigamajig2.maya import naming
-import rigamajig2.maya.joint
-import rigamajig2.maya.rig.live as live
-import rigamajig2.maya.meta as meta
-from rigamajig2.ui.builder_ui.widgets import dataLoader, builderHeader
-from rigamajig2.ui.widgets import QPushButton, sliderGrp
-from rigamajig2.ui.builder_ui import style
-
 from rigamajig2.maya.builder.constants import SKELETON_POS
 from rigamajig2.maya.cmpts.base import GUIDE_STEP
+# RIGAMAJIG2
+from rigamajig2.shared import common
+from rigamajig2.ui.builder_ui import style
+from rigamajig2.ui.builder_ui.widgets import dataLoader, builderSection
+from rigamajig2.ui.widgets import QPushButton, sliderGrp
 
 
 # pylint: disable= too-many-instance-attributes
-class JointWidget(QtWidgets.QWidget):
+class JointWidget(builderSection.BuilderSection):
     """ Joint layout for the builder UI """
 
-    def __init__(self, builder=None):
-        """
-        Constructor for the joint widget
-        :param builder: builder to connect to the ui
-        """
-        super(JointWidget, self).__init__()
-
-        self.builder = builder
-
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
+    WIDGET_TITLE = "Skeleton"
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget = builderHeader.BuilderHeader('Skeleton', addCheckbox=True)
-
         self.jointPositionDataLoader = dataLoader.DataLoader(
             "Joint Positions: ",
             caption="Select a Skeleton position file",
@@ -108,10 +93,6 @@ class JointWidget(QtWidgets.QWidget):
 
     def createLayouts(self):
         """ Create Layouts"""
-        # setup the main layout.
-        self.mainLayout = QtWidgets.QVBoxLayout(self)
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setSpacing(0)
 
         saveLoadJointLayout = QtWidgets.QHBoxLayout()
         saveLoadJointLayout.setContentsMargins(0, 0, 0, 0)
@@ -158,12 +139,9 @@ class JointWidget(QtWidgets.QWidget):
         self.skeletonEditWidget.addSpacing(3)
 
         # add widgets to the main skeleton widget.
-        self.mainCollapseableWidget.addWidget(self.jointPositionDataLoader)
-        self.mainCollapseableWidget.addLayout(saveLoadJointLayout)
-        self.mainCollapseableWidget.addWidget(self.skeletonEditWidget)
-
-        # add the widget to the main layout
-        self.mainLayout.addWidget(self.mainCollapseableWidget)
+        self.mainWidget.addWidget(self.jointPositionDataLoader)
+        self.mainWidget.addLayout(saveLoadJointLayout)
+        self.mainWidget.addWidget(self.skeletonEditWidget)
 
     def createConnections(self):
         """ Create Connections"""
@@ -181,10 +159,10 @@ class JointWidget(QtWidgets.QWidget):
 
     def setBuilder(self, builder):
         """ Set a builder for widget"""
-        rigEnv = builder.getRigEnviornment()
-        self.builder = builder
+        super().setBuilder(builder)
+
         self.jointPositionDataLoader.clear()
-        self.jointPositionDataLoader.setRelativePath(rigEnv)
+        self.jointPositionDataLoader.setRelativePath(self.builder.getRigEnviornment())
 
         # update data within the rig
         jointFiles = self.builder.getRigData(self.builder.getRigFile(), SKELETON_POS)
@@ -193,11 +171,6 @@ class JointWidget(QtWidgets.QWidget):
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.loadJointsPositions()
-
-    @property
-    def isChecked(self):
-        """ Check it the widget is checked"""
-        return self.mainCollapseableWidget.isChecked()
 
     @QtCore.Slot()
     def loadJointsPositions(self):

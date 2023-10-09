@@ -8,30 +8,26 @@
     discription: Functions for working with rigamajig and unreal within maya
 
 """
+import logging
 import os
 import sys
-import logging
-from collections import OrderedDict
-import maya.cmds as cmds
-import maya.mel as mel
-
-from mayafbx import FbxExportOptions, export_fbx
-
-from rigamajig2.maya import meta
-from rigamajig2.maya import decorators
-from rigamajig2.maya import container
-from rigamajig2.maya import namespace
-from rigamajig2.shared import common
-from rigamajig2.maya.rig import control
-from rigamajig2.maya.anim import keyframe
 
 import maya.OpenMayaUI as omui
+import maya.cmds as cmds
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
+from mayafbx import FbxExportOptions, export_fbx
 from shiboken2 import wrapInstance
 
-from rigamajig2.ui.builder_ui.widgets import pathSelector
+from rigamajig2.maya import container
+from rigamajig2.maya import decorators
+from rigamajig2.maya import meta
+from rigamajig2.maya import namespace
+from rigamajig2.maya.anim import keyframe
+from rigamajig2.maya.rig import control
+from rigamajig2.shared import common
+from rigamajig2.ui.widgets import pathSelector
 
 UPAXIS_DICT = {"x": [0, 0, 90],
                "y": [0, 0, 0],

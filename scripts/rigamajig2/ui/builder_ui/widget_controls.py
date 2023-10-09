@@ -14,34 +14,26 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-# RIGAMAJIG2
-from rigamajig2.shared import common
-from rigamajig2.maya import meta
 import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
-from rigamajig2.ui.builder_ui.widgets import dataLoader, builderHeader, overrideColorer
-from rigamajig2.ui.widgets import QPushButton
-from rigamajig2.ui.builder_ui import style
+from rigamajig2.maya import meta
 from rigamajig2.maya.builder.constants import CONTROL_SHAPES
+# RIGAMAJIG2
+from rigamajig2.shared import common
+from rigamajig2.ui.builder_ui import style
+from rigamajig2.ui.builder_ui.widgets import dataLoader, builderSection, overrideColorer
+from rigamajig2.ui.widgets import QPushButton
 
 
 # For this UI its important to have alot of instance attributes
 # pylint: disable = too-many-instance-attributes
-class ControlsWidget(QtWidgets.QWidget):
+class ControlsWidget(builderSection.BuilderSection):
     """ Controls layout for the builder UI """
 
-    def __init__(self, builder=None):
-        super(ControlsWidget, self).__init__()
-
-        self.builder = builder
-
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
+    WIDGET_TITLE = "Controls"
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = builderHeader.BuilderHeader('Controls', addCheckbox=True)
         self.controlDataLoader = dataLoader.DataLoader(
             label="Controls:",
             caption="Select a Control Shape file",
@@ -62,8 +54,9 @@ class ControlsWidget(QtWidgets.QWidget):
         self.saveControlsButton.setIcon(QtGui.QIcon(common.getIcon("saveControls.png")))
         self.saveControlsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.saveControlsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
-        self.saveControlsButton.setToolTip("Left Click: Save controls into their source file (new data appended to last item)"
-                                           "\nRight Click: Save all controls to a new file overriding parents")
+        self.saveControlsButton.setToolTip(
+            "Left Click: Save controls into their source file (new data appended to last item)"
+            "\nRight Click: Save all controls to a new file overriding parents")
 
         self.editControlsWidget = rigamajig2.ui.widgets.collapseableWidget.CollapsibleWidget('Edit Controls')
         self.editControlsWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
@@ -91,13 +84,9 @@ class ControlsWidget(QtWidgets.QWidget):
 
     def createLayouts(self):
         """ Create Layouts"""
-        # setup the main layout.
-        self.mainLayout = QtWidgets.QVBoxLayout(self)
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setSpacing(0)
 
         # MAIN CONTROL LAYOUT
-        self.mainCollapseableWidget.addWidget(self.controlDataLoader)
+        self.mainWidget.addWidget(self.controlDataLoader)
 
         # create the load color checkbox
         loadColorLabel = QtWidgets.QLabel("Load Color:")
@@ -110,10 +99,10 @@ class ControlsWidget(QtWidgets.QWidget):
         controlButtonLayout.addWidget(self.loadColorCheckBox)
         controlButtonLayout.addWidget(self.loadControlsButton)
         controlButtonLayout.addWidget(self.saveControlsButton)
-        self.mainCollapseableWidget.addLayout(controlButtonLayout)
+        self.mainWidget.addLayout(controlButtonLayout)
 
         # EDIT CONTROL LAYOUT
-        self.mainCollapseableWidget.addWidget(self.editControlsWidget)
+        self.mainWidget.addWidget(self.editControlsWidget)
 
         # setup the mirror axis layout
         controlMirrorAxisLayout = QtWidgets.QHBoxLayout()
@@ -143,9 +132,6 @@ class ControlsWidget(QtWidgets.QWidget):
         self.editControlsWidget.addWidget(self.replaceControlButton)
         self.editControlsWidget.addSpacing(3)
 
-        # add the widget to the main layout
-        self.mainLayout.addWidget(self.mainCollapseableWidget)
-
     def createConnections(self):
         """ Create Connections"""
         self.loadControlsButton.clicked.connect(self.loadControlShapes)
@@ -157,10 +143,9 @@ class ControlsWidget(QtWidgets.QWidget):
 
     def setBuilder(self, builder):
         """ Set a builder for intialize widget"""
-        rigEnv = builder.getRigEnviornment()
-        self.builder = builder
+        super().setBuilder(builder)
         self.controlDataLoader.clear()
-        self.controlDataLoader.setRelativePath(rigEnv)
+        self.controlDataLoader.setRelativePath(self.builder.getRigEnviornment())
 
         # update data within the rig
         controlFiles = self.builder.getRigData(self.builder.getRigFile(), CONTROL_SHAPES)
@@ -169,11 +154,6 @@ class ControlsWidget(QtWidgets.QWidget):
     def runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.loadControlShapes()
-
-    @property
-    def isChecked(self):
-        """ Check it the widget is checked"""
-        return self.mainCollapseableWidget.isChecked()
 
     def setAvailableControlShapes(self):
         """ Set control shape items"""

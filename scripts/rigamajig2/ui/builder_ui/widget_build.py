@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: builder_widget.py
+    file: builderSection.py
     author: masonsmigel
     date: 07/2022
     description:
@@ -17,24 +17,16 @@ from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
 # RIGAMAJIG2
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
-from rigamajig2.ui.builder_ui.widgets import dataLoader, builderHeader, scriptRunner
+from rigamajig2.ui.builder_ui.widgets import dataLoader, builderSection, scriptRunner
 
 
-class BuildWidget(QtWidgets.QWidget):
+class BuildWidget(builderSection.BuilderSection):
     """ Build layout for the builder UI """
 
-    def __init__(self, builder=None):
-        super(BuildWidget, self).__init__()
-
-        self.builder = builder
-
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
+    WIDGET_TITLE = "Build Rig"
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = builderHeader.BuilderHeader(text='Build Rig', addCheckbox=True)
 
         self.completeButton = QtWidgets.QPushButton("Build Rig")
         self.completeButton.setFixedHeight(45)
@@ -69,17 +61,14 @@ class BuildWidget(QtWidgets.QWidget):
 
     def createLayouts(self):
         """ Create Layouts """
-        self.mainLayout = QtWidgets.QVBoxLayout(self)
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setSpacing(0)
 
         buildLayout = QtWidgets.QHBoxLayout()
         buildLayout.addWidget(self.buildButton)
         buildLayout.addWidget(self.connectButton)
         buildLayout.addWidget(self.finalizeButton)
 
-        self.mainCollapseableWidget.addWidget(self.completeButton)
-        self.mainCollapseableWidget.addLayout(buildLayout)
+        self.mainWidget.addWidget(self.completeButton)
+        self.mainWidget.addLayout(buildLayout)
 
         psdButtonLayout = QtWidgets.QHBoxLayout()
         psdButtonLayout.setContentsMargins(0, 0, 0, 0)
@@ -88,14 +77,12 @@ class BuildWidget(QtWidgets.QWidget):
         psdButtonLayout.addWidget(self.savePsdButton)
         psdButtonLayout.addWidget(self.loadPsdModeCheckbox)
 
-        self.mainCollapseableWidget.addSpacing(10)
-        self.mainCollapseableWidget.addWidget(self.psdDataLoader)
-        self.mainCollapseableWidget.addLayout(psdButtonLayout)
+        self.mainWidget.addSpacing(10)
+        self.mainWidget.addWidget(self.psdDataLoader)
+        self.mainWidget.addLayout(psdButtonLayout)
 
-        self.mainCollapseableWidget.addSpacing()
-        self.mainCollapseableWidget.addWidget(self.postScriptRunner)
-
-        self.mainLayout.addWidget(self.mainCollapseableWidget)
+        self.mainWidget.addSpacing()
+        self.mainWidget.addWidget(self.postScriptRunner)
 
     def createConnections(self):
         """ Create Connections """
@@ -108,10 +95,9 @@ class BuildWidget(QtWidgets.QWidget):
 
     def setBuilder(self, builder):
         """ Set the builder """
-        rigEnv = builder.getRigEnviornment()
-        self.builder = builder
+        super().setBuilder(builder)
         self.psdDataLoader.clear()
-        self.psdDataLoader.setRelativePath(rigEnv)
+        self.psdDataLoader.setRelativePath(self.builder.getRigEnviornment())
 
         self.postScriptRunner.clearScript()
         scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT, asDict=True)

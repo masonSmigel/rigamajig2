@@ -8,16 +8,15 @@
     discription:
 
 """
-import sys
 import os
-from PySide2 import QtWidgets
-from PySide2 import QtGui
-from PySide2 import QtCore
 
 import git  # import the gitPython library
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
-from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox
 from rigamajig2.shared import common
+from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox
 
 ITEM_HEIGHT = 18
 
@@ -411,7 +410,6 @@ class GitDialog(mayaDialog.MayaDialog):
 
     def showEvent(self, event):
         """ Setup the watcher"""
-
         self.updateWatcherFiles(self.repo)
 
     def closeEvent(self, event):

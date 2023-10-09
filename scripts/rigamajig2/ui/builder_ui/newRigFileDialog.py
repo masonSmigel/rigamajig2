@@ -15,7 +15,7 @@ from maya import OpenMayaUI as omui, cmds as cmds
 from shiboken2 import wrapInstance
 
 import rigamajig2.maya
-from rigamajig2.ui.builder_ui.widgets import pathSelector
+from rigamajig2.ui.widgets import pathSelector
 
 
 class CreateRigEnvDialog(QtWidgets.QDialog):

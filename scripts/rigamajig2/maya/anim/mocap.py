@@ -1,20 +1,20 @@
 """
 functions to connect mocap to character rig
 """
-import sys
-import os
 import logging
-import maya.cmds as cmds
+import os
+import sys
+
 import maya.OpenMayaUI as omui
+import maya.cmds as cmds
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
+import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.decorators
 import rigamajig2.maya.transform
-import rigamajig2.maya.data.abstract_data as abstract_data
-from rigamajig2.ui.builder_ui.widgets import pathSelector
+from rigamajig2.ui.widgets import pathSelector
 
 logger = logging.getLogger(__name__)
 

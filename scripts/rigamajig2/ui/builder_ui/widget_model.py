@@ -7,40 +7,33 @@
     date: 07/2022
     description:
 """
+from PySide2 import QtCore
 # PYTHON
 from PySide2 import QtGui
 from PySide2 import QtWidgets
-from PySide2 import QtCore
-
-# MAYA
-import maya.cmds as cmds
 
 # RIGAMAJIG2
 import rigamajig2.maya.builder.constants
 import rigamajig2.maya.file as file
 import rigamajig2.shared.common
-from rigamajig2.shared import common
-from rigamajig2.ui.builder_ui.widgets import pathSelector, builderHeader, scriptRunner
-from rigamajig2.ui.builder_ui import style as ui_constants
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
+from rigamajig2.shared import common
+from rigamajig2.ui.builder_ui import style as ui_constants
+from rigamajig2.ui.builder_ui.widgets import builderSection, scriptRunner
+from rigamajig2.ui.widgets import pathSelector
 
 
-class ModelWidget(QtWidgets.QWidget):
+# MAYA
+
+
+class ModelWidget(builderSection.BuilderSection):
     """ Model layout for the builder UI """
 
-    def __init__(self, builder=None):
-        super(ModelWidget, self).__init__()
-
-        self.builder = builder
-
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
+    WIDGET_TITLE = 'Model/ Setup Scene'
 
     def createWidgets(self):
         """ Create Widgets """
-        self.mainCollapseableWidget = builderHeader.BuilderHeader(text='Model/ Setup Scene', addCheckbox=True)
         self.modelPathSelector = pathSelector.PathSelector(
             label="model:",
             caption="Select a Model file",
@@ -61,11 +54,7 @@ class ModelWidget(QtWidgets.QWidget):
 
     def createLayouts(self):
         """ Create Layouts """
-        self.mainLayout = QtWidgets.QVBoxLayout(self)
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setSpacing(0)
-
-        self.mainCollapseableWidget.addWidget(self.preScriptRunner)
+        self.mainWidget.addWidget(self.preScriptRunner)
 
         # setup the button layout
         modelButtonLayout = QtWidgets.QHBoxLayout()
@@ -75,12 +64,9 @@ class ModelWidget(QtWidgets.QWidget):
         modelButtonLayout.addWidget(self.openModelButton)
 
         # add widgets to the collapsable widget.
-        self.mainCollapseableWidget.addSpacing(10)
-        self.mainCollapseableWidget.addWidget(self.modelPathSelector)
-        self.mainCollapseableWidget.addLayout(modelButtonLayout)
-
-        # add the widget to the main layout
-        self.mainLayout.addWidget(self.mainCollapseableWidget)
+        self.mainWidget.addSpacing(10)
+        self.mainWidget.addWidget(self.modelPathSelector)
+        self.mainWidget.addLayout(modelButtonLayout)
 
     def createConnections(self):
         """ Create Connections """
@@ -89,9 +75,8 @@ class ModelWidget(QtWidgets.QWidget):
 
     def setBuilder(self, builder):
         """ Set a builder for the model widget """
-        rigEnv = builder.getRigEnviornment()
-        self.builder = builder
-        self.modelPathSelector.setRelativePath(rigEnv)
+        super().setBuilder(builder)
+        self.modelPathSelector.setRelativePath(self.builder.getRigEnviornment())
 
         # clear the ui
         self.preScriptRunner.clearScript()
@@ -101,7 +86,7 @@ class ModelWidget(QtWidgets.QWidget):
         self.modelPathSelector.selectPath(modelFile)
 
         # update the script runner
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PRE_SCRIPT, asDict=True)
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.getRigFile(), constants.PRE_SCRIPT, asDict=True)
         self.preScriptRunner.addScriptsWithRecursionData(scripts)
 
     @QtCore.Slot()
@@ -109,11 +94,6 @@ class ModelWidget(QtWidgets.QWidget):
         """ Run this widget from the builder breakpoint runner """
         self.preScriptRunner.executeAllScripts()
         self.builder.importModel(self.modelPathSelector.getPath())
-
-    @property
-    def isChecked(self):
-        """ Check if the widget is checked """
-        return self.mainCollapseableWidget.isChecked()
 
     @QtCore.Slot()
     def importModel(self):

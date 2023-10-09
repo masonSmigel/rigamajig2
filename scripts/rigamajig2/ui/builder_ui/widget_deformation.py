@@ -16,34 +16,21 @@ from PySide2 import QtWidgets
 
 # RIGAMAJIG2
 import rigamajig2.maya.builder.constants
-from rigamajig2.shared import common
-from rigamajig2.ui.builder_ui.widgets import pathSelector, builderHeader, dataLoader
-from rigamajig2.ui.builder_ui import style
-from rigamajig2.maya.builder.constants import SKINS, PSD, SHAPES, DEFORMERS, DEFORM_LAYERS, DEFORMER_DATA_TYPES
-from rigamajig2.maya.rig import deformLayer
 from rigamajig2.maya import skinCluster
+from rigamajig2.maya.builder.constants import SKINS, SHAPES, DEFORMERS, DEFORM_LAYERS, DEFORMER_DATA_TYPES
+from rigamajig2.shared import common
+from rigamajig2.ui.builder_ui import style
+from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
+from rigamajig2.ui.widgets import pathSelector
 
 
-class DeformationWidget(QtWidgets.QWidget):
+class DeformationWidget(builderSection.BuilderSection):
     """ Deformation layout for the builder UI """
 
-    def __init__(self, builder=None):
-        """
-       Constructor for the deformation widget
-       :param builder: builder to connect to the ui
-       """
-        super(DeformationWidget, self).__init__()
-
-        self.builder = builder
-
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
+    WIDGET_TITLE = "Deformations"
 
     def createWidgets(self):
         """ Create Widgets"""
-        self.mainCollapseableWidget = builderHeader.BuilderHeader('Deformations', addCheckbox=True)
-
         self.deformLayerPathSelector = pathSelector.PathSelector(
             "layers:",
             caption='Select a deformationLayer file',
@@ -114,10 +101,6 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def createLayouts(self):
         """ Create Layouts"""
-        # setup the main layout.
-        self.mainLayout = QtWidgets.QVBoxLayout(self)
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setSpacing(0)
 
         deformLayerLayout = QtWidgets.QHBoxLayout()
         deformLayerLayout.setContentsMargins(0, 0, 0, 0)
@@ -127,10 +110,10 @@ class DeformationWidget(QtWidgets.QWidget):
         deformLayerLayout.addWidget(self.manageDeformLayersButton)
 
         # add the deformation layers back to the collapseable widget
-        self.mainCollapseableWidget.addWidget(self.deformLayerPathSelector)
-        self.mainCollapseableWidget.addLayout(deformLayerLayout)
+        self.mainWidget.addWidget(self.deformLayerPathSelector)
+        self.mainWidget.addLayout(deformLayerLayout)
 
-        self.mainCollapseableWidget.addSpacing(10)
+        self.mainWidget.addSpacing(10)
 
         skinButtonLayout = QtWidgets.QHBoxLayout()
         skinButtonLayout.setContentsMargins(0, 0, 0, 0)
@@ -140,16 +123,15 @@ class DeformationWidget(QtWidgets.QWidget):
         skinButtonLayout.addWidget(self.saveSkinsButton)
 
         # add the skin layers back to the collapseable widget
-        self.mainCollapseableWidget.addWidget(self.skinPathSelector)
-        self.mainCollapseableWidget.addLayout(skinButtonLayout)
+        self.mainWidget.addWidget(self.skinPathSelector)
+        self.mainWidget.addLayout(skinButtonLayout)
 
-        self.mainCollapseableWidget.addWidget(self.skinEditWidget)
+        self.mainWidget.addWidget(self.skinEditWidget)
         self.skinEditWidget.addWidget(self.copySkinWeightsButton)
         self.skinEditWidget.addWidget(self.connectBpmsButton)
         self.skinEditWidget.addSpacing(4)
 
-        self.mainCollapseableWidget.addSpacing(10)
-        # self.mainCollapseableWidget.addWidget(self.SHAPESPathSelector)
+        self.mainWidget.addSpacing(10)
 
         # SHAPES layout
         deformersButtonLayout = QtWidgets.QHBoxLayout()
@@ -158,11 +140,8 @@ class DeformationWidget(QtWidgets.QWidget):
         deformersButtonLayout.addWidget(self.loadDeformersButton)
         deformersButtonLayout.addWidget(self.saveDeformersButton)
 
-        self.mainCollapseableWidget.addWidget(self.deformersDataLoader)
-        self.mainCollapseableWidget.addLayout(deformersButtonLayout)
-
-        # add the widget to the main layout
-        self.mainLayout.addWidget(self.mainCollapseableWidget)
+        self.mainWidget.addWidget(self.deformersDataLoader)
+        self.mainWidget.addLayout(deformersButtonLayout)
 
     def createConnections(self):
         """ Create Connections"""
@@ -180,13 +159,13 @@ class DeformationWidget(QtWidgets.QWidget):
 
     def setBuilder(self, builder):
         """ Set a builder for intialize widget"""
-        rigEnv = builder.getRigEnviornment()
-        self.builder = builder
-        self.deformLayerPathSelector.setRelativePath(rigEnv)
-        self.skinPathSelector.setRelativePath(rigEnv)
+        super().setBuilder(builder)
+        self.deformLayerPathSelector.setRelativePath(self.builder.getRigEnviornment())
+        self.skinPathSelector.setRelativePath(self.builder.getRigEnviornment())
 
         self.deformersDataLoader.clear()
-        self.deformersDataLoader.setRelativePath(rigEnv)
+        self.deformersDataLoader.clear()
+        self.deformersDataLoader.setRelativePath(self.builder.getRigEnviornment())
 
         # update data within the rig
         deformLayerFile = self.builder.getRigData(self.builder.getRigFile(), DEFORM_LAYERS)
@@ -208,11 +187,6 @@ class DeformationWidget(QtWidgets.QWidget):
         self.builder.loadDeformationLayers(self.deformLayerPathSelector.getPath())
         self.builder.loadSkinWeights(self.skinPathSelector.getPath())
         self.builder.loadDeformers(self.deformersDataLoader.getFileList())
-
-    @property
-    def isChecked(self):
-        """ Check it the widget is checked"""
-        return self.mainCollapseableWidget.isChecked()
 
     # CONNECTIONS
     @QtCore.Slot()
@@ -276,4 +250,3 @@ class DeformationWidget(QtWidgets.QWidget):
     @QtCore.Slot()
     def saveDeformerData(self):
         raise NotImplementedError
-

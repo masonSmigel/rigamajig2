@@ -23,7 +23,7 @@ import rigamajig2.ui.builder_ui.recent_files as recent_files
 from rigamajig2.maya import loggers
 # RIGAMJIG
 from rigamajig2.maya.builder import constants
-from rigamajig2.ui.builder_ui.newRigFileDialog import CreateRigEnvDialog
+from rigamajig2.ui.builder_ui.newRigFile_dialog import CreateRigEnvDialog
 
 
 class Actions(object):
@@ -211,12 +211,12 @@ class Actions(object):
         mel.eval("openEvaluationToolkit;")
 
     def openGitVersionControlDialog(self):
-        from rigamajig2.ui.builder_ui import gitDialog
+        from rigamajig2.ui.builder_ui import git_dialog
         rigEnv = self.dialog.rigEnviornment
-        gitDialog.GitDialog.showDialog()
+        git_dialog.GitDialog.showDialog()
 
         # set the rig repo
-        gitDialog.GitDialog.dlg_instance.setRepo(rigEnv)
+        git_dialog.GitDialog.dlg_instance.setRepo(rigEnv)
 
     def reloadRigamajigModules(self):
         """ Reload riamajig modules"""

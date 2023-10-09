@@ -9,14 +9,16 @@
 
 """
 
-from PySide2 import QtWidgets
-from PySide2 import QtGui
 from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
 
 class MayaMessageBox(QtWidgets.QMessageBox):
     def __init__(self, title=None, message=None, icon=None):
         super().__init__()
+
+        self.confirmResultButton = None
 
         if title:
             self.setText(title)
@@ -60,8 +62,10 @@ class MayaMessageBox(QtWidgets.QMessageBox):
         with the default button to:
             QtWidgets.QMessageBox.Save
         """
-        self.setStandardButtons(QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+        self.setStandardButtons(
+            QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
         self.setDefaultButton(QtWidgets.QMessageBox.Save)
+        self.confirmResultButton = QtWidgets.QMessageBox.Save
 
     def setButtonsYesNoCancel(self):
         """
@@ -73,3 +77,18 @@ class MayaMessageBox(QtWidgets.QMessageBox):
         """
         self.setStandardButtons(QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel)
         self.setDefaultButton(QtWidgets.QMessageBox.Yes)
+        self.confirmResultButton = QtWidgets.QMessageBox.Yes
+
+    def getResult(self) -> bool:
+        """
+        Returns a true or false value based on the result of the message box.
+        Must have used setButtonsSaveDiscardCancel or setButtonsYesNoCancel"""
+
+        if not self.confirmResultButton:
+            raise ValueError("No default button setup intialized. Please use setButtonsSaveDiscardCancel or setButtonsYesNoCancel")
+
+        result = self.exec_()
+
+        if result == self.confirmResultButton:
+            return True
+        return False

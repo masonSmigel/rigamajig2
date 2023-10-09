@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: widget_initialize.py
+    file: setup_section.py
     author: masonsmigel
     date: 07/2022
     discription: 
@@ -41,7 +41,7 @@ ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 COMPONENT_ROW_HEIGHT = 20
 
 
-class InitializeWidget(builderSection.BuilderSection):
+class SetupSection(builderSection.BuilderSection):
     """ Initalize layout for the builder UI """
 
     WIDGET_TITLE = "Setup Rig"
@@ -127,9 +127,9 @@ class InitializeWidget(builderSection.BuilderSection):
         self.addComponentsButton.clicked.connect(self.componentManager.showAddComponentDialog)
         self.initalizeBuildButton.clicked.connect(self.initalizeRig)
 
-    def setBuilder(self, builder):
+    def _setBuilder(self, builder):
         """ Set a builder for intialize widget"""
-        super().setBuilder(builder)
+        super()._setBuilder(builder)
 
         self.componentsDataLoader.clear()
         self.guideDataLoader.clear()
@@ -146,7 +146,7 @@ class InitializeWidget(builderSection.BuilderSection):
         guidesFiles = self.builder.getRigData(self.builder.getRigFile(), constants.GUIDES)
         self.guideDataLoader.selectPaths(guidesFiles)
 
-    def runWidget(self):
+    def _runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.loadComponents()
         self.initalizeRig()
@@ -545,10 +545,10 @@ class ComponentManager(QtWidgets.QWidget):
     @QtCore.Slot()
     def _editComponentParameters(self):
         """ Open the Edit component parameters dialog"""
-        from rigamajig2.ui.builder_ui import editComponentDialog
+        from rigamajig2.ui.builder_ui import editComponent_dialog
 
         if not self.editComponentDialog:
-            self.editComponentDialog = editComponentDialog.EditComponentDialog()
+            self.editComponentDialog = editComponent_dialog.EditComponentDialog()
             self.editComponentDialog.windowClosedSignal.connect(self.resetComponentDialogInstance)
             self.editComponentDialog.show()
         else:

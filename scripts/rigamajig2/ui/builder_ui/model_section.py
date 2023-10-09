@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: widget_model.py
+    file: model_section.py
     author: masonsmigel
     date: 07/2022
     description:
@@ -27,7 +27,7 @@ from rigamajig2.ui.widgets import pathSelector
 # MAYA
 
 
-class ModelWidget(builderSection.BuilderSection):
+class ModelSection(builderSection.BuilderSection):
     """ Model layout for the builder UI """
 
     WIDGET_TITLE = 'Model/ Setup Scene'
@@ -70,16 +70,16 @@ class ModelWidget(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
-        self.importModelButton.clicked.connect(self.importModel)
-        self.openModelButton.clicked.connect(self.openModel)
+        self.importModelButton.clicked.connect(self._importModel)
+        self.openModelButton.clicked.connect(self._openModel)
 
-    def setBuilder(self, builder):
+    def _setBuilder(self, builder):
         """ Set a builder for the model widget """
-        super().setBuilder(builder)
-        self.modelPathSelector.setRelativePath(self.builder.getRigEnviornment())
+        super()._setBuilder(builder)
 
         # clear the ui
         self.preScriptRunner.clearScript()
+        self.modelPathSelector.setRelativePath(self.builder.getRigEnviornment())
 
         # update data within the rig
         modelFile = self.builder.getRigData(self.builder.getRigFile(), constants.MODEL_FILE)
@@ -90,17 +90,17 @@ class ModelWidget(builderSection.BuilderSection):
         self.preScriptRunner.addScriptsWithRecursionData(scripts)
 
     @QtCore.Slot()
-    def runWidget(self):
+    def _runWidget(self):
         """ Run this widget from the builder breakpoint runner """
         self.preScriptRunner.executeAllScripts()
         self.builder.importModel(self.modelPathSelector.getPath())
 
     @QtCore.Slot()
-    def importModel(self):
+    def _importModel(self):
         """ Import model from builder """
         self.builder.importModel(self.modelPathSelector.getPath())
 
     @QtCore.Slot()
-    def openModel(self):
+    def _openModel(self):
         """ Open the model file """
         file.open_(self.modelPathSelector.getPath(), f=True)

@@ -23,15 +23,15 @@ import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.ui.builder_ui import actions
-from rigamajig2.ui.builder_ui import recent_files
-from rigamajig2.ui.builder_ui import widget_build
-from rigamajig2.ui.builder_ui import widget_controls
-from rigamajig2.ui.builder_ui import widget_deformation
-from rigamajig2.ui.builder_ui import widget_initialize
-from rigamajig2.ui.builder_ui import widget_joints
+from rigamajig2.ui.builder_ui import build_section
+from rigamajig2.ui.builder_ui import controls_section
+from rigamajig2.ui.builder_ui import deformation_section
 # Import the main widgets for the builder dialog
-from rigamajig2.ui.builder_ui import widget_model
-from rigamajig2.ui.builder_ui import widget_publish
+from rigamajig2.ui.builder_ui import model_section
+from rigamajig2.ui.builder_ui import publish_section
+from rigamajig2.ui.builder_ui import recent_files
+from rigamajig2.ui.builder_ui import setup_section
+from rigamajig2.ui.builder_ui import skeleton_section
 from rigamajig2.ui.widgets import statusLine, QLine, mayaMessageBox, pathSelector
 from rigamajig2.ui.widgets.workspace_control import DockableUI
 
@@ -51,7 +51,7 @@ class BuilderDialog(DockableUI):
     """ Builder dialog"""
     WINDOW_TITLE = "Rigamajig2 Builder  {}".format(rigamajig2.version)
 
-    def __init__(self, rigFile=None):
+    def __init__(self):
         """ Constructor for the builder dialog"""
 
         # Store a rig enviornment and rig builder variables.
@@ -118,14 +118,13 @@ class BuilderDialog(DockableUI):
 
         self.builderSections = list()
 
-        self.modelWidget = widget_model.ModelWidget()
-        self.jointWidget = widget_joints.JointWidget()
-        self.controlsWidget = widget_controls.ControlsWidget()
-        self.intalizeWidget = widget_initialize.InitializeWidget()
-        self.buildWidget = widget_build.BuildWidget()
-        self.deformationWidget = widget_deformation.DeformationWidget()
-        self.publishWidget = widget_publish.PublishWidget()
-        self.publishWidget = widget_publish.PublishWidget()
+        self.modelWidget = model_section.ModelSection()
+        self.jointWidget = skeleton_section.SkeletonSection()
+        self.controlsWidget = controls_section.ControlsSection()
+        self.intalizeWidget = setup_section.SetupSection()
+        self.buildWidget = build_section.BuildSection()
+        self.deformationWidget = deformation_section.DeformationSection()
+        self.publishWidget = publish_section.PublishSection()
 
         self.builderSections = [self.modelWidget,
                                 self.jointWidget,
@@ -284,7 +283,7 @@ class BuilderDialog(DockableUI):
 
         # set paths and widgets relative to the rig env
         for widget in self.builderSections:
-            widget.setBuilder(builder=self.rigBuilder)
+            widget._setBuilder(builder=self.rigBuilder)
 
     # BULDER FUNCTIONS
     def __handleSectionBreakpoints(self, selectedWidget):
@@ -315,7 +314,7 @@ class BuilderDialog(DockableUI):
         # because widgets are added to the ui and the list in oder they can be run sequenctially.
         # when we hit a widget that is checked then the loop stops.
         for widget in self.builderSections:
-            widget.runWidget()
+            widget._runWidget()
 
             if widget.isChecked():
                 print(widget)
@@ -346,7 +345,7 @@ class BuilderDialog(DockableUI):
         # for the rig build we can put the _publish into a try except block
         # if the _publish fails we can add a message to the status line before raising the exception
         try:
-            finalTime = self.publishWidget.publish()
+            finalTime = self.publishWidget._publishWithUiData()
             if finalTime:
                 self.intalizeWidget.componentManager.loadFromScene()
                 self.statusLine.setStatusMessage(

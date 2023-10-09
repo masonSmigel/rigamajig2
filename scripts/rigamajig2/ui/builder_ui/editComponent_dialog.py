@@ -11,18 +11,17 @@
 # PYTHON
 import sys
 
+import maya.OpenMayaUI as omui
+import maya.api.OpenMaya as om2
 # MAYA
 import maya.cmds as cmds
-import maya.api.OpenMaya as om2
-import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
+from rigamajig2.maya import meta
 # RIGAMJIG
 from rigamajig2.ui.builder_ui.widgets import mayaListWidget, mayaDictWidget, mayaStringWidget
-
-from rigamajig2.maya import meta
 
 
 class EditComponentDialog(QtWidgets.QDialog):

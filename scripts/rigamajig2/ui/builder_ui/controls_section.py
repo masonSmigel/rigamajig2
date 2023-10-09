@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: widget_controls.py
+    file: controls_section.py
     author: masonsmigel
     date: 07/2022
     discription: 
@@ -22,12 +22,12 @@ from rigamajig2.maya.builder.constants import CONTROL_SHAPES
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import dataLoader, builderSection, overrideColorer
-from rigamajig2.ui.widgets import QPushButton
+from rigamajig2.ui.widgets import QPushButton, mayaMessageBox
 
 
 # For this UI its important to have alot of instance attributes
 # pylint: disable = too-many-instance-attributes
-class ControlsWidget(builderSection.BuilderSection):
+class ControlsSection(builderSection.BuilderSection):
     """ Controls layout for the builder UI """
 
     WIDGET_TITLE = "Controls"
@@ -77,15 +77,13 @@ class ControlsWidget(builderSection.BuilderSection):
 
         self.controlShapeCheckbox = QtWidgets.QComboBox()
         self.controlShapeCheckbox.setFixedHeight(24)
-        self.setAvailableControlShapes()
+        self.populateAvailableControlShapes()
         self.setControlShapeButton = QtWidgets.QPushButton("Set Shape")
 
         self.replaceControlButton = QtWidgets.QPushButton("Replace Control Shape ")
 
     def createLayouts(self):
         """ Create Layouts"""
-
-        # MAIN CONTROL LAYOUT
         self.mainWidget.addWidget(self.controlDataLoader)
 
         # create the load color checkbox
@@ -134,16 +132,23 @@ class ControlsWidget(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
-        self.loadControlsButton.clicked.connect(self.loadControlShapes)
-        self.saveControlsButton.leftClicked.connect(self.saveControlShapes)
-        self.saveControlsButton.rightClicked.connect(self.saveControlShapesAsOverwrite)
-        self.mirrorControlButton.clicked.connect(self.mirrorControl)
-        self.setControlShapeButton.clicked.connect(self.setControlShape)
-        self.replaceControlButton.clicked.connect(self.replaceControlShape)
+        self.loadControlsButton.clicked.connect(self._loadControlShapes)
+        self.saveControlsButton.leftClicked.connect(self._saveControlShapes)
+        self.saveControlsButton.rightClicked.connect(self._saveControlShapesAsOverwrite)
+        self.mirrorControlButton.clicked.connect(self._mirrorControl)
+        self.setControlShapeButton.clicked.connect(self._setControlShape)
+        self.replaceControlButton.clicked.connect(self._replaceControlShape)
 
-    def setBuilder(self, builder):
+    def populateAvailableControlShapes(self) -> None:
+        """ Set control shape items"""
+        controlShapes = rigamajig2.maya.rig.control.getAvailableControlShapes()
+        for controlShape in controlShapes:
+            self.controlShapeCheckbox.addItem(controlShape)
+
+    @QtCore.Slot()
+    def _setBuilder(self, builder) -> None:
         """ Set a builder for intialize widget"""
-        super().setBuilder(builder)
+        super()._setBuilder(builder)
         self.controlDataLoader.clear()
         self.controlDataLoader.setRelativePath(self.builder.getRigEnviornment())
 
@@ -151,54 +156,58 @@ class ControlsWidget(builderSection.BuilderSection):
         controlFiles = self.builder.getRigData(self.builder.getRigFile(), CONTROL_SHAPES)
         self.controlDataLoader.selectPaths(controlFiles)
 
-    def runWidget(self):
+    @QtCore.Slot()
+    def _runWidget(self) -> None:
         """ Run this widget from the builder breakpoint runner"""
-        self.loadControlShapes()
-
-    def setAvailableControlShapes(self):
-        """ Set control shape items"""
-        controlShapes = rigamajig2.maya.rig.control.getAvailableControlShapes()
-        for controlShape in controlShapes:
-            self.controlShapeCheckbox.addItem(controlShape)
+        self._loadControlShapes()
 
     # CONNECTIONS
     @QtCore.Slot()
-    def loadControlShapes(self):
+    def _loadControlShapes(self) -> None:
         """ Load controlshapes from json using the builder """
         self.builder.loadControlShapes(self.controlDataLoader.getFileList(), self.loadColorCheckBox.isChecked())
 
-    @QtCore.Slot()
-    def saveControlShapes(self):
-        """ Save controlshapes to json using the builder """
-        self._doSaveControlShapes(method="merge")
+    def __validateControlsInScene(self) -> bool:
+        """
+        Validate the scene for proper controls
+        """
+        if len(meta.getTagged("control")) < 1:
+            confirm = mayaMessageBox.MayaMessageBox(title="Save Control Shapes",
+                                                    message="There are no controls in the scene. Are you sure you want to continue?")
+            confirm.setWarning()
+            confirm.setButtonsYesNoCancel()
+
+            return confirm.getResult()
+        # if there are controls we can return true
+        return True
 
     @QtCore.Slot()
-    def saveControlShapesAsOverwrite(self):
-        savedFiles = self._doSaveControlShapes(method="overwrite")
+    def _saveControlShapes(self) -> None:
+        """ Save controlshapes to json using the builder """
+        if not self.__validateControlsInScene():
+            return
+
+        self.builder.saveControlShapes(self.controlDataLoader.getFileList(absolute=True), method="merge")
+
+    @QtCore.Slot()
+    def _saveControlShapesAsOverwrite(self) -> None:
+        """
+        Save all controls to a new layer, overwriting existing layers
+        """
+
+        if not self.__validateControlsInScene():
+            return
+
+        savedFiles = self.builder.saveControlShapes(self.controlDataLoader.getFileList(absolute=True),
+                                                    method="overwrite")
         currentFiles = self.controlDataLoader.getFileList(absolute=True)
         if savedFiles:
             for savedFile in savedFiles:
                 if savedFile not in currentFiles:
                     self.controlDataLoader.selectPath(savedFile)
 
-    def _doSaveControlShapes(self, method='merge'):
-
-        # check if there are controls in the scene before saving.
-        if len(meta.getTagged("control")) < 1:
-            result = cmds.confirmDialog(
-                title='Save Control Shapes',
-                message="There are no controls in the scene. Are you sure you want to continue?",
-                button=['Continue', 'Cancel'],
-                defaultButton='Continue',
-                cancelButton='Cancel')
-
-            if result != 'Continue':
-                return
-
-        return self.builder.saveControlShapes(self.controlDataLoader.getFileList(absolute=True), method=method)
-
     @QtCore.Slot()
-    def mirrorControl(self):
+    def _mirrorControl(self) -> None:
         """ Mirror a control shape """
         axis = 'x'
         if self.controlAxisYRadioButton.isChecked():
@@ -209,14 +218,14 @@ class ControlsWidget(builderSection.BuilderSection):
         rigamajig2.maya.curve.mirror(cmds.ls(sl=True, type='transform'), axis=axis, mode=mirrorMode)
 
     @QtCore.Slot()
-    def setControlShape(self):
+    def _setControlShape(self) -> None:
         """Set the control shape of the selected node"""
         shape = self.controlShapeCheckbox.currentText()
         for node in cmds.ls(sl=True, type='transform'):
             rigamajig2.maya.rig.control.setControlShape(node, shape)
 
     @QtCore.Slot()
-    def replaceControlShape(self):
+    def _replaceControlShape(self) -> None:
         """Replace the control shape"""
         selection = cmds.ls(sl=True, type='transform')
         if len(selection) >= 2:

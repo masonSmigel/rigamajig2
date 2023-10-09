@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: widget_deformation.py
+    file: deformation_section.py
     author: masonsmigel
     date: 07/2022
     discription: 
@@ -24,7 +24,7 @@ from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
 from rigamajig2.ui.widgets import pathSelector
 
 
-class DeformationWidget(builderSection.BuilderSection):
+class DeformationSection(builderSection.BuilderSection):
     """ Deformation layout for the builder UI """
 
     WIDGET_TITLE = "Deformations"
@@ -133,7 +133,6 @@ class DeformationWidget(builderSection.BuilderSection):
 
         self.mainWidget.addSpacing(10)
 
-        # SHAPES layout
         deformersButtonLayout = QtWidgets.QHBoxLayout()
         deformersButtonLayout.setContentsMargins(0, 0, 0, 0)
         deformersButtonLayout.setSpacing(4)
@@ -145,21 +144,22 @@ class DeformationWidget(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
-        self.loadDeformLayersButton.clicked.connect(self.loadDeformLayers)
-        self.saveDeformLayersButton.clicked.connect(self.saveDeformLayers)
-        self.manageDeformLayersButton.clicked.connect(self.openDeformLayerDialog)
+        self.loadDeformLayersButton.clicked.connect(self._loadDeformationLayers)
+        self.saveDeformLayersButton.clicked.connect(self._saveDeformationLayers)
+        self.manageDeformLayersButton.clicked.connect(self._openDeformationLayerDialog)
 
-        self.loadAllSkinButton.clicked.connect(self.loadAllSkins)
-        self.loadSingleSkinButton.clicked.connect(self.loadSingleSkin)
-        self.saveSkinsButton.clicked.connect(self.saveSkin)
-        self.copySkinWeightsButton.clicked.connect(self.copySkinWeights)
-        self.connectBpmsButton.clicked.connect(self.connectBindPreMatrix)
-        self.saveDeformersButton.clicked.connect(self.saveDeformerData)
-        self.loadDeformersButton.clicked.connect(self.loadDeformerData)
+        self.loadAllSkinButton.clicked.connect(self._loadAllSkins)
+        self.loadSingleSkinButton.clicked.connect(self._loadSingleSkin)
+        self.saveSkinsButton.clicked.connect(self._saveSkinWeights)
+        self.copySkinWeightsButton.clicked.connect(self._copySkinWeights)
+        self.connectBpmsButton.clicked.connect(self._connectBindPreMatrix)
+        self.saveDeformersButton.clicked.connect(self._saveDeformerData)
+        self.loadDeformersButton.clicked.connect(self._loadDeformerData)
 
-    def setBuilder(self, builder):
+    @QtCore.Slot()
+    def _setBuilder(self, builder):
         """ Set a builder for intialize widget"""
-        super().setBuilder(builder)
+        super()._setBuilder(builder)
         self.deformLayerPathSelector.setRelativePath(self.builder.getRigEnviornment())
         self.skinPathSelector.setRelativePath(self.builder.getRigEnviornment())
 
@@ -182,7 +182,8 @@ class DeformationWidget(builderSection.BuilderSection):
         DeformerFiles = self.builder.getRigData(self.builder.getRigFile(), DEFORMERS)
         self.deformersDataLoader.selectPaths(common.toList(DeformerFiles))
 
-    def runWidget(self):
+    @QtCore.Slot()
+    def _runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.builder.loadDeformationLayers(self.deformLayerPathSelector.getPath())
         self.builder.loadSkinWeights(self.skinPathSelector.getPath())
@@ -190,28 +191,28 @@ class DeformationWidget(builderSection.BuilderSection):
 
     # CONNECTIONS
     @QtCore.Slot()
-    def loadDeformLayers(self):
+    def _loadDeformationLayers(self):
         """ Save load pose reader setup from json using the builder """
         self.builder.loadDeformationLayers(self.deformLayerPathSelector.getPath())
 
     @QtCore.Slot()
-    def saveDeformLayers(self):
+    def _saveDeformationLayers(self):
         """ Save pose reader setup to json using the builder """
         self.builder.saveDeformationLayers(self.deformLayerPathSelector.getPath())
 
     @QtCore.Slot()
-    def openDeformLayerDialog(self):
-        from rigamajig2.ui.builder_ui import deformLayerDialog
-        dialogInstance = deformLayerDialog.DeformLayerDialog()
+    def _openDeformationLayerDialog(self):
+        from rigamajig2.ui.builder_ui import deformationLayer_dialog
+        dialogInstance = deformationLayer_dialog.DeformLayerDialog()
         dialogInstance.show()
 
     @QtCore.Slot()
-    def loadAllSkins(self):
+    def _loadAllSkins(self):
         """Load all skin weights in the given folder"""
         self.builder.loadSkinWeights(self.skinPathSelector.getPath())
 
     @QtCore.Slot()
-    def loadSingleSkin(self):
+    def _loadSingleSkin(self):
         """Load a single skin file"""
         import rigamajig2.maya.builder.data
         path = cmds.fileDialog2(dialogStyle=2,
@@ -223,19 +224,19 @@ class DeformationWidget(builderSection.BuilderSection):
             rigamajig2.maya.builder.data.loadSingleSkin(path[0])
 
     @QtCore.Slot()
-    def saveSkin(self):
+    def _saveSkinWeights(self):
         """Save the skin weights"""
         self.builder.saveSkinWeights(path=self.skinPathSelector.getPath())
 
     @QtCore.Slot()
-    def copySkinWeights(self):
+    def _copySkinWeights(self):
         """ Copy Skin weights"""
         src = cmds.ls(sl=True)[0]
         dst = cmds.ls(sl=True)[1:]
         skinCluster.copySkinClusterAndInfluences(src, dst)
 
     @QtCore.Slot()
-    def connectBindPreMatrix(self):
+    def _connectBindPreMatrix(self):
         """
         Connect influence joints to their respective bindPreMatrix
         """
@@ -244,9 +245,9 @@ class DeformationWidget(builderSection.BuilderSection):
             skinCluster.connectExistingBPMs(sc)
 
     @QtCore.Slot()
-    def loadDeformerData(self):
+    def _loadDeformerData(self):
         self.builder.loadDeformers(self.deformersDataLoader.getFileList(absolute=False))
 
     @QtCore.Slot()
-    def saveDeformerData(self):
+    def _saveDeformerData(self):
         raise NotImplementedError

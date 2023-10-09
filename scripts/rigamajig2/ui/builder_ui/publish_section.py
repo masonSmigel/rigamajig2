@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: widget_publish.py
+    file: publish_section.py
     author: masonsmigel
     date: 07/2022
     discription: 
@@ -21,7 +21,7 @@ from rigamajig2.ui.builder_ui.widgets import builderSection, scriptRunner
 from rigamajig2.ui.widgets import mayaMessageBox, pathSelector
 
 
-class PublishWidget(builderSection.BuilderSection):
+class PublishSection(builderSection.BuilderSection):
     """ Publish layout for the builder UI """
 
     WIDGET_TITLE = "Publish"
@@ -72,13 +72,14 @@ class PublishWidget(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
-        self.mergeDeformLayersButton.clicked.connect(self.mergeDeformLayers)
-        self.dryPublishButton.clicked.connect(self.dryPublish)
-        self.publishButton.clicked.connect(self.publish)
+        self.mergeDeformLayersButton.clicked.connect(self._mergeDeformLayers)
+        self.dryPublishButton.clicked.connect(self._dryPublish)
+        self.publishButton.clicked.connect(self._publishWithUiData)
 
-    def setBuilder(self, builder):
+    @QtCore.Slot()
+    def _setBuilder(self, builder):
         """ Set the active builder """
-        super().setBuilder(builder)
+        super()._setBuilder(builder)
         self.outPathSelector.setRelativePath(self.builder.getRigEnviornment())
 
         # clear the ui
@@ -104,45 +105,45 @@ class PublishWidget(builderSection.BuilderSection):
         if fileSuffix:
             self.outFileSuffix.setText(fileSuffix)
 
-    def runWidget(self):
+    @QtCore.Slot()
+    def _runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.builder.mergeDeformLayers()
         self.pubScriptRunner.executeAllScripts()
 
-    # CONNECTIONS
-
     @QtCore.Slot()
-    def dryPublish(self):
+    def _dryPublish(self):
         """ run all the _publish steps without saving the file"""
         self.builder.run(publish=True, savePublish=False)
 
     @QtCore.Slot()
-    def mergeDeformLayers(self):
+    def _mergeDeformLayers(self):
         """Merge the deformation layers"""
         self.builder.mergeDeformLayers()
 
     @QtCore.Slot()
-    def publish(self):
-        """ _publish the rig"""
+    def _publishWithUiData(self) -> float or None:
+        """
+        publish the rig with the data from the ui
+        :returns: time taken to export the rig.
+        """
         confirmPublishMessage = mayaMessageBox.MayaMessageBox(
             title="Publish the Rig",
             message="Proceeding will rebuild a fresh rig from saved data overwriting any existing published rigs.",
             icon="warning")
         confirmPublishMessage.setButtonsSaveDiscardCancel()
 
-        res = confirmPublishMessage.exec_()
+        # if the user escapes from the publish
+        if not confirmPublishMessage.getResult():
+            return None
 
-        if res == confirmPublishMessage.Save:
-            outputfile = self.outPathSelector.getPath()
-            fileType = self.outFileTypeComboBox.currentText()
-            suffix = self.outFileSuffix.text()
-            saveFBX = self.saveFBXCheckbox.isChecked()
+        finalTime = self.builder.run(
+            publish=True,
+            outputfile=self.outPathSelector.getPath(),
+            suffix=self.outFileSuffix.text(),
+            assetName=None,
+            fileType=self.outFileTypeComboBox.currentText(),
+            saveFBX=self.saveFBXCheckbox.isChecked()
+            )
 
-            finalTime = self.builder.run(publish=True,
-                                         outputfile=outputfile,
-                                         suffix=suffix,
-                                         assetName=None,
-                                         fileType=fileType,
-                                         saveFBX=saveFBX)
-
-            return finalTime
+        return finalTime

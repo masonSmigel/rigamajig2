@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: gitDialog.py
+    file: git_dialog.py
     author: masonsmigel
     date: 09/2023
     discription:

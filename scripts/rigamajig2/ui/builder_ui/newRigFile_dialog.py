@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: newRigFileDialog.py
+    file: newRigFile_dialog.py
     author: masonsmigel
     date: 08/2023
     discription: 

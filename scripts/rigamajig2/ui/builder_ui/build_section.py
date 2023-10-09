@@ -20,7 +20,7 @@ from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import dataLoader, builderSection, scriptRunner
 
 
-class BuildWidget(builderSection.BuilderSection):
+class BuildSection(builderSection.BuilderSection):
     """ Build layout for the builder UI """
 
     WIDGET_TITLE = "Build Rig"
@@ -93,20 +93,22 @@ class BuildWidget(builderSection.BuilderSection):
         self.loadPsdButton.clicked.connect(self._loadPoseReaders)
         self.savePsdButton.clicked.connect(self._savePoseReaders)
 
-    def setBuilder(self, builder):
+    @QtCore.Slot()
+    def _setBuilder(self, builder):
         """ Set the builder """
-        super().setBuilder(builder)
+        super()._setBuilder(builder)
         self.psdDataLoader.clear()
+        self.postScriptRunner.clearScript()
         self.psdDataLoader.setRelativePath(self.builder.getRigEnviornment())
 
-        self.postScriptRunner.clearScript()
         scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT, asDict=True)
         self.postScriptRunner.addScriptsWithRecursionData(scripts)
 
         psdFiles = self.builder.getRigData(self.builder.getRigFile(), PSD)
         self.psdDataLoader.selectPaths(psdFiles)
 
-    def runWidget(self):
+    @QtCore.Slot()
+    def _runWidget(self):
         """ Run this widget from the builder breakpoint runner """
         self._completeBuild()
         self._loadPoseReaders()

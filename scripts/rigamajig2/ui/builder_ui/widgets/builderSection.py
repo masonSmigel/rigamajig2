@@ -8,6 +8,7 @@
     discription: 
 
 """
+from PySide2 import QtCore
 from PySide2 import QtWidgets
 
 # RIGAMAJIG2
@@ -37,14 +38,16 @@ class BuilderSection(QtWidgets.QWidget):
         self.createLayouts()
         self.createConnections()
 
-    def runWidget(self):
+    @QtCore.Slot()
+    def _runWidget(self):
         """
         Run any functions you that should be run to build the widget.
         Reimplement in subclass
         """
         raise NotImplementedError(f"Not implemented in {self.__class__}")
 
-    def setBuilder(self, builder):
+    @QtCore.Slot()
+    def _setBuilder(self, builder):
         """Set the builder for the widget."""
         self.builder = builder
 

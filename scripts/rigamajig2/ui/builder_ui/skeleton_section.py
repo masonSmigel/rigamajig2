@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: widget_joints.py
+    file: skeleton_section.py
     author: masonsmigel
     date: 07/2022
     discription: 
@@ -27,11 +27,11 @@ from rigamajig2.maya.cmpts.base import GUIDE_STEP
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import dataLoader, builderSection
-from rigamajig2.ui.widgets import QPushButton, sliderGrp
+from rigamajig2.ui.widgets import QPushButton, sliderGrp, mayaMessageBox
 
 
 # pylint: disable= too-many-instance-attributes
-class JointWidget(builderSection.BuilderSection):
+class SkeletonSection(builderSection.BuilderSection):
     """ Joint layout for the builder UI """
 
     WIDGET_TITLE = "Skeleton"
@@ -145,21 +145,22 @@ class JointWidget(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
-        self.cleanSkeletonButton.clicked.connect(self.cleanSkeleton)
-        self.loadJointPositionButton.clicked.connect(self.loadJointsPositions)
-        self.saveJointPositionButton.leftClicked.connect(self.saveJointPositions)
-        self.saveJointPositionButton.rightClicked.connect(self.saveJointPositionAsOverride)
-        self.jointToRotationButton.clicked.connect(self.jointToRotation)
-        self.jointToOrientationButton.clicked.connect(self.jointToOrientation)
-        self.mirrorJointsButton.clicked.connect(self.mirrorJoint)
-        self.pinJointsButton.clicked.connect(self.pinJoints)
-        self.unpinJointsButton.clicked.connect(self.unpinJoints)
-        self.unpinAllJointsButton.clicked.connect(self.unpinAllJoints)
-        self.insertJointsButton.clicked.connect(self.insertJoints)
+        self.cleanSkeletonButton.clicked.connect(self._cleanSkeleton)
+        self.loadJointPositionButton.clicked.connect(self._loadJointsPositions)
+        self.saveJointPositionButton.leftClicked.connect(self._saveJointPositions)
+        self.saveJointPositionButton.rightClicked.connect(self._saveJointPositionAsOverride)
+        self.jointToRotationButton.clicked.connect(self._jointToRotation)
+        self.jointToOrientationButton.clicked.connect(self._jointToOrientation)
+        self.mirrorJointsButton.clicked.connect(self._mirrorJoint)
+        self.pinJointsButton.clicked.connect(self._pinJoints)
+        self.unpinJointsButton.clicked.connect(self._unpinJoints)
+        self.unpinAllJointsButton.clicked.connect(self._unpinAllJoints)
+        self.insertJointsButton.clicked.connect(self._insertJoints)
 
-    def setBuilder(self, builder):
+    @QtCore.Slot()
+    def _setBuilder(self, builder):
         """ Set a builder for widget"""
-        super().setBuilder(builder)
+        super()._setBuilder(builder)
 
         self.jointPositionDataLoader.clear()
         self.jointPositionDataLoader.setRelativePath(self.builder.getRigEnviornment())
@@ -168,30 +169,40 @@ class JointWidget(builderSection.BuilderSection):
         jointFiles = self.builder.getRigData(self.builder.getRigFile(), SKELETON_POS)
         self.jointPositionDataLoader.selectPaths(jointFiles)
 
-    def runWidget(self):
+    @QtCore.Slot()
+    def _runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
-        self.loadJointsPositions()
+        self._loadJointsPositions()
 
     @QtCore.Slot()
-    def loadJointsPositions(self):
+    def _loadJointsPositions(self):
         """ load joints and positions"""
         self.builder.loadJoints(self.jointPositionDataLoader.getFileList())
 
     @QtCore.Slot()
-    def saveJointPositions(self):
+    def _saveJointPositions(self):
         """ save the joint positions"""
-        self._doSaveJointPositions(method="merge")
+        if not self.__validateJointsInScene():
+            return
+
+        self.builder.saveJoints(self.jointPositionDataLoader.getFileList(absolute=True), method="merge")
 
     @QtCore.Slot()
-    def saveJointPositionAsOverride(self):
-        savedFiles = self._doSaveJointPositions(method="overwrite")
+    def _saveJointPositionAsOverride(self):
+        """Save all joints into a new layer. Overriding any joints from lower files."""
+        if not self.__validateJointsInScene():
+            return
+
+        savedFiles = self.builder.saveJoints(self.jointPositionDataLoader.getFileList(absolute=True),
+                                             method="overwrite")
         currentFiles = self.jointPositionDataLoader.getFileList(absolute=True)
         if savedFiles:
             for savedFile in savedFiles:
                 if savedFile not in currentFiles:
                     self.jointPositionDataLoader.selectPath(savedFile)
 
-    def _doSaveJointPositions(self, method="merge"):
+    def __validateJointsInScene(self) -> bool:
+        """Check to make sure the joints exist in the scene and look to see if the the rig is build"""
         isBuilt = False
         # find the main_container and check if its past the guide step
         for container in cmds.ls(type="container"):
@@ -200,36 +211,34 @@ class JointWidget(builderSection.BuilderSection):
                     isBuilt = True
 
         if isBuilt:
-            result = cmds.confirmDialog(
-                t='Save Joints',
-                message="It looks like the rig is already built. Are you sure you want to continue?",
-                button=['Continue', 'Cancel'],
-                defaultButton='Continue',
-                cancelButton='Cancel')
+            confirm = mayaMessageBox.MayaMessageBox(
+                title="Save Joints",
+                message="It looks like the rig is already built. Are you sure you want to continue?"
+                )
+            confirm.setWarning()
+            confirm.setButtonsYesNoCancel()
 
-            if result != 'Continue':
-                return
-
-        return self.builder.saveJoints(self.jointPositionDataLoader.getFileList(absolute=True), method=method)
+            return confirm.getResult()
+        return True
 
     @QtCore.Slot()
-    def pinJoints(self):
+    def _pinJoints(self):
         """ Pin selected joints"""
         live.pin()
 
     @QtCore.Slot()
-    def unpinJoints(self):
+    def _unpinJoints(self):
         """ Unpin selected joints"""
         live.unpin()
 
     @QtCore.Slot()
-    def unpinAllJoints(self):
+    def _unpinAllJoints(self):
         """ Unpin all joints"""
         pinnedNodes = meta.getTagged("isPinned")
         live.unpin(pinnedNodes)
 
     @QtCore.Slot()
-    def insertJoints(self):
+    def _insertJoints(self):
         """ insert joints between two selected joints"""
         jointAmount = self.insertJointsAmountSlider.getValue()
         selection = cmds.ls(sl=True)
@@ -238,7 +247,7 @@ class JointWidget(builderSection.BuilderSection):
 
     @QtCore.Slot()
     @decorators.oneUndo
-    def cleanSkeleton(self):
+    def _cleanSkeleton(self):
         """
         clean the skeleton
         """
@@ -276,7 +285,7 @@ class JointWidget(builderSection.BuilderSection):
                 cmds.warning(f"Joint name is not unique for '{jnt}'")
 
     @QtCore.Slot()
-    def mirrorJoint(self):
+    def _mirrorJoint(self):
         """ mirror joint"""
         axis = 'x'
         if self.jointAxisYRadioButton.isChecked():
@@ -290,11 +299,11 @@ class JointWidget(builderSection.BuilderSection):
             rigamajig2.maya.joint.mirror(joints + [joint], axis=axis, mode=mirrorMode)
 
     @QtCore.Slot()
-    def jointToRotation(self):
+    def _jointToRotation(self):
         """ Convert joint transformation to rotation"""
         rigamajig2.maya.joint.toRotation(cmds.ls(sl=True, type='joint'))
 
     @QtCore.Slot()
-    def jointToOrientation(self):
+    def _jointToOrientation(self):
         """ Convert joint transformation to orientation"""
         rigamajig2.maya.joint.toOrientation(cmds.ls(sl=True, type='joint'))

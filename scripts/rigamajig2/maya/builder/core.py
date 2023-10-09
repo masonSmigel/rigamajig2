@@ -8,27 +8,25 @@
     discription: This module contains utilities for the builder
 
 """
+import glob
+import inspect
+import logging
 # PYTHON
 import os
-import sys
-import glob
-import shutil
-import logging
-import inspect
 import pathlib
+import shutil
+import sys
 
+import maya.api.OpenMaya as om2
 # MAYA
 import maya.cmds as cmds
-import maya.api.OpenMaya as om2
 
 # RIGAMAJIG
 from rigamajig2.maya.builder import constants
-from rigamajig2.shared.logger import Logger
+from rigamajig2.maya.data import abstract_data
 from rigamajig2.shared import common
 from rigamajig2.shared import path as rig_path
 from rigamajig2.shared import runScript
-from rigamajig2.maya.data import abstract_data
-
 # import the message box popup and buttons
 from rigamajig2.ui.widgets import mayaMessageBox
 
@@ -359,9 +357,7 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
         popupConfirm = mayaMessageBox.MayaMessageBox(title=f"Save {dataType}", message=message, icon="info")
         popupConfirm.setButtonsSaveDiscardCancel()
 
-        res = popupConfirm.exec_()
-
-        if res != popupConfirm.Save:
+        if not popupConfirm.getResult():
             return
 
     # Save the data

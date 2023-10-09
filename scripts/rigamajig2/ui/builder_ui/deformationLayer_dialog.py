@@ -2,29 +2,24 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: deformLayerDialog.py
+    file: deformationLayer_dialog.py
     author: masonsmigel
     date: 09/2023
     discription: 
 
 """
-import sys
-import os
-from PySide2 import QtWidgets
-from PySide2 import QtGui
-from PySide2 import QtCore
-import maya.cmds as cmds
-
 from functools import partial
 
-from PySide2.QtWidgets import QMenu
+import maya.cmds as cmds
+from PySide2 import QtCore
+from PySide2 import QtGui
+from PySide2 import QtWidgets
 
-from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox, collapseableWidget
-from rigamajig2.shared import common
-
-from rigamajig2.maya.rig import deformLayer
-from rigamajig2.maya import meta
 from rigamajig2.maya import deformer
+from rigamajig2.maya import meta
+from rigamajig2.maya.rig import deformLayer
+from rigamajig2.shared import common
+from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox, collapseableWidget
 
 DEFORMTREE_STYLESHEET = (f"""
                     QTreeView {{

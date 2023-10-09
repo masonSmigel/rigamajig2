@@ -7,12 +7,13 @@
     date: 06/2022
 
 """
-import sys
 import logging
+import sys
 
 
 class DisableLogger():
     """ Context manager to disable all logger messages from any logger."""
+
     def __enter__(self):
         logging.disable(logging.CRITICAL)
 
@@ -20,12 +21,18 @@ class DisableLogger():
         logging.disable(logging.NOTSET)
 
 
+LOGGER_CODE = 'rigamajig2'
+
+DCC_LOGGING_FORMATT = f"{LOGGER_CODE}.%(name)s - %(levelname)s:  %(message)s"
+LOG_FILE_FORMATT = f"%(asctime)s: {LOGGER_CODE}.%(name)s - %(levelname):  %(message)s"
+
+
 # Custom Logger class
 class Logger(object):
     """
     custom rigamajig logger class
     """
-    LOGGER_NAME = 'Rigamajig2'
+    LOGGER_NAME = 'core'
 
     LEVEL_DEFAULT = logging.DEBUG
     PROPAGATE_DEFAULT = False
@@ -49,7 +56,7 @@ class Logger(object):
                 cls._loggerObj.propagate = cls.PROPAGATE_DEFAULT
 
                 # "%(name)s %(levelname)s [%(module)s: %(lineno)d] %(message)s"
-                fmt = logging.Formatter("%(name)s %(module)s:  %(message)s")
+                fmt = logging.Formatter(DCC_LOGGING_FORMATT)
 
                 streamHandler = logging.StreamHandler(sys.stderr)
                 streamHandler.setFormatter(fmt)
@@ -117,17 +124,25 @@ class Logger(object):
         logger.exception(msg, *args, **kwargs)
 
     @classmethod
-    def writeToFile(cls, path, level=logging.WARNING):
+    def writeToFile(cls, path, level=logging.INFO):
         """write the log to a file"""
         fileHandler = logging.FileHandler(path)
         fileHandler.setLevel(level)
 
-        fmt = logging.Formatter("[%(asctime)s][%(levelname)s][%(message)s]")
+        fmt = logging.Formatter(LOG_FILE_FORMATT)
         fileHandler.setFormatter(fmt)
         logger = cls.loggerObj()
         logger.addHandler(fileHandler)
 
+    @classmethod
+    def endWriteToFile(cls):
+        """ Remove all stream handlers that are logging to a file"""
+        logger = cls.loggerObj()
+        for hander in logger.handlers:
+            if isinstance(hander, logging.FileHandler):
+                logger.removeHandler(hander)
 
 
 if __name__ == '__main__':
-    Logger.info("This is some info")
+    Logger.setLevel(0)
+    Logger.info("test")

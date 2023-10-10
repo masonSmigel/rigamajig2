@@ -9,6 +9,15 @@
 """
 import logging
 
+# Try to load the maya utils module.
+# If it can be imported assume the script is accessed from within maya.
+try:
+    import maya.utils
+
+    inMaya = True
+except:
+    inMaya = False
+
 
 class DisableLogger():
     """ Context manager to disable all logger messages from any logger."""
@@ -30,6 +39,7 @@ LOG_FILE_FORMATT = f"%(asctime)s:%(name)s-%(levelname) : %(message)s"
 # Create a custom formatter
 class LowercaseFormatter(logging.Formatter):
     """Custom Formatter that displayes the level name in lowercase"""
+
     def format(self, record):
         # Call the original formatter to get the message
         msg = super().format(record)
@@ -40,7 +50,6 @@ class LowercaseFormatter(logging.Formatter):
         return msg
 
 
-# Custom Logger class
 class Logger(object):
     """
     custom rigamajig logger class
@@ -61,19 +70,20 @@ class Logger(object):
         if not create one then return it.
         """
         if not cls._loggerObj:
-            if cls.loggerExists():
-                cls._loggerObj = logging.getLogger(cls.LOGGER_NAME)
-            else:
-                cls._loggerObj = logging.getLogger(cls.LOGGER_NAME)
-                cls._loggerObj.setLevel(cls.LEVEL_DEFAULT)
-                cls._loggerObj.propagate = cls.PROPAGATE_DEFAULT
+            pass
+        if cls.loggerExists():
+            cls._loggerObj = logging.getLogger(cls.LOGGER_NAME)
+        else:
+            cls._loggerObj = logging.getLogger(cls.LOGGER_NAME)
+            cls._loggerObj.setLevel(cls.LEVEL_DEFAULT)
+            cls._loggerObj.propagate = cls.PROPAGATE_DEFAULT
 
-                # "%(name)s %(levelname)s [%(module)s: %(lineno)d] %(message)s"
-                fmt = LowercaseFormatter(DCC_LOGGING_FORMATT)
+            fmt = LowercaseFormatter(DCC_LOGGING_FORMATT)
 
-                streamHandler = logging.StreamHandler()
-                streamHandler.setFormatter(fmt)
-                cls._loggerObj.addHandler(streamHandler)
+            # if we are in maya use the maya Gui Log Handler else use a StreamHandler
+            handler = maya.utils.MayaGuiLogHandler() if inMaya else logging.StreamHandler()
+            handler.setFormatter(fmt)
+            cls._loggerObj.addHandler(handler)
 
         return cls._loggerObj
 
@@ -182,5 +192,8 @@ def setLoggingLevel(level):
 
 
 if __name__ == '__main__':
+    print("sent to maya")
     Logger.setLevel(0)
     Logger.info("test")
+    Logger.warning("this is a warning")
+    Logger.error("This is an error")

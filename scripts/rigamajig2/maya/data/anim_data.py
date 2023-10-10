@@ -8,20 +8,17 @@
     author: masonsmigel
     date: 01/2021
 """
+import sys
 from collections import OrderedDict
-import rigamajig2.maya.data.maya_data as maya_data
-import rigamajig2.shared.common as common
-import maya.cmds as cmds
+
 import maya.api.OpenMaya as om
 import maya.api.OpenMayaAnim as oma
-import sys
-import logging
 
+import rigamajig2.maya.data.maya_data as maya_data
+import rigamajig2.shared.common as common
 
 if sys.version_info.major >= 3:
     basestring = str
-
-logger = logging.getLogger(__name__)
 
 
 class AnimData(maya_data.MayaData):
@@ -167,7 +164,7 @@ class AnimData(maya_data.MayaData):
                 mSelectionList.add("{}.{}".format(retargetNode, attribute))
                 currentMPlug = mSelectionList.getPlug(0)
 
-                connectedList = currentMPlug.connectedTo(1,0)
+                connectedList = currentMPlug.connectedTo(1, 0)
                 newAnimCurve = True
 
                 if connectedList:
@@ -191,11 +188,12 @@ class AnimData(maya_data.MayaData):
                     mTimeList.append(om.MTime(self._data[node][attribute]['timeList'][keyIndex], om.MTime.uiUnit()))
                     mDoubleValueList.append(self._data[node][attribute]['valueList'][keyIndex])
 
-                mfnAnimCurve.addKeys(mTimeList,mDoubleValueList, 0,0,1)
+                mfnAnimCurve.addKeys(mTimeList, mDoubleValueList, 0, 0, 1)
 
                 for keyIndex in range(len(self._data[node][attribute]['timeList'])):
                     mfnAnimCurve.setInTangentType(keyIndex, self._data[node][attribute]['inTangentTypeList'][keyIndex])
-                    mfnAnimCurve.setOutTangentType(keyIndex, self._data[node][attribute]['outTangentTypeList'][keyIndex])
+                    mfnAnimCurve.setOutTangentType(keyIndex,
+                                                   self._data[node][attribute]['outTangentTypeList'][keyIndex])
 
                     mfnAnimCurve.setTangentsLocked(keyIndex, self._data[node][attribute]['lockedTangents'][keyIndex])
 
@@ -212,4 +210,4 @@ class AnimData(maya_data.MayaData):
                 if gatherAttrsFromFile:
                     attributes = None
 
-            logger.info("anim loaded '{}' to '{}".format(node, retargetNode))
+            print("anim loaded '{}' to '{}".format(node, retargetNode))

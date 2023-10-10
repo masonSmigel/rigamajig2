@@ -7,19 +7,15 @@ Thanks to:
 Charles Wardlaw: Deformation Layering in Maya’s Parallel GPU World 
 (https://medium.com/@kattkieru/deformation-layering-in-mayas-parallel-gpu-world-15c2e3d66d82)
 """
-import logging
-
-import maya.cmds as cmds
 import maya.api.OpenMaya as om2
 import maya.api.OpenMayaAnim as oma2
+import maya.cmds as cmds
 
-import rigamajig2.shared.common
+import rigamajig2.maya.attr
 import rigamajig2.maya.deformer
 import rigamajig2.maya.openMayaUtils
 import rigamajig2.maya.shape
-import rigamajig2.maya.attr
-
-logger = logging.getLogger(__name__)
+import rigamajig2.shared.common
 
 
 def isSkinCluster(skinCluster):
@@ -506,7 +502,7 @@ def copySkinClusterAndInfluences(sourceMesh, targetMeshes, surfaceMode='closestP
 
         # copy the skin weights
         cmds.copySkinWeights(ss=srcSkinCluster, ds=tgtSkinCluster, nm=True, **kwargs)
-        logger.info("weights copied: {}({}) -> {}({})".format(sourceMesh, srcSkinCluster, tgtMesh, tgtSkinCluster))
+        print("weights copied: {}({}) -> {}({})".format(sourceMesh, srcSkinCluster, tgtMesh, tgtSkinCluster))
 
         return tgtSkinCluster
 

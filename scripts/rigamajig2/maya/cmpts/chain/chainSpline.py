@@ -13,23 +13,17 @@
 chain component
 """
 import maya.cmds as cmds
+
 import rigamajig2.maya.cmpts.base
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.rig.spaces as spaces
-import rigamajig2.maya.transform as rig_transform
+import rigamajig2.maya.joint
 import rigamajig2.maya.joint as joint
+import rigamajig2.maya.node
+import rigamajig2.maya.rig.control as rig_control
+import rigamajig2.maya.transform as rig_transform
+import rigamajig2.shared.common as common
+from rigamajig2.maya import attr
 from rigamajig2.maya import curve
 from rigamajig2.maya import node
-from rigamajig2.maya import attr
-from rigamajig2.maya import naming
-
-import rigamajig2.shared.common as common
-import rigamajig2.maya.node
-import rigamajig2.maya.joint
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 class ChainSpline(rigamajig2.maya.cmpts.base.Base):

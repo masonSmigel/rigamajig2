@@ -1,20 +1,13 @@
 """
 base component
 """
-import maya.cmds as cmds
-import maya.mel as mel
 from collections import OrderedDict
 
-import rigamajig2.maya.container
+import maya.cmds as cmds
+
 import rigamajig2.maya.attr
+import rigamajig2.maya.container
 import rigamajig2.maya.meta
-import rigamajig2.maya.data.joint_data as joint_data
-import rigamajig2.maya.transform as transform
-
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 
 class Base(object):

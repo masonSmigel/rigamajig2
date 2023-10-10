@@ -366,7 +366,6 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             setLayerGroupAction.triggered.connect(partial(self.performSetLayerGroup, layerGroup))
 
             actionsToAdd.append(setLayerGroupAction)
-        print(actionsToAdd)
         layerGroupMenu.addActions(actionsToAdd)
         return layerGroupMenu
 

@@ -8,3 +8,9 @@
     discription: 
 
 """
+
+from rigamajig2.shared import logger
+
+
+class Builder_UI_Logger(logger.Logger):
+    LOGGER_NAME = __name__

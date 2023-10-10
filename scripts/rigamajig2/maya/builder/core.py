@@ -10,7 +10,6 @@
 """
 import glob
 import inspect
-import logging
 # PYTHON
 import os
 import pathlib
@@ -29,8 +28,7 @@ from rigamajig2.shared import path as rig_path
 from rigamajig2.shared import runScript
 # import the message box popup and buttons
 from rigamajig2.ui.widgets import mayaMessageBox
-
-logger = logging.getLogger(__name__)
+from . import Builder_Logger
 
 CMPT_PATH = os.path.abspath(os.path.join(__file__, '../../cmpts'))
 _EXCLUDED_FOLDERS = ['face']
@@ -385,7 +383,7 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
 
             # write out the file
             mergedDataObj.write(dataFile)
-            logger.info(f"{dataType} saved to {dataFile}")
+            Builder_Logger.info(f"{dataType} saved to {dataFile}")
 
         # Get a list of all the files saved.
         filesSaved = list(saveDataDict.keys())
@@ -679,7 +677,7 @@ def createRigEnviornment(sourceEnviornment, targetEnviornment, rigName):
     data.setData(newData)
     data.write(rigFile)
 
-    logger.info("New rig environment created: {}".format(tgtEnvPath))
+    Builder_Logger.info("New rig environment created: {}".format(tgtEnvPath))
     return os.path.join(tgtEnvPath, rigFile)
 
 

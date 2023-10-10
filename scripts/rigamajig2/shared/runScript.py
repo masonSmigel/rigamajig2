@@ -1,11 +1,15 @@
 """
 Tool to run python scripts on the disk
 """
-import os
 import fnmatch
+import os
 import runpy
-import logging
-logger = logging.getLogger(__name__)
+
+from rigamajig2.shared import logger
+
+
+class Run_Script_Logger(logger.Logger):
+    LOGGER_NAME = __name__
 
 
 def runScript(filePath, initGlobals=None):
@@ -18,7 +22,7 @@ def runScript(filePath, initGlobals=None):
     if initGlobals is None:
         initGlobals = dict()
     filePath = os.path.realpath(filePath)
-    logger.info("Running: {}".format(os.path.basename(filePath)))
+    Run_Script_Logger.info("Running: {}".format(os.path.basename(filePath)))
     runpy.run_path(filePath, initGlobals, "__main__")
 
 

@@ -8,24 +8,21 @@
     discription: This module contains functions to actorize a rig. This includes making an actor-anim and an actor-ue
 
 """
-import maya.cmds as cmds
-import logging
 from collections import OrderedDict
-from rigamajig2.maya import meta
+
+import maya.cmds as cmds
+
+from rigamajig2.maya import blendshape
 from rigamajig2.maya import deformer
 from rigamajig2.maya import mesh
-from rigamajig2.maya import uv
-from rigamajig2.maya import skinCluster
-from rigamajig2.maya import blendshape
+from rigamajig2.maya import meta
 from rigamajig2.maya import shape
+from rigamajig2.maya import skinCluster
+from rigamajig2.maya import uv
 
 SOURCE_SUFFIX = "__src"
 
 POLYSMOOTH_KWARGS = OrderedDict(method=0, divisions=1, keepHardEdge=False, propagateEdgeHardness=False,ch=False, ofb=0)
-
-logger = logging.getLogger(__name__)
-
-logger.setLevel(logging.DEBUG)
 
 
 def createNewGeometry():
@@ -108,7 +105,6 @@ def copyDeformations(modelRootDup):
         for sourceDeformer in deformerStack:
             if not skinCluster.isSkinCluster(sourceDeformer) and not blendshape.isBlendshape(sourceDeformer):
                 deformerType = cmds.nodeType(sourceDeformer)
-                logger.warning("Deformers type {} not supported. {} will not be tranfered".format(deformerType, sourceDeformer))
 
         # reverse the deformer stack so we start on the bottom and work up. THis will preserve the order of the source.
         deformerStack = reversed(deformerStack)
@@ -146,10 +142,8 @@ def transferSkinCluster(sourceModel, sourceDeformer, destModel):
     # start with the skin cluster. first we need to check if it has overlapping UVS.
     # It will be faster to check the  source and the two have identical layouts.
     if uv.checkIfOverlapping(sourceModel):
-        logger.debug("{} HAS overlapping Uvs transfering by closest point.".format(sourceModel))
         skinCluster.copySkinClusterAndInfluences(sourceModel, destModel, uvSpace=False)
     else:
-        logger.debug("{} does not have overlapping Uvs transfering by uv space.".format(sourceModel))
         skinCluster.copySkinClusterAndInfluences(sourceModel, destModel, uvSpace=True)
 
 
@@ -223,7 +217,6 @@ def transferBlendshape(sourceModel, sourceDeformer, destModel):
             cmds.connectAttr(destTargetPlug, outConnection, f=True)
 
     # finally lets delete the smooth node and add a log
-    logger.info("blendshape copied: {}({}) -> {}({})".format(sourceModel, sourceDeformer, destModel, destDeformer))
     cmds.delete(tmpSmoothNode)
 
 

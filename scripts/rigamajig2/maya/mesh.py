@@ -1,11 +1,16 @@
 """
 Geometry utilities
 """
-import maya.cmds as cmds
 import maya.api.OpenMaya as om2
+import maya.cmds as cmds
 
-import rigamajig2.shared.common as common
 import rigamajig2.maya.shape as shape
+import rigamajig2.shared.common as common
+from rigamajig2.shared import logger
+
+
+class Mesh_Logger(logger.Logger):
+    LOGGER_NAME = __name__
 
 
 def isMesh(node):
@@ -152,7 +157,7 @@ def cleanShapes(nodes):
             intermidiateShapes = [x for x in shapes if cmds.getAttr('{}.intermediateObject'.format(x))]
             if intermidiateShapes:
                 cmds.delete(intermidiateShapes)
-                print("Deleted Intermeidate Shapes: {}".format(intermidiateShapes))
+                Mesh_Logger.info("Deleted Intermeidate Shapes: {}".format(intermidiateShapes))
 
 
 def cleanModel(nodes=None):
@@ -176,7 +181,7 @@ def cleanModel(nodes=None):
         cmds.xform(node, a=True, ws=True, rp=(0, 0, 0), sp=(0, 0, 0))
         if isMesh(node):
             cleanShapes(node)
-            print('Cleaned Mesh: {}'.format(node))
+            Mesh_Logger.info('Cleaned Mesh: {}'.format(node))
 
 
 def cleanColorSets(meshes):
@@ -188,4 +193,4 @@ def cleanColorSets(meshes):
         colorSets = cmds.polyColorSet(mesh, q=True, allColorSets=True) or list()
         for colorSet in colorSets:
             cmds.polyColorSet(mesh, delete=True, colorSet=colorSet)
-            print("Deleted colorSet: {}".format(colorSet))
+            Mesh_Logger.info("Deleted colorSet: {}".format(colorSet))

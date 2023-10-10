@@ -8,16 +8,15 @@
     author: masonsmigel
     date: 01/2021
 """
-import logging
+
+from collections import OrderedDict
 
 import maya.cmds as cmds
-from collections import OrderedDict
-import rigamajig2.shared.common as common
-import rigamajig2.maya.data.maya_data as maya_data
-import rigamajig2.maya.skinCluster as skinCluster
-import rigamajig2.maya.deformer as deformer
 
-logger = logging.getLogger(__name__)
+import rigamajig2.maya.data.maya_data as maya_data
+import rigamajig2.maya.deformer as deformer
+import rigamajig2.maya.skinCluster as skinCluster
+import rigamajig2.shared.common as common
 
 
 class SkinData(maya_data.MayaData):
@@ -108,7 +107,7 @@ class SkinData(maya_data.MayaData):
 
             if rebind:
                 cmds.select(realInfluences, mesh, r=True)
-                meshSkin = cmds.skinCluster(tsb=True, mi=3, dr=1.0, wd=1,  n=mesh + "_skinCluster")[0]
+                meshSkin = cmds.skinCluster(tsb=True, mi=3, dr=1.0, wd=1, n=mesh + "_skinCluster")[0]
 
             # set the skinweights
             skinCluster.setWeights(mesh, meshSkin, self._data[node]['weights'])
@@ -126,7 +125,8 @@ class SkinData(maya_data.MayaData):
             elif isinstance(self._data[node]['preBindInputs'], list):
                 # # for complete ness this includes a depreciated workflow for a preBind inputs stored as a list.
                 # TODO: this should be depreiciated.
-                cmds.warning("{} is using a depreciated workflow. Please save the skin file again to update!".format(node))
+                cmds.warning(
+                    "{} is using a depreciated workflow. Please save the skin file again to update!".format(node))
                 for index, bindInput in zip(range(len(influenceObjects)), self._data[node]['preBindInputs']):
                     if bindInput:
                         cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, index), f=True)
@@ -143,5 +143,3 @@ class SkinData(maya_data.MayaData):
 
             if skinningMethod == 2:
                 skinCluster.setBlendWeights(mesh, meshSkin, self._data[node]['dqBlendWeights'])
-
-            logger.info("Loaded skinweights for '{}'".format(mesh))

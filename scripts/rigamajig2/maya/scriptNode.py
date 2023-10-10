@@ -1,11 +1,11 @@
 """Script node utilities """
-import maya.cmds as cmds
 import inspect
-import os
 import logging
+import os
+
+import maya.cmds as cmds
 
 from rigamajig2.shared import common
-
 
 logger = logging.getLogger(__name__)
 
@@ -30,6 +30,7 @@ if __name__ == '__main__':
 """
 
 DEFAULT_IMPORTS = 'import maya.cmds as cmds'
+
 
 def isScriptNode(name):
     """
@@ -155,4 +156,5 @@ def validateScriptString(script, defaultImports=''):
         functionSource = inspect.getsource(script)
         functionCall = script.__name__ + '()'
         functionPath = ".".join([script.__module__, script.__name__])
-        return FUNCTION_FORMAT.format(function=functionPath, imports=defaultImports, src=functionSource, call=functionCall)
+        return FUNCTION_FORMAT.format(function=functionPath, imports=defaultImports, src=functionSource,
+                                      call=functionCall)

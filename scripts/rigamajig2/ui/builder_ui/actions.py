@@ -16,13 +16,13 @@ import maya.mel as mel
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-import rigamajig2.maya.builder.builder as builder
 import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.qc as qc
 import rigamajig2.ui.builder_ui.recent_files as recent_files
-from rigamajig2.maya import loggers
+from rigamajig2.maya.builder import Builder_Logger
 # RIGAMJIG
 from rigamajig2.maya.builder import constants
+from rigamajig2.shared import logger
 from rigamajig2.ui.builder_ui.newRigFile_dialog import CreateRigEnvDialog
 
 
@@ -79,7 +79,7 @@ class Actions(object):
         level = 10
         for levels in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
             loggingLevelAction = QtWidgets.QAction(levels, self.setLoggingLevelMenu)
-            loggingLevelAction.triggered.connect(partial(loggers.setLoggingLevel, level))
+            loggingLevelAction.triggered.connect(partial(logger.setLoggingLevel, level))
             self.setLoggingLevelMenu.addAction(loggingLevelAction)
             level += 10
 
@@ -176,7 +176,7 @@ class Actions(object):
 
         data.setData(newData)
         data.write(self.dialog.rigFile)
-        builder.logger.info("data saved to : {}".format(self.dialog.rigFile))
+        Builder_Logger.info(f"data saved to : {self.dialog.rigFile}")
 
     def reloadRigFile(self):
         """ Reload rig file"""

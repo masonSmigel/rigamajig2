@@ -9,26 +9,23 @@
 
 """
 import os
-import sys
 import pathlib
-import inspect
 import platform
 import subprocess
+import sys
 from functools import partial
 
+import maya.OpenMayaUI as omui
+import maya.cmds as cmds
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
-
-import maya.cmds as cmds
-import maya.OpenMayaUI as omui
 from shiboken2 import wrapInstance
 
-from rigamajig2.ui import showInFolder
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.data import abstract_data
-from rigamajig2.shared import path as rig_path
 from rigamajig2.shared import common
+from rigamajig2.ui import showInFolder
 
 ITEM_SIZE_HINT = 18
 
@@ -639,4 +636,3 @@ if __name__ == "__main__":
     testDialog = TestDialog()
     testDialog.show()
 
-    # print(getDataModules())

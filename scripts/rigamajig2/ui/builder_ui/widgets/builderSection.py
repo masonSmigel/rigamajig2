@@ -51,9 +51,6 @@ class BuilderSection(QtWidgets.QWidget):
         """Set the builder for the widget."""
         self.builder = builder
 
-        # TODO: Add a debug log here
-        print(f"{self}, setting builder {builder}")
-
     def createWidgets(self):
         """ Create widgets"""
         pass

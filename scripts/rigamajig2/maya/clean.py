@@ -8,15 +8,18 @@
     discription: functions to clean up scenes
 """
 # PYTHON
-import logging
 
 # MAYA
 import maya.cmds as cmds
 import maya.mel as mel
 
+from rigamajig2.shared import logger
+
 EVIL_METHOD_NAMES = ['DCF_updateViewportList', 'CgAbBlastPanelOptChangeCallback', 'onModelChange3dc']
 
-logger = logging.getLogger(__name__)
+
+class Clean_Logger(logger.Logger):
+    LOGGER_NAME = __name__
 
 
 def cleanNodes():
@@ -37,7 +40,7 @@ def cleanNodes():
                 try:
                     cmds.lockNode(node, l=False)
                     cmds.delete('node')
-                    logger.info("Cleaned Node: '{}'".format(node))
+                    Clean_Logger.info("Cleaned Node: '{}'".format(node))
                 except:
                     pass
 
@@ -51,7 +54,7 @@ def cleanPlugins():
         for plugin in plugins:
             try:
                 cmds.unknownPlugin(plugin, r=True)
-                logger.info("Cleaned Plugin: '{}'".format(plugin))
+                Clean_Logger.info("Cleaned Plugin: '{}'".format(plugin))
             except:
                 pass
 
@@ -73,7 +76,7 @@ def cleanScriptNodes(excludedScriptNodes=None, excludePrefix='rigamajig2'):
             continue
 
         cmds.delete(scriptNode)
-        logger.info("Cleaned Script Node: '{}'".format(scriptNode))
+        Clean_Logger.info("Cleaned Script Node: '{}'".format(scriptNode))
 
 
 def cleanRougePanels(panels=None):
@@ -102,7 +105,7 @@ def cleanRougePanels(panels=None):
             for evilMethodName in capitalEvilMethodNames:
                 if evilMethodName in part.upper():
                     changed = True
-                    logger.info("removed callback '{}' from pannel '{}'".format(part, panelName))
+                    Clean_Logger.info("removed callback '{}' from pannel '{}'".format(part, panelName))
                     break
             else:
                 newParts.append(part)

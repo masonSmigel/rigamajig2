@@ -8,7 +8,6 @@
 
 """
 import logging
-import sys
 
 
 class DisableLogger():
@@ -23,8 +22,22 @@ class DisableLogger():
 
 LOGGER_CODE = 'rigamajig2'
 
-DCC_LOGGING_FORMATT = f"{LOGGER_CODE}.%(name)s - %(levelname)s:  %(message)s"
-LOG_FILE_FORMATT = f"%(asctime)s: {LOGGER_CODE}.%(name)s - %(levelname):  %(message)s"
+DCC_LOGGING_FORMATT = f"%(name)s - %(levelname)s : %(message)s"
+# DCC_LOGGING_FORMATT = f"%(name)s : %(message)s"
+LOG_FILE_FORMATT = f"%(asctime)s:%(name)s-%(levelname) : %(message)s"
+
+
+# Create a custom formatter
+class LowercaseFormatter(logging.Formatter):
+    """Custom Formatter that displayes the level name in lowercase"""
+    def format(self, record):
+        # Call the original formatter to get the message
+        msg = super().format(record)
+        # Convert the log level to lowercase
+        level = record.levelname.lower()
+        # Replace the original log level in the message
+        msg = msg.replace(record.levelname, level)
+        return msg
 
 
 # Custom Logger class
@@ -56,9 +69,9 @@ class Logger(object):
                 cls._loggerObj.propagate = cls.PROPAGATE_DEFAULT
 
                 # "%(name)s %(levelname)s [%(module)s: %(lineno)d] %(message)s"
-                fmt = logging.Formatter(DCC_LOGGING_FORMATT)
+                fmt = LowercaseFormatter(DCC_LOGGING_FORMATT)
 
-                streamHandler = logging.StreamHandler(sys.stderr)
+                streamHandler = logging.StreamHandler()
                 streamHandler.setFormatter(fmt)
                 cls._loggerObj.addHandler(streamHandler)
 
@@ -141,6 +154,31 @@ class Logger(object):
         for hander in logger.handlers:
             if isinstance(hander, logging.FileHandler):
                 logger.removeHandler(hander)
+
+
+def getAllRigamajigLoggers():
+    """
+    Return a list of all rigamajig loggers
+    :return:
+    """
+    loggers = [logging.getLogger(name) for name in logging.root.manager.loggerDict]
+
+    returnList = list()
+    for logger in loggers:
+        if logger.name.startswith("rigamajig2"):
+            returnList.append(logger)
+    return returnList
+
+
+def setLoggingLevel(level):
+    """
+    Set the logging level of all rigamajig loggers
+    :return:
+    """
+
+    for logger in getAllRigamajigLoggers():
+        logger.setLevel(level=level)
+        logger.info(f"Logging Level Changed to: {level}")
 
 
 if __name__ == '__main__':

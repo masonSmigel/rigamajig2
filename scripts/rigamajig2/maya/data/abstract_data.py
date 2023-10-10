@@ -15,10 +15,8 @@ import os
 import sys
 from collections import OrderedDict
 from time import gmtime, strftime
-import rigamajig2.shared.common as common
-import logging
 
-logger = logging.getLogger(__name__)
+import rigamajig2.shared.common as common
 
 
 class AbstractData(object):
@@ -141,7 +139,7 @@ class AbstractData(object):
         directory = os.path.dirname(filepath)
         if createDirectory:
             if not os.path.isdir(directory):
-                logger.info('making path{0}'.format(directory))
+                print('making path{0}'.format(directory))
                 os.makedirs(directory)
 
         # Write Data

@@ -2,20 +2,14 @@
 COG component
 """
 import maya.cmds as cmds
+
 import rigamajig2.maya.cmpts.base
-from rigamajig2.maya import attr
-from rigamajig2.maya.rig import control
-import rigamajig2.maya.rig.spaces as spaces
-import rigamajig2.maya.rig.ikfk as ikfk
-import rigamajig2.maya.transform as rig_transform
+import rigamajig2.maya.constrain as constrain
 import rigamajig2.maya.hierarchy as hierarchy
 import rigamajig2.maya.joint as joint
-import rigamajig2.maya.meta as meta
-import rigamajig2.maya.constrain as constrain
-
-import logging
-
-logger = logging.getLogger(__name__)
+import rigamajig2.maya.transform as rig_transform
+from rigamajig2.maya import attr
+from rigamajig2.maya.rig import control
 
 
 class Cog(rigamajig2.maya.cmpts.base.Base):

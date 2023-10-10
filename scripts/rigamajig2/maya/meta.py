@@ -3,15 +3,13 @@ Functions to add and manage metadata to nodes
 """
 import json
 import sys
-import logging
-from collections import OrderedDict
 from ast import literal_eval
-import maya.cmds as cmds
-import rigamajig2.shared.common as common
-import rigamajig2.maya.attr as rig_attr
+from collections import OrderedDict
 
-logger = logging.getLogger(__name__)
-logger.setLevel(10)
+import maya.cmds as cmds
+
+import rigamajig2.maya.attr as rig_attr
+import rigamajig2.shared.common as common
 
 EXCLUDED_JSON_ATTRS = ['attributeAliasList']
 
@@ -244,7 +242,6 @@ class MetaNode(object):
                 value = self.deserializeComplex(value)  # if the data is a string try to deserialize it.
             except:
                 pass
-                # logger.debug('string {} is not json deserializable'.format(value))
         return value
 
     def getAllData(self, excludedAttrs=None):
@@ -327,7 +324,7 @@ class MetaNode(object):
         :return: serialized data
         """
         if len(data) > 32700:
-            logger.warning('Length of string is over 16bit Maya Attr Template limit - lock this after setting it!')
+            cmds.warning('Length of string is over 16bit Maya Attr Template limit - lock this after setting it!')
         return json.dumps(data)
 
     def deserializeComplex(self, data):

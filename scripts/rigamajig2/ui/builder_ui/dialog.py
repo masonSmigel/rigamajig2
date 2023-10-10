@@ -8,7 +8,7 @@
     discription: This module contains the main dialog for the builder UI
 
 """
-import logging
+
 # PYTHON
 import time
 
@@ -26,7 +26,6 @@ from rigamajig2.ui.builder_ui import actions
 from rigamajig2.ui.builder_ui import build_section
 from rigamajig2.ui.builder_ui import controls_section
 from rigamajig2.ui.builder_ui import deformation_section
-# Import the main widgets for the builder dialog
 from rigamajig2.ui.builder_ui import model_section
 from rigamajig2.ui.builder_ui import publish_section
 from rigamajig2.ui.builder_ui import recent_files
@@ -34,9 +33,8 @@ from rigamajig2.ui.builder_ui import setup_section
 from rigamajig2.ui.builder_ui import skeleton_section
 from rigamajig2.ui.widgets import statusLine, QLine, mayaMessageBox, pathSelector
 from rigamajig2.ui.widgets.workspace_control import DockableUI
-
-logger = logging.getLogger(__name__)
-logger.setLevel(5)
+# Import the main widgets for the builder dialog
+from . import Builder_UI_Logger
 
 MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
 JSON_FILTER = "Json Files (*.json)"
@@ -48,11 +46,12 @@ EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 # this is a long function allow more instance attributes for the widgets.
 # pylint: disable = too-many-instance-attributes
 class BuilderDialog(DockableUI):
-    """ Builder dialog"""
+    """Builder dialog"""
+
     WINDOW_TITLE = "Rigamajig2 Builder  {}".format(rigamajig2.version)
 
     def __init__(self):
-        """ Constructor for the builder dialog"""
+        """Constructor for the builder dialog"""
 
         # Store a rig enviornment and rig builder variables.
         self.rigEnviornment = None
@@ -107,9 +106,10 @@ class BuilderDialog(DockableUI):
         helpmenu.addAction(self.actions.showAboutAction)
 
     def createWidgets(self):
-        """ Create Widgets"""
-        self.rigPathSelector = pathSelector.PathSelector(caption='Select a Rig File', fileFilter="Rig Files (*.rig)",
-                                                         fileMode=1)
+        """Create Widgets"""
+        self.rigPathSelector = pathSelector.PathSelector(
+            caption="Select a Rig File", fileFilter="Rig Files (*.rig)", fileMode=1
+        )
 
         self.assetNameLineEdit = QtWidgets.QLineEdit()
         self.assetNameLineEdit.setPlaceholderText("asset_name")
@@ -126,15 +126,19 @@ class BuilderDialog(DockableUI):
         self.deformationWidget = deformation_section.DeformationSection()
         self.publishWidget = publish_section.PublishSection()
 
-        self.builderSections = [self.modelWidget,
-                                self.jointWidget,
-                                self.intalizeWidget,
-                                self.buildWidget,
-                                self.controlsWidget,
-                                self.deformationWidget,
-                                self.publishWidget]
+        self.builderSections = [
+            self.modelWidget,
+            self.jointWidget,
+            self.intalizeWidget,
+            self.buildWidget,
+            self.controlsWidget,
+            self.deformationWidget,
+            self.publishWidget,
+        ]
 
-        self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
+        self.runSelectedButton = QtWidgets.QPushButton(
+            QtGui.QIcon(":execute.png"), "Run Selected"
+        )
         self.runSelectedButton.setToolTip("Run Rig steps up to the break point")
         self.runSelectedButton.setFixedSize(120, 22)
 
@@ -142,8 +146,12 @@ class BuilderDialog(DockableUI):
         self.runButton.setToolTip("Run all build steps.")
         self.runButton.setFixedSize(80, 22)
 
-        self.publishButton = QtWidgets.QPushButton(QtGui.QIcon(":sourceScript.png"), "Publish")
-        self.publishButton.setToolTip("Publish the rig. This will build the rig and save it.")
+        self.publishButton = QtWidgets.QPushButton(
+            QtGui.QIcon(":sourceScript.png"), "Publish"
+        )
+        self.publishButton.setToolTip(
+            "Publish the rig. This will build the rig and save it."
+        )
         self.publishButton.setFixedSize(80, 22)
 
         self.openScriptEditorButton = QtWidgets.QPushButton()
@@ -152,10 +160,12 @@ class BuilderDialog(DockableUI):
         self.openScriptEditorButton.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
 
         self.statusLine = statusLine.StatusLine()
-        self.statusLine.setStatusMessage(f"Rigamajig2 version {rigamajig2.version}", "info")
+        self.statusLine.setStatusMessage(
+            f"Rigamajig2 version {rigamajig2.version}", "info"
+        )
 
     def createLayouts(self):
-        """ Create Layouts"""
+        """Create Layouts"""
         rigNameLayout = QtWidgets.QHBoxLayout()
         rigNameLayout.addWidget(QtWidgets.QLabel("Rig Name:"))
         rigNameLayout.addWidget(self.assetNameLineEdit)
@@ -180,10 +190,10 @@ class BuilderDialog(DockableUI):
         buildLayout.addStretch()
 
         # groups
-        rigEnvornmentGroup = QtWidgets.QGroupBox('Rig Enviornment')
+        rigEnvornmentGroup = QtWidgets.QGroupBox("Rig Enviornment")
         rigEnvornmentGroup.setLayout(rigEnviornmentLayout)
 
-        buildGroup = QtWidgets.QGroupBox('Build')
+        buildGroup = QtWidgets.QGroupBox("Build")
         buildGroup.setLayout(buildLayout)
 
         # lower persistant buttons (AKA close)
@@ -220,26 +230,35 @@ class BuilderDialog(DockableUI):
         mainLayout.addLayout(lowButtonsLayout)
 
     def createConnections(self):
-        """ Create Connections"""
+        """Create Connections"""
 
         # setup each widget with a connection to uncheck all over widgets when one is checked.
         # This ensures all setups until a breakpoint are run
         self.modelWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.modelWidget))
+            lambda x: self.__handleSectionBreakpoints(self.modelWidget)
+        )
         self.jointWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.jointWidget))
+            lambda x: self.__handleSectionBreakpoints(self.jointWidget)
+        )
         self.intalizeWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.intalizeWidget))
+            lambda x: self.__handleSectionBreakpoints(self.intalizeWidget)
+        )
         self.buildWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.buildWidget))
+            lambda x: self.__handleSectionBreakpoints(self.buildWidget)
+        )
         self.controlsWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.controlsWidget))
+            lambda x: self.__handleSectionBreakpoints(self.controlsWidget)
+        )
         self.deformationWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.deformationWidget))
+            lambda x: self.__handleSectionBreakpoints(self.deformationWidget)
+        )
         self.publishWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.publishWidget))
+            lambda x: self.__handleSectionBreakpoints(self.publishWidget)
+        )
 
-        self.rigPathSelector.selectPathButton.clicked.connect(self._pathSelectorLoadRigFile)
+        self.rigPathSelector.selectPathButton.clicked.connect(
+            self._pathSelectorLoadRigFile
+        )
         self.runSelectedButton.clicked.connect(self._runSelected)
         self.runButton.clicked.connect(self._runAll)
         self.publishButton.clicked.connect(self._publish)
@@ -250,7 +269,7 @@ class BuilderDialog(DockableUI):
 
     @QtCore.Slot()
     def _pathSelectorLoadRigFile(self):
-        """ Load a rig file from the path selector """
+        """Load a rig file from the path selector"""
         newPath = self.rigPathSelector.getPath()
         if newPath:
             self.actions.loadRecentRigFile(newPath)
@@ -287,7 +306,7 @@ class BuilderDialog(DockableUI):
 
     # BULDER FUNCTIONS
     def __handleSectionBreakpoints(self, selectedWidget):
-        """ This function ensures only one build step is selected at a time. it is run whenever a checkbox is toggled."""
+        """This function ensures only one build step is selected at a time. it is run whenever a checkbox is toggled."""
         for section in self.builderSections:
             if section is not selectedWidget:
                 section.setChecked(False)
@@ -303,7 +322,7 @@ class BuilderDialog(DockableUI):
                 breakpointSelected = True
 
         if not breakpointSelected:
-            logger.error("No breakpoint selected no steps to run")
+            Builder_UI_Logger.error("No breakpoint selected no steps to run")
             return
 
         if not confirmBuildRig():
@@ -317,7 +336,7 @@ class BuilderDialog(DockableUI):
             widget._runWidget()
 
             if widget.isChecked():
-                print(widget)
+                Builder_UI_Logger.debug(f"Reached selected breakpoint: {widget.__class__.__name__}")
                 break
 
         runTime = time.time() - startTime
@@ -325,34 +344,41 @@ class BuilderDialog(DockableUI):
 
     @QtCore.Slot()
     def _runAll(self):
-        """ Run builder and update the component manager"""
+        """Run builder and update the component manager"""
 
         if not confirmBuildRig():
             return
 
         try:
             finalTime = self.rigBuilder.run()
-            self.intalizeWidget.componentManager.loadFromScene()
+            self.intalizeWidget.componentManager._loadFromScene()
             self.statusLine.setStatusMessage(
-                message=f"Rig Build Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}", icon="success")
+                message=f"Rig Build Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}",
+                icon="success",
+            )
         except Exception as e:
-            self.statusLine.setStatusMessage(message=f"Rig Build Failed: '{self.rigName}'", icon="failed")
+            self.statusLine.setStatusMessage(
+                message=f"Rig Build Failed: '{self.rigName}'", icon="failed"
+            )
             raise e
 
     @QtCore.Slot()
     def _publish(self):
-        """ Run builder and update the component manager"""
+        """Run builder and update the component manager"""
         # for the rig build we can put the _publish into a try except block
         # if the _publish fails we can add a message to the status line before raising the exception
         try:
             finalTime = self.publishWidget._publishWithUiData()
             if finalTime:
-                self.intalizeWidget.componentManager.loadFromScene()
+                self.intalizeWidget.componentManager._loadFromScene()
                 self.statusLine.setStatusMessage(
                     message=f"Rig Publish Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}",
-                    icon="success")
+                    icon="success",
+                )
         except Exception as e:
-            self.statusLine.setStatusMessage(message=f"Rig Publish Failed: '{self.rigName}'", icon="failed")
+            self.statusLine.setStatusMessage(
+                message=f"Rig Publish Failed: '{self.rigName}'", icon="failed"
+            )
             raise e
 
     def hideEvent(self, e):
@@ -381,7 +407,8 @@ def confirmBuildRig():
         confirmPublishMessage = mayaMessageBox.MayaMessageBox(
             title="Run Rig Build",
             message="Proceeding will rebuild the rig based on data you've saved. Unsaved in-scene changes will be lost!",
-            icon="help")
+            icon="help",
+        )
         confirmPublishMessage.setButtonsYesNoCancel()
         res = confirmPublishMessage.exec_()
 
@@ -395,7 +422,7 @@ def confirmBuildRig():
     return True
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     workspace_control_name = BuilderDialog.get_workspace_control_name()
     if cmds.window(workspace_control_name, exists=True):
         test_dialog.close()

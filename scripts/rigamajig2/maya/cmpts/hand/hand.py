@@ -2,24 +2,16 @@
 hand component
 """
 import maya.cmds as cmds
+
+import rigamajig2.maya.attr as rig_attr
 import rigamajig2.maya.cmpts.base
 import rigamajig2.maya.cmpts.chain.chain
+import rigamajig2.maya.cmpts.hand.gestureUtils as gestureUtils
+import rigamajig2.maya.meta as meta
 import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.rig.spaces as spaces
-import rigamajig2.maya.rig.ikfk as ikfk
 import rigamajig2.maya.transform as rig_transform
-import rigamajig2.maya.attr as rig_attr
 import rigamajig2.shared.common as common
-import rigamajig2.maya.meta as meta
-import rigamajig2.maya.container as container
-import rigamajig2.maya.sdk as sdk
-import rigamajig2.maya.hierarchy as hierarchy
-
-import rigamajig2.maya.cmpts.hand.gestureUtils as gestureUtils
-
-import logging
-
-logger = logging.getLogger(__name__)
 
 FINGER_NAMES = ['thumb', 'index', 'middle', 'ring', 'pinky']
 

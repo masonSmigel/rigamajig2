@@ -523,7 +523,7 @@ class Builder(object):
         logger.info("publish scripts -- complete")
 
     def run(self, publish: bool = False, savePublish: bool = True, outputfile: str = None, assetName: str = None,
-            suffix: str = None, fileType: str = None, versioning: bool = True) -> float:
+            suffix: str = None, fileType: str = None, versioning: bool = True, replaceLog: bool = True) -> float:
         """
         Build a rig.
 
@@ -538,25 +538,22 @@ class Builder(object):
         :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
                            and store a new version each time the publish file is overwritten.
                            This allows the user to keep a log of files approved to be published.
+        :param replaceLog: If True, replace the existing log file. otherwise, append to it.
         """
         if not self.path:
             logger.error('you must provide a build envifornment path. Use Bulder._setRigFile()')
             return
 
-        # setup the logger
-        base_directory = self.getRigEnviornment()
-        rigfileName = os.path.basename(self.getRigFile()).split(".")[0]
-        logFile = os.path.abspath(os.path.join(base_directory, "../", f"{rigfileName}_builder.log"))
-
-        _loggersToWrite = []
-        for key in self.BUILD_LOGGER_SCOPE:
-            _loggersToWrite += logging.getChildLoggers(key)
-        logging.writeToFile(_loggersToWrite, filename=logFile)
-
+        logFile = self.getLogFile()
+        _loggersToWrite = self.initFileLogging(logFile=logFile, replace=replaceLog)
 
         try:
             startTime = time.time()
-            logger.info(f"\nBegin Rig Build\n{'-' * 70}\nbuild env: {self.path}\nlogging to: {logFile}\n")
+            logger.info(f"\n"
+                        f"Begin Rig Build\n{'-' * 70}\n"
+                        f"build env: {self.path}\n"
+                        f"logging to: {logFile}\n")
+
             core.loadRequiredPlugins()
             self.preScript()
 
@@ -600,9 +597,6 @@ class Builder(object):
         finally:
             # end the logger even if we get an exception from the builder
             logging.endWriteToFile(_loggersToWrite, filename=logFile)
-
-        # if the build is sucessful return a true result
-        return finalTime
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
     def publish(self, outputfile: str = None, suffix: str = None, assetName: str = None, fileType: str = None,
@@ -798,3 +792,40 @@ class Builder(object):
         :return:
         """
         return core.getRigData(rigFile=rigFile, key=key)
+
+    def getLogFile(self) -> str:
+        """
+        Get the path to the log file and return it
+
+        :return:
+        """
+        base_directory = self.getRigEnviornment()
+        rigfileName = os.path.basename(self.getRigFile()).split(".")[0]
+        logFile = os.path.abspath(os.path.join(base_directory, "../", f"{rigfileName}_builder.log"))
+
+        return logFile
+
+    def initFileLogging(self, logFile: str, replace: bool = True) -> typing.List[logging.Logger]:
+        """
+        Initialize file logging for the builder.
+        This will save a log file of all commands from the modules specified in the BUILDER_LOGGER_SCOPE.
+
+        :param logFile: path to the log file.
+        :type logFile: str
+
+        :param replace: If True, replace the existing log file; otherwise, append to it.
+        :type replace: bool
+
+        :return: A list of loggers configured for file logging.
+        :rtype: list
+        """
+
+        if os.path.exists(logFile) and replace == True:
+            os.remove(logFile)
+
+        _loggersToWrite = []
+        for key in self.BUILD_LOGGER_SCOPE:
+            _loggersToWrite += logging.getChildLoggers(key)
+        logging.writeToFile(_loggersToWrite, filename=logFile)
+
+        return _loggersToWrite

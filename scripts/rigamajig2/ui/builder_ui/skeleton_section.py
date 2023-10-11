@@ -27,7 +27,7 @@ from rigamajig2.maya.cmpts.base import GUIDE_STEP
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import dataLoader, builderSection
-from rigamajig2.ui.widgets import QPushButton, sliderGrp, mayaMessageBox
+from rigamajig2.ui.widgets import QPushButton, Qslider, mayaMessageBox
 
 
 # pylint: disable= too-many-instance-attributes
@@ -86,7 +86,7 @@ class SkeletonSection(builderSection.BuilderSection):
         self.unpinAllJointsButton = QtWidgets.QPushButton("Un-Pin All Joints")
         self.unpinAllJointsButton.setIcon(QtGui.QIcon(":unpinned"))
 
-        self.insertJointsAmountSlider = sliderGrp.SliderGroup()
+        self.insertJointsAmountSlider = Qslider.QSlider()
         self.insertJointsAmountSlider.setValue(1)
         self.insertJointsAmountSlider.setRange(1, 10)
         self.insertJointsButton = QtWidgets.QPushButton("Insert Joints")

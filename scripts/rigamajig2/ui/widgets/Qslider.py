@@ -1,16 +1,12 @@
 """
 This module contains the slider group pyside widget
 """
-import os
 
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-import maya.cmds as cmds
 
-
-class SliderGroup(QtWidgets.QWidget):
+class QSlider(QtWidgets.QWidget):
     """
     Slider Widget
     """
@@ -23,7 +19,7 @@ class SliderGroup(QtWidgets.QWidget):
         :param value: value of the slider
         :param sliderIncriment: incriment the slider increases by
         """
-        super(SliderGroup, self).__init__()
+        super(QSlider, self).__init__()
         self.lineEdit = QtWidgets.QLineEdit()
         self.lineEdit.setFixedWidth(50)
 

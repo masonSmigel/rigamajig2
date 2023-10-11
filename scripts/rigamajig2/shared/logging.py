@@ -29,18 +29,14 @@ LOG_FILE_FORMATT = f"%(asctime)s : %(name)-32s : %(levelname)-8s : %(message)s"
 
 
 class RigamajigLogger(Logger):
-    def __init__(self, name, level=None, propagate=False):
+    def __init__(self, name):
         super().__init__(name)
 
         if not self.hasHandlers():
             handler = maya.utils.MayaGuiLogHandler() if inMaya else StreamHandler()
-            fmt = Formatter(DCC_LOGGING_FORMATT)
-            handler.setFormatter(fmt)
             self.addHandler(handler)
 
-            if level:
-                self.setLevel(level)
-            self.propagate = propagate
+            self.propagate = False
 
 
 # Override the default getLogger with RigamajigLogger
@@ -81,7 +77,6 @@ def _addFileHandler(logger: Logger, filename: str):
     fileHandler.setFormatter(fmt)
 
     logger.addHandler(fileHandler)
-    print(f"begin logging {logger.name} to {filename}")
 
 
 def writeToFile(loggers: typing.List[Logger], filename: str):
@@ -131,8 +126,6 @@ def endWriteToFile(loggers: str, filename: str = None):
 
             for handler in handlersToRemove:
                 logger.removeHandler(handler)
-                print(f"logger: {logger.name} end logging to file: {handler.baseFilename}")
-
 
 def setLoggingLevel(loggers: typing.List[Logger], level: int):
     """

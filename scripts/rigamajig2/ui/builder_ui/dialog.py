@@ -23,6 +23,7 @@ import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.shared import logging
+from rigamajig2.ui import showInFolder
 from rigamajig2.ui.builder_ui import actions
 from rigamajig2.ui.builder_ui import build_section
 from rigamajig2.ui.builder_ui import controls_section
@@ -32,7 +33,7 @@ from rigamajig2.ui.builder_ui import publish_section
 from rigamajig2.ui.builder_ui import recent_files
 from rigamajig2.ui.builder_ui import setup_section
 from rigamajig2.ui.builder_ui import skeleton_section
-from rigamajig2.ui.widgets import statusLine, QLine, mayaMessageBox, pathSelector
+from rigamajig2.ui.widgets import QLine, mayaMessageBox, pathSelector
 from rigamajig2.ui.widgets.workspace_control import DockableUI
 
 MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
@@ -157,10 +158,7 @@ class BuilderDialog(DockableUI):
         self.openScriptEditorButton.setFlat(True)
         self.openScriptEditorButton.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
 
-        self.statusLine = statusLine.StatusLine()
-        self.statusLine.setStatusMessage(
-            f"Rigamajig2 version {rigamajig2.version}", "info"
-            )
+        self.statusLine = QtWidgets.QStatusBar()
 
     def createLayouts(self):
         """Create Layouts"""
@@ -348,17 +346,30 @@ class BuilderDialog(DockableUI):
             return
 
         try:
-            finalTime = self.rigBuilder.run()
-            self.intalizeWidget.componentManager._loadFromScene()
-            self.statusLine.setStatusMessage(
-                message=f"Rig Build Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}",
-                icon="success",
-                )
+            self.rigBuilder.run()
+            self._showLogButton()
+
         except Exception as e:
-            self.statusLine.setStatusMessage(
-                message=f"Rig Build Failed: '{self.rigName}'", icon="failed"
-                )
+            self.statusLine.showMessage(f"Rig Build Failed: '{self.rigName}'")
             raise e
+
+    def _showLogButton(self):
+        """
+        Utility to add a button to show the logger.
+        """
+
+        logButton = QtWidgets.QPushButton("Show Builder Log")
+        logButton.setIcon(QtGui.QIcon(":openScript.png"))
+        logButton.setFlat(True)
+        logButton.setFixedHeight(20)
+
+        self.statusLine.addWidget(logButton, stretch=True)
+
+        def onShowLogFileClicked():
+            logFile = self.rigBuilder.getLogFile()
+            showInFolder.showInFolder(logFile)
+
+        logButton.clicked.connect(onShowLogFileClicked)
 
     @QtCore.Slot()
     def _publish(self):
@@ -366,16 +377,11 @@ class BuilderDialog(DockableUI):
         # for the rig build we can put the _publish into a try except block
         # if the _publish fails we can add a message to the status line before raising the exception
         try:
-            finalTime = self.publishWidget._publishWithUiData()
-            if finalTime:
-                self.statusLine.setStatusMessage(
-                    message=f"Rig Publish Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}",
-                    icon="success",
-                    )
+            self.publishWidget._publishWithUiData()
+            self._showLogButton()
+
         except Exception as e:
-            self.statusLine.setStatusMessage(
-                message=f"Rig Publish Failed: '{self.rigName}'", icon="failed"
-                )
+            self.statusLine.showMessage(f"Rig Publish Failed: '{self.rigName}'")
             raise e
 
     def hideEvent(self, e):

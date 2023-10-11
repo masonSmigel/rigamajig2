@@ -135,7 +135,7 @@ class PublishSection(builderSection.BuilderSection):
         if not confirmPublishMessage.getResult():
             return None
 
-        finalTime = self.builder.run(
+        self.builder.run(
             publish=True,
             outputfile=self.outPathSelector.getPath(),
             suffix=self.outFileSuffix.text(),
@@ -143,4 +143,3 @@ class PublishSection(builderSection.BuilderSection):
             fileType=self.outFileTypeComboBox.currentText()
             )
 
-        return finalTime

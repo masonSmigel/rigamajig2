@@ -19,7 +19,6 @@ from rigamajig2.shared import logging
 
 EVIL_METHOD_NAMES = ['DCF_updateViewportList', 'CgAbBlastPanelOptChangeCallback', 'onModelChange3dc']
 
-
 logger = logging.getLogger(__name__)
 
 

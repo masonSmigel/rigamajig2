@@ -28,77 +28,23 @@ DCC_LOGGING_FORMATT = f"%(name)s: %(message)s"
 LOG_FILE_FORMATT = f"%(asctime)s : %(name)-32s : %(levelname)-8s : %(message)s"
 
 
-class RigamajigLoggerOptions:
-    """
-    A configuration class for rigamajig2 logger options.
+class RigamajigLogger(Logger):
+    def __init__(self, name, level=None, propagate=False):
+        super().__init__(name)
 
-    :param bool logToFile: Indicates whether to log messages to a file.
-    :param str logFileName: The filename for the log file.
-    """
-    logToFile = False
-    logFileName = None
-    logRootName = None
+        if not self.hasHandlers():
+            handler = maya.utils.MayaGuiLogHandler() if inMaya else StreamHandler()
+            fmt = Formatter(DCC_LOGGING_FORMATT)
+            handler.setFormatter(fmt)
+            self.addHandler(handler)
 
-
-class LowercaseFormatter(Formatter):
-    """Custom Formatter that displays the level name in lowercase."""
-
-    def format(self, record):
-        """
-        Format the log record.
-
-        :param logging.LogRecord record: The log record to be formatted.
-
-        :return: The formatted log message.
-        :rtype: str
-        """
-        # Call the original formatter to get the message
-        msg = super().format(record)
-        # Convert the log level to lowercase
-        level = record.levelname.lower()
-        # Replace the original log level in the message
-        msg = msg.replace(record.levelname, level)
-        return msg
+            if level:
+                self.setLevel(level)
+            self.propagate = propagate
 
 
-# to override the default logger we need to store
-# the old get logger. keep a reference to this function
-# in the variable getLogger_
-getLogger_ = getLogger
-
-
-def getLogger(name: str, level: int = None, propagate: bool = False) -> Logger:
-    """
-    Create a new logger configured for rigamajig2.
-
-    Using get loggers will clear out all handlers.
-
-    :param str name: Name of the logger.
-    :param int level: Default logging level.
-    :param bool propagate: Propagate logging messages to parent.
-
-    :return: A newly created logger.
-    :rtype: logging.Logger
-    """
-    logger = getLogger_(name)
-
-    if logger.name in Logger.manager.loggerDict.keys():
-        return logger
-
-    handler = maya.utils.MayaGuiLogHandler() if inMaya else StreamHandler()
-
-    fmt = LowercaseFormatter(DCC_LOGGING_FORMATT)
-    handler.setFormatter(fmt)
-    logger.handlers = [handler]
-
-    if RigamajigLoggerOptions.logToFile and name.startswith(RigamajigLoggerOptions.logRootName):
-        print("add a new file handler from getLogger")
-        __addFileHandler(logger=logger, filename=RigamajigLoggerOptions.logFileName)
-
-    if level: logger.setLevel(level)
-    logger.propagate = propagate
-
-    return logger
+# Override the default getLogger with RigamajigLogger
+setLoggerClass(RigamajigLogger)
 
 
 def getChildLoggers(loggerName: str = "rigamajig2") -> typing.List[Logger]:
@@ -120,18 +66,13 @@ def getChildLoggers(loggerName: str = "rigamajig2") -> typing.List[Logger]:
     return list(returnList)
 
 
-def __addFileHandler(logger: Logger, filename: str):
+def _addFileHandler(logger: Logger, filename: str):
     """
     Add a FileHandler to the logger.
 
     :param logging.Logger logger: Logger object.
     :param str filename: The name of the log file.
     """
-
-    existingFileHandlers = [handler for handler in logger.handlers if isinstance(handler, FileHandler)]
-    if existingFileHandlers:
-        return
-
     fileHandler = FileHandler(filename)
     fileHandler.setLevel(INFO)
 
@@ -140,9 +81,10 @@ def __addFileHandler(logger: Logger, filename: str):
     fileHandler.setFormatter(fmt)
 
     logger.addHandler(fileHandler)
+    print(f"begin logging {logger.name} to {filename}")
 
 
-def writeToFile(loggerName: str, filename: str):
+def writeToFile(loggers: typing.List[Logger], filename: str):
     """
     Enable logging to a file for all loggers below the specified loggerName.
 
@@ -152,34 +94,44 @@ def writeToFile(loggerName: str, filename: str):
     For each logger below the specified `loggerName`, it adds a `FileHandler` to
     write log messages to the provided file.
 
-    :param str loggerName: The logger name.
+    :param loggers: list of loggers
     :param str filename: The name of the log file.
     """
-    RigamajigLoggerOptions.logToFile = True
-    RigamajigLoggerOptions.logFileName = filename
-    RigamajigLoggerOptions.logRootName = loggerName
 
     # first set all current loggers to write to a file
-    for logger in getChildLoggers(loggerName=loggerName):
-        __addFileHandler(logger=logger, filename=filename)
+    for logger in loggers:
+
+        # if there is already a stream handler for this specific file skip adding the handler.
+        for handler in logger.handlers:
+            if isinstance(handler, FileHandler):
+                if filename and handler.baseFilename == filename:
+                    return
+        # otherwise add the logger.
+        _addFileHandler(logger=logger, filename=filename)
 
 
-def endWriteToFile(loggerName: str):
+def endWriteToFile(loggers: str, filename: str = None):
     """
     Remove all FileHandler loggers from a list of files.
 
-    :param str loggerName: The logger name.
+    :param str loggers: The logger name.
+    :param str filename: The name of the log file to remove (optional).
     """
-    for logger in getChildLoggers(loggerName=loggerName):
+    for logger in loggers:
+
+        handlersToRemove = []
         for handler in logger.handlers:
             if isinstance(handler, FileHandler):
-                logger.removeHandler(handler)
-                print(f"logger: {logger.name} end logging to file")
+                if getattr(handler, "baseFilename", None) == filename:
+                    # If a specific filename is provided, remove only handlers with that filename
+                    handlersToRemove.append(handler)
+                elif not filename:
+                    # If no specific filename is provided, remove all FileHandlers
+                    handlersToRemove.append(handler)
 
-    # reset the logger options
-    RigamajigLoggerOptions.logToFile = False
-    RigamajigLoggerOptions.logFileName = None
-    RigamajigLoggerOptions.logRootName = None
+            for handler in handlersToRemove:
+                logger.removeHandler(handler)
+                print(f"logger: {logger.name} end logging to file: {handler.baseFilename}")
 
 
 def setLoggingLevel(loggers: typing.List[Logger], level: int):
@@ -195,7 +147,7 @@ def setLoggingLevel(loggers: typing.List[Logger], level: int):
 
 if __name__ == '__main__':
     testLogger = getLogger("test")
-
+    writeToFile("test", "/Users/masonsmigel/Desktop/example.log")
     testLogger.info("this is an info message")
     testLogger.warning("this is a warning ")
     testLogger.error("this is an error")

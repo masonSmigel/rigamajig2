@@ -40,6 +40,8 @@ class Builder(object):
     The builder is the foundational class used to construct rigs with Rigamajig2.
     """
 
+    BUILD_LOGGER_SCOPE = ["rigamajig2.maya", "rigamajig2.shared"]
+
     def __init__(self, rigFile=None):
         """
         Initalize the builder
@@ -538,49 +540,67 @@ class Builder(object):
                            This allows the user to keep a log of files approved to be published.
         """
         if not self.path:
-            logger.error('you must provide a build enviornment path. Use Bulder._setRigFile()')
+            logger.error('you must provide a build envifornment path. Use Bulder._setRigFile()')
             return
 
-        startTime = time.time()
-        print('\nBegin Rig Build\n{0}\nbuild env: {1}\n'.format('-' * 70, self.path))
-        core.loadRequiredPlugins()
-        self.preScript()
+        # setup the logger
+        base_directory = self.getRigEnviornment()
+        rigfileName = os.path.basename(self.getRigFile()).split(".")[0]
+        logFile = os.path.abspath(os.path.join(base_directory, "../", f"{rigfileName}_builder.log"))
 
-        self.importModel()
+        _loggersToWrite = []
+        for key in self.BUILD_LOGGER_SCOPE:
+            _loggersToWrite += logging.getChildLoggers(key)
+        logging.writeToFile(_loggersToWrite, filename=logFile)
 
-        self.loadJoints()
 
-        self.loadComponents()
-        self.initalize()
-        self.guide()
+        try:
+            startTime = time.time()
+            logger.info(f"\nBegin Rig Build\n{'-' * 70}\nbuild env: {self.path}\nlogging to: {logFile}\n")
+            core.loadRequiredPlugins()
+            self.preScript()
 
-        self.build()
-        self.connect()
-        self.finalize()
-        self.loadPoseReaders()
-        self.postScript()
+            self.importModel()
 
-        self.loadControlShapes()
+            self.loadJoints()
 
-        self.loadDeformationLayers()
-        self.loadSkinWeights()
-        self.loadDeformers()
+            self.loadComponents()
+            self.initalize()
+            self.guide()
 
-        if publish:
-            # self.optimize()
-            self.mergeDeformLayers()
-            self.publishScript()
-            if savePublish:
-                self.publish(outputfile=outputfile,
-                             suffix=suffix,
-                             assetName=assetName,
-                             fileType=fileType,
-                             versioning=versioning
-                             )
-        endTime = time.time()
-        finalTime = endTime - startTime
+            self.build()
+            self.connect()
+            self.finalize()
+            self.loadPoseReaders()
+            self.postScript()
 
-        print('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
+            self.loadControlShapes()
+
+            self.loadDeformationLayers()
+            self.loadSkinWeights()
+            self.loadDeformers()
+
+            if publish:
+                # self.optimize()
+                self.mergeDeformLayers()
+                self.publishScript()
+                if savePublish:
+                    self.publish(outputfile=outputfile,
+                                 suffix=suffix,
+                                 assetName=assetName,
+                                 fileType=fileType,
+                                 versioning=versioning
+                                 )
+            endTime = time.time()
+            finalTime = endTime - startTime
+
+            logger.info('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
+        except Exception as e:
+            raise e
+        finally:
+            # end the logger even if we get an exception from the builder
+            logging.endWriteToFile(_loggersToWrite, filename=logFile)
+
         # if the build is sucessful return a true result
         return finalTime
 
@@ -754,7 +774,7 @@ class Builder(object):
         os.environ['RIGAMJIG_FILE'] = self.rigFile
         os.environ['RIGAMJIG_ENV'] = self.path
 
-        logger.info('\n\nRig Enviornment path: {0}'.format(self.path))
+        logger.info('\nRig Enviornment path: {0}'.format(self.path))
 
     def saveRigFile(self, dataDict):
         data = abstract_data.AbstractData()

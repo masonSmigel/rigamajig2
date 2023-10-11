@@ -13,7 +13,7 @@ import rigamajig2.maya.meta
 from rigamajig2.maya.rig.control import CONTROLTAG
 from rigamajig2.shared import logging
 
-logger = logging.getLogger(__name__, logging.INFO)
+logger = logging.getLogger(__name__)
 
 UNBUILT_STEP = 0
 INTIALIZE_STEP = 1

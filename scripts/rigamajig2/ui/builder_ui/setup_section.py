@@ -43,7 +43,8 @@ ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 
 COMPONENT_ROW_HEIGHT = 20
 
-logger = logging.getLogger(__name__, level=logging.DEBUG)
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 class SetupSection(builderSection.BuilderSection):

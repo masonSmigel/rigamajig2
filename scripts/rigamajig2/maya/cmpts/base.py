@@ -1,7 +1,6 @@
 """
 base component
 """
-import logging
 from collections import OrderedDict
 
 import maya.cmds as cmds
@@ -12,9 +11,9 @@ import rigamajig2.maya.color
 import rigamajig2.maya.container
 import rigamajig2.maya.meta
 from rigamajig2.maya.rig.control import CONTROLTAG
-from . import Component_Logger
+from rigamajig2.shared import logging
 
-Component_Logger.setLevel(logging.INFO)
+logger = logging.getLogger(__name__, logging.INFO)
 
 UNBUILT_STEP = 0
 INTIALIZE_STEP = 1
@@ -73,7 +72,7 @@ class Base(object):
         if not cmds.objExists(self.container):
             self.createContainer()
             self.createMetaNode(metaNodeName=self.container + "_metadata")
-            Component_Logger.debug(f"Component '{name}' container created.")
+            logger.debug(f"Component '{name}' container created.")
 
         self.metadataNode = self.getMetaDataNode()
 
@@ -139,7 +138,7 @@ class Base(object):
             if key not in REQUIRED_PARAMETERS:
                 value = data.get(key)
                 if not value:
-                    Component_Logger.warning(f"{componentInstance.name}: Failed to get value for: {key}")
+                    logger.warning(f"{componentInstance.name}: Failed to get value for: {key}")
                 componentInstance.defineParameter(parameter=key, value=value)
 
         return componentInstance
@@ -157,7 +156,7 @@ class Base(object):
             self.setStep(1)
 
         else:
-            Component_Logger.debug('component {} already initalized.'.format(self.name))
+            logger.debug('component {} already initalized.'.format(self.name))
 
     def _guideComponent(self):
         """
@@ -177,7 +176,7 @@ class Base(object):
             self.setStep(2)
 
         else:
-            Component_Logger.debug('component {} already guided.'.format(self.name))
+            logger.debug('component {} already guided.'.format(self.name))
 
     def _buildComponent(self):
         """
@@ -202,7 +201,7 @@ class Base(object):
                 self.setupAnimAttrs()
             self.setStep(3)
         else:
-            Component_Logger.debug('component {} already built.'.format(self.name))
+            logger.debug('component {} already built.'.format(self.name))
 
     def _connectComponent(self):
         """ connect components within the rig"""
@@ -215,7 +214,7 @@ class Base(object):
                 self.postConnect()
             self.setStep(4)
         else:
-            Component_Logger.debug('component {} already connected.'.format(self.name))
+            logger.debug('component {} already connected.'.format(self.name))
 
     def _finalizeComponent(self):
         """
@@ -242,7 +241,7 @@ class Base(object):
 
             self.setStep(5)
         else:
-            Component_Logger.debug('component {} already finalized.'.format(self.name))
+            logger.debug('component {} already finalized.'.format(self.name))
 
     def _optimizeComponent(self):
         """"""
@@ -252,7 +251,7 @@ class Base(object):
             self.optimize()
             self.setStep(6)
         else:
-            Component_Logger.debug('component {} already optimized.'.format(self.name))
+            logger.debug('component {} already optimized.'.format(self.name))
 
     # --------------------------------------------------------------------------------
     # functions
@@ -367,7 +366,7 @@ class Base(object):
 
     def deleteSetup(self):
         """ delete the rig setup"""
-        Component_Logger.info("deleting component {}".format(self.name))
+        logger.info("deleting component {}".format(self.name))
         cmds.select(self.container, r=True)
         mel.eval("doDelete;")
 
@@ -423,7 +422,7 @@ class Base(object):
         if not dataType:
             dataType = rigamajig2.maya.meta.validateDataType(value)
 
-        Component_Logger.debug(f"adding component parameter {parameter}, {value} ({dataType})")
+        logger.debug(f"adding component parameter {parameter}, {value} ({dataType})")
         self._componentParameters[parameter] = {"value": value, "dataType": dataType}
 
         if tooltip:
@@ -528,7 +527,7 @@ class Base(object):
                 if value is not None:
                     infoDict[key] = value
 
-        Component_Logger.debug(infoDict)
+        logger.debug(infoDict)
         return infoDict
 
     def getComponenetType(self):

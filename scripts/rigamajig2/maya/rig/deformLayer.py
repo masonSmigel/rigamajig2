@@ -9,21 +9,24 @@
 
 """
 # PYTHON
-from collections import OrderedDict
-import logging
 
 # MAYA
 import maya.cmds as cmds
 
+from rigamajig2.maya import attr
+from rigamajig2.maya import blendshape
+from rigamajig2.maya import clean
+from rigamajig2.maya import deformer
+from rigamajig2.maya import joint
+from rigamajig2.maya import mesh
+from rigamajig2.maya import meta
+from rigamajig2.maya import skinCluster
 # RIGAMJIG2
 from rigamajig2.shared import common
-from rigamajig2.maya import mesh
-from rigamajig2.maya import deformer
-from rigamajig2.maya import meta
-from rigamajig2.maya import attr
-from rigamajig2.maya import joint
-from rigamajig2.maya import blendshape
-from rigamajig2.maya import skinCluster
+from rigamajig2.shared import logging
+
+logger = logging.getLogger(__name__)
+
 
 LAYER_HRC = 'deformLayers'
 LAYERS_ATTR = 'deformationLayers'
@@ -37,8 +40,6 @@ DEFORM_LAYER_BSHP_TAG = "deformLayerBshp"
 CONNECTION_METHOD_LIST = ['bshp', 'inmesh']
 
 DUMMY_JOINT = 'world_dummy_bind'
-
-logger = logging.getLogger(__name__)
 
 
 def _safeSetVisablity(node, value):
@@ -259,7 +260,7 @@ class DeformLayer(object):
         cmds.setAttr("{}.v".format(meshDup), 1)
 
         # cleanup the new mesh
-        mesh.cleanShapes(meshDup)
+        clean.cleanShapes(meshDup)
         attr.unlock(meshDup, attr.TRANSFORMS)
         if cmds.objExists("{}.{}".format(meshDup, LAYERS_ATTR)):
             cmds.deleteAttr("{}.{}".format(meshDup, LAYERS_ATTR))
@@ -378,8 +379,7 @@ class DeformLayer(object):
         _safeSetVisablity(self.model, 1)
 
         # send out a message that the stack was sucessful
-        logger.info(
-            f"deform layers succesfully stacked '{self.model}' ({len(layers)} layers, {deformerCount} deformers)")
+        logger.info(f"deform layers succesfully stacked '{self.model}' ({len(layers)} layers, {deformerCount} deformers)")
 
         # if we want to cleanup delete the deformation layers after stacking the skinClusters
         if cleanup:

@@ -8,13 +8,13 @@
     author: masonsmigel
     date: 01/2021
 """
+from collections import OrderedDict
+
 import maya.cmds as cmds
 
-from collections import OrderedDict
 import rigamajig2.maya.data.maya_data as maya_data
-import rigamajig2.shared.common as common
 import rigamajig2.maya.meta as meta
-import rigamajig2.maya.psd as psd
+import rigamajig2.maya.rig.psd as psd
 
 
 class PSDData(maya_data.MayaData):

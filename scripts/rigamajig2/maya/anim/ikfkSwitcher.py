@@ -2,25 +2,22 @@
 Ik FK switcher
 """
 import sys
-import logging
 import time
-from shiboken2 import wrapInstance
 
-import maya.cmds as cmds
-import maya.api.OpenMaya as om2
 import maya.OpenMayaUI as omui
-
-from PySide2 import QtWidgets
-from PySide2 import QtGui
+import maya.api.OpenMaya as om2
+import maya.cmds as cmds
 from PySide2 import QtCore
+from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
 import rigamajig2.maya.meta as meta
-from rigamajig2.maya.rig import control
 from rigamajig2.maya import container
 from rigamajig2.maya import decorators
+from rigamajig2.maya.rig import control
 
-logger = logging.getLogger(__name__)
+logger = logger.getLogger(__name__)
+
 
 VALID_IKFK_COMPONENTS = ["arm.arm", "leg.leg", "limb.limb"]
 

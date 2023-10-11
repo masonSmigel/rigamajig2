@@ -10,16 +10,17 @@
 # PYTHON
 
 # MAYA
-import maya.cmds as cmds
 import maya.mel as mel
+from maya import cmds as cmds
 
-from rigamajig2.shared import logger
+from rigamajig2.maya import mesh
+from rigamajig2.shared import common as common
+from rigamajig2.shared import logging
 
 EVIL_METHOD_NAMES = ['DCF_updateViewportList', 'CgAbBlastPanelOptChangeCallback', 'onModelChange3dc']
 
 
-class Clean_Logger(logger.Logger):
-    LOGGER_NAME = __name__
+logger = logging.getLogger(__name__)
 
 
 def cleanNodes():
@@ -40,7 +41,7 @@ def cleanNodes():
                 try:
                     cmds.lockNode(node, l=False)
                     cmds.delete('node')
-                    Clean_Logger.info("Cleaned Node: '{}'".format(node))
+                    logger.info("Cleaned Node: '{}'".format(node))
                 except:
                     pass
 
@@ -54,7 +55,7 @@ def cleanPlugins():
         for plugin in plugins:
             try:
                 cmds.unknownPlugin(plugin, r=True)
-                Clean_Logger.info("Cleaned Plugin: '{}'".format(plugin))
+                logger.info("Cleaned Plugin: '{}'".format(plugin))
             except:
                 pass
 
@@ -76,7 +77,7 @@ def cleanScriptNodes(excludedScriptNodes=None, excludePrefix='rigamajig2'):
             continue
 
         cmds.delete(scriptNode)
-        Clean_Logger.info("Cleaned Script Node: '{}'".format(scriptNode))
+        logger.info("Cleaned Script Node: '{}'".format(scriptNode))
 
 
 def cleanRougePanels(panels=None):
@@ -105,7 +106,7 @@ def cleanRougePanels(panels=None):
             for evilMethodName in capitalEvilMethodNames:
                 if evilMethodName in part.upper():
                     changed = True
-                    Clean_Logger.info("removed callback '{}' from pannel '{}'".format(part, panelName))
+                    logger.info("removed callback '{}' from pannel '{}'".format(part, panelName))
                     break
             else:
                 newParts.append(part)
@@ -132,3 +133,60 @@ def cleanScene():
     print('{}\n\tClean RougePanels: '.format('-' * 80))
     cleanRougePanels()
     print('-' * 80)
+
+
+def cleanShapes(nodes):
+    """
+    Cleanup a shape nodes. removes all intermediate shapes on the given nodes
+
+    :param list nodes: a list of nodes to clean
+    """
+    nodes = common.toList(nodes)
+    for node in nodes:
+        if cmds.nodeType(node) in ['nurbsSurface', 'mesh', 'nurbsCurve']:
+            node = cmds.listRelatives(node, p=True)
+        shapes = cmds.listRelatives(node, s=True, ni=False, pa=True) or []
+
+        if len(shapes) == 1:
+            return shapes[0]
+        else:
+            intermidiateShapes = [x for x in shapes if cmds.getAttr('{}.intermediateObject'.format(x))]
+            if intermidiateShapes:
+                cmds.delete(intermidiateShapes)
+                logger.info("Deleted Intermeidate Shapes: {}".format(intermidiateShapes))
+
+
+def cleanModel(nodes=None):
+    """
+    Clean up a model. This is especially useful to prep a model for rigging.
+    It will:
+    - delete the construction history
+    - freeze the transformations
+    - set the mesh pivot to the origin
+    - clean the mesh shapes. (delete intermediete shapes)
+
+    :param nodes: meshes to clean
+    """
+    if not nodes:
+        nodes = cmds.ls(sl=True)
+    nodes = common.toList(nodes)
+
+    for node in nodes:
+        cmds.delete(node, ch=True)
+        cmds.makeIdentity(node, apply=True, t=True, r=True, s=True, n=0, pn=1)
+        cmds.xform(node, a=True, ws=True, rp=(0, 0, 0), sp=(0, 0, 0))
+        if mesh.isMesh(node):
+            cleanShapes(node)
+            logger.info('Cleaned Mesh: {}'.format(node))
+
+
+def cleanColorSets(meshes):
+    """
+    Remove all color set and vertex color data from a model. Theese can appear from things like transfering UVs or
+    using sculptiing tools.
+    """
+    for mesh in meshes:
+        colorSets = cmds.polyColorSet(mesh, q=True, allColorSets=True) or list()
+        for colorSet in colorSets:
+            cmds.polyColorSet(mesh, delete=True, colorSet=colorSet)
+            logger.info("Deleted colorSet: {}".format(colorSet))

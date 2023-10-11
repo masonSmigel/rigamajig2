@@ -9,16 +9,14 @@
 
 
 """
-import logging
-
 from collections import OrderedDict
-import rigamajig2.maya.data.maya_data as maya_data
+
 import maya.cmds as cmds
 
-from rigamajig2.shared import common
+import rigamajig2.maya.data.maya_data as maya_data
 from rigamajig2.maya import blendshape
-from rigamajig2.maya import deformer
-from rigamajig2.maya import mesh
+from rigamajig2.shared import common
+from rigamajig2.shared import logging
 
 logger = logging.getLogger(__name__)
 
@@ -133,5 +131,4 @@ class BlendshapeData(maya_data.MayaData):
 
             blendshape.setWeights(blendshapeNode, weights=self._data[node]['weights'])
 
-            # print a log
-            logger.info("Loaded blendshape'{}' with {} targets".format(node, addedTargets))
+            logger.info(f"Blendshape data loaded: '{node}' with {addedTargets} targets")

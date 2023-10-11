@@ -8,18 +8,20 @@
     discription: 
 
 """
+import linecache
 import os.path
 import uuid
-from collections import OrderedDict
+
 import maya.cmds as cmds
 import maya.mel as mel
-import linecache
 
-from rigamajig2.shared import common
-from rigamajig2.shared import path as rig_path
 import rigamajig2.maya.data.maya_data as maya_data
 from rigamajig2.maya import blendshape
-from rigamajig2.maya import mesh
+from rigamajig2.shared import common
+from rigamajig2.shared import logging
+from rigamajig2.shared import path as rig_path
+
+logger = logging.getLogger(__name__)
 
 SUBFOLDER_PATH = "SHAPES"
 
@@ -121,6 +123,7 @@ class SHAPESData(maya_data.MayaData):
                 # create a duplicate with localized paths then rebuild from that file
                 tmpLocalizedFile = localizeSHAPESFile(setupPath)
                 rebuildSetup(tmpLocalizedFile)
+                logger.info(f"SHAPES data loaded for: {blendshapeNode}")
 
                 # delete the localized version
                 os.remove(tmpLocalizedFile)
@@ -331,8 +334,7 @@ def exportBlendShapeDeltas(bsNode, filePath):
     # Restore the previous the blend shape node.
     mel.eval('$gShapes_bsNode = "{}"'.format(temp))
 
-    # do a print with the br message to keep stuff consistant
-    mel.eval('br_displayMessage -info ("Exported Deltas for \'{}\' to \'{}\' ");'.format(temp, filePath))
+    logger.info(f"SHAPES Data Exported Deltas for '{temp}\' to '{filePath}' ")
     return bool(result)
 
 
@@ -346,7 +348,7 @@ def importBlendshapeDeltas(bsNode, filePath):
                                                                                             blendshape=bsNode))
 
     # do a print with the br message to keep stuff consistant
-    mel.eval('br_displayMessage -info ("Imported Deltas to \'{}\' from \'{}\' ");'.format(bsNode, melPath))
+    logger.info(f"Imported Deltas to '{bsNode}' from '{melPath}'")
 
 
 def localizeSHAPESFile(melFile):

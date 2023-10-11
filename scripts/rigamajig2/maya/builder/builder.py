@@ -26,10 +26,12 @@ from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder import model
 from rigamajig2.maya.cmpts import base
-from . import Builder_Logger
+from rigamajig2.shared import logging
 
 Component = typing.Type[base.Base]
 _StringList = typing.List[str]
+
+logger = logging.getLogger(__name__)
 
 
 # pylint:disable=too-many-public-methods
@@ -38,15 +40,14 @@ class Builder(object):
     The builder is the foundational class used to construct rigs with Rigamajig2.
     """
 
-    def __init__(self, rigFile=None, log=True):
+    def __init__(self, rigFile=None):
         """
         Initalize the builder
         :param rigFile: path to the rig file
         """
         self.path = None
 
-        if rigFile:
-            self.setRigFile(rigFile)
+        if rigFile: self.setRigFile(rigFile)
 
         self.componentList = list()
 
@@ -54,10 +55,6 @@ class Builder(object):
 
         # varibles we need
         self.topSkeletonNodes = list()
-
-        # turn off the logger
-        if log is False:
-            Builder_Logger.disabled = True
 
     def getAvailableComponents(self) -> typing.List[str]:
         """ Get all available components"""
@@ -85,7 +82,7 @@ class Builder(object):
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.MODEL_FILE))
         model.importModel(path)
-        Builder_Logger.info("Model loaded")
+        logger.info("Model loaded")
 
     def loadJoints(self, paths: str = None) -> None:
         """
@@ -98,7 +95,7 @@ class Builder(object):
         for path in common.toList(paths):
             absPath = self.getAbsoultePath(path)
             rigamajig2.maya.builder.data.loadJoints(absPath)
-            Builder_Logger.info(f"Joints loaded : {path}")
+            logger.info(f"Joints loaded : {path}")
 
     def saveJoints(self, fileStack: _StringList = None, method="merge") -> _StringList:
 
@@ -117,7 +114,7 @@ class Builder(object):
         savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData",
                                              method=method)
         if savedFiles:
-            Builder_Logger.info("Joint positions Saved -- complete")
+            logger.info("Joint positions Saved -- complete")
             return savedFiles
 
     def initalize(self) -> None:
@@ -126,10 +123,10 @@ class Builder(object):
         """
 
         for cmpt in self.componentList:
-            Builder_Logger.info('Initalizing: {}'.format(cmpt.name))
+            logger.info('Initalizing: {}'.format(cmpt.name))
             cmpt._initalizeComponent()
 
-        Builder_Logger.info("initalize -- complete")
+        logger.info("initalize -- complete")
 
     def guide(self) -> None:
         """
@@ -140,7 +137,7 @@ class Builder(object):
             cmds.createNode("transform", name="guides")
 
         for cmpt in self.componentList:
-            Builder_Logger.info('Guiding: {}'.format(cmpt.name))
+            logger.info('Guiding: {}'.format(cmpt.name))
             cmpt._guideComponent()
             if hasattr(cmpt, "guidesHierarchy") and cmpt.guidesHierarchy:
                 parent = cmds.listRelatives(cmpt.guidesHierarchy, p=True)
@@ -150,7 +147,7 @@ class Builder(object):
             self.updateMaya()
 
         self.loadGuideData()
-        Builder_Logger.info("guide -- complete")
+        logger.info("guide -- complete")
 
     def build(self) -> None:
         """
@@ -167,7 +164,7 @@ class Builder(object):
 
         # now we can safely build all the components in the scene
         for cmpt in self.componentList:
-            Builder_Logger.info('Building: {}'.format(cmpt.name))
+            logger.info('Building: {}'.format(cmpt.name))
             cmpt._buildComponent()
 
             # if the component is not a main parent the cmpt.rootHierarchy to the rig
@@ -194,41 +191,41 @@ class Builder(object):
                 if not cmds.listRelatives(topModelNodes, p=True):
                     cmds.parent(topModelNodes, 'model')
 
-        Builder_Logger.info("build -- complete")
+        logger.info("build -- complete")
 
     def connect(self) -> None:
         """
         connect rig
         """
         for cmpt in self.componentList:
-            Builder_Logger.info('Connecting: {}'.format(cmpt.name))
+            logger.info('Connecting: {}'.format(cmpt.name))
             cmpt._connectComponent()
             self.updateMaya()
-        Builder_Logger.info("connect -- complete")
+        logger.info("connect -- complete")
 
     def finalize(self) -> None:
         """
         finalize rig
         """
         for cmpt in self.componentList:
-            Builder_Logger.info('Finalizing: {}'.format(cmpt.name))
+            logger.info('Finalizing: {}'.format(cmpt.name))
             cmpt._finalizeComponent()
             self.updateMaya()
 
         # delete the guide group
         cmds.delete("guides")
 
-        Builder_Logger.info("finalize -- complete")
+        logger.info("finalize -- complete")
 
     def optimize(self) -> None:
         """
         optimize rig
         """
         for cmpt in self.componentList:
-            Builder_Logger.info('Optimizing {}'.format(cmpt.name))
+            logger.info('Optimizing {}'.format(cmpt.name))
             cmpt._optimizeComponent()
             self.updateMaya()
-        Builder_Logger.info("optimize -- complete")
+        logger.info("optimize -- complete")
 
     def saveComponents(self, fileStack: _StringList = None, method: str = "merge") -> _StringList:
         """
@@ -261,10 +258,10 @@ class Builder(object):
                 cmpt = self.findComponent(name=componentName)
                 componentDataObj.gatherData(cmpt)
             componentDataObj.write(dataFile)
-            Builder_Logger.info(f"Component Data saved to {dataFile}")
+            logger.info(f"Component Data saved to {dataFile}")
 
         if saveDict:
-            Builder_Logger.info("Components Saved -- Complete")
+            logger.info("Components Saved -- Complete")
 
         return [filepath for filepath in saveDict.keys()]
 
@@ -293,7 +290,7 @@ class Builder(object):
                 if instance.name not in componentNameList:
                     self.componentList.append(instance)
 
-        Builder_Logger.info("components loaded -- complete")
+        logger.info("components loaded -- complete")
 
     def loadControlShapes(self, paths: str = None, applyColor: bool = True) -> None:
         """
@@ -310,7 +307,7 @@ class Builder(object):
             absPath = self.getAbsoultePath(path)
             rigamajig2.maya.builder.data.loadControlShapes(absPath, applyColor=applyColor)
             self.updateMaya()
-            Builder_Logger.info(f"control shapes loaded: {path}")
+            logger.info(f"control shapes loaded: {path}")
 
     def saveControlShapes(self, fileStack: _StringList = None, method: str = 'merge') -> _StringList:
         """
@@ -324,7 +321,7 @@ class Builder(object):
         savedFiles = core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData",
                                              method=method)
         if savedFiles:
-            Builder_Logger.info("Control Shapes Save -- Complete")
+            logger.info("Control Shapes Save -- Complete")
             return savedFiles
 
     def loadGuideData(self, paths: str = None) -> str:
@@ -338,7 +335,7 @@ class Builder(object):
         for path in common.toList(paths):
             absPath = self.getAbsoultePath(path)
             if rigamajig2.maya.builder.data.loadGuideData(absPath):
-                Builder_Logger.info(f"guides loaded: {path}")
+                logger.info(f"guides loaded: {path}")
 
     def saveGuideData(self, fileStack: _StringList = None, method: str = "merge") -> _StringList:
         """
@@ -354,7 +351,7 @@ class Builder(object):
         savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData",
                                              method=method)
         if savedFiles:
-            Builder_Logger.info("Guides Save  -- complete")
+            logger.info("Guides Save  -- complete")
             return savedFiles
 
     def loadPoseReaders(self, paths: str = None, replace: bool = True) -> None:
@@ -369,7 +366,7 @@ class Builder(object):
         for path in common.toList(paths):
             absPath = self.getAbsoultePath(path)
             if rigamajig2.maya.builder.data.loadPoseReaders(absPath, replace=replace):
-                Builder_Logger.info(f"pose readers loaded: {path}")
+                logger.info(f"pose readers loaded: {path}")
 
     def savePoseReaders(self, fileStack: _StringList = None, method: str = "merge") -> _StringList:
         """
@@ -385,7 +382,7 @@ class Builder(object):
                                              method="merge")
         # deform._savePoseReaders(path)
         if savedFiles:
-            Builder_Logger.info("Pose Readers Save -- Complete")
+            logger.info("Pose Readers Save -- Complete")
             return savedFiles
 
     def loadDeformationLayers(self, path: str = None) -> None:
@@ -396,7 +393,7 @@ class Builder(object):
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
         if rigamajig2.maya.builder.data.loadDeformLayers(path):
-            Builder_Logger.info("deformation layers loaded")
+            logger.info("deformation layers loaded")
 
     def saveDeformationLayers(self, path: str = None) -> None:
         """
@@ -406,7 +403,7 @@ class Builder(object):
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
         rigamajig2.maya.builder.data.saveDeformLayers(path)
-        Builder_Logger.info("deformation layers saved to: {}".format(path))
+        logger.info("deformation layers saved to: {}".format(path))
 
     def mergeDeformLayers(self) -> None:
         """Merge all deformation layers for all models"""
@@ -417,7 +414,7 @@ class Builder(object):
                 layer = deformLayer.DeformLayer(model)
                 layer.stackDeformLayers(cleanup=True)
 
-            Builder_Logger.info("deformation layers merged")
+            logger.info("deformation layers merged")
 
     def loadSkinWeights(self, path: str = None) -> None:
         """
@@ -427,7 +424,7 @@ class Builder(object):
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
         if rigamajig2.maya.builder.data.loadSkinWeights(path):
-            Builder_Logger.info("skin weights loaded")
+            logger.info("skin weights loaded")
 
     def saveSkinWeights(self, path: str = None) -> None:
         """
@@ -437,6 +434,7 @@ class Builder(object):
         """
         path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
         rigamajig2.maya.builder.data.saveSkinWeights(path)
+        logger.info("skin weights for: {} saved to:{}".format(cmds.ls(sl=True), path))
 
     def loadDeformers(self, paths: _StringList = None) -> None:
         """ Load additional deformers
@@ -452,7 +450,7 @@ class Builder(object):
         for path in common.toList(paths):
             absPath = self.getAbsoultePath(path)
             if rigamajig2.maya.builder.data.loadDeformer(absPath):
-                Builder_Logger.info(f"deformers loaded: {path}")
+                logger.info(f"deformers loaded: {path}")
 
     # TODO: Fix this or delete it.
     def deleteComponents(self, clearList=True):
@@ -498,7 +496,7 @@ class Builder(object):
                     if not cmds.listRelatives(cmpt.rootHierarchy, p=True):
                         cmds.parent(cmpt.rootHierarchy, 'rig')
 
-            Builder_Logger.info("build: {} -- complete".format(cmpt.name))
+            logger.info("build: {} -- complete".format(cmpt.name))
 
     # --------------------------------------------------------------------------------
     # RUN SCRIPTS UTILITIES
@@ -508,22 +506,22 @@ class Builder(object):
         scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PRE_SCRIPT)
         core.runAllScripts(scripts)
 
-        Builder_Logger.info("pre scripts -- complete")
+        logger.info("pre scripts -- complete")
 
     def postScript(self) -> None:
         """ Run pre scripts. use  through the POST SCRIPT path"""
         scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.POST_SCRIPT)
         core.runAllScripts(scripts)
-        Builder_Logger.info("post scripts -- complete")
+        logger.info("post scripts -- complete")
 
     def publishScript(self) -> None:
         """ Run pre scripts. use  through the PUB SCRIPT path"""
         scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PUB_SCRIPT)
         core.runAllScripts(scripts)
-        Builder_Logger.info("publish scripts -- complete")
+        logger.info("publish scripts -- complete")
 
     def run(self, publish: bool = False, savePublish: bool = True, outputfile: str = None, assetName: str = None,
-            suffix: str = None, fileType: str = None, versioning: bool = True, saveFBX: bool = False) -> float:
+            suffix: str = None, fileType: str = None, versioning: bool = True) -> float:
         """
         Build a rig.
 
@@ -538,10 +536,9 @@ class Builder(object):
         :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
                            and store a new version each time the publish file is overwritten.
                            This allows the user to keep a log of files approved to be published.
-        :param saveFBX: Save an FBX of the rig for use as a skeletal mesh in Unreal
         """
         if not self.path:
-            Builder_Logger.error('you must provide a build enviornment path. Use Bulder._setRigFile()')
+            logger.error('you must provide a build enviornment path. Use Bulder._setRigFile()')
             return
 
         startTime = time.time()
@@ -578,8 +575,8 @@ class Builder(object):
                              suffix=suffix,
                              assetName=assetName,
                              fileType=fileType,
-                             versioning=versioning,
-                             saveFBX=saveFBX)
+                             versioning=versioning
+                             )
         endTime = time.time()
         finalTime = endTime - startTime
 
@@ -589,7 +586,7 @@ class Builder(object):
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
     def publish(self, outputfile: str = None, suffix: str = None, assetName: str = None, fileType: str = None,
-                versioning: bool = True, saveFBX: bool = False) -> None:
+                versioning: bool = True) -> None:
         """
         Publish a rig.
 
@@ -602,7 +599,6 @@ class Builder(object):
         :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
                            and store a new version each time the publish file is overwritten.
                            This allows the user to keep a log of files approved to be published.
-       :param saveFBX: Save an FBX of the rig for use as a skeletal mesh in Unreal
         """
         outputfile = outputfile or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_RIG))
         assetName = assetName or self.getAbsoultePath(self.getRigData(self.rigFile, constants.RIG_NAME))
@@ -655,21 +651,12 @@ class Builder(object):
             # make the output directory and save the file. This will also make the directory for the main publish
             rig_path.mkdir(versionDir)
             versionPath = file.incrimentSave(versionPath, log=False)
-            Builder_Logger.info("out rig versioned: {}   ({})".format(os.path.basename(versionPath), versionPath))
+            logger.info("out rig versioned: {}   ({})".format(os.path.basename(versionPath), versionPath))
 
         # create output directory and save
         publishPath = os.path.join(dirName, fileName)
         file.saveAs(publishPath, log=False)
-        Builder_Logger.info("out rig published: {}  ({})".format(fileName, publishPath))
-
-        # if we have the save FBX box checked we can also save and FBX on publish.
-        if saveFBX:
-            from rigamajig2.maya.anim import ueExport
-            fbxFileName = "{}{}.{}".format(rigName, suffix, "fbx")
-            fbxPublishPath = os.path.join(dirName, fbxFileName)
-
-            ueExport.exportSkeletalMesh("main", fbxPublishPath)
-            Builder_Logger.info("fbx exported: {}".format(fbxPublishPath))
+        logger.info("out rig published: {}  ({})".format(fileName, publishPath))
 
     def updateMaya(self) -> None:
         """ Update maya if in an interactive session"""
@@ -718,7 +705,7 @@ class Builder(object):
                     return cmpt
                 elif type == _type:
                     return cmpt
-        Builder_Logger.warning("No component: {} with type: {} found within current build".format(name, type))
+        logger.warning("No component: {} with type: {} found within current build".format(name, type))
         return None
 
     # --------------------------------------------------------------------------------
@@ -767,7 +754,19 @@ class Builder(object):
         os.environ['RIGAMJIG_FILE'] = self.rigFile
         os.environ['RIGAMJIG_ENV'] = self.path
 
-        Builder_Logger.info('\n\nRig Enviornment path: {0}'.format(self.path))
+        logger.info('\n\nRig Enviornment path: {0}'.format(self.path))
+
+    def saveRigFile(self, dataDict):
+        data = abstract_data.AbstractData()
+        data.read(self.rigFile)
+        newData = data.getData()
+
+        newData.update(dataDict)
+
+        data.setData(newData)
+        data.write(self.rigFile)
+
+        logger.info(f"data saved to : {self.rigFile}")
 
     @staticmethod
     def getRigData(rigFile: str, key: str) -> typing.Any:

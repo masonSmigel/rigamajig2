@@ -24,11 +24,13 @@ import maya.cmds as cmds
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.data import abstract_data
 from rigamajig2.shared import common
+from rigamajig2.shared import logging
 from rigamajig2.shared import path as rig_path
 from rigamajig2.shared import runScript
 # import the message box popup and buttons
 from rigamajig2.ui.widgets import mayaMessageBox
-from . import Builder_Logger
+
+logger = logging.getLogger(__name__)
 
 CMPT_PATH = os.path.abspath(os.path.join(__file__, '../../cmpts'))
 _EXCLUDED_FOLDERS = ['face']
@@ -383,7 +385,7 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
 
             # write out the file
             mergedDataObj.write(dataFile)
-            Builder_Logger.info(f"{dataType} saved to {dataFile}")
+            logger.info(f"{dataType} saved to {dataFile}")
 
         # Get a list of all the files saved.
         filesSaved = list(saveDataDict.keys())
@@ -677,7 +679,7 @@ def createRigEnviornment(sourceEnviornment, targetEnviornment, rigName):
     data.setData(newData)
     data.write(rigFile)
 
-    Builder_Logger.info("New rig environment created: {}".format(tgtEnvPath))
+    logger.info("New rig environment created: {}".format(tgtEnvPath))
     return os.path.join(tgtEnvPath, rigFile)
 
 

@@ -9,20 +9,22 @@
 
 """
 import os
-import logging
-from rigamajig2.shared import path
 from distutils.dir_util import copy_tree
-from rigamajig2.maya.builder import constants
+
+import rigamajig2.shared.logging
 from rigamajig2.maya.builder import builder
+from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.data import abstract_data
+from rigamajig2.shared import path
+
+logger = rigamajig2.shared.logger.getLogger(__name__)
 
 mergableFeilds = [constants.SKELETON_POS,
                   constants.CONTROL_SHAPES,
                   constants.GUIDES,
                   constants.COMPONENTS]
 
-logger = logging.getLogger(__name__)
 
 def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-deliver', method='game'):
     """
@@ -79,7 +81,8 @@ def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-delive
     rigFileDict[constants.SKELETON_POS] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.SKELETON_POS)
     rigFileDict[constants.GUIDES] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.GUIDES)
     rigFileDict[constants.COMPONENTS] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.COMPONENTS)
-    rigFileDict[constants.CONTROL_SHAPES] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.CONTROL_SHAPES)
+    rigFileDict[constants.CONTROL_SHAPES] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv,
+                                                          key=constants.CONTROL_SHAPES)
     rigFileDict[constants.PSD] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.PSD)
     rigFileDict[constants.DEFORM_LAYERS] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.DEFORM_LAYERS)
     rigFileDict[constants.SHAPES] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.SHAPES)
@@ -102,7 +105,7 @@ def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-delive
     filename1 = os.path.basename(rigFile1)
     filename2 = os.path.basename(rigFile2)
 
-    logger.info("Rig files: '{}' and '{}' sucessfully merged! Output: {}".format(filename1, filename2, rigEnv))
+    Builder_Logger.info(f"Rig files: '{filename1}' and '{filename2}' sucessfully merged! Output: {rigEnv}")
 
     return rigFile
 
@@ -174,7 +177,6 @@ def mergeSkinWeights(rigFile1, rigFile2, rigEnv, method='game'):
 
 
 def mergeContentBased(rigFile1, rigFile2, rigEnv, key):
-
     """ Merge types that are content based ie skinweights, blendshapes or SHAPES"""
     # build a skins folder from the first rig file
     relativePath = builder.Builder.getRigData(rigFile1, key)

@@ -13,8 +13,8 @@ from collections import OrderedDict
 import maya.cmds as cmds
 
 from rigamajig2.maya import blendshape
+from rigamajig2.maya import clean
 from rigamajig2.maya import deformer
-from rigamajig2.maya import mesh
 from rigamajig2.maya import meta
 from rigamajig2.maya import shape
 from rigamajig2.maya import skinCluster
@@ -55,7 +55,7 @@ def createNewGeometry():
     for newModel in modelRootDup:
         if mesh.isMesh(newModel):
             # first lets cleanup the shape nodes
-            mesh.cleanShapes(newModel)
+            clean.cleanShapes(newModel)
 
             # now we can run the poly smooth opperation
             cmds.polySmooth(newModel, **POLYSMOOTH_KWARGS)

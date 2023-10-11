@@ -22,6 +22,7 @@ from PySide2 import QtWidgets
 import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
+from rigamajig2.shared import logging
 from rigamajig2.ui.builder_ui import actions
 from rigamajig2.ui.builder_ui import build_section
 from rigamajig2.ui.builder_ui import controls_section
@@ -33,14 +34,14 @@ from rigamajig2.ui.builder_ui import setup_section
 from rigamajig2.ui.builder_ui import skeleton_section
 from rigamajig2.ui.widgets import statusLine, QLine, mayaMessageBox, pathSelector
 from rigamajig2.ui.widgets.workspace_control import DockableUI
-# Import the main widgets for the builder dialog
-from . import Builder_UI_Logger
 
 MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
 JSON_FILTER = "Json Files (*.json)"
 
 LARGE_BTN_HEIGHT = 35
 EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
+
+logger = logging.getLogger(__name__)
 
 
 # this is a long function allow more instance attributes for the widgets.
@@ -86,9 +87,6 @@ class BuilderDialog(DockableUI):
         utilsMenu = self.mainMenu.addMenu("Utils")
         utilsMenu.addAction(self.actions.mergeRigFilesAction)
         utilsMenu.addSeparator()
-        utilsMenu.addMenu(self.actions.setLoggingLevelMenu)
-        # utilsMenu.addAction(self.actions.devModeAction)
-        utilsMenu.addSeparator()
         utilsMenu.addAction(self.actions.removeRigamajigCallbacksAction)
         utilsMenu.addAction(self.actions.reloadRigamajigModulesAction)
 
@@ -109,7 +107,7 @@ class BuilderDialog(DockableUI):
         """Create Widgets"""
         self.rigPathSelector = pathSelector.PathSelector(
             caption="Select a Rig File", fileFilter="Rig Files (*.rig)", fileMode=1
-        )
+            )
 
         self.assetNameLineEdit = QtWidgets.QLineEdit()
         self.assetNameLineEdit.setPlaceholderText("asset_name")
@@ -134,11 +132,11 @@ class BuilderDialog(DockableUI):
             self.controlsWidget,
             self.deformationWidget,
             self.publishWidget,
-        ]
+            ]
 
         self.runSelectedButton = QtWidgets.QPushButton(
             QtGui.QIcon(":execute.png"), "Run Selected"
-        )
+            )
         self.runSelectedButton.setToolTip("Run Rig steps up to the break point")
         self.runSelectedButton.setFixedSize(120, 22)
 
@@ -148,10 +146,10 @@ class BuilderDialog(DockableUI):
 
         self.publishButton = QtWidgets.QPushButton(
             QtGui.QIcon(":sourceScript.png"), "Publish"
-        )
+            )
         self.publishButton.setToolTip(
             "Publish the rig. This will build the rig and save it."
-        )
+            )
         self.publishButton.setFixedSize(80, 22)
 
         self.openScriptEditorButton = QtWidgets.QPushButton()
@@ -162,7 +160,7 @@ class BuilderDialog(DockableUI):
         self.statusLine = statusLine.StatusLine()
         self.statusLine.setStatusMessage(
             f"Rigamajig2 version {rigamajig2.version}", "info"
-        )
+            )
 
     def createLayouts(self):
         """Create Layouts"""
@@ -236,29 +234,29 @@ class BuilderDialog(DockableUI):
         # This ensures all setups until a breakpoint are run
         self.modelWidget.mainWidget.headerWidget.checkbox.clicked.connect(
             lambda x: self.__handleSectionBreakpoints(self.modelWidget)
-        )
+            )
         self.jointWidget.mainWidget.headerWidget.checkbox.clicked.connect(
             lambda x: self.__handleSectionBreakpoints(self.jointWidget)
-        )
+            )
         self.intalizeWidget.mainWidget.headerWidget.checkbox.clicked.connect(
             lambda x: self.__handleSectionBreakpoints(self.intalizeWidget)
-        )
+            )
         self.buildWidget.mainWidget.headerWidget.checkbox.clicked.connect(
             lambda x: self.__handleSectionBreakpoints(self.buildWidget)
-        )
+            )
         self.controlsWidget.mainWidget.headerWidget.checkbox.clicked.connect(
             lambda x: self.__handleSectionBreakpoints(self.controlsWidget)
-        )
+            )
         self.deformationWidget.mainWidget.headerWidget.checkbox.clicked.connect(
             lambda x: self.__handleSectionBreakpoints(self.deformationWidget)
-        )
+            )
         self.publishWidget.mainWidget.headerWidget.checkbox.clicked.connect(
             lambda x: self.__handleSectionBreakpoints(self.publishWidget)
-        )
+            )
 
         self.rigPathSelector.selectPathButton.clicked.connect(
             self._pathSelectorLoadRigFile
-        )
+            )
         self.runSelectedButton.clicked.connect(self._runSelected)
         self.runButton.clicked.connect(self._runAll)
         self.publishButton.clicked.connect(self._publish)
@@ -322,7 +320,7 @@ class BuilderDialog(DockableUI):
                 breakpointSelected = True
 
         if not breakpointSelected:
-            Builder_UI_Logger.error("No breakpoint selected no steps to run")
+            logger.error("No breakpoint selected no steps to run")
             return
 
         if not confirmBuildRig():
@@ -336,7 +334,7 @@ class BuilderDialog(DockableUI):
             widget._runWidget()
 
             if widget.isChecked():
-                Builder_UI_Logger.debug(f"Reached selected breakpoint: {widget.__class__.__name__}")
+                logger.debug(f"Reached selected breakpoint: {widget.__class__.__name__}")
                 break
 
         runTime = time.time() - startTime
@@ -355,11 +353,11 @@ class BuilderDialog(DockableUI):
             self.statusLine.setStatusMessage(
                 message=f"Rig Build Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}",
                 icon="success",
-            )
+                )
         except Exception as e:
             self.statusLine.setStatusMessage(
                 message=f"Rig Build Failed: '{self.rigName}'", icon="failed"
-            )
+                )
             raise e
 
     @QtCore.Slot()
@@ -370,15 +368,14 @@ class BuilderDialog(DockableUI):
         try:
             finalTime = self.publishWidget._publishWithUiData()
             if finalTime:
-                self.intalizeWidget.componentManager._loadFromScene()
                 self.statusLine.setStatusMessage(
                     message=f"Rig Publish Sucessful: '{self.rigName}' -- Completed in {round(finalTime, 3)}",
                     icon="success",
-                )
+                    )
         except Exception as e:
             self.statusLine.setStatusMessage(
                 message=f"Rig Publish Failed: '{self.rigName}'", icon="failed"
-            )
+                )
             raise e
 
     def hideEvent(self, e):
@@ -408,7 +405,7 @@ def confirmBuildRig():
             title="Run Rig Build",
             message="Proceeding will rebuild the rig based on data you've saved. Unsaved in-scene changes will be lost!",
             icon="help",
-        )
+            )
         confirmPublishMessage.setButtonsYesNoCancel()
         res = confirmPublishMessage.exec_()
 

@@ -12,12 +12,15 @@ import os
 
 from maya import cmds as cmds
 
-from rigamajig2.maya import psd, skinCluster, meta as meta, joint as joint
+from rigamajig2.maya import skinCluster, meta as meta, joint as joint
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder.constants import DEFORMER_DATA_TYPES
 from rigamajig2.maya.data import psd_data, skin_data, SHAPES_data, deformLayer_data, joint_data, curve_data, guide_data, abstract_data
+from rigamajig2.maya.rig import psd
+from rigamajig2.shared import logging
 from rigamajig2.shared import path as rig_path, common as common
-from . import Builder_Logger
+
+logger = logging.getLogger(__name__)
 
 
 # Joints
@@ -249,11 +252,9 @@ def loadSingleSkin(path):
         dataObj.read(path)
         try:
             dataObj.applyData(nodes=dataObj.getKeys())
-            geo = dataObj.getKeys()[0]
-            Builder_Logger.info(f"Loaded Skin Weights for: {geo[0] if len(geo)<1 else geo}")
         except:
             fileName = os.path.basename(path)
-            Builder_Logger.WARNING("Failed to load skin weights for {}".format(fileName))
+            logger.error("Failed to load skin weights for {}".format(fileName))
 
 
 def saveSkinWeights(path=None):
@@ -266,7 +267,6 @@ def saveSkinWeights(path=None):
         dataObj = skin_data.SkinData()
         dataObj.gatherDataIterate(cmds.ls(sl=True))
         dataObj.write(path)
-        Builder_Logger.info("skin weights for: {} saved to:{}".format(cmds.ls(sl=True), path))
 
     else:
         for geo in cmds.ls(sl=True):
@@ -275,7 +275,6 @@ def saveSkinWeights(path=None):
             dataObj = skin_data.SkinData()
             dataObj.gatherData(geo)
             dataObj.write("{}/{}.json".format(path, geo))
-            Builder_Logger.info("skin weights for: {} saved to:{}.json".format(path, geo))
 
 
 def saveSHAPESData(path=None):

@@ -16,13 +16,10 @@ import maya.mel as mel
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.qc as qc
 import rigamajig2.ui.builder_ui.recent_files as recent_files
-from rigamajig2.maya.builder import Builder_Logger
 # RIGAMJIG
 from rigamajig2.maya.builder import constants
-from rigamajig2.shared import logger
 from rigamajig2.ui.builder_ui.newRigFile_dialog import CreateRigEnvDialog
 
 
@@ -72,16 +69,6 @@ class Actions(object):
 
         self.mergeRigFilesAction = QtWidgets.QAction("Merge Rig Files", self.dialog)
         self.mergeRigFilesAction.triggered.connect(self.showMergeRigFilesDialog)
-
-        self.setLoggingLevelMenu = QtWidgets.QMenu("Set Logging Level", self.dialog)
-
-        # Add actions to the menu to set the logging level to each stage
-        level = 10
-        for levels in ["DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"]:
-            loggingLevelAction = QtWidgets.QAction(levels, self.setLoggingLevelMenu)
-            loggingLevelAction.triggered.connect(partial(logger.setLoggingLevel, level))
-            self.setLoggingLevelMenu.addAction(loggingLevelAction)
-            level += 10
 
         self.devModeAction = QtWidgets.QAction("Dev Mode", self.dialog)
         self.devModeAction.setCheckable(True)
@@ -138,45 +125,33 @@ class Actions(object):
 
     def saveRigFile(self):
         """ Save out a rig file """
-        data = abstract_data.AbstractData()
-        data.read(self.dialog.rigFile)
-        newData = data.getData()
+        newData = {
+            constants.RIG_NAME: self.dialog.assetNameLineEdit.text(),
+            constants.MODEL_FILE: self.dialog.modelWidget.modelPathSelector.getPath(absoultePath=False),
+            constants.SKELETON_POS: self.dialog.jointWidget.jointPositionDataLoader.getFileList(),
+            constants.GUIDES: self.dialog.intalizeWidget.guideDataLoader.getFileList(),
+            constants.COMPONENTS: self.dialog.intalizeWidget.componentsDataLoader.getFileList(),
+            constants.PSD: self.dialog.buildWidget.psdDataLoader.getFileList(),
+            constants.CONTROL_SHAPES: self.dialog.controlsWidget.controlDataLoader.getFileList(),
+            constants.DEFORM_LAYERS: self.dialog.deformationWidget.deformLayerPathSelector.getPath(absoultePath=False),
+            constants.SKINS: self.dialog.deformationWidget.skinPathSelector.getPath(absoultePath=False),
+            constants.DEFORMERS: self.dialog.deformationWidget.deformersDataLoader.getFileList(),
+            constants.OUTPUT_RIG: self.dialog.publishWidget.outPathSelector.getPath(absoultePath=False),
+            constants.OUTPUT_RIG_FILE_TYPE: self.dialog.publishWidget.outFileTypeComboBox.currentText(),
+            constants.OUTPUT_FILE_SUFFIX: self.dialog.publishWidget.outFileSuffix.text(),
+            # setup new data for the scripts
+            constants.PRE_SCRIPT: self.dialog.modelWidget.preScriptRunner.getCurrentScriptList(
+                relativePath=self.dialog.rigEnviornment),
+            constants.POST_SCRIPT: self.dialog.buildWidget.postScriptRunner.getCurrentScriptList(
+                relativePath=self.dialog.rigEnviornment),
+            constants.PUB_SCRIPT: self.dialog.publishWidget.pubScriptRunner.getCurrentScriptList(
+                relativePath=self.dialog.rigEnviornment),
+            # In older files we explictly had a slot for SHAPES data. We have now replaced that with the deformers key.
+            # to avoid adding shapes files twice we can re-set the shapes data here:
+            constants.SHAPES: None
+            }
 
-        # Save the main feilds
-        newData[constants.RIG_NAME] = self.dialog.assetNameLineEdit.text()
-
-        newData[constants.MODEL_FILE] = self.dialog.modelWidget.modelPathSelector.getPath(absoultePath=False)
-        newData[constants.SKELETON_POS] = self.dialog.jointWidget.jointPositionDataLoader.getFileList()
-        newData[constants.GUIDES] = self.dialog.intalizeWidget.guideDataLoader.getFileList()
-        newData[constants.COMPONENTS] = self.dialog.intalizeWidget.componentsDataLoader.getFileList()
-        newData[constants.PSD] = self.dialog.buildWidget.psdDataLoader.getFileList()
-        newData[constants.CONTROL_SHAPES] = self.dialog.controlsWidget.controlDataLoader.getFileList()
-        newData[constants.DEFORM_LAYERS] = self.dialog.deformationWidget.deformLayerPathSelector.getPath(
-            absoultePath=False)
-        newData[constants.SKINS] = self.dialog.deformationWidget.skinPathSelector.getPath(absoultePath=False)
-        newData[constants.DEFORMERS] = self.dialog.deformationWidget.deformersDataLoader.getFileList()
-        newData[constants.OUTPUT_RIG] = self.dialog.publishWidget.outPathSelector.getPath(absoultePath=False)
-        newData[constants.OUTPUT_RIG_FILE_TYPE] = self.dialog.publishWidget.outFileTypeComboBox.currentText()
-        newData[constants.OUTPUT_FILE_SUFFIX] = self.dialog.publishWidget.outFileSuffix.text()
-
-        # setup new data for the scripts
-        preScripts = self.dialog.modelWidget.preScriptRunner.getCurrentScriptList(
-            relativePath=self.dialog.rigEnviornment)
-        postScripts = self.dialog.buildWidget.postScriptRunner.getCurrentScriptList(
-            relativePath=self.dialog.rigEnviornment)
-        pubScripts = self.dialog.publishWidget.pubScriptRunner.getCurrentScriptList(
-            relativePath=self.dialog.rigEnviornment)
-        newData[constants.PRE_SCRIPT] = preScripts
-        newData[constants.POST_SCRIPT] = postScripts
-        newData[constants.PUB_SCRIPT] = pubScripts
-
-        # In older files we explictly had a slot for SHAPES data. We have now replaced that with the deformers key.
-        # to avoid adding shapes files twice we can re-set the shapes data here:
-        newData[constants.SHAPES] = None
-
-        data.setData(newData)
-        data.write(self.dialog.rigFile)
-        Builder_Logger.info(f"data saved to : {self.dialog.rigFile}")
+        self.dialog.rigBuilder.saveRigFile(newData)
 
     def reloadRigFile(self):
         """ Reload rig file"""

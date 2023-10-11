@@ -16,6 +16,9 @@ import maya.api.OpenMayaAnim as oma
 
 import rigamajig2.maya.data.maya_data as maya_data
 import rigamajig2.shared.common as common
+from rigamajig2.shared import logging
+
+logger = logging.getLogger(__name__)
 
 if sys.version_info.major >= 3:
     basestring = str
@@ -210,4 +213,4 @@ class AnimData(maya_data.MayaData):
                 if gatherAttrsFromFile:
                     attributes = None
 
-            print("anim loaded '{}' to '{}".format(node, retargetNode))
+            logger.info(f"animation data loaded '{node}' to '{retargetNode}")

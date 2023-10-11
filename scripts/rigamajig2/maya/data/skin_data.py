@@ -17,6 +17,9 @@ import rigamajig2.maya.data.maya_data as maya_data
 import rigamajig2.maya.deformer as deformer
 import rigamajig2.maya.skinCluster as skinCluster
 import rigamajig2.shared.common as common
+from rigamajig2.shared import logging
+
+logger = logging.getLogger(__name__)
 
 
 class SkinData(maya_data.MayaData):
@@ -103,7 +106,7 @@ class SkinData(maya_data.MayaData):
             if len(realInfluences) != len(influenceObjects):
                 influenceDifferenge = set(influenceObjects) - set(realInfluences)
                 missingInfluences = list(influenceDifferenge)
-                cmds.warning("Skin cluster {} is missing {} influences.".format(meshSkin, missingInfluences))
+                logger.warning(f"Skin cluster {meshSkin} is missing {missingInfluences} influences.")
 
             if rebind:
                 cmds.select(realInfluences, mesh, r=True)
@@ -125,8 +128,7 @@ class SkinData(maya_data.MayaData):
             elif isinstance(self._data[node]['preBindInputs'], list):
                 # # for complete ness this includes a depreciated workflow for a preBind inputs stored as a list.
                 # TODO: this should be depreiciated.
-                cmds.warning(
-                    "{} is using a depreciated workflow. Please save the skin file again to update!".format(node))
+                logger.warning(f"{node} is using a depreciated workflow. Please save the skin file to update!")
                 for index, bindInput in zip(range(len(influenceObjects)), self._data[node]['preBindInputs']):
                     if bindInput:
                         cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, index), f=True)
@@ -143,3 +145,4 @@ class SkinData(maya_data.MayaData):
 
             if skinningMethod == 2:
                 skinCluster.setBlendWeights(mesh, meshSkin, self._data[node]['dqBlendWeights'])
+            logger.info(f"Loaded Skin Weights for: {node}")

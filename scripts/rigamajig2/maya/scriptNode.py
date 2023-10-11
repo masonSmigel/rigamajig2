@@ -1,13 +1,11 @@
 """Script node utilities """
 import inspect
-import logging
 import os
 
+import maya.api.OpenMaya as om2
 import maya.cmds as cmds
 
 from rigamajig2.shared import common
-
-logger = logging.getLogger(__name__)
 
 SCRIPT_TYPES = [
     "Demand",
@@ -90,7 +88,7 @@ def create(name, sourceType='python', scriptType='Open/Close', beforeScript=None
                                  beforeScript=beforeScript,
                                  afterScript=afterScript,
                                  )
-    logger.info("New script node {} created".format(name))
+    om2.MGlobal.displayInfo("New script node {} created".format(name))
     return scriptNode
 
 

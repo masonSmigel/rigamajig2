@@ -50,7 +50,6 @@ class PublishSection(builderSection.BuilderSection):
         self.outFileTypeComboBox.addItem('ma')
         self.outFileTypeComboBox.addItem('mb')
 
-        self.saveFBXCheckbox = QtWidgets.QCheckBox("Export FBX Skeletal Mesh")
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -68,7 +67,6 @@ class PublishSection(builderSection.BuilderSection):
         self.mainWidget.addWidget(self.outPathSelector)
         self.mainWidget.addWidget(self.dryPublishButton)
         self.mainWidget.addWidget(self.publishButton)
-        self.mainWidget.addWidget(self.saveFBXCheckbox)
 
     def createConnections(self):
         """ Create Connections """
@@ -142,8 +140,7 @@ class PublishSection(builderSection.BuilderSection):
             outputfile=self.outPathSelector.getPath(),
             suffix=self.outFileSuffix.text(),
             assetName=None,
-            fileType=self.outFileTypeComboBox.currentText(),
-            saveFBX=self.saveFBXCheckbox.isChecked()
+            fileType=self.outFileTypeComboBox.currentText()
             )
 
         return finalTime

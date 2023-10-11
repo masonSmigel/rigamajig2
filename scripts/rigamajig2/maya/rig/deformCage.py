@@ -11,20 +11,19 @@
 
 """
 
-import maya.cmds as cmds
 import maya.api.OpenMaya as om2
-import logging
+import maya.cmds as cmds
 
+from rigamajig2.maya import joint
+from rigamajig2.maya import mathUtils
+from rigamajig2.maya import mesh
+from rigamajig2.maya import meshnav
+from rigamajig2.maya import meta
+from rigamajig2.maya import skinCluster
+from rigamajig2.maya import transform
 from rigamajig2.maya.rig import control
 from rigamajig2.shared import common
-from rigamajig2.maya import meta
-from rigamajig2.maya import mesh
-from rigamajig2.maya import skinCluster
-from rigamajig2.maya import joint
-from rigamajig2.maya import transform
-from rigamajig2.maya import mathUtils
-from rigamajig2.maya import meshnav
-from rigamajig2.maya import hierarchy
+from rigamajig2.shared import logging
 
 logger = logging.getLogger(__name__)
 
@@ -288,9 +287,6 @@ class DeformationCage(object):
         # smooth the skin cluster
         smoothSkinCluster(highOutput, intensity=intensity, itterations=itterations)
 
-        # we also need to connect the bpm joints to the skinclusters before we copy it around
-        highSkinCluster = skinCluster.getSkinCluster(highOutput)
-
         # now that we have the bind mesh we can
         for geo in meshesToBind:
             # create a duplicate to store the copied skin data
@@ -310,4 +306,4 @@ class DeformationCage(object):
             # now we can delete the duplicate and move on to the next item
             cmds.delete(tempDup)
 
-        logger.info("Connected and autoSkinned {} meshes".format(len(geo)))
+        logger.info(f"Deform cage connected and autoSkinned {len(geo)} meshes")

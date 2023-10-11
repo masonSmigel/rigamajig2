@@ -13,9 +13,11 @@ import ast
 import os
 import re
 import sys
+import typing
 from functools import partial
 
 import maya.OpenMayaUI as omui
+import maya.api.OpenMaya as om2
 # MAYA
 import maya.cmds as cmds
 from PySide2 import QtCore
@@ -32,13 +34,16 @@ from rigamajig2.maya import naming as naming
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
+from rigamajig2.shared import logging
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
-from rigamajig2.ui.widgets import QPushButton
+from rigamajig2.ui.widgets import QPushButton, mayaMessageBox
 
 ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
 
 COMPONENT_ROW_HEIGHT = 20
+
+logger = logging.getLogger(__name__, level=logging.DEBUG)
 
 
 class SetupSection(builderSection.BuilderSection):
@@ -118,14 +123,14 @@ class SetupSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
-        self.loadGuidesButton.clicked.connect(self.loadGuides)
-        self.saveGuidesButton.leftClicked.connect(self.saveGuides)
-        self.saveGuidesButton.rightClicked.connect(self.saveGuidesAsOverride)
+        self.loadGuidesButton.clicked.connect(self._loadGuides)
+        self.saveGuidesButton.leftClicked.connect(self._saveGuides)
+        self.saveGuidesButton.rightClicked.connect(self._saveGuidesAsOverride)
         self.loadComponentsButton.clicked.connect(self.loadComponents)
         self.saveComponentsButton.clicked.connect(self.saveComponents)
 
         self.addComponentsButton.clicked.connect(self.componentManager.showAddComponentDialog)
-        self.initalizeBuildButton.clicked.connect(self.initalizeRig)
+        self.initalizeBuildButton.clicked.connect(self._initalizeRig)
 
     def _setBuilder(self, builder):
         """ Set a builder for intialize widget"""
@@ -149,7 +154,7 @@ class SetupSection(builderSection.BuilderSection):
     def _runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
         self.loadComponents()
-        self.initalizeRig()
+        self._initalizeRig()
 
     # CONNECTIONS
     @QtCore.Slot()
@@ -170,49 +175,52 @@ class SetupSection(builderSection.BuilderSection):
         self.builder.saveComponents(self.componentsDataLoader.getFileList(absolute=True))
 
     @QtCore.Slot()
-    def loadGuides(self):
+    def _loadGuides(self):
         """ Load guide setup to json using the builder """
 
         self.builder.loadGuideData(self.guideDataLoader.getFileList())
 
     @QtCore.Slot()
-    def saveGuides(self):
+    def _saveGuides(self):
         """ Save guides setup to json using the builder """
-        self._doSaveGuideData(method="merge")
+        if not self.__validateGuidesInScene():
+            return
+        self.builder.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method="merge")
 
     @QtCore.Slot()
-    def saveGuidesAsOverride(self):
+    def _saveGuidesAsOverride(self):
         """ Save all guide data as an override"""
-        savedFiles = self._doSaveGuideData(method="overwrite")
+        if not self.__validateGuidesInScene():
+            return
+
+        savedFiles = self.builder.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method="overwrite")
         currentFiles = self.guideDataLoader.getFileList(absolute=True)
         if savedFiles:
             for savedFile in savedFiles:
                 if savedFile not in currentFiles:
                     self.guideDataLoader.selectPath(savedFile)
 
-    def _doSaveGuideData(self, method='merge'):
-        # check if there are controls in the scene before saving.
+    def __validateGuidesInScene(self):
+        """Check to make sure the guides exist in the scene and look to see if the the rig is build"""
         if len(meta.getTagged("guide")) < 1:
-            result = cmds.confirmDialog(
-                t='Save Guides',
-                message="There are no guides in the scene. Are you sure you want to continue?",
-                button=['Continue', 'Cancel'],
-                defaultButton='Continue',
-                cancelButton='Cancel')
+            confirm = mayaMessageBox.MayaMessageBox(
+                title="Save Guides",
+                message="There are no guides in the scene. Are you sure you want to continue?"
+                )
+            confirm.setWarning()
+            confirm.setButtonsYesNoCancel()
 
-            if result != 'Continue':
-                return
-
-        return self.builder.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method=method)
+            return confirm.getResult()
+        return True
 
     @QtCore.Slot()
-    def initalizeRig(self):
+    def _initalizeRig(self):
         """Run the comppnent intialize on the builder and update the UI """
         self.builder.guide()
-        self.componentManager.loadFromScene()
+        self.componentManager._loadFromScene()
 
     def closeEvent(self, *args, **kwargs):
-        self.componentManager.setScriptJobEnabled(False)
+        self.componentManager._teardownCallbacks()
 
 
 def _getComponentIcon(cmpt):
@@ -227,6 +235,52 @@ def _getComponentColor(cmpt):
     # after we get the UI color we can delte the tmp component instance
     del tmpComponentObj
     return uiColor
+
+
+class ComponentTreeWidgetItem(QtWidgets.QTreeWidgetItem):
+    """Tree Widget Item for components"""
+
+    def __init__(self, name, componentType, buildStep='unbuilt', container=None):
+        super().__init__()
+
+        self.setSizeHint(0, QtCore.QSize(0, COMPONENT_ROW_HEIGHT))  # set height
+
+        uiColor = _getComponentColor(componentType)
+
+        # set the nessesary text.
+        self.setText(0, name)
+        font = QtGui.QFont()
+        font.setBold(True)
+        self.setFont(0, font)
+        self.setTextColor(0, QtGui.QColor(*uiColor))
+
+        self.setText(1, componentType)
+        self.setText(2, buildStep)
+
+        if container:
+            self.setData(0, QtCore.Qt.UserRole, container)
+
+        # set the desaturated color
+        destaturatedColor = [v * 0.78 for v in uiColor]
+        self.setTextColor(1, QtGui.QColor(*destaturatedColor))
+        self.setTextColor(2, QtGui.QColor(156, 156, 156))
+
+        # set the icon
+        icon = _getComponentIcon(componentType)
+        self.setIcon(0, icon)
+
+    def getData(self) -> typing.Dict[str, typing.Any]:
+        """
+        return a dictionary of data for the selected item.
+        :return: a dictionary of component data
+        """
+        itemData = dict()
+        itemData['name'] = self.text(0)
+        itemData['type'] = self.text(1)
+        itemData['step'] = self.text(2)
+        itemData['container'] = self.data(QtCore.Qt.UserRole, 0)
+
+        return itemData
 
 
 # pylint: disable=too-many-public-methods
@@ -245,14 +299,11 @@ class ComponentManager(QtWidgets.QWidget):
         # store an open edit component dialog in a varriable
         self.editComponentDialog = None
 
-        # keep track of the script node ID
-        self.newSceneScriptJobID = -1
-        self.containerScriptJobID = -1
+        self.callbackArray = om2.MCallbackIdArray()
 
         self.createActions()
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
+        self.createWidget()
+
         self.setMinimumHeight(320)
 
     def createActions(self):
@@ -279,13 +330,13 @@ class ComponentManager(QtWidgets.QWidget):
 
         self.reloadComponentAction = QtWidgets.QAction("Reload Cmpts from Scene", self)
         self.reloadComponentAction.setIcon(QtGui.QIcon(":refresh.png"))
-        self.reloadComponentAction.triggered.connect(self.loadFromScene)
+        self.reloadComponentAction.triggered.connect(self._loadFromScene)
 
         self.deleteComponentAction = QtWidgets.QAction("Delete Cmpt", self)
         self.deleteComponentAction.setIcon(QtGui.QIcon(":trash.png"))
         self.deleteComponentAction.triggered.connect(self._deleteComponent)
 
-    def createContextMenu(self, position):
+    def _createContextMenu(self, position):
         menu = QtWidgets.QMenu(self.componentTree)
         menu.addAction(self.selectContainerAction)
         menu.addAction(self.editComponentSettingsAction)
@@ -298,18 +349,24 @@ class ComponentManager(QtWidgets.QWidget):
         menu.addAction(self.deleteComponentAction)
         menu.exec_(self.componentTree.mapToGlobal(position))
 
-    def createWidgets(self):
-        """ Create Widgets"""
+    def createWidget(self):
+        """ Create the Widget"""
+        self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.minimumSize()
+        self.mainLayout.setContentsMargins(0, 0, 0, 0)
+        self.mainLayout.setSpacing(4)
+
         # search icon
-        self.search_icon = QtWidgets.QLabel()
+        searchIcon = QtWidgets.QLabel()
         pixmap = QtGui.QPixmap(":hotkeyFieldSearch.png")
-        self.search_icon.setScaledContents(True)
-        self.search_icon.setPixmap(pixmap)
-        self.search_icon.setMinimumSize(20, 15)
+        searchIcon.setScaledContents(True)
+        searchIcon.setPixmap(pixmap)
+        searchIcon.setMinimumSize(20, 15)
 
         # setup the search bar and completer
         self.searchBar = QtWidgets.QLineEdit()
         self.searchBar.setPlaceholderText("find a component")
+        self.searchBar.returnPressed.connect(self._searchForComponent)
 
         # add the expand and contract widget buttons!
         self.expandWidgetButton = QtWidgets.QPushButton()
@@ -317,11 +374,24 @@ class ComponentManager(QtWidgets.QWidget):
         self.expandWidgetButton.setFlat(True)
         self.expandWidgetButton.setFixedSize(15, 20)
         self.expandWidgetButton.setToolTip("Expand Component Manager")
+        self.expandWidgetButton.clicked.connect(partial(self.__changeTreeWidgetSize, 40))
+
         self.contractWidgetButton = QtWidgets.QPushButton()
         self.contractWidgetButton.setIcon(QtGui.QIcon(":nodeGrapherArrowUp.png"))
         self.contractWidgetButton.setFlat(True)
         self.contractWidgetButton.setFixedSize(15, 20)
         self.expandWidgetButton.setToolTip("Contract Component Manager")
+        self.contractWidgetButton.clicked.connect(partial(self.__changeTreeWidgetSize, -40))
+
+        # build the search bar layout
+        searchBarLayout = QtWidgets.QHBoxLayout()
+        searchBarLayout.addWidget(searchIcon)
+        searchBarLayout.addWidget(self.searchBar)
+        searchBarLayout.addSpacing(20)
+        searchBarLayout.addWidget(self.contractWidgetButton)
+        searchBarLayout.addWidget(self.expandWidgetButton)
+
+        self.mainLayout.addLayout(searchBarLayout)
 
         self.searchCompleter = QtWidgets.QCompleter(self)
         self.searchCompleterModel = QtCore.QStringListModel(list(), self)
@@ -342,98 +412,44 @@ class ComponentManager(QtWidgets.QWidget):
         self.componentTree.setColumnWidth(2, 60)
 
         self.componentTree.setContextMenuPolicy(QtCore.Qt.CustomContextMenu)
-        self.componentTree.customContextMenuRequested.connect(self.createContextMenu)
+        self.componentTree.customContextMenuRequested.connect(self._createContextMenu)
 
-    def createLayouts(self):
-        """ Create Layouts"""
-        self.mainLayout = QtWidgets.QVBoxLayout(self)
-        self.mainLayout.minimumSize()
-        self.mainLayout.setContentsMargins(0, 0, 0, 0)
-        self.mainLayout.setSpacing(4)
-
-        # build the search bar layout
-        searchBarLayout = QtWidgets.QHBoxLayout()
-        searchBarLayout.addWidget(self.search_icon)
-        searchBarLayout.addWidget(self.searchBar)
-        searchBarLayout.addSpacing(20)
-        searchBarLayout.addWidget(self.contractWidgetButton)
-        searchBarLayout.addWidget(self.expandWidgetButton)
-
-        self.mainLayout.addLayout(searchBarLayout)
         self.mainLayout.addWidget(self.componentTree)
 
-    def createConnections(self):
-        self.searchBar.returnPressed.connect(self._searchForComponent)
-        self.expandWidgetButton.clicked.connect(partial(self.__changeTreeWidgetSize, 40))
-        self.contractWidgetButton.clicked.connect(partial(self.__changeTreeWidgetSize, -40))
+    def getAll(self):
+        """ get all components in the component tree"""
+        return [self.componentTree.topLevelItem(i) for i in range(self.componentTree.topLevelItemCount())]
 
-    def setScriptJobEnabled(self, enabled):
+    def getSelectedItem(self):
+        """ get the selected items in the component tree"""
+        return [item for item in self.componentTree.selectedItems()]
+
+    def _setupCallbacks(self):
         """
-        Set the state of the script job.
-        The script job ensures the widget displays changes when the scene changes
+        Setup callbacks
         """
-        # create a script node for clearing the tree when a new scene is opened
-        if enabled and self.newSceneScriptJobID < 0:
-            self.newSceneScriptJobID = cmds.scriptJob(event=["NewSceneOpened", partial(self.loadFromScene)],
-                                                      protected=True)
-        elif not enabled and self.newSceneScriptJobID > 0:
-            print(f"Deleting Script Node: {self.newSceneScriptJobID}")
-            cmds.scriptJob(kill=self.newSceneScriptJobID, f=True)
-            self.newSceneScriptJobID = -1
+        # if a new scene is opened refresh the builder ui
+        self.callbackArray.append(om2.MSceneMessage.addCallback(om2.MSceneMessage.kAfterNew, self._loadFromScene))
 
-        # set the script node for the component update Script Job
-        if enabled and self.containerScriptJobID < 0:
-            self.containerScriptJobID = cmds.scriptJob(event=["currentContainerChange", partial(self.loadFromScene)],
-                                                       protected=True)
-        elif not enabled and self.containerScriptJobID > 0:
-            print(f"Deleting Script Node: {self.containerScriptJobID}")
-            cmds.scriptJob(kill=self.containerScriptJobID, f=True)
-            self.containerScriptJobID = -1
+        # we also want to update the callbacks whenever we update a step on the components.
+        # since all the componts activate a container update when the container changes
+        self.callbackArray.append(om2.MEventMessage.addEventCallback("currentContainerChange", self._loadFromScene))
 
-    def createComponentItem(self, name, componentType, buildStep='unbuilt', container=None):
-        """ append a new component to the ui. Used in the createComponent method """
-        rowcount = self.componentTree.topLevelItemCount()
-        item = QtWidgets.QTreeWidgetItem(rowcount)
-        item.setSizeHint(0, QtCore.QSize(0, COMPONENT_ROW_HEIGHT))  # set height
+        logger.debug(f"Setup Callbacks: {self.callbackArray}")
 
-        # set the nessesary text.
-        item.setText(0, name)
-        # create a font to set it to bold
-        font = QtGui.QFont()
-        font.setBold(True)
-        item.setFont(0, font)
+    def _teardownCallbacks(self):
+        """ Teardown the callbacks we created"""
+        logger.debug(f"Teardown Callbacks: {self.callbackArray}")
 
-        item.setText(1, componentType)
-        item.setText(2, buildStep)
+        om2.MEventMessage.removeCallbacks(self.callbackArray)
+        self.callbackArray.clear()
 
-        # set the icon
-        icon = _getComponentIcon(componentType)
-        item.setIcon(0, icon)
-
-        # set the data
-        if container:
-            item.setData(QtCore.Qt.UserRole, 0, container)
-
-        self.componentTree.addTopLevelItem(item)
-
-        # get the component color
-        uiColor = _getComponentColor(componentType)
-
-        # now we can
-        item.setTextColor(0, QtGui.QColor(*uiColor))
-
-        destaturatedColor = [v * 0.78 for v in uiColor]
-        item.setTextColor(1, QtGui.QColor(*destaturatedColor))
-        item.setTextColor(2, QtGui.QColor(156, 156, 156))
-
+    def _addItemToAutoComplete(self, name):
         # add the item to the search bar if it isnt there already
-
-        # if the name is not in the string list then add it to the string list for autocomplete
         stringList = self.searchCompleterModel.stringList()
         if name not in stringList:
             newStringList = stringList + [name]
             self.searchCompleterModel.setStringList(newStringList)
-        return item
 
     def createComponent(self, name, componentType, input, rigParent):
         """
@@ -448,12 +464,18 @@ class ComponentManager(QtWidgets.QWidget):
         componentObject = core.createComponentClassInstance(componentType)
         cmpt = componentObject(name=name, input=ast.literal_eval(str(input)), rigParent=rigParent)
 
-        self.createComponentItem(name=name, componentType=componentType, buildStep='unbuilt', container=None)
+        item = ComponentTreeWidgetItem(name=name,
+                                       componentType=componentType,
+                                       container=cmpt.getContainer()
+                                       )
+        self.componentTree.addTopLevelItem(item)
         self.builder.componentList.append(cmpt)
+        self._addItemToAutoComplete(name=name)
+
         cmpt._initalizeComponent()
         return cmpt
 
-    def loadFromScene(self):
+    def _loadFromScene(self, *args):
         """ Load exisiting components from the scene"""
         components = meta.getTagged('component')
 
@@ -481,33 +503,12 @@ class ComponentManager(QtWidgets.QWidget):
                     componentItem[0].setText(2, buildStep)
                     componentItem[0].setData(QtCore.Qt.UserRole, 0, component)
 
-    def parseData(self, item):
-        """
-        return a dictionary of data for the selected item.
-        :return:
-        """
-        itemData = dict()
-        itemData['name'] = item.text(0)
-        itemData['type'] = item.text(1)
-        itemData['step'] = item.text(2)
-        itemData['container'] = item.data(QtCore.Qt.UserRole, 0)
-
-        return itemData
-
-    def getAll(self):
-        """ get all components in the component tree"""
-        return [self.componentTree.topLevelItem(i) for i in range(self.componentTree.topLevelItemCount())]
-
-    def getSelectedItem(self):
-        """ get the selected items in the component tree"""
-        return [item for item in self.componentTree.selectedItems()]
-
     def getComponentObj(self, item=None):
         """ Get the component object instance from the builder based on the item in the tree widget. """
         if not item:
             item = self.getSelectedItem()[0]
 
-        itemDict = self.parseData(item)
+        itemDict = item.getData()
         cmpt = self.builder.findComponent(itemDict['name'], itemDict['type'])
         return cmpt
 
@@ -532,14 +533,15 @@ class ComponentManager(QtWidgets.QWidget):
             buildStepString = ['unbuilt', 'initalize', 'guide', 'build', 'connect', 'finalize', 'optimize']
             buildStep = buildStepString[cmpt.getStep()]
 
-            self.createComponentItem(name=name, componentType=componentType, buildStep=buildStep)
+            item = ComponentTreeWidgetItem(name=name, componentType=componentType, buildStep=buildStep)
+            self.componentTree.addTopLevelItem(item)
 
     @QtCore.Slot()
     def _selectContainer(self):
         """ Select the container node of the selected components """
         cmds.select(cl=True)
         for item in self.getSelectedItem():
-            itemDict = self.parseData(item)
+            itemDict = item.getData()
             cmds.select(itemDict['container'], add=True)
 
     @QtCore.Slot()
@@ -567,10 +569,10 @@ class ComponentManager(QtWidgets.QWidget):
         componentNameList = [comp.name for comp in self.builder.componentList]
         if guessMirrorName in componentNameList:
             self._mirrorComponentParameters(selectedComponent)
-            builder.logger.info(f"Mirrored component Parameters: '{selectedComponent.name}' -> '{guessMirrorName}'")
+            logger.info(f"Mirrored component Parameters: '{selectedComponent.name}' -> '{guessMirrorName}'")
         else:
             self._createMirroredComponent(selectedComponent)
-            builder.logger.info(f"Created Mirrored component: '{guessMirrorName}'")
+            logger.info(f"Created Mirrored component: '{guessMirrorName}'")
 
     def _createMirroredComponent(self, component):
         """ Create a mirrored component"""
@@ -595,7 +597,7 @@ class ComponentManager(QtWidgets.QWidget):
         self._mirrorComponentParameters(component)
 
         # update the ui
-        self.loadFromScene()
+        self._loadFromScene()
 
     @QtCore.Slot()
     def _mirrorComponentParameters(self, sourceComponent=None):
@@ -762,7 +764,13 @@ class ComponentManager(QtWidgets.QWidget):
     def showEvent(self, e):
         """ override the show event to add the script job. """
         super(ComponentManager, self).showEvent(e)
-        self.setScriptJobEnabled(True)
+        self._setupCallbacks()
+        self._loadFromScene()
+
+    def hideEvent(self, e):
+        """Override the hide event to teardown the callbacks"""
+        super(ComponentManager, self).hideEvent(e)
+        self._teardownCallbacks()
 
     def showAddComponentDialog(self):
         """ Show the add Component dialog"""

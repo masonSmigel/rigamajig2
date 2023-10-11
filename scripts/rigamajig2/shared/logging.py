@@ -82,6 +82,9 @@ def getLogger(name: str, level: int = None, propagate: bool = False) -> Logger:
     """
     logger = getLogger_(name)
 
+    if logger.name in Logger.manager.loggerDict.keys():
+        return logger
+
     handler = maya.utils.MayaGuiLogHandler() if inMaya else StreamHandler()
 
     fmt = LowercaseFormatter(DCC_LOGGING_FORMATT)
@@ -89,6 +92,7 @@ def getLogger(name: str, level: int = None, propagate: bool = False) -> Logger:
     logger.handlers = [handler]
 
     if RigamajigLoggerOptions.logToFile and name.startswith(RigamajigLoggerOptions.logRootName):
+        print("add a new file handler from getLogger")
         __addFileHandler(logger=logger, filename=RigamajigLoggerOptions.logFileName)
 
     if level: logger.setLevel(level)

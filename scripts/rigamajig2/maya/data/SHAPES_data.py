@@ -346,9 +346,8 @@ def importBlendshapeDeltas(bsNode, filePath):
     melPath = filePath.replace("\\", "/")
     mel.eval('br_blendShapeImportData -delta -fileName "{filePath}" "{blendshape}";'.format(filePath=melPath,
                                                                                             blendshape=bsNode))
-
-    # do a print with the br message to keep stuff consistant
-    logger.info(f"Imported Deltas to '{bsNode}' from '{melPath}'")
+    filename = os.path.basename(melPath)
+    logger.info(f"Imported Deltas to '{bsNode}' from '{filename}'")
 
 
 def localizeSHAPESFile(melFile):

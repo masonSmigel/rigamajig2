@@ -9,6 +9,7 @@
 
 
 """
+import logging
 from collections import OrderedDict
 
 import maya.cmds as cmds
@@ -16,7 +17,6 @@ import maya.cmds as cmds
 import rigamajig2.maya.data.maya_data as maya_data
 from rigamajig2.maya import blendshape
 from rigamajig2.shared import common
-from rigamajig2.shared import logging
 
 logger = logging.getLogger(__name__)
 

@@ -10,6 +10,7 @@
     NOTE: This function requires ngSkinTools
 
 """
+import logging
 
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
@@ -23,7 +24,6 @@ from rigamajig2.maya import skinCluster
 from rigamajig2.maya import transform
 from rigamajig2.maya.rig import control
 from rigamajig2.shared import common
-from rigamajig2.shared import logging
 
 logger = logging.getLogger(__name__)
 

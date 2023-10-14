@@ -10,6 +10,7 @@
 """
 import glob
 import inspect
+import logging
 # PYTHON
 import os
 import pathlib
@@ -24,7 +25,6 @@ import maya.cmds as cmds
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.data import abstract_data
 from rigamajig2.shared import common
-from rigamajig2.shared import logging
 from rigamajig2.shared import path as rig_path
 from rigamajig2.shared import runScript
 # import the message box popup and buttons

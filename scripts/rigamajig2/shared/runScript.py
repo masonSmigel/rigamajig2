@@ -2,10 +2,9 @@
 Tool to run python scripts on the disk
 """
 import fnmatch
+import logging
 import os
 import runpy
-
-from rigamajig2.shared import logging
 
 logger = logging.getLogger(__name__)
 

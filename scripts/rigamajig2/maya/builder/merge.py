@@ -8,17 +8,17 @@
     discription: Merge two .rig files together
 
 """
+import logging
 import os
 from distutils.dir_util import copy_tree
 
-import rigamajig2.shared.logging
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.data import abstract_data
 from rigamajig2.shared import path
 
-logger = rigamajig2.shared.logger.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 mergableFeilds = [constants.SKELETON_POS,
                   constants.CONTROL_SHAPES,

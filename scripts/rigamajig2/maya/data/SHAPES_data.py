@@ -9,6 +9,7 @@
 
 """
 import linecache
+import logging
 import os.path
 import uuid
 
@@ -18,7 +19,6 @@ import maya.mel as mel
 import rigamajig2.maya.data.maya_data as maya_data
 from rigamajig2.maya import blendshape
 from rigamajig2.shared import common
-from rigamajig2.shared import logging
 from rigamajig2.shared import path as rig_path
 
 logger = logging.getLogger(__name__)

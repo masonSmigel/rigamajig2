@@ -8,6 +8,7 @@
     discription: 
 
 """
+import logging
 import os
 
 from maya import cmds as cmds
@@ -17,7 +18,6 @@ from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder.constants import DEFORMER_DATA_TYPES
 from rigamajig2.maya.data import psd_data, skin_data, SHAPES_data, deformLayer_data, joint_data, curve_data, guide_data, abstract_data
 from rigamajig2.maya.rig import psd
-from rigamajig2.shared import logging
 from rigamajig2.shared import path as rig_path, common as common
 
 logger = logging.getLogger(__name__)

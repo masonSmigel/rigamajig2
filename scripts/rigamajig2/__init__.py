@@ -9,8 +9,10 @@
     date: 01/2021
 
 """
-
+import logging
 import sys
+
+from . import configureLoggers
 
 VERSION_MAJOR = 1
 VERSION_MINOR = 2
@@ -22,6 +24,12 @@ version = '%i.%i.%i' % version_info
 __version__ = version
 
 __all__ = ['version', 'version_info', '__version__']
+
+# setup the loggers
+configureLoggers.configureLoggers()
+
+# disable the root logger to start with. we re-enable it in the UI .
+logger = logging.getLogger(__name__)
 
 
 def reloadModule(name='rigamajig2', log=True):

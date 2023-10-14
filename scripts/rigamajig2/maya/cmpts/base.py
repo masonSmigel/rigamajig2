@@ -1,6 +1,7 @@
 """
 base component
 """
+import logging
 from collections import OrderedDict
 
 import maya.cmds as cmds
@@ -11,7 +12,6 @@ import rigamajig2.maya.color
 import rigamajig2.maya.container
 import rigamajig2.maya.meta
 from rigamajig2.maya.rig.control import CONTROLTAG
-from rigamajig2.shared import logging
 
 logger = logging.getLogger(__name__)
 

@@ -10,6 +10,7 @@
 """
 # PYTHON
 import ast
+import logging
 import os
 import re
 import sys
@@ -34,7 +35,6 @@ from rigamajig2.maya import naming as naming
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
-from rigamajig2.shared import logging
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
 from rigamajig2.ui.widgets import QPushButton, mayaMessageBox

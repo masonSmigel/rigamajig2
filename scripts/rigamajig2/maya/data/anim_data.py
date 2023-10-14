@@ -8,6 +8,7 @@
     author: masonsmigel
     date: 01/2021
 """
+import logging
 import sys
 from collections import OrderedDict
 
@@ -16,7 +17,6 @@ import maya.api.OpenMayaAnim as oma
 
 import rigamajig2.maya.data.maya_data as maya_data
 import rigamajig2.shared.common as common
-from rigamajig2.shared import logging
 
 logger = logging.getLogger(__name__)
 

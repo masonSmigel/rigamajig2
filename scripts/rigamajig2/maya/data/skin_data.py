@@ -9,6 +9,7 @@
     date: 01/2021
 """
 
+import logging
 from collections import OrderedDict
 
 import maya.cmds as cmds
@@ -17,7 +18,6 @@ import rigamajig2.maya.data.maya_data as maya_data
 import rigamajig2.maya.deformer as deformer
 import rigamajig2.maya.skinCluster as skinCluster
 import rigamajig2.shared.common as common
-from rigamajig2.shared import logging
 
 logger = logging.getLogger(__name__)
 

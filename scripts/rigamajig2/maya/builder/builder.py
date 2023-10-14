@@ -8,6 +8,7 @@
     discription: This module contains our rig builder.
                  It acts as a wrapper to manage all functions of the rig_builder.
 """
+import logging
 import os
 import time
 import typing
@@ -26,7 +27,6 @@ from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder import model
 from rigamajig2.maya.cmpts import base
-from rigamajig2.shared import logging
 
 Component = typing.Type[base.Base]
 _StringList = typing.List[str]
@@ -544,59 +544,50 @@ class Builder(object):
             logger.error('you must provide a build envifornment path. Use Bulder._setRigFile()')
             return
 
-        logFile = self.getLogFile()
-        _loggersToWrite = self.initFileLogging(logFile=logFile, replace=replaceLog)
+        startTime = time.time()
+        logger.info(f"\n"
+                    f"Begin Rig Build\n{'-' * 70}\n"
+                    f"build env: {self.path}\n"
+                   )
 
-        try:
-            startTime = time.time()
-            logger.info(f"\n"
-                        f"Begin Rig Build\n{'-' * 70}\n"
-                        f"build env: {self.path}\n"
-                        f"logging to: {logFile}\n")
+        core.loadRequiredPlugins()
+        self.preScript()
 
-            core.loadRequiredPlugins()
-            self.preScript()
+        self.importModel()
 
-            self.importModel()
+        self.loadJoints()
 
-            self.loadJoints()
+        self.loadComponents()
+        self.initalize()
+        self.guide()
 
-            self.loadComponents()
-            self.initalize()
-            self.guide()
+        self.build()
+        self.connect()
+        self.finalize()
+        self.loadPoseReaders()
+        self.postScript()
 
-            self.build()
-            self.connect()
-            self.finalize()
-            self.loadPoseReaders()
-            self.postScript()
+        self.loadControlShapes()
 
-            self.loadControlShapes()
+        self.loadDeformationLayers()
+        self.loadSkinWeights()
+        self.loadDeformers()
 
-            self.loadDeformationLayers()
-            self.loadSkinWeights()
-            self.loadDeformers()
+        if publish:
+            # self.optimize()
+            self.mergeDeformLayers()
+            self.publishScript()
+            if savePublish:
+                self.publish(outputfile=outputfile,
+                             suffix=suffix,
+                             assetName=assetName,
+                             fileType=fileType,
+                             versioning=versioning
+                             )
+        endTime = time.time()
+        finalTime = endTime - startTime
 
-            if publish:
-                # self.optimize()
-                self.mergeDeformLayers()
-                self.publishScript()
-                if savePublish:
-                    self.publish(outputfile=outputfile,
-                                 suffix=suffix,
-                                 assetName=assetName,
-                                 fileType=fileType,
-                                 versioning=versioning
-                                 )
-            endTime = time.time()
-            finalTime = endTime - startTime
-
-            logger.info('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
-        except Exception as e:
-            raise e
-        finally:
-            # end the logger even if we get an exception from the builder
-            logging.endWriteToFile(_loggersToWrite, filename=logFile)
+        logger.info('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
     def publish(self, outputfile: str = None, suffix: str = None, assetName: str = None, fileType: str = None,
@@ -792,40 +783,3 @@ class Builder(object):
         :return:
         """
         return core.getRigData(rigFile=rigFile, key=key)
-
-    def getLogFile(self) -> str:
-        """
-        Get the path to the log file and return it
-
-        :return:
-        """
-        base_directory = self.getRigEnviornment()
-        rigfileName = os.path.basename(self.getRigFile()).split(".")[0]
-        logFile = os.path.abspath(os.path.join(base_directory, "../", f"{rigfileName}_builder.log"))
-
-        return logFile
-
-    def initFileLogging(self, logFile: str, replace: bool = True) -> typing.List[logging.Logger]:
-        """
-        Initialize file logging for the builder.
-        This will save a log file of all commands from the modules specified in the BUILDER_LOGGER_SCOPE.
-
-        :param logFile: path to the log file.
-        :type logFile: str
-
-        :param replace: If True, replace the existing log file; otherwise, append to it.
-        :type replace: bool
-
-        :return: A list of loggers configured for file logging.
-        :rtype: list
-        """
-
-        if os.path.exists(logFile) and replace == True:
-            os.remove(logFile)
-
-        _loggersToWrite = []
-        for key in self.BUILD_LOGGER_SCOPE:
-            _loggersToWrite += logging.getChildLoggers(key)
-        logging.writeToFile(_loggersToWrite, filename=logFile)
-
-        return _loggersToWrite

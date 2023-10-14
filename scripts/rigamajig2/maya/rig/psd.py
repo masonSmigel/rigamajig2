@@ -1,6 +1,8 @@
 """
 This Module contains functions for working wist Pose Space Readers (PSDs)
 """
+import logging
+
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
 
@@ -9,7 +11,6 @@ import rigamajig2.maya.meta as meta
 import rigamajig2.maya.node as node
 import rigamajig2.maya.transform as rig_transform
 import rigamajig2.shared.common as common
-from rigamajig2.shared import logging
 
 logger = logging.getLogger(__name__)
 

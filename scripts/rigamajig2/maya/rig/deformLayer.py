@@ -9,6 +9,7 @@
 
 """
 # PYTHON
+import logging
 
 # MAYA
 import maya.cmds as cmds
@@ -23,7 +24,6 @@ from rigamajig2.maya import meta
 from rigamajig2.maya import skinCluster
 # RIGAMJIG2
 from rigamajig2.shared import common
-from rigamajig2.shared import logging
 
 logger = logging.getLogger(__name__)
 

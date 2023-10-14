@@ -8,6 +8,7 @@
     discription: functions to clean up scenes
 """
 # PYTHON
+import logging
 
 # MAYA
 import maya.mel as mel
@@ -15,7 +16,6 @@ from maya import cmds as cmds
 
 from rigamajig2.maya import mesh
 from rigamajig2.shared import common as common
-from rigamajig2.shared import logging
 
 EVIL_METHOD_NAMES = ['DCF_updateViewportList', 'CgAbBlastPanelOptChangeCallback', 'onModelChange3dc']
 

@@ -12,6 +12,7 @@ logger = logging.getLogger(__name__)
 
 class InvalidContainer(Exception): pass
 
+
 def isContainer(name):
     """
     Check if the node is a valid Container

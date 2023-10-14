@@ -1,19 +1,23 @@
 """
 Module for Ik Spline
 """
+import logging
 import sys
+
 import maya.cmds as cmds
 
-import rigamajig2.shared.common as common
-import rigamajig2.maya.debug as debug
-import rigamajig2.maya.curve as rig_curve
-import rigamajig2.maya.cluster as rig_cluster
-import rigamajig2.maya.node as node
-import rigamajig2.maya.transform as rig_transform
 import rigamajig2.maya.attr as rig_attr
+import rigamajig2.maya.cluster as rig_cluster
+import rigamajig2.maya.curve as rig_curve
+import rigamajig2.maya.debug as debug
 import rigamajig2.maya.joint as rig_joint
 import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.meta as meta
+import rigamajig2.maya.node as node
+import rigamajig2.maya.transform as rig_transform
+import rigamajig2.shared.common as common
+
+logger = logging.getLogger(__name__)
 
 if sys.version_info[0] >= 3:
     basestring = str
@@ -140,7 +144,7 @@ class SplineBase(object):
         ikParent = self._group
 
         if clusters < 4:
-            cmds.warning('Cannot create ikSpline with less than 4 controls')
+            logger.warning('Cannot create ikSpline with less than 4 controls')
             clusters = 4
 
         for joint in self._jointList:

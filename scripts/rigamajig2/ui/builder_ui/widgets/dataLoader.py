@@ -8,6 +8,7 @@
     discription: 
 
 """
+import logging
 import os
 import pathlib
 import platform
@@ -26,6 +27,8 @@ from rigamajig2.maya.builder import core
 from rigamajig2.maya.data import abstract_data
 from rigamajig2.shared import common
 from rigamajig2.ui import showInFolder
+
+logger = logging.getLogger(__name__)
 
 ITEM_SIZE_HINT = 18
 
@@ -367,7 +370,7 @@ class DataLoader(QtWidgets.QWidget):
         # get the data type of the file and try to filter it.
         newPathDataType = abstract_data.AbstractData().getDataType(newPath)
         if self.dataFilteringEnabled and newPathDataType not in self.dataFilter:
-            cmds.warning(f"{pathlib.Path(newPath).name}'s data type does not match filter {self.dataFilter}")
+            logger.warning(f"{pathlib.Path(newPath).name}'s data type does not match filter {self.dataFilter}")
 
         self.addItem(newPath)
 
@@ -506,7 +509,7 @@ class DataLoader(QtWidgets.QWidget):
         if self.pathTreeWidget.topLevelItemCount() > 0:
             allPaths = [p.data(0, QtCore.Qt.UserRole) for p in self.getAllItems()]
             if path in allPaths:
-                cmds.warning(f"Path '{path}' is already added to the dataLoader")
+                logger.warning(f"Path '{path}' is already added to the dataLoader")
                 return
 
         dataType = abstract_data.AbstractData.getDataType(fileInfo.filePath())

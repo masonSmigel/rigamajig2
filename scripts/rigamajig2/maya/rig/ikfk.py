@@ -2,25 +2,26 @@
 Module for Ik/Fk stuff
 """
 
+import logging
 import sys
 from collections import OrderedDict
 
-import maya.cmds as cmds
 import maya.api.OpenMaya as om2
-from maya.api.OpenMaya import MVector
-import rigamajig2.shared.common as common
-import rigamajig2.maya.hierarchy as rig_hierarchy
-import rigamajig2.maya.transform as transform
-import rigamajig2.maya.node as node
-import rigamajig2.maya.joint as joint
-import rigamajig2.maya.mathUtils as mathUtils
+import maya.cmds as cmds
+
 import rigamajig2.maya.debug as debug
+import rigamajig2.maya.hierarchy as rig_hierarchy
+import rigamajig2.maya.joint as joint
 import rigamajig2.maya.meta as meta
+import rigamajig2.maya.node as node
 import rigamajig2.maya.rig.control as rig_control
+import rigamajig2.maya.transform as transform
+import rigamajig2.shared.common as common
 
 if sys.version_info.major >= 3:
     basestring = str
 
+logger = logging.getLogger(__name__)
 
 class IkFkBase(object):
     """
@@ -326,7 +327,7 @@ class IkFkLimb(IkFkBase):
 
         # check if our joints are clean. If not return a warning but we can continue.
         if not joint.isClean(jnts[1]) or not joint.isClean(jnts[2]):
-            cmds.warning("Some joints have dirty transformations. Stretch may not work as expected")
+            logger.warning("Some joints have dirty transformations. Stretch may not work as expected")
 
         cmds.addAttr(params, ln='stretch', at='double', dv=1, min=0, max=1, k=True)
         cmds.addAttr(params, ln='stretchTop', at='double', dv=1, k=True)

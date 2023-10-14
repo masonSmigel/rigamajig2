@@ -144,7 +144,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParen
                 attr.lock(output, attrName)
 
         else:
-            cmds.warning("Pose reader already exists on the joint '{}'".format(joint))
+            logger.warning("Pose reader already exists on the joint '{}'".format(joint))
 
     if parent and cmds.objExists(parent):
         hierarchyParent = cmds.listRelatives(hrc, p=True) or ['']

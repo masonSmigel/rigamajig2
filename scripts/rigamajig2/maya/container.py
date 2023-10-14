@@ -1,10 +1,17 @@
 """
 Functions for working with containers
 """
+import logging
+
 import maya.cmds as cmds
 
 import rigamajig2.shared.common as common
 
+logger = logging.getLogger(__name__)
+
+
+class InvalidContainer(Exception): pass
+class ObjectExistsError(Exception): pass
 
 def isContainer(name):
     """
@@ -81,7 +88,8 @@ def removeNodes(nodes, container, removeShapes=True):
     :rtype: list
     """
     if not isContainer(container):
-        raise Exception("{} is not a container.".format(container))
+        logger.error("{} is not a container.".format(container))
+        return None
     cmds.container(container, e=True, removeNode=nodes)
     nodes = common.toList(nodes)
     if removeShapes:
@@ -218,7 +226,8 @@ def addChildAnchor(node, container=None, assetNodeName=None):
 
     containerNode = getContainerFromNode(node)
     if not containerNode:
-        if not container: raise Exception("{} is not a part of a container and no container specified".format(node))
+        if not container:
+            raise Exception("{} is not a part of a container and no container specified".format(node))
         addNodes(node, container)
         containerNode = container
 
@@ -272,6 +281,7 @@ class ActiveContainer(object):
     When the context manager is active any newly created
     nodes are added to the container.
     """
+
     def __init__(self, container):
         """
         Set the current container to active

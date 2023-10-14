@@ -1,16 +1,19 @@
 """
 This is the json module for maya Deformer data
 """
+import logging
+import sys
 from collections import OrderedDict
+
+import maya.cmds as cmds
+
 import rigamajig2.maya.data.maya_data as maya_data
 import rigamajig2.maya.data.node_data as node_data
-import maya.cmds as cmds
-import sys
-
-from rigamajig2.shared import common
-from rigamajig2.maya import blendshape
-from rigamajig2.maya import deformer
 from rigamajig2.maya import attr
+from rigamajig2.maya import deformer
+from rigamajig2.shared import common
+
+logger = logging.getLogger(__name__)
 
 if sys.version_info.major >= 3:
     basestring = str
@@ -86,7 +89,7 @@ class DeformerData(maya_data.MayaData):
 
             gatherAttrs = GATHER_ATTRS.get(data['deformerType'])
             if not gatherAttrs:
-                cmds.warning(f"Deformers type '{data['deformerType']}' is not currently supported")
+                logger.warning(f"Deformers type '{data['deformerType']}' is not currently supported")
                 gatherAttrs = list()
 
             for deformerAttr in gatherAttrs:
@@ -154,7 +157,7 @@ class DeformerData(maya_data.MayaData):
             if not cmds.objExists(node):
                 # if we dont want to create one print out a warning and
                 if not create:
-                    cmds.warning(f"The deformer '{node}' does not exist in the scene. Please use the 'create' flag")
+                    logger.warning(f"The deformer '{node}' does not exist in the scene. Please use the 'create' flag")
                     return
 
                 created = True

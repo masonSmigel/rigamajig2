@@ -1,9 +1,13 @@
 """ Naming Functions """
 
+import logging
 import re
+
 import maya.cmds as cmds
-from collections import OrderedDict
+
 import rigamajig2.shared.common as common
+
+logger = logging.getLogger(__name__)
 
 DELIMINATOR = '_'
 
@@ -35,7 +39,7 @@ def getLongName(obj):
     :rtype: str | None
     """
     if not cmds.objExists(obj):
-        cmds.warning("Object {} does not exist.".format(obj))
+        logger.warning("Object {} does not exist.".format(obj))
         return
     return str(cmds.ls(obj, l=True)[0])
 
@@ -49,7 +53,7 @@ def getShortName(obj):
     :rtype: str | None
     """
     if not cmds.objExists(obj):
-        cmds.warning("Object {} does not exist.".format(obj))
+        logger.warning("Object {} does not exist.".format(obj))
         return
     return str(cmds.ls(obj, l=True)[0].split('|')[-1])
 

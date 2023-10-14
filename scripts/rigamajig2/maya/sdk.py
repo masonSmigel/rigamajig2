@@ -1,12 +1,16 @@
 """
 Functions for working with SDKs
 """
-import maya.cmds as cmds
-import maya.api.OpenMayaAnim as oma
+import logging
 
-import rigamajig2.shared.common as common
+import maya.api.OpenMayaAnim as oma
+import maya.cmds as cmds
+
 import rigamajig2.maya.attr as attr
 import rigamajig2.maya.openMayaUtils as omu
+import rigamajig2.shared.common as common
+
+logger = logging.getLogger(__name__)
 
 SDKNODETYPES = ['animCurveUU', 'animCurveUA', 'animCurveUL', 'animCurveUT']
 DEFAULT_SDK_TYPE = 'animCurveUU'
@@ -57,7 +61,7 @@ def getSdkDriver(sdk):
     :rtype: str
     """
     if not cmds.ls(sdk, type=SDKNODETYPES):
-        cmds.error('{} is not an SDK node'.format(sdk))
+        logger.error('{} is not an SDK node'.format(sdk))
         return
     connList = cmds.listConnections(sdk, s=True, d=False, p=True, scn=True)
     if connList:
@@ -75,7 +79,7 @@ def getSdkDriven(sdk):
     :rtype: str
     """
     if not cmds.ls(sdk, type=SDKNODETYPES):
-        cmds.error('{} is not an SDK node'.format(sdk))
+        logger.error('{} is not an SDK node'.format(sdk))
         return
     connList = cmds.listConnections(sdk, s=False, d=True, p=True, scn=True)
 

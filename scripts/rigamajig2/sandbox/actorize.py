@@ -8,6 +8,7 @@
     discription: This module contains functions to actorize a rig. This includes making an actor-anim and an actor-ue
 
 """
+import logging
 from collections import OrderedDict
 
 import maya.cmds as cmds
@@ -19,6 +20,8 @@ from rigamajig2.maya import meta
 from rigamajig2.maya import shape
 from rigamajig2.maya import skinCluster
 from rigamajig2.maya import uv
+
+logger = logging.getLogger(__name__)
 
 SOURCE_SUFFIX = "__src"
 
@@ -69,7 +72,7 @@ def createNewGeometry():
             # get the source model if it exists (which it always should) and create a message connection to use later
             srcModel = "{}{}".format(newModel, SOURCE_SUFFIX)
             if not cmds.objExists(srcModel):
-                cmds.warning("The model {} does not have a valid source. ".format(modelNode))
+                logger.warning("The model {} does not have a valid source. ".format(modelNode))
                 continue
             meta.createMessageConnection(newModel, srcModel, "sourceModel")
 

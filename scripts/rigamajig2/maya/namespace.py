@@ -1,8 +1,11 @@
 """
 Namespace functions
 """
+import logging
+
 import maya.cmds as cmds
 
+logger = logging.getLogger(__name__)
 
 def deleteAllNamespace():
     """
@@ -33,7 +36,7 @@ def addToNamespace(nodes, namespace):
         nodes = [nodes]
 
     if not cmds.namespace(exists=namespace):
-        cmds.error("namespace {} does not exist".format(namespace))
+        logger.error("namespace {} does not exist".format(namespace))
         return
 
     for node in nodes:

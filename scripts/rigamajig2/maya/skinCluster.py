@@ -7,6 +7,8 @@ Thanks to:
 Charles Wardlaw: Deformation Layering in Maya’s Parallel GPU World 
 (https://medium.com/@kattkieru/deformation-layering-in-mayas-parallel-gpu-world-15c2e3d66d82)
 """
+import logging
+
 import maya.api.OpenMaya as om2
 import maya.api.OpenMayaAnim as oma2
 import maya.cmds as cmds
@@ -528,7 +530,7 @@ def connectExistingBPMs(skinCluster, influences=None):
             cmds.connectAttr("{}.worldInverseMatrix".format(bpmInfluence),
                              "{}.bindPreMatrix[{}]".format(skinCluster, index), f=True)
         else:
-            cmds.warning("No Bpm exists for {}".format(influence))
+            logger.warning("No Bpm exists for {}".format(influence))
 
 
 def localize(skinclusters, transform):

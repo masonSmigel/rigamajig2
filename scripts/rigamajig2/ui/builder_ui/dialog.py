@@ -156,7 +156,13 @@ class BuilderDialog(DockableUI):
         self.openScriptEditorButton.setFlat(True)
         self.openScriptEditorButton.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
 
+        self.openLogFileButton = QtWidgets.QPushButton("log")
+        self.openLogFileButton.setIcon(QtGui.QIcon(":list.svg"))
+        self.openLogFileButton.setMaximumHeight(18)
+        self.openLogFileButton.setFlat(True)
+
         self.statusLine = QtWidgets.QStatusBar()
+        self.statusLine.addPermanentWidget(self.openLogFileButton)
 
     def createLayouts(self):
         """Create Layouts"""
@@ -256,6 +262,7 @@ class BuilderDialog(DockableUI):
         self.runSelectedButton.clicked.connect(self._runSelected)
         self.runButton.clicked.connect(self._runAll)
         self.publishButton.clicked.connect(self._publish)
+        self.openLogFileButton.clicked.connect(self._openLogFile)
 
     # --------------------------------------------------------------------------------
     # Connections
@@ -361,6 +368,15 @@ class BuilderDialog(DockableUI):
         except Exception as e:
             self.statusLine.showMessage(f"Rig Publish Failed: '{self.rigName}'")
             raise e
+
+    @QtCore.Slot()
+    def _openLogFile(self):
+        """Open the log file by getting the first handler of the root rigamajig logger."""
+        rigamajig2RootLogger = logging.getLogger("rigamajig2")
+        logFile = rigamajig2RootLogger.handlers[0].baseFilename
+
+        url = QtCore.QUrl.fromLocalFile(logFile)
+        QtGui.QDesktopServices.openUrl(url)
 
     def showEvent(self, *args, **kwargs):
         """Show event for the Builder UI"""

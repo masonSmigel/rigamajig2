@@ -1,11 +1,15 @@
 """
 Geometry utilities
 """
+import logging
+
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
 
 import rigamajig2.maya.shape as shape
 import rigamajig2.shared.common as common
+
+logger = logging.getLogger(__name__)
 
 
 def isMesh(node):
@@ -57,7 +61,7 @@ def getVertPositions(mesh, world=True):
         mesh = mesh[0]
 
     if shape.getType(mesh) != 'mesh':
-        cmds.error("Node must be of type 'mesh'. {} is of type {}".format(mesh, shape.getType(mesh)))
+        logger.error("Node must be of type 'mesh'. {} is of type {}".format(mesh, shape.getType(mesh)))
 
     sel = om2.MGlobal.getSelectionListByName(mesh)
     dagPath = sel.getDagPath(0)
@@ -122,7 +126,7 @@ def getVertexNormal(mesh, vertex, world=True):
         mesh = mesh[0]
 
     if shape.getType(mesh) != 'mesh':
-        cmds.error("Node must be of type 'mesh'. {} is of type {}".format(mesh, shape.getType(mesh)))
+        logger.error("Node must be of type 'mesh'. {} is of type {}".format(mesh, shape.getType(mesh)))
 
     mfnMesh = getMeshFn(mesh)
 
@@ -132,5 +136,3 @@ def getVertexNormal(mesh, vertex, world=True):
     vertexNormal = mfnMesh.getVertexNormal(vertex, False, space)
 
     return vertexNormal
-
-

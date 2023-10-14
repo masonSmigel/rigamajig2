@@ -1,10 +1,15 @@
 """
 This is the json module for maya transform data
 """
-from collections import OrderedDict
-import rigamajig2.maya.data.maya_data as maya_data
-import maya.cmds as cmds
+import logging
 import sys
+from collections import OrderedDict
+
+import maya.cmds as cmds
+
+import rigamajig2.maya.data.maya_data as maya_data
+
+logger = logging.getLogger(__name__)
 
 if sys.version_info.major >= 3:
     basestring = str
@@ -112,13 +117,13 @@ class NodeData(maya_data.MayaData):
                     value = self._data[node][attribute]
                     if isinstance(value, (list, tuple)):
                         try:cmds.setAttr("{0}.{1}".format(node, attribute), *value)
-                        except: cmds.warning("failed to set attribute: '{}.{}'".format(node, attribute))
+                        except: logger.warning("failed to set attribute: '{}.{}'".format(node, attribute))
                     elif isinstance(value, basestring):
                         try: cmds.setAttr("{0}.{1}".format(node, attribute), value, type="string")
-                        except: cmds.warning("failed to set attribute: '{}.{}'".format(node, attribute))
+                        except: logger.warning("failed to set attribute: '{}.{}'".format(node, attribute))
                     else:
                         try: cmds.setAttr("{0}.{1}".format(node, attribute), value)
-                        except: cmds.warning("failed to set attribute: '{}.{}'".format(node, attribute))
+                        except: logger.warning("failed to set attribute: '{}.{}'".format(node, attribute))
 
             # clear out attributes if getting from file
             if gatherAttrsFromFile:

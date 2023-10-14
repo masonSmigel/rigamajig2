@@ -8,6 +8,7 @@
     discription: 
 
 """
+import logging
 from functools import partial
 
 import maya.cmds as cmds
@@ -20,6 +21,9 @@ from rigamajig2.maya import meta
 from rigamajig2.maya.rig import deformLayer
 from rigamajig2.shared import common
 from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox, collapseableWidget
+
+logger = logging.getLogger(__name__)
+
 
 DEFORMTREE_STYLESHEET = (f"""
                     QTreeView {{
@@ -606,7 +610,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         if cmds.objExists(node):
             cmds.select(node, replace=True)
         else:
-            cmds.warning(f"Cannot find the node: '{node}' in your scene")
+            logger.error(f"Cannot find the node: '{node}' in your scene")
 
     def performReorderDeformer(self, opperation="up"):
         """

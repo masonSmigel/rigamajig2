@@ -1,9 +1,14 @@
 """
 Functions to quickly create utility nodes and setup their attribtues quickly
 """
+import logging
+
 import maya.cmds as cmds
-import rigamajig2.shared.common as common
+
 import rigamajig2.maya.attr as attr
+import rigamajig2.shared.common as common
+
+logger = logging.getLogger(__name__)
 
 
 def setConnection(plug, value):
@@ -61,7 +66,7 @@ def connectOutput(source, destination, f=True):
     :return:
     """
     if not cmds.objExists(destination) and attr.isAttr(destination):
-        cmds.error('Destination: {} does not exist or is not a valid attribute'.format(destination))
+        logger.error('Destination: {} does not exist or is not a valid attribute'.format(destination))
         return
 
     if attr.isCompound(destination):

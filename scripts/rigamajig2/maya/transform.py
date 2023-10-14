@@ -1,15 +1,18 @@
 """
 Utilities for transforms
 """
+import logging
 import math
-import maya.cmds as cmds
+
 import maya.api.OpenMaya as om2
+import maya.cmds as cmds
 
 import rigamajig2.maya.attr
-import rigamajig2.maya.hierarchy as dag
-import rigamajig2.shared.common as common
-import rigamajig2.maya.matrix as matrix
 import rigamajig2.maya.mathUtils as mathUtils
+import rigamajig2.maya.matrix as matrix
+import rigamajig2.shared.common as common
+
+logger = logging.getLogger(__name__)
 
 ROTATEORDER = ['xyz', 'yzx', 'zxy', 'xzy', 'yxz', 'zyx']
 
@@ -225,7 +228,7 @@ def multiMatrixConstraint(driverList, driven, valueList, mo=True, t=True, r=True
     :param bool sh: Apply shear transformations
     """
     if not mathUtils.isEqual(sum(valueList), 1):
-        cmds.warning("Value list is not normalized. This may produce unexpected results")
+        logger.warning("Value list is not normalized. This may produce unexpected results")
 
     wtAddMatrix = cmds.createNode("wtAddMatrix", name="{}_multiBlended_wtAddMatrix".format(driven))
 
@@ -311,7 +314,7 @@ def getAveragePoint(transforms):
     avPoint = om2.MPoint(0, 0, 0)
     for tranform in transforms:
         if not cmds.objExists(tranform):
-            cmds.warning("Object does not exist")
+            logger.warning("Object does not exist")
         p = om2.MPoint(cmds.xform(tranform, q=True, ws=True, rp=True))
         avPoint += p
 
@@ -343,7 +346,7 @@ def mirror(trs=None, axis='x', leftToken=None, rightToken=None, mode='rotate'):
 
     for transform in trs:
         if not cmds.nodeType(transform) in ['transform', '']:
-            cmds.warning("{} is not a transform and connot be mirrored".format(transform))
+            logger.warning("{} is not a transform and connot be mirrored".format(transform))
             return
 
         # Get the worldspace matrix, as a list of 16 float values
@@ -558,6 +561,7 @@ def decomposeScale(driver, driven):
     cmds.connectAttr(f"{multMatrix}.matrixSum", f"{decompMatrix}.inputMatrix")
 
     cmds.connectAttr(f'{decompMatrix}.outputScale', f"{driven}.scale", f=True)
+
 
 def aimChain(chain, aimVector, upVector, worldUpObject=None, worldUpType='object', worldUpVector=(0, 1, 0)):
     """

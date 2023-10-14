@@ -8,10 +8,14 @@
     discription: 
 
 """
-import maya.cmds as cmds
-import maya.api.OpenMaya as om2
-import os
 import json
+import logging
+import os
+
+import maya.api.OpenMaya as om2
+import maya.cmds as cmds
+
+logger = logging.getLogger(__name__)
 
 SELECTION_OVERRIDE = "selectionOverride"
 
@@ -42,7 +46,7 @@ def clearRigamajigCallbacks():
     """
 
     if MAYA_ENV_CALLBACKS_ARRAY not in os.environ:
-        cmds.warning("No Rigamajig Callbacks exist in the scene")
+        logger.warning("No Rigamajig Callbacks exist in the scene")
         return
 
     callbackIdList = json.loads(os.environ[MAYA_ENV_CALLBACKS_ARRAY])

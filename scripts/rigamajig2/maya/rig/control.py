@@ -1,28 +1,31 @@
 """
 Controller functions
 """
+import logging
 import os
-import maya.cmds as cmds
-import maya.api.OpenMaya as om2
 
+import maya.cmds as cmds
+
+import rigamajig2.maya.attr
+import rigamajig2.maya.color
+import rigamajig2.maya.connection
+import rigamajig2.maya.constrain
+import rigamajig2.maya.curve
+import rigamajig2.maya.data.curve_data
 import rigamajig2.maya.decorators
+import rigamajig2.maya.hierarchy
+import rigamajig2.maya.joint
+import rigamajig2.maya.meshnav as meshnav
+import rigamajig2.maya.meta as meta
+import rigamajig2.maya.naming
+import rigamajig2.maya.shape
+import rigamajig2.maya.transform
+import rigamajig2.maya.uv
 import rigamajig2.shared.common as common
 import rigamajig2.shared.path
-import rigamajig2.maya.connection
-import rigamajig2.maya.naming
-import rigamajig2.maya.hierarchy
-import rigamajig2.maya.data.curve_data
-import rigamajig2.maya.curve
-import rigamajig2.maya.color
 from rigamajig2.maya import node
-import rigamajig2.maya.transform
-import rigamajig2.maya.meta as meta
-import rigamajig2.maya.shape
-import rigamajig2.maya.attr
-import rigamajig2.maya.joint
-import rigamajig2.maya.uv
-import rigamajig2.maya.meshnav as meshnav
-import rigamajig2.maya.constrain
+
+logger = logging.getLogger(__name__)
 
 CONTROLSHAPES = os.path.join(os.path.dirname(__file__), "controlShapes.data").replace("\\", "/")
 
@@ -323,11 +326,11 @@ def createAtObject(name, side=None, shape='circle', orig=True, spaces=False, trs
     :rtype: Control
     """
     if not xformObj:
-        cmds.error("You must pass an xform object to create a control at. Otherwise use control.create")
+        logger.error("You must pass an xform object to create a control at. Otherwise use control.create")
         return
 
     if not cmds.objExists(xformObj):
-        cmds.error(
+        logger.error(
             "Object {} does not exist. cannot create a control at a transform that doesnt exist".format(xformObj))
         return
 
@@ -461,11 +464,11 @@ def createMeshRivetAtObject(name, mesh, side=None, shape='circle', orig=True, sp
    """
 
     if not xformObj:
-        cmds.error("You must pass an xform object to create a control at. Otherwise use control.createMeshRivet")
+        logger.error("You must pass an xform object to create a control at. Otherwise use control.createMeshRivet")
         return
 
     if not cmds.objExists(xformObj):
-        cmds.error(
+        logger.error(
             "Object {} does not exist. cannot create a control at a transform that doesnt exist".format(xformObj))
         return
 
@@ -529,7 +532,7 @@ def createDisplayLine(point1, point2, name=None, parent=None, displayType='temp'
     :return: name of the curve created.
     """
     if displayType not in ['norm', 'temp', 'ref']:
-        cmds.error("{} is not a valid display type. Valid values are: ['norm', 'temp', 'ref']".format(displayType))
+        logger.error("{} is not a valid display type. Valid values are: ['norm', 'temp', 'ref']".format(displayType))
         return
     if not name:
         name = rigamajig2.maya.naming.getUniqueName("displayLine")

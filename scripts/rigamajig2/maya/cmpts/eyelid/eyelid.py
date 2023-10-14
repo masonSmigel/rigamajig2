@@ -8,22 +8,25 @@
     discription:  A realistic eyelid component module
 
 """
+import logging
+
 import maya.cmds as cmds
+
 import rigamajig2.maya.cmpts.base
-from rigamajig2.shared import common
-from rigamajig2.maya.rig import control
-from rigamajig2.maya.rig import spaces
-from rigamajig2.maya.rig import live
 from rigamajig2.maya import attr
-from rigamajig2.maya import transform
-from rigamajig2.maya import joint
-from rigamajig2.maya import meta
-from rigamajig2.maya import node
-from rigamajig2.maya import curve
-from rigamajig2.maya import hierarchy
-from rigamajig2.maya import mathUtils
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import constrain
+from rigamajig2.maya import curve
+from rigamajig2.maya import joint
+from rigamajig2.maya import mathUtils
+from rigamajig2.maya import meta
+from rigamajig2.maya import node
+from rigamajig2.maya import transform
+from rigamajig2.maya.rig import control
+from rigamajig2.maya.rig import live
+from rigamajig2.shared import common
+
+logger = logging.getLogger(__name__)
 
 GUIDE_SCALE = 0.2
 
@@ -575,7 +578,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         upAxis = transform.getClosestAxis(self.eyeballJoint, target=self.upVector)
 
         if not aimAxis == 'z' and not upAxis == "y":
-            cmds.warning("Eyeball joints should be oriented in world space. Skipping fleshy eyelid setup")
+            logger.warning("Eyeball joints should be oriented in world space. Skipping fleshy eyelid setup")
             return
 
         fleshyEyeAttr = attr.createAttr(self.paramsHierarchy, "fleshyEye", "float", value=1, minValue=0, maxValue=1)
@@ -658,7 +661,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             creaseDriver = self.uppCreaseDriver if part == 'upp' else self.lowCreaseDriver
             # if the string is empty then we can display a wanring and skip this
             if creaseDriver == '':
-                cmds.warning("Must provide a crease driver to useCreaseFollow")
+                logger.warning("Must provide a crease driver to useCreaseFollow")
                 return
 
             creaseHierachy = cmds.createNode("transform", name="{}_{}CreaseFollow".format(self.name, part),

@@ -2,7 +2,6 @@
 Utility functions
 """
 import maya.cmds as cmds
-import time
 
 from maya import OpenMaya as om
 from maya.api import OpenMaya as om2
@@ -31,7 +30,7 @@ def getMObject(name):
     :return: MObject
     """
     if not cmds.objExists(name):
-        cmds.error("Object '{}' does not exist".format(name))
+        logger.error("Object '{}' does not exist".format(name))
         return
 
     sel = om2.MGlobal.getSelectionListByName(name)

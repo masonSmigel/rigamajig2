@@ -1,14 +1,16 @@
 """ Curve functions """
+import logging
 from collections import OrderedDict
 
-import maya.cmds as cmds
 import maya.api.OpenMaya as om2
+import maya.cmds as cmds
 
 import rigamajig2.maya.decorators
-import rigamajig2.shared.common as common
-import rigamajig2.maya.shape as shape
-import rigamajig2.maya.mathUtils as mathUtils
 import rigamajig2.maya.openMayaUtils as openMayaUtils
+import rigamajig2.maya.shape as shape
+import rigamajig2.shared.common as common
+
+logger = logging.getLogger(__name__)
 
 
 def createCurve(points, degree=3, name='curve', transformType="transform", form="Open", parent=None):
@@ -147,7 +149,7 @@ def getCvPositions(curve, world=True):
         curve = curve[0]
 
     if shape.getType(curve) != 'nurbsCurve':
-        cmds.error("Node must be of type 'nurbsCurve'. {} is of type {}".format(curve, shape.getType(curve)))
+        logger.error("Node must be of type 'nurbsCurve'. {} is of type {}".format(curve, shape.getType(curve)))
 
     cvPos = list()
     for cv in getCvs(curve):
@@ -255,7 +257,7 @@ def setCvPositions(curve, cvList, world=True):
         curve = curve[0]
 
     if shape.getType(curve) != 'nurbsCurve':
-        cmds.error("Node must be of type 'nurbsCurve'. {} is of type {}".format(curve, shape.getType(curve)))
+        logger.error("Node must be of type 'nurbsCurve'. {} is of type {}".format(curve, shape.getType(curve)))
 
     for i, cv in enumerate(getCvs(curve)):
         if world:
@@ -380,15 +382,15 @@ def mirror(curves, axis='x', mode='replace'):
                 destinationCv = cv.replace(curve, destinationCurve)
 
                 if not cmds.objExists(cv):
-                    cmds.warning('Cannot find source: {}'.format(cv))
+                    logger.warning('Cannot find source: {}'.format(cv))
                     return
 
                 if not cmds.objExists(destinationCv):
-                    cmds.warning('Cannot find destination: {}'.format(destinationCv))
+                    logger.warning('Cannot find destination: {}'.format(destinationCv))
                     return
 
                 if cv == destinationCv:
-                    cmds.warning('Cannot find mirror for: {}'.format(cv))
+                    logger.warning('Cannot find mirror for: {}'.format(cv))
                     return
 
                 pos = cmds.xform(cv, q=True, ws=True, t=True)

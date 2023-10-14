@@ -1,17 +1,20 @@
 """
 functions for Joints
 """
-import maya.cmds as cmds
+import logging
+
 import maya.api.OpenMaya as om2
+import maya.cmds as cmds
 
-from rigamajig2.shared import common
-from rigamajig2.maya import mathUtils
-from rigamajig2.maya import naming
 from rigamajig2.maya import attr
-from rigamajig2.maya import transform
 from rigamajig2.maya import decorators
+from rigamajig2.maya import mathUtils
 from rigamajig2.maya import meta
+from rigamajig2.maya import naming
+from rigamajig2.maya import transform
+from rigamajig2.shared import common
 
+logger = logging.getLogger(__name__)
 
 def isJoint(joint):
     """
@@ -87,10 +90,10 @@ def length(joint):
     :rtype: float
     """
     if not isJoint(joint):
-        cmds.error('{} is not a joint'.format(joint))
+        logger.error('{} is not a joint'.format(joint))
         return
     if isEndJoint(joint):
-        cmds.warning("{} is an end joint and has no length".format(joint))
+        logger.warning("{} is an end joint and has no length".format(joint))
 
     decendents = cmds.ls(cmds.listRelatives(joint, c=True) or [], type='joint')
     if decendents:
@@ -158,7 +161,7 @@ def insertJoints(startJoint, endJoint, amount=1, name=None):
 
     childJoints = cmds.listRelatives(startJoint, c=True) or []
     if endJoint not in childJoints:
-        cmds.error("{} is not a child of {}".format(endJoint, startJoint))
+        logger.error("{} is not a child of {}".format(endJoint, startJoint))
         return
 
     startPos = cmds.xform(startJoint, q=True, ws=True, t=True)

@@ -1,9 +1,14 @@
 """
 This is the json module for maya specific data
 """
+import logging
 from collections import OrderedDict
-import rigamajig2.maya.data.abstract_data as abstract_data
+
 import maya.cmds as cmds
+
+import rigamajig2.maya.data.abstract_data as abstract_data
+
+logger = logging.getLogger(__name__)
 
 
 class MayaData(abstract_data.AbstractData):
@@ -16,6 +21,6 @@ class MayaData(abstract_data.AbstractData):
         :type node: str
         """
         if not cmds.objExists(node):
-            cmds.warning("{0} does not exist in this Maya session".format(node))
+            logger.warning("{0} does not exist in this Maya session".format(node))
 
         self._data[node] = OrderedDict(dagPath=cmds.ls(node, l=True)[0])

@@ -616,7 +616,7 @@ class ComponentManager(QtWidgets.QWidget):
         mirrorComponent = self.builder.findComponent(guessMirrorName, componentType)
 
         if not mirrorComponent:
-            cmds.warning("No mirror found for: {}".format(sourceComponent.name))
+            logger.warning("No mirror found for: {}".format(sourceComponent.name))
             return
 
         # get the original data. We will use this to create the mirrored data.

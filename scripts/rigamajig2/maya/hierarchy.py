@@ -1,12 +1,15 @@
 """
 Functions to Navigate the Directed Acyclic Graph (DAG)
 """
+import logging
 from collections import OrderedDict
+
 import maya.cmds as cmds
 
-import rigamajig2.shared.common as common
 import rigamajig2.maya.naming as naming
+import rigamajig2.shared.common as common
 
+logger = logging.getLogger(__name__)
 
 def create(node, hierarchy=None, above=True, matchTransform=True, nodeType='transform'):
     """
@@ -22,11 +25,11 @@ def create(node, hierarchy=None, above=True, matchTransform=True, nodeType='tran
     node = common.getFirstIndex(node)
 
     if not cmds.objExists(node):
-        cmds.error("Node '{}' does not exist. cannot create a hierarchy".format(node))
+        logger.error("Node '{}' does not exist. cannot create a hierarchy".format(node))
         return
 
     if not cmds.nodeType(node) in ['transform', 'joint']:
-        cmds.error("{} must be a transform".format(node))
+        logger.error("{} must be a transform".format(node))
         return
 
     parent = getParent(node)

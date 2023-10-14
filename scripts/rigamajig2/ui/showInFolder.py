@@ -8,7 +8,7 @@
     discription: 
 
 """
-import maya.cmds as cmds
+import platform
 
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -17,10 +17,10 @@ from PySide2 import QtGui
 def showInFolder(filePath):
     """ Show the selected file in the enclosing folder """
 
-    if cmds.about(windows=True):
+    if platform.system() == 'Windows':
         if openInExplorer(filePath):
             return
-    elif cmds.about(macOS=True):
+    elif platform.system() == 'Darwin':
         if openInFinder(filePath):
             return
 
@@ -31,7 +31,7 @@ def showInFolder(filePath):
         else:
             QtGui.QDesktopServices.openUrl(QtCore.QUrl.fromLocalFile(fileInfo.path()))
     else:
-        cmds.error("Invalid Directory")
+        raise FileNotFoundError("Invalid Directory path")
 
 
 def openInExplorer(filePath):

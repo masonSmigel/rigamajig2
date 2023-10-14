@@ -1,14 +1,18 @@
 """
 Functions for deformers
 """
-import maya.cmds as cmds
-import maya.api.OpenMaya as om2
-import maya.OpenMayaAnim as oma
+import logging
+
 import maya.OpenMaya as om
-import rigamajig2.shared.common as common
+import maya.OpenMayaAnim as oma
+import maya.cmds as cmds
+
+import rigamajig2.maya.mesh
 import rigamajig2.maya.openMayaUtils as omu
 import rigamajig2.maya.shape
-import rigamajig2.maya.mesh
+import rigamajig2.shared.common as common
+
+logger = logging.getLogger(__name__)
 
 
 def isDeformer(deformer):
@@ -74,10 +78,10 @@ def reorderToTop(geometry, deformer):
         stack = getDeformerStack(geo)
 
         if len(stack) < 2:
-            cmds.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geometry))
+            logger.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geometry))
 
         if deformer not in stack:
-            cmds.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geometry))
+            logger.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geometry))
             continue
 
         stack = [d for d in stack if d != deformer]
@@ -102,10 +106,10 @@ def reorderToBottom(geometry, deformer):
         stack = getDeformerStack(geometry)
 
         if len(stack) < 2:
-            cmds.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geo))
+            logger.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geo))
 
         if deformer not in stack:
-            cmds.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geo))
+            logger.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geo))
             continue
 
         stack = [d for d in stack if d != deformer]
@@ -129,10 +133,10 @@ def reorderSlide(geometry, deformer, up=True):
         stack = getDeformerStack(geo)
 
         if len(stack) < 2:
-            cmds.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geometry))
+            logger.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geometry))
 
         if deformer not in stack:
-            cmds.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geometry))
+            logger.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geometry))
             continue
 
         if stack.index(deformer) == 0 and up: return
@@ -284,7 +288,7 @@ def getAffectedGeo(deformer):
     :rtype: list
     """
     if not isDeformer(deformer):
-        cmds.error("object '{}' is not a deformer".format(deformer))
+        logger.error("object '{}' is not a deformer".format(deformer))
         return
 
     affectedObjects = list()
@@ -311,7 +315,7 @@ def getGeoIndex(deformer, geo):
     :return:
     """
     if not isDeformer(deformer):
-        cmds.error("object '{}' is not a deformer".format(deformer))
+        logger.error("object '{}' is not a deformer".format(deformer))
         return
 
     geo = rigamajig2.maya.shape.getShapes(geo)
@@ -345,7 +349,7 @@ def getWeights(deformer, geometry=None):
     """
     weightList = dict()
     if not isDeformer(deformer):
-        cmds.error("object '{}' is not a deformer".format(deformer))
+        logger.error("object '{}' is not a deformer".format(deformer))
         return
 
     if not geometry: geometry = common.getFirstIndex(getAffectedGeo(deformer))
@@ -384,7 +388,7 @@ def setWeights(deformer, weights, geometry=None):
                 If ommited the first geometry of the deformer will be used.
     """
     if not isDeformer(deformer):
-        cmds.error("object '{}' is not a deformer".format(deformer))
+        logger.error("object '{}' is not a deformer".format(deformer))
         return
 
     if not geometry: geometry = common.getFirstIndex(getAffectedGeo(deformer))
@@ -423,10 +427,10 @@ def addGeoToDeformer(deformer, geo):
     :param str geo: geo to add to the deformer
     """
     if not isDeformer(deformer):
-        cmds.error("object '{}' is not a deformer".format(deformer))
+        logger.error("object '{}' is not a deformer".format(deformer))
         return
     if not cmds.objExists(geo):
-        cmds.error("object '{}' does not exist".format(geo))
+        logger.error("object '{}' does not exist".format(geo))
         return
 
     cmds.deformer(deformer, e=True, g=geo)
@@ -440,10 +444,10 @@ def removeGeoFromDeformer(deformer, geo):
     :param str geo: name of the geometry to remove the deformer from
     """
     if not isDeformer(deformer):
-        cmds.error("object '{}' is not a deformer".format(deformer))
+        logger.error("object '{}' is not a deformer".format(deformer))
         return
     if not cmds.objExists(geo):
-        cmds.error("object '{}' does not exist".format(geo))
+        logger.error("object '{}' does not exist".format(geo))
         return
     cmds.deformer(deformer, e=True, rm=True, g=geo)
 
@@ -460,14 +464,14 @@ def transferDeformer(deformer, sourceMesh, targetMesh):
     :return:
     """
     if not isDeformer(deformer):
-        cmds.error("object '{}' is not a deformer".format(deformer))
+        logger.error("object '{}' is not a deformer".format(deformer))
         return
     if not cmds.objExists(targetMesh):
-        cmds.error("object '{}' does not exist".format(geo))
+        logger.error("object '{}' does not exist".format(geo))
         return
 
     if not rigamajig2.maya.shape.getPointCount(sourceMesh) == rigamajig2.maya.shape.getPointCount(targetMesh):
-        cmds.error(f"'{sourceMesh}' and '{targetMesh}' meshes do not match vertex count")
+        logger.error(f"'{sourceMesh}' and '{targetMesh}' meshes do not match vertex count")
 
     addGeoToDeformer(deformer=deformer, geo=targetMesh)
 
@@ -475,4 +479,3 @@ def transferDeformer(deformer, sourceMesh, targetMesh):
     setWeights(deformer=deformer, weights=weights, geometry=targetMesh)
 
     return deformer
-

@@ -337,7 +337,7 @@ class DeformLayer(object):
         """
 
         if not self.getNumberOfDeformationLayers() > 0:
-            cmds.warning("No deformation layers to connect back to render model")
+            logger.warning("No deformation layers to connect back to render model")
             return
 
         layers = self.getDeformationLayers()

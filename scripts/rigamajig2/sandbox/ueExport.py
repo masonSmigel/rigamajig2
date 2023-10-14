@@ -146,7 +146,7 @@ def exportAnimationClip(mainNode, outputPath=None, upAxis='y', cleanTrsGlobal=Fa
     # check for keyframes or constraints
     connections = cmds.listConnections(trsNode, s=True, d=False) or list()
     if len(connections) > 0:
-        cmds.warning("{} has incoming connections. pre-rotaton may not apply as expected".format(trsNode))
+        logger.warning("{} has incoming connections. pre-rotaton may not apply as expected".format(trsNode))
 
     const = cmds.parentConstraint(tempTransform, trsNode, mo=True)
 
@@ -385,7 +385,7 @@ class BatchExportFBX(QtWidgets.QDialog):
 
         outputFilePath = self.outputPath.getPath(absoultePath=True)
         if outputFilePath is None:
-            cmds.error("Please select an output path before exporting FBXs")
+            logger.error("Please select an output path before exporting FBXs")
             return
 
         logger.info("----- Begin Animation Clip Export -----")

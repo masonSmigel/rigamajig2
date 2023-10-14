@@ -1,10 +1,14 @@
 """
 Functions for connections
 """
-import maya.cmds as cmds
+import logging
+
 import maya.api.OpenMaya as om2
+import maya.cmds as cmds
+
 import rigamajig2.maya.attr as attr
 
+logger = logging.getLogger(__name__)
 
 def getPlugInput(plug):
     """
@@ -80,4 +84,4 @@ def connectPlugs2(source, destination):
     if attr.isCompound(source) == attr.isCompound(destination):
         cmds.connectAttr(source, destination, f=True)
     else:
-        cmds.error('Cannot connect compound and non-compound attributes: {} to {}'.format(source, destination))
+        logger.error('Cannot connect compound and non-compound attributes: {} to {}'.format(source, destination))

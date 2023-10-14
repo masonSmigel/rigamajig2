@@ -8,12 +8,16 @@
     discription: some utilities for working with keyframes
 
 """
-import maya.cmds as cmds
+import logging
 from collections import OrderedDict
 
-from rigamajig2.shared import common
+import maya.cmds as cmds
+
 from rigamajig2.maya import attr
 from rigamajig2.maya import decorators
+from rigamajig2.shared import common
+
+logger = logging.getLogger(__name__)
 
 
 def wipeKeys(nodes, attributes=None, reset=False):
@@ -40,7 +44,7 @@ def wipeKeys(nodes, attributes=None, reset=False):
             plug = "{}.{}".format(node, attribute)
             # if the plug doesnt exist we can skip it and give a warning
             if not cmds.objExists(plug):
-                cmds.warning("The attribute '{}' does not exist. Cannot wipe non-existant attributes".format(plug))
+                logger.warning("The attribute '{}' does not exist. Cannot wipe non-existant attributes".format(plug))
                 continue
 
             # cut the keyframes
@@ -48,7 +52,6 @@ def wipeKeys(nodes, attributes=None, reset=False):
 
             if reset:
                 attr.resetDefault(node, attribute)
-
 
 
 @decorators.suspendViewport

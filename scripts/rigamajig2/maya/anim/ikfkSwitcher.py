@@ -76,9 +76,6 @@ def switchSelectedComponent(controlNodes=None, ik=None, fk=None):
     if controlNodes is None:
         if len(cmds.ls(sl=True)) > 0:
             controlNodes = cmds.ls(sl=True)
-            # # add a warning that only the first node will be matched
-            # if len(cmds.ls(sl=True)) > 1:
-            #     cmds.warning("Only the First control in the selection will be matched.")
         else:
             raise Exception("Please select a control to switch components")
 
@@ -364,7 +361,7 @@ class IkFkMatchRangeDialog(QtWidgets.QDialog):
             controlNode = cmds.ls(sl=True)[0]
             # add a warning that only the first node will be matched
             if len(cmds.ls(sl=True)) > 1:
-                cmds.warning("Only the First control in the selection will be matched.")
+                logger.warning("Only the First control in the selection will be matched.")
         else:
             raise Exception("Please select a control to switch components")
 

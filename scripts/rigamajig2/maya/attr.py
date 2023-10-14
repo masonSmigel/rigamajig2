@@ -7,13 +7,14 @@
     date: 01/2021
     discription: attribute functions and helpers.
 """
+import logging
 
-# MAYA
-import maya.cmds as cmds
 import maya.api.OpenMaya as om2
+import maya.cmds as cmds
 
-# RIGAMAJIG
 import rigamajig2.shared.common as common
+
+logger = logging.getLogger(__name__)
 
 TRANSLATE = ['tx', 'ty', 'tz']
 ROTATE = ['rx', 'ry', 'rz']
@@ -64,7 +65,7 @@ def createAttr(node, longName, attributeType, value=None, niceName=None, shortNa
     :rtype: str
     """
     if hasAttr(node, longName):
-        cmds.warning("Attribute {1}, already exists on {0}".format(node, longName))
+        logger.warning("Attribute {1}, already exists on {0}".format(node, longName))
         return
     data = dict()
     if shortName is not None: data["shortName"] = shortName
@@ -125,7 +126,7 @@ def createEnum(node, longName, enum, value=None, niceName=None, shortName=None,
     :rtype: str
     """
     if hasAttr(node, longName):
-        cmds.warning("Attribute {1}, already exists on {0}".format(node, longName))
+        logger.warning("Attribute {1}, already exists on {0}".format(node, longName))
         return
 
     data = dict()
@@ -189,7 +190,7 @@ def createProxy(sources, targets):
             if not cmds.attributeQuery(attrName, n=target, exists=True):
                 cmds.addAttr(target, ln=attrName, pxy=sourceAttr)
             else:
-                cmds.error("Attribute {} already exists. Cannot make a proxy".format(target + '.' + attrName))
+                logger.error("Attribute {} already exists. Cannot make a proxy".format(target + '.' + attrName))
 
 
 # We need alot of arguments here
@@ -215,7 +216,7 @@ def createColorAttr(node, longName, value=False, niceName=None, shortName=None,
     :rtype: str
     """
     if hasAttr(node, longName):
-        cmds.warning("Attribute {1}, already exists on {0}".format(node, longName))
+        logger.warning("Attribute {1}, already exists on {0}".format(node, longName))
         return
     data = {'attributeType': 'float3', "usedAsColor": True, "keyable": keyable, "readable": readable,
             "storable": storable, "writable": writable}
@@ -266,7 +267,7 @@ def createColorAttr(node, longName, value=False, niceName=None, shortName=None,
                 cmds.setAttr(valChannel, value[2])
 
         else:
-            cmds.error("{} is not a valid channel box type. Channel box types are: 'rgb', 'hsv'".format(channelBoxType))
+            logger.error("{} is not a valid channel box type. Channel box types are: 'rgb', 'hsv'".format(channelBoxType))
     else:
         if value:
             cmds.setAttr(node + '_r', value[0])
@@ -790,7 +791,7 @@ def _getPlug(plug):
         if nodeFn.hasAttribute(attr):
             return nodeFn.findPlug(attr, True)
 
-    cmds.warning('Plug {} could not be found.'.format(plug))
+    logger.warning('Plug {} could not be found.'.format(plug))
     return
 
 

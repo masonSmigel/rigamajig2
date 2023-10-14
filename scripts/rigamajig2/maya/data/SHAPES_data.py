@@ -69,7 +69,7 @@ class SHAPESData(maya_data.MayaData):
         """
 
         if not self.__validateSHAPES():
-            cmds.warning(
+            logger.warning(
                 "SHAPES plugin is not available. SHAPES data can still be loaded, but you cannot save new data")
             return
 

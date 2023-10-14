@@ -8,11 +8,11 @@
     discription: 
 
 """
+import logging
 # PYTHON
 import sys
 
 import maya.OpenMayaUI as omui
-import maya.api.OpenMaya as om2
 # MAYA
 import maya.cmds as cmds
 from PySide2 import QtCore
@@ -22,6 +22,8 @@ from shiboken2 import wrapInstance
 from rigamajig2.maya import meta
 # RIGAMJIG
 from rigamajig2.ui.builder_ui.widgets import mayaListWidget, mayaDictWidget, mayaStringWidget
+
+logger = logging.getLogger(__name__)
 
 
 class EditComponentDialog(QtWidgets.QDialog):
@@ -268,7 +270,7 @@ class EditComponentDialog(QtWidgets.QDialog):
                 metaNode.setData(attr=parameter, value=data)
                 print("Set data {}.{}: {}".format(container, parameter, data))
             except:
-                om2.MGlobal.displayWarning("Failed to set data on {}.{}".format(container, parameter))
+                logger.warning("Failed to set data on {}.{}".format(container, parameter))
 
     def closeEvent(self, *args, **kwargs):
         """ Add a close event to emit the signal whenever the window is closed"""

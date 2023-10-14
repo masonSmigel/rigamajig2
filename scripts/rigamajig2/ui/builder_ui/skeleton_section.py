@@ -8,11 +8,10 @@
     discription: 
 
 """
+import logging
 
-# MAYA
 import maya.cmds as cmds
 from PySide2 import QtCore
-# PYTHON
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
@@ -23,11 +22,12 @@ from rigamajig2.maya import decorators
 from rigamajig2.maya import naming
 from rigamajig2.maya.builder.constants import SKELETON_POS
 from rigamajig2.maya.cmpts.base import GUIDE_STEP
-# RIGAMAJIG2
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import dataLoader, builderSection
 from rigamajig2.ui.widgets import QPushButton, Qslider, mayaMessageBox
+
+logger = logging.getLogger(__name__)
 
 
 # pylint: disable= too-many-instance-attributes
@@ -282,7 +282,7 @@ class SkeletonSection(builderSection.BuilderSection):
 
             # give a warning if the names arent unique
             if not naming.isUniqueName(jnt.split("|")[-1]):
-                cmds.warning(f"Joint name is not unique for '{jnt}'")
+                logger.warning(f"Joint name is not unique for '{jnt}'")
 
     @QtCore.Slot()
     def _mirrorJoint(self):

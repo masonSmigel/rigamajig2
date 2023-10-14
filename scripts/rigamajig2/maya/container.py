@@ -11,7 +11,6 @@ logger = logging.getLogger(__name__)
 
 
 class InvalidContainer(Exception): pass
-class ObjectExistsError(Exception): pass
 
 def isContainer(name):
     """
@@ -37,7 +36,7 @@ def create(name, nodes=None, dagContainer=False):
     :rtype: str
     """
     if cmds.objExists(name):
-        raise RuntimeError("Object {} already exists. Cannot create a container with that name".format(name))
+        raise InvalidContainer("Object {} already exists. Cannot create a container with that name".format(name))
     if nodes:
         for node in nodes:
             if not cmds.objExists(node):
@@ -64,7 +63,7 @@ def addNodes(nodes, container, addShape=True, force=False):
     :rtype: list
     """
     if not isContainer(container):
-        raise Exception("{} is not a container.".format(container))
+        raise InvalidContainer("{} is not a container.".format(container))
 
     cmds.container(container, e=True, addNode=nodes, force=force)
     if addShape:
@@ -110,7 +109,7 @@ def getNodesInContainer(container, getSubContained=False):
     :rtype: list
     """
     if not isContainer(container):
-        raise RuntimeError("{} is not a container.".format(container))
+        raise InvalidContainer("{} is not a container.".format(container))
     nodeList = cmds.container(container, q=True, nodeList=True) or []
 
     # we also need to get nodes from subcontainers
@@ -140,12 +139,12 @@ def addPublishAttr(attr, assetAttrName=None, bind=True):
     """
     Publish an attribute
 
-    :param str attr: contained node attribute to _publish. Attribute should be listed as a plug:
+    :param str attr: contained node attribute to publish. Attribute should be listed as a plug:
     :param str assetAttrName: Name used on the container. if node it will be auto generated from the node and attr name
-    :param bool bind: bind the _publish node to the container
+    :param bool bind: bind the publish node to the container
     """
     if not cmds.objExists(attr):
-        raise RuntimeError("Attribute {} does not exist. Cannot _publish attribute".format(attr))
+        raise RuntimeError("Attribute {} does not exist. Cannot publish attribute".format(attr))
 
     if not assetAttrName: assetAttrName = attr.replace('.', '_')
 
@@ -162,14 +161,14 @@ def addPublishNodes(nodes, container=None, bind=True):
     """
     Publish a node.
 
-    :param str list nodes: contained node to _publish.
+    :param str list nodes: contained node to publish.
     :param str container: Optional- specify a container to add nodes to if nodes are not in a container
-    :param bool bind: bind the _publish node to the container
+    :param bool bind: bind the publish node to the container
     """
     nodes = common.toList(nodes)
     for node in nodes:
         if not cmds.objExists(node):
-            raise RuntimeError("Node {} does not exist. Cannot _publish Node".format(node))
+            raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
 
         assetNodeName = node
 
@@ -197,7 +196,7 @@ def addParentAnchor(node, container=None, assetNodeName=None):
     """
     node = common.getFirstIndex(node)
     if not cmds.objExists(node):
-        raise RuntimeError("Node {} does not exist. Cannot _publish Node".format(node))
+        raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
 
     if not assetNodeName: assetNodeName = 'parent'
 
@@ -220,7 +219,7 @@ def addChildAnchor(node, container=None, assetNodeName=None):
     """
     node = common.getFirstIndex(node)
     if not cmds.objExists(node):
-        raise RuntimeError("Node {} does not exist. Cannot _publish Node".format(node))
+        raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
 
     if not assetNodeName: assetNodeName = 'child'
 

@@ -5,13 +5,14 @@
     file: publish_section.py
     author: masonsmigel
     date: 07/2022
-    discription: 
+    description: 
 
 """
 # PYTHON
 from PySide2 import QtCore
 from PySide2 import QtWidgets
 
+from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 # RIGAMAJIG2
@@ -26,6 +27,9 @@ class PublishSection(builderSection.BuilderSection):
 
     WIDGET_TITLE = "Publish"
 
+    def __init__(self):
+        super().__init__()
+
     def createWidgets(self):
         """ Create Widgets"""
         self.pubScriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
@@ -38,18 +42,16 @@ class PublishSection(builderSection.BuilderSection):
             caption="Select a location to save",
             fileFilter=common.MAYA_FILTER,
             fileMode=2
-            )
+        )
         self.mergeDeformLayersButton = QtWidgets.QPushButton("Merge Deform Layers")
 
         self.dryPublishButton = QtWidgets.QPushButton("Dry Publish Rig")
-        # self.dryPublishButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.publishButton = QtWidgets.QPushButton("Publish Rig")
         self.publishButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
 
         self.outFileTypeComboBox = QtWidgets.QComboBox()
         self.outFileTypeComboBox.addItem('ma')
         self.outFileTypeComboBox.addItem('mb')
-
 
     def createLayouts(self):
         """ Create Layouts"""
@@ -78,7 +80,7 @@ class PublishSection(builderSection.BuilderSection):
     def _setBuilder(self, builder):
         """ Set the active builder """
         super()._setBuilder(builder)
-        self.outPathSelector.setRelativePath(self.builder.getRigEnviornment())
+        self.outPathSelector.setRelativePath(self.builder.getRigEnvironment())
 
         # clear the ui
         self.pubScriptRunner.clearScript()
@@ -135,11 +137,13 @@ class PublishSection(builderSection.BuilderSection):
         if not confirmPublishMessage.getResult():
             return None
 
-        self.builder.run(
-            publish=True,
-            outputfile=self.outPathSelector.getPath(),
-            suffix=self.outFileSuffix.text(),
-            assetName=None,
-            fileType=self.outFileTypeComboBox.currentText()
-            )
+        # publish with a new builder instance.
+        publishBuilder = builder.Builder()
+        publishBuilder.setRigFile(self.builder.getRigFile())
 
+        # override the builder
+        publishBuilder.builderData[constants.OUTPUT_RIG] = self.outPathSelector.getPath()
+        publishBuilder.builderData[constants.OUTPUT_FILE_SUFFIX] = self.outFileSuffix.text()
+        publishBuilder.builderData[constants.OUTPUT_RIG_FILE_TYPE] = self.outFileTypeComboBox.currentText()
+
+        publishBuilder.run(publish=True, savePublish=True)

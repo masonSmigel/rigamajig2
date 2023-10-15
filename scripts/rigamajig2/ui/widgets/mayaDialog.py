@@ -5,16 +5,16 @@
     file: mayaDialog.py.py
     author: masonsmigel
     date: 09/2023
-    discription: 
+    description: 
 
 """
 import sys
-from PySide2 import QtWidgets
-from PySide2 import QtCore
-from PySide2 import QtGui
-from shiboken2 import wrapInstance
+
 import maya.OpenMayaUI as omui
 import maya.cmds as cmds
+from PySide2 import QtCore
+from PySide2 import QtWidgets
+from shiboken2 import wrapInstance
 
 
 class MayaDialog(QtWidgets.QDialog):

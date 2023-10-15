@@ -56,7 +56,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         super(Limb, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        # initalize cmpt settings.
+        # initialize cmpt settings.
         self.defineParameter(parameter="useProxyAttrs", value=False, dataType="bool")
         self.defineParameter(parameter="useCallbackSwitch", value=True, dataType="bool")
         self.defineParameter(parameter="useScale", value=True, dataType="bool")

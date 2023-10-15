@@ -5,7 +5,7 @@
     file: ue.py
     author: masonsmigel
     date: 02/2023
-    discription: Functions for working with rigamajig and unreal within maya
+    description: Functions for working with rigamajig and unreal within maya
 
 """
 import logging

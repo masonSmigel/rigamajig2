@@ -1,27 +1,36 @@
 {
-    "type": "AbstractData", 
-    "user": "masonsmigel", 
-    "time": "2022-07-26 23:13:24", 
+    "user": "masonsmigel",
+    "type": "AbstractData",
+    "time": "2023-10-15 14:59:06",
     "data": {
-        "archetype_parent" : "base",
-        "rig_name": "", 
-        "model_file": "", 
-        "skeleton_file": "skeleton.ma", 
-        "skeleton_pos": "skeleton_pos.json", 
-        "pre_script": [
-        ], 
+        "archetype_parent": "base",
+        "rig_name": "test",
+        "model_file": null,
+        "skeleton_file": "skeleton.ma",
+        "skeleton_pos": [
+            "skeleton_pos.json"
+        ],
+        "pre_script": [],
         "post_script": [
             "post_scripts/set_biped_attrs.py"
-        ], 
-        "pub_script": [
         ],
-        "control_shapes": "controlShapes.json", 
-        "guides": "guides.json", 
-        "components": "components.json", 
-        "skins": "skin_weights/", 
-        "psd": "", 
-        "output_file": "../out/", 
+        "pub_script": [],
+        "control_shapes": [
+            "controlShapes.json"
+        ],
+        "guides": [
+            "guides.json"
+        ],
+        "components": [
+            "components.json"
+        ],
+        "skins": "skin_weights/",
+        "psd": false,
+        "output_file": "../out/",
         "output_file_type": "mb",
-        "output_file_suffix": "_rig"
+        "output_file_suffix": "_rig",
+        "deform_layers": null,
+        "deformers": false,
+        "SHAPES": null
     }
 }

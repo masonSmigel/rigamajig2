@@ -5,7 +5,7 @@
     file: attr.py
     author: masonsmigel
     date: 01/2021
-    discription: attribute functions and helpers.
+    description: attribute functions and helpers.
 """
 import logging
 

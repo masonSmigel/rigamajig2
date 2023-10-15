@@ -5,7 +5,7 @@
     file: setup_section.py
     author: masonsmigel
     date: 07/2022
-    discription: 
+    description: 
 
 """
 # PYTHON
@@ -141,8 +141,8 @@ class SetupSection(builderSection.BuilderSection):
         self.guideDataLoader.clear()
         self.componentManager.clearTree()
 
-        self.componentsDataLoader.setRelativePath(self.builder.getRigEnviornment())
-        self.guideDataLoader.setRelativePath(self.builder.getRigEnviornment())
+        self.componentsDataLoader.setRelativePath(self.builder.getRigEnvironment())
+        self.guideDataLoader.setRelativePath(self.builder.getRigEnvironment())
         self.componentManager.setRigBuilder(self.builder)
 
         # update data within the rig
@@ -165,7 +165,7 @@ class SetupSection(builderSection.BuilderSection):
         # load the compoonents from the file. then initialize them
         componentFiles = self.componentsDataLoader.getFileList()
         self.builder.loadComponents(componentFiles)
-        self.builder.initalize()
+        self.builder.initialize()
 
         self.componentManager.loadListFromBuilder()
 
@@ -473,7 +473,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.builder.componentList.append(cmpt)
         self._addItemToAutoComplete(name=name)
 
-        cmpt._initalizeComponent()
+        cmpt._initializeComponent()
         return cmpt
 
     def _loadFromScene(self, *args):
@@ -510,8 +510,8 @@ class ComponentManager(QtWidgets.QWidget):
             item = self.getSelectedItem()[0]
 
         itemDict = item.getData()
-        cmpt = self.builder.findComponent(itemDict['name'], itemDict['type'])
-        return cmpt
+        component = self.builder.findComponent(itemDict['name'])
+        return component
 
     def resetComponentDialogInstance(self):
         """ Set the instance of the component dialog back to None. This way we know when it must be re-created"""
@@ -522,17 +522,17 @@ class ComponentManager(QtWidgets.QWidget):
         self.builder = builder
 
     def loadListFromBuilder(self):
-        """ Load the compoonent list from the builder"""
+        """ Load the component list from the builder"""
         # reset the tree and autocompletes
         self.clearTree()
 
         if not self.builder:
             raise RuntimeError("No valid rig builder found")
-        for cmpt in self.builder.getComponentList():
-            name = cmpt.name
-            componentType = cmpt.componentType
-            buildStepString = ['unbuilt', 'initalize', 'guide', 'build', 'connect', 'finalize', 'optimize']
-            buildStep = buildStepString[cmpt.getStep()]
+        for component in self.builder.getComponentList():
+            name = component.name
+            componentType = component.componentType
+            buildStepString = ['unbuilt', 'initialize', 'guide', 'build', 'connect', 'finalize', 'optimize']
+            buildStep = buildStepString[component.getStep()]
 
             item = ComponentTreeWidgetItem(name=name, componentType=componentType, buildStep=buildStep)
             self.componentTree.addTopLevelItem(item)
@@ -594,7 +594,7 @@ class ComponentManager(QtWidgets.QWidget):
         mirroredComponent = self.createComponent(guessMirrorName, componentType, mirroredInput, mirroredRigParent)
 
         # We need to force the component to intialize so we can mirror stuff
-        mirroredComponent._initalizeComponent()
+        mirroredComponent._initializeComponent()
         self._mirrorComponentParameters(component)
 
         # update the ui
@@ -612,8 +612,7 @@ class ComponentManager(QtWidgets.QWidget):
 
         # find the mirrored component
         guessMirrorName = common.getMirrorName(sourceComponent.name)
-        componentType = sourceComponent.componentType
-        mirrorComponent = self.builder.findComponent(guessMirrorName, componentType)
+        mirrorComponent = self.builder.findComponent(guessMirrorName)
 
         if not mirrorComponent:
             logger.warning("No mirror found for: {}".format(sourceComponent.name))

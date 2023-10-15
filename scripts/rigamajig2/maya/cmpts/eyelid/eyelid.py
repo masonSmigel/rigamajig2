@@ -5,7 +5,7 @@
     file: realisticEyelid.py.py
     author: masonsmigel
     date: 11/2022
-    discription:  A realistic eyelid component module
+    description:  A realistic eyelid component module
 
 """
 import logging

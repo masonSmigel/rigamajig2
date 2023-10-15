@@ -57,7 +57,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="useSubMeta", value=True, dataType="bool")
         self.defineParameter(parameter="useFirstAsThumb", value=True, dataType="bool")
 
-        # initalize some other variables we need
+        # initialize some other variables we need
         self.fingerComponentList = list()
 
     def createBuildGuides(self):
@@ -91,7 +91,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         for i in range(len(self.input)):
             endJoint = cmds.ls(reversed(cmds.listRelatives(self.input[i], ad=True)), type='joint')[-1]
 
-            # initalize a finger component
+            # initialize a finger component
             fingerName = inputBaseNames[i] + '_' + self.side if self.side else inputBaseNames[i]
             fingerComponent = rigamajig2.maya.cmpts.chain.chain.Chain(
                 fingerName,
@@ -101,7 +101,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
             fingerComponent.defineParameter("addSdk", True)
             fingerComponent.defineParameter("addFKSpace", self.addFKSpace)
 
-            fingerComponent._initalizeComponent()
+            fingerComponent._initializeComponent()
             cmds.container(self.container, e=True, f=True, addNode=fingerComponent.getContainer())
             meta.tag(fingerComponent.getContainer(), 'subComponent')
             self.fingerComponentList.append(fingerComponent)

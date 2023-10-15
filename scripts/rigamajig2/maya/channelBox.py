@@ -5,7 +5,7 @@
     file: channelBox.py
     author: masonsmigel
     date: 01/2021
-    discription: channel Box utilities
+    description: channel Box utilities
 """
 
 import maya.cmds as cmds

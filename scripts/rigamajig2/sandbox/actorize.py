@@ -5,7 +5,7 @@
     file: actorize.py.py
     author: masonsmigel
     date: 02/2023
-    discription: This module contains functions to actorize a rig. This includes making an actor-anim and an actor-ue
+    description: This module contains functions to actorize a rig. This includes making an actor-anim and an actor-ue
 
 """
 import logging

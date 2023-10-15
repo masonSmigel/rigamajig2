@@ -5,25 +5,23 @@
     file: brows.py
     author: masonsmigel
     date: 12/2022
-    discription: brow component module
+    description: brow component module
 
 """
 import maya.cmds as cmds
+
 import rigamajig2.maya.cmpts.base
-from rigamajig2.shared import common
-from rigamajig2.maya.rig import control
-from rigamajig2.maya.rig import spaces
-from rigamajig2.maya.rig import live
 from rigamajig2.maya import attr
-from rigamajig2.maya import transform
+from rigamajig2.maya import constrain
+from rigamajig2.maya import curve
 from rigamajig2.maya import joint
+from rigamajig2.maya import mathUtils
 from rigamajig2.maya import meta
 from rigamajig2.maya import node
-from rigamajig2.maya import curve
-from rigamajig2.maya import hierarchy
-from rigamajig2.maya import mathUtils
-from rigamajig2.maya import blendshape
-from rigamajig2.maya import constrain
+from rigamajig2.maya import transform
+from rigamajig2.maya.rig import control
+from rigamajig2.maya.rig import live
+from rigamajig2.shared import common
 
 GUIDE_SCALE = 0.2
 

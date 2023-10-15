@@ -18,7 +18,6 @@ from rigamajig2.maya.builder import core
 from rigamajig2.shared import common
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.test import mayaunittest
-from rigamajig2.shared import logger
 
 
 class TestBuilderScriptLayering(TestCase):
@@ -29,9 +28,9 @@ class TestBuilderScriptLayering(TestCase):
         Ensure the script layering is resulting in two lists of equal length
         """
 
-        with logger.DisableLogger():
-            tempDir = mayaunittest.Settings.temp_dir
-            rigFile = core.newRigEnviornmentFromArchetype(tempDir, "biped", "tempRig")
+        # with logger.DisableLogger():
+        tempDir = mayaunittest.Settings.temp_dir
+        rigFile = core.newRigEnviornmentFromArchetype(tempDir, "biped", "tempRig")
 
         for scriptType in [constants.PRE_SCRIPT, constants.POST_SCRIPT, constants.PUB_SCRIPT]:
             archetypeScriptList = core.GetCompleteScriptList.getScriptList(rigFile, scriptType=scriptType)

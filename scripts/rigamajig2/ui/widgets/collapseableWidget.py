@@ -5,7 +5,7 @@
     file: builderHeader.py
     author: masonsmigel
     date: 09/2023
-    discription: 
+    description: 
 
 """
 from PySide2 import QtWidgets, QtGui, QtCore

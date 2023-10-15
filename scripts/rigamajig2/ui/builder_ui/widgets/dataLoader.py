@@ -5,7 +5,7 @@
     file: dataLoader.py
     author: masonsmigel
     date: 07/2023
-    discription: 
+    description: 
 
 """
 import logging

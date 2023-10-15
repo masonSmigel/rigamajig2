@@ -5,11 +5,13 @@
     file: recent_files.py.py
     author: masonsmigel
     date: 04/2023
-    discription: 
+    description: 
 
 """
 import os
+
 import maya.cmds as cmds
+
 from rigamajig2.maya.data import abstract_data
 
 RECENT_FILE_NAME = "rigamajig2_recentfiles.json"

@@ -5,13 +5,14 @@
     file: geometryVisability.py
     author: masonsmigel
     date: 11/2022
-    discription: 
+    description: 
 
 """
 import maya.cmds as cmds
-from rigamajig2.shared import common
+
 from rigamajig2.maya import attr
 from rigamajig2.maya import node
+from rigamajig2.shared import common
 
 
 def addGeometrySwitch(driverNode, driverAttr, geoSets=None, enumNames=None):

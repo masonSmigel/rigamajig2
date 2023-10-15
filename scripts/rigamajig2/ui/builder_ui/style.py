@@ -5,11 +5,11 @@
     file: constants.py
     author: masonsmigel
     date: 07/2022
-    discription: 
+    description: 
 
 """
-from PySide2 import QtGui
 from PySide2 import QtCore
+from PySide2 import QtGui
 
 LARGE_BTN_HEIGHT = 35
 LARGE_BTN_ICON_SIZE = QtCore.QSize(24, 24)

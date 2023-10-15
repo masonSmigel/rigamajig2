@@ -5,12 +5,13 @@
     file: macros.py
     author: masonsmigel
     date: 12/2022
-    discription: Functions and tool for building macros
+    description: Functions and tool for building macros
 
 """
 import maya.cmds as cmds
-from rigamajig2.maya import sdk
+
 from rigamajig2.maya import attr
+from rigamajig2.maya import sdk
 
 
 def createMacroPose(driverPlug, drivenControls=None, preInfinity=False, postInfinity=False,

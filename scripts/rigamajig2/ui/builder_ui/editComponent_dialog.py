@@ -5,7 +5,7 @@
     file: editComponentParametersDialog.py
     author: masonsmigel
     date: 08/2022
-    discription: 
+    description: 
 
 """
 import logging
@@ -159,7 +159,7 @@ class EditComponentDialog(QtWidgets.QDialog):
 
         # check to make sure the container exists
         if not self.currentComponent.getContainer() or not cmds.objExists(self.currentComponent.getContainer()):
-            raise RuntimeError("Component is not initalized. Please initalize the component to continue.")
+            raise RuntimeError("Component is not initalized. Please initialize the component to continue.")
 
         # ensure all maya component level changes are loaded onto the class
         self.currentComponent._updateClassParameters()

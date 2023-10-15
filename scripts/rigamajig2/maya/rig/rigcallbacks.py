@@ -5,7 +5,7 @@
     file: rigcallbacks.py
     author: masonsmigel
     date: 08/2023
-    discription: 
+    description: 
 
 """
 import json

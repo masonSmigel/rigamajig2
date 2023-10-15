@@ -5,7 +5,7 @@
     file: deformation_section.py
     author: masonsmigel
     date: 07/2022
-    discription: 
+    description: 
 
 """
 # MAYA
@@ -160,12 +160,12 @@ class DeformationSection(builderSection.BuilderSection):
     def _setBuilder(self, builder):
         """ Set a builder for intialize widget"""
         super()._setBuilder(builder)
-        self.deformLayerPathSelector.setRelativePath(self.builder.getRigEnviornment())
-        self.skinPathSelector.setRelativePath(self.builder.getRigEnviornment())
+        self.deformLayerPathSelector.setRelativePath(self.builder.getRigEnvironment())
+        self.skinPathSelector.setRelativePath(self.builder.getRigEnvironment())
 
         self.deformersDataLoader.clear()
         self.deformersDataLoader.clear()
-        self.deformersDataLoader.setRelativePath(self.builder.getRigEnviornment())
+        self.deformersDataLoader.setRelativePath(self.builder.getRigEnvironment())
 
         # update data within the rig
         deformLayerFile = self.builder.getRigData(self.builder.getRigFile(), DEFORM_LAYERS)

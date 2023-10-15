@@ -5,7 +5,7 @@
     file: scripts.py
     author: masonsmigel
     date: 07/2022
-    discription: This module contains utilities for the builder
+    description: This module contains utilities for the builder
 
 """
 import glob
@@ -213,7 +213,7 @@ def createDataClassInstance(dataType=None):
     """
     dataTypeInfo = getDataModules().get(dataType)
     if not dataTypeInfo:
-        raise ValueError(f"Data type {dataType} is not valid. Valid Types are {dataModules}")
+        raise ValueError(f"Data type {dataType} is not valid. Valid Types are {getDataModules()}")
 
     modulePath = dataTypeInfo[0]
     className = dataTypeInfo[1]
@@ -229,7 +229,7 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
                        doSave=True):
     """
     Perform a layered data save. This can be used on nearly any node data class to save a list of data into the
-    source files where they originally came from. If the node data appears in mutliple files it will be saved in the
+    source files where they originally came from. If the node data appears in multiple files it will be saved in the
     lowest file to preserve inheritance.
 
     There are several methods to append new node data that has been added since the previous save.
@@ -297,7 +297,7 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
                 if node in previouslySavedNodes:
                     continue
                 # append the node to the list
-                saveDataDict[dataFile].append(node)
+                saveDataDict.get(dataFile).append(node)
                 previouslySavedNodes.append(node)
 
     # get the difference of lists for the unsaved nodes and deleted nodes
@@ -317,7 +317,7 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
         saveDataDict[fileName] = unsavedNodes
 
     if method == 'overwrite':
-        # get a filename to save the data to if one isnt provided
+        # get a filename to save the data to if one isn't provided
         if not fileName:
             if searchFileStack:
                 startDir = os.path.dirname(searchFileStack[0])
@@ -342,8 +342,8 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
 
         saveDataDict[fileName] = dataToSave
 
-    # check if the maya UI is running. It SHOULD always be if we're saving data but theres a chance its not.
-    # if there is lets build a confrm dialog to double check info before its saved
+    # check if the maya UI is running. It SHOULD always be if we're saving data but there's a chance it's not.
+    # if there is lets build a conform dialog to double-check info before its saved
     if not om2.MGlobal.mayaState() and popupInfo:
         message = f"Save {len(dataToSave)} nodes to {len(saveDataDict.keys())} files\n\n"
 
@@ -629,7 +629,7 @@ def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
         raise RuntimeError("{} is not a valid archetype".format(archetype))
 
     archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
-    rigFile = createRigEnviornment(sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName)
+    rigFile = createRigEnvironment(sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName)
 
     data = abstract_data.AbstractData()
     data.read(rigFile)
@@ -653,7 +653,7 @@ def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
     return rigFile
 
 
-def createRigEnviornment(sourceEnviornment, targetEnviornment, rigName):
+def createRigEnvironment(sourceEnviornment, targetEnviornment, rigName):
     """
     create a new rig enviornment from an existing rig enviornment.
     :param sourceEnviornment: source rig enviornment

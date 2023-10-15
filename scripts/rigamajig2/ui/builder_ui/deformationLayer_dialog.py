@@ -5,7 +5,7 @@
     file: deformationLayer_dialog.py
     author: masonsmigel
     date: 09/2023
-    discription: 
+    description: 
 
 """
 import logging

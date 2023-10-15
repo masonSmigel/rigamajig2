@@ -5,7 +5,7 @@
     file: blendshape_data.py
     author: masonsmigel
     date: 09/2022
-    discription: This is the json module for saving maya blendshape data
+    description: This is the json module for saving maya blendshape data
 
 
 """

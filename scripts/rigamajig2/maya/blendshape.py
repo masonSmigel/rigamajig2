@@ -5,23 +5,21 @@
     file: blendshape.py
     author: masonsmigel
     date: 01/2021
-    discription: blendshape functions and helpers.
+    description: blendshape functions and helpers.
 """
 
+import maya.api.OpenMaya as om
+import maya.api.OpenMayaAnim as oma
 # MAYA
 import maya.cmds as cmds
-import maya.api.OpenMayaAnim as oma
-import maya.api.OpenMaya as om
 
+import rigamajig2.maya.openMayaUtils as omu
 # RIGAMAJIG
 import rigamajig2.maya.shape
-import rigamajig2.maya.openMayaUtils as omu
-from rigamajig2.shared import common
-from rigamajig2.maya import deformer
-from rigamajig2.maya import shape
-from rigamajig2.maya import attr
-from rigamajig2.maya import mesh
 from rigamajig2.maya import connection
+from rigamajig2.maya import deformer
+from rigamajig2.maya import mesh
+from rigamajig2.shared import common
 
 
 def isBlendshape(blendshape):

@@ -5,7 +5,7 @@
     file: builderSection.py
     author: masonsmigel
     date: 10/2023
-    discription: 
+    description:
 
 """
 from PySide2 import QtCore
@@ -20,12 +20,12 @@ class BuilderSection(QtWidgets.QWidget):
 
     WIDGET_TITLE = "Builder Widget"
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self):
         """ Constructor"""
-        super(BuilderSection, self).__init__(*args, **kwargs)
+        super(BuilderSection, self).__init__()
 
         self.builder = None
-        self.rigEnviornment = None
+        self.rigEnvironment = None
 
         self.mainWidget = builderHeader.BuilderHeader(text=self.WIDGET_TITLE, addCheckbox=True)
         self.mainLayout = QtWidgets.QVBoxLayout(self)

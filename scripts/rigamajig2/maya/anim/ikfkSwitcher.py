@@ -105,7 +105,7 @@ class IkFkSwitch(object):
     """Class to switch IKFK components"""
 
     def __init__(self, node):
-        """initalize"""
+        """initialize"""
         self.node = node
         self.gatherInfo()
 

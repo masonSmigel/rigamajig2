@@ -5,7 +5,7 @@
     file: QPushButton.py
     author: Xingyu Lei
     date: 08/2023
-    discription: implemented from: https://www.xingyulei.com/post/qt-detect-click/index.html
+    description: implemented from: https://www.xingyulei.com/post/qt-detect-click/index.html
 
 """
 from PySide2 import QtCore

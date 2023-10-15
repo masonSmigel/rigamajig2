@@ -5,21 +5,22 @@
     file: eyeballs.py
     author: masonsmigel
     date: 12/2022
-    discription: eyeballs component. This is a subclass of the lookAt component
+    description: eyeballs component. This is a subclass of the lookAt component
                 with some atributes for the iris and pupil size
 
 """
 import maya.cmds as cmds
+
 import rigamajig2.maya.cmpts.lookAt.lookAt
+from rigamajig2.maya import attr
+from rigamajig2.maya import hierarchy
+from rigamajig2.maya import joint
+from rigamajig2.maya import mathUtils
+from rigamajig2.maya import meta
+from rigamajig2.maya import node
+from rigamajig2.maya import transform
 from rigamajig2.maya.rig import control
 from rigamajig2.maya.rig import live
-from rigamajig2.maya import hierarchy
-from rigamajig2.maya import transform
-from rigamajig2.maya import attr
-from rigamajig2.maya import meta
-from rigamajig2.maya import joint
-from rigamajig2.maya import node
-from rigamajig2.maya import mathUtils
 from rigamajig2.shared import common
 
 IRIS_PERCENT = 0.9

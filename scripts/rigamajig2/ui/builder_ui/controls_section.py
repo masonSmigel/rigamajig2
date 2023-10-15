@@ -5,7 +5,7 @@
     file: controls_section.py
     author: masonsmigel
     date: 07/2022
-    discription: 
+    description: 
 
 """
 # MAYA
@@ -150,7 +150,7 @@ class ControlsSection(builderSection.BuilderSection):
         """ Set a builder for intialize widget"""
         super()._setBuilder(builder)
         self.controlDataLoader.clear()
-        self.controlDataLoader.setRelativePath(self.builder.getRigEnviornment())
+        self.controlDataLoader.setRelativePath(self.builder.getRigEnvironment())
 
         # update data within the rig
         controlFiles = self.builder.getRigData(self.builder.getRigFile(), CONTROL_SHAPES)

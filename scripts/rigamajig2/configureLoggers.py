@@ -5,7 +5,7 @@
     file: configureLoggers.py.py
     author: masonsmigel
     date: 10/2023
-    discription: setup all loggers for rigamajig
+    description: setup all loggers for rigamajig
 
 """
 import json

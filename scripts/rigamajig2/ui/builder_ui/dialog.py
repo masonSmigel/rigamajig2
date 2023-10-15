@@ -5,12 +5,12 @@
     file: dialog.py
     author: masonsmigel
     date: 07/2022
-    discription: This module contains the main dialog for the builder UI
+    description: This module contains the main dialog for the builder UI
 
 """
 import logging
-# PYTHON
 import time
+from functools import partial
 
 # MAYA
 import maya.cmds as cmds
@@ -43,8 +43,6 @@ EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 logger = logging.getLogger(__name__)
 
 
-# this is a long function allow more instance attributes for the widgets.
-# pylint: disable = too-many-instance-attributes
 class BuilderDialog(DockableUI):
     """Builder dialog"""
 
@@ -53,18 +51,18 @@ class BuilderDialog(DockableUI):
     def __init__(self):
         """Constructor for the builder dialog"""
 
-        # Store a rig enviornment and rig builder variables.
-        self.rigEnviornment = None
+        # Store a rig environment and rig builder variables.
+        self.rigEnvironment = None
         self.rigBuilder = None
 
         super(BuilderDialog, self).__init__()
 
         self.setMinimumSize(420, 600)
 
-        # with the maya mixin stuff the window comes in at a weird size. This ensures its not a weird size.
+        # with the maya mixin stuff the window comes in at a weird size. This ensures it's not a weird size.
         self.resize(420, 800)
 
-        # if we dont provide a rig file load the most recent one from the recent files list
+        # if we don't provide a rig file load the most recent one from the recent files list
         recentFile = recent_files.getMostRecentFile()
         if recentFile:
             self._setRigFile(recentFile)
@@ -98,15 +96,17 @@ class BuilderDialog(DockableUI):
         toolsMenu.addAction(self.actions.openProfilerAction)
         toolsMenu.addAction(self.actions.openEvaluationToolkitAction)
 
-        helpmenu = self.mainMenu.addMenu("Help")
-        helpmenu.addAction(self.actions.showDocumentationAction)
-        helpmenu.addAction(self.actions.showAboutAction)
+        helpMenu = self.mainMenu.addMenu("Help")
+        helpMenu.addAction(self.actions.openBuilderLogFileAction)
+        helpMenu.addSeparator()
+        helpMenu.addAction(self.actions.showDocumentationAction)
+        helpMenu.addAction(self.actions.showAboutAction)
 
     def createWidgets(self):
         """Create Widgets"""
         self.rigPathSelector = pathSelector.PathSelector(
             caption="Select a Rig File", fileFilter="Rig Files (*.rig)", fileMode=1
-            )
+        )
 
         self.assetNameLineEdit = QtWidgets.QLineEdit()
         self.assetNameLineEdit.setPlaceholderText("asset_name")
@@ -115,27 +115,25 @@ class BuilderDialog(DockableUI):
 
         self.builderSections = list()
 
-        self.modelWidget = model_section.ModelSection()
-        self.jointWidget = skeleton_section.SkeletonSection()
-        self.controlsWidget = controls_section.ControlsSection()
-        self.intalizeWidget = setup_section.SetupSection()
-        self.buildWidget = build_section.BuildSection()
-        self.deformationWidget = deformation_section.DeformationSection()
-        self.publishWidget = publish_section.PublishSection()
+        self.modelSection = model_section.ModelSection()
+        self.jointSection = skeleton_section.SkeletonSection()
+        self.controlsSection = controls_section.ControlsSection()
+        self.setupSection = setup_section.SetupSection()
+        self.buildSection = build_section.BuildSection()
+        self.deformationSection = deformation_section.DeformationSection()
+        self.publishSection = publish_section.PublishSection()
 
         self.builderSections = [
-            self.modelWidget,
-            self.jointWidget,
-            self.intalizeWidget,
-            self.buildWidget,
-            self.controlsWidget,
-            self.deformationWidget,
-            self.publishWidget,
-            ]
+            self.modelSection,
+            self.jointSection,
+            self.setupSection,
+            self.buildSection,
+            self.controlsSection,
+            self.deformationSection,
+            self.publishSection,
+        ]
 
-        self.runSelectedButton = QtWidgets.QPushButton(
-            QtGui.QIcon(":execute.png"), "Run Selected"
-            )
+        self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
         self.runSelectedButton.setToolTip("Run Rig steps up to the break point")
         self.runSelectedButton.setFixedSize(120, 22)
 
@@ -143,12 +141,8 @@ class BuilderDialog(DockableUI):
         self.runButton.setToolTip("Run all build steps.")
         self.runButton.setFixedSize(80, 22)
 
-        self.publishButton = QtWidgets.QPushButton(
-            QtGui.QIcon(":sourceScript.png"), "Publish"
-            )
-        self.publishButton.setToolTip(
-            "Publish the rig. This will build the rig and save it."
-            )
+        self.publishButton = QtWidgets.QPushButton(QtGui.QIcon(":sourceScript.png"), "Publish")
+        self.publishButton.setToolTip("Publish the rig. This will build the rig and save it.")
         self.publishButton.setFixedSize(80, 22)
 
         self.openScriptEditorButton = QtWidgets.QPushButton()
@@ -156,13 +150,7 @@ class BuilderDialog(DockableUI):
         self.openScriptEditorButton.setFlat(True)
         self.openScriptEditorButton.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
 
-        self.openLogFileButton = QtWidgets.QPushButton("log")
-        self.openLogFileButton.setIcon(QtGui.QIcon(":list.svg"))
-        self.openLogFileButton.setMaximumHeight(18)
-        self.openLogFileButton.setFlat(True)
-
         self.statusLine = QtWidgets.QStatusBar()
-        self.statusLine.addPermanentWidget(self.openLogFileButton)
 
     def createLayouts(self):
         """Create Layouts"""
@@ -174,29 +162,29 @@ class BuilderDialog(DockableUI):
         rigNameLayout.addWidget(QtWidgets.QLabel("rig archetype:"))
         rigNameLayout.addWidget(self.archetypeBaseLabel)
 
-        rigEnviornmentLayout = QtWidgets.QVBoxLayout()
-        rigEnviornmentLayout.addWidget(self.rigPathSelector)
-        rigEnviornmentLayout.addLayout(rigNameLayout)
+        rigEnvironmentLayout = QtWidgets.QVBoxLayout()
+        rigEnvironmentLayout.addWidget(self.rigPathSelector)
+        rigEnvironmentLayout.addLayout(rigNameLayout)
 
-        # add the collapseable widgets
+        # add the collapsable widgets
         buildLayout = QtWidgets.QVBoxLayout()
-        buildLayout.addWidget(self.modelWidget)
-        buildLayout.addWidget(self.jointWidget)
-        buildLayout.addWidget(self.intalizeWidget)
-        buildLayout.addWidget(self.buildWidget)
-        buildLayout.addWidget(self.controlsWidget)
-        buildLayout.addWidget(self.deformationWidget)
-        buildLayout.addWidget(self.publishWidget)
+        buildLayout.addWidget(self.modelSection)
+        buildLayout.addWidget(self.jointSection)
+        buildLayout.addWidget(self.setupSection)
+        buildLayout.addWidget(self.buildSection)
+        buildLayout.addWidget(self.controlsSection)
+        buildLayout.addWidget(self.deformationSection)
+        buildLayout.addWidget(self.publishSection)
         buildLayout.addStretch()
 
         # groups
-        rigEnvornmentGroup = QtWidgets.QGroupBox("Rig Enviornment")
-        rigEnvornmentGroup.setLayout(rigEnviornmentLayout)
+        rigEnvironmentGroup = QtWidgets.QGroupBox("Rig Environment")
+        rigEnvironmentGroup.setLayout(rigEnvironmentLayout)
 
         buildGroup = QtWidgets.QGroupBox("Build")
         buildGroup.setLayout(buildLayout)
 
-        # lower persistant buttons (AKA close)
+        # lower persistent buttons (AKA close)
         lowButtonsLayout = QtWidgets.QVBoxLayout()
         lowButtonsLayout.setContentsMargins(0, 0, 0, 0)
         runButtonLayout = QtWidgets.QHBoxLayout()
@@ -213,7 +201,7 @@ class BuilderDialog(DockableUI):
         bodyWidget = QtWidgets.QWidget()
         bodyLayout = QtWidgets.QVBoxLayout(bodyWidget)
         bodyLayout.setContentsMargins(0, 0, 0, 0)
-        bodyLayout.addWidget(rigEnvornmentGroup)
+        bodyLayout.addWidget(rigEnvironmentGroup)
         bodyLayout.addWidget(buildGroup)
 
         bodyScrollArea = QtWidgets.QScrollArea()
@@ -234,35 +222,16 @@ class BuilderDialog(DockableUI):
 
         # setup each widget with a connection to uncheck all over widgets when one is checked.
         # This ensures all setups until a breakpoint are run
-        self.modelWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.modelWidget)
-            )
-        self.jointWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.jointWidget)
-            )
-        self.intalizeWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.intalizeWidget)
-            )
-        self.buildWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.buildWidget)
-            )
-        self.controlsWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.controlsWidget)
-            )
-        self.deformationWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.deformationWidget)
-            )
-        self.publishWidget.mainWidget.headerWidget.checkbox.clicked.connect(
-            lambda x: self.__handleSectionBreakpoints(self.publishWidget)
+
+        for widget in self.builderSections:
+            widget.mainWidget.headerWidget.checkbox.clicked.connect(
+                partial(self.__handleBreakpoint, widget)
             )
 
-        self.rigPathSelector.selectPathButton.clicked.connect(
-            self._pathSelectorLoadRigFile
-            )
+        self.rigPathSelector.selectPathButton.clicked.connect(self._pathSelectorLoadRigFile)
         self.runSelectedButton.clicked.connect(self._runSelected)
         self.runButton.clicked.connect(self._runAll)
         self.publishButton.clicked.connect(self._publish)
-        self.openLogFileButton.clicked.connect(self._openLogFile)
 
     # --------------------------------------------------------------------------------
     # Connections
@@ -283,7 +252,7 @@ class BuilderDialog(DockableUI):
         """
         self.rigPathSelector.selectPath(path=path)
         fileInfo = QtCore.QFileInfo(self.rigPathSelector.getPath())
-        self.rigEnviornment = fileInfo.path()
+        self.rigEnvironment = fileInfo.path()
         self.rigFile = fileInfo.filePath()
 
         self.rigBuilder = builder.Builder(self.rigFile)
@@ -295,7 +264,7 @@ class BuilderDialog(DockableUI):
         self.rigName = self.rigBuilder.getRigData(self.rigFile, constants.RIG_NAME)
         self.assetNameLineEdit.setText(self.rigName)
 
-        # set the text of the archetype to the archetype. We need to check if its a string and update the formatting
+        # set the text of the archetype to the archetype. We need to check if it's a string and update the formatting
         archetype = self.rigBuilder.getRigData(self.rigFile, constants.BASE_ARCHETYPE)
         if isinstance(archetype, (list, tuple)):
             archetype = ", ".join(archetype)
@@ -305,8 +274,8 @@ class BuilderDialog(DockableUI):
         for widget in self.builderSections:
             widget._setBuilder(builder=self.rigBuilder)
 
-    # BULDER FUNCTIONS
-    def __handleSectionBreakpoints(self, selectedWidget):
+    # BUILDER FUNCTIONS
+    def __handleBreakpoint(self, selectedWidget):
         """This function ensures only one build step is selected at a time. it is run whenever a checkbox is toggled."""
         for section in self.builderSections:
             if section is not selectedWidget:
@@ -331,7 +300,7 @@ class BuilderDialog(DockableUI):
 
         startTime = time.time()
 
-        # because widgets are added to the ui and the list in oder they can be run sequenctially.
+        # because widgets are added to the ui and the list in oder they can be run sequentially.
         # when we hit a widget that is checked then the loop stops.
         for widget in self.builderSections:
             widget._runWidget()
@@ -363,36 +332,28 @@ class BuilderDialog(DockableUI):
         # for the rig build we can put the _publish into a try except block
         # if the _publish fails we can add a message to the status line before raising the exception
         try:
-            self.publishWidget._publishWithUiData()
+            self.publishSection._publishWithUiData()
 
         except Exception as e:
             self.statusLine.showMessage(f"Rig Publish Failed: '{self.rigName}'")
             raise e
 
-    @QtCore.Slot()
-    def _openLogFile(self):
-        """Open the log file by getting the first handler of the root rigamajig logger."""
-        rigamajig2RootLogger = logging.getLogger("rigamajig2")
-        logFile = rigamajig2RootLogger.handlers[0].baseFilename
-
-        url = QtCore.QUrl.fromLocalFile(logFile)
-        QtGui.QDesktopServices.openUrl(url)
-
-    def showEvent(self, *args, **kwargs):
+    def showEvent(self, event):
         """Show event for the Builder UI"""
+        super().showEvent(event)
         logger.info("Builder UI launched")
 
-    def hideEvent(self, e):
+    def hideEvent(self, event):
         """override the hide event to delete the scripts jobs from the initialize widget"""
         # this is a bit of a pain instead of using the close event but since we're using
-        # the workspace control the closeEvent is now owned by Maya. This is a nice work around to
+        # the workspace control the closeEvent is now owned by Maya. This is a nice workaround to
         # ensure the script jobs are deleted when the main window is hidden (done my closing the 'X' button)
         # however when in development you should manually call the close() method BEFORE deleting the workspace control.
-        super(BuilderDialog, self).hideEvent(e)
+        super(BuilderDialog, self).hideEvent(event)
 
         # call the close event for each builder section so the close logic is more localized
-        # to each section. this will not get called by default when using the mayaMixin so we need to call
-        # it explictly here.
+        # to each section. this will not get called by default when using the mayaMixin, so we need to call
+        # it explicitly here.
         for section in self.builderSections:
             section.closeEvent()
 
@@ -402,7 +363,7 @@ class BuilderDialog(DockableUI):
 def confirmBuildRig():
     """
     This is to check if the scene is safe for a rig rebuild.
-    Check if the scene has unsaved changes. If it does give the user a prompt to see if its safe to clear the scene.
+    Check if the scene has unsaved changes. If it does give the user a prompt to see if it's safe to clear the scene.
 
     :return: Returns True or False depending on the scene state and user input
     """
@@ -413,23 +374,21 @@ def confirmBuildRig():
             title="Run Rig Build",
             message="Proceeding will rebuild the rig based on data you've saved. Unsaved in-scene changes will be lost!",
             icon="help",
-            )
+        )
         confirmPublishMessage.setButtonsYesNoCancel()
         res = confirmPublishMessage.exec_()
 
         if res == confirmPublishMessage.Yes:
-            # if the scene has been modified but the user wants to rebuild return true
             return True
         else:
-            # otherwise return false
             return False
-    # if the scene has not been modified we can return true
     return True
 
 
 if __name__ == "__main__":
     workspace_control_name = BuilderDialog.get_workspace_control_name()
     if cmds.window(workspace_control_name, exists=True):
+        # noinspection PyUnboundLocalVariable
         test_dialog.close()
         cmds.deleteUI(workspace_control_name)
 

@@ -48,7 +48,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
         if len(self.input) != 2:
             raise RuntimeError('Input list must have a length of 2')
 
-    def setInitalData(self):
+    def setInitialData(self):
         # if the last joint is an end joint dont include it in the list.
         if not cmds.objExists(self.input[0]):
             self.enabled = False
@@ -70,7 +70,7 @@ class Chain(rigamajig2.maya.cmpts.base.Base):
             self.defineParameter(parameter=jointNameStr, value=inputBaseNames[i] + "_fk", dataType="string")
 
     def initialHierarchy(self):
-        """Build the initial hirarchy"""
+        """Build the initial hierarchy"""
         super(Chain, self).initialHierarchy()
 
         self.fkControlList = list()

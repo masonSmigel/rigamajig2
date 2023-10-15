@@ -5,16 +5,17 @@
     file: splineFk.py
     author: masonsmigel
     date: 07/2022
-    discription: 
+    description: 
 
 """
 import maya.cmds as cmds
-import rigamajig2.maya.cmpts.base
-import rigamajig2.maya.transform as rig_transform
+
 import rigamajig2.maya.attr as rig_attr
+import rigamajig2.maya.cmpts.base
 import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.rig.spline as spline
 import rigamajig2.maya.rig.spaces as spaces
+import rigamajig2.maya.rig.spline as spline
+import rigamajig2.maya.transform as rig_transform
 from rigamajig2.shared import common as common
 
 
@@ -45,7 +46,7 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         super(SplineFK, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        # initalize cmpt settings
+        # initialize cmpt settings
         self.defineParameter(parameter="numControls", value=4, dataType="int")
 
         self.defineParameter(parameter="fkControlName", value=f"{self.name}_fk_0", dataType="bool")

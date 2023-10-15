@@ -56,7 +56,7 @@ def deletePsdReader(joints):
 
 
 def initalizePsds():
-    """This will initalize the pose reader parent group"""
+    """This will initialize the pose reader parent group"""
     if not cmds.objExists("pose_readers"):
         root = cmds.createNode("transform", n="pose_readers")
         if cmds.objExists("rig"):
@@ -82,7 +82,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParen
     :param bool parent: Parent in the rig for the pose reader
     :param str overwriteParent: Object to use as a parent for the pose reader instead of the heirarchy parent
     """
-    # initalize an envornment for our Psds to go to
+    # initialize an envornment for our Psds to go to
     initalizePsds()
 
     joint = common.getFirstIndex(joint)

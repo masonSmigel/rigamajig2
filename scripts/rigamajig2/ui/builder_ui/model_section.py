@@ -79,7 +79,7 @@ class ModelSection(builderSection.BuilderSection):
 
         # clear the ui
         self.preScriptRunner.clearScript()
-        self.modelPathSelector.setRelativePath(self.builder.getRigEnviornment())
+        self.modelPathSelector.setRelativePath(self.builder.getRigEnvironment())
 
         # update data within the rig
         modelFile = self.builder.getRigData(self.builder.getRigFile(), constants.MODEL_FILE)

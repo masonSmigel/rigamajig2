@@ -5,7 +5,7 @@
     file: keyframe.py
     author: masonsmigel
     date: 03/2023
-    discription: some utilities for working with keyframes
+    description: some utilities for working with keyframes
 
 """
 import logging

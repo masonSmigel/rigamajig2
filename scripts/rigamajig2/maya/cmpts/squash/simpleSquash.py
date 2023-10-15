@@ -2,15 +2,15 @@
 squash component
 """
 import maya.cmds as cmds
+
+import rigamajig2.maya.attr as rig_attr
 import rigamajig2.maya.cmpts.base
+import rigamajig2.maya.joint as joint
+import rigamajig2.maya.mathUtils as mathUtils
+import rigamajig2.maya.node as node
 import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.transform as rig_transform
-import rigamajig2.maya.attr as rig_attr
-import rigamajig2.maya.joint as joint
 import rigamajig2.shared.common as common
-import rigamajig2.maya.meta as meta
-import rigamajig2.maya.node as node
-import rigamajig2.maya.mathUtils as mathUtils
 
 
 class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
@@ -40,7 +40,7 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         super(SimpleSquash, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        # initalize cmpt settings.
+        # initialize cmpt settings.
         self.defineParameter(parameter="useProxyAttrs", value=False, dataType="bool")
         self.defineParameter(parameter="startControlName", value=f"{self.name}Start", dataType="string")
         self.defineParameter(parameter="endControlName", value=f"{self.name}End", dataType="string")

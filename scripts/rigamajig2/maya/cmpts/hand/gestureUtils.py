@@ -5,16 +5,16 @@
     file: gestureUtils.py.py
     author: masonsmigel
     date: 07/2022
-    discription:
+    description:
 
 """
 
 import maya.cmds as cmds
 
-import rigamajig2.shared.common as common
-import rigamajig2.maya.sdk as sdk
 import rigamajig2.maya.attr as attr
 import rigamajig2.maya.rig.control as rig_control
+import rigamajig2.maya.sdk as sdk
+import rigamajig2.shared.common as common
 
 
 def setupSpreadSdk(controlsList, attrHolder, driverAttr, axis='y', multiplier=1.0):

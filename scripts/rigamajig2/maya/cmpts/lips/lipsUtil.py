@@ -5,19 +5,16 @@
     file: lipsUtil.py
     author: masonsmigel
     date: 12/2022
-    discription: Utility functions used in the lips component
+    description: Utility functions used in the lips component
 
 """
 import maya.cmds as cmds
-import rigamajig2.maya.cmpts.base
-from rigamajig2.maya import transform
-from rigamajig2.maya import node
+
 from rigamajig2.maya import curve
-from rigamajig2.maya import hierarchy
 from rigamajig2.maya import mathUtils
-from rigamajig2.maya import constrain
+from rigamajig2.maya import node
 from rigamajig2.maya import skinCluster
-from rigamajig2.maya import connection
+from rigamajig2.maya import transform
 
 
 def autoSkinLowCurve(crv, min, mid, max):

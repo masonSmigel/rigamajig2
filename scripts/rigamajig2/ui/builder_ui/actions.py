@@ -5,20 +5,19 @@
     file: actions.py
     author: masonsmigel
     date: 07/2022
-    discription: 
+    description: 
 
 """
-# PYTHON
+import logging
 from functools import partial
 
-# MAYA
 import maya.mel as mel
+from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 import rigamajig2.maya.qc as qc
 import rigamajig2.ui.builder_ui.recent_files as recent_files
-# RIGAMJIG
 from rigamajig2.maya.builder import constants
 from rigamajig2.ui.builder_ui.newRigFile_dialog import CreateRigEnvDialog
 
@@ -41,7 +40,7 @@ class Actions(object):
         # FILE
         self.newRigFileAction = QtWidgets.QAction("New Rig File", self.dialog)
         self.newRigFileAction.setIcon(QtGui.QIcon(":fileNew.png"))
-        self.newRigFileAction.triggered.connect(self.createRigEnviornment)
+        self.newRigFileAction.triggered.connect(self.createRigEnvironment)
 
         self.loadRigFileAction = QtWidgets.QAction("Load Rig File", self.dialog)
         self.loadRigFileAction.setIcon(QtGui.QIcon(":folder-open.png"))
@@ -90,14 +89,17 @@ class Actions(object):
         self.openEvaluationToolkitAction.triggered.connect(self.openEvaluationToolkit)
 
         # HELP
+        self.openBuilderLogFileAction = QtWidgets.QAction("Open Log file", self.dialog)
+        self.openBuilderLogFileAction.triggered.connect(self._openLogFile)
+
         self.showDocumentationAction = QtWidgets.QAction("Documentation", self.dialog)
         self.showDocumentationAction.triggered.connect(self.showDocumentation)
 
         self.showAboutAction = QtWidgets.QAction("About", self.dialog)
         self.showAboutAction.triggered.connect(self.showAbout)
 
-    def createRigEnviornment(self):
-        """ Create Rig Enviornment"""
+    def createRigEnvironment(self):
+        """ Create Rig Environment"""
         createDialog = CreateRigEnvDialog()
         createDialog.newRigEnviornmentCreated.connect(self.dialog._setRigFile)
         createDialog.showDialog()
@@ -127,29 +129,29 @@ class Actions(object):
         """ Save out a rig file """
         newData = {
             constants.RIG_NAME: self.dialog.assetNameLineEdit.text(),
-            constants.MODEL_FILE: self.dialog.modelWidget.modelPathSelector.getPath(absoultePath=False),
-            constants.SKELETON_POS: self.dialog.jointWidget.jointPositionDataLoader.getFileList(),
-            constants.GUIDES: self.dialog.intalizeWidget.guideDataLoader.getFileList(),
-            constants.COMPONENTS: self.dialog.intalizeWidget.componentsDataLoader.getFileList(),
-            constants.PSD: self.dialog.buildWidget.psdDataLoader.getFileList(),
-            constants.CONTROL_SHAPES: self.dialog.controlsWidget.controlDataLoader.getFileList(),
-            constants.DEFORM_LAYERS: self.dialog.deformationWidget.deformLayerPathSelector.getPath(absoultePath=False),
-            constants.SKINS: self.dialog.deformationWidget.skinPathSelector.getPath(absoultePath=False),
-            constants.DEFORMERS: self.dialog.deformationWidget.deformersDataLoader.getFileList(),
-            constants.OUTPUT_RIG: self.dialog.publishWidget.outPathSelector.getPath(absoultePath=False),
-            constants.OUTPUT_RIG_FILE_TYPE: self.dialog.publishWidget.outFileTypeComboBox.currentText(),
-            constants.OUTPUT_FILE_SUFFIX: self.dialog.publishWidget.outFileSuffix.text(),
+            constants.MODEL_FILE: self.dialog.modelSection.modelPathSelector.getPath(absoultePath=False),
+            constants.SKELETON_POS: self.dialog.jointSection.jointPositionDataLoader.getFileList(),
+            constants.GUIDES: self.dialog.setupSection.guideDataLoader.getFileList(),
+            constants.COMPONENTS: self.dialog.setupSection.componentsDataLoader.getFileList(),
+            constants.PSD: self.dialog.buildSection.psdDataLoader.getFileList(),
+            constants.CONTROL_SHAPES: self.dialog.controlsSection.controlDataLoader.getFileList(),
+            constants.DEFORM_LAYERS: self.dialog.deformationSection.deformLayerPathSelector.getPath(absoultePath=False),
+            constants.SKINS: self.dialog.deformationSection.skinPathSelector.getPath(absoultePath=False),
+            constants.DEFORMERS: self.dialog.deformationSection.deformersDataLoader.getFileList(),
+            constants.OUTPUT_RIG: self.dialog.publishSection.outPathSelector.getPath(absoultePath=False),
+            constants.OUTPUT_RIG_FILE_TYPE: self.dialog.publishSection.outFileTypeComboBox.currentText(),
+            constants.OUTPUT_FILE_SUFFIX: self.dialog.publishSection.outFileSuffix.text(),
             # setup new data for the scripts
-            constants.PRE_SCRIPT: self.dialog.modelWidget.preScriptRunner.getCurrentScriptList(
-                relativePath=self.dialog.rigEnviornment),
-            constants.POST_SCRIPT: self.dialog.buildWidget.postScriptRunner.getCurrentScriptList(
-                relativePath=self.dialog.rigEnviornment),
-            constants.PUB_SCRIPT: self.dialog.publishWidget.pubScriptRunner.getCurrentScriptList(
-                relativePath=self.dialog.rigEnviornment),
+            constants.PRE_SCRIPT: self.dialog.modelSection.preScriptRunner.getCurrentScriptList(
+                relativePath=self.dialog.rigEnvironment),
+            constants.POST_SCRIPT: self.dialog.buildSection.postScriptRunner.getCurrentScriptList(
+                relativePath=self.dialog.rigEnvironment),
+            constants.PUB_SCRIPT: self.dialog.publishSection.pubScriptRunner.getCurrentScriptList(
+                relativePath=self.dialog.rigEnvironment),
             # In older files we explictly had a slot for SHAPES data. We have now replaced that with the deformers key.
             # to avoid adding shapes files twice we can re-set the shapes data here:
             constants.SHAPES: None
-            }
+        }
 
         self.dialog.rigBuilder.saveRigFile(newData)
 
@@ -187,7 +189,7 @@ class Actions(object):
 
     def openGitVersionControlDialog(self):
         from rigamajig2.ui.builder_ui import git_dialog
-        rigEnv = self.dialog.rigEnviornment
+        rigEnv = self.dialog.rigEnvironment
         git_dialog.GitDialog.showDialog()
 
         # set the rig repo
@@ -209,6 +211,15 @@ class Actions(object):
         mergeRigsDialog.MergeRigsDialog.showDialog()
 
     # SHOW HELP
+    @QtCore.Slot()
+    def _openLogFile(self):
+        """Open the log file by getting the first handler of the root rigamajig logger."""
+        rigamajig2RootLogger = logging.getLogger("rigamajig2")
+        logFile = rigamajig2RootLogger.handlers[0].baseFilename
+
+        url = QtCore.QUrl.fromLocalFile(logFile)
+        QtGui.QDesktopServices.openUrl(url)
+
     def showDocumentation(self):
         """ Open Documentation"""
         pass

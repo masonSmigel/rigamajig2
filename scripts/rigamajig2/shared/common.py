@@ -1,9 +1,10 @@
 """
 This module contains functions common to all modules and constants
 """
-from collections import OrderedDict
 import re
 import sys
+import typing
+from collections import OrderedDict
 
 DEBUG = False
 REQUIRED_PLUGINS = ['quatNodes', 'matrixNodes']
@@ -159,7 +160,7 @@ def toList(values):
     return values
 
 
-def getFirstIndex(var):
+def getFirstIndex(var:typing.Any)->typing.Any:
     """
     Return the first index of a list
     :param var: list to get index from

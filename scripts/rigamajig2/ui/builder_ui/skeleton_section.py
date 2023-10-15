@@ -5,7 +5,7 @@
     file: skeleton_section.py
     author: masonsmigel
     date: 07/2022
-    discription: 
+    description: 
 
 """
 import logging
@@ -163,7 +163,7 @@ class SkeletonSection(builderSection.BuilderSection):
         super()._setBuilder(builder)
 
         self.jointPositionDataLoader.clear()
-        self.jointPositionDataLoader.setRelativePath(self.builder.getRigEnviornment())
+        self.jointPositionDataLoader.setRelativePath(self.builder.getRigEnvironment())
 
         # update data within the rig
         jointFiles = self.builder.getRigData(self.builder.getRigFile(), SKELETON_POS)

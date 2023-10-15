@@ -5,7 +5,7 @@
     file: newRigFile_dialog.py
     author: masonsmigel
     date: 08/2023
-    discription: 
+    description: 
 
 """
 import sys
@@ -14,7 +14,7 @@ from PySide2 import QtWidgets, QtCore
 from maya import OpenMayaUI as omui, cmds as cmds
 from shiboken2 import wrapInstance
 
-import rigamajig2.maya
+from rigamajig2.maya.builder import core
 from rigamajig2.ui.widgets import pathSelector
 
 
@@ -38,7 +38,7 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
             mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
 
         super(CreateRigEnvDialog, self).__init__(mayaMainWindow)
-        self.rigEnviornment = None
+        self.rigEnvironment = None
 
         self.setWindowTitle(self.WINDOW_TITLE)
         if cmds.about(ntOS=True):
@@ -62,7 +62,7 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         self.archetypeRadioButtonWidget = QtWidgets.QWidget()
         self.archetypeRadioButtonWidget.setFixedHeight(25)
         self.archetypeComboBox = QtWidgets.QComboBox()
-        for archetype in rigamajig2.maya.builder.core.getAvailableArchetypes():
+        for archetype in core.getAvailableArchetypes():
             self.archetypeComboBox.addItem(archetype)
 
         self.sourcePath = pathSelector.PathSelector("Source:", fileMode=2)
@@ -115,7 +115,7 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         self.fromExistingRadioButton.toggled.connect(self.updateCreateMethod)
 
         self.cancelButton.clicked.connect(self.close)
-        self.createButton.clicked.connect(self.createNewRigEnviornment)
+        self.createButton.clicked.connect(self.createNewRigEnvironment)
 
     def updateCreateMethod(self):
         """
@@ -129,25 +129,26 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
             self.archetypeRadioButtonWidget.setVisible(False)
             self.sourcePath.setVisible(True)
 
-    def createNewRigEnviornment(self):
+    def createNewRigEnvironment(self):
         """
-        Create a new rig enviornment
+        Create a new rig environment
         """
 
-        destinationRigEnviornment = self.destinationPath.getPath()
+        destinationRigEnvironment = self.destinationPath.getPath()
         rigName = self.rigNameLineEdit.text()
         if self.fromArchetypeRadioButton.isChecked():
             archetype = self.archetypeComboBox.currentText()
-            rigFile = rigamajig2.maya.builder.core.newRigEnviornmentFromArchetype(
-                newEnv=destinationRigEnviornment,
+            rigFile = core.newRigEnviornmentFromArchetype(
+                newEnv=destinationRigEnvironment,
                 archetype=archetype,
                 rigName=rigName)
         else:
-            sourceEnviornment = self.sourcePath.getPath()
-            rigFile = rigamajig2.maya.builder.core.createRigEnviornment(
-                sourceEnviornment=sourceEnviornment,
-                targetEnviornment=destinationRigEnviornment,
+            sourceEnvironment = self.sourcePath.getPath()
+            rigFile = core.createRigEnvironment(
+                sourceEnviornment=sourceEnvironment,
+                targetEnviornment=destinationRigEnvironment,
                 rigName=rigName)
+        # noinspection PyUnresolvedReferences
         self.newRigEnviornmentCreated.emit(rigFile)
 
         self.close()

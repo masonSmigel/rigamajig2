@@ -5,19 +5,14 @@
     file: component_data.py
     author: masonsmigel
     date: 09/2023
-    discription: 
+    description: 
 
 """
-from collections import OrderedDict
 import rigamajig2.maya.data.abstract_data as abstract_data
-import maya.cmds as cmds
-
-from rigamajig2.shared import common
-
-from rigamajig2.maya.cmpts import base
 from rigamajig2.maya import container
 from rigamajig2.maya.builder import core
-from rigamajig2.maya.builder import constants
+from rigamajig2.maya.cmpts import base
+from rigamajig2.shared import common
 
 
 class ComponentData(abstract_data.AbstractData):

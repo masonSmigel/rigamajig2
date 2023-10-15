@@ -5,7 +5,7 @@
     file: merge.py
     author: masonsmigel
     date: 01/2023
-    discription: Merge two .rig files together
+    description: Merge two .rig files together
 
 """
 import logging

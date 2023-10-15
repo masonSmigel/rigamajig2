@@ -5,22 +5,19 @@
     file: mayaObjectWidget.py
     author: masonsmigel
     date: 08/2022
-    discription: 
+    description: 
 
 """
 
 import sys
-from os.path import relpath
 
+import maya.OpenMayaUI as omui
+import maya.api.OpenMaya as om2
+import maya.cmds as cmds
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
-
-import maya.cmds as cmds
-import maya.OpenMayaUI as omui
-
-import maya.api.OpenMaya as om2
 
 SCRIPT_FILE_FILTER = "Python (*.py) ;; Mel (*.mel)"
 

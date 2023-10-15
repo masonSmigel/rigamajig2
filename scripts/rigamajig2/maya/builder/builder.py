@@ -5,7 +5,7 @@
     file: model.py
     author: masonsmigel
     date: 07/2022
-    discription: This module contains our rig builder.
+    description: This module contains our rig builder.
                  It acts as a wrapper to manage all functions of the rig_builder.
 """
 import logging
@@ -40,33 +40,33 @@ class Builder(object):
     The builder is the foundational class used to construct rigs with Rigamajig2.
     """
 
-    BUILD_LOGGER_SCOPE = ["rigamajig2.maya", "rigamajig2.shared"]
+    VERSIONS_DIRECTORY = "versions"
 
     def __init__(self, rigFile=None):
         """
-        Initalize the builder
+        Initialize the builder
         :param rigFile: path to the rig file
         """
         self.path = None
+        self.rigFile = None
+        self.builderData = {}
 
         if rigFile: self.setRigFile(rigFile)
 
         self.componentList = list()
-
         self._availableComponents = core.findComponents()
-
-        # varibles we need
+        # variables we need
         self.topSkeletonNodes = list()
 
     def getAvailableComponents(self) -> typing.List[str]:
         """ Get all available components"""
         return self._availableComponents
 
-    def getAbsoultePath(self, path) -> str:
+    def getAbsolutePath(self, path) -> str:
         """
-        Get the absoulte path of the given path relative to the rigEnviornment
+        Get the absolute path of the given path relative to the rigEnvironment
 
-        :param str path: Path to get relative to the rig enviornment
+        :param str path: Path to get relative to the rig environment
         """
         if path:
             path = common.getFirstIndex(path)
@@ -82,7 +82,7 @@ class Builder(object):
 
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.MODEL_FILE))
+        path = path or self.getAbsolutePath(self.builderData.get(constants.MODEL_FILE))
         model.importModel(path)
         logger.info("Model loaded")
 
@@ -92,11 +92,11 @@ class Builder(object):
 
         :param str paths: list of paths Path to the json file. if none is provided use the data from the rigFile
         """
-        paths = paths or self.getRigData(self.rigFile, constants.SKELETON_POS)
+        paths = paths or self.builderData.get(constants.SKELETON_POS)
 
         for path in common.toList(paths):
-            absPath = self.getAbsoultePath(path)
-            rigamajig2.maya.builder.data.loadJoints(absPath)
+            absolutePath = self.getAbsolutePath(path)
+            rigamajig2.maya.builder.data.loadJoints(absolutePath)
             logger.info(f"Joints loaded : {path}")
 
     def saveJoints(self, fileStack: _StringList = None, method="merge") -> _StringList:
@@ -107,10 +107,6 @@ class Builder(object):
         :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
         :param str method: method of data merging to apply. Default is "merge"
         """
-        #
-        # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKELETON_POS))
-        # guides.saveJoints(path)
-
         fileStack = common.toList(fileStack)
         dataToSave = rigamajig2.maya.builder.data.gatherJoints()
         savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData",
@@ -119,16 +115,16 @@ class Builder(object):
             logger.info("Joint positions Saved -- complete")
             return savedFiles
 
-    def initalize(self) -> None:
+    def initialize(self) -> None:
         """
-        Initalize rig (this is where the user can make changes)
+        Initialize rig (this is where the user can make changes)
         """
 
-        for cmpt in self.componentList:
-            logger.info('Initalizing: {}'.format(cmpt.name))
-            cmpt._initalizeComponent()
+        for component in self.componentList:
+            logger.info('Initializing: {}'.format(component.name))
+            component._initializeComponent()
 
-        logger.info("initalize -- complete")
+        logger.info("initialize -- complete")
 
     def guide(self) -> None:
         """
@@ -138,14 +134,14 @@ class Builder(object):
         if not cmds.objExists("guides"):
             cmds.createNode("transform", name="guides")
 
-        for cmpt in self.componentList:
-            logger.info('Guiding: {}'.format(cmpt.name))
-            cmpt._guideComponent()
-            if hasattr(cmpt, "guidesHierarchy") and cmpt.guidesHierarchy:
-                parent = cmds.listRelatives(cmpt.guidesHierarchy, p=True)
+        for component in self.componentList:
+            logger.info('Guiding: {}'.format(component.name))
+            component._guideComponent()
+            if hasattr(component, "guidesHierarchy") and component.guidesHierarchy:
+                parent = cmds.listRelatives(component.guidesHierarchy, p=True)
                 if parent and parent[0] == 'guides':
                     break
-                cmds.parent(cmpt.guidesHierarchy, "guides")
+                cmds.parent(component.guidesHierarchy, "guides")
             self.updateMaya()
 
         self.loadGuideData()
@@ -159,21 +155,20 @@ class Builder(object):
         # we need to make sure the main.main component gets built first if it exists in the list.
         # this is because all components that use the joint.connectChains function check for a bind group
         # to build the proper scale constraints
-        for cmpt in self.componentList:
-            if cmpt.getComponenetType() == 'main.main':
-                self.componentList.remove(cmpt)
-                self.componentList.insert(0, cmpt)
+        for component in self.componentList:
+            if component.getComponentType() == 'main.main':
+                self.componentList.remove(component)
+                self.componentList.insert(0, component)
 
         # now we can safely build all the components in the scene
-        for cmpt in self.componentList:
-            logger.info('Building: {}'.format(cmpt.name))
-            cmpt._buildComponent()
+        for component in self.componentList:
+            logger.info('Building: {}'.format(component.name))
+            component._buildComponent()
 
-            # if the component is not a main parent the cmpt.rootHierarchy to the rig
-            if cmds.objExists('rig') and cmpt.getComponenetType() != 'main.main':
-                if hasattr(cmpt, "rootHierarchy"):
-                    if not cmds.listRelatives(cmpt.rootHierarchy, p=True):
-                        cmds.parent(cmpt.rootHierarchy, 'rig')
+            if cmds.objExists('rig') and component.getComponentType() != 'main.main':
+                if hasattr(component, "rootHierarchy"):
+                    if not cmds.listRelatives(component.rootHierarchy, p=True):
+                        cmds.parent(component.rootHierarchy, 'rig')
 
             # refresh the viewport after each component is built.
             self.updateMaya()
@@ -199,9 +194,9 @@ class Builder(object):
         """
         connect rig
         """
-        for cmpt in self.componentList:
-            logger.info('Connecting: {}'.format(cmpt.name))
-            cmpt._connectComponent()
+        for component in self.componentList:
+            logger.info('Connecting: {}'.format(component.name))
+            component._connectComponent()
             self.updateMaya()
         logger.info("connect -- complete")
 
@@ -209,9 +204,9 @@ class Builder(object):
         """
         finalize rig
         """
-        for cmpt in self.componentList:
-            logger.info('Finalizing: {}'.format(cmpt.name))
-            cmpt._finalizeComponent()
+        for component in self.componentList:
+            logger.info('Finalizing: {}'.format(component.name))
+            component._finalizeComponent()
             self.updateMaya()
 
         # delete the guide group
@@ -223,16 +218,16 @@ class Builder(object):
         """
         optimize rig
         """
-        for cmpt in self.componentList:
-            logger.info('Optimizing {}'.format(cmpt.name))
-            cmpt._optimizeComponent()
+        for component in self.componentList:
+            logger.info('Optimizing {}'.format(component.name))
+            component._optimizeComponent()
             self.updateMaya()
         logger.info("optimize -- complete")
 
-    def saveComponents(self, fileStack: _StringList = None, method: str = "merge") -> _StringList:
+    def saveComponents(self, fileStack: _StringList = None, method: str = "merge") -> _StringList or None:
         """
         Save out components to a file.
-        This only saves compoonent settings such as name, inputs, spaces and names.
+        This only saves component settings such as name, inputs, spaces and names.
 
         :param str fileStack: path to the component data file
         :param str method: method of data merging to apply. Default is "merge"
@@ -251,14 +246,14 @@ class Builder(object):
         if not saveDict:
             return
 
-        # ... next loop throught the save dict and gather component data based on the component name.
+        # ... next loop through the save dict and gather component data based on the component name.
         for dataFile in saveDict:
             componentDataObj = component_data.ComponentData()
 
             # loop through the list of component names
             for componentName in saveDict[dataFile]:
-                cmpt = self.findComponent(name=componentName)
-                componentDataObj.gatherData(cmpt)
+                component = self.findComponent(name=componentName)
+                componentDataObj.gatherData(component)
             componentDataObj.write(dataFile)
             logger.info(f"Component Data saved to {dataFile}")
 
@@ -273,19 +268,19 @@ class Builder(object):
 
         :param str paths: Path to the json file. if none is provided use the data from the rigFile
         """
-        paths = paths or self.getRigData(self.rigFile, constants.COMPONENTS)
+        paths = paths or self.builderData.get(constants.COMPONENTS)
 
         self.setComponents(list())
         for path in common.toList(paths):
-            path = self.getAbsoultePath(path)
+            path = self.getAbsolutePath(path)
 
             componentDataObj = component_data.ComponentData()
             componentDataObj.read(path)
 
             # look through each component and add it to the builder list
             # check before adding it so only one instance of each exists in the list
-            for cmpt in componentDataObj.getKeys():
-                instance = common.getFirstIndex(componentDataObj.applyData(cmpt))
+            for component in componentDataObj.getKeys():
+                instance = common.getFirstIndex(componentDataObj.applyData(component))
 
                 # we only want to add components with a new name. Each component should have a unique name
                 componentNameList = [c.name for c in self.componentList]
@@ -301,12 +296,12 @@ class Builder(object):
         :param list paths: Path to the json file. if none is provided use the data from the rigFile
         :param bool applyColor: Apply the control colors.
         """
-        paths = paths or self.getRigData(self.rigFile, constants.CONTROL_SHAPES)
+        paths = paths or self.builderData.get(constants.CONTROL_SHAPES)
 
         for path in common.toList(paths):
-            # make the path an absoulte
+            # make the path an absolute
 
-            absPath = self.getAbsoultePath(path)
+            absPath = self.getAbsolutePath(path)
             rigamajig2.maya.builder.data.loadControlShapes(absPath, applyColor=applyColor)
             self.updateMaya()
             logger.info(f"control shapes loaded: {path}")
@@ -326,16 +321,16 @@ class Builder(object):
             logger.info("Control Shapes Save -- Complete")
             return savedFiles
 
-    def loadGuideData(self, paths: str = None) -> str:
+    def loadGuideData(self, paths: str = None):
         """
         Load guide data
 
         :param list paths: Path to the json file. if none is provided use the data from the rigFile
         """
-        paths = paths or self.getRigData(self.rigFile, constants.GUIDES)
+        paths = paths or self.builderData.get(constants.GUIDES)
 
         for path in common.toList(paths):
-            absPath = self.getAbsoultePath(path)
+            absPath = self.getAbsolutePath(path)
             if rigamajig2.maya.builder.data.loadGuideData(absPath):
                 logger.info(f"guides loaded: {path}")
 
@@ -346,7 +341,7 @@ class Builder(object):
         :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
         :param str method: method of data merging to apply. Default is "merge"
         """
-        # rigFileData = common.toList(self.getAbsoultePath(self.getRigData(self.rigFile, constants.GUIDES)))[-1]
+        # rigFileData = common.toList(self.getAbsolutePath(self.builderData.get(constants.GUIDES)))[-1]
         # path = path or rigFileData
         fileStack = common.toList(fileStack)
         dataToSave = rigamajig2.maya.builder.data.gatherGuides()
@@ -363,24 +358,24 @@ class Builder(object):
         :param list paths: Path to the json file. if none is provided use the data from the rigFile
         :param replace: Replace existing pose readers.
         """
-        paths = paths or self.getRigData(self.rigFile, constants.PSD) or ''
+        paths = paths or self.builderData.get(constants.PSD) or ''
 
         for path in common.toList(paths):
-            absPath = self.getAbsoultePath(path)
+            absPath = self.getAbsolutePath(path)
             if rigamajig2.maya.builder.data.loadPoseReaders(absPath, replace=replace):
                 logger.info(f"pose readers loaded: {path}")
 
-    def savePoseReaders(self, fileStack: _StringList = None, method: str = "merge") -> _StringList:
+    def savePoseReaders(self, fileStack: _StringList = None) -> _StringList:
         """
         Save out pose readers
 
         :param str fileStack: Path to the json file. if none is provided use the data from the rigFile.
-        :param str method: method of data merging to apply. Default is "merge"
         """
-        # path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.PSD))
 
-        allPsds = rigamajig2.maya.builder.data.gatherPoseReaders()
-        savedFiles = core.performLayeredSave(dataToSave=allPsds, fileStack=fileStack, dataType="PSDData",
+        # path = path or self.getAbsolutePath(self.builderData.get(constants.PSD))
+
+        allPoseReaders = rigamajig2.maya.builder.data.gatherPoseReaders()
+        savedFiles = core.performLayeredSave(dataToSave=allPoseReaders, fileStack=fileStack, dataType="PSDData",
                                              method="merge")
         # deform._savePoseReaders(path)
         if savedFiles:
@@ -393,7 +388,7 @@ class Builder(object):
 
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
+        path = path or self.getAbsolutePath(self.builderData.get(constants.DEFORM_LAYERS)) or ''
         if rigamajig2.maya.builder.data.loadDeformLayers(path):
             logger.info("deformation layers loaded")
 
@@ -403,7 +398,7 @@ class Builder(object):
 
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.DEFORM_LAYERS)) or ''
+        path = path or self.getAbsolutePath(self.builderData.get(constants.DEFORM_LAYERS)) or ''
         rigamajig2.maya.builder.data.saveDeformLayers(path)
         logger.info("deformation layers saved to: {}".format(path))
 
@@ -412,8 +407,8 @@ class Builder(object):
         import rigamajig2.maya.rig.deformLayer as deformLayer
 
         if len(meta.getTagged("hasDeformLayers")) > 0:
-            for model in meta.getTagged("hasDeformLayers"):
-                layer = deformLayer.DeformLayer(model)
+            for mesh in meta.getTagged("hasDeformLayers"):
+                layer = deformLayer.DeformLayer(mesh)
                 layer.stackDeformLayers(cleanup=True)
 
             logger.info("deformation layers merged")
@@ -424,7 +419,7 @@ class Builder(object):
 
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
+        path = path or self.getAbsolutePath(self.builderData.get(constants.SKINS)) or ''
         if rigamajig2.maya.builder.data.loadSkinWeights(path):
             logger.info("skin weights loaded")
 
@@ -434,7 +429,7 @@ class Builder(object):
 
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsoultePath(self.getRigData(self.rigFile, constants.SKINS)) or ''
+        path = path or self.getAbsolutePath(self.builderData.get(constants.SKINS)) or ''
         rigamajig2.maya.builder.data.saveSkinWeights(path)
         logger.info("skin weights for: {} saved to:{}".format(cmds.ls(sl=True), path))
 
@@ -443,14 +438,14 @@ class Builder(object):
         :param list paths: Path to the json file. if none is provided use the data from the rigFile
         """
         if not paths:
-            deformerPaths = self.getRigData(self.rigFile, constants.DEFORMERS) or []
-            shapesPaths = self.getRigData(self.rigFile, constants.SHAPES) or []
+            deformerPaths = self.builderData.get(constants.DEFORMERS) or []
+            shapesPaths = self.builderData.get(constants.SHAPES) or []
 
             # if we have both deformerPaths and shapesPaths we need to join the two paths
             paths = common.toList(shapesPaths) + common.toList(deformerPaths)
 
         for path in common.toList(paths):
-            absPath = self.getAbsoultePath(path)
+            absPath = self.getAbsolutePath(path)
             if rigamajig2.maya.builder.data.loadDeformer(absPath):
                 logger.info(f"deformers loaded: {path}")
 
@@ -462,43 +457,43 @@ class Builder(object):
         :param bool clearList: clear the builder component list
         """
         mainComponent = None
-        for cmpt in self.componentList:
-            if cmds.objExists(cmpt.container):
-                if cmpt.getComponenetType() == 'main.main':
-                    mainComponent = cmpt
+        for component in self.componentList:
+            if cmds.objExists(component.container):
+                if component.getComponentType() == 'main.main':
+                    mainComponent = component
                 else:
-                    cmpt.deleteSetup()
+                    component.deleteSetup()
         if mainComponent:
             mainComponent.deleteSetup()
         if clearList:
             self.componentList = list()
 
     # TODO: Fix this or delete it.
-    def buildSingleComponent(self, name, type):
+    def buildSingleComponent(self, name):
         """
         Build a single component based on the name and component type.
-        If a component with the given name and type exists within the self.cmpt_list build that component.
+        If a component with the given name and type exists within the self.componentList build that component.
 
-        Warning: Building a single component without nesseary connection nodes in the scene may lead to unpredicable results. ONLY USE THIS FOR RND!
+        Warning: Building a single component without necessary connection nodes in the scene may lead
+        to unpredictable results. ONLY USE THIS FOR RND!
 
         :param name: name of the component to build
-        :param type: type of the component to build
         :return:
         """
-        cmpt = self.findComponent(name=name, type=type)
+        component = self.findComponent(name=name)
 
-        if cmpt:
-            cmpt._intialize_cmpt()
-            cmpt._build_cmpt()
-            cmpt._connect_cmpt()
-            cmpt._finalize_cmpt()
+        if component:
+            component._intialize_cmpt()
+            component._build_cmpt()
+            component._connect_cmpt()
+            component._finalize_cmpt()
 
-            if cmds.objExists('rig') and cmpt.getComponenetType() != 'main.Main':
-                if hasattr(cmpt, "rootHierarchy"):
-                    if not cmds.listRelatives(cmpt.rootHierarchy, p=True):
-                        cmds.parent(cmpt.rootHierarchy, 'rig')
+            if cmds.objExists('rig') and component.getComponentType() != 'main.Main':
+                if hasattr(component, "rootHierarchy"):
+                    if not cmds.listRelatives(component.rootHierarchy, p=True):
+                        cmds.parent(component.rootHierarchy, 'rig')
 
-            logger.info("build: {} -- complete".format(cmpt.name))
+            logger.info("build: {} -- complete".format(component.name))
 
     # --------------------------------------------------------------------------------
     # RUN SCRIPTS UTILITIES
@@ -522,33 +517,28 @@ class Builder(object):
         core.runAllScripts(scripts)
         logger.info("publish scripts -- complete")
 
-    def run(self, publish: bool = False, savePublish: bool = True, outputfile: str = None, assetName: str = None,
-            suffix: str = None, fileType: str = None, versioning: bool = True, replaceLog: bool = True) -> float:
+    def run(self, publish:bool = False, savePublish:bool = True, versioning:bool = True) -> None:
         """
         Build a rig.
 
-        if Publish is True then it will also run the publish steps. See publish for more information.
+        This method orchestrates the entire rig building process. It encompasses loading components,
+        building the rig, connecting elements, and finalizing the rig. Optionally, it can run the
+        publishing steps if `publish` is set to True.
 
-        :param publish: if True also run the publish steps
-        :param savePublish: if True also save the publish file
-        :param outputfile: Path for the output file.
-        :param assetName: Asset name used to generate a file name.
-        :param suffix: suffix to attatch to the end of the asset name.
-        :param fileType: File type of the publish file. valid values are 'mb' or 'ma'.
-        :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
-                           and store a new version each time the publish file is overwritten.
-                           This allows the user to keep a log of files approved to be published.
-        :param replaceLog: If True, replace the existing log file. otherwise, append to it.
+        :param publish: If True, the publishing steps will be executed.
+        :param savePublish: If True, the publishing file will be saved. This is effective only when `publish` is True.
+        :param versioning: Enable versioning. If True, a new version will be created in the publishing directory
+                           each time the publishing file is overwritten. This allows for version control.
         """
         if not self.path:
-            logger.error('you must provide a build envifornment path. Use Bulder._setRigFile()')
+            logger.error('you must provide a build environment path. Use _setRigFile()')
             return
 
         startTime = time.time()
         logger.info(f"\n"
                     f"Begin Rig Build\n{'-' * 70}\n"
                     f"build env: {self.path}\n"
-                   )
+                    )
 
         core.loadRequiredPlugins()
         self.preScript()
@@ -558,7 +548,7 @@ class Builder(object):
         self.loadJoints()
 
         self.loadComponents()
-        self.initalize()
+        self.initialize()
         self.guide()
 
         self.build()
@@ -578,90 +568,60 @@ class Builder(object):
             self.mergeDeformLayers()
             self.publishScript()
             if savePublish:
-                self.publish(outputfile=outputfile,
-                             suffix=suffix,
-                             assetName=assetName,
-                             fileType=fileType,
-                             versioning=versioning
-                             )
+                self.publish(versioning=versioning)
         endTime = time.time()
         finalTime = endTime - startTime
 
         logger.info('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
-    def publish(self, outputfile: str = None, suffix: str = None, assetName: str = None, fileType: str = None,
-                versioning: bool = True) -> None:
+    def publish(self, versioning:bool=True) -> None:
         """
         Publish a rig.
 
-        This will run the whole builder as well as create a publish file.
+        This method saves the rig file into the output directory specified in `builderData`.
+        If `versioning` is enabled, a new version is created in the publishing directory, allowing
+        for version control.
 
-        :param outputfile: Path for the output file
-        :param suffix: the file suffix to add to the rig file
-        :param assetName: Asset name used to generate a file name
-        :param fileType: File type of the publish file. valid values are 'mb' or 'ma'
-        :param versioning: Enable versioning. Versioning will create a separate file within the publish directory
-                           and store a new version each time the publish file is overwritten.
-                           This allows the user to keep a log of files approved to be published.
+        The output path and filename is built from the "output_file", "rig_name", "output_file_suffix"
+        and "output_file_type" keys of the build file.
+
+        :param versioning: If True, versioning will be applied to the published rig.
+        :return: None
         """
-        outputfile = outputfile or self.getAbsoultePath(self.getRigData(self.rigFile, constants.OUTPUT_RIG))
-        assetName = assetName or self.getAbsoultePath(self.getRigData(self.rigFile, constants.RIG_NAME))
-        fileType = fileType or self.getRigData(self.rigFile, constants.OUTPUT_RIG_FILE_TYPE)
-        suffix = suffix or self.getRigData(self.rigFile, constants.OUTPUT_FILE_SUFFIX)
 
-        suffix = suffix or str()
-        # check if the provided path is a file path.
-        # if so use the file naming and extension from the provided path
-        if rig_path.isFile(outputfile):
-            fileName = outputfile.split(os.sep)[-1]
-            dirName = '/'.join(outputfile.split(os.sep)[:-1])
-
-        # if only a directory is provided than generate a filename using the rig name and file extension
-        else:
-            dirName = outputfile
-            if assetName:
-                rigName = self.getRigData(self.rigFile, constants.RIG_NAME)
-                fileName = "{}{}.{}".format(rigName, suffix, fileType)
-            else:
-                raise RuntimeError("Must select an output path or character name to publish a rig")
+        outputDirectory, outputFileName = self.getPublishFileInfo()
 
         # if we want to save a version as well
         if versioning:
-            # get the version directory, file
-            versionDir = os.path.join(dirName, 'versions')
-            filebase = ".".join(fileName.split('.')[:-1])
-            fileext = fileName.split('.')[-1]
+            versionDirectory = os.path.join(outputDirectory, self.VERSIONS_DIRECTORY)
 
-            # format the new file name and file path
-            versionFile = "{}_{}.{}".format(filebase, 'v000', fileext)
-            versionPath = os.path.join(versionDir, versionFile)
+            existingVersions = self.getExistingVersions()
+            nextVersion = len(existingVersions) + 1 if existingVersions else 1
 
-            # get a list of previous publishes to determine the proper version for this file
-
-            if os.path.exists(versionDir):
-                versionDirContents = os.listdir(versionDir)
-                numberOfPublishes = len([x for x in versionDirContents if x.endswith(".{}".format(fileext))])
-            else:
-                numberOfPublishes = 0
+            versionFileName = self.getPublishFileName(
+                includeVersion=True,
+                version=nextVersion
+            )
 
             topNodes = cmds.ls(assemblies=True)
             topTransformNodes = cmds.ls(topNodes, exactType='transform')
             for node in topTransformNodes:
-                # set the version to the number of publishes (plus one) to account for the version we are about to publish
-                cmds.addAttr(node, longName="__version__", attributeType='short', dv=numberOfPublishes + 1, k=False)
+                cmds.addAttr(node, longName="__version__", attributeType='short', dv=nextVersion, k=False)
                 cmds.setAttr("{}.__version__".format(node), lock=True)
                 cmds.setAttr("{}.__version__".format(node), cb=True)
 
+            versionPath = os.path.join(versionDirectory, versionFileName)
+
             # make the output directory and save the file. This will also make the directory for the main publish
-            rig_path.mkdir(versionDir)
-            versionPath = file.incrimentSave(versionPath, log=False)
-            logger.info("out rig versioned: {}   ({})".format(os.path.basename(versionPath), versionPath))
+            rig_path.mkdir(versionDirectory)
+            outputVersionPath = file.saveAs(versionPath, log=False)
+            logger.info("out rig versioned: {}   ({})".format(versionFileName, outputVersionPath))
 
         # create output directory and save
-        publishPath = os.path.join(dirName, fileName)
+        publishPath = os.path.join(outputDirectory, outputFileName)
         file.saveAs(publishPath, log=False)
-        logger.info("out rig published: {}  ({})".format(fileName, publishPath))
+        logger.info("out rig published: {}  ({})".format(outputFileName, publishPath))
 
     def updateMaya(self) -> None:
         """ Update maya if in an interactive session"""
@@ -672,8 +632,8 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     # GET
     # --------------------------------------------------------------------------------
-    def getRigEnviornment(self) -> str:
-        """Get the rig enviornment"""
+    def getRigEnvironment(self) -> str:
+        """Get the rig environment"""
         return self.path
 
     def getRigFile(self) -> str:
@@ -684,61 +644,124 @@ class Builder(object):
         """Get a list of all components in the builder"""
         return self.componentList
 
+    def getPublishFileInfo(self) -> tuple[None, None] or tuple[str, str]:
+        """
+        Get the directory and filename for the output rig file.
+
+        :return: Tuple[str, str] - A tuple containing the directory and filename.
+        :raises RuntimeError: If an output path or rig name is not provided.
+        """
+        outputfile = self.getAbsolutePath(self.builderData.get(constants.OUTPUT_RIG))
+        outputRigName = self.builderData.get(constants.RIG_NAME)
+
+        if rig_path.isFile(outputfile):
+            filename = outputfile.split(os.sep)[-1]
+            directory = '/'.join(outputfile.split(os.sep)[:-1])
+        elif rig_path.isDir(outputfile):
+            directory = outputfile
+
+            if not outputRigName:
+                raise RuntimeError("Must select an output path or rig name to publish a rig")
+
+            filename = self.getPublishFileName(includeVersion=False, version=None)
+        else:
+            return None, None
+
+        return directory, filename
+
+    def getPublishFileName(self, includeVersion=False, version: int = None):
+        """
+        Format the file name for an output Maya file.
+
+        :param includeVersion: Whether to include the version number in the filename.
+        :param version: The version number to include in the filename.
+        :return: str - The formatted output file name.
+        """
+        outputRigName = self.builderData.get(constants.RIG_NAME)
+        fileType = self.builderData.get(constants.OUTPUT_RIG_FILE_TYPE)
+        suffix = self.builderData.get(constants.OUTPUT_FILE_SUFFIX) or ""
+        if includeVersion:
+            return f"{outputRigName}{suffix}_v{version:03d}.{fileType}"
+        return f"{outputRigName}{suffix}.{fileType}"
+
+    def getExistingVersions(self) -> list[str] or None:
+        """
+        Get a list of all existing versions in the currently set output directory.
+
+        :return: List[str] - A list of existing version filenames, sorted in descending order.
+        """
+        directory, _ = self.getPublishFileInfo()
+        outputRigName = self.builderData.get(constants.RIG_NAME)
+
+        versionsDirectory = os.path.join(directory, self.VERSIONS_DIRECTORY)
+        existingVersionFiles = []
+
+        if not os.path.exists(versionsDirectory):
+            return None
+
+        # Iterate over all files in the directory
+        for filename in os.listdir(versionsDirectory):
+            if filename.startswith(outputRigName) and filename.lower().endswith(('.ma', '.mb')):
+                existingVersionFiles.append(filename)
+
+        existingVersionFiles.sort(reverse=True)
+        return existingVersionFiles
+
     def getComponentFromContainer(self, container: str) -> Component:
         """
-        Get the component object from a container name
+        Get the component object from a container
+
         :param container: name of the container to get the component for
         :return: component object
         """
         name = cmds.getAttr("{}.name".format(container))
-        componentType = cmds.getAttr("{}.type".format(container))
 
-        return self.findComponent(name, componentType)
+        return self.findComponent(name)
 
-    def findComponent(self, name: str, type: str = None) -> Component:
+    def findComponent(self, name: str) -> Component or None :
         """
         Find a component within the self.componentList.
+
         :param name: name of the component to find
-        :param type: type of the component to find
         :return: component object
         """
-        for cmpt in self.componentList:
-            _name = cmpt.name
-            _type = cmpt.componentType
+        for component in self.componentList:
+            _name = component.name
+            _type = component.componentType
             if name == _name:
                 if not type:
-                    return cmpt
+                    return component
                 elif type == _type:
-                    return cmpt
+                    return component
         logger.warning("No component: {} with type: {} found within current build".format(name, type))
         return None
 
     # --------------------------------------------------------------------------------
     # SET
     # --------------------------------------------------------------------------------
-    def setComponents(self, cmpts: typing.List[Component]) -> None:
+    def setComponents(self, components: typing.List[Component]) -> None:
         """
-        Set the self.cmpt_list
+        Set the `componentList`
 
-        :param cmpts: list of components to set
+        :param components: list of components to set
         """
-        cmpts = common.toList(cmpts)
-        self.componentList = cmpts
+        components = common.toList(components)
+        self.componentList = components
 
-    def appendComponents(self, cmpts: typing.List[Component]) -> None:
+    def appendComponents(self, components: typing.List[Component]) -> None:
         """
         append a component
 
-        :param cmpts: list of components to append
+        :param components: list of components to append
         """
-        cmpts = common.toList(cmpts)
-        for cmpt in cmpts:
-            self.componentList.append(cmpt)
+        components = common.toList(components)
+        for component in components:
+            self.componentList.append(component)
 
     def setRigFile(self, rigFile: str) -> None:
         """
         Set the rig file.
-        This will update the self.rigFile and self.path variables
+        This will update the `rigFile` and `path` parameters
 
         :param rigFile: Path of the rig file to set.
         """
@@ -750,18 +773,25 @@ class Builder(object):
         rigData.read(self.rigFile)
         data = rigData.getData()
         if "rig_env" not in data:
-            rigEnviornmentPath = '../'
+            rigEnvironmentPath = '../'
         else:
-            rigEnviornmentPath = data["rig_env"]
-        self.path = os.path.abspath(os.path.join(self.rigFile, rigEnviornmentPath))
+            rigEnvironmentPath = data["rig_env"]
+        self.path = os.path.abspath(os.path.join(self.rigFile, rigEnvironmentPath))
+        self.builderData = data
 
-        # also set the rig file and rig enviornment into eniviornment varriables to access in other scripts if needed.
+        # also set the rig file and rig environment into environment variables to access in other scripts if needed.
         os.environ['RIGAMJIG_FILE'] = self.rigFile
         os.environ['RIGAMJIG_ENV'] = self.path
 
-        logger.info('\nRig Enviornment path: {0}'.format(self.path))
+        logger.info('\nRig Environment path: {0}'.format(self.path))
 
     def saveRigFile(self, dataDict):
+        """
+        Save a rig file.
+
+        :param dataDict: dictionary of rig data to save to the rigFile
+        :return:
+        """
         data = abstract_data.AbstractData()
         data.read(self.rigFile)
         newData = data.getData()
@@ -776,7 +806,7 @@ class Builder(object):
     @staticmethod
     def getRigData(rigFile: str, key: str) -> typing.Any:
         """
-        read the data from the self.rig_file. Kept here for compatability of old code. Should probably be deleted!
+        read the data from the self.rig_file. Kept here for compatibility of old code. Should probably be deleted!
 
         :param rigFile: path to thr rig file to get date from
         :param key: name of the dictionary key to get the data from

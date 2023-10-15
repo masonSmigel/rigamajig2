@@ -47,11 +47,6 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         if len(self.input) != 6:
             raise RuntimeError('Input list must have a length of 6')
 
-    def setInitalData(self):
-        side = "_{}".format(self.side) if self.side else ""
-        # self.cmptSettings['ikSpaces']['hip'] = self.cmptSettings['limbSwingName'] + side
-        # self.cmptSettings['pvSpaces']['foot'] = self.cmptSettings['limb_ikName'] + side
-
     def createBuildGuides(self):
         """ create build guides_hrc """
         super(Leg, self).createBuildGuides()

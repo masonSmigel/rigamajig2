@@ -5,21 +5,20 @@
     file: splineSquash.py
     author: masonsmigel
     date: 10/2022
-    discription: spline based squash component
+    description: spline based squash component
 
 """
 
 import maya.cmds as cmds
-import rigamajig2.maya.cmpts.base
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.transform as rig_transform
+
 import rigamajig2.maya.attr as rig_attr
+import rigamajig2.maya.cmpts.base
 import rigamajig2.maya.joint as joint
-import rigamajig2.shared.common as common
-import rigamajig2.maya.meta as meta
-import rigamajig2.maya.node as node
-import rigamajig2.maya.rig.spline as spline
 import rigamajig2.maya.mathUtils as mathUtils
+import rigamajig2.maya.rig.control as rig_control
+import rigamajig2.maya.rig.spline as spline
+import rigamajig2.maya.transform as rig_transform
+import rigamajig2.shared.common as common
 
 
 class SplineSquash(rigamajig2.maya.cmpts.base.Base):

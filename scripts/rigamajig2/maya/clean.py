@@ -5,7 +5,7 @@
     file: clean.py
     author: masonsmigel
     date: 01/2021
-    discription: functions to clean up scenes
+    description: functions to clean up scenes
 """
 # PYTHON
 import logging

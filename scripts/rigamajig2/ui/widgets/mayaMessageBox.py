@@ -5,7 +5,7 @@
     file: mayaMessageBox.py.py
     author: masonsmigel
     date: 09/2023
-    discription: 
+    description: 
 
 """
 

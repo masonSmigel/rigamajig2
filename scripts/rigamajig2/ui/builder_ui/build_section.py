@@ -99,7 +99,7 @@ class BuildSection(builderSection.BuilderSection):
         super()._setBuilder(builder)
         self.psdDataLoader.clear()
         self.postScriptRunner.clearScript()
-        self.psdDataLoader.setRelativePath(self.builder.getRigEnviornment())
+        self.psdDataLoader.setRelativePath(self.builder.getRigEnvironment())
 
         scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT, asDict=True)
         self.postScriptRunner.addScriptsWithRecursionData(scripts)
@@ -142,7 +142,7 @@ class BuildSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _completeBuild(self):
         """ Execute a complete rig build (steps initialize - finalize) """
-        self.builder.initalize()
+        self.builder.initialize()
         self.builder.build()
         self.builder.connect()
         self.builder.finalize()

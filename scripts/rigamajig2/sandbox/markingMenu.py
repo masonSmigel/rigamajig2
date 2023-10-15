@@ -5,14 +5,13 @@
     file: markingMenu.py.py
     author: masonsmigel
     date: 12/2022
-    discription: 
+    description: 
 
 """
 import maya.cmds as cmds
 
-
-import rigamajig2.maya.joint
 import rigamajig2.maya.curve
+import rigamajig2.maya.joint
 
 
 def mirrorJointSelection(mode="translate"):

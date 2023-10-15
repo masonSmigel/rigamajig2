@@ -5,13 +5,11 @@
     file: QLine.py
     author: masonsmigel
     date: 07/2023
-    discription: 
+    description: 
 
 """
 
 from PySide2 import QtWidgets
-from PySide2 import QtGui
-from PySide2 import QtCore
 
 
 class QLine(QtWidgets.QFrame):

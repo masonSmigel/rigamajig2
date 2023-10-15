@@ -9,7 +9,6 @@
 
 """
 import os
-from rigamajig2.shared import logger
 
 import maya.cmds as cmds
 import rigamajig2.maya.data.deformLayer_data as deformLayer_data
@@ -116,10 +115,10 @@ class TestDeformLayers(TestCase):
 
         self.testImportDeformLayerData()
 
-        with logger.DisableLogger():
-            newBlendshape = deformLayer.transferAllDeformerTypes("pSphere1_bshp", "pSphere1", "d2_pSphere1_layer03")
-            newSkincluster = deformLayer.transferAllDeformerTypes("pSphere1_skinCluster", "pSphere1", "d2_pSphere1_layer03")
-            newDeltaMush = deformLayer.transferAllDeformerTypes("pSphere1_deltaMush", "pSphere1", "d2_pSphere1_layer03")
+        # with logger.DisableLogger():
+        newBlendshape = deformLayer.transferAllDeformerTypes("pSphere1_bshp", "pSphere1", "d2_pSphere1_layer03")
+        newSkincluster = deformLayer.transferAllDeformerTypes("pSphere1_skinCluster", "pSphere1", "d2_pSphere1_layer03")
+        newDeltaMush = deformLayer.transferAllDeformerTypes("pSphere1_deltaMush", "pSphere1", "d2_pSphere1_layer03")
 
         deformerStack = deformer.getDeformerStack("d2_pSphere1_layer03")
 

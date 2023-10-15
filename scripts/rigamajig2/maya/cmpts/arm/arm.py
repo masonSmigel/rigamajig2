@@ -13,7 +13,7 @@ import rigamajig2.maya.transform as rig_transform
 
 class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
     """
-    Arm component (sublcass of the limb.limb)
+    Arm component (subclass of the limb.limb)
     """
     VERSION_MAJOR = 1
     VERSION_MINOR = 0
@@ -26,11 +26,11 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
     def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         """
         :param str name: component name. To add a side use a side token
-        :param list input: list of 4 joints starting with the clavical and ending with the wrist.
+        :param list input: list of 4 joints starting with the clavicle and ending with the wrist.
         :param float int size: default size of the controls.
         :param str rigParent: connect the component to a rigParent.
-        :param dict ikSpaces: dictionary of key and space for the ik control. formated as {"attrName": object}
-        :param dict pvSpaces: dictionary of key and space for the pv control. formated as {"attrName": object}
+        :param dict ikSpaces: dictionary of key and space for the ik control. formatted as {"attrName": object}
+        :param dict pvSpaces: dictionary of key and space for the pv control. formatted as {"attrName": object}
         :param bool useProxyAttrs: use proxy attributes instead of an ikfk control
         """
         # noinspection PyTypeChecker
@@ -42,14 +42,8 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.defineParameter(parameter='limb_autoWristName', value=self.name.split("_")[0] + "_autoWrist",
                              dataType="string")
 
-    def setInitalData(self):
-        # side = "_{}".format(self.side) if self.side else ""
-        # self.cmptSettings['ikSpaces']['shoulder'] = self.cmptSettings['limbSwingName'] + side
-        # self.cmptSettings['pvSpaces']['hand'] = self.cmptSettings['limb_ikName'] + side
-        pass
-
     def initialHierarchy(self):
-        """Build the initial hirarchy"""
+        """Build the initial hierarchy"""
         super(Arm, self).initialHierarchy()
 
         self.limbAutoAim = rig_control.create(
@@ -63,7 +57,7 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
             parent=self.limbGimbleIk.name,
             shape='plus',
             position=cmds.xform(self.input[3], q=True, ws=True, t=True)
-            )
+        )
 
     def rigSetup(self):
         """Add the rig setup"""
@@ -72,7 +66,7 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
         cmds.delete(cmds.listRelatives(self.ikfk.getIkJointList()[-1], ad=True, type='orientConstraint'))
         cmds.orientConstraint(self.limbAutoAim.name, self.ikfk.getIkJointList()[-1], mo=True)
 
-        # Setup the autoAim stuff. This is basicly like the interpolation joint stuff.
+        # Setup the autoAim stuff. This is basically like the interpolation joint stuff.
         rig_attr.createAttr(self.paramsHierarchy, "autoWrist", "float", value=0, minValue=0, maxValue=1)
         rig_control.connectControlVisiblity(self.paramsHierarchy, "autoWrist", self.limbAutoAim.name)
 

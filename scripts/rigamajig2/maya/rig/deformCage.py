@@ -5,7 +5,7 @@
     file: deformCage.py
     author: masonsmigel
     date: 12/2022
-    discription: This module can be used to build a deformation cage for model
+    description: This module can be used to build a deformation cage for model
 
     NOTE: This function requires ngSkinTools
 

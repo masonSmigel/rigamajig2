@@ -5,7 +5,7 @@
     file: chainSpline.py
     author: masonsmigel
     date: 11/2022
-    discription: 
+    description: 
 
 """
 
@@ -60,7 +60,7 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         super(ChainSpline, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        # initalize cmpt settings.
+        # initialize cmpt settings.
         self.defineParameter(parameter="numberMainControls", value=4, dataType="int")
         self.defineParameter(parameter="closed", value=False, dataType="bool")
         self.defineParameter(parameter="aimAxis", value="x", dataType="string")

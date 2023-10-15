@@ -5,15 +5,13 @@
     file: addCurveToLibarary.py
     author: masonsmigel
     date: 11/2022
-    discription: 
+    description: 
 
 """
 
-import maya.cmds as cmds 
+import maya.cmds as cmds
 
 from rigamajig2.maya.data import curve_data
-
-
 
 CURVE_DATA_PATH = '/Users/masonsmigel/Documents/dev/maya/rigamajig2/scripts/rigamajig2/maya/rig/controlShapes.data'
 

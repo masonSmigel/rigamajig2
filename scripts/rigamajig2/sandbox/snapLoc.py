@@ -5,13 +5,14 @@
     file: locSnapUtil.py
     author: masonsmigel
     date: 07/2022
-    discription: locator snapping utility tool
+    description: locator snapping utility tool
 
 """
 
 import math
-import maya.cmds as cmds
+
 import maya.api.OpenMaya as om2
+import maya.cmds as cmds
 
 
 def createNode(name=None, type='locator'):

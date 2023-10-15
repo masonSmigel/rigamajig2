@@ -5,7 +5,7 @@
     file: SHAPES_data.py
     author: masonsmigel
     date: 03/2023
-    discription: 
+    description: 
 
 """
 import linecache

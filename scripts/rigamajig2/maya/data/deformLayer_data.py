@@ -5,17 +5,18 @@
     file: deformLayer_data.py
     author: masonsmigel
     date: 09/2022
-    discription: This is the json module for saving maya deformation data
+    description: This is the json module for saving maya deformation data
 
 
 """
 from collections import OrderedDict
-import rigamajig2.maya.data.maya_data as maya_data
+
 import maya.cmds as cmds
 
-from rigamajig2.shared import common
-from rigamajig2.maya.rig import deformLayer
+import rigamajig2.maya.data.maya_data as maya_data
 from rigamajig2.maya import meta
+from rigamajig2.maya.rig import deformLayer
+from rigamajig2.shared import common
 
 
 class DeformLayerData(maya_data.MayaData):

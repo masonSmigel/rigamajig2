@@ -5,19 +5,16 @@
     file: blendshapeUtils.py
     author: masonsmigel
     date: 10/2022
-    discription: A bunch of usefull utilities for working with blendshapes
+    description: A bunch of usefull utilities for working with blendshapes
 
 """
 import maya.cmds as cmds
 
-from rigamajig2.shared import common
-
+from rigamajig2.maya import attr
+from rigamajig2.maya import blendshape
 from rigamajig2.maya import skinCluster
 from rigamajig2.maya.data import skin_data
-
-from rigamajig2.maya import blendshape
-from rigamajig2.maya import attr
-from rigamajig2.maya import shape
+from rigamajig2.shared import common
 
 
 def createSplitBlendshapes(targets, splitJoints, splitMesh, skinFile=None, base=None):

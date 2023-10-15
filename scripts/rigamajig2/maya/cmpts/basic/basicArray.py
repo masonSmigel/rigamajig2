@@ -5,14 +5,15 @@
     file: basicArray.py
     author: masonsmigel
     date: 10/2022
-    discription: 
+    description: 
 
 """
 import maya.cmds as cmds
+
 import rigamajig2.maya.cmpts.base
-from rigamajig2.shared import common
-from rigamajig2.maya.cmpts.basic import basic
 from rigamajig2.maya import meta
+from rigamajig2.maya.cmpts.basic import basic
+from rigamajig2.shared import common
 
 
 class BasicArray(rigamajig2.maya.cmpts.base.Base):
@@ -53,7 +54,7 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="addSdk", value=False, dataType="bool")
         self.defineParameter(parameter="addBpm", value=False, dataType="bool")
 
-    def setInitalData(self):
+    def setInitialData(self):
         """ Build the joint name attributes"""
 
         inputBaseNames = [x.rsplit("_bind", 1)[0] for x in self.input]
@@ -64,7 +65,7 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
             self.defineParameter(parameter=jointNameStr, value=inputBaseNames[i], dataType="string")
 
     def initialHierarchy(self):
-        """ Build the inital hierarchy"""
+        """ Build the initial hierarchy"""
         super(BasicArray, self).initialHierarchy()
 
         self.basicComponentList = list()
@@ -82,28 +83,28 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
             component.defineParameter("addSdk", self.addSdk)
             component.defineParameter("addBpm", self.addBpm)
 
-            component._initalizeComponent()
+            component._initializeComponent()
             cmds.container(self.container, e=True, f=True, addNode=component.getContainer())
             meta.tag(component.getContainer(), 'subComponent')
             self.basicComponentList.append(component)
 
     def rigSetup(self):
-        """Setup the rig, for this component that includes buidling the basic components"""
+        """Setup the rig, for this component that includes building the basic components"""
 
-        for cmpt in self.basicComponentList:
-            cmpt._buildComponent()
-            cmds.parent(cmpt.paramsHierarchy, self.paramsHierarchy)
-            cmds.parent(cmpt.control.orig, self.controlHierarchy)
-            cmds.parent(cmpt.spacesHierarchy, self.spacesHierarchy)
+        for component in self.basicComponentList:
+            component._buildComponent()
+            cmds.parent(component.paramsHierarchy, self.paramsHierarchy)
+            cmds.parent(component.control.orig, self.controlHierarchy)
+            cmds.parent(component.spacesHierarchy, self.spacesHierarchy)
 
             if self.addBpm:
                 self.bpmHierarchy = cmds.createNode("transform", name="{}_bpm_hrc".format(self.name),
                                                     parent=self.rootHierarchy)
-                cmds.parent(cmpt.bpmHierarchy, self.bpmHierarchy)
+                cmds.parent(component.bpmHierarchy, self.bpmHierarchy)
 
-            cmds.delete(cmpt.rootHierarchy)
+            cmds.delete(component.rootHierarchy)
 
     def connect(self):
         """ run the setup step of each component"""
-        for cmpt in self.basicComponentList:
-            cmpt._connectComponent()
+        for component in self.basicComponentList:
+            component._connectComponent()

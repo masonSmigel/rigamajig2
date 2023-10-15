@@ -5,11 +5,12 @@
     file: quickRename.py
     author: masonsmigel
     date: 04/2023
-    discription: 
+    description: 
 
 """
 
 import sys
+
 import maya.cmds as cmds
 from PySide2 import QtWidgets
 from maya import OpenMayaUI as omui

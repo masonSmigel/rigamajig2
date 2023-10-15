@@ -16,7 +16,7 @@ from rigamajig2.maya.rig.control import CONTROLTAG
 logger = logging.getLogger(__name__)
 
 UNBUILT_STEP = 0
-INTIALIZE_STEP = 1
+INITIALIZE_STEP = 1
 GUIDE_STEP = 2
 BUILD_STEP = 3
 CONNECT_STEP = 4
@@ -51,7 +51,7 @@ class Base(object):
         :type input: list
         :param size: default size of the controls:
         :type size: float
-        :param rigParent: node to parent to connect the component to in the heirarchy
+        :param rigParent: node to parent to connect the component to in the hierarchy
         :type rigParent: str
         :param enabled: If set to false the component will not build
         """
@@ -87,13 +87,14 @@ class Base(object):
 
     def help(self):
         """
+        print useful component info to the script editor to help debugging.
         """
         returnString = "-" * 80
         returnString += f"\nRigamajig Component: <{self.__class__.__module__} object at {hex(id(self))}>\n"
         for key in self._componentParameters:
             tooltip = self._componentParameters[key].get('tooltip')
-            tooltip_string = f"\t({tooltip})" if tooltip else ""
-            returnString += f"\t{key} = {self._componentParameters[key]['value']} {tooltip_string}\n"
+            tooltipString = f"\t({tooltip})" if tooltip else ""
+            returnString += f"\t{key} = {self._componentParameters[key]['value']} {tooltipString}\n"
 
         returnString += "-" * 80
         print(returnString)
@@ -143,20 +144,19 @@ class Base(object):
 
         return componentInstance
 
-    def _initalizeComponent(self):
+    def _initializeComponent(self):
         """
-        setup all intialize functions for the component
+        setup all initialize functions for the component
 
         process order:
             self.createContainer
         """
-        if self.getStep() < INTIALIZE_STEP and self.enabled:
-            # fullDict = dict(self.metaData, **self.cmptSettings)
-            self.setInitalData()
+        if self.getStep() < INITIALIZE_STEP and self.enabled:
+            self.setInitialData()
             self.setStep(1)
 
         else:
-            logger.debug('component {} already initalized.'.format(self.name))
+            logger.debug('component {} already initialized.'.format(self.name))
 
     def _guideComponent(self):
         """
@@ -244,7 +244,10 @@ class Base(object):
             logger.debug('component {} already finalized.'.format(self.name))
 
     def _optimizeComponent(self):
-        """"""
+        """
+        Optimize the comonent
+        :return:
+        """
         # self._updateClassParameters()
 
         if self.getStep() != OPTIMIZE_STEP:
@@ -264,9 +267,9 @@ class Base(object):
         """Add additional guides"""
         pass
 
-    def setInitalData(self):
+    def setInitialData(self):
         """
-        Set inital component data.
+        Set initial component data.
         This allows you to set component data within subclasses.
         """
         pass
@@ -294,7 +297,7 @@ class Base(object):
             rigamajig2.maya.container.addNodes(self.metadataNode, self.container, force=True)
 
     def initialHierarchy(self):
-        """Setup the inital Hirarchy. implement in subclass"""
+        """Setup the initial Hierarchy. implement in subclass"""
         self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
         self.paramsHierarchy = cmds.createNode('transform', n=self.name + '_params',
                                                parent=self.rootHierarchy)
@@ -326,7 +329,7 @@ class Base(object):
         pass
 
     def initConnect(self):
-        """initalize the connection. implement in subclass"""
+        """initialize the connection. implement in subclass"""
         pass
 
     def connect(self):
@@ -338,7 +341,7 @@ class Base(object):
         pass
 
     def publishNodes(self):
-        """Publush nodes. implement in subclass"""
+        """Publish nodes. implement in subclass"""
         rigamajig2.maya.container.addParentAnchor(self.rootHierarchy, container=self.container)
         rigamajig2.maya.container.addChildAnchor(self.rootHierarchy, container=self.container)
 
@@ -379,7 +382,7 @@ class Base(object):
         set the pipeline step.
 
         step 0 - unbuilt
-        step 1 - initalize component
+        step 1 - initialize component
         step 2 - guide component
         step 3 - build component
         step 4 - connect component
@@ -391,7 +394,7 @@ class Base(object):
         """
         if not cmds.objExists("{}.{}".format(self.container, 'build_step')):
             rigamajig2.maya.attr.createEnum(self.container, 'build_step', value=0,
-                                            enum=['unbuilt', 'initalize', 'guide', 'build', 'connect', 'finalize',
+                                            enum=['unbuilt', 'initialize', 'guide', 'build', 'connect', 'finalize',
                                                   'optimize'],
                                             keyable=False, channelBox=False)
 
@@ -478,7 +481,7 @@ class Base(object):
 
     def _updateClassParameters(self):
         """
-        loadSettings meta data from the settings node into a dictionary.
+        loadSettings metadata from the settings node into a dictionary.
         Only updates the value of the component parameters
         """
         newComponentData = self._componentParameters.copy()
@@ -514,7 +517,7 @@ class Base(object):
 
     def getComponentData(self):
         """Get all component Data """
-        # ensure we are saving the most up to date versions of our code
+        # ensure we are saving the most up-to-date versions of our code
         self._updateClassParameters()
 
         # create an info dictionary with the important component settings.
@@ -530,7 +533,7 @@ class Base(object):
         logger.debug(infoDict)
         return infoDict
 
-    def getComponenetType(self):
+    def getComponentType(self):
         """Get the component type"""
         return self.componentType
 
@@ -565,16 +568,3 @@ class Base(object):
     #
     #     return setter
 
-    @classmethod
-    def testBuild(cls, cmpt):
-        """
-        Static method to run the initialize, build, connect, finalize and optimize steps
-        :param cmpt: component to test the build.
-        :return:
-        """
-        cmpt._initalizeComponent()
-        cmpt._guideComponent()
-        cmpt._buildComponent()
-        cmpt._connectComponent()
-        cmpt._finalizeComponent()
-        cmpt._optimizeComponent()

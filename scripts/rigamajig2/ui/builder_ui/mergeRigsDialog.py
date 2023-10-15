@@ -5,7 +5,7 @@
     file: mergeRigsDialog.py.py
     author: masonsmigel
     date: 01/2023
-    discription: 
+    description: 
 
 """
 # PYTHON

@@ -5,21 +5,19 @@
     file: jaw.py
     author: masonsmigel
     date: 09/2022
-    discription: create a jaw control
+    description: create a jaw control
 
 """
 
 import maya.cmds as cmds
+
 import rigamajig2.maya.cmpts.base
-from rigamajig2.shared import common
-from rigamajig2.maya.rig import control
-from rigamajig2.maya.rig import spaces
 from rigamajig2.maya import attr
-from rigamajig2.maya import transform
 from rigamajig2.maya import joint
-from rigamajig2.maya import meta
 from rigamajig2.maya import node
-from rigamajig2.maya import hierarchy
+from rigamajig2.maya import transform
+from rigamajig2.maya.rig import control
+from rigamajig2.shared import common
 
 
 class Jaw(rigamajig2.maya.cmpts.base.Base):

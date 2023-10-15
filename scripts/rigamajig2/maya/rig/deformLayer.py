@@ -5,7 +5,7 @@
     file: deformLayer.py
     author: masonsmigel
     date: 09/2022
-    discription: This module contains a class to manage and setup deformation layers
+    description: This module contains a class to manage and setup deformation layers
 
 """
 # PYTHON

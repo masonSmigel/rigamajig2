@@ -5,6 +5,6 @@
     file: __init__.py.py
     author: masonsmigel
     date: 11/2022
-    discription: 
+    description: 
 
 """

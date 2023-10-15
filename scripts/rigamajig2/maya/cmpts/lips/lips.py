@@ -5,7 +5,7 @@
     file: lips.py
     author: masonsmigel
     date: 12/2022
-    discription: component to build the lips
+    description: component to build the lips
 
 """
 import maya.cmds as cmds

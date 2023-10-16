@@ -35,6 +35,7 @@ from rigamajig2.maya import naming as naming
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
+from rigamajig2.ui.builder_ui import editComponent_dialog
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
 from rigamajig2.ui.widgets import QPushButton, mayaMessageBox
@@ -207,7 +208,7 @@ class SetupSection(builderSection.BuilderSection):
             confirm = mayaMessageBox.MayaMessageBox(
                 title="Save Guides",
                 message="There are no guides in the scene. Are you sure you want to continue?"
-                )
+            )
             confirm.setWarning()
             confirm.setButtonsYesNoCancel()
 
@@ -548,7 +549,6 @@ class ComponentManager(QtWidgets.QWidget):
     @QtCore.Slot()
     def _editComponentParameters(self):
         """ Open the Edit component parameters dialog"""
-        from rigamajig2.ui.builder_ui import editComponent_dialog
 
         if not self.editComponentDialog:
             self.editComponentDialog = editComponent_dialog.EditComponentDialog()

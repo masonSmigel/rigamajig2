@@ -729,11 +729,9 @@ class Builder(object):
             _name = component.name
             _type = component.componentType
             if name == _name:
-                if not type:
-                    return component
-                elif type == _type:
-                    return component
-        logger.warning("No component: {} with type: {} found within current build".format(name, type))
+                return component
+
+        logger.warning("No component: '{}' found within current build".format(name, type))
         return None
 
     # --------------------------------------------------------------------------------

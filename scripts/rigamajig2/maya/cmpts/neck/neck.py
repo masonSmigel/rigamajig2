@@ -2,20 +2,17 @@
 neck component
 """
 import maya.cmds as cmds
+
+import rigamajig2.maya.attr as rig_attr
 import rigamajig2.maya.cmpts.base
+import rigamajig2.maya.hierarchy as hierarchy
+import rigamajig2.maya.joint as rig_joint
 import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.rig.spaces as spaces
 import rigamajig2.maya.rig.live as live
+import rigamajig2.maya.rig.spaces as spaces
 import rigamajig2.maya.rig.spline as spline
 import rigamajig2.maya.transform as rig_transform
-import rigamajig2.maya.mathUtils as mathUtils
-import rigamajig2.maya.constrain as constrain
-import rigamajig2.maya.node as node
 import rigamajig2.shared.common as common
-import rigamajig2.maya.hierarchy as hierarchy
-import rigamajig2.maya.attr as rig_attr
-import rigamajig2.maya.joint as rig_joint
-import rigamajig2.maya.meta as meta
 
 HEAD_PERCENT = 0.7
 
@@ -55,8 +52,8 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="headTangent_name", value="headTan", dataType="string")
         self.defineParameter(parameter="neckTangent_name", value="neckTan", dataType="string")
         self.defineParameter(parameter="skull_name", value="skull", dataType="string")
-        self.defineParameter(parameter="neckSpaces", value=dict(), dataType="complex")
-        self.defineParameter(parameter="headSpaces", value=dict(), dataType="complex")
+        self.defineParameter(parameter="neckSpaces", value=dict(), dataType="dict")
+        self.defineParameter(parameter="headSpaces", value=dict(), dataType="dict")
 
     def createBuildGuides(self):
         """Create the build guides"""

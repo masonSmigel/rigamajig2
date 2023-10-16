@@ -61,9 +61,10 @@ class InputDialog(QtWidgets.QDialog):
 # pylint: disable = too-many-public-methods
 class MayaDict(QtWidgets.QWidget):
     """
-    Ui to setup simple dictionaries of maya objects. Simple dictionaries conist of a key and value.
+    Ui to set up simple dictionaries of maya objects. Simple dictionaries conist of a key and value.
     Like an enum attribute. They are most commonly used for spaces.
     """
+    itemsChanged = QtCore.Signal(str)
 
     def __init__(self, label=None):
         """
@@ -182,6 +183,7 @@ class MayaDict(QtWidgets.QWidget):
         item.setData(QtCore.Qt.UserRole, 1, fullDagPath)
 
         self.mayaObjectDict.addTopLevelItem(item)
+        self.itemsChanged.emit(item.text(0))
 
     def setItems(self, dictonary):
         """ Set the list widget to a list of items"""
@@ -243,10 +245,12 @@ class MayaDict(QtWidgets.QWidget):
         for item in selectedItems:
             index = self.mayaObjectDict.indexOfTopLevelItem(item)
             self.mayaObjectDict.takeTopLevelItem(index)
+            self.itemsChanged.emit(item.text(0))
 
     def clearAll(self):
         """ Clear the whole widget"""
         self.mayaObjectDict.clear()
+        self.itemsChanged.emit("")
 
 
 class TestDialog(QtWidgets.QDialog):

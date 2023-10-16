@@ -53,8 +53,8 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="lipsBotName", value=inputBaseNames[3], dataType="string")
         self.defineParameter(parameter="lips_lName", value=inputBaseNames[4] + "_l", dataType="string")
         self.defineParameter(parameter="lips_rName", value=inputBaseNames[5] + "_r", dataType="string")
-        self.defineParameter(parameter="jawOpenTyOffset", value=-0.2, dataType="int")
-        self.defineParameter(parameter="jawOpenTzOffset", value=-0.4, dataType="int")
+        self.defineParameter(parameter="jawOpenTyOffset", value=-0.2, dataType="float")
+        self.defineParameter(parameter="jawOpenTzOffset", value=-0.4, dataType="float")
 
     def initialHierarchy(self):
         """Build the inital rig hierarchy"""

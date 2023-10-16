@@ -198,16 +198,16 @@ def validateDataType(val):
             val = literal_eval(val)
         except:
             return "string"
-        if issubclass(type(val), dict): return 'complex'
-        if issubclass(type(val), list): return 'complex'
-        if issubclass(type(val), tuple): return 'complex'
+        if issubclass(type(val), dict): return 'dict'
+        if issubclass(type(val), list): return 'list'
+        if issubclass(type(val), tuple): return 'list'
     if issubclass(type(val), unicode): return 'string'
     if issubclass(type(val), bool): return 'bool'
-    if issubclass(type(val), int): return 'int'
     if issubclass(type(val), float): return 'float'
-    if issubclass(type(val), dict): return 'complex'
-    if issubclass(type(val), list): return 'complex'
-    if issubclass(type(val), tuple): return 'complex'
+    if issubclass(type(val), int): return 'int'
+    if issubclass(type(val), dict): return 'dict'
+    if issubclass(type(val), list): return 'list'
+    if issubclass(type(val), tuple): return 'list'
 
 
 class MetaNode(object):
@@ -282,22 +282,20 @@ class MetaNode(object):
                         'float': {'at': 'double'},
                         'double': {'at': 'double'},
                         'enum': {'at': 'enum'},
-                        'complex': {'dt': 'string'}}
+                        'list': {'dt': 'string'},
+                        'dict': {'dt': 'string'}
+                        }
 
         if not attrType or attrType not in dataTypeDict:
             attrType = validateDataType(value)
             if attrType is None:
                 return
-
-        if attrType == 'complex':
+        if attrType == 'dict' or attrType == "list":
             value = self.serializeComplex(value)
             attrType = validateDataType(value)
         # if the attribute does not exist then add the attribute
         if not cmds.objExists("{}.{}".format(self.node, attr)):
             cmds.addAttr(self.node, longName=attr, **dataTypeDict[attrType])
-        else:
-            # Todo: try to change the attribute data if it doesnt match
-            pass
 
         rig_attr.setPlugValue("{}.{}".format(self.node, attr), value=value)
 

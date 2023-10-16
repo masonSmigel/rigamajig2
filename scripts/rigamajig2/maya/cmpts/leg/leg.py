@@ -15,7 +15,7 @@ import rigamajig2.maya.transform as rig_transform
 
 class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
     """
-    Leg Component  (sublcass of the limb.limb)
+    Leg Component  (subclass of the limb.limb)
     The leg component includes a foot.
     """
     VERSION_MAJOR = 1
@@ -32,8 +32,8 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         :param list input: list of 6 joints starting with the pelvis and ending with the toes.
         :param float int size: default size of the controls.
         :param str rigParent: connect the component to a rigParent.
-        :param dict ikSpaces: dictionary of key and space for the ik control. formated as {"attrName": object}
-        :param dict pvSpaces: dictionary of key and space for the pv control. formated as {"attrName": object}
+        :param dict ikSpaces: dictionary of key and space for the ik control. formatted as {"attrName": object}
+        :param dict pvSpaces: dictionary of key and space for the pv control. formatted as {"attrName": object}
         :param bool useProxyAttrs: use proxy attributes instead of an ikfk control
         """
         super(Leg, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
@@ -58,7 +58,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.toeGuide = rig_control.createGuide("{}_toe".format(self.name), parent=self.guidesHierarchy)
 
     def initialHierarchy(self):
-        """Build the initial hirarchy"""
+        """Build the initial hierarchy"""
         super(Leg, self).initialHierarchy()
         self.toesFk = rig_control.createAtObject(
             self.toes_fkName,
@@ -71,8 +71,8 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
             shape='square',
             shapeAim='x',
             xformObj=self.input[4]
-            )
-        # create ik piviot controls
+        )
+        # create ik pivot controls
         self.heelIk = rig_control.createAtObject(
             self.heel_ikName,
             self.side,

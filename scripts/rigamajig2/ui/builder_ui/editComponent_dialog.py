@@ -9,70 +9,66 @@
 
 """
 import logging
-# PYTHON
-import sys
+import typing
+from functools import partial
 
-import maya.OpenMayaUI as omui
-# MAYA
 import maya.cmds as cmds
 from PySide2 import QtCore
+from PySide2 import QtGui
 from PySide2 import QtWidgets
-from shiboken2 import wrapInstance
 
 from rigamajig2.maya import meta
-# RIGAMJIG
+from rigamajig2.maya.cmpts.base import Base
 from rigamajig2.ui.builder_ui.widgets import mayaListWidget, mayaDictWidget, mayaStringWidget
+from rigamajig2.ui.widgets import mayaDialog
 
 logger = logging.getLogger(__name__)
 
 
-class EditComponentDialog(QtWidgets.QDialog):
+def getNiceName(string):
+    """
+    Format a camelCase string into a Nice Name
+    :param string:
+    :return:
+    """
+    result = string[0].capitalize()
+    previousCharacterUppercase = False
+    for char in string[1:]:
+        if char.isupper() and not previousCharacterUppercase:
+            result += " " + char
+            previousCharacterUppercase = True
+        elif char == "_" or char == "-":
+            result += " "
+        else:
+            result += char
+            previousCharacterUppercase = False
+    return result
+
+
+class EditComponentDialog(mayaDialog.MayaDialog):
     """Edit component dialog UI"""
     WINDOW_TITLE = "Edit Component: "
 
-    dialogInstance = None
+    WINDOW_SIZE = (340, 600)
 
     windowClosedSignal = QtCore.Signal(bool)
 
     def __init__(self):
-        """ Constructor for the builder dialog"""
-        if sys.version_info.major < 3:
-            mayaMainWindow = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
-        else:
-            mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+        super().__init__()
 
-        super(EditComponentDialog, self).__init__(mayaMainWindow)
+        self.componentWidgets: typing.List[typing.Tuple[str, QtWidgets.QWidget]] = list()
 
-        self.setWindowTitle(self.WINDOW_TITLE)
-        if cmds.about(ntOS=True):
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        elif cmds.about(macOS=True):
-            self.setProperty("saveWindowPref", True)
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        self.setMinimumSize(280, 600)
-
-        # store a list of all component level widgets.
-        # The list stores items in a tuple of (parameter name, QWidget)
-        # This allows us to keep track of what widget goes to which parameter so they can be re-applied.
-        self.componentWidgets = list()
-
-        # store the current component python instance
-        self.currentComponent = None
-
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
+        self.currentComponent: Base or None = None
 
     def createWidgets(self):
         """ Create Widgets"""
         self.nameLineEdit = QtWidgets.QLineEdit()
+        self.nameLineEdit.setReadOnly(True)
         self.typeLineEdit = QtWidgets.QLineEdit()
         self.typeLineEdit.setReadOnly(True)
-        self.inputMayaList = mayaListWidget.MayaList()
-        self.inputMayaList.setHeight(120)
-        self.rigParentMayaString = mayaStringWidget.MayaString()
-        self.tagLineEdit = QtWidgets.QLineEdit()
-        self.enabledCheckbox = QtWidgets.QCheckBox()
+
+        self.selectContainerButton = QtWidgets.QPushButton("Select Container")
+        self.selectContainerButton.setIcon(QtGui.QIcon(":container.svg"))
 
         self.applyButton = QtWidgets.QPushButton("Apply Parameters")
         self.applyButton.setFixedHeight(35)
@@ -81,61 +77,47 @@ class EditComponentDialog(QtWidgets.QDialog):
     def createLayouts(self):
         """ Create Layouts"""
         self.mainLayout = QtWidgets.QVBoxLayout(self)
+        self.mainLayout.setContentsMargins(4, 4, 4, 4)
+        self.mainLayout.setSpacing(4)
 
         # stuff for the common widget
         commonLayout = QtWidgets.QVBoxLayout()
-        commonLayout.setContentsMargins(0, 0, 0, 0)
         commonLayout.addSpacing(4)
+        commonLayout.setContentsMargins(4, 4, 4, 4)
 
         # setup the form layout
         commonFormLayout = QtWidgets.QFormLayout()
-        commonFormLayout.addRow(QtWidgets.QLabel("name:"), self.nameLineEdit)
-        commonFormLayout.addRow(QtWidgets.QLabel("type:"), self.typeLineEdit)
-        commonFormLayout.addRow(QtWidgets.QLabel("inputs:"), self.inputMayaList)
-        commonFormLayout.addRow(QtWidgets.QLabel("rigParent:"), self.rigParentMayaString)
-        commonFormLayout.addRow(QtWidgets.QLabel("component Tag:"), self.tagLineEdit)
-        commonFormLayout.addRow(QtWidgets.QLabel("enabled:"), self.enabledCheckbox)
+        commonFormLayout.addRow(QtWidgets.QLabel("Name:"), self.nameLineEdit)
+        commonFormLayout.addRow(QtWidgets.QLabel("Type:"), self.typeLineEdit)
+        commonFormLayout.addRow(self.selectContainerButton)
         commonLayout.addLayout(commonFormLayout)
-        # add a tiny space at the bottom
-        commonLayout.addSpacing(4)
-
-        commonGroupBox = QtWidgets.QGroupBox("common")
-        commonGroupBox.setLayout(commonLayout)
-        # setup a size policy. We need this to make sure the group doesnt scale vertically but does horizontally
-        sizePolicy = QtWidgets.QSizePolicy()
-        sizePolicy.setHorizontalPolicy(QtWidgets.QSizePolicy.Preferred)
-        sizePolicy.setVerticalPolicy(QtWidgets.QSizePolicy.Fixed)
-        commonGroupBox.setSizePolicy(sizePolicy)
 
         # stuff for the component level parameters
         componentLayout = QtWidgets.QVBoxLayout()
         componentLayout.addSpacing(4)
-        componentLayout.setContentsMargins(0, 0, 0, 0)
+
         # setup the form layout
         componentFormLayout = QtWidgets.QFormLayout()
         componentLayout.addLayout(componentFormLayout)
         componentLayout.addStretch()
-        # add a tiny space at the bottom
         componentLayout.addSpacing(4)
 
         # store the form layout to use later
         self.componentFormLayout = componentFormLayout
 
-        componentGroupBox = QtWidgets.QGroupBox("component")
+        componentGroupBox = QtWidgets.QGroupBox("Parameters")
         componentGroupBox.setLayout(componentLayout)
 
         # scrollable widget for scrollable area
         bodyWidget = QtWidgets.QWidget()
         bodyLayout = QtWidgets.QVBoxLayout(bodyWidget)
-        bodyLayout.setContentsMargins(0, 0, 0, 0)
-        bodyLayout.addWidget(commonGroupBox)
         bodyLayout.addWidget(componentGroupBox)
 
         # scrollable area
         bodyScrollArea = QtWidgets.QScrollArea()
         bodyScrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
         bodyScrollArea.setWidgetResizable(True)
-        bodyScrollArea.setWidget(bodyWidget)
+        bodyScrollArea.setWidget(componentGroupBox)
 
         # lower buttons
         lowButtonsLayout = QtWidgets.QVBoxLayout()
@@ -143,135 +125,155 @@ class EditComponentDialog(QtWidgets.QDialog):
         lowButtonsLayout.addWidget(self.applyButton)
         lowButtonsLayout.addWidget(self.closeButton)
 
+        self.mainLayout.addLayout(commonLayout)
         self.mainLayout.addWidget(bodyScrollArea)
         self.mainLayout.addLayout(lowButtonsLayout)
-        self.mainLayout.setContentsMargins(2, 2, 2, 2)
 
     def createConnections(self):
         """ Create Connections"""
-        self.applyButton.clicked.connect(self.applyParameters)
+        self.selectContainerButton.clicked.connect(self._selectContainer)
+        self.applyButton.clicked.connect(self._applyAllParameters)
         self.closeButton.clicked.connect(self.close)
 
-    def setComponent(self, component):
-        """ Set the widget to the given component """
+    def setComponent(self, component: Base) -> None:
+        """
+        Set the active widget to display and edit the provided component.
 
+        :param component: The component to set as the active one.
+        :raises RuntimeError: If the provided component is not initialized or its container does not exist.
+        """
         self.currentComponent = component
 
         # check to make sure the container exists
         if not self.currentComponent.getContainer() or not cmds.objExists(self.currentComponent.getContainer()):
-            raise RuntimeError("Component is not initalized. Please initialize the component to continue.")
+            raise RuntimeError("Component is not initialized. Please initialize the component to continue.")
 
-        # ensure all maya component level changes are loaded onto the class
         self.currentComponent._updateClassParameters()
 
         # set the title of the window to reflect the active component
         title = self.WINDOW_TITLE + " " + self.currentComponent.name
         self.setWindowTitle(title)
 
-        # set the commmon parameters
+        self.clearWidgets()
+
         self.nameLineEdit.setText(self.currentComponent.name)
         self.typeLineEdit.setText(self.currentComponent.componentType)
-        self.inputMayaList.setItems(self.currentComponent.input)
-        self.rigParentMayaString.setText(self.currentComponent.rigParent)
-        self.tagLineEdit.setText(self.currentComponent.componentTag or None)
-        self.enabledCheckbox.setChecked(self.currentComponent.enabled)
 
-        # clear the old parameter widgets
-        self.componentWidgets = list()
-        for i in reversed(range(self.componentFormLayout.count())):
-            self.componentFormLayout.itemAt(i).widget().deleteLater()
+        for key, data in self.currentComponent._componentParameters.items():
+            if key in ["name", "type"]:
+                continue
+            self._addParameterWidget(key, data)
 
-        # add all the new widgets
-        for key in self.currentComponent._componentParameters.keys():
-            if key not in ['name', 'input', 'rigParent', 'type', 'enabled', 'component_side', 'componentTag']:
-                self.addWidgetFromParameter(
-                    parameter=key,
-                    container=self.currentComponent.getContainer(),
-                    parameterType=type(component._componentParameters[key]["value"])
-                    )
-
-    def addWidgetFromParameter(self, parameter, container, parameterType):
+    def _addParameterWidget(self, parameter: str, data: typing.Dict[str, typing.Any]):
         """
-        :return:
-        """
+        Create and add a parameter widget to the component form layout based on the provided parameter data.
 
-        if parameterType == int:
-            # add an int widget
-            widget = QtWidgets.QLineEdit()
-            value = cmds.getAttr("{}.{}".format(container, parameter))
-            widget.setText(str(value))
-        elif parameterType == float:
-            # add a float widget
-            widget = QtWidgets.QLineEdit()
-            value = cmds.getAttr("{}.{}".format(container, parameter))
-            widget.setText(str(value))
-        elif parameterType == dict:
-            # add a maya dict widget
+        :param parameter: The name of the parameter.
+        :param data: A dictionary containing information about the parameter, including its data type.
+                     Expected keys: 'dataType' - The data type of the parameter.
+                                    'value' - The value of the parameter.
+        :return: None
+        :raises KeyError: If the specified parameter type is invalid.
+        """
+        print(data)
+
+        if data["dataType"] == "int":
+            widget = QtWidgets.QSpinBox()
+            widget.setValue(data["value"])
+            widget.valueChanged.connect(partial(self._setParameterOnContainer, parameter=parameter, widget=widget))
+
+        elif data["dataType"] == "float":
+            widget = QtWidgets.QDoubleSpinBox()
+            widget.setSingleStep(0.01)
+            widget.setValue(data["value"])
+            widget.valueChanged.connect(partial(self._setParameterOnContainer, parameter=parameter, widget=widget))
+
+        elif data["dataType"] == "dict":
             widget = mayaDictWidget.MayaDict()
+            widget.setItems(data["value"])
+            widget.itemsChanged.connect(partial(self._setParameterOnContainer, parameter=parameter, widget=widget))
 
-            # this should be de-serialized.
-            metaNode = meta.MetaNode(container)
-            data = metaNode.getData(parameter)
-            widget.setItems(data)
-
-        elif parameterType == list:
-            # add a maya list widget
+        elif data["dataType"] == "list":
             widget = mayaListWidget.MayaList()
+            widget.setItems(data["value"])
+            widget.itemsChanged.connect(partial(self._setParameterOnContainer, parameter=parameter, widget=widget))
 
-            metaNode = meta.MetaNode(container)
-            data = metaNode.getData(parameter)
-            widget.setItems(data)
-        elif parameterType == bool:
+        elif data["dataType"] == "bool":
             widget = QtWidgets.QCheckBox()
-            value = cmds.getAttr("{}.{}".format(container, parameter))
-            widget.setChecked(value)
+            widget.setChecked(data["value"])
+            widget.stateChanged.connect(partial(self._setParameterOnContainer, parameter=parameter, widget=widget))
+
+        elif data["dataType"] == "string":
+            widget = mayaStringWidget.MayaString()
+            widget.setText(data["value"])
+            widget.textChanged.connect(partial(self._setParameterOnContainer, parameter=parameter, widget=widget))
         else:
-            widget = QtWidgets.QLineEdit()
-            value = cmds.getAttr("{}.{}".format(container, parameter))
-            widget.setText(value)
+            raise KeyError(f"Parameter {parameter} has invalid data {data['dataType']} is invalid")
 
-        # add the widget to the component layout
-        self.componentFormLayout.addRow("{}:".format(parameter), widget)
-        self.componentWidgets.append([parameter, widget])
+        label = QtWidgets.QLabel(getNiceName(getNiceName(parameter) + ":"))
+        if "tooltip" in data.keys():
+            label.setToolTip(data["tooltip"])
+        self.componentFormLayout.addRow(label, widget)
+        self.componentWidgets.append((parameter, widget))
 
-    def applyParameters(self):
-        """ Apply the parameters back to the component"""
+    def _applyAllParameters(self):
+        """
+        Apply all the parameters from the UI to the component
+        """
+
+        self._selectContainer()
+
+        for parameter, widget in self.componentWidgets:
+            self._setParameterOnContainer(value=None, parameter=parameter, widget=widget)
+
+    # noinspection PyUnusedLocal
+    def _setParameterOnContainer(self, value: typing.Any, parameter: str, widget: QtWidgets.QWidget) -> None:
+        """
+        Set the value of a specified parameter on the corresponding container based on the data from the given widget.
+
+        :param value: This parameter is not used within the method and is included for compatibility.
+        :param parameter: The name of the component parameter to set on the container.
+        :param widget: The widget associated with the parameter, from which the new data will be obtained.
+                       Supported widget types include MayaDict, MayaList, MayaString, QCheckBox, QLineEdit, and QSpinBox.
+        :return: None
+        """
 
         container = self.currentComponent.getContainer()
 
-        # select the container so we can instanly see the data applied
-        cmds.select(container, r=True)
-
         metaNode = meta.MetaNode(container)
+        if isinstance(widget, mayaDictWidget.MayaDict):
+            data = widget.getData()
+        elif isinstance(widget, mayaListWidget.MayaList):
+            data = widget.getData()
+        elif isinstance(widget, mayaStringWidget.MayaString):
+            data = widget.getText()
+        elif isinstance(widget, QtWidgets.QCheckBox):
+            data = widget.isChecked()
+        elif isinstance(widget, QtWidgets.QLineEdit):
+            data = widget.text()
+        elif isinstance(widget, QtWidgets.QSpinBox):
+            data = widget.value()
+        else:
+            raise ValueError(f"Unable to gather data from {parameter} ({widget}")
 
-        # insert our common parameters into the top of the list
-        commonWidgets = [["input", self.inputMayaList],
-                         ["rigParent", self.rigParentMayaString],
-                         ["componentTag", self.tagLineEdit],
-                         ["enabled", self.enabledCheckbox]]
-        allComponentWidgets = commonWidgets + self.componentWidgets
+        metaNode.setData(attr=parameter, value=data)
 
-        for parameter, widget in allComponentWidgets:
-            if isinstance(widget, mayaDictWidget.MayaDict):
-                data = widget.getData()
-            elif isinstance(widget, mayaListWidget.MayaList):
-                data = widget.getData()
-            elif isinstance(widget, mayaStringWidget.MayaString):
-                data = widget.getText()
-            elif isinstance(widget, QtWidgets.QCheckBox):
-                data = widget.isChecked()
-            elif isinstance(widget, QtWidgets.QLineEdit):
-                data = widget.text()
-            else:
-                data = None
+    def _selectContainer(self) -> None:
+        """
+        Select the container from the current component
+        """
 
-            # try to set the data
-            try:
-                metaNode.setData(attr=parameter, value=data)
-                print("Set data {}.{}: {}".format(container, parameter, data))
-            except:
-                logger.warning("Failed to set data on {}.{}".format(container, parameter))
+        container = self.currentComponent.getContainer()
+        cmds.select(container, replace=True)
 
     def closeEvent(self, *args, **kwargs):
         """ Add a close event to emit the signal whenever the window is closed"""
         self.windowClosedSignal.emit(True)
+
+    def clearWidgets(self):
+        """
+        Clear all widgets from the UI
+        """
+        self.componentWidgets = list()
+        for i in reversed(range(self.componentFormLayout.count())):
+            self.componentFormLayout.itemAt(i).widget().deleteLater()

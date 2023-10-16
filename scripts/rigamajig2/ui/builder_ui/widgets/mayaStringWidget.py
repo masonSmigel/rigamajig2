@@ -38,9 +38,10 @@ class MayaString(QtWidgets.QWidget):
     Ui to set a maya object as the selection and clear and retreive the object
     """
 
+    textChanged = QtCore.Signal(str)
+
     def __init__(self):
         """
-
         """
         super(MayaString, self).__init__()
         self._fullDagPath = None
@@ -81,7 +82,7 @@ class MayaString(QtWidgets.QWidget):
 
     def createConnections(self):
         """ Create connections"""
-        pass
+        self.mayaObject.textChanged.connect(self.textChanged.emit)
 
     def _createContextMenu(self, position):
         """Create the right click context menu"""
@@ -97,7 +98,6 @@ class MayaString(QtWidgets.QWidget):
     def setText(self, text):
         """Set the text of the mayaObject line edit"""
         self.mayaObject.setText(text)
-
 
     def setHeight(self, height):
         """Set the height of the widget"""

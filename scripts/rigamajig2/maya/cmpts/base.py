@@ -2,6 +2,7 @@
 base component
 """
 import logging
+import typing
 from collections import OrderedDict
 
 import maya.cmds as cmds
@@ -137,9 +138,9 @@ class Base(object):
         # gather other data from the class
         for key in componentInstance._componentParameters:
             if key not in REQUIRED_PARAMETERS:
-                value = data.get(key)
-                if not value:
+                if key not in data.keys():
                     logger.warning(f"{componentInstance.name}: Failed to get value for: {key}")
+                value = data.get(key)
                 componentInstance.defineParameter(parameter=key, value=value)
 
         return componentInstance
@@ -409,7 +410,9 @@ class Base(object):
             return cmds.getAttr("{}.{}".format(self.container, 'build_step'))
         return 0
 
-    def defineParameter(self, parameter, value, dataType=None, hide=True, lock=False, tooltip=None):
+    def defineParameter(
+            self, parameter: str, value: typing.Any, dataType: str = None,
+            hide: bool = True, lock: bool = False, tooltip: str = None):
         """
         Define a parameter component. This makes up the core data structure of a component.
         This defines parameters and behaviors and is used to build the rest of the functionality but should NOT define the structre.

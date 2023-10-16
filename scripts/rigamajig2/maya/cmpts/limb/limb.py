@@ -56,7 +56,6 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         super(Limb, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        # initialize cmpt settings.
         self.defineParameter(parameter="useProxyAttrs", value=False, dataType="bool")
         self.defineParameter(parameter="useCallbackSwitch", value=True, dataType="bool")
         self.defineParameter(parameter="useScale", value=True, dataType="bool")
@@ -81,8 +80,8 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="bend4Name", value=self.name.split("_")[0] + "_4_bend", dataType="string")
         self.defineParameter(parameter="bend5Name", value=self.name.split("_")[0] + "_5_bend", dataType="string")
 
-        self.defineParameter(parameter="ikSpaces", value=dict(), dataType="complex")
-        self.defineParameter(parameter="pvSpaces", value=dict(), dataType="complex")
+        self.defineParameter(parameter="ikSpaces", value=dict(), dataType="dict")
+        self.defineParameter(parameter="pvSpaces", value=dict(), dataType="dict")
 
     def createBuildGuides(self):
         """Show Advanced Proxy"""
@@ -113,7 +112,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             parent=self.controlHierarchy,
             shape='square',
             xformObj=self.input[0]
-            )
+        )
         self.limbSwing = rig_control.createAtObject(
             self.limbSwingName,
             self.side,
@@ -124,7 +123,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             parent=self.limbBase.name,
             shape='square',
             xformObj=self.input[1]
-            )
+        )
 
         # fk controls
         self.joint1Fk = rig_control.createAtObject(
@@ -137,7 +136,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             shape='circle',
             shapeAim='x',
             xformObj=self.input[1]
-            )
+        )
         self.joint2Fk = rig_control.createAtObject(
             self.joint2_fkName, self.side,
             orig=True,
@@ -148,7 +147,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             shape='circle',
             shapeAim='x',
             xformObj=self.input[2]
-            )
+        )
         self.joint3Fk = rig_control.createAtObject(
             self.joint3_fkName, self.side,
             orig=True,
@@ -159,7 +158,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             shape='circle',
             shapeAim='x',
             xformObj=self.input[3]
-            )
+        )
         self.joint3GimbleFk = rig_control.createAtObject(
             self.gimble_fkName,
             self.side,
@@ -171,7 +170,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             shape='circle',
             shapeAim='x',
             xformObj=self.input[3]
-            )
+        )
 
         # Ik controls
         self.limbIk = rig_control.create(
@@ -186,7 +185,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             shape='cube',
             position=cmds.xform(self.input[3], q=True, ws=True, t=True),
             rotation=cmds.xform(self.input[3], q=True, ws=True, ro=True) if self.localOrientIK else None
-            )
+        )
 
         self.limbGimbleIk = rig_control.createAtObject(
             self.gimble_ikName,
@@ -198,7 +197,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             parent=self.limbIk.name,
             shape='sphere',
             xformObj=self.limbIk.name
-            )
+        )
 
         # pv_pos = ikfk.IkFkLimb.getPoleVectorPos(self.input[1:4], magnitude=0)
         poleVectorPos = cmds.xform(self.guidePoleVector, q=True, ws=True, t=True)
@@ -213,7 +212,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             position=poleVectorPos,
             parent=self.controlHierarchy,
             shapeAim='z'
-            )
+        )
 
         # if we dont want to use proxy attributes then create an attribute to hold attributes
         if not self.useProxyAttrs:
@@ -247,7 +246,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 "transform",
                 n=self.name + "_bendControl",
                 parent=self.controlHierarchy
-                )
+            )
 
             self.bend1 = rig_control.create(
                 self.bend1Name,
@@ -259,7 +258,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 shape='circle', shapeAim='x',
                 position=cmds.xform(self.input[1], q=True, ws=True, t=True),
                 parent=self.bendControlHierarchy
-                )
+            )
 
             self.bend2 = rig_control.create(
                 self.bend2Name,
@@ -272,7 +271,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 shapeAim='x',
                 position=mathUtils.nodePosLerp(self.input[1], self.input[2], 0.5),
                 parent=self.bendControlHierarchy
-                )
+            )
 
             self.bend3 = rig_control.create(
                 self.bend3Name,
@@ -285,7 +284,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 shapeAim='x',
                 position=cmds.xform(self.input[2], q=True, ws=True, t=True),
                 parent=self.bendControlHierarchy
-                )
+            )
 
             self.bend4 = rig_control.create(
                 self.bend2Name,
@@ -298,7 +297,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 shapeAim='x',
                 position=mathUtils.nodePosLerp(self.input[2], self.input[3], 0.5),
                 parent=self.bendControlHierarchy
-                )
+            )
 
             self.bend5 = rig_control.create(
                 self.bend4Name, self.side,
@@ -310,7 +309,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                 shapeAim='x',
                 position=cmds.xform(self.input[3], q=True, ws=True, t=True),
                 parent=self.bendControlHierarchy
-                )
+            )
 
             # aim the controls down the chain
             bendAimList = [b.orig for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]]

@@ -37,10 +37,11 @@ class MayaList(QtWidgets.QWidget):
     """
     Ui to set a maya object as the selection and clear and retreive the object
     """
+    itemsChanged = QtCore.Signal(str)
 
     def __init__(self):
         """
-        intialize the maya list
+        initialize the maya list
         """
         super(MayaList, self).__init__()
 
@@ -141,6 +142,7 @@ class MayaList(QtWidgets.QWidget):
             item.setData(QtCore.Qt.UserRole, obj)
 
         self.mayaObjectList.addItem(item)
+        self.itemsChanged.emit(item.text())
 
     def setItems(self, items):
         """ Set the list widget to a list of items"""
@@ -197,6 +199,7 @@ class MayaList(QtWidgets.QWidget):
     def clearAll(self):
         """ Clear the whole widget"""
         self.mayaObjectList.clear()
+        self.itemsChanged.emit("")
 
 
 class TestDialog(QtWidgets.QDialog):

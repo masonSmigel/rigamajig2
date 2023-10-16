@@ -21,6 +21,8 @@ class MayaDialog(QtWidgets.QDialog):
     """ Dialog for the mocap import """
     WINDOW_TITLE = "Maya Dialog"
 
+    WINDOW_SIZE = (600, 400)
+
     dlg_instance = None
 
     @classmethod
@@ -49,6 +51,8 @@ class MayaDialog(QtWidgets.QDialog):
         elif cmds.about(macOS=True):
             self.setProperty("saveWindowPref", True)
             self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+
+        self.setMinimumSize(*self.WINDOW_SIZE)
 
         self.createActions()
         self.createWidgets()

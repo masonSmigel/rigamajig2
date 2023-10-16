@@ -5,7 +5,7 @@
     file: editComponentParametersDialog.py
     author: masonsmigel
     date: 08/2022
-    description: 
+    description:
 
 """
 import logging
@@ -13,6 +13,7 @@ import typing
 from functools import partial
 
 import maya.cmds as cmds
+import maya.mel as mel
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
@@ -70,8 +71,6 @@ class EditComponentDialog(mayaDialog.MayaDialog):
         self.selectContainerButton = QtWidgets.QPushButton("Select Container")
         self.selectContainerButton.setIcon(QtGui.QIcon(":container.svg"))
 
-        self.applyButton = QtWidgets.QPushButton("Apply Parameters")
-        self.applyButton.setFixedHeight(35)
         self.closeButton = QtWidgets.QPushButton("Close")
 
     def createLayouts(self):
@@ -92,47 +91,41 @@ class EditComponentDialog(mayaDialog.MayaDialog):
         commonFormLayout.addRow(self.selectContainerButton)
         commonLayout.addLayout(commonFormLayout)
 
-        # stuff for the component level parameters
-        componentLayout = QtWidgets.QVBoxLayout()
-        componentLayout.addSpacing(4)
-
         # setup the form layout
-        componentFormLayout = QtWidgets.QFormLayout()
-        componentLayout.addLayout(componentFormLayout)
-        componentLayout.addStretch()
-        componentLayout.addSpacing(4)
-
-        # store the form layout to use later
-        self.componentFormLayout = componentFormLayout
+        self.componentFormLayout = QtWidgets.QFormLayout()
 
         componentGroupBox = QtWidgets.QGroupBox("Parameters")
-        componentGroupBox.setLayout(componentLayout)
-
-        # scrollable widget for scrollable area
-        bodyWidget = QtWidgets.QWidget()
-        bodyLayout = QtWidgets.QVBoxLayout(bodyWidget)
-        bodyLayout.addWidget(componentGroupBox)
+        componentGroupBox.setAutoFillBackground(True)
 
         # scrollable area
+        bodyWidget = QtWidgets.QWidget()
+
+        bodyWidget.setLayout(self.componentFormLayout)
         bodyScrollArea = QtWidgets.QScrollArea()
         bodyScrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
+        bodyScrollArea.setFrameShadow(QtWidgets.QFrame.Plain)
         bodyScrollArea.setWidgetResizable(True)
-        bodyScrollArea.setWidget(componentGroupBox)
+        bodyScrollArea.setWidget(bodyWidget)
+
+        # scrollable widget for scrollable are
+        bodyLayout = QtWidgets.QVBoxLayout()
+        bodyLayout.setContentsMargins(2, 2, 2, 2)
+        bodyLayout.addWidget(bodyScrollArea)
+
+        componentGroupBox.setLayout(bodyLayout)
 
         # lower buttons
         lowButtonsLayout = QtWidgets.QVBoxLayout()
         lowButtonsLayout.setSpacing(4)
-        lowButtonsLayout.addWidget(self.applyButton)
         lowButtonsLayout.addWidget(self.closeButton)
 
         self.mainLayout.addLayout(commonLayout)
-        self.mainLayout.addWidget(bodyScrollArea)
+        self.mainLayout.addWidget(componentGroupBox)
         self.mainLayout.addLayout(lowButtonsLayout)
 
     def createConnections(self):
         """ Create Connections"""
         self.selectContainerButton.clicked.connect(self._selectContainer)
-        self.applyButton.clicked.connect(self._applyAllParameters)
         self.closeButton.clicked.connect(self.close)
 
     def setComponent(self, component: Base) -> None:
@@ -175,8 +168,6 @@ class EditComponentDialog(mayaDialog.MayaDialog):
         :return: None
         :raises KeyError: If the specified parameter type is invalid.
         """
-        print(data)
-
         if data["dataType"] == "int":
             widget = QtWidgets.QSpinBox()
             widget.setValue(data["value"])
@@ -215,16 +206,6 @@ class EditComponentDialog(mayaDialog.MayaDialog):
             label.setToolTip(data["tooltip"])
         self.componentFormLayout.addRow(label, widget)
         self.componentWidgets.append((parameter, widget))
-
-    def _applyAllParameters(self):
-        """
-        Apply all the parameters from the UI to the component
-        """
-
-        self._selectContainer()
-
-        for parameter, widget in self.componentWidgets:
-            self._setParameterOnContainer(value=None, parameter=parameter, widget=widget)
 
     # noinspection PyUnusedLocal
     def _setParameterOnContainer(self, value: typing.Any, parameter: str, widget: QtWidgets.QWidget) -> None:
@@ -265,6 +246,9 @@ class EditComponentDialog(mayaDialog.MayaDialog):
 
         container = self.currentComponent.getContainer()
         cmds.select(container, replace=True)
+
+        melCmd = 'showEditorExact("{}")'.format(container)
+        mel.eval(melCmd, lowestPriority=True)
 
     def closeEvent(self, *args, **kwargs):
         """ Add a close event to emit the signal whenever the window is closed"""

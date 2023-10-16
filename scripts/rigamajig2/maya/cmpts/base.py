@@ -139,9 +139,10 @@ class Base(object):
         for key in componentInstance._componentParameters:
             if key not in REQUIRED_PARAMETERS:
                 if key not in data.keys():
-                    logger.warning(f"{componentInstance.name}: Failed to get value for: {key}")
+                    logger.warning(f"{componentInstance.name}: Failed to get value for: {key}. Skipping parameter")
+                    continue
                 value = data.get(key)
-                componentInstance.defineParameter(parameter=key, value=value)
+                componentInstance.setParameterValue(parameter=key, value=value)
 
         return componentInstance
 
@@ -433,6 +434,26 @@ class Base(object):
 
         if tooltip:
             self._componentParameters[parameter].update({"tooltip": tooltip})
+
+        self.setParameterValue(parameter=parameter, value=value, hide=hide, lock=lock)
+
+    def setParameterValue(self, parameter: str, value: typing.Any, hide: bool = True, lock: bool = False) -> None:
+        """
+        Set the parameter value. unlike define parameter this will attempt to set the parameter to the given data type
+        :param parameter:
+        :param value:
+        :param bool hide: hide the added parameter from the channel box
+        :param bool lock: lock the added parameter
+        :return:
+        """
+        if parameter not in self._componentParameters.keys():
+            logger.warning(f"Parameter {parameter} does not exist on {self.__class__.__name__}")
+            return
+
+        self._componentParameters[parameter]["value"] = value
+        dataType = self._componentParameters[parameter].get("dataType")
+        if not dataType:
+            raise TypeError(f"{parameter} data type cannot be None")
 
         metaData = rigamajig2.maya.meta.MetaNode(self.container)
         metaData.setData(attr=parameter, value=value, attrType=dataType, hide=hide, lock=lock)

@@ -61,7 +61,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="useScale", value=True, dataType="bool")
         self.defineParameter(parameter="addTwistJoints", value=True, dataType="bool")
         self.defineParameter(parameter="addBendies", value=True, dataType="bool")
-        self.defineParameter(parameter="localOrientIK", value=False, dataType="bool")
+        self.defineParameter(parameter="localOrientIk", value=False, dataType="bool")
 
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.defineParameter(parameter="limbBaseName", value=inputBaseNames[0], dataType="string")
@@ -184,7 +184,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             parent=self.controlHierarchy,
             shape='cube',
             position=cmds.xform(self.input[3], q=True, ws=True, t=True),
-            rotation=cmds.xform(self.input[3], q=True, ws=True, ro=True) if self.localOrientIK else None
+            rotation=cmds.xform(self.input[3], q=True, ws=True, ro=True) if self.localOrientIk else None
         )
 
         self.limbGimbleIk = rig_control.createAtObject(

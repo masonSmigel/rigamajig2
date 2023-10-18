@@ -57,9 +57,21 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.ballGuide = rig_control.createGuide("{}_ball".format(self.name), parent=self.guidesHierarchy)
         self.toeGuide = rig_control.createGuide("{}_toe".format(self.name), parent=self.guidesHierarchy)
 
+    def autoOrientGuides(self):
+        """Auto orient the foot pivot guides"""
+        # auto aim the guides. these should ALWAYS be in world space.
+        cmds.delete(cmds.aimConstraint(self.toeGuide, self.heelGuide,
+                                       aimVector=(0, 0, 1), upVector=(0, 1, 0), worldUpType="scene", mo=False))
+        rig_transform.matchTransform(self.input[4], self.ballGuide)
+        cmds.delete(cmds.aimConstraint(self.input[5], self.ballGuide,
+                                       aimVector=(0, 0, 1), upVector=(0, 1, 0), worldUpType="scene", mo=False))
+        cmds.delete(cmds.aimConstraint(self.heelGuide, self.toeGuide,
+                                       aimVector=(0, 0, -1), upVector=(0, 1, 0), worldUpType="scene", mo=False))
+
     def initialHierarchy(self):
         """Build the initial hierarchy"""
         super(Leg, self).initialHierarchy()
+
         self.toesFk = rig_control.createAtObject(
             self.toes_fkName,
             self.side,
@@ -84,7 +96,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
             shape='cube',
             shapeAim='x',
             xformObj=self.heelGuide
-            )
+        )
         self.ballIk = rig_control.createAtObject(
             self.ball_ikName,
             self.side,
@@ -96,7 +108,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
             shape='cube',
             shapeAim='x',
             xformObj=self.ballGuide
-            )
+        )
         self.toesIk = rig_control.createAtObject(
             self.toes_ikName,
             self.side,
@@ -108,7 +120,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
             shape='cube',
             shapeAim='x',
             xformObj=self.toeGuide
-            )
+        )
         self.footPivotControls = [self.heelIk.name, self.ballIk.name, self.toesIk.name]
         self.ikControls += self.footPivotControls
 
@@ -116,38 +128,38 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         """Add the rig setup"""
         super(Leg, self).rigSetup()
         # setup the foot Ik
-        self.footikfk = ikfk.IkFkFoot(jointList=self.input[3:],
+        self.footIkFk = ikfk.IkFkFoot(jointList=self.input[3:],
                                       heelPivot=self.heelGuide, innPivot=self.innGuide, outPivot=self.outGuide)
-        self.footikfk.setGroup(self.ikfk.getGroup())
-        self.footikfk.create(params=self.paramsHierarchy)
-        ikfk.IkFkFoot.createFootRoll(self.footikfk.getPivotDict(), self.footikfk.getGroup(),
+        self.footIkFk.setGroup(self.ikfk.getGroup())
+        self.footIkFk.create(params=self.paramsHierarchy)
+        ikfk.IkFkFoot.createFootRoll(self.footIkFk.getPivotDict(), self.footIkFk.getGroup(),
                                      params=self.paramsHierarchy)
 
         # connect the Foot IKFK to the ankle IK
-        cmds.parent(self._ikEndTgt, self.footikfk.getPivotDict()['ankle'])
-        cmds.parent(self.footikfk.getPivotDict()['root'], self.limbGimbleIk.name)
+        cmds.parent(self._ikEndTgt, self.footIkFk.getPivotDict()['ankle'])
+        cmds.parent(self.footIkFk.getPivotDict()['root'], self.limbGimbleIk.name)
         cmds.delete(cmds.listRelatives(self._ikEndTgt, ad=True, type='pointConstraint'))
 
         # add in the foot roll controllers
-        cmds.parent(self.heelIk.orig, self.footikfk.getPivotDict()['heel'])
-        cmds.parent(self.footikfk.getPivotDict()['ballSwivel'], self.heelIk.name)
+        cmds.parent(self.heelIk.orig, self.footIkFk.getPivotDict()['heel'])
+        cmds.parent(self.footIkFk.getPivotDict()['ballSwivel'], self.heelIk.name)
 
-        cmds.parent(self.toesIk.orig, self.footikfk.getPivotDict()['end'])
-        cmds.parent(self.footikfk.getPivotDict()['ball'], self.toesIk.name)
-        cmds.parent(self.footikfk.getPivotDict()['toe'], self.toesIk.name)
+        cmds.parent(self.toesIk.orig, self.footIkFk.getPivotDict()['end'])
+        cmds.parent(self.footIkFk.getPivotDict()['ball'], self.toesIk.name)
+        cmds.parent(self.footIkFk.getPivotDict()['toe'], self.toesIk.name)
 
-        cmds.parent(self.ballIk.orig, self.footikfk.getPivotDict()['ball'])
-        cmds.parent(self.footikfk.getPivotDict()['ankle'], self.ballIk.name)
+        cmds.parent(self.ballIk.orig, self.footIkFk.getPivotDict()['ball'])
+        cmds.parent(self.footIkFk.getPivotDict()['ankle'], self.ballIk.name)
 
         # setup the toes
-        rig_transform.connectOffsetParentMatrix(self.footikfk.getBlendJointList()[2], self.toesFk.orig, mo=True)
+        rig_transform.connectOffsetParentMatrix(self.footIkFk.getBlendJointList()[2], self.toesFk.orig, mo=True)
         # TODO: this is alittle hacky... maybe fix it later
-        cmds.setAttr("{}.{}".format(self.footikfk.getIkJointList()[1], 'segmentScaleCompensate'), 0)
+        cmds.setAttr("{}.{}".format(self.footIkFk.getIkJointList()[1], 'segmentScaleCompensate'), 0)
 
     def postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
-        blendedJointlist = self.ikfk.getBlendJointList() + [self.toesFk.name]
-        rigamajig2.maya.joint.connectChains(blendedJointlist, self.input[1:-1])
+        blendJoints = self.ikfk.getBlendJointList() + [self.toesFk.name]
+        rigamajig2.maya.joint.connectChains(blendJoints, self.input[1:-1])
         rigamajig2.maya.attr.lock(self.input[-1], rigamajig2.maya.attr.TRANSFORMS + ['v'])
         ikfk.IkFkBase.connectVisibility(self.paramsHierarchy, 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
 
@@ -161,7 +173,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
     def setupAnimAttrs(self):
         """ setup animation attributes"""
 
-        # connect the fook ik attributes to the foot control
+        # connect the foot ik attributes to the foot control
         rigamajig2.maya.attr.addSeparator(self.limbIk.name, '----')
         rigamajig2.maya.attr.driveAttribute('roll', self.paramsHierarchy, self.limbIk.name)
         rigamajig2.maya.attr.driveAttribute('bank', self.paramsHierarchy, self.limbIk.name)
@@ -179,5 +191,5 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         super(Leg, self).connect()
 
     def finalize(self):
-        """ Lock some attributes we dont want to see"""
+        """ Lock some attributes we don't want to see"""
         super(Leg, self).finalize()

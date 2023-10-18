@@ -196,6 +196,7 @@ class Base(object):
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
+                self.autoOrientGuides()
                 self.initialHierarchy()
                 self.preRigSetup()
                 self.rigSetup()
@@ -297,6 +298,9 @@ class Base(object):
                                                          sourceAttr="metaDataNetworkNode")
 
             rigamajig2.maya.container.addNodes(self.metadataNode, self.container, force=True)
+
+    def autoOrientGuides(self):
+        """Automate positioning and orienting of the guides."""
 
     def initialHierarchy(self):
         """Setup the initial Hierarchy. implement in subclass"""

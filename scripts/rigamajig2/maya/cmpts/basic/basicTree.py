@@ -57,9 +57,9 @@ class BasicTree(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="addSdk", value=False, dataType="bool")
         self.defineParameter(parameter="skipJoints", value=[], dataType="list")
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """ build the inital hierarchy"""
-        super(BasicTree, self).initialHierarchy()
+        super(BasicTree, self)._initialHierarchy()
 
         # create a dictionary of the parents for the component
         self.hierarchyDict = OrderedDict()
@@ -104,7 +104,7 @@ class BasicTree(rigamajig2.maya.cmpts.base.Base):
 
             cmds.parent(ctl.orig, parent)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """"""
         # connect each item to the associated joint
         for jnt, data in self.hierarchyDict.items():
@@ -112,7 +112,7 @@ class BasicTree(rigamajig2.maya.cmpts.base.Base):
 
             joint.connectChains([ctl.name], jnt)
 
-    def connect(self):
+    def _connect(self):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):

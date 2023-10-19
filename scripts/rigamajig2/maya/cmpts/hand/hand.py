@@ -60,7 +60,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         # initialize some other variables we need
         self.fingerComponentList = list()
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """Show Advanced Proxy"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
@@ -70,9 +70,9 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         if self.side == 'r':
             cmds.xform(self.thumbCupGuide, ws=True, ro=(180, 0, 0))
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(Hand, self).initialHierarchy()
+        super(Hand, self)._initialHierarchy()
 
         # create the hand gesture controller
         pos = rig_transform.getAveragePoint(self.input[1:])
@@ -101,15 +101,15 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
             fingerComponent.defineParameter("addSdk", True)
             fingerComponent.defineParameter("addFKSpace", self.addFKSpace)
 
-            fingerComponent._initializeComponent()
+            fingerComponent.initializeComponent()
             cmds.container(self.container, e=True, f=True, addNode=fingerComponent.getContainer())
             meta.tag(fingerComponent.getContainer(), 'subComponent')
             self.fingerComponentList.append(fingerComponent)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         self.cupControls = list()
         for i, cmpt in enumerate(self.fingerComponentList):
-            cmpt._buildComponent()
+            cmpt.buildComponent()
             cmds.parent(cmpt.controlHierarchy, self.controlHierarchy)
             cmds.parent(cmpt.spacesHierarchy, self.spacesHierarchy)
 
@@ -206,10 +206,10 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
             else:
                 gestureUtils.setupSimple(self.cupControls[i].trs, self.wrist.name, fingerName + 'Cup', multplier=-1)
 
-    def setupAnimAttrs(self):
+    def _setupAnimAttrs(self):
         """ setup animation attributes"""
 
-        rigamajig2.maya.attr.addSeparator(self.wrist.name, "visability")
+        rigamajig2.maya.attr.addSeparator(self.wrist.name, "visibility")
         # add an attribute to hide the finger controls
         rigamajig2.maya.attr.createAttr(self.wrist.name, "cupPivots", "bool", value=0, keyable=False, channelBox=True)
         cupControls = [x.name for x in self.cupControls]
@@ -219,7 +219,7 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
         fingerControls = [x.controlers for x in self.fingerComponentList]
         rig_control.connectControlVisiblity(self.wrist.name, "fingers", fingerControls)
 
-    def connect(self):
+    def _connect(self):
         if cmds.objExists(self.rigParent):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.wrist.orig, mo=True)
 
@@ -231,19 +231,19 @@ class Hand(rigamajig2.maya.cmpts.base.Base):
             if cmds.objExists('trs_motion'):
                 spaces.addSpace(self.wrist.spaces, ['trs_motion'], nameList=['world'], constraintType='orient')
 
-    def finalize(self):
+    def _finalize(self):
         # navigate around container parenting since we have already parented the containers to the hand container
         for cmpt in self.fingerComponentList:
-            cmpt.finalize()
+            cmpt._finalize()
 
-    def optimize(self):
+    def _optimize(self):
         """Optimize the component"""
         for cmpt in self.fingerComponentList:
-            cmpt._optimizeComponent()
+            cmpt.optimizeComponent()
 
-    def deleteSetup(self):
+    def __deleteSetup(self):
         """Delete the rig setup"""
         for cmpt in self.fingerComponentList:
-            cmpt.deleteSetup()
-        super(Hand, self).deleteSetup()
+            cmpt.__deleteSetup()
+        super(Hand, self).__deleteSetup()
 

@@ -52,8 +52,8 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="addSdk", value=False, dataType="bool")
         self.defineParameter(parameter="addBpm", value=False, dataType="bool")
 
-    def initialHierarchy(self):
-        super(Basic, self).initialHierarchy()
+    def _initialHierarchy(self):
+        super(Basic, self)._initialHierarchy()
 
         self.control = rig_control.create(self.controlName, self.side,
                                           spaces=self.addSpaces, trs=self.addTrs, sdk=self.addSdk,
@@ -63,7 +63,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
         if not self.worldOrient:
             rig_transform.matchRotate(self.input[0], self.control.orig)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         if self.worldOrient:
             if self.side:
                 name = "{}_{}_trs".format(self.controlName, self.side)
@@ -87,7 +87,7 @@ class Basic(rigamajig2.maya.cmpts.base.Base):
 
             joint.hideJoints(self.bpmJointList)
 
-    def connect(self):
+    def _connect(self):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):

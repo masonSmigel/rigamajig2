@@ -49,7 +49,7 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         if len(self.input) != 1:
             raise RuntimeError('Input list must have a length of 1')
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """Create the build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
@@ -71,9 +71,9 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
                                                 rotation=rot
                                                 )
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(SimpleSquash, self).initialHierarchy()
+        super(SimpleSquash, self)._initialHierarchy()
 
         self.squashStart = rig_control.createAtObject(self.startControlName, self.side,
                                                       hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
@@ -86,7 +86,7 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
 
         self.controlers = [self.squashStart.name, self.squashEnd.name]
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """Add the rig setup"""
         self.ikHierarchy = cmds.createNode('transform', n=self.name + '_ik', parent=self.rootHierarchy)
 
@@ -153,14 +153,14 @@ class SimpleSquash(rigamajig2.maya.cmpts.base.Base):
         joint.hideJoints([startJoint, endJoint, squashJoint])
         cmds.setAttr("{}.v".format(self.ikHandle), 0)
 
-    def connect(self):
+    def _connect(self):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.squashStart.orig, mo=True)
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.squashEnd.orig, mo=True)
 
-    def setupAnimAttrs(self):
+    def _setupAnimAttrs(self):
         if self.useProxyAttrs:
             for control in self.controlers:
                 rig_attr.addSeparator(control, '----')

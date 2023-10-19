@@ -53,7 +53,7 @@ class SplineSquash(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="midControlName", value=f"{self.name}Mid", dataType="string")
         self.defineParameter(parameter="botControlName", value=f"{self.name}Bot", dataType="string")
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """Create the build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
@@ -80,9 +80,9 @@ class SplineSquash(rigamajig2.maya.cmpts.base.Base):
                                                 position=topPos,
                                                 )
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """ Build the initial heirarchy"""
-        super(SplineSquash, self).initialHierarchy()
+        super(SplineSquash, self)._initialHierarchy()
         self.botControl = rig_control.createAtObject(self.botControlName, side=self.side,
                                                      hideAttrs=['s', 'v'], size=self.size, color='yellow',
                                                      parent=self.controlHierarchy, shape='pyramid', shapeAim='x',
@@ -98,7 +98,7 @@ class SplineSquash(rigamajig2.maya.cmpts.base.Base):
                                                      parent=self.controlHierarchy, shape='pyramid', shapeAim='x',
                                                      xformObj=self.topGuide)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """ build the rig setup"""
 
         fullJointList = joint.getInbetweenJoints(self.input[0], self.input[-1])
@@ -129,7 +129,7 @@ class SplineSquash(rigamajig2.maya.cmpts.base.Base):
 
             joint.hideJoints(self.bpmJointList)
 
-    def connect(self):
+    def _connect(self):
         """
         Connect the spline to the rig parent
         :return:

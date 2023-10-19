@@ -83,7 +83,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="ikSpaces", value=dict(), dataType="dict")
         self.defineParameter(parameter="pvSpaces", value=dict(), dataType="dict")
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """Show Advanced Proxy"""
         import rigamajig2.maya.rig.live as live
 
@@ -95,9 +95,9 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rig_control.createDisplayLine(self.input[2], self.guidePoleVector, pvLineName, self.guidesHierarchy)
         rig_control.createDisplayLine(self.input[1], self.input[3], ikLineName, self.guidesHierarchy)
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(Limb, self).initialHierarchy()
+        super(Limb, self)._initialHierarchy()
 
         hideAttrs = [] if self.useScale else ['s']
 
@@ -324,7 +324,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         self.controlers = [self.limbBase.name, self.limbSwing.name] + self.fkControls + self.ikControls
 
     # pylint:disable=too-many-statements
-    def rigSetup(self):
+    def _rigSetup(self):
         """Add the rig setup"""
         self.ikfk = ikfk.IkFkLimb(self.input[1:4])
         self.ikfk.setGroup(self.name + '_ikfk')
@@ -433,7 +433,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
 
         self.__createIkFkMatchSetup()
 
-    def postRigSetup(self):
+    def _postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
         rigamajig2.maya.joint.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
         ikfk.IkFkBase.connectVisibility(self.paramsHierarchy, 'ikfk', ikList=self.ikControls, fkList=self.fkControls)
@@ -445,7 +445,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         # connect the base to the main bind chain
         rigamajig2.maya.joint.connectChains(self.limbBase.name, self.input[0])
 
-    def setupAnimAttrs(self):
+    def _setupAnimAttrs(self):
 
         if self.useProxyAttrs:
             for control in self.controlers:
@@ -482,13 +482,14 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
                             channelBox=True)
         rig_control.connectControlVisiblity(self.joint3Fk.name, driverAttr="gimble", controls=self.joint3GimbleFk.name)
 
-    def connect(self):
+    def _connect(self):
         """Create the connection"""
 
         # if not using proxy attributes then setup our ikfk controller
         if not self.useProxyAttrs:
             if self.useCallbackSwitch:
                 rig_transform.connectOffsetParentMatrix(self.input[3], self.ikfkProxySwitch.orig)
+                rig_transform.connectOffsetParentMatrix(self.input[0], self.ikfkControl.orig)
                 meta.createMessageConnection(self.ikfkProxySwitch.name,
                                              self.ikfkControl.name,
                                              sourceAttr="selectionOverride",
@@ -519,7 +520,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
             pvSpaceValues = [self.pvSpaces[k] for k in self.pvSpaces.keys()]
             spaces.addSpace(self.limbPv.spaces, pvSpaceValues, self.pvSpaces.keys(), 'parent')
 
-    def finalize(self):
+    def _finalize(self):
         """ Lock some attributes we dont want to see"""
         rig_attr.lockAndHide(self.rootHierarchy, rig_attr.TRANSFORMS + ['v'])
         rig_attr.lockAndHide(self.controlHierarchy, rig_attr.TRANSFORMS + ['v'])
@@ -527,7 +528,7 @@ class Limb(rigamajig2.maya.cmpts.base.Base):
         rig_attr.lockAndHide(self.ikfk.getGroup(), rig_attr.TRANSFORMS + ['v'])
         rig_attr.lockAndHide(self.paramsHierarchy, rig_attr.TRANSFORMS + ['v'])
 
-    def setAttrs(self):
+    def _setControlAttributes(self):
         """ Set some attributes to values that make more sense for the inital setup."""
         if self.useProxyAttrs:
             cmds.setAttr("{}.{}".format(self.limbIk.name, 'softStretch'), 0.2)

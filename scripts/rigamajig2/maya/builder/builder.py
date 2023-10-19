@@ -122,7 +122,7 @@ class Builder(object):
 
         for component in self.componentList:
             logger.info('Initializing: {}'.format(component.name))
-            component._initializeComponent()
+            component.initializeComponent()
 
         logger.info("initialize -- complete")
 
@@ -136,7 +136,7 @@ class Builder(object):
 
         for component in self.componentList:
             logger.info('Guiding: {}'.format(component.name))
-            component._guideComponent()
+            component.guideComponent()
             if hasattr(component, "guidesHierarchy") and component.guidesHierarchy:
                 parent = cmds.listRelatives(component.guidesHierarchy, p=True)
                 if parent and parent[0] == 'guides':
@@ -163,7 +163,7 @@ class Builder(object):
         # now we can safely build all the components in the scene
         for component in self.componentList:
             logger.info('Building: {}'.format(component.name))
-            component._buildComponent()
+            component.buildComponent()
 
             if cmds.objExists('rig') and component.getComponentType() != 'main.main':
                 if hasattr(component, "rootHierarchy"):
@@ -196,7 +196,7 @@ class Builder(object):
         """
         for component in self.componentList:
             logger.info('Connecting: {}'.format(component.name))
-            component._connectComponent()
+            component.connectComponent()
             self.updateMaya()
         logger.info("connect -- complete")
 
@@ -206,7 +206,7 @@ class Builder(object):
         """
         for component in self.componentList:
             logger.info('Finalizing: {}'.format(component.name))
-            component._finalizeComponent()
+            component.finalizeComponent()
             self.updateMaya()
 
         # delete the guide group
@@ -220,7 +220,7 @@ class Builder(object):
         """
         for component in self.componentList:
             logger.info('Optimizing {}'.format(component.name))
-            component._optimizeComponent()
+            component.optimizeComponent()
             self.updateMaya()
         logger.info("optimize -- complete")
 

@@ -56,9 +56,9 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="jawOpenTyOffset", value=-0.2, dataType="float")
         self.defineParameter(parameter="jawOpenTzOffset", value=-0.4, dataType="float")
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the inital rig hierarchy"""
-        super(Jaw, self).initialHierarchy()
+        super(Jaw, self)._initialHierarchy()
 
         self.jawControl = control.createAtObject(
             self.jawName,
@@ -126,7 +126,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
         self.lipsControls = [self.lipsTopControl, self.lipsBotControl, self.lipsLControl, self.lipsRControl]
         self.allControls = [self.jawControl, self.muppetControl] + self.lipsControls
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """ Create the rig setup"""
 
         # bind all the contols to the joints
@@ -250,7 +250,7 @@ class Jaw(rigamajig2.maya.cmpts.base.Base):
                         output="{}.tz".format(self.jawControl.trs),
                         name="{}_jawOpenTz".format(self.name))
 
-    def connect(self):
+    def _connect(self):
         """ connect the rig to its rigparent"""
         if cmds.objExists(self.rigParent):
             transform.connectOffsetParentMatrix(self.rigParent, self.jawControl.orig, mo=True)

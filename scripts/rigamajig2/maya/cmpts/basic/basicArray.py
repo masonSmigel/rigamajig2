@@ -54,7 +54,7 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="addSdk", value=False, dataType="bool")
         self.defineParameter(parameter="addBpm", value=False, dataType="bool")
 
-    def setInitialData(self):
+    def _setInitialData(self):
         """ Build the joint name attributes"""
 
         inputBaseNames = [x.rsplit("_bind", 1)[0] for x in self.input]
@@ -64,9 +64,9 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
             self.controlNameAttrs.append(jointNameStr)
             self.defineParameter(parameter=jointNameStr, value=inputBaseNames[i], dataType="string")
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """ Build the initial hierarchy"""
-        super(BasicArray, self).initialHierarchy()
+        super(BasicArray, self)._initialHierarchy()
 
         self.basicComponentList = list()
         for i in range(len(self.input)):
@@ -83,16 +83,16 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
             component.defineParameter("addSdk", self.addSdk)
             component.defineParameter("addBpm", self.addBpm)
 
-            component._initializeComponent()
+            component.initializeComponent()
             cmds.container(self.container, e=True, f=True, addNode=component.getContainer())
             meta.tag(component.getContainer(), 'subComponent')
             self.basicComponentList.append(component)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """Setup the rig, for this component that includes building the basic components"""
 
         for component in self.basicComponentList:
-            component._buildComponent()
+            component.buildComponent()
             cmds.parent(component.paramsHierarchy, self.paramsHierarchy)
             cmds.parent(component.control.orig, self.controlHierarchy)
             cmds.parent(component.spacesHierarchy, self.spacesHierarchy)
@@ -104,7 +104,7 @@ class BasicArray(rigamajig2.maya.cmpts.base.Base):
 
             cmds.delete(component.rootHierarchy)
 
-    def connect(self):
+    def _connect(self):
         """ run the setup step of each component"""
         for component in self.basicComponentList:
-            component._connectComponent()
+            component.connectComponent()

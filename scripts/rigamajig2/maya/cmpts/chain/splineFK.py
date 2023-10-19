@@ -59,7 +59,7 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         if len(self.input) != 2:
             raise RuntimeError('Input list must have a length of 2')
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """Create the build guides"""
 
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
@@ -68,9 +68,9 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         self.upVectorGuide = rig_control.createGuide(self.name + "_upVector", parent=self.guidesHierarchy,
                                                      position=pos)
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(SplineFK, self).initialHierarchy()
+        super(SplineFK, self)._initialHierarchy()
 
         self.fkControlList = list()
         self.ikControlList = list()
@@ -94,7 +94,7 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         self.fkControls = [ctl.name for ctl in self.fkControlList]
         self.ikControls = [ctl.name for ctl in self.ikControlList]
 
-    def rigSetup(self):
+    def _rigSetup(self):
         self.ikspline = spline.SplineBase(self.inputList, name=self.name)
         self.ikspline.setGroup(self.name + '_ik')
         self.ikspline.create(clusters=self.numControls, params=self.paramsHierarchy)
@@ -145,7 +145,7 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         # delete the guides
         cmds.delete(self.guidesHierarchy)
 
-    def connect(self):
+    def _connect(self):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):

@@ -64,7 +64,7 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.defineParameter(parameter="browAllName", value=inputBaseNames[0], dataType="string")
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """Create the build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
@@ -132,9 +132,9 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
 
             self.browControlGuides.append(guide)
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the inital rig hierarchy"""
-        super(Brow, self).initialHierarchy()
+        super(Brow, self)._initialHierarchy()
 
         self.browAll = control.createAtObject(name=self.browAllName,
                                               side=self.side,
@@ -163,7 +163,7 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
                                        parent=self.browControls[0].name)
         transform.matchTransform(self.browControls[0].name, self.tiltTrs)
 
-    def preRigSetup(self):
+    def _preRigSetup(self):
         """ Setup the joints and curves needed for the brow setup"""
 
         self.curvesHierarchy = cmds.createNode("transform", name="{}_curves".format(self.name), p=self.rootHierarchy)
@@ -214,7 +214,7 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
 
                 cmds.orientConstraint(self.tiltTrs, tiltJoint, mo=True)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """ create the main rig setup """
         joint.connectChains([self.browAll.name], [self.input[0]])
 
@@ -270,14 +270,14 @@ class Brow(rigamajig2.maya.cmpts.base.Base):
         cmds.connectAttr(furrowFollow, "{}.w0".format(const2[0]))
         cmds.connectAttr("{}.outputX".format(browFurrowReverse), "{}.w1".format(const2[0]))
 
-    def connect(self):
+    def _connect(self):
         """connect to the rig parent"""
 
         if cmds.objExists(self.rigParent):
             # connect the browAll
             transform.connectOffsetParentMatrix(self.rigParent, self.browAll.orig, mo=True)
 
-    def finalize(self):
+    def _finalize(self):
         """ Finalize the rig setup """
         # hide the curves group
         cmds.setAttr("{}.v".format(self.curvesHierarchy), 0)

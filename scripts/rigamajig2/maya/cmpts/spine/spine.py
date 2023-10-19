@@ -2,20 +2,18 @@
 spine component
 """
 import maya.cmds as cmds
+
+import rigamajig2.maya.attr as rig_attr
 import rigamajig2.maya.cmpts.base
+import rigamajig2.maya.hierarchy as hierarchy
+import rigamajig2.maya.joint as joint
+import rigamajig2.maya.node as node
 import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.rig.live as live
 import rigamajig2.maya.rig.spaces as spaces
 import rigamajig2.maya.rig.spline as spline
 import rigamajig2.maya.transform as rig_transform
-import rigamajig2.maya.mathUtils as mathUtils
-import rigamajig2.maya.constrain as constrain
-import rigamajig2.maya.node as node
 import rigamajig2.shared.common as common
-import rigamajig2.maya.hierarchy as hierarchy
-import rigamajig2.maya.attr as rig_attr
-import rigamajig2.maya.joint as joint
-import rigamajig2.maya.meta as meta
 
 HIPS_PERCENT = 0.33
 SPINE_PERCENT = 0.5
@@ -58,7 +56,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="chestTanget_name", value="chestTan", dataType="string")
         self.defineParameter(parameter="chestSpaces", value=dict(), dataType="dict")
        
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """Create the build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
@@ -103,9 +101,9 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
 
         rig_attr.lockAndHide(self.chestTopGuide, rig_attr.TRANSLATE + ['v'])
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(Spine, self).initialHierarchy()
+        super(Spine, self)._initialHierarchy()
 
         # build the hips swivel control
         hipPos = cmds.xform(self.input[0], q=True, ws=True, t=True)
@@ -203,7 +201,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
             position=chestPos
             )
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """Add the rig setup"""
 
         # the spline might shift slightly when the ik is created.
@@ -263,7 +261,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
         cmds.orientConstraint(self.hipSwing.name, self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.chestTop.name, self.ikspline._endTwist, mo=True)
 
-    def connect(self):
+    def _connect(self):
         """Create the connection"""
 
         # add world space switches
@@ -286,7 +284,7 @@ class Spine(rigamajig2.maya.cmpts.base.Base):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.torso.orig, mo=True)
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.ikspline.getGroup(), mo=True)
 
-    def finalize(self):
+    def _finalize(self):
         rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
         rig_attr.lockAndHide(self.paramsHierarchy, rig_attr.TRANSFORMS + ['v'])
 

@@ -43,9 +43,9 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="cogGimble_name", value="hipsGimble", dataType="string")
         self.defineParameter(parameter="cogPivot_name", value="hips_pivot", dataType="string")
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(Cog, self).initialHierarchy()
+        super(Cog, self)._initialHierarchy()
         # self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
         # self.controlHierarchy = cmds.createNode('transform', n=self.name + '_control', parent=self.rootHierarchy)
 
@@ -67,7 +67,7 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
                                         position=pos)
         self.cogGimble.addTrs("neg")
 
-    def rigSetup(self):
+    def _rigSetup(self):
         # create the pivot negate
 
         negateOffsetName = self.cogGimble.trs + '_trs'
@@ -80,7 +80,7 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
             rig_transform.matchTransform(self.input[0], self.inputTrs)
             joint.connectChains(self.inputTrs, self.input[0])
 
-    def setupAnimAttrs(self):
+    def _setupAnimAttrs(self):
         """ setup the animation attributes """
 
         # create a visability control for the ikGimble control
@@ -92,6 +92,6 @@ class Cog(rigamajig2.maya.cmpts.base.Base):
         attr.createAttr(self.cog.name, "gimble", attributeType='bool', value=0, keyable=False, channelBox=True)
         control.connectControlVisiblity(self.cog.name, "gimble", controls=self.cogGimble.name)
 
-    def connect(self):
+    def _connect(self):
         if cmds.objExists(self.rigParent):
             cmds.parentConstraint(self.rigParent, self.cog[0], mo=True)

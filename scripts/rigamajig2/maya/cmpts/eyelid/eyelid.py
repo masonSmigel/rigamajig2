@@ -82,7 +82,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.defineParameter(parameter="eyeSocketName", value=inputBaseNames[0], dataType="string")
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """Create all build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
@@ -228,9 +228,9 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             returnList.append(guide)
         return returnList
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the inital rig hierarchy"""
-        super(Eyelid, self).initialHierarchy()
+        super(Eyelid, self)._initialHierarchy()
 
         self.eyeSocket = control.createAtObject(name=self.eyeSocketName,
                                                 side=self.side,
@@ -271,7 +271,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
                                              hideAttrs=['s', 'v'])
                 self.creaseControls.append(ctl)
 
-    def preRigSetup(self):
+    def _preRigSetup(self):
         """ Setup the joints and curves neeeded for this eyelid setup"""
         # create the upVector
         self.upVector = cmds.createNode("transform", name="{}_upVec".format(self.name), p=self.spacesHierarchy)
@@ -410,7 +410,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
 
                 joint.connectChains([targetLoc], [endJoint], connectScale=False)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """ create the main rig setup """
         # connect the eyesocket control to the eyesocket joint
         joint.connectChains([self.eyeSocket.name], [self.input[0]])
@@ -610,7 +610,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             eyelidControl = self.lidControls[2] if part == "upper" else self.lidControls[6]
             transform.connectOffsetParentMatrix(eyeReader, eyelidControl.trs, mo=True, t=True, r=False, s=False)
 
-    def setupAnimAttrs(self):
+    def _setupAnimAttrs(self):
         """Setup animation attributes."""
         attr.addSeparator(self.eyeSocket.name, "----")
         attr.driveAttribute("blink", self.paramsHierarchy, self.eyeSocket.name)
@@ -640,7 +640,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
         # setup the fleshy eye
         attr.driveAttribute("fleshyEye", self.paramsHierarchy, self.eyeSocket.name)
 
-    def connect(self):
+    def _connect(self):
         """connect to the rig parent"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
@@ -704,7 +704,7 @@ class Eyelid(rigamajig2.maya.cmpts.base.Base):
             followAttr = attr.createAttr(creaseControl.name, "creaseFollow", "float", value=1, minValue=0, maxValue=1)
             cmds.connectAttr(followAttr, "{}.envelope".format(blend))
 
-    def finalize(self):
+    def _finalize(self):
         """ Finalize the rig setup """
         # hide the curves group
         cmds.setAttr("{}.v".format(self.curvesHierarchy), 0)

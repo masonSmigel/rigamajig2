@@ -2,13 +2,14 @@
 Look at Component
 """
 import maya.cmds as cmds
+
 import rigamajig2.maya.cmpts.base
-import rigamajig2.shared.common as common
-import rigamajig2.maya.transform as rig_transform
-import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.joint as joint
 import rigamajig2.maya.mathUtils as mathUtils
+import rigamajig2.maya.rig.control as rig_control
 import rigamajig2.maya.rig.spaces as spaces
+import rigamajig2.maya.transform as rig_transform
+import rigamajig2.shared.common as common
 
 
 class LookAt(rigamajig2.maya.cmpts.base.Base):
@@ -51,7 +52,7 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
                 parameterValue = '_'.join(input.split("_")[:-1])
                 self.defineParameter(parameter=parameterName, value=parameterValue, dataType="string")
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """ create build guides_hrc """
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
@@ -62,11 +63,11 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
             setattr(self, "_{}_upVecTgt".format(input), inputUpVector)
             rig_transform.matchTranslate(input, inputUpVector)
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """
         :return:
         """
-        super(LookAt, self).initialHierarchy()
+        super(LookAt, self)._initialHierarchy()
 
         self.aimTarget = rig_control.createAtObject(self.aimTargetName,
                                                     spaces=True,
@@ -89,7 +90,7 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
 
             self.lookAtCtlList.append(lookAtControl)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """
         setup the rig
         """
@@ -116,7 +117,7 @@ class LookAt(rigamajig2.maya.cmpts.base.Base):
         # Delete the proxy guides_hrc:
         cmds.delete(self.guidesHierarchy)
 
-    def connect(self):
+    def _connect(self):
         """
         connect to the rig parent
         """

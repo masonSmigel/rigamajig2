@@ -79,7 +79,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
         inputBaseNames = [x.split("_")[0] for x in self.input]
         self.defineParameter(parameter="lipsAllName", value=inputBaseNames[0], dataType="string")
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """ create all build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
@@ -252,9 +252,9 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
         return returnList
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """ Build the initial rig hierarchy"""
-        super(Lips, self).initialHierarchy()
+        super(Lips, self)._initialHierarchy()
 
         # create the lips all control
         self.lipsAll = control.createAtObject(name=self.lipsAllName,
@@ -342,7 +342,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                                              hideAttrs=['s', 'v'])
                 self.extraTweakers.append(ctl)
 
-    def preRigSetup(self):
+    def _preRigSetup(self):
         """ Setup the joints and curves needed for the setup"""
         # create the upVector
         self.upVector = cmds.createNode("transform", name="{}_upVec".format(self.name), p=self.spacesHierarchy)
@@ -412,7 +412,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             joint.connectChains([targetLoc], [endJoint], connectScale=False)
             self.aimTgtList.append(targetLoc)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """ create the main rig setup """
         joint.connectChains([self.lipsAll.name], [self.input[0]])
 
@@ -766,7 +766,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
             paramsHolder=self.paramsHierarchy
             )
 
-    def setupAnimAttrs(self):
+    def _setupAnimAttrs(self):
         """ setup the animator parameters"""
         # create a visability control for the ikGimble control
         attr.addSeparator(self.lipsAll.name, "----")
@@ -802,7 +802,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
 
             cmds.connectAttr(curlAttr, "{}.ty".format(tweaker.sdk))
 
-    def connect(self):
+    def _connect(self):
         """Create the connection to other components """
 
         # connect the lips all
@@ -847,7 +847,7 @@ class Lips(rigamajig2.maya.cmpts.base.Base):
                         cornerSetup = self.cornerSetups[i - 2]
                         cmds.connectAttr("{}.{}".format(jawTrs, channel), "{}.{}".format(cornerSetup, channel))
 
-    def finalize(self):
+    def _finalize(self):
         """ Finalize the rig setup """
         # hide the curves group
         cmds.setAttr("{}.v".format(self.curvesHierarchy), 0)

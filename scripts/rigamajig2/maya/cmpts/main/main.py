@@ -2,12 +2,13 @@
 main component
 """
 import maya.cmds as cmds
-import rigamajig2.maya.cmpts.base
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.container
-import rigamajig2.maya.node
+
 import rigamajig2.maya.attr
+import rigamajig2.maya.cmpts.base
+import rigamajig2.maya.container
 import rigamajig2.maya.meta
+import rigamajig2.maya.node
+import rigamajig2.maya.rig.control as rig_control
 
 RIG_HRC_NAME = 'rig'
 BIND_HRC_NAME = 'bind'
@@ -37,7 +38,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         """
         super(Main, self).__init__(name=name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the initial hirarchy"""
         self.rootHierarchy = cmds.createNode('transform', n=self.name)
         self.rigHierarchy = cmds.createNode('transform', n=RIG_HRC_NAME, parent=self.rootHierarchy)
@@ -64,7 +65,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         # add nodes to the container
         self.controlers = [self.trsGlobal.name, self.trsShot.name, self.trsMotion.name]
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """Add the self.rig setup"""
         # Setup the main scaling
         rigamajig2.maya.node.multMatrix([self.trsMotion.name + '.matrix',
@@ -114,7 +115,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
         cmds.connectAttr(rigVisAttr, "{}.v".format(self.rigHierarchy))
         cmds.connectAttr(bindVisAttr, "{}.v".format(self.bindHierarchy))
 
-    def finalize(self):
+    def _finalize(self):
         rigamajig2.maya.attr.lockAndHide(self.rootHierarchy, rigamajig2.maya.attr.TRANSFORMS + ['v'])
         rigamajig2.maya.attr.lock(self.rigHierarchy, rigamajig2.maya.attr.TRANSFORMS)
         rigamajig2.maya.attr.lock(self.bindHierarchy, rigamajig2.maya.attr.TRANSFORMS)
@@ -122,7 +123,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
 
         self.addMetadataToMain()
 
-    def deleteSetup(self):
+    def __deleteSetup(self):
         if cmds.objExists(BIND_HRC_NAME):
             skeletonChildren = cmds.listRelatives(BIND_HRC_NAME, c=True)
             if skeletonChildren: cmds.parent(skeletonChildren, world=True)
@@ -135,7 +136,7 @@ class Main(rigamajig2.maya.cmpts.base.Base):
             modelChildred = cmds.listRelatives(MOD_HRC_NAME, c=True)
             if modelChildred: cmds.parent(modelChildred, world=True)
 
-        super(Main, self).deleteSetup()
+        super(Main, self).__deleteSetup()
 
     def addMetadataToMain(self):
         """

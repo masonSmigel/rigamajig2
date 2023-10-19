@@ -84,7 +84,7 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         # self.loadSettings(self.cmptSettings)
         self._updateClassParameters()
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
 
         # load the component name stuff
         self.setupInitialData()
@@ -119,9 +119,9 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
 
             self.mainGuidesList.append(guide)
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the initial hirarchy"""
-        super(ChainSpline, self).initialHierarchy()
+        super(ChainSpline, self)._initialHierarchy()
 
         self.mainControls = list()
         self.mainDriverJoints = list()
@@ -157,7 +157,7 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
 
             self.subControlers.append(subControl)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """ Do the rig setup"""
 
         form = "Closed" if self.closed else "Open"
@@ -208,7 +208,7 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
         controls = [c.name for c in self.subControlers]
         joint.connectChains(controls, self.inputList)
 
-    def connect(self):
+    def _connect(self):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
@@ -217,7 +217,7 @@ class ChainSpline(rigamajig2.maya.cmpts.base.Base):
 
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.upVectorTrs, mo=True)
 
-    def finalize(self):
+    def _finalize(self):
         """ Finalize the component """
         attr.createAttr(self.paramsHierarchy, "subControls", "bool", value=0, keyable=False, channelBox=True)
         controls = [c.name for c in self.subControlers]

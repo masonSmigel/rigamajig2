@@ -55,7 +55,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
         self.defineParameter(parameter="neckSpaces", value=dict(), dataType="dict")
         self.defineParameter(parameter="headSpaces", value=dict(), dataType="dict")
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """Create the build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
@@ -73,8 +73,8 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
                                                   position=skullPos)
         rig_attr.lockAndHide(self.skullGuide, rig_attr.TRANSLATE + ['v'])
 
-    def initialHierarchy(self):
-        super(Neck, self).initialHierarchy()
+    def _initialHierarchy(self):
+        super(Neck, self)._initialHierarchy()
 
         self.neck = rig_control.createAtObject(
             self.neck_name, self.side,
@@ -141,7 +141,7 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
             shapeAim='x',
             xformObj=self.neckGuide)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """Add the rig setup"""
         # create the spline ik
         self.ikspline = spline.SplineBase(self.input, name=self.name)
@@ -180,12 +180,12 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
 
         rig_transform.connectOffsetParentMatrix(self.neck.name, self.ikspline.getGroup(), mo=True)
 
-    def setupAnimAttrs(self):
+    def _setupAnimAttrs(self):
         # create a visability control for the ikGimble control
         rig_attr.createAttr(self.head.name, "gimble", attributeType='bool', value=0, keyable=False, channelBox=True)
         rig_control.connectControlVisiblity(self.head.name, "gimble", controls=self.headGimble.name)
 
-    def connect(self):
+    def _connect(self):
         """Create the connection"""
 
         # connect the rig to is rigParent
@@ -210,6 +210,6 @@ class Neck(rigamajig2.maya.cmpts.base.Base):
                             self.headSpaces.keys(),
                             'orient')
 
-    def finalize(self):
+    def _finalize(self):
         rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ['v'])
         rig_attr.lockAndHide(self.paramsHierarchy, rig_attr.TRANSFORMS + ['v'])

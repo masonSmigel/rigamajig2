@@ -42,8 +42,8 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
     def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
         super(Eyeballs, self).__init__(name=name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
 
-    def createBuildGuides(self):
-        super(Eyeballs, self).createBuildGuides()
+    def _createBuildGuides(self):
+        super(Eyeballs, self)._createBuildGuides()
 
         # add guides for the pupil and iris
         for inputJoint in self.input:
@@ -65,8 +65,8 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
             setattr(self, "{}_irisGuide".format(inputJoint), irisGuide)
             setattr(self, "{}_pupilGuide".format(inputJoint), pupilGuide)
 
-    def preRigSetup(self):
-        """ We'll use the preRigSetup to build the joints for the pupil and iris"""
+    def _preRigSetup(self):
+        """ We'll use the _preRigSetup to build the joints for the pupil and iris"""
 
         for inputJoint in self.input:
             irisGuide = getattr(self, "{}_irisGuide".format(inputJoint))
@@ -90,9 +90,9 @@ class Eyeballs(rigamajig2.maya.cmpts.lookAt.lookAt.LookAt):
             setattr(self, "{}_irisJoint".format(inputJoint), irisJoint)
             setattr(self, "{}_pupilJoint".format(inputJoint), pupilJoint)
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """ do the rig setup"""
-        super(Eyeballs, self).rigSetup()
+        super(Eyeballs, self)._rigSetup()
 
         for inputJoint, eyeControl in zip(self.input, self.lookAtCtlList):
             # get the aim axis and length to use in the iris and pupil setup

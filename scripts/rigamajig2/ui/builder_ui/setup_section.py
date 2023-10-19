@@ -474,7 +474,7 @@ class ComponentManager(QtWidgets.QWidget):
         self.builder.componentList.append(cmpt)
         self._addItemToAutoComplete(name=name)
 
-        cmpt._initializeComponent()
+        cmpt.initializeComponent()
         return cmpt
 
     def _loadFromScene(self, *args):
@@ -594,7 +594,7 @@ class ComponentManager(QtWidgets.QWidget):
         mirroredComponent = self.createComponent(guessMirrorName, componentType, mirroredInput, mirroredRigParent)
 
         # We need to force the component to intialize so we can mirror stuff
-        mirroredComponent._initializeComponent()
+        mirroredComponent.initializeComponent()
         self._mirrorComponentParameters(component)
 
         # update the ui

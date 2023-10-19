@@ -42,9 +42,9 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.defineParameter(parameter='limb_autoWristName', value=self.name.split("_")[0] + "_autoWrist",
                              dataType="string")
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the initial hierarchy"""
-        super(Arm, self).initialHierarchy()
+        super(Arm, self)._initialHierarchy()
 
         self.limbAutoAim = rig_control.create(
             self.limb_autoWristName,
@@ -59,9 +59,9 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
             position=cmds.xform(self.input[3], q=True, ws=True, t=True)
         )
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """Add the rig setup"""
-        super(Arm, self).rigSetup()
+        super(Arm, self)._rigSetup()
 
         cmds.delete(cmds.listRelatives(self.ikfk.getIkJointList()[-1], ad=True, type='orientConstraint'))
         cmds.orientConstraint(self.limbAutoAim.name, self.ikfk.getIkJointList()[-1], mo=True)
@@ -86,20 +86,20 @@ class Arm(rigamajig2.maya.cmpts.limb.limb.Limb):
         # connect the node to the control
         cmds.connectAttr("{}.{}".format(self.paramsHierarchy, "autoWrist"), "{}.envelope".format(blendMatrix))
 
-    def setupAnimAttrs(self):
+    def _setupAnimAttrs(self):
         # specific controls not affected by userProxy
         rig_attr.addSeparator(self.limbIk.name, '----')
         rig_attr.driveAttribute('autoWrist', self.paramsHierarchy, self.limbIk.name)
-        super(Arm, self).setupAnimAttrs()
+        super(Arm, self)._setupAnimAttrs()
 
-    def postRigSetup(self):
+    def _postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
-        super(Arm, self).postRigSetup()
+        super(Arm, self)._postRigSetup()
 
-    def connect(self):
+    def _connect(self):
         """Create the connection"""
-        super(Arm, self).connect()
+        super(Arm, self)._connect()
 
-    def finalize(self):
+    def _finalize(self):
         """ Lock some attributes we dont want to see"""
-        super(Arm, self).finalize()
+        super(Arm, self)._finalize()

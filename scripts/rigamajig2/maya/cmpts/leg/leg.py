@@ -47,9 +47,9 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         if len(self.input) != 6:
             raise RuntimeError('Input list must have a length of 6')
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """ create build guides_hrc """
-        super(Leg, self).createBuildGuides()
+        super(Leg, self)._createBuildGuides()
 
         self.heelGuide = rig_control.createGuide("{}_heel".format(self.name), parent=self.guidesHierarchy)
         self.innGuide = rig_control.createGuide("{}_inn".format(self.name), parent=self.guidesHierarchy)
@@ -57,7 +57,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.ballGuide = rig_control.createGuide("{}_ball".format(self.name), parent=self.guidesHierarchy)
         self.toeGuide = rig_control.createGuide("{}_toe".format(self.name), parent=self.guidesHierarchy)
 
-    def autoOrientGuides(self):
+    def _autoOrientGuides(self):
         """Auto orient the foot pivot guides"""
         # auto aim the guides. these should ALWAYS be in world space.
         cmds.delete(cmds.aimConstraint(self.toeGuide, self.heelGuide,
@@ -68,9 +68,9 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         cmds.delete(cmds.aimConstraint(self.heelGuide, self.toeGuide,
                                        aimVector=(0, 0, -1), upVector=(0, 1, 0), worldUpType="scene", mo=False))
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Build the initial hierarchy"""
-        super(Leg, self).initialHierarchy()
+        super(Leg, self)._initialHierarchy()
 
         self.toesFk = rig_control.createAtObject(
             self.toes_fkName,
@@ -124,9 +124,9 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         self.footPivotControls = [self.heelIk.name, self.ballIk.name, self.toesIk.name]
         self.ikControls += self.footPivotControls
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """Add the rig setup"""
-        super(Leg, self).rigSetup()
+        super(Leg, self)._rigSetup()
         # setup the foot Ik
         self.footIkFk = ikfk.IkFkFoot(jointList=self.input[3:],
                                       heelPivot=self.heelGuide, innPivot=self.innGuide, outPivot=self.outGuide)
@@ -156,7 +156,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         # TODO: this is alittle hacky... maybe fix it later
         cmds.setAttr("{}.{}".format(self.footIkFk.getIkJointList()[1], 'segmentScaleCompensate'), 0)
 
-    def postRigSetup(self):
+    def _postRigSetup(self):
         """ Connect the blend chain to the bind chain"""
         blendJoints = self.ikfk.getBlendJointList() + [self.toesFk.name]
         rigamajig2.maya.joint.connectChains(blendJoints, self.input[1:-1])
@@ -170,7 +170,7 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         # connect the base to the main bind chain
         rigamajig2.maya.joint.connectChains(self.limbBase.name, self.input[0])
 
-    def setupAnimAttrs(self):
+    def _setupAnimAttrs(self):
         """ setup animation attributes"""
 
         # connect the foot ik attributes to the foot control
@@ -184,12 +184,12 @@ class Leg(rigamajig2.maya.cmpts.limb.limb.Limb):
         rigamajig2.maya.attr.createAttr(self.limbIk.name, "footPivots", "bool", value=0, keyable=False, channelBox=True)
         rig_control.connectControlVisiblity(self.limbIk.name, "footPivots", self.footPivotControls)
 
-        super(Leg, self).setupAnimAttrs()
+        super(Leg, self)._setupAnimAttrs()
 
-    def connect(self):
+    def _connect(self):
         """Create the connection"""
-        super(Leg, self).connect()
+        super(Leg, self)._connect()
 
-    def finalize(self):
+    def _finalize(self):
         """ Lock some attributes we don't want to see"""
-        super(Leg, self).finalize()
+        super(Leg, self)._finalize()

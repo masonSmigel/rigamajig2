@@ -71,8 +71,8 @@ class Base(object):
 
         # we will always need the container if it does not exist.
         if not cmds.objExists(self.container):
-            self.createContainer()
-            self.createMetaNode(metaNodeName=self.container + "_metadata")
+            self._createContainer()
+            self._createMetaNode(metaNodeName=self.container + "_metadata")
             logger.debug(f"Component '{name}' container created.")
 
         self.metadataNode = self.getMetaDataNode()
@@ -146,26 +146,26 @@ class Base(object):
 
         return componentInstance
 
-    def _initializeComponent(self):
+    def initializeComponent(self):
         """
         setup all initialize functions for the component
 
         process order:
-            self.createContainer
+            self._createContainer
         """
         if self.getStep() < INITIALIZE_STEP and self.enabled:
-            self.setInitialData()
+            self._setInitialData()
             self.setStep(1)
 
         else:
             logger.debug('component {} already initialized.'.format(self.name))
 
-    def _guideComponent(self):
+    def guideComponent(self):
         """
         setup the component guides
         process order:
             self.preScript
-            self.createJoints
+            self._createJoints
             self.createBuildGuides
         """
         self._updateClassParameters()
@@ -173,22 +173,22 @@ class Base(object):
         if self.getStep() < GUIDE_STEP and self.enabled:
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
-                self.createJoints()
-                self.createBuildGuides()
+                self._createJoints()
+                self._createBuildGuides()
             self.setStep(2)
 
         else:
             logger.debug('component {} already guided.'.format(self.name))
 
-    def _buildComponent(self):
+    def buildComponent(self):
         """
         build the rig
 
         process order:
-            self.initialHierarchy
-            self.preRigSetup
-            self.rigSetup
-            self.postRigSetup
+            self._initialHierarchy
+            self._preRigSetup
+            self._rigSetup
+            self._postRigSetup
         """
         self._updateClassParameters()
 
@@ -196,47 +196,47 @@ class Base(object):
 
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
-                self.autoOrientGuides()
-                self.initialHierarchy()
-                self.preRigSetup()
-                self.rigSetup()
-                self.postRigSetup()
-                self.setupAnimAttrs()
+                self._autoOrientGuides()
+                self._initialHierarchy()
+                self._preRigSetup()
+                self._rigSetup()
+                self._postRigSetup()
+                self._setupAnimAttrs()
             self.setStep(3)
         else:
             logger.debug('component {} already built.'.format(self.name))
 
-    def _connectComponent(self):
+    def connectComponent(self):
         """ connect components within the rig"""
         self._updateClassParameters()
 
         if self.getStep() < CONNECT_STEP and self.enabled:
             with rigamajig2.maya.container.ActiveContainer(self.container):
-                self.initConnect()
-                self.connect()
-                self.postConnect()
+                self._preConnect()
+                self._connect()
+                self._postConnect()
             self.setStep(4)
         else:
             logger.debug('component {} already connected.'.format(self.name))
 
-    def _finalizeComponent(self):
+    def finalizeComponent(self):
         """
         finalize component
 
          process order:
-            self.publishNodes
-            self.publishAttributes
+            self._publishNodes
+            self._publishAttributes
             self.finalize
             self.postScripts
         """
         # self._updateClassParameters()
 
         if self.getStep() < FINALIZE_STEP and self.enabled:
-            self.publishNodes()
-            self.publishAttributes()
+            self._publishNodes()
+            self._publishAttributes()
             with rigamajig2.maya.container.ActiveContainer(self.container):
-                self.finalize()
-                self.setAttrs()
+                self._finalize()
+                self._setControlAttributes()
 
             # if we added a component tag build that now!
             if self.componentTag:
@@ -246,15 +246,15 @@ class Base(object):
         else:
             logger.debug('component {} already finalized.'.format(self.name))
 
-    def _optimizeComponent(self):
+    def optimizeComponent(self):
         """
-        Optimize the comonent
+        Optimize the component
         :return:
         """
         # self._updateClassParameters()
 
         if self.getStep() != OPTIMIZE_STEP:
-            self.optimize()
+            self._optimize()
             self.setStep(6)
         else:
             logger.debug('component {} already optimized.'.format(self.name))
@@ -262,22 +262,22 @@ class Base(object):
     # --------------------------------------------------------------------------------
     # functions
     # --------------------------------------------------------------------------------
-    def createJoints(self):
+    def _createJoints(self):
         """build joints required for the component"""
         pass
 
-    def createBuildGuides(self):
+    def _createBuildGuides(self):
         """Add additional guides"""
         pass
 
-    def setInitialData(self):
+    def _setInitialData(self):
         """
         Set initial component data.
         This allows you to set component data within subclasses.
         """
         pass
 
-    def createContainer(self):
+    def _createContainer(self):
         """Create a Container for the component"""
         if not cmds.objExists(self.container):
             self.container = rigamajig2.maya.container.create(self.container)
@@ -290,7 +290,7 @@ class Base(object):
                                             locked=True
                                             )
 
-    def createMetaNode(self, metaNodeName):
+    def _createMetaNode(self, metaNodeName):
         """Create the metadata node. This will store any data we need to transfer across steps"""
         if not cmds.objExists(metaNodeName):
             self.metadataNode = cmds.createNode(METADATA_NODE_TYPE, name=metaNodeName)
@@ -299,10 +299,10 @@ class Base(object):
 
             rigamajig2.maya.container.addNodes(self.metadataNode, self.container, force=True)
 
-    def autoOrientGuides(self):
+    def _autoOrientGuides(self):
         """Automate positioning and orienting of the guides."""
 
-    def initialHierarchy(self):
+    def _initialHierarchy(self):
         """Setup the initial Hierarchy. implement in subclass"""
         self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
         self.paramsHierarchy = cmds.createNode('transform', n=self.name + '_params',
@@ -318,35 +318,35 @@ class Base(object):
         for hierarchy in [self.paramsHierarchy, self.controlHierarchy, self.spacesHierarchy]:
             rigamajig2.maya.attr.lockAndHide(hierarchy, rigamajig2.maya.attr.TRANSFORMS + ['v'])
 
-    def preRigSetup(self):
+    def _preRigSetup(self):
         """Pre rig setup. implement in subclass"""
         pass
 
-    def rigSetup(self):
+    def _rigSetup(self):
         """Add the rig setup. implement in subclass"""
         pass
 
-    def postRigSetup(self):
+    def _postRigSetup(self):
         """Add the post setup. implement in subclass"""
         pass
 
-    def setupAnimAttrs(self):
+    def _setupAnimAttrs(self):
         """Setup animation attributes. implement in subclass"""
         pass
 
-    def initConnect(self):
+    def _preConnect(self):
         """initialize the connection. implement in subclass"""
         pass
 
-    def connect(self):
+    def _connect(self):
         """create the connection. implement in subclass"""
         pass
 
-    def postConnect(self):
+    def _postConnect(self):
         """any final cleanup after the connection. implement in subclass"""
         pass
 
-    def publishNodes(self):
+    def _publishNodes(self):
         """Publish nodes. implement in subclass"""
         rigamajig2.maya.container.addParentAnchor(self.rootHierarchy, container=self.container)
         rigamajig2.maya.container.addChildAnchor(self.rootHierarchy, container=self.container)
@@ -357,23 +357,23 @@ class Base(object):
             if rigamajig2.maya.meta.hasTag(currentNode, CONTROLTAG):
                 rigamajig2.maya.container.addPublishNodes(currentNode)
 
-    def publishAttributes(self):
+    def _publishAttributes(self):
         """_publish attributes. implement in subclass"""
         pass
 
-    def finalize(self):
+    def _finalize(self):
         """Finalize a component. implement in subclass"""
         pass
 
-    def setAttrs(self):
+    def _setControlAttributes(self):
         """Set attributes. implement in subclass"""
         pass
 
-    def optimize(self):
+    def _optimize(self):
         """Optimize a component. implement in subclass"""
         pass
 
-    def deleteSetup(self):
+    def _deleteSetup(self):
         """ delete the rig setup"""
         logger.info("deleting component {}".format(self.name))
         cmds.select(self.container, r=True)

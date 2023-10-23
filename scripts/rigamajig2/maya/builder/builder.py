@@ -109,8 +109,15 @@ class Builder(object):
         """
         fileStack = common.toList(fileStack)
         dataToSave = rigamajig2.maya.builder.data.gatherJoints()
-        savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="JointData",
-                                             method=method)
+
+        layeredSaveInfo = rigamajig2.maya.builder.data.gatherLayeredSaveData(
+            dataToSave=dataToSave,
+            fileStack=fileStack,
+            dataType="JointData",
+            method=method)
+
+        savedFiles = rigamajig2.maya.builder.data.performLayeredSave(layeredSaveInfo, dataType="JointData", prompt=True)
+
         if savedFiles:
             logger.info("Joint positions Saved -- complete")
             return savedFiles
@@ -236,14 +243,14 @@ class Builder(object):
         # because component data is gathered from the class but saved with the name as a key
         # this needs to be done in steps. First we can define our save dictionaries using the layered save...
         componentNameList = [c.name for c in self.componentList]
-        saveDict = core.performLayeredSave(dataToSave=componentNameList,
-                                           fileStack=fileStack,
-                                           dataType="ComponentData",
-                                           method=method,
-                                           doSave=False)
+        saveDict = rigamajig2.maya.builder.data.gatherLayeredSaveData(
+            dataToSave=componentNameList,
+            fileStack=fileStack,
+            dataType="ComponentData",
+            method=method)
 
         # if we escape from the save then we can return
-        if not saveDict:
+        if not rigamajig2.maya.builder.data.layeredSavePrompt(saveDataDict=saveDict, dataType="ComponentData"):
             return
 
         # ... next loop through the save dict and gather component data based on the component name.
@@ -251,7 +258,7 @@ class Builder(object):
             componentDataObj = component_data.ComponentData()
 
             # loop through the list of component names
-            for componentName in saveDict[dataFile]:
+            for componentName in saveDict[dataFile][rigamajig2.maya.builder.data.CHANGED]:
                 component = self.findComponent(name=componentName)
                 componentDataObj.gatherData(component)
             componentDataObj.write(dataFile)
@@ -313,10 +320,13 @@ class Builder(object):
         :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
         :param str method: method of data merging to apply. Default is "merge"
         """
+        layeredSaveInfo = rigamajig2.maya.builder.data.gatherLayeredSaveData(
+            dataToSave=rigamajig2.maya.builder.data.gatherControlShapes(),
+            fileStack=fileStack,
+            dataType="CurveData",
+            method=method)
 
-        allControls = rigamajig2.maya.builder.data.gatherControlShapes()
-        savedFiles = core.performLayeredSave(dataToSave=allControls, fileStack=fileStack, dataType="CurveData",
-                                             method=method)
+        savedFiles = rigamajig2.maya.builder.data.performLayeredSave(layeredSaveInfo, dataType="CurveData", prompt=True)
         if savedFiles:
             logger.info("Control Shapes Save -- Complete")
             return savedFiles
@@ -345,8 +355,10 @@ class Builder(object):
         # path = path or rigFileData
         fileStack = common.toList(fileStack)
         dataToSave = rigamajig2.maya.builder.data.gatherGuides()
-        savedFiles = core.performLayeredSave(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData",
-                                             method=method)
+        layeredSaveInfo = rigamajig2.maya.builder.data.gatherLayeredSaveData(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData",
+                                                                             method=method)
+        savedFiles = rigamajig2.maya.builder.data.performLayeredSave(saveDataDict=layeredSaveInfo, dataType="GuideData", prompt=True)
+
         if savedFiles:
             logger.info("Guides Save  -- complete")
             return savedFiles
@@ -375,8 +387,15 @@ class Builder(object):
         # path = path or self.getAbsolutePath(self.builderData.get(constants.PSD))
 
         allPoseReaders = rigamajig2.maya.builder.data.gatherPoseReaders()
-        savedFiles = core.performLayeredSave(dataToSave=allPoseReaders, fileStack=fileStack, dataType="PSDData",
-                                             method="merge")
+
+        layeredSaveInfo = rigamajig2.maya.builder.data.gatherLayeredSaveData(
+            dataToSave=allPoseReaders,
+            fileStack=fileStack,
+            dataType="PSDData",
+            method="merge")
+
+        savedFiles = rigamajig2.maya.builder.data.performLayeredSave(layeredSaveInfo, dataType="PSDData", prompt=True)
+
         # deform._savePoseReaders(path)
         if savedFiles:
             logger.info("Pose Readers Save -- Complete")

@@ -10,6 +10,7 @@
 """
 import logging
 import os
+import typing
 
 from maya import cmds as cmds
 
@@ -20,14 +21,23 @@ from rigamajig2.maya.data import psd_data, skin_data, SHAPES_data, deformLayer_d
     abstract_data
 from rigamajig2.maya.rig import psd
 from rigamajig2.shared import path as rig_path, common as common
+from rigamajig2.ui.widgets import mayaMessageBox
 
 logger = logging.getLogger(__name__)
 
-# layeredSave
-def performLayeredSave(dataSaveDict, dataType, method="merge", fileName=None, popupInfo=True,
-        doSave=True):
+
+CHANGED = "changed"
+ADDED = "added"
+REMOVED = "removed"
+
+DATA_MERGE_METHODS = ['new', 'merge', 'overwrite']
+
+LayeredDataInfoDict = typing.Dict[str, typing.Dict[str, typing.List]]
+
+
+def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileName=None) -> LayeredDataInfoDict:
     """
-    Perform a layered data save. This can be used on nearly any node data class to save a list of data into the
+    gather data for a layered data save. This can be used on nearly any node data class to save a list of data into the
     source files where they originally came from. If the node data appears in multiple files it will be saved in the
     lowest file to preserve inheritance.
 
@@ -42,23 +52,194 @@ def performLayeredSave(dataSaveDict, dataType, method="merge", fileName=None, po
     :param dataType: Datatype to save.
     :param method: method to append new data. Available options are [new, merge, overwrite]
     :param fileName: if using new file method provide a file to save new data to
-    :param popupInfo: if maya is running this will give a popup with some basic info about the scene
-    :param doSave: If False the save will not be performed. Useful when only the data dictionary is needed.
+    :return: dictonary containing info about all nodes added, changed and removed from each file.
+    """
+
+    dataModules = list(core.getDataModules(core.DATA_PATH).keys())
+    if dataType not in dataModules:
+        raise ValueError(f"Data type {dataType} is not valid. Valid Types are {dataModules}")
+
+    if method not in ['new', 'merge', 'overwrite']:
+        raise ValueError(f"Merge method '{method}' is not valid. Use {DATA_MERGE_METHODS}")
+
+    fileStack = common.toList(fileStack)
+
+    # sometimes we may want to save other data types into a different data loader.
+    # Here we need to filter only files of the data type we want
+    filteredFileStack = []
+    for dataFile in fileStack:
+        dataFileType = abstract_data.AbstractData.getDataType(dataFile)
+        if dataFileType == dataType or dataFileType == "AbstractData":
+            filteredFileStack.append(dataFile)
+
+    # first lets get a list of all the nodes that has been previously saved
+    # we can save that into a dictionary with the file they came from and a list to compare to the new data.
+    # (check for deleted/missing nodes)
+    sourceNodesDict = dict()
+    sourceNodesList = set()
+    for dataFile in filteredFileStack:
+        dataClass = core.createDataClassInstance(dataType=dataType)
+        dataClass.read(dataFile)
+        nodes = dataClass.getKeys()
+        sourceNodesDict[dataFile] = nodes
+
+        sourceNodesList.update(nodes)
+
+    # since we want to replace values from the bottom of the stack first we need to reverse our filestack
+    searchFileStack = filteredFileStack.copy()
+    searchFileStack.reverse()
+
+    # work on saving the node data of nodes that have been saved first. build a source dictionary to save this data to
+    saveDataDict = dict()
+    for dataFile in filteredFileStack:
+        saveDataDict[dataFile] = {CHANGED: [], ADDED: [], REMOVED: []}
+
+    # we also need to build a list of nodes that we have already saved.
+    previouslySavedNodes = list()
+
+    for dataFile in searchFileStack:
+        nodesPreviouslyInFile = sourceNodesDict[dataFile]
+        for node in nodesPreviouslyInFile:
+            if node in dataToSave:
+                # if we have already saved the node we can skip it!
+                if node in previouslySavedNodes:
+                    continue
+                # append the node to the list
+                saveDataDict[dataFile][CHANGED].append(node)
+                previouslySavedNodes.append(node)
+            else:
+                saveDataDict[dataFile][REMOVED].append(node)
+
+    # get the difference of lists for the unsaved nodes and deleted nodes
+    unsavedNodes = set(dataToSave) - set(previouslySavedNodes)
+
+    # now we need to do something with the new nodes!
+    if method == 'merge':
+        saveDataDict[searchFileStack[0]][ADDED] += unsavedNodes
+
+    if method == 'new':
+        if not fileName:
+            raise Exception("Please provide a file path to save data to a new file")
+
+        saveDataDict[fileName][ADDED] += unsavedNodes
+
+    if method == 'overwrite':
+        # get a filename to save the data to if one isn't provided
+        if not fileName:
+            if searchFileStack:
+                startDir = os.path.dirname(searchFileStack[0])
+            else:
+                startDir = cmds.workspace(q=True, active=True)
+
+            fileName = cmds.fileDialog2(
+                ds=2,
+                cap="Override: Select a file to save the data to",
+                ff="Json Files (*.json)",
+                okc="Select",
+                fileMode=0,
+                dir=startDir)
+
+            fileName = fileName[0] if fileName else None
+
+        # save the data to the new filename
+        if not fileName:
+            raise UserWarning("Must specify an override file if one is not proved.")
+
+        # next we need to clear out the added or changed data.
+        # keep anything added to removed because we cant delete data later.
+        for key in saveDataDict:
+            saveDataDict[key][CHANGED] = []
+            saveDataDict[key][ADDED] = []
+
+        # add all data to a new key.
+        saveDataDict[fileName] = {CHANGED: [], ADDED: dataToSave, REMOVED: []}
+
+    return saveDataDict
+
+def validateLayeredSaveData(saveDataDict: LayeredDataInfoDict) -> bool:
+    """
+    Validate that the dictionary provided is prepared to be saved as a layeredDataDict
+    :param saveDataDict: dictonary of layered data info to process the files with. generated using gatherLayeredSaveData
     :return:
     """
+    if not saveDataDict:
+        return False
+
+    resultsList = list()
+    for file in saveDataDict:
+        resultsList.append(all(key in saveDataDict[file] for key in [CHANGED,ADDED, REMOVED]))
+
+    return all(resultsList)
+
+
+def layeredSavePrompt(saveDataDict: LayeredDataInfoDict, dataType: str) -> bool:
+    """
+    Bring up the prompt with info about the layered save.
+
+    :param saveDataDict: dictonary of layered data info to process the files with. generated using gatherLayeredSaveData
+    :param dataType: Datatype to save.
+    :return: result of the popup dialog
+    """
+    tab = "    "
+    message = str()
+
+    totalNodesToSave = 0
+
+    if not validateLayeredSaveData(saveDataDict=saveDataDict):
+        raise TypeError("Dictionary provided is not a valid layeredSaveInfo")
+
+    for dataFile in saveDataDict.keys():
+        numberChangedNodes = len(saveDataDict[dataFile][CHANGED])
+        numberAddedNodes = len(saveDataDict[dataFile][ADDED])
+        numberRemovedNodes = len(saveDataDict[dataFile][REMOVED])
+
+        message += f"\n{os.path.basename(dataFile)}: {numberChangedNodes + numberAddedNodes} nodes"
+
+        if numberAddedNodes:
+            message += f"\n{tab}New Nodes: {numberAddedNodes}"
+        if numberRemovedNodes:
+            message += f"\n{tab}Deleted Nodes: {numberRemovedNodes}"
+
+        totalNodesToSave += numberChangedNodes
+        totalNodesToSave += numberAddedNodes
+
+    mainMessage = f"Save {totalNodesToSave} nodes to {len(saveDataDict.keys())} files\n" + message
+    popupConfirm = mayaMessageBox.MayaMessageBox(title=f"Save {dataType}", message=mainMessage, icon="info")
+    popupConfirm.setButtonsSaveDiscardCancel()
+
+    return popupConfirm.getResult()
+
+
+def performLayeredSave(saveDataDict, dataType="AbstractData", prompt=True) -> typing.List[str] or None:
+    """
+    Perform a layered data save.
+    Takes a dictonary of filepaths that contain a dictonary of nodes added, changed and removed.
+    This should be generated by the `gatherLayeredSaveData` function.
+
+    :param saveDataDict: dictonary of layered data info to process the files with. generated using gatherLayeredSaveData
+    :param dataType: Datatype to save.
+    :param prompt: opens a UI prompt if maya is running with a UI
+    :return: list of all files edited.
+    """
+    if not validateLayeredSaveData(saveDataDict=saveDataDict):
+        raise TypeError("Dictionary provided is not a valid layeredSaveInfo")
+
+    if prompt:
+        if not layeredSavePrompt(saveDataDict=saveDataDict, dataType=dataType):
+            return None
 
     for dataFile in saveDataDict:
 
         # read all the old data. Anything that is NOT updated it will stay the same as the previous file.
-        oldDataObj = createDataClassInstance(dataType=dataType)
+        oldDataObj = core.createDataClassInstance(dataType=dataType)
         if os.path.exists(dataFile):
             oldDataObj.read(dataFile)
 
         # create a dictionary with data that is updated from our scene
-        newDataObj = createDataClassInstance(dataType=dataType)
-        changedNodes = saveDataDict[dataFile][CHANGED_KEY]
-        addedNodes = saveDataDict[dataFile][ADDED_KEY]
-        removedNodes = saveDataDict[dataFile][REMOVED_KEY]
+        newDataObj = core.createDataClassInstance(dataType=dataType)
+        changedNodes = saveDataDict[dataFile][CHANGED]
+        addedNodes = saveDataDict[dataFile][ADDED]
+        removedNodes = saveDataDict[dataFile][REMOVED]
 
         newDataObj.gatherDataIterate(changedNodes)
         newDataObj.gatherDataIterate(addedNodes)

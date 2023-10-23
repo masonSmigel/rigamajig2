@@ -23,6 +23,63 @@ from rigamajig2.shared import path as rig_path, common as common
 
 logger = logging.getLogger(__name__)
 
+# layeredSave
+def performLayeredSave(dataSaveDict, dataType, method="merge", fileName=None, popupInfo=True,
+        doSave=True):
+    """
+    Perform a layered data save. This can be used on nearly any node data class to save a list of data into the
+    source files where they originally came from. If the node data appears in multiple files it will be saved in the
+    lowest file to preserve inheritance.
+
+    There are several methods to append new node data that has been added since the previous save.
+
+    new - new data is added to a new file at the bottom of the file stack
+    merge - new data is merged onto the file at the bottom of the file stack
+    overwrite - all data is saved into a new file at the bottom of the file stack
+
+    :param dataToSave: List of nodes to save data from
+    :param fileStack: list of file from which we're currently reading data from
+    :param dataType: Datatype to save.
+    :param method: method to append new data. Available options are [new, merge, overwrite]
+    :param fileName: if using new file method provide a file to save new data to
+    :param popupInfo: if maya is running this will give a popup with some basic info about the scene
+    :param doSave: If False the save will not be performed. Useful when only the data dictionary is needed.
+    :return:
+    """
+
+    for dataFile in saveDataDict:
+
+        # read all the old data. Anything that is NOT updated it will stay the same as the previous file.
+        oldDataObj = createDataClassInstance(dataType=dataType)
+        if os.path.exists(dataFile):
+            oldDataObj.read(dataFile)
+
+        # create a dictionary with data that is updated from our scene
+        newDataObj = createDataClassInstance(dataType=dataType)
+        changedNodes = saveDataDict[dataFile][CHANGED_KEY]
+        addedNodes = saveDataDict[dataFile][ADDED_KEY]
+        removedNodes = saveDataDict[dataFile][REMOVED_KEY]
+
+        newDataObj.gatherDataIterate(changedNodes)
+        newDataObj.gatherDataIterate(addedNodes)
+
+        # remove deleted nodes from the old dictionary
+        oldData = oldDataObj.getData()
+        for key in removedNodes:
+            oldData.pop(key)
+        oldDataObj.setData(oldData)
+
+        # add the two data objects.
+        mergedDataObj = oldDataObj + newDataObj
+
+        # write out the file
+        mergedDataObj.write(dataFile)
+        logger.info(f"{dataType} saved to {dataFile}")
+
+    # Get a list of all the files saved.
+    filesSaved = list(saveDataDict.keys())
+    return filesSaved
+
 
 # Joints
 def loadJoints(path=None):

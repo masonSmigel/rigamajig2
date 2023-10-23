@@ -46,6 +46,10 @@ DATA_EXCLUDE_FOLDERS = []
 DATA_MERGE_METHODS = ['new', 'merge', 'overwrite']
 
 
+CHANGED_KEY = "changed"
+ADDED_KEY = "added"
+REMOVED_KEY = "removed"
+
 # Component Utilities
 def findComponents(path=CMPT_PATH, excludedFolders=_EXCLUDED_FOLDERS, excludedFiles=_EXCLUDED_FILES):
     """
@@ -207,7 +211,7 @@ def getDataModules(path=None):
 
 def createDataClassInstance(dataType=None):
     """
-    Create a new and usable instance of a given data type to be activly used when loading new data
+    Create a new and usable instance of a given data type to be actively used when loading new data
     :param dataType:
     :return:
     """
@@ -226,7 +230,7 @@ def createDataClassInstance(dataType=None):
 
 
 def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName=None, popupInfo=True,
-                       doSave=True):
+        doSave=True):
     """
     Perform a layered data save. This can be used on nearly any node data class to save a list of data into the
     source files where they originally came from. If the node data appears in multiple files it will be saved in the
@@ -285,28 +289,30 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
     # work on saving the node data of nodes that have been saved first. build a source dictionary to save this data to
     saveDataDict = dict()
     for dataFile in filteredFileStack:
-        saveDataDict[dataFile] = list()
+        saveDataDict[dataFile] = {CHANGED_KEY: [], ADDED_KEY: [], REMOVED_KEY: []}
 
     # we also need to build a list of nodes that we have already saved.
     previouslySavedNodes = list()
-    for node in dataToSave:
-        for dataFile in searchFileStack:
-            nodesPreviouslyInFile = sourceNodesDict[dataFile]
-            if node in nodesPreviouslyInFile:
+
+    for dataFile in searchFileStack:
+        nodesPreviouslyInFile = sourceNodesDict[dataFile]
+        for node in nodesPreviouslyInFile:
+            if node in dataToSave:
                 # if we have already saved the node we can skip it!
                 if node in previouslySavedNodes:
                     continue
                 # append the node to the list
-                saveDataDict.get(dataFile).append(node)
+                saveDataDict[dataFile][CHANGED_KEY].append(node)
                 previouslySavedNodes.append(node)
+            else:
+                saveDataDict[dataFile][REMOVED_KEY].append(node)
 
     # get the difference of lists for the unsaved nodes and deleted nodes
     unsavedNodes = set(dataToSave) - set(previouslySavedNodes)
-    deletedNodes = sourceNodesList - set(dataToSave)
 
     # now we need to do something with the new nodes!
     if method == 'merge':
-        saveDataDict[searchFileStack[0]] += unsavedNodes
+        saveDataDict[searchFileStack[0]][ADDED_KEY] += unsavedNodes
 
     if method == 'new':
 
@@ -314,7 +320,7 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
         if not fileName:
             raise Exception("Please provide a file path to save data to a new file")
 
-        saveDataDict[fileName] = unsavedNodes
+        saveDataDict[fileName][ADDED_KEY] += unsavedNodes
 
     if method == 'overwrite':
         # get a filename to save the data to if one isn't provided
@@ -324,23 +330,27 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
             else:
                 startDir = cmds.workspace(q=True, active=True)
 
-            fileName = cmds.fileDialog2(ds=2,
-                                        cap="Override: Select a file to save the data to",
-                                        ff="Json Files (*.json)",
-                                        okc="Select",
-                                        fileMode=0,
-                                        dir=startDir)
-            if fileName:
-                fileName = fileName[0]
+            fileName = cmds.fileDialog2(
+                ds=2,
+                cap="Override: Select a file to save the data to",
+                ff="Json Files (*.json)",
+                okc="Select",
+                fileMode=0,
+                dir=startDir)
+
+            fileName = fileName[0] if fileName else None
 
         # save the data to the new filename
         if not fileName:
             return
-        # next we need to clear out the data from all other keys
-        for key in saveDataDict:
-            saveDataDict[key] = []
 
-        saveDataDict[fileName] = dataToSave
+        # next we need to clear out the added or changed data.
+        # keep anything added to removed because we cant delete data later.
+        for key in saveDataDict:
+            saveDataDict[key][CHANGED_KEY] = []
+            saveDataDict[key][ADDED_KEY] = []
+        # add all data to a new key.
+        saveDataDict[fileName] = {CHANGED_KEY: [], ADDED_KEY: dataToSave, REMOVED_KEY: []}
 
     # check if the maya UI is running. It SHOULD always be if we're saving data but there's a chance it's not.
     # if there is lets build a conform dialog to double-check info before its saved
@@ -348,11 +358,16 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
         message = f"Save {len(dataToSave)} nodes to {len(saveDataDict.keys())} files\n\n"
 
         for dataFile in saveDataDict.keys():
-            message += f"\n {os.path.basename(dataFile)}: {len(saveDataDict[dataFile])} nodes"
+            numberChangedNodes = len(saveDataDict[dataFile][CHANGED_KEY])
+            numberAddedNodes = len(saveDataDict[dataFile][ADDED_KEY])
+            numberRemovedNodes = len(saveDataDict[dataFile][REMOVED_KEY])
+            message += f"\n {os.path.basename(dataFile)}: {numberChangedNodes + numberAddedNodes} nodes"
 
-        message += f"\n\nNew Nodes: {len(unsavedNodes)}"
-        message += f"\nDeleted Nodes: {len(deletedNodes)}"
-        # message += f"\n\n Check the script editor for more info"
+            if numberAddedNodes != 0:
+                message += f"\n    New Nodes: {numberAddedNodes}"
+            if numberRemovedNodes != 0:
+                message += f"\n    Deleted Nodes: {numberRemovedNodes}"
+            message += "\n"
 
         popupConfirm = mayaMessageBox.MayaMessageBox(title=f"Save {dataType}", message=message, icon="info")
         popupConfirm.setButtonsSaveDiscardCancel()
@@ -369,15 +384,19 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
             if os.path.exists(dataFile):
                 oldDataObj.read(dataFile)
 
-            # create a dictonary with data that is updated from our scene
+            # create a dictionary with data that is updated from our scene
             newDataObj = createDataClassInstance(dataType=dataType)
-            newDataObj.gatherDataIterate(saveDataDict[dataFile])
+            changedNodes = saveDataDict[dataFile][CHANGED_KEY]
+            addedNodes = saveDataDict[dataFile][ADDED_KEY]
+            removedNodes = saveDataDict[dataFile][REMOVED_KEY]
+
+            newDataObj.gatherDataIterate(changedNodes)
+            newDataObj.gatherDataIterate(addedNodes)
 
             # remove deleted nodes from the old dictionary
             oldData = oldDataObj.getData()
-            for key in deletedNodes:
-                if key in oldDataObj.getKeys():
-                    oldData.pop(key)
+            for key in removedNodes:
+                oldData.pop(key)
             oldDataObj.setData(oldData)
 
             # add the two data objects.
@@ -395,6 +414,113 @@ def performLayeredSave(dataToSave, fileStack, dataType, method="merge", fileName
     if not doSave:
         return saveDataDict
 
+def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileName=None):
+    """
+    build a data dictionary for saving layered data.
+
+    """
+
+    dataModules = list(getDataModules(DATA_PATH).keys())
+    if dataType not in dataModules:
+        raise ValueError(f"Data type {dataType} is not valid. Valid Types are {dataModules}")
+
+    if method not in ['new', 'merge', 'overwrite']:
+        raise ValueError(f"Merge method '{method}' is not valid. Use {DATA_MERGE_METHODS}")
+
+    fileStack = common.toList(fileStack)
+
+    # sometimes we may want to save other data types into a different data loader.
+    # Here we need to filter only files of the data type we want
+    filteredFileStack = []
+    for dataFile in fileStack:
+        dataFileType = abstract_data.AbstractData.getDataType(dataFile)
+        if dataFileType == dataType or dataFileType == "AbstractData":
+            filteredFileStack.append(dataFile)
+
+    # first lets get a list of all the nodes that has been previously saved
+    # we can save that into a dictionary with the file they came from and a list to compare to the new data.
+    # (check for deleted/missing nodes)
+    sourceNodesDict = dict()
+    sourceNodesList = set()
+    for dataFile in filteredFileStack:
+        dataClass = createDataClassInstance(dataType=dataType)
+        dataClass.read(dataFile)
+        nodes = dataClass.getKeys()
+        sourceNodesDict[dataFile] = nodes
+
+        sourceNodesList.update(nodes)
+
+    # since we want to replace values from the bottom of the stack first we need to reverse our filestack
+    searchFileStack = filteredFileStack.copy()
+    searchFileStack.reverse()
+
+    # work on saving the node data of nodes that have been saved first. build a source dictionary to save this data to
+    saveDataDict = dict()
+    for dataFile in filteredFileStack:
+        saveDataDict[dataFile] = {CHANGED_KEY: [], ADDED_KEY: [], REMOVED_KEY: []}
+
+    # we also need to build a list of nodes that we have already saved.
+    previouslySavedNodes = list()
+
+    for dataFile in searchFileStack:
+        nodesPreviouslyInFile = sourceNodesDict[dataFile]
+        for node in nodesPreviouslyInFile:
+            if node in dataToSave:
+                # if we have already saved the node we can skip it!
+                if node in previouslySavedNodes:
+                    continue
+                # append the node to the list
+                saveDataDict[dataFile][CHANGED_KEY].append(node)
+                previouslySavedNodes.append(node)
+            else:
+                saveDataDict[dataFile][REMOVED_KEY].append(node)
+
+    # get the difference of lists for the unsaved nodes and deleted nodes
+    unsavedNodes = set(dataToSave) - set(previouslySavedNodes)
+
+    # now we need to do something with the new nodes!
+    if method == 'merge':
+        saveDataDict[searchFileStack[0]][ADDED_KEY] += unsavedNodes
+
+    if method == 'new':
+
+        # if there is not a new file type
+        if not fileName:
+            raise Exception("Please provide a file path to save data to a new file")
+
+        saveDataDict[fileName][ADDED_KEY] += unsavedNodes
+
+    if method == 'overwrite':
+        # get a filename to save the data to if one isn't provided
+        if not fileName:
+            if searchFileStack:
+                startDir = os.path.dirname(searchFileStack[0])
+            else:
+                startDir = cmds.workspace(q=True, active=True)
+
+            fileName = cmds.fileDialog2(
+                ds=2,
+                cap="Override: Select a file to save the data to",
+                ff="Json Files (*.json)",
+                okc="Select",
+                fileMode=0,
+                dir=startDir)
+
+            fileName = fileName[0] if fileName else None
+
+        # save the data to the new filename
+        if not fileName:
+            return
+
+        # next we need to clear out the added or changed data.
+        # keep anything added to removed because we cant delete data later.
+        for key in saveDataDict:
+            saveDataDict[key][CHANGED_KEY] = []
+            saveDataDict[key][ADDED_KEY] = []
+        # add all data to a new key.
+        saveDataDict[fileName] = {CHANGED_KEY: [], ADDED_KEY: dataToSave, REMOVED_KEY: []}
+
+    return saveDataDict
 
 def loadRequiredPlugins():
     """

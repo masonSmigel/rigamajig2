@@ -297,7 +297,11 @@ class MetaNode(object):
         if not cmds.objExists("{}.{}".format(self.node, attr)):
             cmds.addAttr(self.node, longName=attr, **dataTypeDict[attrType])
 
-        rig_attr.setPlugValue("{}.{}".format(self.node, attr), value=value)
+        try:
+            rig_attr.setPlugValue("{}.{}".format(self.node, attr), value=value)
+        except TypeError as e:
+            logger.error(f"Failed to set data on {self.node}, {attr} , {value}")
+            raise e
 
         if not hide:
             cmds.setAttr("{}.{}".format(self.node, attr), k=True)

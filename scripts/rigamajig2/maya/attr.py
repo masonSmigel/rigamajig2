@@ -944,7 +944,7 @@ def setPlugValue(plug, value):
 
         # String
         elif pType == om2.MFnData.kString:
-            value = value
+            value = str(value)
             plug.setString(value)
 
     # MATRIX

@@ -373,7 +373,7 @@ class Base(object):
         """Optimize a component. implement in subclass"""
         pass
 
-    def _deleteSetup(self):
+    def deleteSetup(self):
         """ delete the rig setup"""
         logger.info("deleting component {}".format(self.name))
         cmds.select(self.container, r=True)

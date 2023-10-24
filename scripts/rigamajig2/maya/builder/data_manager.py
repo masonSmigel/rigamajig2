@@ -21,7 +21,6 @@ from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder.constants import DEFORMER_DATA_TYPES
 from rigamajig2.maya.data import (psd_data,
                                   skin_data,
-                                  SHAPES_data,
                                   deformLayer_data,
                                   joint_data,
                                   curve_data,
@@ -43,6 +42,7 @@ DATA_MERGE_METHODS = ['new', 'merge', 'overwrite']
 
 LayeredDataInfoDict = typing.Dict[str, typing.Dict[str, typing.List]]
 
+_StringList = typing.List[str]
 
 def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileName=None) -> LayeredDataInfoDict:
     """
@@ -132,23 +132,6 @@ def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileN
         layeredDataInfo[fileName][ADDED] += unsavedNodes
 
     if method == 'overwrite':
-        # get a filename to save the data to if one isn't provided
-        if not fileName:
-            if searchFileStack:
-                startDir = os.path.dirname(searchFileStack[0])
-            else:
-                startDir = cmds.workspace(q=True, active=True)
-
-            fileName = cmds.fileDialog2(
-                ds=2,
-                cap="Override: Select a file to save the data to",
-                ff="Json Files (*.json)",
-                okc="Select",
-                fileMode=0,
-                dir=startDir)
-
-            fileName = fileName[0] if fileName else None
-
         # save the data to the new filename
         if not fileName:
             raise UserWarning("Must specify an override file if one is not proved.")
@@ -302,29 +285,28 @@ def loadJoints(filepath=None):
             meta.tag(node, 'skeleton_root')
 
 
-def saveJoints(filepath=None):
+def saveJoints(fileStack: _StringList = None, method="merge", fileName=None) -> _StringList:
     """
-    save the joints
-    :param filepath: path to save joints
+    Save the joint Data to a json file
+
+    :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
+    :param str method: method of data merging to apply. Default is "merge"
     """
+    fileStack = common.toList(fileStack)
+    dataToSave = gatherJoints()
 
-    # find all skeleton roots and get the positions of their children
-    skeletonRoots = common.toList(meta.getTagged('skeleton_root'))
+    layeredSaveInfo = gatherLayeredSaveData(
+        dataToSave=dataToSave,
+        fileStack=fileStack,
+        dataType="JointData",
+        method=method,
+        fileName=fileName)
 
-    if not skeletonRoots:
-        skeletonRoots = cmds.ls(sl=True)
+    savedFiles = performLayeredSave(layeredSaveInfo, dataType="JointData", prompt=True)
 
-    if skeletonRoots:
-        dataObj = joint_data.JointData()
-        for root in skeletonRoots:
-            dataObj.gatherData(root)
-            childJoints = cmds.listRelatives(root, allDescendents=True, type='joint') or list()
-            dataObj.gatherDataIterate(childJoints)
-        dataObj.write(filepath)
-    else:
-        raise RuntimeError(
-            "the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))
-
+    if savedFiles:
+        logger.info("Joint positions Saved -- complete")
+        return savedFiles
 
 def gatherJoints():
     """
@@ -375,15 +357,28 @@ def loadGuideData(filepath=None):
         # return False
 
 
-def saveGuideData(filepath=None):
+def saveGuideData(fileStack: _StringList = None, method: str = "merge", fileName=None) -> _StringList:
     """
     Save guides data
-    :param filepath: path to guide data to save
-    :return:
+
+    :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
+    :param str method: method of data merging to apply. Default is "merge"
     """
-    dataObj = guide_data.GuideData()
-    dataObj.gatherDataIterate(meta.getTagged("guide"))
-    dataObj.write(filepath)
+    # rigFileData = common.toList(self.getAbsolutePath(self.builderData.get(constants.GUIDES)))[-1]
+    # path = path or rigFileData
+    fileStack = common.toList(fileStack)
+    layeredSaveInfo = gatherLayeredSaveData(
+        dataToSave=gatherGuides(),
+        fileStack=fileStack,
+        dataType="GuideData",
+        method=method,
+        fileName=fileName
+    )
+    savedFiles = performLayeredSave(saveDataDict=layeredSaveInfo, dataType="GuideData", prompt=True)
+
+    if savedFiles:
+        logger.info("Guides Save  -- complete")
+        return savedFiles
 
 
 def gatherGuides():
@@ -415,11 +410,25 @@ def loadControlShapes(filepath=None, applyColor=True):
     curveDataObj.applyData(controls, create=True, applyColor=applyColor)
 
 
-def saveControlShapes(filepath=None):
-    """save the control shapes"""
-    curveDataObj = curve_data.CurveData()
-    curveDataObj.gatherDataIterate(meta.getTagged("control"))
-    curveDataObj.write(filepath)
+def saveControlShapes(fileStack: _StringList = None, method: str = 'merge', fileName=None) -> _StringList:
+    """
+    Save the control shapes
+
+    :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
+    :param str method: method of data merging to apply. Default is "merge"
+    """
+    layeredSaveInfo = gatherLayeredSaveData(
+        dataToSave=gatherControlShapes(),
+        fileStack=fileStack,
+        dataType="CurveData",
+        method=method,
+        fileName=fileName
+    )
+
+    savedFiles = performLayeredSave(layeredSaveInfo, dataType="CurveData", prompt=True)
+    if savedFiles:
+        logger.info("Control Shapes Save -- Complete")
+        return savedFiles
 
 
 def gatherControlShapes():
@@ -428,16 +437,29 @@ def gatherControlShapes():
 
 
 # POSE SPACE DEFORMERS
-def savePoseReaders(filepath=None):
+def savePoseReaders(fileStack: _StringList = None) -> _StringList:
     """
     Save out pose readers
-    :param filepath: path to the pose reader file
+
+    :param str fileStack: Path to the json file. if none is provided use the data from the rigFile.
     """
 
-    dataObj = psd_data.PSDData()
-    dataObj.gatherDataIterate(meta.getTagged("poseReader"))
-    dataObj.write(filepath)
+    # path = path or self.getAbsolutePath(self.builderData.get(constants.PSD))
 
+    allPoseReaders = gatherPoseReaders()
+
+    layeredSaveInfo = gatherLayeredSaveData(
+        dataToSave=allPoseReaders,
+        fileStack=fileStack,
+        dataType="PSDData",
+        method="merge")
+
+    savedFiles = performLayeredSave(layeredSaveInfo, dataType="PSDData", prompt=True)
+
+    # deform._onSavePoseReaders(path)
+    if savedFiles:
+        logger.info("Pose Readers Save -- Complete")
+        return savedFiles
 
 def gatherPoseReaders():
     """
@@ -482,10 +504,10 @@ def loadSkinWeights(filepath=None):
     else:
         files = os.listdir(filepath)
         for f in files:
-            filePath = os.path.join(filepath, f)
-            _, fileExtension = os.path.splitext(filePath)
+            eachFile = os.path.join(filepath, f)
+            _, fileExtension = os.path.splitext(eachFile)
             if fileExtension == '.json':
-                loadSingleSkin(filePath)
+                loadSingleSkin(eachFile)
         return True
 
 
@@ -505,16 +527,17 @@ def loadSingleSkin(filepath):
             logger.error("Failed to load skin weights for {}".format(fileName))
 
 
-def saveSkinWeights(filePath=None):
+def saveSkinWeights(filepath=None):
     """
     Save skin weights for selected object
-    :param filePath: path to skin weights directory
+    :param filepath: path to skin weights directory
     :return:
     """
-    if path.isFile(filePath):
+    if path.isFile(filepath):
         dataObj = skin_data.SkinData()
         dataObj.gatherDataIterate(cmds.ls(sl=True))
-        dataObj.write(filePath)
+        dataObj.write(filepath)
+        logger.info("skin weights for selection ({}) saved to:{}".format(cmds.ls(sl=True), path))
 
     else:
         for geo in cmds.ls(sl=True):
@@ -522,45 +545,11 @@ def saveSkinWeights(filePath=None):
                 continue
             dataObj = skin_data.SkinData()
             dataObj.gatherData(geo)
-            dataObj.write("{}/{}.json".format(filePath, geo))
+            dataObj.write("{}/{}.json".format(filepath, geo))
 
+            logger.info("skin weights for: {} saved to:{}".format(geo, filepath))
 
-def saveSHAPESData(filepath=None):
-    """
-    Save both a shapes setup mel file and a json file of the deltas to apply back.
-    We can also localize the mel files we create
-
-    :param filepath:
-    :return:
-    """
-    dataObj = SHAPES_data.SHAPESData()
-    if os.path.exists(filepath):
-        dataObj.read(filepath)
-
-    dataObj.gatherDataIterate(cmds.ls(sl=True))
-    dataObj.write(filepath)
-
-
-def loadSHAPESData(filepath=None):
-    """
-    Import blendshape and connection data from the SHAPES plugin.
-    The super cool thing about importing the shapes data is that we don't need to load the plugin!
-    The data is applied by sourcing a mel file
-    """
-
-    if not filepath:
-        return
-    if not os.path.exists(filepath):
-        return
-
-    if filepath and path.isFile(filepath):
-        dataObj = SHAPES_data.SHAPESData()
-        dataObj.read(filepath)
-        dataObj.applyData(nodes=dataObj.getKeys())
-        return True
-
-
-def saveDeformLayers(filepath=None):
+def saveDeformationLayers(filepath=None):
     """
     Save the deformation layers
     :param filepath: path to the deformation layers file
@@ -572,9 +561,10 @@ def saveDeformLayers(filepath=None):
 
     dataObj.gatherDataIterate(cmds.ls(sl=True))
     dataObj.write(filepath)
+    logger.info("deformation layers saved to: {}".format(filepath))
 
 
-def loadDeformLayers(filepath=None):
+def loadDeformationLayers(filepath=None):
     """
     Load the deformation layers
     :param filepath: path to the deformation layers file

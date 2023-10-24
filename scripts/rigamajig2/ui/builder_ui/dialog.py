@@ -332,7 +332,7 @@ class BuilderDialog(DockableUI):
         # for the rig build we can put the _publish into a try except block
         # if the _publish fails we can add a message to the status line before raising the exception
         try:
-            self.publishSection._publishWithUiData()
+            self.publishSection._onPublishWithUiData()
 
         except Exception as e:
             self.statusLine.showMessage(f"Rig Publish Failed: '{self.rigName}'")

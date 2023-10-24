@@ -72,9 +72,9 @@ class PublishSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
-        self.mergeDeformLayersButton.clicked.connect(self._mergeDeformLayers)
-        self.dryPublishButton.clicked.connect(self._dryPublish)
-        self.publishButton.clicked.connect(self._publishWithUiData)
+        self.mergeDeformLayersButton.clicked.connect(self._onMergeDeformLayers)
+        self.dryPublishButton.clicked.connect(self._onDryPublish)
+        self.publishButton.clicked.connect(self._onPublishWithUiData)
 
     @QtCore.Slot()
     def _setBuilder(self, builder):
@@ -112,17 +112,17 @@ class PublishSection(builderSection.BuilderSection):
         self.pubScriptRunner.executeAllScripts()
 
     @QtCore.Slot()
-    def _dryPublish(self):
+    def _onDryPublish(self):
         """ run all the _publish steps without saving the file"""
         self.builder.run(publish=True, savePublish=False)
 
     @QtCore.Slot()
-    def _mergeDeformLayers(self):
+    def _onMergeDeformLayers(self):
         """Merge the deformation layers"""
         self.builder.mergeDeformLayers()
 
     @QtCore.Slot()
-    def _publishWithUiData(self) -> float or None:
+    def _onPublishWithUiData(self) -> float or None:
         """
         publish the rig with the data from the ui
         :returns: time taken to export the rig.

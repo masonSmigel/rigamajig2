@@ -35,6 +35,7 @@ from rigamajig2.maya import naming as naming
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import data_manager
 from rigamajig2.ui.builder_ui import editComponent_dialog
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
@@ -125,11 +126,11 @@ class SetupSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
-        self.loadGuidesButton.clicked.connect(self._loadGuides)
-        self.saveGuidesButton.leftClicked.connect(self._saveGuides)
-        self.saveGuidesButton.rightClicked.connect(self._saveGuidesAsOverride)
-        self.loadComponentsButton.clicked.connect(self.loadComponents)
-        self.saveComponentsButton.clicked.connect(self.saveComponents)
+        self.loadGuidesButton.clicked.connect(self._onLoadGuidesClicked)
+        self.saveGuidesButton.leftClicked.connect(self._onSaveGuidesClicked)
+        self.saveGuidesButton.rightClicked.connect(self._onSaveGuidesAsOverrideClicked)
+        self.loadComponentsButton.clicked.connect(self._onLoadComponentsClicked)
+        self.saveComponentsButton.clicked.connect(self._onSaveComponentsClicked)
 
         self.addComponentsButton.clicked.connect(self.componentManager.showAddComponentDialog)
         self.initalizeBuildButton.clicked.connect(self._initalizeRig)
@@ -160,10 +161,10 @@ class SetupSection(builderSection.BuilderSection):
 
     # CONNECTIONS
     @QtCore.Slot()
-    def loadComponents(self):
+    def _onLoadComponentsClicked(self):
         """ Load component setup from json using the builder """
         self.builder.setComponents(list())
-        # load the compoonents from the file. then initialize them
+        # load the components from the file. then initialize them
         componentFiles = self.componentsDataLoader.getFileList()
         self.builder.loadComponents(componentFiles)
         self.builder.initialize()
@@ -171,36 +172,50 @@ class SetupSection(builderSection.BuilderSection):
         self.componentManager.loadListFromBuilder()
 
     @QtCore.Slot()
-    def saveComponents(self):
+    def _onSaveComponentsClicked(self):
         """ Save component setup from json using the builder """
         # self.builder.loadMetadataToComponentSettings()
         self.builder.saveComponents(self.componentsDataLoader.getFileList(absolute=True))
 
     @QtCore.Slot()
-    def _loadGuides(self):
+    def _onLoadGuidesClicked(self):
         """ Load guide setup to json using the builder """
 
         self.builder.loadGuideData(self.guideDataLoader.getFileList())
 
     @QtCore.Slot()
-    def _saveGuides(self):
+    def _onSaveGuidesClicked(self):
         """ Save guides setup to json using the builder """
         if not self.__validateGuidesInScene():
             return
-        self.builder.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method="merge")
+        data_manager.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method="merge")
 
     @QtCore.Slot()
-    def _saveGuidesAsOverride(self):
+    def _onSaveGuidesAsOverrideClicked(self):
         """ Save all guide data as an override"""
         if not self.__validateGuidesInScene():
             return
 
-        savedFiles = self.builder.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method="overwrite")
+        fileResults = cmds.fileDialog2(
+            ds=2,
+            cap="Save Guides to override file",
+            ff="Json Files (*.json)",
+            okc="Select",
+            fileMode=0,
+            dir=self.builder.getRigEnvironment()
+        )
+
+        fileName = fileResults[0] if fileResults else None
+
+        savedFiles = data_manager.saveGuideData(
+            self.guideDataLoader.getFileList(absolute=True),
+            method="overwrite",
+            fileName=fileName
+        )
         currentFiles = self.guideDataLoader.getFileList(absolute=True)
-        if savedFiles:
-            for savedFile in savedFiles:
-                if savedFile not in currentFiles:
-                    self.guideDataLoader.selectPath(savedFile)
+
+        newFiles = set(savedFiles) - set(currentFiles)
+        self.jointPositionDataLoader.selectPaths(newFiles)
 
     def __validateGuidesInScene(self):
         """Check to make sure the guides exist in the scene and look to see if the the rig is build"""

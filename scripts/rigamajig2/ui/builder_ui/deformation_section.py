@@ -146,17 +146,17 @@ class DeformationSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
-        self.loadDeformLayersButton.clicked.connect(self._loadDeformationLayers)
-        self.saveDeformLayersButton.clicked.connect(self._saveDeformationLayers)
-        self.manageDeformLayersButton.clicked.connect(self._openDeformationLayerDialog)
+        self.loadDeformLayersButton.clicked.connect(self._onLoadDeformationLayers)
+        self.saveDeformLayersButton.clicked.connect(self._onSaveDeformationLayers)
+        self.manageDeformLayersButton.clicked.connect(self._onOpenDeformLayerManager)
 
-        self.loadAllSkinButton.clicked.connect(self._loadAllSkins)
-        self.loadSingleSkinButton.clicked.connect(self._loadSingleSkin)
-        self.saveSkinsButton.clicked.connect(self._saveSkinWeights)
-        self.copySkinWeightsButton.clicked.connect(self._copySkinWeights)
+        self.loadAllSkinButton.clicked.connect(self._onLoadAllSkins)
+        self.loadSingleSkinButton.clicked.connect(self._onLoadSingleSkin)
+        self.saveSkinsButton.clicked.connect(self._onSaveSkin)
+        self.copySkinWeightsButton.clicked.connect(self._onCopySkins)
         self.connectBpmsButton.clicked.connect(self._connectBindPreMatrix)
-        self.saveDeformersButton.clicked.connect(self._saveDeformerData)
-        self.loadDeformersButton.clicked.connect(self._loadDeformerData)
+        self.saveDeformersButton.clicked.connect(self._onSaveDeformerData)
+        self.loadDeformersButton.clicked.connect(self._onLoadDeformerData)
 
     @QtCore.Slot()
     def _setBuilder(self, builder):
@@ -193,27 +193,27 @@ class DeformationSection(builderSection.BuilderSection):
 
     # CONNECTIONS
     @QtCore.Slot()
-    def _loadDeformationLayers(self):
+    def _onLoadDeformationLayers(self):
         """ Save load pose reader setup from json using the builder """
         self.builder.loadDeformationLayers(self.deformLayerPathSelector.getPath())
 
     @QtCore.Slot()
-    def _saveDeformationLayers(self):
+    def _onSaveDeformationLayers(self):
         """ Save pose reader setup to json using the builder """
-        self.builder.saveDeformationLayers(self.deformLayerPathSelector.getPath())
+        data_manager.saveDeformationLayers(self.deformLayerPathSelector.getPath())
 
     @QtCore.Slot()
-    def _openDeformationLayerDialog(self):
+    def _onOpenDeformLayerManager(self):
         dialogInstance = deformationLayer_dialog.DeformLayerDialog()
         dialogInstance.show()
 
     @QtCore.Slot()
-    def _loadAllSkins(self):
+    def _onLoadAllSkins(self):
         """Load all skin weights in the given folder"""
         self.builder.loadSkinWeights(self.skinPathSelector.getPath())
 
     @QtCore.Slot()
-    def _loadSingleSkin(self):
+    def _onLoadSingleSkin(self):
         """Load a single skin file"""
         filepath = cmds.fileDialog2(
             dialogStyle=2,
@@ -226,12 +226,12 @@ class DeformationSection(builderSection.BuilderSection):
             data_manager.loadSingleSkin(filepath[0])
 
     @QtCore.Slot()
-    def _saveSkinWeights(self):
+    def _onSaveSkin(self):
         """Save the skin weights"""
-        self.builder.saveSkinWeights(filePath=self.skinPathSelector.getPath())
+        data_manager.saveSkinWeights(self.skinPathSelector.getPath())
 
     @QtCore.Slot()
-    def _copySkinWeights(self):
+    def _onCopySkins(self):
         """ Copy Skin weights"""
         src = cmds.ls(sl=True)[0]
         dst = cmds.ls(sl=True)[1:]
@@ -247,9 +247,9 @@ class DeformationSection(builderSection.BuilderSection):
             skinCluster.connectExistingBPMs(sc)
 
     @QtCore.Slot()
-    def _loadDeformerData(self):
+    def _onLoadDeformerData(self):
         self.builder.loadDeformers(self.deformersDataLoader.getFileList(absolute=False))
 
     @QtCore.Slot()
-    def _saveDeformerData(self):
+    def _onSaveDeformerData(self):
         raise NotImplementedError

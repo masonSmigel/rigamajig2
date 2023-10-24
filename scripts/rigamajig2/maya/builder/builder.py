@@ -34,7 +34,6 @@ _StringList = typing.List[str]
 logger = logging.getLogger(__name__)
 
 
-# pylint:disable=too-many-public-methods
 class Builder(object):
     """
     The builder is the foundational class used to construct rigs with Rigamajig2.
@@ -98,29 +97,6 @@ class Builder(object):
             absolutePath = self.getAbsolutePath(path)
             data_manager.loadJoints(absolutePath)
             logger.info(f"Joints loaded : {path}")
-
-    def saveJoints(self, fileStack: _StringList = None, method="merge") -> _StringList:
-
-        """
-        Save the joint Data to a json file
-
-        :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
-        :param str method: method of data merging to apply. Default is "merge"
-        """
-        fileStack = common.toList(fileStack)
-        dataToSave = data_manager.gatherJoints()
-
-        layeredSaveInfo = data_manager.gatherLayeredSaveData(
-            dataToSave=dataToSave,
-            fileStack=fileStack,
-            dataType="JointData",
-            method=method)
-
-        savedFiles = data_manager.performLayeredSave(layeredSaveInfo, dataType="JointData", prompt=True)
-
-        if savedFiles:
-            logger.info("Joint positions Saved -- complete")
-            return savedFiles
 
     def initialize(self) -> None:
         """
@@ -313,24 +289,6 @@ class Builder(object):
             self.updateMaya()
             logger.info(f"control shapes loaded: {path}")
 
-    def saveControlShapes(self, fileStack: _StringList = None, method: str = 'merge') -> _StringList:
-        """
-        Save the control shapes
-
-        :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
-        :param str method: method of data merging to apply. Default is "merge"
-        """
-        layeredSaveInfo = data_manager.gatherLayeredSaveData(
-            dataToSave=data_manager.gatherControlShapes(),
-            fileStack=fileStack,
-            dataType="CurveData",
-            method=method)
-
-        savedFiles = data_manager.performLayeredSave(layeredSaveInfo, dataType="CurveData", prompt=True)
-        if savedFiles:
-            logger.info("Control Shapes Save -- Complete")
-            return savedFiles
-
     def loadGuideData(self, paths: str = None):
         """
         Load guide data
@@ -343,29 +301,6 @@ class Builder(object):
             absPath = self.getAbsolutePath(path)
             if data_manager.loadGuideData(absPath):
                 logger.info(f"guides loaded: {path}")
-
-    def saveGuideData(self, fileStack: _StringList = None, method: str = "merge") -> _StringList:
-        """
-        Save guides data
-
-        :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
-        :param str method: method of data merging to apply. Default is "merge"
-        """
-        # rigFileData = common.toList(self.getAbsolutePath(self.builderData.get(constants.GUIDES)))[-1]
-        # path = path or rigFileData
-        fileStack = common.toList(fileStack)
-        dataToSave = data_manager.gatherGuides()
-        layeredSaveInfo = data_manager.gatherLayeredSaveData(
-            dataToSave=dataToSave,
-            fileStack=fileStack,
-            dataType="GuideData",
-            method=method
-        )
-        savedFiles = data_manager.performLayeredSave(saveDataDict=layeredSaveInfo, dataType="GuideData", prompt=True)
-
-        if savedFiles:
-            logger.info("Guides Save  -- complete")
-            return savedFiles
 
     def loadPoseReaders(self, paths: str = None, replace: bool = True) -> None:
         """
@@ -381,30 +316,6 @@ class Builder(object):
             if data_manager.loadPoseReaders(absPath, replace=replace):
                 logger.info(f"pose readers loaded: {path}")
 
-    def savePoseReaders(self, fileStack: _StringList = None) -> _StringList:
-        """
-        Save out pose readers
-
-        :param str fileStack: Path to the json file. if none is provided use the data from the rigFile.
-        """
-
-        # path = path or self.getAbsolutePath(self.builderData.get(constants.PSD))
-
-        allPoseReaders = data_manager.gatherPoseReaders()
-
-        layeredSaveInfo = data_manager.gatherLayeredSaveData(
-            dataToSave=allPoseReaders,
-            fileStack=fileStack,
-            dataType="PSDData",
-            method="merge")
-
-        savedFiles = data_manager.performLayeredSave(layeredSaveInfo, dataType="PSDData", prompt=True)
-
-        # deform._savePoseReaders(path)
-        if savedFiles:
-            logger.info("Pose Readers Save -- Complete")
-            return savedFiles
-
     def loadDeformationLayers(self, path: str = None) -> None:
         """
         Load the deformation layers
@@ -412,18 +323,8 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsolutePath(self.builderData.get(constants.DEFORM_LAYERS)) or ''
-        if data_manager.loadDeformLayers(path):
+        if data_manager.loadDeformationLayers(path):
             logger.info("deformation layers loaded")
-
-    def saveDeformationLayers(self, path: str = None) -> None:
-        """
-        Load the deformation layers
-
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
-        """
-        path = path or self.getAbsolutePath(self.builderData.get(constants.DEFORM_LAYERS)) or ''
-        data_manager.saveDeformLayers(path)
-        logger.info("deformation layers saved to: {}".format(path))
 
     def mergeDeformLayers(self) -> None:
         """Merge all deformation layers for all models"""
@@ -445,16 +346,6 @@ class Builder(object):
         path = path or self.getAbsolutePath(self.builderData.get(constants.SKINS)) or ''
         if data_manager.loadSkinWeights(path):
             logger.info("skin weights loaded")
-
-    def saveSkinWeights(self, path: str = None) -> None:
-        """
-        Save the skin weights
-
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
-        """
-        path = path or self.getAbsolutePath(self.builderData.get(constants.SKINS)) or ''
-        data_manager.saveSkinWeights(path)
-        logger.info("skin weights for: {} saved to:{}".format(cmds.ls(sl=True), path))
 
     def loadDeformers(self, paths: _StringList = None) -> None:
         """ Load additional deformers

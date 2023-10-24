@@ -13,6 +13,7 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import data_manager
 from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
 # RIGAMAJIG2
 from rigamajig2.shared import common
@@ -86,12 +87,12 @@ class BuildSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
-        self.completeButton.clicked.connect(self._completeBuild)
-        self.buildButton.clicked.connect(self._doBuilderBuild)
-        self.connectButton.clicked.connect(self._doBuilderConnect)
-        self.finalizeButton.clicked.connect(self._doBuilderFinalize)
-        self.loadPsdButton.clicked.connect(self._loadPoseReaders)
-        self.savePsdButton.clicked.connect(self._savePoseReaders)
+        self.completeButton.clicked.connect(self._onCompleteBuild)
+        self.buildButton.clicked.connect(self._onBuilderBuild)
+        self.connectButton.clicked.connect(self._onBuilderConnect)
+        self.finalizeButton.clicked.connect(self._onBuilderFinalize)
+        self.loadPsdButton.clicked.connect(self._onLoadPoseReaders)
+        self.savePsdButton.clicked.connect(self._onSavePoseReaders)
 
     @QtCore.Slot()
     def _setBuilder(self, builder):
@@ -110,37 +111,37 @@ class BuildSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _runWidget(self):
         """ Run this widget from the builder breakpoint runner """
-        self._completeBuild()
-        self._loadPoseReaders()
+        self._onCompleteBuild()
+        self._onLoadPoseReaders()
         self.postScriptRunner.executeAllScripts()
 
     @QtCore.Slot()
-    def _doBuilderBuild(self):
+    def _onBuilderBuild(self):
         """ Execute the builder build function """
         self.builder.build()
 
     @QtCore.Slot()
-    def _doBuilderConnect(self):
+    def _onBuilderConnect(self):
         """ Execute the builder connect function """
         self.builder.connect()
 
     @QtCore.Slot()
-    def _doBuilderFinalize(self):
+    def _onBuilderFinalize(self):
         """ Execute the builder finalize function """
         self.builder.finalize()
 
     @QtCore.Slot()
-    def _loadPoseReaders(self):
+    def _onLoadPoseReaders(self):
         """ Load pose reader setup from JSON using the builder """
         self.builder.loadPoseReaders(self.psdDataLoader.getFileList(), replace=self.loadPsdModeCheckbox.currentIndex())
 
     @QtCore.Slot()
-    def _savePoseReaders(self):
+    def _onSavePoseReaders(self):
         """ Save pose reader setup to JSON using the builder """
-        self.builder.savePoseReaders(self.psdDataLoader.getFileList(absolute=True))
+        data_manager.savePoseReaders(self.psdDataLoader.getFileList(absolute=True))
 
     @QtCore.Slot()
-    def _completeBuild(self):
+    def _onCompleteBuild(self):
         """ Execute a complete rig build (steps initialize - finalize) """
         self.builder.initialize()
         self.builder.build()

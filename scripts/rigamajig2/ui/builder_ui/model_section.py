@@ -70,8 +70,8 @@ class ModelSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
-        self.importModelButton.clicked.connect(self._importModel)
-        self.openModelButton.clicked.connect(self._openModel)
+        self.importModelButton.clicked.connect(self._onImportModel)
+        self.openModelButton.clicked.connect(self._onOpenModel)
 
     def _setBuilder(self, builder):
         """ Set a builder for the model widget """
@@ -96,11 +96,11 @@ class ModelSection(builderSection.BuilderSection):
         self.builder.importModel(self.modelPathSelector.getPath())
 
     @QtCore.Slot()
-    def _importModel(self):
+    def _onImportModel(self):
         """ Import model from builder """
         self.builder.importModel(self.modelPathSelector.getPath())
 
     @QtCore.Slot()
-    def _openModel(self):
+    def _onOpenModel(self):
         """ Open the model file """
         file.open_(self.modelPathSelector.getPath(), f=True)

@@ -17,6 +17,7 @@ from PySide2 import QtWidgets
 import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
 from rigamajig2.maya import meta
+from rigamajig2.maya.builder import data_manager
 from rigamajig2.maya.builder.constants import CONTROL_SHAPES
 # RIGAMAJIG2
 from rigamajig2.shared import common
@@ -41,7 +42,7 @@ class ControlsSection(builderSection.BuilderSection):
             fileMode=1,
             dataFilteringEnabled=True,
             dataFilter=["CurveData"]
-            )
+        )
         self.loadColorCheckBox = QtWidgets.QCheckBox()
         self.loadColorCheckBox.setChecked(True)
         self.loadColorCheckBox.setFixedWidth(25)
@@ -132,12 +133,12 @@ class ControlsSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
-        self.loadControlsButton.clicked.connect(self._loadControlShapes)
-        self.saveControlsButton.leftClicked.connect(self._saveControlShapes)
-        self.saveControlsButton.rightClicked.connect(self._saveControlShapesAsOverwrite)
-        self.mirrorControlButton.clicked.connect(self._mirrorControl)
-        self.setControlShapeButton.clicked.connect(self._setControlShape)
-        self.replaceControlButton.clicked.connect(self._replaceControlShape)
+        self.loadControlsButton.clicked.connect(self._onLoadControlShapes)
+        self.saveControlsButton.leftClicked.connect(self._onSaveControlShapes)
+        self.saveControlsButton.rightClicked.connect(self._onSaveControlShapesAsOverwrite)
+        self.mirrorControlButton.clicked.connect(self._onMirrorControl)
+        self.setControlShapeButton.clicked.connect(self._onSetControlShape)
+        self.replaceControlButton.clicked.connect(self._onReplaceControlShape)
 
     def populateAvailableControlShapes(self) -> None:
         """ Set control shape items"""
@@ -159,11 +160,11 @@ class ControlsSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _runWidget(self) -> None:
         """ Run this widget from the builder breakpoint runner"""
-        self._loadControlShapes()
+        self._onLoadControlShapes()
 
     # CONNECTIONS
     @QtCore.Slot()
-    def _loadControlShapes(self) -> None:
+    def _onLoadControlShapes(self) -> None:
         """ Load controlshapes from json using the builder """
         self.builder.loadControlShapes(self.controlDataLoader.getFileList(), self.loadColorCheckBox.isChecked())
 
@@ -182,32 +183,44 @@ class ControlsSection(builderSection.BuilderSection):
         return True
 
     @QtCore.Slot()
-    def _saveControlShapes(self) -> None:
+    def _onSaveControlShapes(self) -> None:
         """ Save controlshapes to json using the builder """
         if not self.__validateControlsInScene():
             return
 
-        self.builder.saveControlShapes(self.controlDataLoader.getFileList(absolute=True), method="merge")
+        data_manager.saveControlShapes(self.controlDataLoader.getFileList(absolute=True), method="merge")
 
     @QtCore.Slot()
-    def _saveControlShapesAsOverwrite(self) -> None:
+    def _onSaveControlShapesAsOverwrite(self) -> None:
         """
         Save all controls to a new layer, overwriting existing layers
         """
 
         if not self.__validateControlsInScene():
             return
+        fileResults = cmds.fileDialog2(
+            ds=2,
+            cap="Save Controls to override file",
+            ff="Json Files (*.json)",
+            okc="Select",
+            fileMode=0,
+            dir=self.builder.getRigEnvironment()
+        )
 
-        savedFiles = self.builder.saveControlShapes(self.controlDataLoader.getFileList(absolute=True),
-                                                    method="overwrite")
+        fileName = fileResults[0] if fileResults else None
+
+        savedFiles = data_manager.saveControlShapes(
+            self.controlDataLoader.getFileList(absolute=True),
+            method="overwrite",
+            fileName=fileName
+        )
         currentFiles = self.controlDataLoader.getFileList(absolute=True)
-        if savedFiles:
-            for savedFile in savedFiles:
-                if savedFile not in currentFiles:
-                    self.controlDataLoader.selectPath(savedFile)
+
+        newFiles = set(savedFiles) - set(currentFiles)
+        self.jointPositionDataLoader.selectPaths(newFiles)
 
     @QtCore.Slot()
-    def _mirrorControl(self) -> None:
+    def _onMirrorControl(self) -> None:
         """ Mirror a control shape """
         axis = 'x'
         if self.controlAxisYRadioButton.isChecked():
@@ -218,14 +231,14 @@ class ControlsSection(builderSection.BuilderSection):
         rigamajig2.maya.curve.mirror(cmds.ls(sl=True, type='transform'), axis=axis, mode=mirrorMode)
 
     @QtCore.Slot()
-    def _setControlShape(self) -> None:
+    def _onSetControlShape(self) -> None:
         """Set the control shape of the selected node"""
         shape = self.controlShapeCheckbox.currentText()
         for node in cmds.ls(sl=True, type='transform'):
             rigamajig2.maya.rig.control.setControlShape(node, shape)
 
     @QtCore.Slot()
-    def _replaceControlShape(self) -> None:
+    def _onReplaceControlShape(self) -> None:
         """Replace the control shape"""
         selection = cmds.ls(sl=True, type='transform')
         if len(selection) >= 2:

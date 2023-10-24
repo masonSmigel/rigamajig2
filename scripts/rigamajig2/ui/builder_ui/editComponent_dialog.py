@@ -171,11 +171,13 @@ class EditComponentDialog(mayaDialog.MayaDialog):
         if data["dataType"] == "int":
             widget = QtWidgets.QSpinBox()
             widget.setValue(data["value"])
+            widget.setRange(-10_000, 10_000)
             widget.valueChanged.connect(partial(self._setParameterOnContainer, parameter=parameter, widget=widget))
 
         elif data["dataType"] == "float":
             widget = QtWidgets.QDoubleSpinBox()
             widget.setSingleStep(0.01)
+            widget.setRange(-10_000, 10_000)
             widget.setValue(data["value"])
             widget.valueChanged.connect(partial(self._setParameterOnContainer, parameter=parameter, widget=widget))
 
@@ -233,6 +235,8 @@ class EditComponentDialog(mayaDialog.MayaDialog):
         elif isinstance(widget, QtWidgets.QLineEdit):
             data = widget.text()
         elif isinstance(widget, QtWidgets.QSpinBox):
+            data = widget.value()
+        elif isinstance(widget, QtWidgets.QDoubleSpinBox):
             data = widget.value()
         else:
             raise ValueError(f"Unable to gather data from {parameter} ({widget}")

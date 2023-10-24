@@ -16,7 +16,6 @@ import typing
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
 
-import rigamajig2.maya.builder.data
 import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.data.component_data as component_data
 import rigamajig2.maya.file as file
@@ -25,6 +24,7 @@ import rigamajig2.shared.common as common
 import rigamajig2.shared.path as rig_path
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import data_manager
 from rigamajig2.maya.builder import model
 from rigamajig2.maya.cmpts import base
 
@@ -96,7 +96,7 @@ class Builder(object):
 
         for path in common.toList(paths):
             absolutePath = self.getAbsolutePath(path)
-            rigamajig2.maya.builder.data.loadJoints(absolutePath)
+            data_manager.loadJoints(absolutePath)
             logger.info(f"Joints loaded : {path}")
 
     def saveJoints(self, fileStack: _StringList = None, method="merge") -> _StringList:
@@ -108,15 +108,15 @@ class Builder(object):
         :param str method: method of data merging to apply. Default is "merge"
         """
         fileStack = common.toList(fileStack)
-        dataToSave = rigamajig2.maya.builder.data.gatherJoints()
+        dataToSave = data_manager.gatherJoints()
 
-        layeredSaveInfo = rigamajig2.maya.builder.data.gatherLayeredSaveData(
+        layeredSaveInfo = data_manager.gatherLayeredSaveData(
             dataToSave=dataToSave,
             fileStack=fileStack,
             dataType="JointData",
             method=method)
 
-        savedFiles = rigamajig2.maya.builder.data.performLayeredSave(layeredSaveInfo, dataType="JointData", prompt=True)
+        savedFiles = data_manager.performLayeredSave(layeredSaveInfo, dataType="JointData", prompt=True)
 
         if savedFiles:
             logger.info("Joint positions Saved -- complete")
@@ -243,14 +243,14 @@ class Builder(object):
         # because component data is gathered from the class but saved with the name as a key
         # this needs to be done in steps. First we can define our save dictionaries using the layered save...
         componentNameList = [c.name for c in self.componentList]
-        saveDict = rigamajig2.maya.builder.data.gatherLayeredSaveData(
+        saveDict = data_manager.gatherLayeredSaveData(
             dataToSave=componentNameList,
             fileStack=fileStack,
             dataType="ComponentData",
             method=method)
 
         # if we escape from the save then we can return
-        if not rigamajig2.maya.builder.data.layeredSavePrompt(saveDataDict=saveDict, dataType="ComponentData"):
+        if not data_manager.layeredSavePrompt(layeredDataInfo=saveDict, dataType="ComponentData"):
             return
 
         # ... next loop through the save dict and gather component data based on the component name.
@@ -258,7 +258,7 @@ class Builder(object):
             componentDataObj = component_data.ComponentData()
 
             # loop through the list of component names
-            for componentName in saveDict[dataFile][rigamajig2.maya.builder.data.CHANGED]:
+            for componentName in saveDict[dataFile][data_manager.CHANGED]:
                 component = self.findComponent(name=componentName)
                 componentDataObj.gatherData(component)
             componentDataObj.write(dataFile)
@@ -309,7 +309,7 @@ class Builder(object):
             # make the path an absolute
 
             absPath = self.getAbsolutePath(path)
-            rigamajig2.maya.builder.data.loadControlShapes(absPath, applyColor=applyColor)
+            data_manager.loadControlShapes(absPath, applyColor=applyColor)
             self.updateMaya()
             logger.info(f"control shapes loaded: {path}")
 
@@ -320,13 +320,13 @@ class Builder(object):
         :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
         :param str method: method of data merging to apply. Default is "merge"
         """
-        layeredSaveInfo = rigamajig2.maya.builder.data.gatherLayeredSaveData(
-            dataToSave=rigamajig2.maya.builder.data.gatherControlShapes(),
+        layeredSaveInfo = data_manager.gatherLayeredSaveData(
+            dataToSave=data_manager.gatherControlShapes(),
             fileStack=fileStack,
             dataType="CurveData",
             method=method)
 
-        savedFiles = rigamajig2.maya.builder.data.performLayeredSave(layeredSaveInfo, dataType="CurveData", prompt=True)
+        savedFiles = data_manager.performLayeredSave(layeredSaveInfo, dataType="CurveData", prompt=True)
         if savedFiles:
             logger.info("Control Shapes Save -- Complete")
             return savedFiles
@@ -341,7 +341,7 @@ class Builder(object):
 
         for path in common.toList(paths):
             absPath = self.getAbsolutePath(path)
-            if rigamajig2.maya.builder.data.loadGuideData(absPath):
+            if data_manager.loadGuideData(absPath):
                 logger.info(f"guides loaded: {path}")
 
     def saveGuideData(self, fileStack: _StringList = None, method: str = "merge") -> _StringList:
@@ -354,10 +354,14 @@ class Builder(object):
         # rigFileData = common.toList(self.getAbsolutePath(self.builderData.get(constants.GUIDES)))[-1]
         # path = path or rigFileData
         fileStack = common.toList(fileStack)
-        dataToSave = rigamajig2.maya.builder.data.gatherGuides()
-        layeredSaveInfo = rigamajig2.maya.builder.data.gatherLayeredSaveData(dataToSave=dataToSave, fileStack=fileStack, dataType="GuideData",
-                                                                             method=method)
-        savedFiles = rigamajig2.maya.builder.data.performLayeredSave(saveDataDict=layeredSaveInfo, dataType="GuideData", prompt=True)
+        dataToSave = data_manager.gatherGuides()
+        layeredSaveInfo = data_manager.gatherLayeredSaveData(
+            dataToSave=dataToSave,
+            fileStack=fileStack,
+            dataType="GuideData",
+            method=method
+        )
+        savedFiles = data_manager.performLayeredSave(saveDataDict=layeredSaveInfo, dataType="GuideData", prompt=True)
 
         if savedFiles:
             logger.info("Guides Save  -- complete")
@@ -374,7 +378,7 @@ class Builder(object):
 
         for path in common.toList(paths):
             absPath = self.getAbsolutePath(path)
-            if rigamajig2.maya.builder.data.loadPoseReaders(absPath, replace=replace):
+            if data_manager.loadPoseReaders(absPath, replace=replace):
                 logger.info(f"pose readers loaded: {path}")
 
     def savePoseReaders(self, fileStack: _StringList = None) -> _StringList:
@@ -386,15 +390,15 @@ class Builder(object):
 
         # path = path or self.getAbsolutePath(self.builderData.get(constants.PSD))
 
-        allPoseReaders = rigamajig2.maya.builder.data.gatherPoseReaders()
+        allPoseReaders = data_manager.gatherPoseReaders()
 
-        layeredSaveInfo = rigamajig2.maya.builder.data.gatherLayeredSaveData(
+        layeredSaveInfo = data_manager.gatherLayeredSaveData(
             dataToSave=allPoseReaders,
             fileStack=fileStack,
             dataType="PSDData",
             method="merge")
 
-        savedFiles = rigamajig2.maya.builder.data.performLayeredSave(layeredSaveInfo, dataType="PSDData", prompt=True)
+        savedFiles = data_manager.performLayeredSave(layeredSaveInfo, dataType="PSDData", prompt=True)
 
         # deform._savePoseReaders(path)
         if savedFiles:
@@ -408,7 +412,7 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsolutePath(self.builderData.get(constants.DEFORM_LAYERS)) or ''
-        if rigamajig2.maya.builder.data.loadDeformLayers(path):
+        if data_manager.loadDeformLayers(path):
             logger.info("deformation layers loaded")
 
     def saveDeformationLayers(self, path: str = None) -> None:
@@ -418,7 +422,7 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsolutePath(self.builderData.get(constants.DEFORM_LAYERS)) or ''
-        rigamajig2.maya.builder.data.saveDeformLayers(path)
+        data_manager.saveDeformLayers(path)
         logger.info("deformation layers saved to: {}".format(path))
 
     def mergeDeformLayers(self) -> None:
@@ -439,7 +443,7 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsolutePath(self.builderData.get(constants.SKINS)) or ''
-        if rigamajig2.maya.builder.data.loadSkinWeights(path):
+        if data_manager.loadSkinWeights(path):
             logger.info("skin weights loaded")
 
     def saveSkinWeights(self, path: str = None) -> None:
@@ -449,7 +453,7 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsolutePath(self.builderData.get(constants.SKINS)) or ''
-        rigamajig2.maya.builder.data.saveSkinWeights(path)
+        data_manager.saveSkinWeights(path)
         logger.info("skin weights for: {} saved to:{}".format(cmds.ls(sl=True), path))
 
     def loadDeformers(self, paths: _StringList = None) -> None:
@@ -465,7 +469,7 @@ class Builder(object):
 
         for path in common.toList(paths):
             absPath = self.getAbsolutePath(path)
-            if rigamajig2.maya.builder.data.loadDeformer(absPath):
+            if data_manager.loadDeformer(absPath):
                 logger.info(f"deformers loaded: {path}")
 
     # TODO: Fix this or delete it.
@@ -594,7 +598,7 @@ class Builder(object):
         logger.info('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
-    def publish(self, versioning:bool=True) -> None:
+    def publish(self, versioning: bool = True) -> None:
         """
         Publish a rig.
 

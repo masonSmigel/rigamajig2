@@ -42,7 +42,7 @@ DATA_EXCLUDE_FOLDERS = []
 
 
 # Component Utilities
-def findComponents(path=CMPT_PATH, excludedFolders=_EXCLUDED_FOLDERS, excludedFiles=_EXCLUDED_FILES):
+def findComponents(path=CMPT_PATH, excludedFolders=None, excludedFiles=None):
     """
     Find all valid components within a folder
     :param path: path to search for components
@@ -50,6 +50,8 @@ def findComponents(path=CMPT_PATH, excludedFolders=_EXCLUDED_FOLDERS, excludedFi
     :param excludedFiles: names of files to exclude from the search
     :return:
     """
+    excludedFiles = excludedFiles or _EXCLUDED_FILES
+    excludedFolders = excludedFolders or _EXCLUDED_FOLDERS
     path = rig_path.cleanPath(path)
     items = os.listdir(path)
 

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: data.py
+    file: data_manager.py
     author: masonsmigel
     date: 08/2023
     description: 
@@ -14,17 +14,26 @@ import typing
 
 from maya import cmds as cmds
 
-from rigamajig2.maya import skinCluster, meta as meta, joint as joint
+from rigamajig2.maya import joint
+from rigamajig2.maya import meta
+from rigamajig2.maya import skinCluster
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder.constants import DEFORMER_DATA_TYPES
-from rigamajig2.maya.data import psd_data, skin_data, SHAPES_data, deformLayer_data, joint_data, curve_data, guide_data, \
-    abstract_data
+from rigamajig2.maya.data import (psd_data,
+                                  skin_data,
+                                  SHAPES_data,
+                                  deformLayer_data,
+                                  joint_data,
+                                  curve_data,
+                                  guide_data,
+                                  abstract_data
+                                  )
 from rigamajig2.maya.rig import psd
-from rigamajig2.shared import path as rig_path, common as common
+from rigamajig2.shared import common
+from rigamajig2.shared import path
 from rigamajig2.ui.widgets import mayaMessageBox
 
 logger = logging.getLogger(__name__)
-
 
 CHANGED = "changed"
 ADDED = "added"
@@ -85,14 +94,14 @@ def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileN
 
         sourceNodesList.update(nodes)
 
-    # since we want to replace values from the bottom of the stack first we need to reverse our filestack
+    # since we want to replace values from the bottom of the stack first we need to reverse our file-stack
     searchFileStack = filteredFileStack.copy()
     searchFileStack.reverse()
 
     # work on saving the node data of nodes that have been saved first. build a source dictionary to save this data to
-    saveDataDict = dict()
+    layeredDataInfo = dict()
     for dataFile in filteredFileStack:
-        saveDataDict[dataFile] = {CHANGED: [], ADDED: [], REMOVED: []}
+        layeredDataInfo[dataFile] = {CHANGED: [], ADDED: [], REMOVED: []}
 
     # we also need to build a list of nodes that we have already saved.
     previouslySavedNodes = list()
@@ -104,24 +113,23 @@ def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileN
                 # if we have already saved the node we can skip it!
                 if node in previouslySavedNodes:
                     continue
-                # append the node to the list
-                saveDataDict[dataFile][CHANGED].append(node)
+                layeredDataInfo[dataFile][CHANGED].append(node)
                 previouslySavedNodes.append(node)
             else:
-                saveDataDict[dataFile][REMOVED].append(node)
+                layeredDataInfo[dataFile][REMOVED].append(node)
 
     # get the difference of lists for the unsaved nodes and deleted nodes
     unsavedNodes = set(dataToSave) - set(previouslySavedNodes)
 
     # now we need to do something with the new nodes!
     if method == 'merge':
-        saveDataDict[searchFileStack[0]][ADDED] += unsavedNodes
+        layeredDataInfo[searchFileStack[0]][ADDED] += unsavedNodes
 
     if method == 'new':
         if not fileName:
             raise Exception("Please provide a file path to save data to a new file")
 
-        saveDataDict[fileName][ADDED] += unsavedNodes
+        layeredDataInfo[fileName][ADDED] += unsavedNodes
 
     if method == 'overwrite':
         # get a filename to save the data to if one isn't provided
@@ -147,36 +155,37 @@ def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileN
 
         # next we need to clear out the added or changed data.
         # keep anything added to removed because we cant delete data later.
-        for key in saveDataDict:
-            saveDataDict[key][CHANGED] = []
-            saveDataDict[key][ADDED] = []
+        for key in layeredDataInfo:
+            layeredDataInfo[key][CHANGED] = []
+            layeredDataInfo[key][ADDED] = []
 
         # add all data to a new key.
-        saveDataDict[fileName] = {CHANGED: [], ADDED: dataToSave, REMOVED: []}
+        layeredDataInfo[fileName] = {CHANGED: [], ADDED: dataToSave, REMOVED: []}
 
-    return saveDataDict
+    return layeredDataInfo
 
-def validateLayeredSaveData(saveDataDict: LayeredDataInfoDict) -> bool:
+
+def validateLayeredSaveData(layeredDataInfo: LayeredDataInfoDict) -> bool:
     """
     Validate that the dictionary provided is prepared to be saved as a layeredDataDict
-    :param saveDataDict: dictonary of layered data info to process the files with. generated using gatherLayeredSaveData
+    :param layeredDataInfo: dictonary of layered data info to process the files with. generated using gatherLayeredSaveData
     :return:
     """
-    if not saveDataDict:
+    if not layeredDataInfo:
         return False
 
     resultsList = list()
-    for file in saveDataDict:
-        resultsList.append(all(key in saveDataDict[file] for key in [CHANGED,ADDED, REMOVED]))
+    for file in layeredDataInfo:
+        resultsList.append(all(key in layeredDataInfo[file] for key in [CHANGED, ADDED, REMOVED]))
 
     return all(resultsList)
 
 
-def layeredSavePrompt(saveDataDict: LayeredDataInfoDict, dataType: str) -> bool:
+def layeredSavePrompt(layeredDataInfo: LayeredDataInfoDict, dataType: str) -> bool:
     """
     Bring up the prompt with info about the layered save.
 
-    :param saveDataDict: dictonary of layered data info to process the files with. generated using gatherLayeredSaveData
+    :param layeredDataInfo: dictonary of layered data info to process the files with. generated using gatherLayeredSaveData
     :param dataType: Datatype to save.
     :return: result of the popup dialog
     """
@@ -185,13 +194,13 @@ def layeredSavePrompt(saveDataDict: LayeredDataInfoDict, dataType: str) -> bool:
 
     totalNodesToSave = 0
 
-    if not validateLayeredSaveData(saveDataDict=saveDataDict):
+    if not validateLayeredSaveData(layeredDataInfo=layeredDataInfo):
         raise TypeError("Dictionary provided is not a valid layeredSaveInfo")
 
-    for dataFile in saveDataDict.keys():
-        numberChangedNodes = len(saveDataDict[dataFile][CHANGED])
-        numberAddedNodes = len(saveDataDict[dataFile][ADDED])
-        numberRemovedNodes = len(saveDataDict[dataFile][REMOVED])
+    for dataFile in layeredDataInfo.keys():
+        numberChangedNodes = len(layeredDataInfo[dataFile][CHANGED])
+        numberAddedNodes = len(layeredDataInfo[dataFile][ADDED])
+        numberRemovedNodes = len(layeredDataInfo[dataFile][REMOVED])
 
         message += f"\n{os.path.basename(dataFile)}: {numberChangedNodes + numberAddedNodes} nodes"
 
@@ -203,7 +212,7 @@ def layeredSavePrompt(saveDataDict: LayeredDataInfoDict, dataType: str) -> bool:
         totalNodesToSave += numberChangedNodes
         totalNodesToSave += numberAddedNodes
 
-    mainMessage = f"Save {totalNodesToSave} nodes to {len(saveDataDict.keys())} files\n" + message
+    mainMessage = f"Save {totalNodesToSave} nodes to {len(layeredDataInfo.keys())} files\n" + message
     popupConfirm = mayaMessageBox.MayaMessageBox(title=f"Save {dataType}", message=mainMessage, icon="info")
     popupConfirm.setButtonsSaveDiscardCancel()
 
@@ -221,11 +230,11 @@ def performLayeredSave(saveDataDict, dataType="AbstractData", prompt=True) -> ty
     :param prompt: opens a UI prompt if maya is running with a UI
     :return: list of all files edited.
     """
-    if not validateLayeredSaveData(saveDataDict=saveDataDict):
+    if not validateLayeredSaveData(layeredDataInfo=saveDataDict):
         raise TypeError("Dictionary provided is not a valid layeredSaveInfo")
 
     if prompt:
-        if not layeredSavePrompt(saveDataDict=saveDataDict, dataType=dataType):
+        if not layeredSavePrompt(layeredDataInfo=saveDataDict, dataType=dataType):
             return None
 
     for dataFile in saveDataDict:
@@ -263,20 +272,20 @@ def performLayeredSave(saveDataDict, dataType="AbstractData", prompt=True) -> ty
 
 
 # Joints
-def loadJoints(path=None):
+def loadJoints(filepath=None):
     """
     Load all joints for the builder
-    :param path: path to joint file
+    :param filepath: path to joint file
     :return:
     """
-    if not path:
+    if not filepath:
         return
 
-    if not os.path.exists(path):
+    if not os.path.exists(filepath):
         return
 
     dataObj = joint_data.JointData()
-    dataObj.read(path)
+    dataObj.read(filepath)
     dataObj.applyData(dataObj.getKeys())
 
     # tag all bind joints
@@ -293,10 +302,10 @@ def loadJoints(path=None):
             meta.tag(node, 'skeleton_root')
 
 
-def saveJoints(path=None):
+def saveJoints(filepath=None):
     """
     save the joints
-    :param path: path to save joints
+    :param filepath: path to save joints
     """
 
     # find all skeleton roots and get the positions of their children
@@ -311,7 +320,7 @@ def saveJoints(path=None):
             dataObj.gatherData(root)
             childJoints = cmds.listRelatives(root, allDescendents=True, type='joint') or list()
             dataObj.gatherDataIterate(childJoints)
-        dataObj.write(path)
+        dataObj.write(filepath)
     else:
         raise RuntimeError(
             "the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))
@@ -344,21 +353,21 @@ def gatherJoints():
 
 
 # Guides
-def loadGuideData(path=None):
+def loadGuideData(filepath=None):
     """
     Load guide data
-    :param path: path to guide data to save
+    :param filepath: path to guide data to save
     :return:
     """
-    if not path:
+    if not filepath:
         return
 
-    if path and not os.path.exists(path):
+    if filepath and not os.path.exists(filepath):
         return
 
     try:
         dataObj = guide_data.GuideData()
-        dataObj.read(path)
+        dataObj.read(filepath)
         dataObj.applyData(nodes=dataObj.getKeys())
         return True
     except Exception as e:
@@ -366,15 +375,15 @@ def loadGuideData(path=None):
         # return False
 
 
-def saveGuideData(path=None):
+def saveGuideData(filepath=None):
     """
     Save guides data
-    :param path: path to guide data to save
+    :param filepath: path to guide data to save
     :return:
     """
     dataObj = guide_data.GuideData()
     dataObj.gatherDataIterate(meta.getTagged("guide"))
-    dataObj.write(path)
+    dataObj.write(filepath)
 
 
 def gatherGuides():
@@ -386,31 +395,31 @@ def gatherGuides():
 
 
 # CONTROL SHAPES
-def loadControlShapes(path=None, applyColor=True):
+def loadControlShapes(filepath=None, applyColor=True):
     """
     Load the control shapes
-    :param path: path to control shape
+    :param filepath: path to control shape
     :param applyColor: Apply the control colors.
     :return:
     """
-    if not path:
+    if not filepath:
         return
 
-    if not os.path.exists(path):
-        raise Exception("Path does no exist {}".format(path))
+    if not os.path.exists(filepath):
+        raise Exception("Path does no exist {}".format(filepath))
 
     curveDataObj = curve_data.CurveData()
-    curveDataObj.read(path)
+    curveDataObj.read(filepath)
 
     controls = [ctl for ctl in curveDataObj.getKeys() if cmds.objExists(ctl)]
     curveDataObj.applyData(controls, create=True, applyColor=applyColor)
 
 
-def saveControlShapes(path=None):
+def saveControlShapes(filepath=None):
     """save the control shapes"""
     curveDataObj = curve_data.CurveData()
     curveDataObj.gatherDataIterate(meta.getTagged("control"))
-    curveDataObj.write(path)
+    curveDataObj.write(filepath)
 
 
 def gatherControlShapes():
@@ -419,15 +428,15 @@ def gatherControlShapes():
 
 
 # POSE SPACE DEFORMERS
-def savePoseReaders(path=None):
+def savePoseReaders(filepath=None):
     """
     Save out pose readers
-    :param path: path to the pose reader file
+    :param filepath: path to the pose reader file
     """
 
     dataObj = psd_data.PSDData()
     dataObj.gatherDataIterate(meta.getTagged("poseReader"))
-    dataObj.write(path)
+    dataObj.write(filepath)
 
 
 def gatherPoseReaders():
@@ -438,74 +447,74 @@ def gatherPoseReaders():
     return [psd.getAssociateJoint(p) for p in meta.getTagged("poseReader")]
 
 
-def loadPoseReaders(path=None, replace=True):
+def loadPoseReaders(filepath=None, replace=True):
     """
     Load pose readers
-    :param path: path to the pose reader file
+    :param filepath: path to the pose reader file
     :param replace: If true replace existing pose readers.
     """
-    if not path:
+    if not filepath:
         return
-    if not os.path.exists(path):
+    if not os.path.exists(filepath):
         return
-    if path:
+    if filepath:
         dataObj = psd_data.PSDData()
-        dataObj.read(path)
+        dataObj.read(filepath)
         dataObj.applyData(nodes=dataObj.getData().keys(), replace=replace)
         return True
 
 
-# SKINWEIGHTS
-def loadSkinWeights(path=None):
+# SKIN WEIGHTS
+def loadSkinWeights(filepath=None):
     """
     Load all skinweights within the folder
-    :param path: path to skin weights directory
+    :param filepath: path to skin weights directory
     """
-    if not path:
+    if not filepath:
         return
 
-    if not os.path.exists(path):
+    if not os.path.exists(filepath):
         return
 
-    root, ext = os.path.splitext(path)
+    root, ext = os.path.splitext(filepath)
     if ext:
-        loadSingleSkin(path)
+        loadSingleSkin(filepath)
     else:
-        files = os.listdir(path)
+        files = os.listdir(filepath)
         for f in files:
-            filePath = os.path.join(path, f)
-            _, fileext = os.path.splitext(filePath)
-            if fileext == '.json':
+            filePath = os.path.join(filepath, f)
+            _, fileExtension = os.path.splitext(filePath)
+            if fileExtension == '.json':
                 loadSingleSkin(filePath)
         return True
 
 
-def loadSingleSkin(path):
+def loadSingleSkin(filepath):
     """
     load a single skin weight file
-    :param path: path to skin weight file
+    :param filepath: path to skin weight file
     :return:
     """
-    if path:
+    if filepath:
         dataObj = skin_data.SkinData()
-        dataObj.read(path)
+        dataObj.read(filepath)
         try:
             dataObj.applyData(nodes=dataObj.getKeys())
         except:
-            fileName = os.path.basename(path)
+            fileName = os.path.basename(filepath)
             logger.error("Failed to load skin weights for {}".format(fileName))
 
 
-def saveSkinWeights(path=None):
+def saveSkinWeights(filePath=None):
     """
     Save skin weights for selected object
-    :param path: path to skin weights directory
+    :param filePath: path to skin weights directory
     :return:
     """
-    if rig_path.isFile(path):
+    if path.isFile(filePath):
         dataObj = skin_data.SkinData()
         dataObj.gatherDataIterate(cmds.ls(sl=True))
-        dataObj.write(path)
+        dataObj.write(filePath)
 
     else:
         for geo in cmds.ls(sl=True):
@@ -513,92 +522,92 @@ def saveSkinWeights(path=None):
                 continue
             dataObj = skin_data.SkinData()
             dataObj.gatherData(geo)
-            dataObj.write("{}/{}.json".format(path, geo))
+            dataObj.write("{}/{}.json".format(filePath, geo))
 
 
-def saveSHAPESData(path=None):
+def saveSHAPESData(filepath=None):
     """
     Save both a shapes setup mel file and a json file of the deltas to apply back.
     We can also localize the mel files we create
 
-    :param path:
+    :param filepath:
     :return:
     """
     dataObj = SHAPES_data.SHAPESData()
-    if os.path.exists(path):
-        dataObj.read(path)
+    if os.path.exists(filepath):
+        dataObj.read(filepath)
 
     dataObj.gatherDataIterate(cmds.ls(sl=True))
-    dataObj.write(path)
+    dataObj.write(filepath)
 
 
-def loadSHAPESData(path=None):
+def loadSHAPESData(filepath=None):
     """
     Import blendshape and connection data from the SHAPES plugin.
-    The super cool thing about importing the shapes data is that we dont need to load the plugin!
+    The super cool thing about importing the shapes data is that we don't need to load the plugin!
     The data is applied by sourcing a mel file
     """
 
-    if not path:
+    if not filepath:
         return
-    if not os.path.exists(path):
+    if not os.path.exists(filepath):
         return
 
-    if path and rig_path.isFile(path):
+    if filepath and path.isFile(filepath):
         dataObj = SHAPES_data.SHAPESData()
-        dataObj.read(path)
+        dataObj.read(filepath)
         dataObj.applyData(nodes=dataObj.getKeys())
         return True
 
 
-def saveDeformLayers(path=None):
+def saveDeformLayers(filepath=None):
     """
     Save the deformation layers
-    :param path: path to the deformation layers file
+    :param filepath: path to the deformation layers file
     :return:
     """
     dataObj = deformLayer_data.DeformLayerData()
-    if os.path.exists(path):
-        dataObj.read(path)
+    if os.path.exists(filepath):
+        dataObj.read(filepath)
 
     dataObj.gatherDataIterate(cmds.ls(sl=True))
-    dataObj.write(path)
+    dataObj.write(filepath)
 
 
-def loadDeformLayers(path=None):
+def loadDeformLayers(filepath=None):
     """
     Load the deformation layers
-    :param path: path to the deformation layers file
+    :param filepath: path to the deformation layers file
     :return:
     """
-    if not path:
+    if not filepath:
         return
-    if not os.path.exists(path):
+    if not os.path.exists(filepath):
         return
-    if path:
+    if filepath:
         dataObj = deformLayer_data.DeformLayerData()
-        dataObj.read(path)
+        dataObj.read(filepath)
         dataObj.applyData(nodes=dataObj.getKeys())
         return True
 
 
-def loadDeformer(path=None):
+def loadDeformer(filepath=None):
     """
     Loads all additional deformation data for the rig.
-    :param path:
+    :param filepath:
     :return:
     """
-    if not path:
+    if not filepath:
         return
-    if not os.path.exists(path):
+    if not os.path.exists(filepath):
         return
 
-    if path and rig_path.isFile(path):
-        dataType = abstract_data.AbstractData().getDataType(path)
+    if filepath and path.isFile(filepath):
+        dataType = abstract_data.AbstractData().getDataType(filepath)
         if dataType not in DEFORMER_DATA_TYPES:
-            raise ValueError(f"{os.path.basename(path)} is not a type of deformer data")
+            raise ValueError(f"{os.path.basename(filepath)} is not a type of deformer data")
 
         dataObj = core.createDataClassInstance(dataType)
-        dataObj.read(path)
+        dataObj.read(filepath)
         dataObj.applyData(nodes=dataObj.getKeys())
         return True

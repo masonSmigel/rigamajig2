@@ -17,8 +17,10 @@ from PySide2 import QtWidgets
 # RIGAMAJIG2
 import rigamajig2.maya.builder.constants
 from rigamajig2.maya import skinCluster
+from rigamajig2.maya.builder import data_manager
 from rigamajig2.maya.builder.constants import SKINS, SHAPES, DEFORMERS, DEFORM_LAYERS, DEFORMER_DATA_TYPES
 from rigamajig2.shared import common
+from rigamajig2.ui.builder_ui import deformationLayer_dialog
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
 from rigamajig2.ui.widgets import pathSelector
@@ -202,7 +204,6 @@ class DeformationSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _openDeformationLayerDialog(self):
-        from rigamajig2.ui.builder_ui import deformationLayer_dialog
         dialogInstance = deformationLayer_dialog.DeformLayerDialog()
         dialogInstance.show()
 
@@ -214,19 +215,20 @@ class DeformationSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _loadSingleSkin(self):
         """Load a single skin file"""
-        import rigamajig2.maya.builder.data
-        path = cmds.fileDialog2(dialogStyle=2,
-                                caption="Select a skin file",
-                                fileFilter=common.JSON_FILTER,
-                                okc="Select",
-                                dir=self.skinPathSelector.getPath())
-        if path:
-            rigamajig2.maya.builder.data.loadSingleSkin(path[0])
+        filepath = cmds.fileDialog2(
+            dialogStyle=2,
+            caption="Select a skin file",
+            fileFilter=common.JSON_FILTER,
+            okc="Select",
+            dir=self.skinPathSelector.getPath()
+        )
+        if filepath:
+            data_manager.loadSingleSkin(filepath[0])
 
     @QtCore.Slot()
     def _saveSkinWeights(self):
         """Save the skin weights"""
-        self.builder.saveSkinWeights(path=self.skinPathSelector.getPath())
+        self.builder.saveSkinWeights(filePath=self.skinPathSelector.getPath())
 
     @QtCore.Slot()
     def _copySkinWeights(self):

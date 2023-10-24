@@ -49,8 +49,8 @@ class SplineFK(rigamajig2.maya.cmpts.base.Base):
         # initialize cmpt settings
         self.defineParameter(parameter="numControls", value=4, dataType="int")
 
-        self.defineParameter(parameter="fkControlName", value=f"{self.name}_fk_0", dataType="bool")
-        self.defineParameter(parameter="ikControlName", value=f"{self.name}_ik_0", dataType="bool")
+        self.defineParameter(parameter="fkControlName", value=f"{self.name}_fk_0", dataType="string")
+        self.defineParameter(parameter="ikControlName", value=f"{self.name}_ik_0", dataType="string")
         self.defineParameter(parameter="addFKSpace", value=False, dataType="bool")
 
         self.inputList = rigamajig2.maya.joint.getInbetweenJoints(self.input[0], self.input[1])

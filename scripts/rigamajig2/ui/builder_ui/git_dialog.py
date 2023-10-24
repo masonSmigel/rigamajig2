@@ -66,6 +66,7 @@ def addToGitIgnore(repo_path, items_to_ignore):
 
 class GitDialog(mayaDialog.MayaDialog):
     WINDOW_TITLE = "Git Version History"
+    WINDOW_SIZE = (200, 450)
 
     def __init__(self, repoPath=None):
         super().__init__()

@@ -207,6 +207,7 @@ class Builder(object):
             self.updateMaya()
         logger.info("optimize -- complete")
 
+    # TODO: maybe move this to `data_manager.py`
     def saveComponents(self, fileStack: _StringList = None, method: str = "merge") -> _StringList or None:
         """
         Save out components to a file.
@@ -215,7 +216,6 @@ class Builder(object):
         :param str fileStack: path to the component data file
         :param str method: method of data merging to apply. Default is "merge"
         """
-
         # because component data is gathered from the class but saved with the name as a key
         # this needs to be done in steps. First we can define our save dictionaries using the layered save...
         componentNameList = [c.name for c in self.componentList]
@@ -238,10 +238,6 @@ class Builder(object):
                 component = self.findComponent(name=componentName)
                 componentDataObj.gatherData(component)
             componentDataObj.write(dataFile)
-            logger.info(f"Component Data saved to {dataFile}")
-
-        if saveDict:
-            logger.info("Components Saved -- Complete")
 
         return [filepath for filepath in saveDict.keys()]
 
@@ -325,17 +321,6 @@ class Builder(object):
         path = path or self.getAbsolutePath(self.builderData.get(constants.DEFORM_LAYERS)) or ''
         if data_manager.loadDeformationLayers(path):
             logger.info("deformation layers loaded")
-
-    def mergeDeformLayers(self) -> None:
-        """Merge all deformation layers for all models"""
-        import rigamajig2.maya.rig.deformLayer as deformLayer
-
-        if len(meta.getTagged("hasDeformLayers")) > 0:
-            for mesh in meta.getTagged("hasDeformLayers"):
-                layer = deformLayer.DeformLayer(mesh)
-                layer.stackDeformLayers(cleanup=True)
-
-            logger.info("deformation layers merged")
 
     def loadSkinWeights(self, path: str = None) -> None:
         """
@@ -479,7 +464,6 @@ class Builder(object):
 
         if publish:
             # self.optimize()
-            self.mergeDeformLayers()
             self.publishScript()
             if savePublish:
                 self.publish(versioning=versioning)
@@ -528,7 +512,7 @@ class Builder(object):
             versionPath = os.path.join(versionDirectory, versionFileName)
 
             # make the output directory and save the file. This will also make the directory for the main publish
-            rig_path.mkdir(versionDirectory)
+            os.makedirs(versionDirectory)
             outputVersionPath = file.saveAs(versionPath, log=False)
             logger.info("out rig versioned: {}   ({})".format(versionFileName, outputVersionPath))
 

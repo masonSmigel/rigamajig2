@@ -32,6 +32,7 @@ LAYER_HRC = 'deformLayers'
 LAYERS_ATTR = 'deformationLayers'
 LAYER_ATTR = 'deformationLayer'
 LAYER_GROUP_ATTR = "deformLayerGroup"
+LAYERS_STACKED_ATTR = "layersStacked"
 
 MAIN_NODE_NAME = 'main'
 
@@ -165,6 +166,7 @@ class DeformLayer(object):
         if not cmds.objExists(f"{self.model}.{LAYER_GROUP_ATTR}"):
             layerGroup = layerGroup or "main"
             attr.createAttr(self.model, longName=LAYER_GROUP_ATTR, attributeType="string", value=layerGroup)
+            attr.createAttr(self.model, longName=LAYERS_STACKED_ATTR, attributeType="bool", value=False, keyable=False)
             attr.lock(self.model, attrs=LAYER_GROUP_ATTR)
 
     def _intialzeLayersSetup(self):
@@ -340,6 +342,10 @@ class DeformLayer(object):
             logger.warning("No deformation layers to connect back to render model")
             return
 
+        if attr.getPlugValue(f"{self.model}.{LAYERS_STACKED_ATTR}"):
+            logger.error("layers already stacked.")
+            return
+
         layers = self.getDeformationLayers()
         deformerCount = 0
         for layer in layers:
@@ -370,20 +376,18 @@ class DeformLayer(object):
                 else:
                     logger.warning(f"{deformer_} is not stackable.")
                     continue
-                # if the deformer was transfered increase the deformer count
                 deformerCount += 1
 
             cmds.setAttr("{}.v".format(layer), 0)
 
-        # Use a try exept block just incase the render mesh is connected to something.
         _safeSetVisablity(self.model, 1)
 
-        # send out a message that the stack was sucessful
-        logger.info(f"deform layers succesfully stacked '{self.model}' ({len(layers)} layers, {deformerCount} deformers)")
+        attr.setPlugValue(f"{self.model}.{LAYERS_STACKED_ATTR}", True)
 
-        # if we want to cleanup delete the deformation layers after stacking the skinClusters
+        # send out a message that the stack was successful
+        logger.info(f"deform layers successfully stacked '{self.model}' ({len(layers)} layers, {deformerCount} deformers)")
+
         if cleanup:
-            # delete all the deformation layers
             cmds.delete(layers)
 
     def transferDeformer(self, deformerName, sourceLayer, targetLayer, override=True):

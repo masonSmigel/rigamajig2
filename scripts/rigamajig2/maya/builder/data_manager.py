@@ -399,7 +399,6 @@ def loadGuideData(filepath=None):
     :return:
     """
     if not path.validatePathExists(filepath):
-        logger.error(f"path does not exist: {filepath}")
         return False
     if not path.isFile(filepath):
         logger.error(f"filepath {filepath} is not a file")
@@ -450,7 +449,6 @@ def loadControlShapes(filepath=None, applyColor=True):
     :return:
     """
     if not path.validatePathExists(filepath):
-        logger.error(f"path does not exist: {filepath}")
         return False
     if not path.isFile(filepath):
         logger.error(f"filepath {filepath} is not a file")
@@ -524,7 +522,6 @@ def loadPoseReaders(filepath=None, replace=True):
     :param replace: If true replace existing pose readers.
     """
     if not path.validatePathExists(filepath):
-        logger.error(f"path does not exist: {filepath}")
         return False
     if not path.isFile(filepath):
         logger.error(f"filepath {filepath} is not a file")
@@ -543,7 +540,6 @@ def loadSkinWeights(filepath=None):
     :param filepath: path to skin weights directory
     """
     if not path.validatePathExists(filepath):
-        logger.error(f"path does not exist: {filepath}")
         return False
 
     root, ext = os.path.splitext(filepath)
@@ -616,7 +612,6 @@ def loadDeformationLayers(filepath=None):
     :return:
     """
     if not path.validatePathExists(filepath):
-        logger.error(f"path does not exist: {filepath}")
         return False
     if not path.isFile(filepath):
         logger.error(f"filepath {filepath} is not a file")
@@ -635,7 +630,6 @@ def loadDeformer(filepath=None):
     :return:
     """
     if not path.validatePathExists(filepath):
-        logger.error(f"path does not exist: {filepath}")
         return False
     if not path.isFile(filepath):
         logger.error(f"filepath {filepath} is not a file")

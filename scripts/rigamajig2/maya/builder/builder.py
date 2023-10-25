@@ -27,7 +27,7 @@ from rigamajig2.maya.builder import data_manager
 from rigamajig2.maya.builder import model
 from rigamajig2.maya.cmpts import base
 
-Component = typing.Type[base.Base]
+_Component = typing.Type[base.Base]
 _StringList = typing.List[str]
 
 logger = logging.getLogger(__name__)
@@ -492,7 +492,7 @@ class Builder(object):
         """Get the rig file"""
         return self.rigFile
 
-    def getComponentList(self) -> typing.List[Component]:
+    def getComponentList(self) -> typing.List[_Component]:
         """Get a list of all components in the builder"""
         return self.componentList
 
@@ -559,7 +559,7 @@ class Builder(object):
         existingVersionFiles.sort(reverse=True)
         return existingVersionFiles
 
-    def getComponentFromContainer(self, container: str) -> Component:
+    def getComponentFromContainer(self, container: str) -> _Component:
         """
         Get the component object from a container
 
@@ -570,7 +570,7 @@ class Builder(object):
 
         return self.findComponent(name)
 
-    def findComponent(self, name: str) -> Component or None:
+    def findComponent(self, name: str) -> _Component or None:
         """
         Find a component within the self.componentList.
 
@@ -589,7 +589,7 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     # SET
     # --------------------------------------------------------------------------------
-    def setComponents(self, components: typing.List[Component]) -> None:
+    def setComponents(self, components: typing.List[_Component]) -> None:
         """
         Set the `componentList`
 
@@ -598,7 +598,7 @@ class Builder(object):
         components = common.toList(components)
         self.componentList = components
 
-    def appendComponents(self, components: typing.List[Component]) -> None:
+    def appendComponents(self, components: typing.List[_Component]) -> None:
         """
         append a component
 

@@ -85,6 +85,10 @@ class SkinData(maya_data.MayaData):
         nodes = common.toList(nodes)
 
         for node in nodes:
+            if not cmds.objExists(node):
+                logger.error(f"'{node}' does not exist in scene. Cannot load skinweights")
+                continue
+
             meshShape = deformer.getDeformShape(node)
             mesh = cmds.listRelatives(meshShape, p=True)[0]
             meshSkin = skinCluster.getSkinCluster(mesh)

@@ -247,7 +247,6 @@ def performLayeredSave(saveDataDict, dataType="AbstractData", prompt=True) -> ty
 
         # write out the file
         mergedDataObj.write(dataFile)
-        logger.info(f"{dataType} saved to {dataFile}")
 
     # Get a list of all the files saved.
     filesSaved = list(saveDataDict.keys())
@@ -261,11 +260,12 @@ def loadJoints(filepath=None):
     :param filepath: path to joint file
     :return:
     """
-    if not filepath:
-        return
-
-    if not os.path.exists(filepath):
-        return
+    if not path.validatePathExists(filepath):
+        logger.error(f"path does not exist: {filepath}")
+        return False
+    if not path.isFile(filepath):
+        logger.error(f"filepath {filepath} is not a file")
+        return False
 
     dataObj = joint_data.JointData()
     dataObj.read(filepath)
@@ -304,9 +304,7 @@ def saveJoints(fileStack: _StringList = None, method="merge", fileName=None) -> 
 
     savedFiles = performLayeredSave(layeredSaveInfo, dataType="JointData", prompt=True)
 
-    if savedFiles:
-        logger.info("Joint positions Saved -- complete")
-        return savedFiles
+    return savedFiles
 
 def gatherJoints():
     """
@@ -341,20 +339,18 @@ def loadGuideData(filepath=None):
     :param filepath: path to guide data to save
     :return:
     """
-    if not filepath:
-        return
+    if not path.validatePathExists(filepath):
+        logger.error(f"path does not exist: {filepath}")
+        return False
+    if not path.isFile(filepath):
+        logger.error(f"filepath {filepath} is not a file")
+        return False
 
-    if filepath and not os.path.exists(filepath):
-        return
-
-    try:
-        dataObj = guide_data.GuideData()
-        dataObj.read(filepath)
-        dataObj.applyData(nodes=dataObj.getKeys())
-        return True
-    except Exception as e:
-        raise e
-        # return False
+    dataObj = guide_data.GuideData()
+    dataObj.read(filepath)
+    dataObj.applyData(nodes=dataObj.getKeys())
+    return True
+    # return False
 
 
 def saveGuideData(fileStack: _StringList = None, method: str = "merge", fileName=None) -> _StringList:
@@ -376,9 +372,7 @@ def saveGuideData(fileStack: _StringList = None, method: str = "merge", fileName
     )
     savedFiles = performLayeredSave(saveDataDict=layeredSaveInfo, dataType="GuideData", prompt=True)
 
-    if savedFiles:
-        logger.info("Guides Save  -- complete")
-        return savedFiles
+    return savedFiles
 
 
 def gatherGuides():
@@ -397,11 +391,12 @@ def loadControlShapes(filepath=None, applyColor=True):
     :param applyColor: Apply the control colors.
     :return:
     """
-    if not filepath:
-        return
-
-    if not os.path.exists(filepath):
-        raise Exception("Path does no exist {}".format(filepath))
+    if not path.validatePathExists(filepath):
+        logger.error(f"path does not exist: {filepath}")
+        return False
+    if not path.isFile(filepath):
+        logger.error(f"filepath {filepath} is not a file")
+        return False
 
     curveDataObj = curve_data.CurveData()
     curveDataObj.read(filepath)
@@ -426,9 +421,8 @@ def saveControlShapes(fileStack: _StringList = None, method: str = 'merge', file
     )
 
     savedFiles = performLayeredSave(layeredSaveInfo, dataType="CurveData", prompt=True)
-    if savedFiles:
-        logger.info("Control Shapes Save -- Complete")
-        return savedFiles
+
+    return savedFiles
 
 
 def gatherControlShapes():
@@ -457,9 +451,8 @@ def savePoseReaders(fileStack: _StringList = None) -> _StringList:
     savedFiles = performLayeredSave(layeredSaveInfo, dataType="PSDData", prompt=True)
 
     # deform._onSavePoseReaders(path)
-    if savedFiles:
-        logger.info("Pose Readers Save -- Complete")
-        return savedFiles
+    return savedFiles
+
 
 def gatherPoseReaders():
     """
@@ -475,15 +468,17 @@ def loadPoseReaders(filepath=None, replace=True):
     :param filepath: path to the pose reader file
     :param replace: If true replace existing pose readers.
     """
-    if not filepath:
-        return
-    if not os.path.exists(filepath):
-        return
-    if filepath:
-        dataObj = psd_data.PSDData()
-        dataObj.read(filepath)
-        dataObj.applyData(nodes=dataObj.getData().keys(), replace=replace)
-        return True
+    if not path.validatePathExists(filepath):
+        logger.error(f"path does not exist: {filepath}")
+        return False
+    if not path.isFile(filepath):
+        logger.error(f"filepath {filepath} is not a file")
+        return False
+
+    dataObj = psd_data.PSDData()
+    dataObj.read(filepath)
+    dataObj.applyData(nodes=dataObj.getData().keys(), replace=replace)
+    return True
 
 
 # SKIN WEIGHTS
@@ -492,11 +487,9 @@ def loadSkinWeights(filepath=None):
     Load all skinweights within the folder
     :param filepath: path to skin weights directory
     """
-    if not filepath:
-        return
-
-    if not os.path.exists(filepath):
-        return
+    if not path.validatePathExists(filepath):
+        logger.error(f"path does not exist: {filepath}")
+        return False
 
     root, ext = os.path.splitext(filepath)
     if ext:
@@ -508,7 +501,7 @@ def loadSkinWeights(filepath=None):
             _, fileExtension = os.path.splitext(eachFile)
             if fileExtension == '.json':
                 loadSingleSkin(eachFile)
-        return True
+    return True
 
 
 def loadSingleSkin(filepath):
@@ -520,11 +513,11 @@ def loadSingleSkin(filepath):
     if filepath:
         dataObj = skin_data.SkinData()
         dataObj.read(filepath)
-        try:
-            dataObj.applyData(nodes=dataObj.getKeys())
-        except:
-            fileName = os.path.basename(filepath)
-            logger.error("Failed to load skin weights for {}".format(fileName))
+
+        dataObj.applyData(nodes=dataObj.getKeys())
+        # except:
+        #     fileName = os.path.basename(filepath)
+        #     logger.error("Failed to load skin weights for {}".format(fileName))
 
 
 def saveSkinWeights(filepath=None):
@@ -537,7 +530,6 @@ def saveSkinWeights(filepath=None):
         dataObj = skin_data.SkinData()
         dataObj.gatherDataIterate(cmds.ls(sl=True))
         dataObj.write(filepath)
-        logger.info("skin weights for selection ({}) saved to:{}".format(cmds.ls(sl=True), path))
 
     else:
         for geo in cmds.ls(sl=True):
@@ -547,7 +539,6 @@ def saveSkinWeights(filepath=None):
             dataObj.gatherData(geo)
             dataObj.write("{}/{}.json".format(filepath, geo))
 
-            logger.info("skin weights for: {} saved to:{}".format(geo, filepath))
 
 def saveDeformationLayers(filepath=None):
     """
@@ -561,7 +552,6 @@ def saveDeformationLayers(filepath=None):
 
     dataObj.gatherDataIterate(cmds.ls(sl=True))
     dataObj.write(filepath)
-    logger.info("deformation layers saved to: {}".format(filepath))
 
 
 def loadDeformationLayers(filepath=None):
@@ -570,15 +560,17 @@ def loadDeformationLayers(filepath=None):
     :param filepath: path to the deformation layers file
     :return:
     """
-    if not filepath:
-        return
-    if not os.path.exists(filepath):
-        return
-    if filepath:
-        dataObj = deformLayer_data.DeformLayerData()
-        dataObj.read(filepath)
-        dataObj.applyData(nodes=dataObj.getKeys())
-        return True
+    if not path.validatePathExists(filepath):
+        logger.error(f"path does not exist: {filepath}")
+        return False
+    if not path.isFile(filepath):
+        logger.error(f"filepath {filepath} is not a file")
+        return False
+
+    dataObj = deformLayer_data.DeformLayerData()
+    dataObj.read(filepath)
+    dataObj.applyData(nodes=dataObj.getKeys())
+    return True
 
 
 def loadDeformer(filepath=None):
@@ -587,17 +579,18 @@ def loadDeformer(filepath=None):
     :param filepath:
     :return:
     """
-    if not filepath:
-        return
-    if not os.path.exists(filepath):
-        return
+    if not path.validatePathExists(filepath):
+        logger.error(f"path does not exist: {filepath}")
+        return False
+    if not path.isFile(filepath):
+        logger.error(f"filepath {filepath} is not a file")
+        return False
 
-    if filepath and path.isFile(filepath):
-        dataType = abstract_data.AbstractData().getDataType(filepath)
-        if dataType not in DEFORMER_DATA_TYPES:
-            raise ValueError(f"{os.path.basename(filepath)} is not a type of deformer data")
+    dataType = abstract_data.AbstractData().getDataType(filepath)
+    if dataType not in DEFORMER_DATA_TYPES:
+        raise ValueError(f"{os.path.basename(filepath)} is not a type of deformer data")
 
-        dataObj = core.createDataClassInstance(dataType)
-        dataObj.read(filepath)
-        dataObj.applyData(nodes=dataObj.getKeys())
-        return True
+    dataObj = core.createDataClassInstance(dataType)
+    dataObj.read(filepath)
+    dataObj.applyData(nodes=dataObj.getKeys())
+    return True

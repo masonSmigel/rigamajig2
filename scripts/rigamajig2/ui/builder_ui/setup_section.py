@@ -126,11 +126,11 @@ class SetupSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
-        self.loadGuidesButton.clicked.connect(self._onLoadGuidesClicked)
-        self.saveGuidesButton.leftClicked.connect(self._onSaveGuidesClicked)
-        self.saveGuidesButton.rightClicked.connect(self._onSaveGuidesAsOverrideClicked)
-        self.loadComponentsButton.clicked.connect(self._onLoadComponentsClicked)
-        self.saveComponentsButton.clicked.connect(self._onSaveComponentsClicked)
+        self.loadGuidesButton.clicked.connect(self._onLoadGuides)
+        self.saveGuidesButton.leftClicked.connect(self._onSaveGuides)
+        self.saveGuidesButton.rightClicked.connect(self._onSaveGuidesAsOverride)
+        self.loadComponentsButton.clicked.connect(self._onLoadComponents)
+        self.saveComponentsButton.clicked.connect(self._onSaveComponents)
 
         self.addComponentsButton.clicked.connect(self.componentManager.showAddComponentDialog)
         self.initalizeBuildButton.clicked.connect(self._initalizeRig)
@@ -156,12 +156,12 @@ class SetupSection(builderSection.BuilderSection):
 
     def _runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
-        self.loadComponents()
+        self._onLoadComponents()
         self._initalizeRig()
 
     # CONNECTIONS
     @QtCore.Slot()
-    def _onLoadComponentsClicked(self):
+    def _onLoadComponents(self):
         """ Load component setup from json using the builder """
         self.builder.setComponents(list())
         # load the components from the file. then initialize them
@@ -172,26 +172,26 @@ class SetupSection(builderSection.BuilderSection):
         self.componentManager.loadListFromBuilder()
 
     @QtCore.Slot()
-    def _onSaveComponentsClicked(self):
+    def _onSaveComponents(self):
         """ Save component setup from json using the builder """
         # self.builder.loadMetadataToComponentSettings()
         self.builder.saveComponents(self.componentsDataLoader.getFileList(absolute=True))
 
     @QtCore.Slot()
-    def _onLoadGuidesClicked(self):
+    def _onLoadGuides(self):
         """ Load guide setup to json using the builder """
 
         self.builder.loadGuideData(self.guideDataLoader.getFileList())
 
     @QtCore.Slot()
-    def _onSaveGuidesClicked(self):
+    def _onSaveGuides(self):
         """ Save guides setup to json using the builder """
         if not self.__validateGuidesInScene():
             return
         data_manager.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method="merge")
 
     @QtCore.Slot()
-    def _onSaveGuidesAsOverrideClicked(self):
+    def _onSaveGuidesAsOverride(self):
         """ Save all guide data as an override"""
         if not self.__validateGuidesInScene():
             return

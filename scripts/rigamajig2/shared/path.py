@@ -66,18 +66,16 @@ def getAbsoultePath(rel, start):
 
     return normalizedPath
 
-
-def mkdir(path):
+def validatePathExists(filepath:str) -> bool:
     """
-    :param path: path to create
-    :type path: str
+    Check to see if a file path is passed in and exists
 
-    :return: path. if creation failed return None
-    :rtype: str
+    :param filepath: name of the file path to check.
+    :return: boolean if the filepath is real and exists or not.
     """
-    if isFile(path):
-        path = os.path.dirname(path)
+    if not filepath:
+        return False
+    if not os.path.exists(filepath):
+        return False
 
-    if not os.path.isdir(path):
-        os.makedirs(path)
-    return path
+    return True

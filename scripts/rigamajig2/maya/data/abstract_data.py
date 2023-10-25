@@ -11,6 +11,7 @@
 
 import getpass
 import json
+import logging
 import os
 import sys
 from collections import OrderedDict
@@ -148,6 +149,9 @@ class AbstractData(object):
         f.close()
 
         self._filepath = filepath
+
+        logger = logging.getLogger(self.__module__)
+        logger.info(f"{self.__class__.__name__} saved to : {filepath} ({len(self._data)} node(s))")
 
     def read(self, filepath):
         """

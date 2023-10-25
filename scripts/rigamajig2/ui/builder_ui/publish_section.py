@@ -43,8 +43,6 @@ class PublishSection(builderSection.BuilderSection):
             fileFilter=common.MAYA_FILTER,
             fileMode=2
         )
-        self.mergeDeformLayersButton = QtWidgets.QPushButton("Merge Deform Layers")
-
         self.dryPublishButton = QtWidgets.QPushButton("Dry Publish Rig")
         self.publishButton = QtWidgets.QPushButton("Publish Rig")
         self.publishButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
@@ -55,7 +53,6 @@ class PublishSection(builderSection.BuilderSection):
 
     def createLayouts(self):
         """ Create Layouts"""
-        self.mainWidget.addWidget(self.mergeDeformLayersButton)
         self.mainWidget.addSpacing(4)
         self.mainWidget.addWidget(self.pubScriptRunner)
 
@@ -72,7 +69,6 @@ class PublishSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
-        self.mergeDeformLayersButton.clicked.connect(self._onMergeDeformLayers)
         self.dryPublishButton.clicked.connect(self._onDryPublish)
         self.publishButton.clicked.connect(self._onPublishWithUiData)
 
@@ -108,18 +104,12 @@ class PublishSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
-        self.builder.mergeDeformLayers()
         self.pubScriptRunner.executeAllScripts()
 
     @QtCore.Slot()
     def _onDryPublish(self):
         """ run all the _publish steps without saving the file"""
         self.builder.run(publish=True, savePublish=False)
-
-    @QtCore.Slot()
-    def _onMergeDeformLayers(self):
-        """Merge the deformation layers"""
-        self.builder.mergeDeformLayers()
 
     @QtCore.Slot()
     def _onPublishWithUiData(self) -> float or None:

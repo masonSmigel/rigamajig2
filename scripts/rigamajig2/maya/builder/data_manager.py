@@ -46,6 +46,7 @@ LayeredDataInfoDict = typing.Dict[str, typing.Dict[str, typing.List]]
 _StringList = typing.List[str]
 _Builder = typing.Type["Builder"]
 
+
 def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileName=None) -> LayeredDataInfoDict:
     """
     gather data for a layered data save. This can be used on nearly any node data class to save a list of data into the
@@ -256,11 +257,12 @@ def performLayeredSave(saveDataDict, dataType="AbstractData", prompt=True) -> ty
 
 
 # Joints
-def loadJoints(filepath=None):
+def loadJointData(filepath: str = None) -> bool:
     """
     Load all joints for the builder
+
     :param filepath: path to joint file
-    :return:
+    :return: True if the data was loaded. False if no data was loaded
     """
     if not path.validatePathExists(filepath):
         logger.error(f"path does not exist: {filepath}")
@@ -285,6 +287,7 @@ def loadJoints(filepath=None):
         # find joints without a parent and make them a root
         if not len(node.split('|')) > 2:
             meta.tag(node, 'skeleton_root')
+    return True
 
 
 def saveJoints(fileStack: _StringList = None, method="merge", fileName=None) -> _StringList:
@@ -293,6 +296,9 @@ def saveJoints(fileStack: _StringList = None, method="merge", fileName=None) -> 
 
     :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
     :param str method: method of data merging to apply. Default is "merge"
+    :param str fileName: path to the override file.
+
+    :return: list of files saved
     """
     fileStack = common.toList(fileStack)
     dataToSave = gatherJoints()
@@ -308,7 +314,8 @@ def saveJoints(fileStack: _StringList = None, method="merge", fileName=None) -> 
 
     return savedFiles
 
-def gatherJoints():
+
+def gatherJoints() -> _StringList:
     """
     gather all joints in the scene to save.
     :return: list of all joints in the scene that should be saved.
@@ -332,6 +339,7 @@ def gatherJoints():
             "the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))
 
     return allJoints
+
 
 # Components
 def saveComponents(builder: _Builder, fileStack: _StringList = None, method: str = "merge") -> _StringList or None:
@@ -368,35 +376,39 @@ def saveComponents(builder: _Builder, fileStack: _StringList = None, method: str
 
     return [filepath for filepath in saveDict.keys()]
 
-def loadComponents(builder: _Builder, filepaths: _StringList = None) -> None:
+
+def loadComponentData(builder: _Builder, filepath: str = None) -> None:
     """
     Load components from a json file. This will only load the component settings and objects.
 
-    :param builder:
-    :param filepaths:
-    :return:
+    :param builder: instance of the builder to store the component list on
+    :param filepath: path to component data file
     """
-    for filepath in common.toList(filepaths):
 
-        componentDataObj = component_data.ComponentData()
-        componentDataObj.read(filepath)
+    if not path.isFile(filepath):
+        logger.error(f"filepath {filepath} is not a file")
+        return
 
-        # look through each component and add it to the builder list
-        # check before adding it so only one instance of each exists in the list
-        for component in componentDataObj.getKeys():
-            instance = common.getFirstIndex(componentDataObj.applyData(component))
+    componentDataObj = component_data.ComponentData()
+    componentDataObj.read(filepath)
 
-            componentNameList = [component.name for component in builder.componentList]
-            if instance.name not in componentNameList:
-                builder.componentList.append(instance)
+    # look through each component and add it to the builder list
+    # check before adding it so only one instance of each exists in the list
+    for component in componentDataObj.getKeys():
+        instance = common.getFirstIndex(componentDataObj.applyData(component))
+
+        componentNameList = [component.name for component in builder.componentList]
+        if instance.name not in componentNameList:
+            builder.componentList.append(instance)
 
 
 # Guides
-def loadGuideData(filepath=None):
+def loadGuideData(filepath=None) -> bool:
     """
     Load guide data
+    
     :param filepath: path to guide data to save
-    :return:
+    :return: True if the data was loaded. False if no data was loaded
     """
     if not path.validatePathExists(filepath):
         return False
@@ -408,15 +420,15 @@ def loadGuideData(filepath=None):
     dataObj.read(filepath)
     dataObj.applyData(nodes=dataObj.getKeys())
     return True
-    # return False
 
 
-def saveGuideData(fileStack: _StringList = None, method: str = "merge", fileName=None) -> _StringList:
+def saveGuides(fileStack: _StringList = None, method: str = "merge", fileName: str = None) -> _StringList:
     """
     Save guides data
 
     :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
     :param str method: method of data merging to apply. Default is "merge"
+    :param str fileName: path to the override file.
     """
     # path = path or rigFileData
     fileStack = common.toList(fileStack)
@@ -432,7 +444,7 @@ def saveGuideData(fileStack: _StringList = None, method: str = "merge", fileName
     return savedFiles
 
 
-def gatherGuides():
+def gatherGuides() -> _StringList:
     """
     Gather all guides in the scene
     :return: a list of all guides in the scene
@@ -440,13 +452,13 @@ def gatherGuides():
     return meta.getTagged("guide")
 
 
-# CONTROL SHAPES
-def loadControlShapes(filepath=None, applyColor=True):
+def loadControlShapeData(filepath: str = None, applyColor: bool = True) -> bool:
     """
     Load the control shapes
+
     :param filepath: path to control shape
     :param applyColor: Apply the control colors.
-    :return:
+    :return: True if the data was loaded. False if no data was loaded
     """
     if not path.validatePathExists(filepath):
         return False
@@ -459,14 +471,18 @@ def loadControlShapes(filepath=None, applyColor=True):
 
     controls = [ctl for ctl in curveDataObj.getKeys() if cmds.objExists(ctl)]
     curveDataObj.applyData(controls, create=True, applyColor=applyColor)
+    return True
 
 
-def saveControlShapes(fileStack: _StringList = None, method: str = 'merge', fileName=None) -> _StringList:
+def saveControlShapes(fileStack: _StringList = None, method: str = 'merge', fileName: str = None) -> _StringList:
     """
     Save the control shapes
 
     :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
     :param str method: method of data merging to apply. Default is "merge"
+    :param str fileName: path to the override file.
+
+    :return: list of files saved
     """
     layeredSaveInfo = gatherLayeredSaveData(
         dataToSave=gatherControlShapes(),
@@ -481,8 +497,12 @@ def saveControlShapes(fileStack: _StringList = None, method: str = 'merge', file
     return savedFiles
 
 
-def gatherControlShapes():
-    """gather controls from the scene"""
+def gatherControlShapes() -> _StringList:
+    """
+    gather controls from the scene
+
+    :return: list of all control shapes
+    """
     return meta.getTagged("control")
 
 
@@ -507,19 +527,22 @@ def savePoseReaders(fileStack: _StringList = None) -> _StringList:
     return savedFiles
 
 
-def gatherPoseReaders():
+def gatherPoseReaders() -> _StringList:
     """
     gather Pose readers from the scene
-    :return:
+
+    :return: list of all pose reader joints to save
     """
     return [psd.getAssociateJoint(p) for p in meta.getTagged("poseReader")]
 
 
-def loadPoseReaders(filepath=None, replace=True):
+def loadPoseReaderData(filepath: str = None, replace: bool = True) -> bool:
     """
     Load pose readers
+
     :param filepath: path to the pose reader file
     :param replace: If true replace existing pose readers.
+    :return: True if the data was loaded. False if no data was loaded
     """
     if not path.validatePathExists(filepath):
         return False
@@ -534,10 +557,12 @@ def loadPoseReaders(filepath=None, replace=True):
 
 
 # SKIN WEIGHTS
-def loadSkinWeights(filepath=None):
+def loadSkinWeightData(filepath=None) -> bool:
     """
     Load all skinweights within the folder
     :param filepath: path to skin weights directory
+    :return: True if the data was loaded. False if no data was loaded
+
     """
     if not path.validatePathExists(filepath):
         return False
@@ -555,27 +580,28 @@ def loadSkinWeights(filepath=None):
     return True
 
 
-def loadSingleSkin(filepath):
+def loadSingleSkin(filepath) -> bool:
     """
     load a single skin weight file
     :param filepath: path to skin weight file
     :return:
     """
+    if not path.isFile(filepath):
+        logger.error(f"filepath {filepath} is not a file")
+        return False
+
     if filepath:
         dataObj = skin_data.SkinData()
         dataObj.read(filepath)
-
         dataObj.applyData(nodes=dataObj.getKeys())
-        # except:
-        #     fileName = os.path.basename(filepath)
-        #     logger.error("Failed to load skin weights for {}".format(fileName))
+    return True
 
 
-def saveSkinWeights(filepath=None):
+def saveSkinWeights(filepath: str = None) -> None:
     """
     Save skin weights for selected object
+
     :param filepath: path to skin weights directory
-    :return:
     """
     if path.isFile(filepath):
         dataObj = skin_data.SkinData()
@@ -591,11 +617,11 @@ def saveSkinWeights(filepath=None):
             dataObj.write("{}/{}.json".format(filepath, geo))
 
 
-def saveDeformationLayers(filepath=None):
+def saveDeformationLayers(filepath: str = None) -> None:
     """
     Save the deformation layers
+
     :param filepath: path to the deformation layers file
-    :return:
     """
     dataObj = deformLayer_data.DeformLayerData()
     if os.path.exists(filepath):
@@ -605,11 +631,12 @@ def saveDeformationLayers(filepath=None):
     dataObj.write(filepath)
 
 
-def loadDeformationLayers(filepath=None):
+def loadDeformationLayerData(filepath: str = None) -> bool:
     """
     Load the deformation layers
+
     :param filepath: path to the deformation layers file
-    :return:
+    :return: True if the data was loaded. False if no data was loaded
     """
     if not path.validatePathExists(filepath):
         return False
@@ -623,11 +650,12 @@ def loadDeformationLayers(filepath=None):
     return True
 
 
-def loadDeformer(filepath=None):
+def loadDeformer(filepath: str = None) -> bool:
     """
     Loads all additional deformation data for the rig.
-    :param filepath:
-    :return:
+
+    :param filepath: path to the data to load
+    :return: True if the data was loaded. False if no data was loaded
     """
     if not path.validatePathExists(filepath):
         return False

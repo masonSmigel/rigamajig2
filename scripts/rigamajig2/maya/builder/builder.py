@@ -95,7 +95,7 @@ class Builder(object):
 
         for path in common.toList(paths):
             absolutePath = self.getAbsolutePath(path)
-            data_manager.loadJoints(absolutePath)
+            data_manager.loadJointData(absolutePath)
             logger.info(f"Joints loaded : {path}")
 
     def initialize(self) -> None:
@@ -127,7 +127,6 @@ class Builder(object):
                 cmds.parent(component.guidesHierarchy, "guides")
             self.updateMaya()
 
-        self.loadGuideData()
         logger.info("guide -- complete")
 
     def build(self) -> None:
@@ -217,7 +216,8 @@ class Builder(object):
         absolutePaths = [self.getAbsolutePath(path) for path in paths]
 
         self.setComponents([])
-        data_manager.loadComponents(self, filepaths=absolutePaths)
+        for filepath in common.toList(absolutePaths):
+            data_manager.loadComponentData(self, filepath=filepath)
 
         logger.info("components loaded -- complete")
 
@@ -234,11 +234,11 @@ class Builder(object):
             # make the path an absolute
 
             absPath = self.getAbsolutePath(path)
-            data_manager.loadControlShapes(absPath, applyColor=applyColor)
+            data_manager.loadControlShapeData(absPath, applyColor=applyColor)
             self.updateMaya()
             logger.info(f"control shapes loaded: {path}")
 
-    def loadGuideData(self, paths: str = None):
+    def loadGuides(self, paths: str = None):
         """
         Load guide data
 
@@ -262,7 +262,7 @@ class Builder(object):
 
         for path in common.toList(paths):
             absPath = self.getAbsolutePath(path)
-            if data_manager.loadPoseReaders(absPath, replace=replace):
+            if data_manager.loadPoseReaderData(absPath, replace=replace):
                 logger.info(f"pose readers loaded: {path}")
 
     def loadDeformationLayers(self, path: str = None) -> None:
@@ -272,7 +272,7 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsolutePath(self.builderData.get(constants.DEFORM_LAYERS)) or ''
-        if data_manager.loadDeformationLayers(path):
+        if data_manager.loadDeformationLayerData(path):
             logger.info("deformation layers loaded")
 
     def loadSkinWeights(self, path: str = None) -> None:
@@ -282,7 +282,7 @@ class Builder(object):
         :param str path: Path to the json file. if none is provided use the data from the rigFile
         """
         path = path or self.getAbsolutePath(self.builderData.get(constants.SKINS)) or ''
-        if data_manager.loadSkinWeights(path):
+        if data_manager.loadSkinWeightData(path):
             logger.info("skin weights loaded")
 
     def loadDeformers(self, paths: _StringList = None) -> None:
@@ -369,7 +369,7 @@ class Builder(object):
         core.runAllScripts(scripts)
         logger.info("publish scripts -- complete")
 
-    def run(self, publish:bool = False, savePublish:bool = True, versioning:bool = True) -> None:
+    def run(self, publish: bool = False, savePublish: bool = True, versioning: bool = True) -> None:
         """
         Build a rig.
 
@@ -402,6 +402,8 @@ class Builder(object):
         self.loadComponents()
         self.initialize()
         self.guide()
+
+        self.loadGuides()
 
         self.build()
         self.connect()

@@ -158,6 +158,7 @@ class SetupSection(builderSection.BuilderSection):
         """ Run this widget from the builder breakpoint runner"""
         self._onLoadComponents()
         self._initalizeRig()
+        self.guideDataLoader.loadAllData()
 
     # CONNECTIONS
     @QtCore.Slot()
@@ -180,14 +181,14 @@ class SetupSection(builderSection.BuilderSection):
     def _onLoadGuides(self):
         """ Load guide setup to json using the builder """
 
-        self.builder.loadGuideData(self.guideDataLoader.getFileList())
+        self.builder.loadGuides(self.guideDataLoader.getFileList())
 
     @QtCore.Slot()
     def _onSaveGuides(self):
         """ Save guides setup to json using the builder """
         if not self.__validateGuidesInScene():
             return
-        data_manager.saveGuideData(self.guideDataLoader.getFileList(absolute=True), method="merge")
+        data_manager.saveGuides(self.guideDataLoader.getFileList(absolute=True), method="merge")
 
     @QtCore.Slot()
     def _onSaveGuidesAsOverride(self):
@@ -206,7 +207,7 @@ class SetupSection(builderSection.BuilderSection):
 
         fileName = fileResults[0] if fileResults else None
 
-        savedFiles = data_manager.saveGuideData(
+        savedFiles = data_manager.saveGuides(
             self.guideDataLoader.getFileList(absolute=True),
             method="overwrite",
             fileName=fileName

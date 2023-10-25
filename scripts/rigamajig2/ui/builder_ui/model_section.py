@@ -93,7 +93,7 @@ class ModelSection(builderSection.BuilderSection):
     def _runWidget(self):
         """ Run this widget from the builder breakpoint runner """
         self.preScriptRunner.executeAllScripts()
-        self.builder.importModel(self.modelPathSelector.getPath())
+        self._onImportModel()
 
     @QtCore.Slot()
     def _onImportModel(self):

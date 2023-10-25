@@ -25,7 +25,8 @@ from rigamajig2.maya.data import (psd_data,
                                   joint_data,
                                   curve_data,
                                   guide_data,
-                                  abstract_data
+                                  abstract_data,
+                                  component_data
                                   )
 from rigamajig2.maya.rig import psd
 from rigamajig2.shared import common
@@ -43,6 +44,7 @@ DATA_MERGE_METHODS = ['new', 'merge', 'overwrite']
 LayeredDataInfoDict = typing.Dict[str, typing.Dict[str, typing.List]]
 
 _StringList = typing.List[str]
+_Builder = typing.Type["Builder"]
 
 def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileName=None) -> LayeredDataInfoDict:
     """
@@ -331,6 +333,63 @@ def gatherJoints():
 
     return allJoints
 
+# Components
+def saveComponents(builder: _Builder, fileStack: _StringList = None, method: str = "merge") -> _StringList or None:
+    """
+    Save out components to a file.
+    This only saves component settings such as name, inputs, spaces and names.
+
+    :param builder: instance of a builder object.
+    :param str fileStack: path to the component data file
+    :param str method: method of data merging to apply. Default is "merge"
+    """
+    # because component data is gathered from the class but saved with the name as a key
+    # this needs to be done in steps. First we can define our save dictionaries using the layered save...
+    componentNameList = [c.name for c in builder.componentList]
+    saveDict = gatherLayeredSaveData(
+        dataToSave=componentNameList,
+        fileStack=fileStack,
+        dataType="ComponentData",
+        method=method)
+
+    # if we escape from the save then we can return
+    if not layeredSavePrompt(layeredDataInfo=saveDict, dataType="ComponentData"):
+        return
+
+    # ... next loop through the save dict and gather component data based on the component name.
+    for dataFile in saveDict:
+        componentDataObj = component_data.ComponentData()
+
+        # loop through the list of component names
+        for componentName in saveDict[dataFile][CHANGED] + saveDict[dataFile][ADDED]:
+            component = builder.findComponent(name=componentName)
+            componentDataObj.gatherData(component)
+        componentDataObj.write(dataFile)
+
+    return [filepath for filepath in saveDict.keys()]
+
+def loadComponents(builder: _Builder, filepaths: _StringList = None) -> None:
+    """
+    Load components from a json file. This will only load the component settings and objects.
+
+    :param builder:
+    :param filepaths:
+    :return:
+    """
+    for filepath in common.toList(filepaths):
+
+        componentDataObj = component_data.ComponentData()
+        componentDataObj.read(filepath)
+
+        # look through each component and add it to the builder list
+        # check before adding it so only one instance of each exists in the list
+        for component in componentDataObj.getKeys():
+            instance = common.getFirstIndex(componentDataObj.applyData(component))
+
+            componentNameList = [component.name for component in builder.componentList]
+            if instance.name not in componentNameList:
+                builder.componentList.append(instance)
+
 
 # Guides
 def loadGuideData(filepath=None):
@@ -360,7 +419,6 @@ def saveGuideData(fileStack: _StringList = None, method: str = "merge", fileName
     :param str fileStack: Path to the json file. if none is provided use the data from the rigFile
     :param str method: method of data merging to apply. Default is "merge"
     """
-    # rigFileData = common.toList(self.getAbsolutePath(self.builderData.get(constants.GUIDES)))[-1]
     # path = path or rigFileData
     fileStack = common.toList(fileStack)
     layeredSaveInfo = gatherLayeredSaveData(
@@ -437,9 +495,6 @@ def savePoseReaders(fileStack: _StringList = None) -> _StringList:
 
     :param str fileStack: Path to the json file. if none is provided use the data from the rigFile.
     """
-
-    # path = path or self.getAbsolutePath(self.builderData.get(constants.PSD))
-
     allPoseReaders = gatherPoseReaders()
 
     layeredSaveInfo = gatherLayeredSaveData(

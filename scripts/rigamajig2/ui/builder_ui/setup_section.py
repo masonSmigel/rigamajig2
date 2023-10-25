@@ -174,8 +174,7 @@ class SetupSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _onSaveComponents(self):
         """ Save component setup from json using the builder """
-        # self.builder.loadMetadataToComponentSettings()
-        self.builder.saveComponents(self.componentsDataLoader.getFileList(absolute=True))
+        data_manager.saveComponents(self.builder, self.componentsDataLoader.getFileList(absolute=True))
 
     @QtCore.Slot()
     def _onLoadGuides(self):
@@ -792,7 +791,6 @@ class ComponentManager(QtWidgets.QWidget):
         dialog = CreateComponentDialog()
         dialog.newComponentCreatedSignal.connect(self.createComponent)
         dialog.show()
-
 
 class CreateComponentDialog(QtWidgets.QDialog):
     """

@@ -17,7 +17,6 @@ import maya.api.OpenMaya as om2
 import maya.cmds as cmds
 
 import rigamajig2.maya.data.abstract_data as abstract_data
-import rigamajig2.maya.data.component_data as component_data
 import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
 import rigamajig2.shared.common as common
@@ -69,8 +68,9 @@ class Builder(object):
         """
         if path:
             path = common.getFirstIndex(path)
-            # TODO: add in a check if this is a single file or multipleFiles
             return os.path.realpath(os.path.join(self.path, path))
+
+    # Todo: setup properties for rigamajig file keys.
 
     # --------------------------------------------------------------------------------
     # RIG BUILD STEPS
@@ -207,40 +207,6 @@ class Builder(object):
             self.updateMaya()
         logger.info("optimize -- complete")
 
-    # TODO: maybe move this to `data_manager.py`
-    def saveComponents(self, fileStack: _StringList = None, method: str = "merge") -> _StringList or None:
-        """
-        Save out components to a file.
-        This only saves component settings such as name, inputs, spaces and names.
-
-        :param str fileStack: path to the component data file
-        :param str method: method of data merging to apply. Default is "merge"
-        """
-        # because component data is gathered from the class but saved with the name as a key
-        # this needs to be done in steps. First we can define our save dictionaries using the layered save...
-        componentNameList = [c.name for c in self.componentList]
-        saveDict = data_manager.gatherLayeredSaveData(
-            dataToSave=componentNameList,
-            fileStack=fileStack,
-            dataType="ComponentData",
-            method=method)
-
-        # if we escape from the save then we can return
-        if not data_manager.layeredSavePrompt(layeredDataInfo=saveDict, dataType="ComponentData"):
-            return
-
-        # ... next loop through the save dict and gather component data based on the component name.
-        for dataFile in saveDict:
-            componentDataObj = component_data.ComponentData()
-
-            # loop through the list of component names
-            for componentName in saveDict[dataFile][data_manager.CHANGED]:
-                component = self.findComponent(name=componentName)
-                componentDataObj.gatherData(component)
-            componentDataObj.write(dataFile)
-
-        return [filepath for filepath in saveDict.keys()]
-
     def loadComponents(self, paths: str = None) -> None:
         """
         Load components from a json file. This will only load the component settings and objects.
@@ -248,23 +214,10 @@ class Builder(object):
         :param str paths: Path to the json file. if none is provided use the data from the rigFile
         """
         paths = paths or self.builderData.get(constants.COMPONENTS)
+        absolutePaths = [self.getAbsolutePath(path) for path in paths]
 
-        self.setComponents(list())
-        for path in common.toList(paths):
-            path = self.getAbsolutePath(path)
-
-            componentDataObj = component_data.ComponentData()
-            componentDataObj.read(path)
-
-            # look through each component and add it to the builder list
-            # check before adding it so only one instance of each exists in the list
-            for component in componentDataObj.getKeys():
-                instance = common.getFirstIndex(componentDataObj.applyData(component))
-
-                # we only want to add components with a new name. Each component should have a unique name
-                componentNameList = [c.name for c in self.componentList]
-                if instance.name not in componentNameList:
-                    self.componentList.append(instance)
+        self.setComponents([])
+        data_manager.loadComponents(self, filepaths=absolutePaths)
 
         logger.info("components loaded -- complete")
 
@@ -512,7 +465,8 @@ class Builder(object):
             versionPath = os.path.join(versionDirectory, versionFileName)
 
             # make the output directory and save the file. This will also make the directory for the main publish
-            os.makedirs(versionDirectory)
+            if not os.path.exists(versionDirectory):
+                os.makedirs(versionDirectory)
             outputVersionPath = file.saveAs(versionPath, log=False)
             logger.info("out rig versioned: {}   ({})".format(versionFileName, outputVersionPath))
 
@@ -616,7 +570,7 @@ class Builder(object):
 
         return self.findComponent(name)
 
-    def findComponent(self, name: str) -> Component or None :
+    def findComponent(self, name: str) -> Component or None:
         """
         Find a component within the self.componentList.
 

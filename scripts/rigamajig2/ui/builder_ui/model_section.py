@@ -86,7 +86,7 @@ class ModelSection(builderSection.BuilderSection):
         self.modelPathSelector.selectPath(modelFile)
 
         # update the script runner
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.getRigFile(), constants.PRE_SCRIPT, asDict=True)
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.getRigFile(), constants.PRE_SCRIPT)
         self.preScriptRunner.addScriptsWithRecursionData(scripts)
 
     @QtCore.Slot()

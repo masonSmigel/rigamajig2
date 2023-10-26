@@ -102,7 +102,7 @@ class BuildSection(builderSection.BuilderSection):
         self.postScriptRunner.clearScript()
         self.psdDataLoader.setRelativePath(self.builder.getRigEnvironment())
 
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT, asDict=True)
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT)
         self.postScriptRunner.addScriptsWithRecursionData(scripts)
 
         psdFiles = self.builder.getRigData(self.builder.getRigFile(), PSD)

@@ -86,7 +86,7 @@ class PublishSection(builderSection.BuilderSection):
         self.outPathSelector.selectPath(outFile)
 
         # update the script runner
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PUB_SCRIPT, asDict=True)
+        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PUB_SCRIPT)
         self.pubScriptRunner.addScriptsWithRecursionData(scripts)
 
         # set the default output file type

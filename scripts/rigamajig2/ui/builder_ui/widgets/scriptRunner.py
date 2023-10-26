@@ -2,23 +2,18 @@
 Script runner widget
 """
 import os.path
-import sys
-import subprocess
 import platform
-from os.path import relpath
+import subprocess
+import sys
 
+import maya.OpenMayaUI as omui
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
-import maya.cmds as cmds
-import maya.OpenMayaUI as omui
-
 import rigamajig2.shared.runScript as runScript
-import rigamajig2.shared.common as common
 from rigamajig2.ui import showInFolder
-import rigamajig2.shared.path as rig_path
 
 SCRIPT_FILE_FILTER = "Python (*.py) ;; Mel (*.mel)"
 
@@ -157,11 +152,11 @@ class ScriptRunner(QtWidgets.QWidget):
         add a list of script while including recusion data in the loaded script data
         """
 
-        for recursion in scriptsDict:
+        for i, recursion in enumerate(scriptsDict):
             scriptsList = scriptsDict[recursion]
 
             for script in scriptsList:
-                self._addScriptToWidget(script, data=recursion, color=RECURSION_COLORS[recursion])
+                item = self._addScriptToWidget(script, data=recursion, color=RECURSION_COLORS[i])
                 self.currentScriptsList.append(script)
 
     def _addScriptToWidget(self, script, data=0, color=None, top=False):
@@ -271,7 +266,7 @@ class ScriptRunner(QtWidgets.QWidget):
                 if relativePath:
                     scriptPath = os.path.relpath(scriptPath, relativePath)
 
-                scriptList.insert(0, scriptPath)
+                scriptList.append(scriptPath)
 
         return scriptList
 

@@ -230,6 +230,20 @@ def flattenList(selList):
     return flatList
 
 
+def joinLists(listOfLists):
+    """
+    Joins a list of lists into a single flat list.
+
+    :param listOfLists: A list containing sub-lists to be joined.
+    :return: A flat list containing all elements from the sub-lists in the original order.
+    """
+    joinedList = []
+    for sublist in listOfLists:
+        joinedList.extend(sublist)
+
+    return joinedList
+
+
 def getMirrorName(name, left=None, right=None):
     """
     Get the appropriate name for a control on the opposide side of the rig.

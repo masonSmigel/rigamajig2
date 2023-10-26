@@ -6,7 +6,6 @@
         "archetype_parent": "base",
         "rig_name": "test",
         "model_file": null,
-        "skeleton_file": "skeleton.ma",
         "skeleton_pos": [
             "skeleton_pos.json"
         ],

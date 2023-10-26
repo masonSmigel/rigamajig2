@@ -72,6 +72,71 @@ class Builder(object):
 
     # Todo: setup properties for rigamajig file keys.
 
+    @property
+    def modelFile(self):
+        return self.builderData.get(constants.MODEL_FILE)
+
+    @property
+    def skeletonFile(self):
+        return self.builderData.get(constants.SKELETON_POS)
+
+    @property
+    def guidesFile(self):
+        return self.builderData.get(constants.GUIDES)
+
+    @property
+    def componentsFile(self):
+        return self.builderData.get(constants.COMPONENTS)
+
+    @property
+    def controlShapesFile(self):
+        return self.builderData.get(constants.CONTROL_SHAPES)
+
+    @property
+    def poseReadersFile(self):
+        return self.builderData.get(constants.PSD)
+
+    @property
+    def skinsFile(self):
+        return self.builderData.get(constants.SKINS)
+
+    @property
+    def deformersFile(self):
+        return self.builderData.get(constants.DEFORMERS)
+
+    @property
+    def deformLayersFile(self):
+        return self.builderData.get(constants.DEFORM_LAYERS)
+
+    @property
+    def outputFilePath(self):
+        return self.builderData.get(constants.OUTPUT_RIG)
+
+    @property
+    def outputFileSuffix(self):
+        return self.builderData.get(constants.OUTPUT_FILE_SUFFIX)
+
+    @property
+    def outputFileType(self):
+        return self.builderData.get(constants.OUTPUT_RIG_FILE_TYPE)
+
+    @property
+    def preScripts(self) -> typing.List[str]:
+        scriptsDict = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PRE_SCRIPT)
+        scripts = list(scriptsDict.values())
+        return common.joinLists(scripts)
+
+    @property
+    def postScripts(self) -> typing.List[str]:
+        scriptsDict = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.POST_SCRIPT)
+        scripts = list(scriptsDict.values())
+        return common.joinLists(scripts)
+
+    @property
+    def pubScripts(self) -> typing.List[str]:
+        scriptsDict = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PUB_SCRIPT)
+        scripts = list(scriptsDict.values())
+        return common.joinLists(scripts)
     # --------------------------------------------------------------------------------
     # RIG BUILD STEPS
     # --------------------------------------------------------------------------------
@@ -350,23 +415,20 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     # RUN SCRIPTS UTILITIES
     # --------------------------------------------------------------------------------
-    def preScript(self) -> None:
+    def runPreScripts(self) -> None:
         """ Run pre scripts. use  through the PRE SCRIPT path"""
-        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PRE_SCRIPT)
-        core.runAllScripts(scripts)
+        core.runAllScripts(self.preScripts)
 
         logger.info("pre scripts -- complete")
 
-    def postScript(self) -> None:
+    def runPostScripts(self) -> None:
         """ Run pre scripts. use  through the POST SCRIPT path"""
-        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.POST_SCRIPT)
-        core.runAllScripts(scripts)
+        core.runAllScripts(self.postScripts)
         logger.info("post scripts -- complete")
 
-    def publishScript(self) -> None:
+    def runPublishScripts(self) -> None:
         """ Run pre scripts. use  through the PUB SCRIPT path"""
-        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PUB_SCRIPT)
-        core.runAllScripts(scripts)
+        core.runAllScripts(self.pubScripts)
         logger.info("publish scripts -- complete")
 
     def run(self, publish: bool = False, savePublish: bool = True, versioning: bool = True) -> None:
@@ -393,7 +455,7 @@ class Builder(object):
                     )
 
         core.loadRequiredPlugins()
-        self.preScript()
+        self.runPreScripts()
 
         self.importModel()
 
@@ -409,7 +471,7 @@ class Builder(object):
         self.connect()
         self.finalize()
         self.loadPoseReaders()
-        self.postScript()
+        self.runPostScripts()
 
         self.loadControlShapes()
 
@@ -419,7 +481,7 @@ class Builder(object):
 
         if publish:
             # self.optimize()
-            self.publishScript()
+            self.runPublishScripts()
             if savePublish:
                 self.publish(versioning=versioning)
         endTime = time.time()

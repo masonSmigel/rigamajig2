@@ -3,6 +3,10 @@ This module contains path utilities
 """
 import os
 import pathlib
+import typing
+
+RelativePath = typing.TypeVar('RelativePath', str, pathlib.Path)
+AbsolutePath = typing.TypeVar('AbsolutePath', str, pathlib.Path)
 
 
 def cleanPath(path):

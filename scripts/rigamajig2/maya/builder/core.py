@@ -315,7 +315,9 @@ class GetCompleteScriptList(object):
         localScriptPaths = getRigData(rigFile, scriptType)
         rigEnvironmentPath = os.path.abspath(os.path.join(rigFile, "../"))
 
-        _scriptsAtRecursionLevel = []
+        if recursionLevel not in cls.scriptDict:
+            cls.scriptDict[recursionLevel] = []
+
         # for each item in the script path append the scripts
         for localScriptPath in localScriptPaths:
             fullScriptPath = os.path.join(rigEnvironmentPath, localScriptPath)
@@ -329,12 +331,7 @@ class GetCompleteScriptList(object):
                     _scriptList.insert(0, script)
                     cls.scriptList.insert(0, script)
 
-            _scriptsAtRecursionLevel += _scriptList
-
-        if recursionLevel not in cls.scriptDict:
-            cls.scriptDict[recursionLevel] = []
-
-        cls.scriptDict[recursionLevel].extend(_scriptsAtRecursionLevel)
+            cls.scriptDict[recursionLevel].extend(_scriptList)
 
         # now we can look at the parent archetypes and iterate through them too.
         baseArchetype = getRigData(rigFile, constants.BASE_ARCHETYPE)

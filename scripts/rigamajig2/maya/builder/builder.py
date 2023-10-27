@@ -20,7 +20,7 @@ import rigamajig2.maya.data.abstract_data as abstract_data
 import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
 import rigamajig2.shared.common as common
-import rigamajig2.shared.path as rig_path
+import rigamajig2.shared.path as path
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder import data_manager
@@ -36,6 +36,9 @@ logger = logging.getLogger(__name__)
 class Builder(object):
     """
     The builder is the foundational class used to construct rigs with Rigamajig2.
+
+    The builder should always work with relative paths both inside the builder class and the builder UI.
+    It is only when loading data that paths are converted to absolutePaths but should never be accessed outside of loading.
     """
 
     VERSIONS_DIRECTORY = "versions"
@@ -60,108 +63,140 @@ class Builder(object):
         """ Get all available components"""
         return self._availableComponents
 
-    def getAbsolutePath(self, path) -> str:
+    def getAbsolutePath(self, filepath: path.RelativePath) -> path.AbsolutePath:
         """
         Get the absolute path of the given path relative to the rigEnvironment
 
-        :param str path: Path to get relative to the rig environment
+        :param str filepath: Path to get relative to the rig environment
         """
-        if path:
-            path = common.getFirstIndex(path)
-            return os.path.realpath(os.path.join(self.path, path))
+        if filepath:
+            filepath = common.getFirstIndex(filepath)
+            return os.path.realpath(os.path.join(self.path, filepath))
 
     # Todo: setup properties for rigamajig file keys.
 
     @property
-    def modelFile(self):
+    def modelFile(self) -> path.RelativePath:
+        """Relative path to the model file"""
         return self.builderData.get(constants.MODEL_FILE)
 
     @property
-    def skeletonFile(self):
+    def jointFiles(self) -> typing.List[path.RelativePath]:
         return self.builderData.get(constants.SKELETON_POS)
 
     @property
-    def guidesFile(self):
+    def guideFiles(self) -> typing.List[path.RelativePath]:
         return self.builderData.get(constants.GUIDES)
 
     @property
-    def componentsFile(self):
+    def componentFiles(self) -> typing.List[path.RelativePath]:
         return self.builderData.get(constants.COMPONENTS)
 
     @property
-    def controlShapesFile(self):
+    def controlShapeFiles(self) -> typing.List[path.RelativePath]:
         return self.builderData.get(constants.CONTROL_SHAPES)
 
     @property
-    def poseReadersFile(self):
+    def poseReadersFiles(self) -> typing.List[path.RelativePath]:
         return self.builderData.get(constants.PSD)
 
     @property
-    def skinsFile(self):
+    def skinsFile(self) -> path.RelativePath:
+        """
+        The skins file can either be a single json file or a directory.
+
+        If a single file is used all skin data will be saved into that file.
+        If a directory is specified each skinFile will be saved to a separate json file inside that directory.
+        """
         return self.builderData.get(constants.SKINS)
 
     @property
-    def deformersFile(self):
+    def deformerFiles(self) -> typing.List[path.RelativePath]:
         return self.builderData.get(constants.DEFORMERS)
 
     @property
-    def deformLayersFile(self):
+    def deformLayersFile(self) -> path.RelativePath:
         return self.builderData.get(constants.DEFORM_LAYERS)
 
     @property
-    def outputFilePath(self):
+    def outputFilePath(self) -> path.RelativePath:
         return self.builderData.get(constants.OUTPUT_RIG)
 
     @property
-    def outputFileSuffix(self):
+    def rigName(self) -> path.RelativePath:
+        return self.builderData.get(constants.RIG_NAME)
+
+    @property
+    def outputFileSuffix(self) -> str:
         return self.builderData.get(constants.OUTPUT_FILE_SUFFIX)
 
     @property
-    def outputFileType(self):
+    def outputFileType(self) -> str:
         return self.builderData.get(constants.OUTPUT_RIG_FILE_TYPE)
 
+    def localPreScripts(self) -> typing.List[path.AbsolutePath]:
+        """List of pre scripts local to this rig file"""
+        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PRE_SCRIPT)[0]
+        return scripts
+
     @property
-    def preScripts(self) -> typing.List[str]:
+    def localPostScripts(self) -> typing.List[path.AbsolutePath]:
+        """List of post scripts local to this rig file"""
+        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.POST_SCRIPT)[0]
+        return scripts
+
+    @property
+    def localPubScripts(self) -> typing.List[path.AbsolutePath]:
+        """List of publish scripts local to this rig file"""
+        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PUB_SCRIPT)[0]
+        return scripts
+
+    @property
+    def preScripts(self) -> typing.List[path.AbsolutePath]:
+        """List of all pre scripts both local and inherited from archetypes"""
         scriptsDict = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PRE_SCRIPT)
         scripts = list(scriptsDict.values())
         return common.joinLists(scripts)
 
     @property
-    def postScripts(self) -> typing.List[str]:
+    def postScripts(self) -> typing.List[path.AbsolutePath]:
+        """List of all post scripts both local and inherited from archetypes"""
         scriptsDict = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.POST_SCRIPT)
         scripts = list(scriptsDict.values())
         return common.joinLists(scripts)
 
     @property
-    def pubScripts(self) -> typing.List[str]:
+    def pubScripts(self) -> typing.List[path.AbsolutePath]:
+        """List of all pub scripts both local and inherited from archetypes"""
         scriptsDict = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PUB_SCRIPT)
         scripts = list(scriptsDict.values())
         return common.joinLists(scripts)
+
     # --------------------------------------------------------------------------------
     # RIG BUILD STEPS
     # --------------------------------------------------------------------------------
-    def importModel(self, path: str = None) -> None:
+    def importModel(self, filepath: str = None) -> None:
         """
         Import the model file
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param str filepath: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsolutePath(self.builderData.get(constants.MODEL_FILE))
-        model.importModel(path)
+        filepath = filepath or self.getAbsolutePath(self.modelFile)
+        model.importModel(filepath)
         logger.info("Model loaded")
 
-    def loadJoints(self, paths: str = None) -> None:
+    def loadJoints(self, filePaths: typing.List[path.RelativePath] = None) -> None:
         """
          Load the joint Data to a json file
 
-        :param str paths: list of paths Path to the json file. if none is provided use the data from the rigFile
+        :param str filePaths: list of paths Path to the json file. if none is provided use the data from the rigFile
         """
-        paths = paths or self.builderData.get(constants.SKELETON_POS)
+        filePaths = filePaths or self.jointFiles
 
-        for path in common.toList(paths):
-            absolutePath = self.getAbsolutePath(path)
+        for filepath in common.toList(filePaths):
+            absolutePath = self.getAbsolutePath(filepath)
             data_manager.loadJointData(absolutePath)
-            logger.info(f"Joints loaded : {path}")
+            logger.info(f"Joints loaded : {filepath}")
 
     def initialize(self) -> None:
         """
@@ -271,14 +306,14 @@ class Builder(object):
             self.updateMaya()
         logger.info("optimize -- complete")
 
-    def loadComponents(self, paths: str = None) -> None:
+    def loadComponents(self, filepaths: typing.List[path.RelativePath] = None) -> None:
         """
         Load components from a json file. This will only load the component settings and objects.
 
-        :param str paths: Path to the json file. if none is provided use the data from the rigFile
+        :param str filepaths: Path to the json file. if none is provided use the data from the rigFile
         """
-        paths = paths or self.builderData.get(constants.COMPONENTS)
-        absolutePaths = [self.getAbsolutePath(path) for path in paths]
+        filepaths = filepaths or self.componentFiles
+        absolutePaths = [self.getAbsolutePath(filepath) for filepath in filepaths]
 
         self.setComponents([])
         for filepath in common.toList(absolutePaths):
@@ -286,85 +321,80 @@ class Builder(object):
 
         logger.info("components loaded -- complete")
 
-    def loadControlShapes(self, paths: str = None, applyColor: bool = True) -> None:
+    def loadControlShapes(self, filepaths: typing.List[path.RelativePath] = None, applyColor: bool = True) -> None:
         """
         Load the control shapes
 
-        :param list paths: Path to the json file. if none is provided use the data from the rigFile
+        :param list filepaths: Path to the json file. if none is provided use the data from the rigFile
         :param bool applyColor: Apply the control colors.
         """
-        paths = paths or self.builderData.get(constants.CONTROL_SHAPES)
+        filepaths = filepaths or self.controlShapeFiles
 
-        for path in common.toList(paths):
+        for filepath in common.toList(filepaths):
             # make the path an absolute
 
-            absPath = self.getAbsolutePath(path)
+            absPath = self.getAbsolutePath(filepath)
             data_manager.loadControlShapeData(absPath, applyColor=applyColor)
             self.updateMaya()
-            logger.info(f"control shapes loaded: {path}")
+            logger.info(f"control shapes loaded: {filepath}")
 
-    def loadGuides(self, paths: str = None):
+    def loadGuides(self, filepaths: typing.List[path.RelativePath] = None):
         """
         Load guide data
 
-        :param list paths: Path to the json file. if none is provided use the data from the rigFile
+        :param list filepaths: Path to the json file. if none is provided use the data from the rigFile
         """
-        paths = paths or self.builderData.get(constants.GUIDES)
+        filepaths = filepaths or self.guideFiles
 
-        for path in common.toList(paths):
-            absPath = self.getAbsolutePath(path)
+        for filepath in common.toList(filepaths):
+            absPath = self.getAbsolutePath(filepath)
             if data_manager.loadGuideData(absPath):
-                logger.info(f"guides loaded: {path}")
+                logger.info(f"guides loaded: {filepath}")
 
-    def loadPoseReaders(self, paths: str = None, replace: bool = True) -> None:
+    def loadPoseReaders(self, filepaths: typing.List[path.RelativePath] = None, replace: bool = True) -> None:
         """
         Load pose readers
 
-        :param list paths: Path to the json file. if none is provided use the data from the rigFile
+        :param list filepaths: Path to the json file. if none is provided use the data from the rigFile
         :param replace: Replace existing pose readers.
         """
-        paths = paths or self.builderData.get(constants.PSD) or ''
+        filepaths = filepaths or self.poseReadersFiles or ''
 
-        for path in common.toList(paths):
-            absPath = self.getAbsolutePath(path)
+        for filepath in common.toList(filepaths):
+            absPath = self.getAbsolutePath(filepath)
             if data_manager.loadPoseReaderData(absPath, replace=replace):
-                logger.info(f"pose readers loaded: {path}")
+                logger.info(f"pose readers loaded: {filepath}")
 
-    def loadDeformationLayers(self, path: str = None) -> None:
+    def loadDeformationLayers(self, filepath: path.RelativePath = None) -> None:
         """
         Load the deformation layers
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param str filepath: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsolutePath(self.builderData.get(constants.DEFORM_LAYERS)) or ''
-        if data_manager.loadDeformationLayerData(path):
+        filepath = filepath or self.getAbsolutePath(self.deformLayersFile) or None
+        if data_manager.loadDeformationLayerData(filepath):
             logger.info("deformation layers loaded")
 
-    def loadSkinWeights(self, path: str = None) -> None:
+    def loadSkinWeights(self, filepath: path.RelativePath = None) -> None:
         """
         Load the skin weights
 
-        :param str path: Path to the json file. if none is provided use the data from the rigFile
+        :param str filepath: Path to the json file. if none is provided use the data from the rigFile
         """
-        path = path or self.getAbsolutePath(self.builderData.get(constants.SKINS)) or ''
-        if data_manager.loadSkinWeightData(path):
+        filepath = filepath or self.getAbsolutePath(self.skinsFile) or None
+        if data_manager.loadSkinWeightData(filepath):
             logger.info("skin weights loaded")
 
-    def loadDeformers(self, paths: _StringList = None) -> None:
+    def loadDeformers(self, filepaths: typing.List[path.RelativePath] = None) -> None:
         """ Load additional deformers
-        :param list paths: Path to the json file. if none is provided use the data from the rigFile
+        :param list filepaths: Path to the json file. if none is provided use the data from the rigFile
         """
-        if not paths:
-            deformerPaths = self.builderData.get(constants.DEFORMERS) or []
-            shapesPaths = self.builderData.get(constants.SHAPES) or []
+        deformerPaths = filepaths or self.deformerFiles or []
 
-            # if we have both deformerPaths and shapesPaths we need to join the two paths
-            paths = common.toList(shapesPaths) + common.toList(deformerPaths)
-
-        for path in common.toList(paths):
-            absPath = self.getAbsolutePath(path)
+        for filepath in common.toList(deformerPaths):
+            absPath = self.getAbsolutePath(filepath)
             if data_manager.loadDeformer(absPath):
-                logger.info(f"deformers loaded: {path}")
+                logger.info(f"deformers loaded: {filepath}")
 
     # TODO: Fix this or delete it.
     def deleteComponents(self, clearList=True):
@@ -567,16 +597,15 @@ class Builder(object):
         :return: Tuple[str, str] - A tuple containing the directory and filename.
         :raises RuntimeError: If an output path or rig name is not provided.
         """
-        outputfile = self.getAbsolutePath(self.builderData.get(constants.OUTPUT_RIG))
-        outputRigName = self.builderData.get(constants.RIG_NAME)
+        outputfile = self.getAbsolutePath(self.outputFilePath)
 
-        if rig_path.isFile(outputfile):
+        if path.isFile(outputfile):
             filename = outputfile.split(os.sep)[-1]
             directory = '/'.join(outputfile.split(os.sep)[:-1])
-        elif rig_path.isDir(outputfile):
+        elif path.isDir(outputfile):
             directory = outputfile
 
-            if not outputRigName:
+            if not self.rigName:
                 raise RuntimeError("Must select an output path or rig name to publish a rig")
 
             filename = self.getPublishFileName(includeVersion=False, version=None)
@@ -593,12 +622,9 @@ class Builder(object):
         :param version: The version number to include in the filename.
         :return: str - The formatted output file name.
         """
-        outputRigName = self.builderData.get(constants.RIG_NAME)
-        fileType = self.builderData.get(constants.OUTPUT_RIG_FILE_TYPE)
-        suffix = self.builderData.get(constants.OUTPUT_FILE_SUFFIX) or ""
         if includeVersion:
-            return f"{outputRigName}{suffix}_v{version:03d}.{fileType}"
-        return f"{outputRigName}{suffix}.{fileType}"
+            return f"{self.rigName}{self.outputFileSuffix or ''}_v{version:03d}.{self.outputFileType}"
+        return f"{self.rigName}{self.outputFileSuffix or ''}.{self.outputFileType}"
 
     def getExistingVersions(self) -> list[str] or None:
         """
@@ -607,7 +633,6 @@ class Builder(object):
         :return: List[str] - A list of existing version filenames, sorted in descending order.
         """
         directory, _ = self.getPublishFileInfo()
-        outputRigName = self.builderData.get(constants.RIG_NAME)
 
         versionsDirectory = os.path.join(directory, self.VERSIONS_DIRECTORY)
         existingVersionFiles = []
@@ -617,7 +642,7 @@ class Builder(object):
 
         # Iterate over all files in the directory
         for filename in os.listdir(versionsDirectory):
-            if filename.startswith(outputRigName) and filename.lower().endswith(('.ma', '.mb')):
+            if filename.startswith(self.rigName) and filename.lower().endswith(('.ma', '.mb')):
                 existingVersionFiles.append(filename)
 
         existingVersionFiles.sort(reverse=True)

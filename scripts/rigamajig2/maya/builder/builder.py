@@ -50,10 +50,15 @@ class Builder(object):
         Initialize the builder
         :param rigFile: path to the rig file
         """
-        self.path = None
+        self.rigEnvironment = None
         self.rigFile = None
 
-        # private properties
+        self._availableComponents = core.findComponents()
+        self.componentList = []
+
+        # rig file properties
+        self._archetypeParent = None
+        self._rigName = None
         self._modelFile = None
         self._jointFiles = None
         self._guideFiles = None
@@ -64,21 +69,13 @@ class Builder(object):
         self._deformerFiles = None
         self._deformLayerFiles = None
         self._outputFilePath = None
-        self._rigName = None
         self._outFileSuffix = None
         self._outputFileType = None
         self._localPreScripts = None
         self._localPostScripts = None
         self._localPubScripts = None
 
-        self.builderData = {}
-
         if rigFile: self.setRigFile(rigFile)
-
-        self.componentList = list()
-        self._availableComponents = core.findComponents()
-        # variables we need
-        self.topSkeletonNodes = list()
 
     def getAvailableComponents(self) -> typing.List[str]:
         """ Get all available components"""
@@ -92,7 +89,15 @@ class Builder(object):
         """
         if filepath:
             filepath = common.getFirstIndex(filepath)
-            return os.path.realpath(os.path.join(self.path, filepath))
+            return os.path.realpath(os.path.join(self.rigEnvironment, filepath))
+
+    @property
+    def archetypeParent(self) -> str or typing.List[str]:
+        return self._archetypeParent
+
+    @archetypeParent.setter
+    def archetypeParent(self, value: str or typing.List[str]):
+        self._archetypeParent = value
 
     @property
     def rigName(self) -> str:
@@ -208,8 +213,8 @@ class Builder(object):
             logger.error(f"'{value}' is not a valid output file type.")
         self._outputFileType = value
 
-    # TODO: rework the scripts so the local scripts can stay relative and easy to edit. while the full script list can
-    # be absoulte
+    # TODO: rework the scripts so the local scripts can stay relative and easy to edit.
+    #  TODO: while the full script list can be absoulte
     @property
     def localPreScripts(self) -> typing.List[path.AbsolutePath]:
         """List of pre scripts local to this rig file"""
@@ -254,7 +259,7 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     def importModel(self) -> None:
         """
-        Import the model file
+        Import the model file from the `modelFile` property
         """
         filepath = self.getAbsolutePath(self.modelFile)
         model.importModel(filepath)
@@ -262,9 +267,7 @@ class Builder(object):
 
     def loadJoints(self) -> None:
         """
-         Load the joint Data to a json file
-
-        :param str filePaths: list of paths Path to the json file. if none is provided use the data from the rigFile
+        Load the joint Data from the `jointFiles` property
         """
         filePaths = self.jointFiles
 
@@ -383,9 +386,8 @@ class Builder(object):
 
     def loadComponents(self) -> None:
         """
-        Load components from a json file. This will only load the component settings and objects.
-
-        :param str filepaths: Path to the json file. if none is provided use the data from the rigFile
+        Load components from  the `componentFiles` property.
+        This will only load the component settings and objects.
         """
         filepaths = self.componentFiles
 
@@ -397,9 +399,8 @@ class Builder(object):
 
     def loadControlShapes(self, applyColor: bool = True) -> None:
         """
-        Load the control shapes
+        Load the control shapes from the `controlShapeFiles` property
 
-        :param list filepaths: Path to the json file. if none is provided use the data from the rigFile
         :param bool applyColor: Apply the control colors.
         """
         filepaths = self.controlShapeFiles
@@ -414,9 +415,7 @@ class Builder(object):
 
     def loadGuides(self):
         """
-        Load guide data
-
-        :param list filepaths: Path to the json file. if none is provided use the data from the rigFile
+        Load guide data from the `guideFiles` property
         """
         filepaths = self.guideFiles
 
@@ -427,9 +426,8 @@ class Builder(object):
 
     def loadPoseReaders(self, replace: bool = True) -> None:
         """
-        Load pose readers
+        Load pose readers from the `poseReadersFiles` property
 
-        :param list filepaths: Path to the json file. if none is provided use the data from the rigFile
         :param replace: Replace existing pose readers.
         """
         filepaths = self.poseReadersFiles or None
@@ -441,9 +439,7 @@ class Builder(object):
 
     def loadDeformationLayers(self) -> None:
         """
-        Load the deformation layers
-
-        :param str filepath: Path to the json file. if none is provided use the data from the rigFile
+        Load the deformation layers from the `deformLayersFile` property
         """
         filepath = self.getAbsolutePath(self.deformLayersFile) or None
         if data_manager.loadDeformationLayerData(filepath):
@@ -451,17 +447,15 @@ class Builder(object):
 
     def loadSkinWeights(self) -> None:
         """
-        Load the skin weights
-
-        :param str filepath: Path to the json file. if none is provided use the data from the rigFile
+        Load the skin weights from the `skinsFile` property
         """
         filepath = self.getAbsolutePath(self.skinsFile) or None
         if data_manager.loadSkinWeightData(filepath):
             logger.info("skin weights loaded")
 
     def loadDeformers(self ) -> None:
-        """ Load additional deformers
-        :param list filepaths: Path to the json file. if none is provided use the data from the rigFile
+        """
+        Load additional deformers from the `deformerFiles` property
         """
         deformerPaths = self.deformerFiles or []
 
@@ -548,14 +542,14 @@ class Builder(object):
         :param versioning: Enable versioning. If True, a new version will be created in the publishing directory
                            each time the publishing file is overwritten. This allows for version control.
         """
-        if not self.path:
+        if not self.rigEnvironment:
             logger.error('you must provide a build environment path. Use _setRigFile()')
             return
 
         startTime = time.time()
         logger.info(f"\n"
                     f"Begin Rig Build\n{'-' * 70}\n"
-                    f"build env: {self.path}\n"
+                    f"build env: {self.rigEnvironment}\n"
                     )
 
         core.loadRequiredPlugins()
@@ -654,7 +648,7 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     def getRigEnvironment(self) -> str:
         """Get the rig environment"""
-        return self.path
+        return self.rigEnvironment
 
     def getRigFile(self) -> str:
         """Get the rig file"""
@@ -789,9 +783,10 @@ class Builder(object):
             rigEnvironmentPath = '../'
         else:
             rigEnvironmentPath = data["rig_env"]
-        self.path = os.path.abspath(os.path.join(self.rigFile, rigEnvironmentPath))
+        self.rigEnvironment = os.path.abspath(os.path.join(self.rigFile, rigEnvironmentPath))
 
         # setup the rigamajig properties
+        self.archetypeParent = data.get(constants.BASE_ARCHETYPE)
         self.modelFile = data.get(constants.MODEL_FILE)
         self.jointFiles = data.get(constants.SKELETON_POS)
         self.guideFiles = data.get(constants.GUIDES)
@@ -806,13 +801,11 @@ class Builder(object):
         self.outFileSuffix = data.get(constants.OUTPUT_FILE_SUFFIX)
         self.outputFileType = data.get(constants.OUTPUT_RIG_FILE_TYPE)
 
-        self.builderData = data
-
         # also set the rig file and rig environment into environment variables to access in other scripts if needed.
         os.environ['RIGAMJIG_FILE'] = self.rigFile
-        os.environ['RIGAMJIG_ENV'] = self.path
+        os.environ['RIGAMJIG_ENV'] = self.rigEnvironment
 
-        logger.info('\nRig Environment path: {0}'.format(self.path))
+        logger.info('\nRig Environment path: {0}'.format(self.rigEnvironment))
 
     def saveRigFile(self, dataDict):
         """

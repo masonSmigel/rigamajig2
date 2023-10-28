@@ -50,16 +50,21 @@ class DataLoader(QtWidgets.QWidget):
     """ Widget to select valid file or folder paths """
 
     DATA_TYPE_LIST = core.getDataModules()
-    def __init__(self,
-                 label=None,
-                 caption='Select a file or Folder',
-                 fileFilter=JSON_FILTER,
-                 fileMode=1,
-                 widgetHeight=102,
-                 relativePath=None,
-                 parent=None,
-                 dataFilteringEnabled=False,
-                 dataFilter=None):
+
+    # emit a list of files when updated
+    filesUpdated = QtCore.Signal(object)
+
+    def __init__(
+            self,
+            label=None,
+            caption='Select a file or Folder',
+            fileFilter=JSON_FILTER,
+            fileMode=1,
+            widgetHeight=102,
+            relativePath=None,
+            parent=None,
+            dataFilteringEnabled=False,
+            dataFilter=None):
         """
         :param label: label to give the path selector
         :param caption: hover over caption
@@ -192,6 +197,7 @@ class DataLoader(QtWidgets.QWidget):
         self.mainLayout.addLayout(lowerLayout)
 
     def createConnections(self):
+        self.pathTreeWidget.itemChanged.connect(self.emitFilesUpdatedSignal)
         self.addPathButtton.clicked.connect(self.showAddDataContextMenu)
         self.selectPathButton.clicked.connect(self.pickPath)
         self.showInFolderButton.clicked.connect(self.showInFolder)
@@ -492,6 +498,8 @@ class DataLoader(QtWidgets.QWidget):
         for item in items:
             self.pathTreeWidget.takeTopLevelItem(self.pathTreeWidget.indexOfTopLevelItem(item))
 
+        self.emitFilesUpdatedSignal()
+
     def addItem(self, path=None):
         """
         Add a new path to the data widget. This is mainly two parts, one to validate the path, and a second to create the widget.
@@ -541,6 +549,11 @@ class DataLoader(QtWidgets.QWidget):
         item.setSizeHint(0, QtCore.QSize(0, ITEM_SIZE_HINT))  # set height
 
         self.pathTreeWidget.addTopLevelItem(item)
+        self.emitFilesUpdatedSignal()
+
+    def emitFilesUpdatedSignal(self, *args):
+        fileList = list(self.getFileList(absolute=False))
+        self.filesUpdated.emit(fileList)
 
     # UI Visuals
     def changeTreeWidgetSize(self, size):
@@ -571,7 +584,8 @@ class DataLoader(QtWidgets.QWidget):
             for url in event.mimeData().urls():
                 filePath = url.path()
                 if filePath:
-                   self.selectPath(filePath)
+                    self.selectPath(filePath)
+
 
 class TestDialog(QtWidgets.QDialog):
     """

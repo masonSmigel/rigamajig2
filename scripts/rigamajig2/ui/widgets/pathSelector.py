@@ -12,15 +12,19 @@ from rigamajig2.ui import showInFolder
 
 
 class PathSelector(QtWidgets.QWidget):
-    """ Widget to select valid file or folder paths """
+    """ Widget to select valid file or folder paths. Emits the pathUpdated signal when the path is changed."""
 
-    def __init__(self,
-                 label=None,
-                 caption='Select a file or Folder',
-                 fileFilter="All Files (*.*)",
-                 fileMode=1,
-                 relativePath=None,
-                 parent=None):
+    pathUpdated = QtCore.Signal(str)
+
+    def __init__(
+            self,
+            label=None,
+            caption='Select a file or Folder',
+            fileFilter="All Files (*.*)",
+            fileMode=1,
+            relativePath=None,
+            parent=None
+    ):
         """
         :param label: label to give the path selector
         :param caption: hover over caption
@@ -46,6 +50,7 @@ class PathSelector(QtWidgets.QWidget):
 
         self.pathLineEdit = QtWidgets.QLineEdit()
         self.pathLineEdit.setPlaceholderText("path/to/file/or/folder")
+        self.pathLineEdit.editingFinished.connect(self.emitPathUpdatedSignal)
 
         self.selectPathButton = QtWidgets.QPushButton("...")
         self.selectPathButton.setFixedSize(24, 19)
@@ -95,15 +100,13 @@ class PathSelector(QtWidgets.QWidget):
                 fm=self.fileMode,
                 okc='Select',
                 dir=currentPath
-                )
-            if newPath:
-                newPath = newPath[0]
-            else:
-                # if we dont select a new path cancel the action by returning.
-                return
+            )
+
+            newPath = newPath[0] if newPath else None
 
             # next select the new path.
             self.selectPath(newPath)
+            self.emitPathUpdatedSignal()
 
     def selectPath(self, path=None):
         """
@@ -147,3 +150,7 @@ class PathSelector(QtWidgets.QWidget):
     def setLabelText(self, text):
         """ Set the label text"""
         self.pathLabel.setText(text)
+
+    def emitPathUpdatedSignal(self):
+        """Emit a signal that the path has been updated """
+        self.pathUpdated.emit(self.getPath())

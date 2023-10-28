@@ -64,11 +64,16 @@ class PublishSection(builderSection.BuilderSection):
         publishFileLayout.addWidget(self.outFileTypeComboBox)
         self.mainWidget.addLayout(publishFileLayout)
         self.mainWidget.addWidget(self.outPathSelector)
+        self.mainWidget.addWidget(self.outPathSelector)
         self.mainWidget.addWidget(self.dryPublishButton)
         self.mainWidget.addWidget(self.publishButton)
 
     def createConnections(self):
         """ Create Connections """
+        self.outPathSelector.pathUpdated.connect(self._setOutputFilePath)
+        self.outFileSuffix.textChanged.connect(self._setOutputFileSuffix)
+        self.outFileTypeComboBox.currentTextChanged.connect(self._setOutputFileType)
+
         self.dryPublishButton.clicked.connect(self._onDryPublish)
         self.publishButton.clicked.connect(self._onPublishWithUiData)
 
@@ -132,8 +137,19 @@ class PublishSection(builderSection.BuilderSection):
         publishBuilder.setRigFile(self.builder.getRigFile())
 
         # override the builder
-        publishBuilder.builderData[constants.OUTPUT_RIG] = self.outPathSelector.getPath()
-        publishBuilder.builderData[constants.OUTPUT_FILE_SUFFIX] = self.outFileSuffix.text()
-        publishBuilder.builderData[constants.OUTPUT_RIG_FILE_TYPE] = self.outFileTypeComboBox.currentText()
+        publishBuilder.outputFilePath = self.outPathSelector.getPath()
+        publishBuilder.outputFileSuffix = self.outFileSuffix.text()
+        publishBuilder.outputFileType = self.outFileTypeComboBox.currentText()
 
         publishBuilder.run(publish=True, savePublish=True)
+
+    def _setOutputFilePath(self, filepath):
+        if self.builder:
+            self.builder.outputFilePath = filepath
+
+    def _setOutputFileSuffix(self):
+        if self.builder:
+            self.builder.outputFileSuffix = self.outFileSuffix.text()
+
+    def _setOutputFileType(self, fileType):
+        if self.builder: self.builder.outputFileType = fileType

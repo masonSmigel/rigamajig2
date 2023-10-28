@@ -146,6 +146,10 @@ class DeformationSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
+        self.deformLayerPathSelector.pathUpdated.connect(self._setDeformLayerFile)
+        self.skinPathSelector.pathUpdated.connect(self._setSkinFiles)
+        self.deformersDataLoader.filesUpdated.connect(self._setDeformerFiles)
+
         self.loadDeformLayersButton.clicked.connect(self._onLoadDeformationLayers)
         self.saveDeformLayersButton.clicked.connect(self._onSaveDeformationLayers)
         self.manageDeformLayersButton.clicked.connect(self._onOpenDeformLayerManager)
@@ -187,15 +191,15 @@ class DeformationSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _runWidget(self):
         """ Run this widget from the builder breakpoint runner"""
-        self.builder.loadDeformationLayers(self.deformLayerPathSelector.getPath())
-        self.builder.loadSkinWeights(self.skinPathSelector.getPath())
-        self.builder.loadDeformers(self.deformersDataLoader.getFileList())
+        self._onLoadDeformationLayers()
+        self._onLoadAllSkins()
+        self._onLoadDeformerData()
 
     # CONNECTIONS
     @QtCore.Slot()
     def _onLoadDeformationLayers(self):
         """ Save load pose reader setup from json using the builder """
-        self.builder.loadDeformationLayers(self.deformLayerPathSelector.getPath())
+        self.builder.loadDeformationLayers()
 
     @QtCore.Slot()
     def _onSaveDeformationLayers(self):
@@ -210,7 +214,7 @@ class DeformationSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _onLoadAllSkins(self):
         """Load all skin weights in the given folder"""
-        self.builder.loadSkinWeights(self.skinPathSelector.getPath())
+        self.builder.loadSkinWeights()
 
     @QtCore.Slot()
     def _onLoadSingleSkin(self):
@@ -248,8 +252,23 @@ class DeformationSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _onLoadDeformerData(self):
-        self.builder.loadDeformers(self.deformersDataLoader.getFileList(absolute=False))
+        self.builder.loadDeformers()
 
     @QtCore.Slot()
     def _onSaveDeformerData(self):
         raise NotImplementedError
+
+    @QtCore.Slot()
+    def _setSkinFiles(self, filepath):
+        if self.builder:
+            self.builder.skinsFile = filepath
+
+    @QtCore.Slot()
+    def _setDeformLayerFile(self, filepath):
+        if self.builder:
+            self.builder.deformLayersFile = filepath
+
+    @QtCore.Slot()
+    def _setDeformerFiles(self, fileList):
+        if self.builder:
+            self.builder.deformerFiles = fileList

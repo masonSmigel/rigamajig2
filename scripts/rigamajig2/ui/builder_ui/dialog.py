@@ -223,6 +223,8 @@ class BuilderDialog(DockableUI):
         # setup each widget with a connection to uncheck all over widgets when one is checked.
         # This ensures all setups until a breakpoint are run
 
+        self.assetNameLineEdit.editingFinished.connect(self._setRigName)
+
         for widget in self.builderSections:
             widget.mainWidget.headerWidget.checkbox.clicked.connect(
                 partial(self.__handleBreakpoint, widget)
@@ -358,6 +360,10 @@ class BuilderDialog(DockableUI):
             section.closeEvent()
 
         logger.info("Builder UI closed")
+
+    def _setRigName(self):
+        if self.rigBuilder:
+            self.rigBuilder.rigName = self.assetNameLineEdit.text()
 
 
 def confirmBuildRig():

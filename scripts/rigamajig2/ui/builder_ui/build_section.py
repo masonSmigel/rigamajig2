@@ -87,6 +87,7 @@ class BuildSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
+        self.psdDataLoader.filesUpdated.connect(self._setPoseReadersFiles)
         self.completeButton.clicked.connect(self._onCompleteBuild)
         self.buildButton.clicked.connect(self._onBuilderBuild)
         self.connectButton.clicked.connect(self._onBuilderConnect)
@@ -133,7 +134,7 @@ class BuildSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _onLoadPoseReaders(self):
         """ Load pose reader setup from JSON using the builder """
-        self.builder.loadPoseReaders(self.psdDataLoader.getFileList(), replace=self.loadPsdModeCheckbox.currentIndex())
+        self.builder.loadPoseReaders(replace=self.loadPsdModeCheckbox.currentIndex())
 
     @QtCore.Slot()
     def _onSavePoseReaders(self):
@@ -147,3 +148,8 @@ class BuildSection(builderSection.BuilderSection):
         self.builder.build()
         self.builder.connect()
         self.builder.finalize()
+
+    @QtCore.Slot()
+    def _setPoseReadersFiles(self, fileList):
+        if self.builder:
+            self.builder.poseReadersFiles = fileList

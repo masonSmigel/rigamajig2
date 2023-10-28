@@ -128,19 +128,19 @@ class Actions(object):
     def saveRigFile(self):
         """ Save out a rig file """
         newData = {
-            constants.RIG_NAME: self.dialog.assetNameLineEdit.text(),
-            constants.MODEL_FILE: self.dialog.modelSection.modelPathSelector.getPath(absoultePath=False),
-            constants.SKELETON_POS: self.dialog.jointSection.jointPositionDataLoader.getFileList(),
-            constants.GUIDES: self.dialog.setupSection.guideDataLoader.getFileList(),
-            constants.COMPONENTS: self.dialog.setupSection.componentsDataLoader.getFileList(),
-            constants.PSD: self.dialog.buildSection.psdDataLoader.getFileList(),
-            constants.CONTROL_SHAPES: self.dialog.controlsSection.controlDataLoader.getFileList(),
-            constants.DEFORM_LAYERS: self.dialog.deformationSection.deformLayerPathSelector.getPath(absoultePath=False),
-            constants.SKINS: self.dialog.deformationSection.skinPathSelector.getPath(absoultePath=False),
-            constants.DEFORMERS: self.dialog.deformationSection.deformersDataLoader.getFileList(),
-            constants.OUTPUT_RIG: self.dialog.publishSection.outPathSelector.getPath(absoultePath=False),
-            constants.OUTPUT_RIG_FILE_TYPE: self.dialog.publishSection.outFileTypeComboBox.currentText(),
-            constants.OUTPUT_FILE_SUFFIX: self.dialog.publishSection.outFileSuffix.text(),
+            constants.RIG_NAME: self.dialog.rigBuilder.rigName,
+            constants.MODEL_FILE: self.dialog.rigBuilder.modelFile,
+            constants.SKELETON_POS: self.dialog.rigBuilder.jointFiles,
+            constants.GUIDES: self.dialog.rigBuilder.guideFiles,
+            constants.COMPONENTS: self.dialog.rigBuilder.componentFiles,
+            constants.PSD: self.dialog.rigBuilder.poseReadersFiles,
+            constants.CONTROL_SHAPES: self.dialog.rigBuilder.controlShapeFiles,
+            constants.DEFORM_LAYERS: self.dialog.rigBuilder.deformLayersFile,
+            constants.SKINS: self.dialog.rigBuilder.skinsFile,
+            constants.DEFORMERS: self.dialog.rigBuilder.deformerFiles,
+            constants.OUTPUT_RIG: self.dialog.rigBuilder.outputFilePath,
+            constants.OUTPUT_FILE_SUFFIX: self.dialog.rigBuilder.outputFileSuffix,
+            constants.OUTPUT_RIG_FILE_TYPE: self.dialog.rigBuilder.outputFileType,
             # setup new data for the scripts
             constants.PRE_SCRIPT: self.dialog.modelSection.preScriptRunner.getCurrentScriptList(
                 relativePath=self.dialog.rigEnvironment),

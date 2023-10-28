@@ -126,6 +126,9 @@ class SetupSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
+        self.componentsDataLoader.filesUpdated.connect(self._setComponentFiles)
+        self.guideDataLoader.filesUpdated.connect(self._setGuideFiles)
+
         self.loadGuidesButton.clicked.connect(self._onLoadGuides)
         self.saveGuidesButton.leftClicked.connect(self._onSaveGuides)
         self.saveGuidesButton.rightClicked.connect(self._onSaveGuidesAsOverride)
@@ -158,7 +161,7 @@ class SetupSection(builderSection.BuilderSection):
         """ Run this widget from the builder breakpoint runner"""
         self._onLoadComponents()
         self._initalizeRig()
-        self.guideDataLoader.loadAllData()
+        self._onLoadGuides()
 
     # CONNECTIONS
     @QtCore.Slot()
@@ -166,8 +169,7 @@ class SetupSection(builderSection.BuilderSection):
         """ Load component setup from json using the builder """
         self.builder.setComponents(list())
         # load the components from the file. then initialize them
-        componentFiles = self.componentsDataLoader.getFileList()
-        self.builder.loadComponents(componentFiles)
+        self.builder.loadComponents()
         self.builder.initialize()
 
         self.componentManager.loadListFromBuilder()
@@ -181,7 +183,7 @@ class SetupSection(builderSection.BuilderSection):
     def _onLoadGuides(self):
         """ Load guide setup to json using the builder """
 
-        self.builder.loadGuides(self.guideDataLoader.getFileList())
+        self.builder.loadGuides()
 
     @QtCore.Slot()
     def _onSaveGuides(self):
@@ -235,6 +237,17 @@ class SetupSection(builderSection.BuilderSection):
         """Run the comppnent intialize on the builder and update the UI """
         self.builder.guide()
         self.componentManager._loadFromScene()
+
+    @QtCore.Slot()
+    def _setComponentFiles(self, fileList):
+        if self.builder:
+            self.builder.componentFiles = fileList
+
+    @QtCore.Slot()
+    def _setGuideFiles(self, fileList):
+        if self.builder:
+            self.builder.guideFiles = fileList
+
 
     def closeEvent(self, *args, **kwargs):
         self.componentManager._teardownCallbacks()

@@ -146,6 +146,7 @@ class SkeletonSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
+        self.jointPositionDataLoader.filesUpdated.connect(self._setJointFiles)
         self.cleanSkeletonButton.clicked.connect(self._onCleanSkeleton)
         self.loadJointPositionButton.clicked.connect(self._onLoadJointsPositions)
         self.saveJointPositionButton.leftClicked.connect(self._onSaveJointPositions)
@@ -178,7 +179,7 @@ class SkeletonSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _onLoadJointsPositions(self):
         """ load joints and positions"""
-        self.builder.loadJoints(self.jointPositionDataLoader.getFileList())
+        self.builder.loadJoints()
 
     @QtCore.Slot()
     def _onSaveJointPositions(self):
@@ -321,3 +322,8 @@ class SkeletonSection(builderSection.BuilderSection):
     def _onJointToOrientation(self):
         """ Convert joint transformation to orientation"""
         rigamajig2.maya.joint.toOrientation(cmds.ls(sl=True, type='joint'))
+
+    @QtCore.Slot()
+    def _setJointFiles(self, fileList):
+        if self.builder:
+            self.builder.jointFiles = fileList

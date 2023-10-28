@@ -70,6 +70,7 @@ class ModelSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
+        self.modelPathSelector.pathUpdated.connect(self._setModelFile)
         self.importModelButton.clicked.connect(self._onImportModel)
         self.openModelButton.clicked.connect(self._onOpenModel)
 
@@ -98,9 +99,14 @@ class ModelSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _onImportModel(self):
         """ Import model from builder """
-        self.builder.importModel(self.modelPathSelector.getPath())
+        self.builder.importModel()
 
     @QtCore.Slot()
     def _onOpenModel(self):
         """ Open the model file """
         file.open_(self.modelPathSelector.getPath(), f=True)
+
+    @QtCore.Slot()
+    def _setModelFile(self, modelFile):
+        if self.builder:
+            self.builder.modelFile = modelFile

@@ -133,6 +133,7 @@ class ControlsSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections"""
+        self.controlDataLoader.filesUpdated.connect(self._setControlShapeFiles)
         self.loadControlsButton.clicked.connect(self._onLoadControlShapes)
         self.saveControlsButton.leftClicked.connect(self._onSaveControlShapes)
         self.saveControlsButton.rightClicked.connect(self._onSaveControlShapesAsOverwrite)
@@ -166,7 +167,7 @@ class ControlsSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _onLoadControlShapes(self) -> None:
         """ Load controlshapes from json using the builder """
-        self.builder.loadControlShapes(self.controlDataLoader.getFileList(), self.loadColorCheckBox.isChecked())
+        self.builder.loadControlShapes(self.loadColorCheckBox.isChecked())
 
     def __validateControlsInScene(self) -> bool:
         """
@@ -247,3 +248,8 @@ class ControlsSection(builderSection.BuilderSection):
                     for shape in cmds.listRelatives(dest, shapes=True, pa=True):
                         cmds.delete(shape)
                 rigamajig2.maya.curve.copyShape(selection[0], dest)
+
+    @QtCore.Slot()
+    def _setControlShapeFiles(self, fileList):
+        if self.builder:
+            self.builder.controlShapeFiles = fileList

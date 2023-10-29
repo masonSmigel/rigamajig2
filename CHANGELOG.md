@@ -22,13 +22,22 @@ Lots of various fixes. This became a large update with some structural changes t
   editing parameters (includes updates to `editComponent_dialog.py`)
 * Major logger updates using a logger config file to setup logging to a file for each rigamajig session. Also
   standardizes info displayed to the user.
-* More standardized code. 
+* More standardized code
 
 ### Changed:
 
+* all management of data is now done within the `builder.data_manager` instead of builder. The intended workflow is that
+  the builder will represent the current status of a rig, while the user manages the data to add or remove from the
+  builder.
+    * this includes the addition of properties to manage builder data types. (must always be relative to the build
+      environment)
+    * the builder dialog now uses signals to set the properties when the widgets are updated. That means the `run`
+      button will
+      build based on current UI data regardless of if it has or hasnt been saved.
 * Updated `shapes_data` to avoid writing multiple files when gathering data. Instead it now writes once.
 * Updated `transfom.connectOffsetMatrix` to support input matrices instead of only transforms.
 * refactored `builder_ui.py` to have a  `workspace_control.py` base class
+* General cleanup of logging to be more localized to its source module.
 
 ### Fixed:
 
@@ -37,6 +46,8 @@ Lots of various fixes. This became a large update with some structural changes t
 ### Removed:
 
 * Removed custom logger.
+* removed the `mergeDefromLayers` step from the builder. Instead this should be done using a custom publish script.
+    * In the future we will implement a library of default scripts to easily add to any rig.
 
 ## 1.2.0
 

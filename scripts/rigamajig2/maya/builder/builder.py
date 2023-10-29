@@ -105,6 +105,7 @@ class Builder(object):
 
     @rigName.setter
     def rigName(self, value: str):
+        logger.debug(f"Set Rig name to: {value}")
         self._rigName = value
 
     @property
@@ -113,8 +114,8 @@ class Builder(object):
         return self._modelFile
 
     @modelFile.setter
-    def modelFile(self, value):
-        # todo maybe we can check this somehow?
+    def modelFile(self, value:path.RelativePath):
+        logger.debug(f"Set model file to: {value}")
         self._modelFile = value
 
     @property
@@ -123,6 +124,7 @@ class Builder(object):
 
     @jointFiles.setter
     def jointFiles(self, value: typing.List[path.RelativePath]):
+        logger.debug(f"Set joint files to: {value}")
         self._jointFiles = value
 
     @property
@@ -131,6 +133,7 @@ class Builder(object):
 
     @guideFiles.setter
     def guideFiles(self, value: typing.List[path.RelativePath]):
+        logger.debug(f"Set guide files to: {value}")
         self._guideFiles = value
 
     @property
@@ -139,6 +142,7 @@ class Builder(object):
 
     @componentFiles.setter
     def componentFiles(self, value: typing.List[path.RelativePath]):
+        logger.debug(f"Set component files to: {value}")
         self._componentFiles = value
 
     @property
@@ -147,6 +151,7 @@ class Builder(object):
 
     @controlShapeFiles.setter
     def controlShapeFiles(self, value: typing.List[path.RelativePath]):
+        logger.debug(f"Set controlShape files to: {value}")
         self._controlShapeFiles = value
 
     @property
@@ -155,6 +160,8 @@ class Builder(object):
 
     @poseReadersFiles.setter
     def poseReadersFiles(self, value: typing.List[path.RelativePath]):
+        logger.debug(f"Set pose Reader files to: {value}")
+
         self._poseReadersFiles = value
 
     @property
@@ -169,6 +176,7 @@ class Builder(object):
 
     @skinsFile.setter
     def skinsFile(self, value: path.RelativePath):
+        logger.debug(f"Set skins files to: {value}")
         self._skinsFile = value
 
     @property
@@ -177,6 +185,7 @@ class Builder(object):
 
     @deformerFiles.setter
     def deformerFiles(self, value: typing.List[path.RelativePath]):
+        logger.debug(f"Set deformer files to: {value}")
         self._deformerFiles = value
 
     @property
@@ -185,6 +194,7 @@ class Builder(object):
 
     @deformLayersFile.setter
     def deformLayersFile(self, value: path.RelativePath):
+        logger.debug(f"Set deform Layer files to: {value}")
         self._deformLayerFiles = value
 
     @property
@@ -193,6 +203,7 @@ class Builder(object):
 
     @outputFilePath.setter
     def outputFilePath(self, value: path.RelativePath):
+        logger.debug(f"Set output path files to: {value}")
         self._outputFilePath = value
 
     @property
@@ -201,6 +212,7 @@ class Builder(object):
 
     @outputFileSuffix.setter
     def outputFileSuffix(self, value: str):
+        logger.debug(f"Set output suffix to: {value}")
         self._outFileSuffix = value
 
     @property
@@ -211,48 +223,47 @@ class Builder(object):
     def outputFileType(self, value: str):
         if value not in VALID_FILE_TYPES:
             logger.error(f"'{value}' is not a valid output file type.")
+        logger.debug(f"Set output file type to: {value}")
         self._outputFileType = value
 
-    # TODO: rework the scripts so the local scripts can stay relative and easy to edit.
-    #  TODO: while the full script list can be absoulte
     @property
-    def localPreScripts(self) -> typing.List[path.AbsolutePath]:
+    def localPreScripts(self) -> typing.List[path.RelativePath]:
         """List of pre scripts local to this rig file"""
-        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PRE_SCRIPT)[0]
-        return scripts
+        return self._localPreScripts
+
+    @localPreScripts.setter
+    def localPreScripts(self, value):
+        relativeScriptList = []
+        for script in common.toList(value):
+            relativeScriptList.append(path.getRelativePath(script, self.rigEnvironment))
+        logger.debug(f"Set local pre scripts to: {relativeScriptList}")
+        self._localPreScripts = relativeScriptList
 
     @property
-    def localPostScripts(self) -> typing.List[path.AbsolutePath]:
+    def localPostScripts(self) -> typing.List[path.RelativePath]:
         """List of post scripts local to this rig file"""
-        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.POST_SCRIPT)[0]
-        return scripts
+        return self._localPostScripts
+
+    @localPostScripts.setter
+    def localPostScripts(self, value):
+        relativeScriptList = []
+        for script in common.toList(value):
+            relativeScriptList.append(path.getRelativePath(script, self.rigEnvironment))
+        logger.debug(f"Set local post scripts to: {relativeScriptList}")
+        self._localPostScripts = relativeScriptList
 
     @property
-    def localPubScripts(self) -> typing.List[path.AbsolutePath]:
+    def localPubScripts(self) -> typing.List[path.RelativePath]:
         """List of publish scripts local to this rig file"""
-        scripts = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PUB_SCRIPT)[0]
-        return scripts
+        return self._localPubScripts
 
-    @property
-    def preScripts(self) -> typing.List[path.AbsolutePath]:
-        """List of all pre scripts both local and inherited from archetypes"""
-        scriptsDict = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PRE_SCRIPT)
-        scripts = list(scriptsDict.values())
-        return common.joinLists(scripts)
-
-    @property
-    def postScripts(self) -> typing.List[path.AbsolutePath]:
-        """List of all post scripts both local and inherited from archetypes"""
-        scriptsDict = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.POST_SCRIPT)
-        scripts = list(scriptsDict.values())
-        return common.joinLists(scripts)
-
-    @property
-    def pubScripts(self) -> typing.List[path.AbsolutePath]:
-        """List of all pub scripts both local and inherited from archetypes"""
-        scriptsDict = core.GetCompleteScriptList.getScriptList(self.rigFile, constants.PUB_SCRIPT)
-        scripts = list(scriptsDict.values())
-        return common.joinLists(scripts)
+    @localPubScripts.setter
+    def localPubScripts(self, value):
+        relativeScriptList = []
+        for script in common.toList(value):
+            relativeScriptList.append(path.getRelativePath(script, self.rigEnvironment))
+        logger.debug(f"Set local pub scripts to: {relativeScriptList}")
+        self._localPubScripts = relativeScriptList
 
     # --------------------------------------------------------------------------------
     # RIG BUILD STEPS
@@ -513,21 +524,39 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     # RUN SCRIPTS UTILITIES
     # --------------------------------------------------------------------------------
-    def runPreScripts(self) -> None:
-        """ Run pre scripts. use  through the PRE SCRIPT path"""
-        core.runAllScripts(self.preScripts)
 
-        logger.info("pre scripts -- complete")
+    def runBuilderScripts(self, scriptStep):
+        """
+        Run builder scripts for a specific script Type
 
-    def runPostScripts(self) -> None:
-        """ Run pre scripts. use  through the POST SCRIPT path"""
-        core.runAllScripts(self.postScripts)
-        logger.info("post scripts -- complete")
+        :param scriptStep: script type to run. This can be either
+        """
+        if scriptStep == constants.PRE_SCRIPT:
+            localScripts = self.localPreScripts
+            niceScriptStepName = "Pre script"
+        elif scriptStep == constants.POST_SCRIPT:
+            localScripts = self.localPostScripts
+            niceScriptStepName = "Post script"
+        elif scriptStep == constants.PUB_SCRIPT:
+            localScripts = self.localPubScripts
+            niceScriptStepName = "Pub script"
+        else:
+            raise KeyError(f"'{scriptStep} is not a valid script type")
 
-    def runPublishScripts(self) -> None:
-        """ Run pre scripts. use  through the PUB SCRIPT path"""
-        core.runAllScripts(self.pubScripts)
-        logger.info("publish scripts -- complete")
+        absoluteScripts = [self.getAbsolutePath(script) for script in localScripts]
+        core.runAllScripts(absoluteScripts)
+        if len(absoluteScripts):
+            logger.info(f"{niceScriptStepName}: local scripts -- complete")
+
+        # next get scripts to inherit
+        scriptDict = core.GetCompleteScriptList.getScriptList(self.rigFile, scriptStep)
+
+        inheritedScripts = {recursion: scripts for recursion, scripts in scriptDict.items() if recursion > 0}
+        scripts = list(inheritedScripts.values())
+        completeScriptList = common.joinLists(scripts)
+        core.runAllScripts(completeScriptList)
+        if len(completeScriptList):
+            logger.info(f"{niceScriptStepName}: inherited scripts -- complete")
 
     def run(self, publish: bool = False, savePublish: bool = True, versioning: bool = True) -> None:
         """
@@ -543,7 +572,7 @@ class Builder(object):
                            each time the publishing file is overwritten. This allows for version control.
         """
         if not self.rigEnvironment:
-            logger.error('you must provide a build environment path. Use _setRigFile()')
+            logger.error('you must provide a build environment path. Use `_setRigFile()`')
             return
 
         startTime = time.time()
@@ -553,7 +582,7 @@ class Builder(object):
                     )
 
         core.loadRequiredPlugins()
-        self.runPreScripts()
+        self.runBuilderScripts(constants.PRE_SCRIPT)
 
         self.importModel()
 
@@ -569,7 +598,7 @@ class Builder(object):
         self.connect()
         self.finalize()
         self.loadPoseReaders()
-        self.runPostScripts()
+        self.runBuilderScripts(constants.POST_SCRIPT)
 
         self.loadControlShapes()
 
@@ -579,7 +608,7 @@ class Builder(object):
 
         if publish:
             # self.optimize()
-            self.runPublishScripts()
+            self.runBuilderScripts(constants.PUB_SCRIPT)
             if savePublish:
                 self.publish(versioning=versioning)
         endTime = time.time()
@@ -786,6 +815,7 @@ class Builder(object):
         self.rigEnvironment = os.path.abspath(os.path.join(self.rigFile, rigEnvironmentPath))
 
         # setup the rigamajig properties
+        self.rigName = data.get(constants.RIG_NAME)
         self.archetypeParent = data.get(constants.BASE_ARCHETYPE)
         self.modelFile = data.get(constants.MODEL_FILE)
         self.jointFiles = data.get(constants.SKELETON_POS)
@@ -793,13 +823,16 @@ class Builder(object):
         self.componentFiles = data.get(constants.COMPONENTS)
         self.controlShapeFiles = data.get(constants.CONTROL_SHAPES)
         self.poseReadersFiles = data.get(constants.PSD)
+        self.deformLayersFile = data.get(constants.DEFORM_LAYERS)
         self.skinsFile = data.get(constants.SKINS)
         self.deformerFiles = data.get(constants.DEFORMERS)
-        self.deformLayerFiles = data.get(constants.DEFORM_LAYERS)
         self.outputFilePath = data.get(constants.OUTPUT_RIG)
-        self.rigName = data.get(constants.RIG_NAME)
         self.outFileSuffix = data.get(constants.OUTPUT_FILE_SUFFIX)
         self.outputFileType = data.get(constants.OUTPUT_RIG_FILE_TYPE)
+
+        self.localPreScripts = data.get(constants.PRE_SCRIPT)
+        self.localPostScripts = data.get(constants.POST_SCRIPT)
+        self.localPubScripts = data.get(constants.PUB_SCRIPT)
 
         # also set the rig file and rig environment into environment variables to access in other scripts if needed.
         os.environ['RIGAMJIG_FILE'] = self.rigFile
@@ -807,18 +840,35 @@ class Builder(object):
 
         logger.info('\nRig Environment path: {0}'.format(self.rigEnvironment))
 
-    def saveRigFile(self, dataDict):
+    def saveRigFile(self):
         """
-        Save a rig file.
-
-        :param dataDict: dictionary of rig data to save to the rigFile
-        :return:
+        Save a rig file based on current instance property values.
         """
         data = abstract_data.AbstractData()
         data.read(self.rigFile)
         newData = data.getData()
 
-        newData.update(dataDict)
+        newBuilderData = {
+            constants.RIG_NAME: self.rigName,
+            constants.BASE_ARCHETYPE: self.archetypeParent,
+            constants.MODEL_FILE: self.modelFile,
+            constants.SKELETON_POS: self.jointFiles,
+            constants.GUIDES: self.guideFiles,
+            constants.COMPONENTS: self.componentFiles,
+            constants.CONTROL_SHAPES: self.controlShapeFiles,
+            constants.PSD: self.poseReadersFiles,
+            constants.DEFORM_LAYERS: self.deformLayersFile,
+            constants.SKINS: self.skinsFile,
+            constants.DEFORMERS: self.deformerFiles,
+            constants.OUTPUT_RIG: self.outputFilePath,
+            constants.OUTPUT_FILE_SUFFIX: self.outFileSuffix,
+            constants.OUTPUT_RIG_FILE_TYPE: self.outputFileType,
+            constants.PRE_SCRIPT: self.localPreScripts,
+            constants.POST_SCRIPT: self.localPostScripts,
+            constants.PUB_SCRIPT: self.localPubScripts
+        }
+
+        newData.update(newBuilderData)
 
         data.setData(newData)
         data.write(self.rigFile)

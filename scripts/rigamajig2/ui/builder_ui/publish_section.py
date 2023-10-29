@@ -70,6 +70,7 @@ class PublishSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
+        self.pubScriptRunner.scriptsUpdated.connect(self._setLocalPubScripts)
         self.outPathSelector.pathUpdated.connect(self._setOutputFilePath)
         self.outFileSuffix.textChanged.connect(self._setOutputFileSuffix)
         self.outFileTypeComboBox.currentTextChanged.connect(self._setOutputFileType)
@@ -153,3 +154,16 @@ class PublishSection(builderSection.BuilderSection):
 
     def _setOutputFileType(self, fileType):
         if self.builder: self.builder.outputFileType = fileType
+
+    @QtCore.Slot()
+    def _setLocalPubScripts(self, scriptData):
+        if not builder:
+            return
+
+        localPubScripts = list()
+        for key, scriptItemData in scriptData.items():
+            if scriptItemData.get(scriptRunner.CUSTOM_DATA_KEY) == 0:
+                filePath = scriptItemData.get(scriptRunner.FILEPATH_DATA_KEY)
+                localPubScripts.append(filePath)
+
+        self.builder.localPubScripts = localPubScripts

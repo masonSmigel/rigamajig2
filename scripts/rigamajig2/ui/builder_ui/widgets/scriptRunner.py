@@ -37,12 +37,17 @@ RECURSION_COLORS = {0: None,
                     }
 
 
+FILEPATH_DATA_KEY = "filepath"
+CUSTOM_DATA_KEY = "customData"
+
 # ignore too many public methods to UI classes.
 # pylint: disable = too-many-public-methods
 class ScriptRunner(QtWidgets.QWidget):
     """
     Ui element to run a list of scripts in a folder
     """
+
+    scriptsUpdated = QtCore.Signal(object)
 
     def __init__(self, rootDirectory=None, title='Scripts', *args, **kwargs):
         """
@@ -156,8 +161,10 @@ class ScriptRunner(QtWidgets.QWidget):
             scriptsList = scriptsDict[recursion]
 
             for script in scriptsList:
-                item = self._addScriptToWidget(script, data=recursion, color=RECURSION_COLORS[i])
+                self._addScriptToWidget(script, data=recursion, color=RECURSION_COLORS[i])
                 self.currentScriptsList.append(script)
+
+        self.emitScriptsUpdatedSignal()
 
     def _addScriptToWidget(self, script, data=0, color=None, top=False):
         """private method to add scripts to the list """
@@ -167,13 +174,12 @@ class ScriptRunner(QtWidgets.QWidget):
             item = QtWidgets.QListWidgetItem(fileName)
             item.setSizeHint(QtCore.QSize(0, ITEM_HEIGHT))  # set height
 
-            # set the data
-            item.setData(QtCore.Qt.UserRole, fileInfo.filePath())
-            item.setToolTip(fileInfo.filePath())
+            # Create a tuple or dictionary to hold both filePath and custom data
+            itemData = {FILEPATH_DATA_KEY: fileInfo.filePath(), CUSTOM_DATA_KEY: data}
 
-            if data:
-                pass
-                # item.setData(QtCore.Qt.ItemDataRole, data)
+            # set the data
+            item.setData(QtCore.Qt.UserRole, itemData)
+            item.setToolTip(fileInfo.filePath())
 
             # set the icon
             if script.endswith(".py"):
@@ -199,6 +205,7 @@ class ScriptRunner(QtWidgets.QWidget):
         if filePath:
             self._addScriptToWidget(filePath, top=True)
             self.currentScriptsList.append(filePath)
+            self.emitScriptsUpdatedSignal()
 
     def createNewScript(self):
         """create a new script"""
@@ -210,35 +217,32 @@ class ScriptRunner(QtWidgets.QWidget):
 
             self._addScriptToWidget(filePath, top=True)
             self.currentScriptsList.append(filePath)
+            self.emitScriptsUpdatedSignal()
 
     def clearScript(self):
         """Clear all scripts from the UI"""
         self.scriptList.clear()
         self.currentScriptsList = list()
+        self.emitScriptsUpdatedSignal()
 
     def executeAllScripts(self):
         """run all script list items"""
         for item in self.getAllItems():
-            self.runScript(item)
+            scriptPath = item.data(QtCore.Qt.UserRole).get(FILEPATH_DATA_KEY)
+            runScript.runScript(scriptPath)
 
     def runSelectedScripts(self):
         """run the selected script list items"""
         for item in self.getSelectedItems():
-            self.runScript(item)
+            scriptPath = item.data(QtCore.Qt.UserRole).get(FILEPATH_DATA_KEY)
+            runScript.runScript(scriptPath)
 
     def deleteSelectedScripts(self):
         """delete the selected script list items"""
         for item in self.getSelectedItems():
-            self.deleteItems(item)
+            self.scriptList.takeItem(self.scriptList.row(item))
 
-    def runScript(self, item):
-        """run a script list item"""
-        scriptPath = item.data(QtCore.Qt.UserRole)
-        runScript.runScript(scriptPath)
-
-    def deleteItems(self, item):
-        """delete a script list item"""
-        self.scriptList.takeItem(self.scriptList.row(item))
+        self.emitScriptsUpdatedSignal()
 
     def getAllItems(self):
         """get all items in the script list"""
@@ -261,7 +265,7 @@ class ScriptRunner(QtWidgets.QWidget):
             # TODO: this is a bit hacky....
 
             if item.textColor() == QtGui.QColor():
-                scriptPath = item.data(QtCore.Qt.UserRole)
+                scriptPath = item.data(QtCore.Qt.UserRole).get(FILEPATH_DATA_KEY)
 
                 if relativePath:
                     scriptPath = os.path.relpath(scriptPath, relativePath)
@@ -275,14 +279,15 @@ class ScriptRunner(QtWidgets.QWidget):
         items = self.getSelectedItems()
 
         for item in items:
-            filePath = item.data(QtCore.Qt.UserRole)
+            filePath = item.data(QtCore.Qt.UserRole).get(FILEPATH_DATA_KEY)
             showInFolder.showInFolder(filePath=filePath)
 
     def openScript(self):
         items = self.getSelectedItems()
 
         for item in items:
-            filePath = item.data(QtCore.Qt.UserRole)
+            filePath = item.data(QtCore.Qt.UserRole).get(FILEPATH_DATA_KEY)
+            print(filePath)
             # macOS
             if platform.system() == 'Darwin':
                 subprocess.check_call(['open', filePath])
@@ -292,6 +297,13 @@ class ScriptRunner(QtWidgets.QWidget):
             # Linux
             else:
                 subprocess.check_call(['xdg-open', filePath])
+
+    def emitScriptsUpdatedSignal(self,*args):
+        """emit a signal with a list of all the scripts"""
+        scriptsList = {}
+        for item in self.getAllItems():
+            scriptsList[item.text()] = item.data(QtCore.Qt.UserRole)
+        self.scriptsUpdated.emit(scriptsList)
 
     def dragEnterEvent(self, event):
         """ Reimplementing event to accept plain text, """
@@ -315,3 +327,4 @@ class ScriptRunner(QtWidgets.QWidget):
                 if filePath:
                     self._addScriptToWidget(filePath, top=True)
                     self.currentScriptsList.append(filePath)
+            self.emitScriptsUpdatedSignal()

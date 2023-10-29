@@ -70,9 +70,11 @@ class ModelSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
+        self.preScriptRunner.scriptsUpdated.connect(self._setLocalPreScripts)
         self.modelPathSelector.pathUpdated.connect(self._setModelFile)
         self.importModelButton.clicked.connect(self._onImportModel)
         self.openModelButton.clicked.connect(self._onOpenModel)
+
 
     def _setBuilder(self, builder):
         """ Set a builder for the model widget """
@@ -110,3 +112,16 @@ class ModelSection(builderSection.BuilderSection):
     def _setModelFile(self, modelFile):
         if self.builder:
             self.builder.modelFile = modelFile
+
+    @QtCore.Slot()
+    def _setLocalPreScripts(self, scriptData):
+        if not self.builder:
+            return
+
+        localPreScripts = list()
+        for key, scriptItemData in scriptData.items():
+            if scriptItemData.get(scriptRunner.CUSTOM_DATA_KEY) == 0:
+                filePath = scriptItemData.get(scriptRunner.FILEPATH_DATA_KEY)
+                localPreScripts.append(filePath)
+
+        self.builder.localPreScripts = localPreScripts

@@ -7,6 +7,7 @@
     date: 07/2022
     description:
 """
+
 # PYTHON
 from PySide2 import QtCore
 from PySide2 import QtGui
@@ -87,6 +88,7 @@ class BuildSection(builderSection.BuilderSection):
 
     def createConnections(self):
         """ Create Connections """
+        self.postScriptRunner.scriptsUpdated.connect(self._setLocalPostScripts)
         self.psdDataLoader.filesUpdated.connect(self._setPoseReadersFiles)
         self.completeButton.clicked.connect(self._onCompleteBuild)
         self.buildButton.clicked.connect(self._onBuilderBuild)
@@ -153,3 +155,17 @@ class BuildSection(builderSection.BuilderSection):
     def _setPoseReadersFiles(self, fileList):
         if self.builder:
             self.builder.poseReadersFiles = fileList
+
+    @QtCore.Slot()
+    def _setLocalPostScripts(self, scriptData):
+        if not self.builder:
+            return
+
+        localPostScripts = list()
+        for key, scriptItemData in scriptData.items():
+            if scriptItemData.get(scriptRunner.CUSTOM_DATA_KEY) == 0:
+                filePath = scriptItemData.get(scriptRunner.FILEPATH_DATA_KEY)
+                localPostScripts.append(filePath)
+
+        self.builder.localPostScripts = localPostScripts
+

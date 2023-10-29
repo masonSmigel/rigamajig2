@@ -18,7 +18,6 @@ from PySide2 import QtWidgets
 
 import rigamajig2.maya.qc as qc
 import rigamajig2.ui.builder_ui.recent_files as recent_files
-from rigamajig2.maya.builder import constants
 from rigamajig2.ui.builder_ui.newRigFile_dialog import CreateRigEnvDialog
 
 
@@ -127,33 +126,7 @@ class Actions(object):
 
     def saveRigFile(self):
         """ Save out a rig file """
-        newData = {
-            constants.RIG_NAME: self.dialog.rigBuilder.rigName,
-            constants.MODEL_FILE: self.dialog.rigBuilder.modelFile,
-            constants.SKELETON_POS: self.dialog.rigBuilder.jointFiles,
-            constants.GUIDES: self.dialog.rigBuilder.guideFiles,
-            constants.COMPONENTS: self.dialog.rigBuilder.componentFiles,
-            constants.PSD: self.dialog.rigBuilder.poseReadersFiles,
-            constants.CONTROL_SHAPES: self.dialog.rigBuilder.controlShapeFiles,
-            constants.DEFORM_LAYERS: self.dialog.rigBuilder.deformLayersFile,
-            constants.SKINS: self.dialog.rigBuilder.skinsFile,
-            constants.DEFORMERS: self.dialog.rigBuilder.deformerFiles,
-            constants.OUTPUT_RIG: self.dialog.rigBuilder.outputFilePath,
-            constants.OUTPUT_FILE_SUFFIX: self.dialog.rigBuilder.outputFileSuffix,
-            constants.OUTPUT_RIG_FILE_TYPE: self.dialog.rigBuilder.outputFileType,
-            # setup new data for the scripts
-            constants.PRE_SCRIPT: self.dialog.modelSection.preScriptRunner.getCurrentScriptList(
-                relativePath=self.dialog.rigEnvironment),
-            constants.POST_SCRIPT: self.dialog.buildSection.postScriptRunner.getCurrentScriptList(
-                relativePath=self.dialog.rigEnvironment),
-            constants.PUB_SCRIPT: self.dialog.publishSection.pubScriptRunner.getCurrentScriptList(
-                relativePath=self.dialog.rigEnvironment),
-            # In older files we explictly had a slot for SHAPES data. We have now replaced that with the deformers key.
-            # to avoid adding shapes files twice we can re-set the shapes data here:
-            constants.SHAPES: None
-        }
-
-        self.dialog.rigBuilder.saveRigFile(newData)
+        self.dialog.rigBuilder.saveRigFile()
 
     def reloadRigFile(self):
         """ Reload rig file"""

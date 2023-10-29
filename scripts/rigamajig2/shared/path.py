@@ -49,13 +49,25 @@ def isDir(path):
         return True
 
 
-def getRelativePath(path, start):
+def getRelativePath(targetPath, basePath):
     """
-    :param path:
-    :param start:
-    :return:
+    Make a given target path relative to a specified base path.
+
+    :param targetPath: The target path to be made relative.
+
+    :param basePath: The base path to which the target path should be made relative.
+
+    :return: The relative path from the base path to the target path.
+    :rtype: str
     """
-    return os.path.relpath(path, start)
+    # Check if the target_path is already relative to base_path
+    if not os.path.isabs(targetPath):
+        return targetPath  # It's already relative
+
+    # Make the path relative to base_path
+    relativePath = os.path.relpath(targetPath, start=basePath)
+
+    return relativePath
 
 
 def getAbsoultePath(rel, start):

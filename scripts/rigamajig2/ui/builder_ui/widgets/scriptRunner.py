@@ -252,28 +252,6 @@ class ScriptRunner(QtWidgets.QWidget):
         """get selected items in the script list"""
         return [i for i in self.scriptList.selectedItems()]
 
-    def getCurrentScriptList(self, relativePath=None):
-        """
-        get a list of scripts at the current recursion level (no recursion level)
-        :param relativePath:
-        :return:
-        """
-
-        scriptList = list()
-        for item in self.getAllItems():
-
-            # TODO: this is a bit hacky....
-
-            if item.textColor() == QtGui.QColor():
-                scriptPath = item.data(QtCore.Qt.UserRole).get(FILEPATH_DATA_KEY)
-
-                if relativePath:
-                    scriptPath = os.path.relpath(scriptPath, relativePath)
-
-                scriptList.append(scriptPath)
-
-        return scriptList
-
     def showInFolder(self):
         """ Show the selected file in the enclosing folder """
         items = self.getSelectedItems()

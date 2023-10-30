@@ -18,7 +18,7 @@ from PySide2 import QtWidgets
 
 import rigamajig2.maya.qc as qc
 import rigamajig2.ui.builder_ui.recent_files as recent_files
-from rigamajig2.ui.builder_ui.newRigFile_dialog import CreateRigEnvDialog
+from rigamajig2.ui.builder_ui.dialogs.newRigFile_dialog import CreateRigEnvDialog
 
 
 class Actions(object):
@@ -161,7 +161,7 @@ class Actions(object):
         mel.eval("openEvaluationToolkit;")
 
     def openGitVersionControlDialog(self):
-        from rigamajig2.ui.builder_ui import git_dialog
+        from rigamajig2.ui.builder_ui.dialogs import git_dialog
         rigEnv = self.dialog.rigEnvironment
         git_dialog.GitDialog.showDialog()
 
@@ -179,7 +179,7 @@ class Actions(object):
 
     def showMergeRigFilesDialog(self):
         """ Show the merge rig files dialog"""
-        from rigamajig2.ui.builder_ui import mergeRigsDialog
+        from rigamajig2.ui.builder_ui.dialogs import mergeRigsDialog
 
         mergeRigsDialog.MergeRigsDialog.showDialog()
 

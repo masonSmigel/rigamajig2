@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 """
     project: rigamajig2
-    file: dialog.py
+    file: builder_dialog.py
     author: masonsmigel
     date: 07/2022
     description: This module contains the main dialog for the builder UI
@@ -23,14 +23,14 @@ import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.ui.builder_ui import actions
-from rigamajig2.ui.builder_ui import build_section
-from rigamajig2.ui.builder_ui import controls_section
-from rigamajig2.ui.builder_ui import deformation_section
-from rigamajig2.ui.builder_ui import model_section
-from rigamajig2.ui.builder_ui import publish_section
 from rigamajig2.ui.builder_ui import recent_files
-from rigamajig2.ui.builder_ui import setup_section
-from rigamajig2.ui.builder_ui import skeleton_section
+from rigamajig2.ui.builder_ui.sections import (model_section,
+                                               setup_section,
+                                               deformation_section,
+                                               controls_section,
+                                               skeleton_section,
+                                               build_section,
+                                               publish_section)
 from rigamajig2.ui.widgets import QLine, mayaMessageBox, pathSelector
 from rigamajig2.ui.widgets.workspace_control import DockableUI
 

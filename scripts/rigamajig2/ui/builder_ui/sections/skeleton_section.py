@@ -327,3 +327,4 @@ class SkeletonSection(builderSection.BuilderSection):
     def _setJointFiles(self, fileList):
         if self.builder:
             self.builder.jointFiles = fileList
+            self.postRigFileModifiedEvent()

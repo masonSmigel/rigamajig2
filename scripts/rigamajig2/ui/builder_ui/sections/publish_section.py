@@ -27,9 +27,6 @@ class PublishSection(builderSection.BuilderSection):
 
     WIDGET_TITLE = "Publish"
 
-    def __init__(self):
-        super().__init__()
-
     def createWidgets(self):
         """ Create Widgets"""
         self.pubScriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
@@ -147,13 +144,17 @@ class PublishSection(builderSection.BuilderSection):
     def _setOutputFilePath(self, filepath):
         if self.builder:
             self.builder.outputFilePath = filepath
+            self.postRigFileModifiedEvent()
 
     def _setOutputFileSuffix(self):
         if self.builder:
             self.builder.outputFileSuffix = self.outFileSuffix.text()
+            self.postRigFileModifiedEvent()
 
     def _setOutputFileType(self, fileType):
-        if self.builder: self.builder.outputFileType = fileType
+        if self.builder:
+            self.builder.outputFileType = fileType
+            self.postRigFileModifiedEvent()
 
     @QtCore.Slot()
     def _setLocalPubScripts(self, scriptData):
@@ -167,3 +168,4 @@ class PublishSection(builderSection.BuilderSection):
                 localPubScripts.append(filePath)
 
         self.builder.localPubScripts = localPubScripts
+        self.postRigFileModifiedEvent()

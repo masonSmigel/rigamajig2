@@ -11,6 +11,7 @@
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
+from maya.api import OpenMaya as om
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
@@ -84,9 +85,11 @@ class BuilderSection(QtWidgets.QWidget):
 
     WIDGET_TITLE = "Builder Widget"
 
-    def __init__(self):
+    def __init__(self, sectionParent):
         """ Constructor"""
         super(BuilderSection, self).__init__()
+
+        self.sectionParent = sectionParent
 
         self.builder = None
         self.rigEnvironment = None
@@ -140,3 +143,11 @@ class BuilderSection(QtWidgets.QWidget):
     def setChecked(self, value):
         """ Accessor method to set the value of the checkbox"""
         self.mainWidget.setChecked(value)
+
+    def postRigFileModifiedEvent(self):
+        """Post the builder modified event"""
+        if self.sectionParent.rigFileIsModified:
+            return None
+
+        if om.MUserEventMessage.isUserEvent(self.sectionParent.rigFileModified):
+            om.MUserEventMessage.postUserEvent(self.sectionParent.rigFileModified)

@@ -112,6 +112,7 @@ class ModelSection(builderSection.BuilderSection):
     def _setModelFile(self, modelFile):
         if self.builder:
             self.builder.modelFile = modelFile
+            self.postRigFileModifiedEvent()
 
     @QtCore.Slot()
     def _setLocalPreScripts(self, scriptData):
@@ -125,3 +126,4 @@ class ModelSection(builderSection.BuilderSection):
                 localPreScripts.append(filePath)
 
         self.builder.localPreScripts = localPreScripts
+        self.postRigFileModifiedEvent()

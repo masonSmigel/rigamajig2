@@ -262,13 +262,16 @@ class DeformationSection(builderSection.BuilderSection):
     def _setSkinFiles(self, filepath):
         if self.builder:
             self.builder.skinsFile = filepath
+            self.postRigFileModifiedEvent()
 
     @QtCore.Slot()
     def _setDeformLayerFile(self, filepath):
         if self.builder:
             self.builder.deformLayersFile = filepath
+            self.postRigFileModifiedEvent()
 
     @QtCore.Slot()
     def _setDeformerFiles(self, fileList):
         if self.builder:
             self.builder.deformerFiles = fileList
+            self.postRigFileModifiedEvent()

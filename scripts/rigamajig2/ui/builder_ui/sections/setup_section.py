@@ -18,7 +18,7 @@ import typing
 from functools import partial
 
 import maya.OpenMayaUI as omui
-import maya.api.OpenMaya as om2
+import maya.api.OpenMaya as om
 # MAYA
 import maya.cmds as cmds
 from PySide2 import QtCore
@@ -242,12 +242,13 @@ class SetupSection(builderSection.BuilderSection):
     def _setComponentFiles(self, fileList):
         if self.builder:
             self.builder.componentFiles = fileList
+            self.postRigFileModifiedEvent()
 
     @QtCore.Slot()
     def _setGuideFiles(self, fileList):
         if self.builder:
             self.builder.guideFiles = fileList
-
+            self.postRigFileModifiedEvent()
 
     def closeEvent(self, *args, **kwargs):
         self.componentManager._teardownCallbacks()
@@ -329,7 +330,7 @@ class ComponentManager(QtWidgets.QWidget):
         # store an open edit component dialog in a varriable
         self.editComponentDialog = None
 
-        self.callbackArray = om2.MCallbackIdArray()
+        self.callbackArray = om.MCallbackIdArray()
 
         self.createActions()
         self.createWidget()
@@ -459,11 +460,11 @@ class ComponentManager(QtWidgets.QWidget):
         Setup callbacks
         """
         # if a new scene is opened refresh the builder ui
-        self.callbackArray.append(om2.MSceneMessage.addCallback(om2.MSceneMessage.kAfterNew, self._loadFromScene))
+        self.callbackArray.append(om.MSceneMessage.addCallback(om.MSceneMessage.kAfterNew, self._loadFromScene))
 
         # we also want to update the callbacks whenever we update a step on the components.
         # since all the componts activate a container update when the container changes
-        self.callbackArray.append(om2.MEventMessage.addEventCallback("currentContainerChange", self._loadFromScene))
+        self.callbackArray.append(om.MEventMessage.addEventCallback("currentContainerChange", self._loadFromScene))
 
         logger.debug(f"Setup Callbacks: {self.callbackArray}")
 
@@ -471,7 +472,7 @@ class ComponentManager(QtWidgets.QWidget):
         """ Teardown the callbacks we created"""
         logger.debug(f"Teardown Callbacks: {self.callbackArray}")
 
-        om2.MEventMessage.removeCallbacks(self.callbackArray)
+        om.MEventMessage.removeCallbacks(self.callbackArray)
         self.callbackArray.clear()
 
     def _addItemToAutoComplete(self, name):

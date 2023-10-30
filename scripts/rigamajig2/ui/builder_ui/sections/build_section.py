@@ -155,6 +155,7 @@ class BuildSection(builderSection.BuilderSection):
     def _setPoseReadersFiles(self, fileList):
         if self.builder:
             self.builder.poseReadersFiles = fileList
+            self.postRigFileModifiedEvent()
 
     @QtCore.Slot()
     def _setLocalPostScripts(self, scriptData):
@@ -168,4 +169,5 @@ class BuildSection(builderSection.BuilderSection):
                 localPostScripts.append(filePath)
 
         self.builder.localPostScripts = localPostScripts
+        self.postRigFileModifiedEvent()
 

@@ -12,6 +12,7 @@ import logging
 import time
 from functools import partial
 
+import maya.api.OpenMaya as om
 # MAYA
 import maya.cmds as cmds
 from PySide2 import QtCore
@@ -48,17 +49,22 @@ class BuilderDialog(DockableUI):
 
     WINDOW_TITLE = "Rigamajig2 Builder  {}".format(rigamajig2.version)
 
+    rigFileModified = "rigFileModifiedEvent"
+    rigFileSaved = "rigFileSavedEvent"
+
     def __init__(self):
         """Constructor for the builder dialog"""
+        super(BuilderDialog, self).__init__()
 
         # Store a rig environment and rig builder variables.
         self.rigEnvironment = None
         self.rigBuilder = None
 
-        super(BuilderDialog, self).__init__()
+        self.callbackArray = om.MCallbackIdArray()
+
+        self._rigFileIsModified = False
 
         self.setMinimumSize(420, 600)
-
         # with the maya mixin stuff the window comes in at a weird size. This ensures it's not a weird size.
         self.resize(420, 800)
 
@@ -66,6 +72,10 @@ class BuilderDialog(DockableUI):
         recentFile = recent_files.getMostRecentFile()
         if recentFile:
             self._setRigFile(recentFile)
+
+    @property
+    def rigFileIsModified(self):
+        return self._rigFileIsModified
 
     def createMenus(self):
         """create menu actions"""
@@ -113,24 +123,14 @@ class BuilderDialog(DockableUI):
 
         self.archetypeBaseLabel = QtWidgets.QLabel("None")
 
-        self.builderSections = list()
-
-        self.modelSection = model_section.ModelSection()
-        self.jointSection = skeleton_section.SkeletonSection()
-        self.controlsSection = controls_section.ControlsSection()
-        self.setupSection = setup_section.SetupSection()
-        self.buildSection = build_section.BuildSection()
-        self.deformationSection = deformation_section.DeformationSection()
-        self.publishSection = publish_section.PublishSection()
-
         self.builderSections = [
-            self.modelSection,
-            self.jointSection,
-            self.setupSection,
-            self.buildSection,
-            self.controlsSection,
-            self.deformationSection,
-            self.publishSection,
+            model_section.ModelSection(self),
+            skeleton_section.SkeletonSection(self),
+            setup_section.SetupSection(self),
+            build_section.BuildSection(self),
+            controls_section.ControlsSection(self),
+            deformation_section.DeformationSection(self),
+            publish_section.PublishSection(self)
         ]
 
         self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
@@ -168,13 +168,8 @@ class BuilderDialog(DockableUI):
 
         # add the collapsable widgets
         buildLayout = QtWidgets.QVBoxLayout()
-        buildLayout.addWidget(self.modelSection)
-        buildLayout.addWidget(self.jointSection)
-        buildLayout.addWidget(self.setupSection)
-        buildLayout.addWidget(self.buildSection)
-        buildLayout.addWidget(self.controlsSection)
-        buildLayout.addWidget(self.deformationSection)
-        buildLayout.addWidget(self.publishSection)
+        for section in self.builderSections:
+            buildLayout.addWidget(section)
         buildLayout.addStretch()
 
         # groups
@@ -340,10 +335,46 @@ class BuilderDialog(DockableUI):
             self.statusLine.showMessage(f"Rig Publish Failed: '{self.rigName}'")
             raise e
 
+    def _setRigFileModified(self, value=True):
+        self.statusLine.showMessage("Builder has unsaved changes")
+
+        self._rigFileIsModified = value
+
+    def _setupCallbacks(self):
+        """Setup required builder callbacks"""
+        om.MUserEventMessage.registerUserEvent(self.rigFileModified)
+        om.MUserEventMessage.registerUserEvent(self.rigFileSaved)
+
+        self.callbackArray.append(
+            om.MUserEventMessage.addUserEventCallback(
+                self.rigFileModified,
+                self._setRigFileModified,
+                clientData=True
+            ))
+        logger.info(f"setup Callbacks: {self.callbackArray}")
+
+    def _teardownCallbacks(self):
+        """tear down builder callbacks"""
+        logger.info(f"Teardown Callbacks: {self.callbackArray}")
+
+        om.MEventMessage.removeCallbacks(self.callbackArray)
+        self.callbackArray.clear()
+
+        try:
+            om.MUserEventMessage.deregisterUserEvent(self.rigFileModified)
+        except RuntimeError:
+            logger.debug(f"failed to deregister: {self.rigFileModified}")
+
+        try:
+            om.MUserEventMessage.deregisterUserEvent(self.rigFileSaved)
+        except RuntimeError:
+            logger.debug(f"failed to deregister: {self.rigFileSaved}")
+
     def showEvent(self, event):
         """Show event for the Builder UI"""
         super().showEvent(event)
         logger.info("Builder UI launched")
+        self._setupCallbacks()
 
     def hideEvent(self, event):
         """override the hide event to delete the scripts jobs from the initialize widget"""
@@ -352,6 +383,8 @@ class BuilderDialog(DockableUI):
         # ensure the script jobs are deleted when the main window is hidden (done my closing the 'X' button)
         # however when in development you should manually call the close() method BEFORE deleting the workspace control.
         super(BuilderDialog, self).hideEvent(event)
+
+        self._teardownCallbacks()
 
         # call the close event for each builder section so the close logic is more localized
         # to each section. this will not get called by default when using the mayaMixin, so we need to call

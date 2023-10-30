@@ -253,3 +253,4 @@ class ControlsSection(builderSection.BuilderSection):
     def _setControlShapeFiles(self, fileList):
         if self.builder:
             self.builder.controlShapeFiles = fileList
+            self.postRigFileModifiedEvent()

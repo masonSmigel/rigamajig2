@@ -336,8 +336,11 @@ class BuilderDialog(DockableUI):
             raise e
 
     def _setRigFileModified(self, value=True):
-        self.statusLine.showMessage("Builder has unsaved changes")
-
+        if value:
+            # TODO: replace this with some kind of icon 
+            self.statusLine.showMessage("Builder has unsaved changes")
+        else:
+            self.statusLine.clearMessage()
         self._rigFileIsModified = value
 
     def _setupCallbacks(self):
@@ -360,15 +363,11 @@ class BuilderDialog(DockableUI):
         om.MEventMessage.removeCallbacks(self.callbackArray)
         self.callbackArray.clear()
 
-        try:
+        if om.MUserEventMessage.isUserEvent(self.rigFileModified):
             om.MUserEventMessage.deregisterUserEvent(self.rigFileModified)
-        except RuntimeError:
-            logger.debug(f"failed to deregister: {self.rigFileModified}")
 
-        try:
+        if om.MUserEventMessage.isUserEvent(self.rigFileSaved):
             om.MUserEventMessage.deregisterUserEvent(self.rigFileSaved)
-        except RuntimeError:
-            logger.debug(f"failed to deregister: {self.rigFileSaved}")
 
     def showEvent(self, event):
         """Show event for the Builder UI"""

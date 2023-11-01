@@ -12,9 +12,9 @@ def onMayaDroppedPythonFile(*args):
 
     # from the installer path build other important paths.
     module_root = os.path.dirname(installer_path)
-    python_path = os.path.join(module_root, 'scripts')
+    python_path = os.path.join(module_root, 'python')
     plugin_path = os.path.join(module_root, 'plug-ins')
-    lib_path = os.path.join(module_root, 'scripts', 'lib')
+    lib_path = os.path.join(module_root, 'python', 'lib')
 
     # Check if the modules directory exists in the user preference directory (if it doesn't, create it)
     maya_moddir_path = '{}/modules'.format(pymel.util.getEnv('MAYA_APP_DIR'))
@@ -28,7 +28,10 @@ def onMayaDroppedPythonFile(*args):
     with open(maya_mod_file, 'w') as moduleFile:
 
         output = '+ rigamajig2 1.0 {}'.format(module_root)
+        output += '\r\nPYTHONPATH += {}'.format(python_path)
         output += '\r\nPYTHONPATH += {}'.format(lib_path)
+        output += '\r\nMAYA_PLUG_IN_PATH += {}'.format(plugin_path)
+
         # Add the path to plugin path on first use
         if plugin_path not in pymel.util.getEnv("MAYA_PLUG_IN_PATH"):
             pymel.util.putEnv("MAYA_PLUG_IN_PATH", [pymel.util.getEnv("MAYA_PLUG_IN_PATH"), plugin_path])

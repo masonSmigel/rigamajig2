@@ -1,0 +1,551 @@
+// ===========================================================================
+// Copyright 2019 Autodesk, Inc. All rights reserved.
+//
+// Use of this software is subject to the terms of the Autodesk license
+// agreement provided at the time of installation or download, or which
+// otherwise accompanies this software in either electronic or hard copy form.
+// ===========================================================================
+////////////////////////////////////////////////////////////////////////////////
+//
+//  Procedure Name:
+//      MLdeleteUnused
+//
+//  Description:
+// 		Delete unused rendering nodes (ML stands for MultiLister,
+//		the old shading interface).
+//
+//  Input Arguments:
+//      None.
+//
+//  Return Value:
+//      None.
+//
+
+
+proc string[] getRenderNodes()
+//
+//	Procedure: getRenderNodes()
+//
+//	Purpose:
+//
+//		Lists all nodes in the scene that are classified as shading nodes
+//		(shaders, textures, utilities, or imageplanes).  Each type of node
+//		has a static classification type.  We use listNodeTypes() to get a
+//		list of the shading node types, then "ls -type" to list the nodes of
+//		those types in the scene.
+//
+//		This code used to iterate through every node in the scene, checking its
+//		classification to see if it is a rendering node.  This was unnecessary,
+//		as classifications are associated with node types, not individual nodes.
+//		This new approach is much more efficient.
+//
+{
+	string $renderTypes[] = `listNodeTypes "texture"`;
+	$renderTypes = stringArrayCatenate( $renderTypes, `listNodeTypes "utility"` );
+	$renderTypes = stringArrayCatenate( $renderTypes, `listNodeTypes "imageplane"` );
+	$renderTypes = stringArrayCatenate( $renderTypes, `listNodeTypes "shader"` );
+
+	string $cmd = "ls -long ";
+	string $t;
+	for( $t in $renderTypes )
+	{
+		$cmd += (" -type \"" + $t + "\" ");
+	}
+
+	string $renderNodes[] = eval($cmd);
+	$renderNodes = stringArrayCatenate( $renderNodes, `lsThroughFilter "DefaultMrNodesFilter"` );
+	return $renderNodes;
+}
+
+global proc int shadingGroupUnused(string $shadingGroup)
+//
+//	Determine if the shading group with the name $shadingGroup is unused by
+//	checking membership and layer overrides. If there are members or layer
+//	references then also check if at least one shader is connected to the
+//	group
+//
+{
+	if (!`objExists $shadingGroup`)
+		return false;
+
+	if (`sets -q -renderable $shadingGroup`) {
+		if ($shadingGroup != "initialShadingGroup" &&
+			$shadingGroup != "initialParticleSE" &&
+			$shadingGroup != "defaultLightSet" &&
+			$shadingGroup != "defaultObjectSet") {
+
+			// connection to dag objects
+			string $objs[] = `sets -q $shadingGroup`;
+
+			// connection to render layers means that
+			// the shading engine is used as a override
+			// or assigned to a render layer member.
+			string $layers[] = `listConnections -type renderLayer $shadingGroup`;
+
+			if (size($objs) == 0 && size($layers) == 0)
+			{
+				//	empty shading group
+				//
+				return true;
+			}
+			else
+			{
+				//	check to make sure at least one shader is connected
+				//	to the group
+				//
+				int $connected = false;
+
+				// Check Maya shader connections
+				string  $attributes[] = {".surfaceShader", ".volumeShader", ".displacementShader"};
+				for($attr in $attributes)
+				{
+					if( size(`listConnections ($shadingGroup + $attr)`)>0 )
+					{
+						$connected = true;
+						break;
+					}
+				}
+				// Check custom shader connections
+				if( !$connected ) {
+					string $customShadersArray[] = `callbacks -executeCallbacks -hook "allConnectedShaders" $shadingGroup`;
+					for ($shader in $customShadersArray) {
+						if ($shader != "") {
+							$connected = true;
+							break;
+						}
+					}
+				}
+
+				if( !$connected ) {
+					return true;
+				}
+			}
+		}
+	}
+
+	return false;
+}
+
+global proc int MLdeleteUnused()
+{
+	//	Are we being called during an Optimize Scene Size operation?
+	// 	If so, we need to display progress information.  This was done
+	//	as a global variable to avoid having to change the signature of
+	//	the proc, as that could break many scripts, both internal and
+	//	customer-written.
+	//
+	int $showProgress = cleanUp_ShouldReportProgress();
+
+	int $i, $j, $count, $count2;
+	int $shouldDelete = false;
+	string $se[];
+	string $conn[];
+
+	//------------------------------------------------------------------------
+	//	Stage 1: Delete empty shading groups, as well as shading groups that
+	//			 have no connected surface, volume, or displacement shaders.
+	//
+	string $sets[] = `ls -sets`;
+	$count = `size($sets)`;
+
+	int $numDeleted = 0;
+	int $interrupted = 0;
+
+	//	initialize progress bar for stage 1 if required
+	//
+	if( $showProgress )
+	{
+		cleanUp_StartProgress( $count, "Rendering Nodes: Deleting empty shading groups", 1 );
+	}
+
+	for ($i = 0; $i < $count; $i++)
+	{
+		//	check for user interrupt if required
+		//
+		if( $showProgress )
+		{
+			if( cleanUp_SetProgress( $i ) )
+			{
+				$interrupted = 1;
+				break;
+			}
+		}
+
+		string $currShadingGroup = $sets[$i];
+
+		if ( shadingGroupUnused($currShadingGroup) )
+		{
+			$shouldDelete = true;
+
+			// Give plugins a chance to label the node as 'shouldnt be deleted'
+			//
+			$conn = `listConnections -shapes true -connections true -source false $currShadingGroup`;
+			// conn is an array of plug/connection pairs
+			$count2 = `size($conn)`;
+			for ($j = 0; $j < $count2; $j+=2) {
+				int $thirdPartyPreventDeletions[] = `callbacks -executeCallbacks -hook "preventMaterialDeletionFromCleanUpSceneCommand" $currShadingGroup $conn[$j+1] $conn[$j]`;
+				for($deletionPrevented in $thirdPartyPreventDeletions)
+				{
+					if($deletionPrevented)
+					{
+						$shouldDelete = false;
+						break;
+					}
+				}
+			}
+
+			if ($shouldDelete) {
+				$numDeleted += deleteIfNotReferenced( $currShadingGroup );
+			}
+		}
+	}
+
+	//	finalize progress bar for stage 1 if required
+	//
+	if( $showProgress )
+	{
+		cleanUp_EndProgress();
+	}
+
+	//	if stage 1 was interrupted, skip all subsequent stages
+	//
+	if( $interrupted )
+	{
+		return $numDeleted;
+	}
+
+	//
+	//	End stage 1.
+	//-------------------------------------------------------------------
+
+	//------------------------------------------------------------------------
+	//	Stage 2: Delete all material nodes (surface, volume, displacement shaders)
+	//			 whose outputs are not connected to anything.  Output connections
+	//			 from message attributes must be considered specially, since they
+	//			 may be irrelevant (like the connection from shader.message to
+	//			 defaultMaterialList, for example).  Such connections do not indicate
+	//			 that the node is in use.
+	//
+	//			 Note that this stage will delete shaders that were feeding into empty
+	//			 shading groups.  Stage 1 deleted the shadingEngine node for empty shading
+	//			 groups, which leaves unconnected the materials that were feeding into it.
+	//			 These materials will now be deleted in this stage.  In the next stage, any
+	//			 textures/utilities that were feeding into these materials will also be
+	//			 deleted.
+	//
+
+	string $defaultMaterials[] = `ls -defaultNodes -materials`;
+
+	// Delete all unconnected materials.
+	string $materials[] = `ls -long -mat`;
+	$count = `size($materials)`;
+
+	//	Initialize progress bar for stage 2 if required.
+	//
+	if( $showProgress )
+	{
+		cleanUp_StartProgress( $count, "Rendering Nodes: Deleting unconnected materials", 1 );
+	}
+
+	for ($i = 0; $i < $count; $i++)
+	{
+
+		//	check for user interrupt if required.
+		//
+		if( $showProgress )
+		{
+			if( cleanUp_SetProgress( $i ) )
+			{
+				$interrupted = 1;
+				break;
+			}
+		}
+
+		// Now determine if the readOnly connections are done.
+		string $currShader = $materials[$i];
+
+		// Don't try to delete if this is an undeletable default material
+		int $isDefaultMaterial = false;
+		for($node in $defaultMaterials){
+			if ($currShader == $node){
+				$isDefaultMaterial = true;
+				break;
+			}
+		}
+		if($isDefaultMaterial){
+			continue;
+		}		
+
+		$conn = `listConnections -shapes true -connections true -source false $currShader`;
+		// conn is an array of plug/connection pairs
+		$count2 = `size($conn)`;
+		for ($j = 0; $j < $count2; $j+=2) {
+			clear $se;
+			if ($conn[$j] != ($currShader + ".message")) {
+				$shouldDelete = false;
+				break;
+			} else {
+				// must explicitly check for a shading engine connection on message
+				$se = `listConnections -type shadingEngine ($conn[$j])`;
+				
+				int $thirdPartyPreventDeletions[] = `callbacks -executeCallbacks -hook "preventMaterialDeletionFromCleanUpSceneCommand" $currShader $conn[$j+1] $conn[$j]`;
+				int $thirdPartyPreventsDeletion = false;
+				for($deletionPrevented in $thirdPartyPreventDeletions)
+				{
+					if($deletionPrevented)
+					{
+						$thirdPartyPreventsDeletion = true;
+						break;
+					}
+				}
+				
+				if (size($se) != 0) {
+					$shouldDelete = false;
+					break;
+				}
+				else if ($thirdPartyPreventsDeletion) {
+					$shouldDelete = false;
+					break;
+				}
+				else {
+					$shouldDelete = true;
+				}
+			}
+		}
+
+		if ($shouldDelete) {
+			$numDeleted += deleteIfNotReferenced( $currShader );
+		}
+
+		$shouldDelete = false;
+		clear $conn;
+		clear $se;
+	}
+
+	//	finalize progress for stage 2 if required.
+	//
+	if( $showProgress )
+	{
+		cleanUp_EndProgress();
+	}
+
+	//	if interrupted, don't continue to stage 3.
+	//
+	if( $interrupted )
+	{
+		return $numDeleted;
+	}
+
+	//--------------------------------------------------------------------------
+	//
+	//	Stage 3: delete all unused texture/utility nodes.  Nodes are unused if
+	//			 they have no relevant output connections.  The algorithm proceeds
+	//			 iteratively.  Each iteration considers all shading nodes, and deletes
+	//			 the ones with no relevant outputs.  Thus, the iterations will proceed
+	//			 through each unused shading network by depth.  We stop iterating when
+	//			 the previous iteration did not delete anything.
+	//
+
+	int $deleteAnything = true;
+	int $oldSizeAll = 0;
+	string $all[];
+	string $type,$node,$connType,$attrName;
+
+	int $it = 0;
+
+	while ($deleteAnything)
+	{
+		$it++;
+		$deleteAnything = false;
+
+		//	the "getRenderNodes" operation can take a few seconds to run on large scenes.  For this reason,
+		//	we give it its own progress bar update that is not interruptable.  We want users to know
+		//	what's going on.
+		//
+
+		//	initialize progress bar for listing of rendering nodes
+		//
+		if( $showProgress )
+		{
+			cleanUp_StartProgress( -1, ("Rendering Nodes: finding texture/utility nodes (iteration " + $it + ")"), 0 );
+		}
+
+		$all = getRenderNodes();
+
+		//	finalize progress bar for listing of rendering nodes
+		//
+		if( $showProgress )
+		{
+			cleanUp_EndProgress();
+		}
+
+		$count = size($all);
+
+		//	initialize progress bar for deletion of unused rendering nodes.
+		//
+		if( $showProgress )
+		{
+			cleanUp_StartProgress( $count, ("Rendering Nodes: deleting unused texture/utility nodes (iteration " + $it + ")"), 1 );
+		}
+
+		//	check to see if the previous iteration removed any nodes.  If not, then we are done.
+		//
+		if($oldSizeAll != $count)
+		{
+			for( $i = 0; $i < $count; $i++ )
+			{
+				$node = $all[$i];
+
+				// Don't try to delete if this is an undeletable default material
+				int $isDefaultMaterial = false;
+				for($dnode in $defaultMaterials){
+					if ($node == $dnode){
+						$isDefaultMaterial = true;
+						break;
+					}
+				}
+				if($isDefaultMaterial){
+					continue;
+				}
+
+				//	update progress, if required
+				//
+				if( $showProgress )
+				{
+					if( cleanUp_SetProgress( $i ) )
+					{
+						$interrupted = 1;
+						break;
+					}
+				}
+
+				// Deleting one node can delete other connected nodes.
+				if (!`objExists $node`)
+				    continue;
+
+				$type = `nodeType $node`;
+
+				// A heightField might not have any output connections, so
+				// look for an input connection before treating it as
+				// just a regular utility node...
+				//
+				if( $type == "heightField" )
+				{
+					$conn = `listConnections -connections true
+						-source true -shapes true $node`;
+					if( size( $conn ) != 0 )
+					{
+						continue;
+					}
+				}
+				
+				// If this is a free image plane, it should have its default respective camera,
+				// Ignore if the node is an free image plane
+				if ( $type == "imagePlane" )
+				{
+					// This attribute to declear the image plane is free or not
+					$attrName = $node + ".lockedToCamera";
+					if ( `getAttr $attrName` == 0 )
+					{
+							// If this attribute is false, the image plane is a free image plane and should not be deleted.
+							continue;
+					}		
+				}
+
+                // It's a texture, postprocess or utility node.
+                // Now determine if the readable connections are done.
+                $shouldDelete = true;
+
+				//	decide whether or not the node is unused
+				//
+                $conn = `listConnections -connections true -source false -shapes true $node`;
+                int $connCount = size($conn);
+                for ($j = 0; $j < $connCount; $j+=2)
+				{
+                    $attrName = match (".message",$conn[$j]);
+                    if ($attrName == ".message")
+					{
+                        // must explicitly check for the following
+                        // destinations on a message attribute:
+                        // shading engine, arrayMapper, or a
+                        // camera in the case of imagePlane or
+                        // cameraView
+                        // <directional/spot/point>Light for mental ray light shader
+                        // transform for mental ray geometry shader
+                        // mentalrayOptions for mental ray contour shader
+                        $connType = `nodeType $conn[$j+1]`;
+                        if ($connType == "shadingEngine"
+                        ||  `objectType -isa "camera" $conn[$j+1]`
+                        ||  $connType == "imagePlane"
+                        ||  $connType == "arrayMapper"
+                        ||  $connType == "directionalLight"
+                        ||  $connType == "spotLight"
+                        ||  $connType == "pointLight"
+                        ||  $connType == "areaLight"
+                        ||  $connType == "transform"
+                         )
+                        {
+                            $shouldDelete = false;
+                        }
+                        else if( `isClassified $conn[$j+1] "shader/surface"`
+                              || `isClassified $conn[$j+1] "shader/volume"`
+                              || `isClassified $conn[$j+1] "shader/displacement"`) {
+                            $shouldDelete = false;
+                        }
+
+						// Give plugins a chance to label the node as 'shouldnt be deleted'
+						int $thirdPartyPreventDeletions[] = `callbacks -executeCallbacks -hook "preventMaterialDeletionFromCleanUpSceneCommand" $node $conn[$j+1] $conn[$j]`;
+						for($deletionPrevented in $thirdPartyPreventDeletions)
+						{
+							if($deletionPrevented )
+							{
+								$shouldDelete = false;
+								break;
+							}
+						}
+						
+                        if (!$shouldDelete)
+                            break;
+                    }
+                    else {
+								$shouldDelete = false;
+								break;
+							}
+						} // foreach destination connection
+						if ($shouldDelete)
+						{
+							$numDeleted += deleteIfNotReferenced( $node );
+							$deleteAnything = true;
+						}
+
+			$shouldDelete = false;
+			} // foreach dependency node
+			$oldSizeAll = $count;
+		}
+        else
+		{
+			$deleteAnything = false;
+		}
+
+		//	update progress if required.
+		//
+		if( $showProgress )
+		{
+			cleanUp_EndProgress();
+		}
+
+		if( $interrupted )
+		{
+			break;
+		}
+	}
+
+	//	finalize progress bar for stage 3.
+	//
+	if( $showProgress )
+	{
+		cleanUp_EndProgress();
+	}
+
+	return $numDeleted;
+}

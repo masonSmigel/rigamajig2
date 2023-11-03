@@ -75,10 +75,11 @@ class Builder(object):
         self._localPostScripts = None
         self._localPubScripts = None
 
-        if rigFile: self.setRigFile(rigFile)
+        if rigFile:
+            self.setRigFile(rigFile)
 
     def getAvailableComponents(self) -> typing.List[str]:
-        """ Get all available components"""
+        """Get all available components"""
         return self._availableComponents
 
     def getAbsolutePath(self, filepath: path.RelativePath) -> path.AbsolutePath:
@@ -114,7 +115,7 @@ class Builder(object):
         return self._modelFile
 
     @modelFile.setter
-    def modelFile(self, value:path.RelativePath):
+    def modelFile(self, value: path.RelativePath):
         logger.debug(f"Set model file to: {value}")
         self._modelFile = value
 
@@ -293,7 +294,7 @@ class Builder(object):
         """
 
         for component in self.componentList:
-            logger.info('Initializing: {}'.format(component.name))
+            logger.info("Initializing: {}".format(component.name))
             component.initializeComponent()
 
         logger.info("initialize -- complete")
@@ -307,11 +308,11 @@ class Builder(object):
             cmds.createNode("transform", name="guides")
 
         for component in self.componentList:
-            logger.info('Guiding: {}'.format(component.name))
+            logger.info("Guiding: {}".format(component.name))
             component.guideComponent()
             if hasattr(component, "guidesHierarchy") and component.guidesHierarchy:
                 parent = cmds.listRelatives(component.guidesHierarchy, p=True)
-                if parent and parent[0] == 'guides':
+                if parent and parent[0] == "guides":
                     break
                 cmds.parent(component.guidesHierarchy, "guides")
             self.updateMaya()
@@ -327,37 +328,37 @@ class Builder(object):
         # this is because all components that use the joint.connectChains function check for a bind group
         # to build the proper scale constraints
         for component in self.componentList:
-            if component.getComponentType() == 'main.main':
+            if component.getComponentType() == "main.main":
                 self.componentList.remove(component)
                 self.componentList.insert(0, component)
 
         # now we can safely build all the components in the scene
         for component in self.componentList:
-            logger.info('Building: {}'.format(component.name))
+            logger.info("Building: {}".format(component.name))
             component.buildComponent()
 
-            if cmds.objExists('rig') and component.getComponentType() != 'main.main':
+            if cmds.objExists("rig") and component.getComponentType() != "main.main":
                 if hasattr(component, "rootHierarchy"):
                     if not cmds.listRelatives(component.rootHierarchy, p=True):
-                        cmds.parent(component.rootHierarchy, 'rig')
+                        cmds.parent(component.rootHierarchy, "rig")
 
             # refresh the viewport after each component is built.
             self.updateMaya()
 
         # parent the bind joints to the bind group. if one exists
-        if cmds.objExists('bind'):
-            topSkeletonNodes = meta.getTagged('skeleton_root')
+        if cmds.objExists("bind"):
+            topSkeletonNodes = meta.getTagged("skeleton_root")
             if topSkeletonNodes:
                 for topSkeletonNode in topSkeletonNodes:
                     if not cmds.listRelatives(topSkeletonNode, p=True):
                         cmds.parent(topSkeletonNodes, common.BINDTAG)
 
         # if the model group exists. parent the model
-        if cmds.objExists('model'):
-            topModelNodes = meta.getTagged('model_root')
+        if cmds.objExists("model"):
+            topModelNodes = meta.getTagged("model_root")
             if topModelNodes:
                 if not cmds.listRelatives(topModelNodes, p=True):
-                    cmds.parent(topModelNodes, 'model')
+                    cmds.parent(topModelNodes, "model")
 
         logger.info("build -- complete")
 
@@ -366,7 +367,7 @@ class Builder(object):
         connect rig
         """
         for component in self.componentList:
-            logger.info('Connecting: {}'.format(component.name))
+            logger.info("Connecting: {}".format(component.name))
             component.connectComponent()
             self.updateMaya()
         logger.info("connect -- complete")
@@ -376,7 +377,7 @@ class Builder(object):
         finalize rig
         """
         for component in self.componentList:
-            logger.info('Finalizing: {}'.format(component.name))
+            logger.info("Finalizing: {}".format(component.name))
             component.finalizeComponent()
             self.updateMaya()
 
@@ -390,7 +391,7 @@ class Builder(object):
         optimize rig
         """
         for component in self.componentList:
-            logger.info('Optimizing {}'.format(component.name))
+            logger.info("Optimizing {}".format(component.name))
             component.optimizeComponent()
             self.updateMaya()
         logger.info("optimize -- complete")
@@ -464,7 +465,7 @@ class Builder(object):
         if data_manager.loadSkinWeightData(filepath):
             logger.info("skin weights loaded")
 
-    def loadDeformers(self ) -> None:
+    def loadDeformers(self) -> None:
         """
         Load additional deformers from the `deformerFiles` property
         """
@@ -485,7 +486,7 @@ class Builder(object):
         mainComponent = None
         for component in self.componentList:
             if cmds.objExists(component.container):
-                if component.getComponentType() == 'main.main':
+                if component.getComponentType() == "main.main":
                     mainComponent = component
                 else:
                     component.deleteSetup()
@@ -514,10 +515,10 @@ class Builder(object):
             component._connect_cmpt()
             component._finalize_cmpt()
 
-            if cmds.objExists('rig') and component.getComponentType() != 'main.Main':
+            if cmds.objExists("rig") and component.getComponentType() != "main.Main":
                 if hasattr(component, "rootHierarchy"):
                     if not cmds.listRelatives(component.rootHierarchy, p=True):
-                        cmds.parent(component.rootHierarchy, 'rig')
+                        cmds.parent(component.rootHierarchy, "rig")
 
             logger.info("build: {} -- complete".format(component.name))
 
@@ -551,14 +552,20 @@ class Builder(object):
         # next get scripts to inherit
         scriptDict = core.GetCompleteScriptList.getScriptList(self.rigFile, scriptStep)
 
-        inheritedScripts = {recursion: scripts for recursion, scripts in scriptDict.items() if recursion > 0}
+        inheritedScripts = {
+            recursion: scripts
+            for recursion, scripts in scriptDict.items()
+            if recursion > 0
+        }
         scripts = list(inheritedScripts.values())
         completeScriptList = common.joinLists(scripts)
         core.runAllScripts(completeScriptList)
         if len(completeScriptList):
             logger.info(f"{niceScriptStepName}: inherited scripts -- complete")
 
-    def run(self, publish: bool = False, savePublish: bool = True, versioning: bool = True) -> None:
+    def run(
+        self, publish: bool = False, savePublish: bool = True, versioning: bool = True
+    ) -> None:
         """
         Build a rig.
 
@@ -572,14 +579,15 @@ class Builder(object):
                            each time the publishing file is overwritten. This allows for version control.
         """
         if not self.rigEnvironment:
-            logger.error('you must provide a build environment path. Use `_setRigFile()`')
+            logger.error(
+                "you must provide a build environment path. Use `_setRigFile()`"
+            )
             return
 
         startTime = time.time()
-        logger.info(f"\n"
-                    f"Begin Rig Build\n{'-' * 70}\n"
-                    f"build env: {self.rigEnvironment}\n"
-                    )
+        logger.info(
+            f"\n" f"Begin Rig Build\n{'-' * 70}\n" f"build env: {self.rigEnvironment}\n"
+        )
 
         core.loadRequiredPlugins()
         self.runBuilderScripts(constants.PRE_SCRIPT)
@@ -614,7 +622,9 @@ class Builder(object):
         endTime = time.time()
         finalTime = endTime - startTime
 
-        logger.info('\nCompleted Rig Build \t -- time elapsed: {0}\n{1}\n'.format(finalTime, '-' * 70))
+        logger.info(
+            f"\nCompleted Rig Build \t -- time elapsed: {finalTime}\n{'-' * 70}\n"
+        )
 
     # UTILITY FUNCTION TO PUBLISH THE RIG
     def publish(self, versioning: bool = True) -> None:
@@ -642,16 +652,21 @@ class Builder(object):
             nextVersion = len(existingVersions) + 1 if existingVersions else 1
 
             versionFileName = self.getPublishFileName(
-                includeVersion=True,
-                version=nextVersion
+                includeVersion=True, version=nextVersion
             )
 
             topNodes = cmds.ls(assemblies=True)
-            topTransformNodes = cmds.ls(topNodes, exactType='transform')
+            topTransformNodes = cmds.ls(topNodes, exactType="transform")
             for node in topTransformNodes:
-                cmds.addAttr(node, longName="__version__", attributeType='short', dv=nextVersion, k=False)
+                cmds.addAttr(
+                    node,
+                    longName="__version__",
+                    attributeType="short",
+                    defaultValue=nextVersion,
+                    keyable=False,
+                )
                 cmds.setAttr("{}.__version__".format(node), lock=True)
-                cmds.setAttr("{}.__version__".format(node), cb=True)
+                cmds.setAttr("{}.__version__".format(node), channelBox=True)
 
             versionPath = os.path.join(versionDirectory, versionFileName)
 
@@ -659,7 +674,11 @@ class Builder(object):
             if not os.path.exists(versionDirectory):
                 os.makedirs(versionDirectory)
             outputVersionPath = file.saveAs(versionPath, log=False)
-            logger.info("out rig versioned: {}   ({})".format(versionFileName, outputVersionPath))
+            logger.info(
+                "out rig versioned: {}   ({})".format(
+                    versionFileName, outputVersionPath
+                )
+            )
 
         # create output directory and save
         publishPath = os.path.join(outputDirectory, outputFileName)
@@ -667,10 +686,10 @@ class Builder(object):
         logger.info("out rig published: {}  ({})".format(outputFileName, publishPath))
 
     def updateMaya(self) -> None:
-        """ Update maya if in an interactive session"""
+        """Update maya if in an interactive session"""
         # refresh the viewport after each component is built.
         if not om2.MGlobal.mayaState():
-            cmds.refresh(f=True)
+            cmds.refresh(force=True)
 
     # --------------------------------------------------------------------------------
     # GET
@@ -698,12 +717,14 @@ class Builder(object):
 
         if path.isFile(outputfile):
             filename = outputfile.split(os.sep)[-1]
-            directory = '/'.join(outputfile.split(os.sep)[:-1])
+            directory = "/".join(outputfile.split(os.sep)[:-1])
         elif path.isDir(outputfile):
             directory = outputfile
 
             if not self.rigName:
-                raise RuntimeError("Must select an output path or rig name to publish a rig")
+                raise RuntimeError(
+                    "Must select an output path or rig name to publish a rig"
+                )
 
             filename = self.getPublishFileName(includeVersion=False, version=None)
         else:
@@ -739,7 +760,7 @@ class Builder(object):
 
         # Iterate over all files in the directory
         for filename in os.listdir(versionsDirectory):
-            if filename.startswith(self.rigName) and filename.lower().endswith(('.ma', '.mb')):
+            if filename.startswith(self.rigName) and filename.lower().endswith((".ma", ".mb")):
                 existingVersionFiles.append(filename)
 
         existingVersionFiles.sort(reverse=True)
@@ -769,7 +790,9 @@ class Builder(object):
             if name == _name:
                 return component
 
-        logger.warning("No component: '{}' found within current build".format(name, type))
+        logger.warning(
+            "No component: '{}' found within current build".format(name, type)
+        )
         return None
 
     # --------------------------------------------------------------------------------
@@ -809,10 +832,12 @@ class Builder(object):
         rigData.read(self.rigFile)
         data = rigData.getData()
         if "rig_env" not in data:
-            rigEnvironmentPath = '../'
+            rigEnvironmentPath = "../"
         else:
             rigEnvironmentPath = data["rig_env"]
-        self.rigEnvironment = os.path.abspath(os.path.join(self.rigFile, rigEnvironmentPath))
+        self.rigEnvironment = os.path.abspath(
+            os.path.join(self.rigFile, rigEnvironmentPath)
+        )
 
         # setup the rigamajig properties
         self.rigName = data.get(constants.RIG_NAME)
@@ -835,10 +860,10 @@ class Builder(object):
         self.localPubScripts = data.get(constants.PUB_SCRIPT)
 
         # also set the rig file and rig environment into environment variables to access in other scripts if needed.
-        os.environ['RIGAMJIG_FILE'] = self.rigFile
-        os.environ['RIGAMJIG_ENV'] = self.rigEnvironment
+        os.environ["RIGAMJIG_FILE"] = self.rigFile
+        os.environ["RIGAMJIG_ENV"] = self.rigEnvironment
 
-        logger.info('\nRig Environment path: {0}'.format(self.rigEnvironment))
+        logger.info("\nRig Environment path: {0}".format(self.rigEnvironment))
 
     def saveRigFile(self):
         """
@@ -865,7 +890,7 @@ class Builder(object):
             constants.OUTPUT_RIG_FILE_TYPE: self.outputFileType,
             constants.PRE_SCRIPT: self.localPreScripts,
             constants.POST_SCRIPT: self.localPostScripts,
-            constants.PUB_SCRIPT: self.localPubScripts
+            constants.PUB_SCRIPT: self.localPubScripts,
         }
 
         newData.update(newBuilderData)

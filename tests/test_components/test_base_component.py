@@ -9,12 +9,8 @@
 
 """
 
-import os
-import rigamajig2.maya.data.curve_data as curve_data
-import maya.cmds as cmds
-
+from rigamajig2.maya.components import base
 from rigamajig2.maya.test.mayaunittest import TestCase
-from rigamajig2.maya.cmpts import base
 
 
 class TestBaseComponent(TestCase):

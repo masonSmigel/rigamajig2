@@ -6,16 +6,15 @@ This is a command line unit test runner for mayapy.
 Derived from: Chad Vernon
 https://github.com/chadmv/cmt
 """
-from argparse import ArgumentParser
 import errno
 import os
-import sys
 import platform
 import shutil
 import stat
 import subprocess
 import tempfile
 import uuid
+from argparse import ArgumentParser
 
 RIGAMJIG_ROOT_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), '..'))
 
@@ -91,7 +90,7 @@ def main():
 
     pargs = parser.parse_args()
 
-    mayaunittest = os.path.join(RIGAMJIG_ROOT_DIR, 'scripts', 'rigamajig2', 'maya','test', 'mayaunittest.py')
+    mayaunittest = os.path.join(RIGAMJIG_ROOT_DIR, 'python', 'rigamajig2', 'maya','test', 'mayaunittest.py')
     cmd = [mayapy(pargs.maya), mayaunittest]
     if not os.path.exists(cmd[0]):
         raise RuntimeError('Maya {0} is not installed on this system.'.format(pargs.maya))
@@ -101,8 +100,9 @@ def main():
         return
 
     # add the lib to the python PAth
-    libPath = os.path.join(RIGAMJIG_ROOT_DIR, 'scripts', 'lib')
-    os.environ['PYTHONPATH'] = "{}:{}".format(libPath, os.environ['PYTHONPATH'])
+    libPath = os.path.join(RIGAMJIG_ROOT_DIR, 'python', 'lib')
+    pythonPath = os.path.join(RIGAMJIG_ROOT_DIR, 'python')
+    os.environ['PYTHONPATH'] = "{}:{}".format(libPath, pythonPath, os.environ['PYTHONPATH'])
 
     # Create clean prefs
     os.environ['MAYA_APP_DIR'] = maya_app_dir

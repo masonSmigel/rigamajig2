@@ -23,6 +23,7 @@ Lots of various fixes. This became a large update with some structural changes t
 * Major logger updates using a logger config file to setup logging to a file for each rigamajig session. Also
   standardizes info displayed to the user.
 * More standardized code
+* added parameters to all classes for better autocomplete than `defineParameters` alone
 
 ### Changed:
 
@@ -48,6 +49,8 @@ Lots of various fixes. This became a large update with some structural changes t
 * Removed custom logger.
 * removed the `mergeDefromLayers` step from the builder. Instead this should be done using a custom publish script.
     * In the future we will implement a library of default scripts to easily add to any rig.
+* removed `addProxyAttrs` from all components since they arent really that useful and cluttered components
+* removed alot of control name feilds from components instead control names are more reliant on the input joint names.
 
 ## 1.2.0
 

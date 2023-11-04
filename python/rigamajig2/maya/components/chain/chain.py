@@ -15,41 +15,44 @@ from rigamajig2.maya.components import base
 class Chain(base.Base):
     """
     Fk chain component.
-    This is a simple chain component made of only an fk chain.
+    This is a simple chain component made of only a fk chain.
     """
+
     VERSION_MAJOR = 1
-    VERSION_MINOR = 0
+    VERSION_MINOR = 1
     VERSION_PATCH = 0
 
     version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
-    version = '%i.%i.%i' % version_info
+    version = "%i.%i.%i" % version_info
     __version__ = version
 
     UI_COLOR = (109, 208, 159)
 
     def __init__(self, name, input, size=1, rigParent=str(), componentTag=None):
-        """"
+        """
         :param str name: name of the components
         :param list input: list of two joints. A start and an end joint
         :param float int size: default size of the controls:
         :param bool addFKSpace: add a world/local space switch to the base of the fk chain
-        :param str rigParent: node to parent to connect the component to in the heirarchy
+        :param str rigParent: node to parent to connect the component to in the hierarchy
         """
         super(Chain, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.defineParameter(parameter="useProxyAttrs", value=False, dataType="bool")
-        self.defineParameter(parameter="useScale", value=False, dataType="bool")
-        self.defineParameter(parameter="addSdk", value=True, dataType="bool")
-        self.defineParameter(parameter="addFKSpace", value=False, dataType="bool")
-        self.defineParameter(parameter="addBpm", value=False, dataType="bool")
+        self.useScale = True
+        self.addSdk = True
+        self.addFKSpace = False
+        self.addBpm = False
 
-        # noinspection PyTypeChecker
+        self.defineParameter(parameter="useScale", value=self.useScale, dataType="bool")
+        self.defineParameter(parameter="addSdk", value=self.addSdk, dataType="bool")
+        self.defineParameter(parameter="addFKSpace", value=self.addFKSpace, dataType="bool")
+        self.defineParameter(parameter="addBpm", value=self.addBpm, dataType="bool")
+
         if len(self.input) != 2:
-            raise RuntimeError('Input list must have a length of 2')
+            raise RuntimeError("Input list must have a length of 2")
 
     def _setInitialData(self):
-        # if the last joint is an end joint dont include it in the list.
         if not cmds.objExists(self.input[0]):
             self.enabled = False
             return
@@ -65,7 +68,7 @@ class Chain(base.Base):
 
         self.controlNameList = list()
         for i in range(len(self.inputList)):
-            jointNameStr = ("joint{}Name".format(i))
+            jointNameStr = "joint{}Name".format(i)
             self.controlNameList.append(jointNameStr)
             self.defineParameter(parameter=jointNameStr, value=inputBaseNames[i] + "_fk", dataType="string")
 
@@ -75,37 +78,52 @@ class Chain(base.Base):
 
         self.fkControlList = list()
         if self.useScale:
-            hideAttrs = ['v']
+            hideAttrs = ["v"]
         else:
-            hideAttrs = ['v', 's']
+            hideAttrs = ["v", "s"]
 
-        for i in range(len(self.inputList)):
-            parent = self.controlHierarchy
-            addSpaces = True
-            if i > 0:
+        for i, inputJoint in enumerate(self.inputList):
+            if i == 0:
+                parent = self.controlHierarchy
+                addSpaces = True
+            else:
                 parent = self.fkControlList[i - 1].name
                 addSpaces = False
-            control = rig_control.createAtObject(getattr(self, self.controlNameList[i]), self.side,
-                                                 spaces=addSpaces, sdk=self.addSdk, hideAttrs=hideAttrs,
-                                                 size=self.size, color='blue', parent=parent, shapeAim='x',
-                                                 shape='square', xformObj=self.inputList[i])
+
+            inputBaseName = inputJoint.split("_")[0]
+
+            control = rig_control.createAtObject(
+                name=inputBaseName + "_fk",
+                side=self.side,
+                spaces=addSpaces,
+                sdk=self.addSdk,
+                hideAttrs=hideAttrs,
+                size=self.size,
+                color="blue",
+                parent=parent,
+                shapeAim="x",
+                shape="square",
+                xformObj=self.inputList[i],
+            )
 
             self.fkControlList.append(control)
 
-        self.controlers = [ctl.name for ctl in self.fkControlList]
+        self.controlsList = [ctl.name for ctl in self.fkControlList]
 
     def _rigSetup(self):
         """Add the rig setup"""
-        rigamajig2.maya.joint.connectChains(self.controlers, self.inputList)
+        rigamajig2.maya.joint.connectChains(self.controlsList, self.inputList)
 
         if self.addBpm:
             # if needed we will add a bind pre matrix joint.
-            self.bpmHierarchy = cmds.createNode("transform", name="{}_bpm_hrc".format(self.name),
-                                                parent=self.rootHierarchy)
+            self.bpmHierarchy = cmds.createNode(
+                "transform", name="{}_bpm_hrc".format(self.name), parent=self.rootHierarchy
+            )
 
             bpmJointName = [x.rsplit("_", 1)[0] + "_bpm" for x in self.inputList]
-            self.bpmJointList = rigamajig2.maya.joint.duplicateChain(self.inputList, parent=self.bpmHierarchy,
-                                                                     names=bpmJointName)
+            self.bpmJointList = rigamajig2.maya.joint.duplicateChain(
+                self.inputList, parent=self.bpmHierarchy, names=bpmJointName
+            )
 
             rigamajig2.maya.joint.hideJoints(self.bpmJointList)
 
@@ -119,9 +137,10 @@ class Chain(base.Base):
             spaces.create(self.fkControlList[0].spaces, self.fkControlList[0].name, parent=self.spacesHierarchy)
 
             # if the main control exists connect the world space
-            if cmds.objExists('trs_motion'):
-                spaces.addSpace(self.fkControlList[0].spaces, ['trs_motion'], nameList=['world'],
-                                constraintType='orient')
+            if cmds.objExists("trs_motion"):
+                spaces.addSpace(
+                    self.fkControlList[0].spaces, ["trs_motion"], nameList=["world"], constraintType="orient"
+                )
 
         if self.addBpm:
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)

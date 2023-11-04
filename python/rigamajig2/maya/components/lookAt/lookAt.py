@@ -17,12 +17,13 @@ class LookAt(rigamajig2.maya.components.base.Base):
     Look at or Aim component.
     All joints within the same component will aim at the same target.
     """
+
     VERSION_MAJOR = 1
-    VERSION_MINOR = 0
+    VERSION_MINOR = 1
     VERSION_PATCH = 0
 
     version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
-    version = '%i.%i.%i' % version_info
+    version = "%i.%i.%i" % version_info
     __version__ = version
 
     UI_COLOR = (198, 167, 255)
@@ -41,23 +42,28 @@ class LookAt(rigamajig2.maya.components.base.Base):
         super(LookAt, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.defineParameter(parameter="aimTargetName", value=self.name + "_aim", dataType="string")
-        self.defineParameter(parameter="lookAtSpaces", value=dict(), dataType="dict")
-        self.defineParameter(parameter="rigParentList", value=list(), dataType="list")
-        self.defineParameter(parameter="upAxis", value="y", dataType="string")
+        self.aimTargetName = self.name + "_aim"
+        self.lookAtSpaces = {}
+        self.rigParentList = []
+        self.upAxis = "y"
+
+        self.defineParameter(parameter="aimTargetName", value=self.aimTargetName, dataType="string")
+        self.defineParameter(parameter="lookAtSpaces", value=self.lookAtSpaces, dataType="dict")
+        self.defineParameter(parameter="rigParentList", value=self.rigParentList, dataType="list")
+        self.defineParameter(parameter="upAxis", value=self.upAxis, dataType="string")
 
         for input in self.input:
             if cmds.objExists(input):
-                parameterName = '{}Name'.format(input)
-                parameterValue = '_'.join(input.split("_")[:-1])
+                parameterName = "{}Name".format(input)
+                parameterValue = "_".join(input.split("_")[:-1])
                 self.defineParameter(parameter=parameterName, value=parameterValue, dataType="string")
 
     def _createBuildGuides(self):
-        """ create build guides_hrc """
-        self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
+        """create build guides_hrc"""
+        self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
 
         self._lookAtTgt = rig_control.createGuide("{}_lookAtTgt".format(self.name), parent=self.guidesHierarchy)
-        rig_transform.matchTranslate(self.input, self._lookAtTgt)
+        rig_transform.matchTranslate(self.input[0], self._lookAtTgt)
         for input in self.input:
             inputUpVector = rig_control.createGuide("{}_upVecTgt".format(input), parent=self.guidesHierarchy)
             setattr(self, "_{}_upVecTgt".format(input), inputUpVector)
@@ -69,19 +75,32 @@ class LookAt(rigamajig2.maya.components.base.Base):
         """
         super(LookAt, self)._initialHierarchy()
 
-        self.aimTarget = rig_control.createAtObject(self.aimTargetName,
-                                                    spaces=True,
-                                                    hideAttrs=['v', 's'], size=self.size, color='banana',
-                                                    parent=self.controlHierarchy, shape='square', shapeAim='z',
-                                                    xformObj=self._lookAtTgt)
+        self.aimTarget = rig_control.createAtObject(
+            self.aimTargetName,
+            spaces=True,
+            hideAttrs=["v", "s"],
+            size=self.size,
+            color="banana",
+            parent=self.controlHierarchy,
+            shape="square",
+            shapeAim="z",
+            xformObj=self._lookAtTgt,
+        )
 
         self.lookAtCtlList = list()
         for input in self.input:
             lookAtName = getattr(self, "{}Name".format(input))
             aimAxis = rig_transform.getAimAxis(input)
-            lookAtControl = rig_control.createAtObject(lookAtName, hideAttrs=['v'], size=self.size,
-                                                       color='banana', parent=self.controlHierarchy, shape='circle',
-                                                       shapeAim=aimAxis, xformObj=input)
+            lookAtControl = rig_control.createAtObject(
+                lookAtName,
+                hideAttrs=["v"],
+                size=self.size,
+                color="banana",
+                parent=self.controlHierarchy,
+                shape="circle",
+                shapeAim=aimAxis,
+                xformObj=input,
+            )
             lookAtControl.addTrs("aim")
 
             # postion the control at the end joint. Get the aim vector from the input and mutiply by joint length.
@@ -102,13 +121,21 @@ class LookAt(rigamajig2.maya.components.base.Base):
             upVectorGuide = getattr(self, "_{}_upVecTgt".format(input))
 
             # create an upvector and aim contraint
-            upVectorTrs = cmds.createNode("transform", name="{}_upVec".format(lookatControl.trs),
-                                          p=self.spacesHierarchy)
+            upVectorTrs = cmds.createNode(
+                "transform", name="{}_upVec".format(lookatControl.trs), parent=self.spacesHierarchy
+            )
             rig_transform.matchTranslate(upVectorGuide, upVectorTrs)
             self.upVecObjList.append(upVectorTrs)
 
-            cmds.aimConstraint(self.aimTarget.name, lookatControl.trs, aim=aimVector, upVector=upVector,
-                               worldUpType='object', worldUpObject=upVectorTrs, mo=True)
+            cmds.aimConstraint(
+                self.aimTarget.name,
+                lookatControl.trs,
+                aimVector=aimVector,
+                upVector=upVector,
+                worldUpType="object",
+                worldUpObject=upVectorTrs,
+                maintainOffset=True,
+            )
 
             # connect the control to input joint
             joint.connectChains(lookatControl.name, input)
@@ -134,9 +161,9 @@ class LookAt(rigamajig2.maya.components.base.Base):
             for upVec in self.upVecObjList:
                 rig_transform.connectOffsetParentMatrix(self.rigParent, upVec, mo=True)
 
-        spaces.create(self.aimTarget.spaces, self.aimTarget.name, parent=self.spacesHierarchy, defaultName='world')
+        spaces.create(self.aimTarget.spaces, self.aimTarget.name, parent=self.spacesHierarchy, defaultName="world")
 
         if self.lookAtSpaces:
             spaceValues = [self.lookAtSpaces[k] for k in self.lookAtSpaces.keys()]
-            spacesAttrs = self.lookAtSpaces.keys()
-            spaces.addSpace(self.aimTarget.spaces, spaceValues, spacesAttrs, 'parent')
+            spacesAttrs = list(self.lookAtSpaces.keys())
+            spaces.addSpace(self.aimTarget.spaces, spaceValues, spacesAttrs, "parent")

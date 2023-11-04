@@ -19,7 +19,7 @@ class Leg(rigamajig2.maya.components.limb.limb.Limb):
     The leg component includes a foot.
     """
     VERSION_MAJOR = 1
-    VERSION_MINOR = 0
+    VERSION_MINOR = 1
     VERSION_PATCH = 0
 
     version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
@@ -38,6 +38,7 @@ class Leg(rigamajig2.maya.components.limb.limb.Limb):
         """
         super(Leg, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
 
+        # TODO: jaw control names
         self.defineParameter(parameter="toes_fkName", value="toes_fk", dataType="string")
         self.defineParameter(parameter="toes_ikName", value="toes_ik", dataType="string")
         self.defineParameter(parameter="ball_ikName", value="ball_ik", dataType="string")

@@ -28,7 +28,7 @@ class SplineSquash(rigamajig2.maya.components.base.Base):
     based on the distance between the two end controls.
     """
     VERSION_MAJOR = 1
-    VERSION_MINOR = 0
+    VERSION_MINOR = 1
     VERSION_PATCH = 0
 
     version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
@@ -48,17 +48,22 @@ class SplineSquash(rigamajig2.maya.components.base.Base):
         super(SplineSquash, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.defineParameter(parameter="createBpm", value=True, dataType="bool")
-        self.defineParameter(parameter="topControlName", value=f"{self.name}Top", dataType="string")
-        self.defineParameter(parameter="midControlName", value=f"{self.name}Mid", dataType="string")
-        self.defineParameter(parameter="botControlName", value=f"{self.name}Bot", dataType="string")
+        self.addBpm = True
+        self.topControlName = f"{self.name}Top"
+        self.midControlName = f"{self.name}Mid"
+        self.botControlName = f"{self.name}Bot"
+
+        self.defineParameter(parameter="addBpm", value=self.addBpm, dataType="bool")
+        self.defineParameter(parameter="topControlName", value=self.topControlName, dataType="string")
+        self.defineParameter(parameter="midControlName", value=self.midControlName, dataType="string")
+        self.defineParameter(parameter="botControlName", value=self.botControlName, dataType="string")
 
     def _createBuildGuides(self):
         """Create the build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
-        botPos = cmds.xform(self.input[0], q=True, ws=True, t=True)
-        topPos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
+        botPos = rig_transform.getTranslate(self.input[0])
+        topPos = rig_transform.getTranslate(self.input[-1])
 
         # get the average postion of the top and bottom positions
         averagePos = mathUtils.scalarMult(mathUtils.addVector(botPos, topPos), 0.5)
@@ -121,7 +126,7 @@ class SplineSquash(rigamajig2.maya.components.base.Base):
         rig_attr.createAttr(self.topControl.name, 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
         cmds.connectAttr("{}.volumeFactor".format(self.topControl.name), "{}.volumeFactor".format(self.paramsHierarchy))
 
-        if self.createBpm:
+        if self.addBpm:
             self.bpmHierarchy = cmds.createNode("transform", name="{}_bpm_hrc".format(self.name), parent=self.rootHierarchy)
 
             jointNameList = [x.rsplit("_", 1)[0] + "_bpm" for x in fullJointList]
@@ -139,7 +144,7 @@ class SplineSquash(rigamajig2.maya.components.base.Base):
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.midControl.orig, mo=True)
             rig_transform.connectOffsetParentMatrix(self.rigParent, self.topControl.orig, mo=True)
 
-            if self.createBpm:
+            if self.addBpm:
                 rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
 
 

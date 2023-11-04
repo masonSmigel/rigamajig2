@@ -46,15 +46,18 @@ class Spine(rigamajig2.maya.components.base.Base):
         super(Spine, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
-        self.defineParameter(parameter="addSpineMid", value=True, dataType="bool")
-        self.defineParameter(parameter="hipsSwing_name", value="hip_swing", dataType="string")
-        self.defineParameter(parameter="torso_name", value="torso", dataType="string")
-        self.defineParameter(parameter="spineMid_name", value="spineMid", dataType="string")
-        self.defineParameter(parameter="chest_name", value="chest", dataType="string")
-        self.defineParameter(parameter="chestTop_name", value="chestTop", dataType="string")
-        self.defineParameter(parameter="hipTanget_name", value="hipTan", dataType="string")
-        self.defineParameter(parameter="chestTanget_name", value="chestTan", dataType="string")
-        self.defineParameter(parameter="chestSpaces", value=dict(), dataType="dict")
+        self.addSpineMid = True
+        self.chestSpaces = {}
+        self.chestName = "chest"
+        self.spineName = "spine"
+        self.torsoName = "torso"
+        self.hipsName = "hip"
+
+        self.defineParameter(parameter="addSpineMid", value=self.addSpineMid, dataType="bool")
+        self.defineParameter(parameter="hipsName", value=self.hipsName, dataType="string")
+        self.defineParameter(parameter="torsoName", value=self.torsoName, dataType="string")
+        self.defineParameter(parameter="chestName", value=self.chestName, dataType="string")
+        self.defineParameter(parameter="chestSpaces", value=self.chestSpaces, dataType="dict")
        
     def _createBuildGuides(self):
         """Create the build guides"""
@@ -108,7 +111,7 @@ class Spine(rigamajig2.maya.components.base.Base):
         # build the hips swivel control
         hipPos = cmds.xform(self.input[0], q=True, ws=True, t=True)
         self.hipSwing = rig_control.createAtObject(
-            name=self.hipsSwing_name,
+            name=self.hipsName + "_swing",
             side=self.side,
             spaces=True,
             hideAttrs=['s', 'v'],
@@ -122,7 +125,7 @@ class Spine(rigamajig2.maya.components.base.Base):
 
         # build the torso control
         self.torso = rig_control.createAtObject(
-            name=self.torso_name,
+            name=self.torsoName,
             side=self.side,
             spaces=True,
             hideAttrs=['s', 'v'],
@@ -137,7 +140,7 @@ class Spine(rigamajig2.maya.components.base.Base):
         # if we want to add a spineMid then add it between the chest and torso
         if self.addSpineMid:
             self.spineMid = rig_control.createAtObject(
-                name=self.spineMid_name,
+                name=self.spineName+"Mid",
                 side=self.side,
                 hideAttrs=['s', 'v'],
                 size=self.size,
@@ -150,7 +153,7 @@ class Spine(rigamajig2.maya.components.base.Base):
 
         # build the chest control
         self.chest = rig_control.createAtObject(
-            name=self.chest_name,
+            name=self.chestName,
             side=self.side,
             spaces=True,
             hideAttrs=['s', 'v'],
@@ -165,7 +168,7 @@ class Spine(rigamajig2.maya.components.base.Base):
 
         chestPos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
         self.chestTop = rig_control.createAtObject(
-            name=self.chestTop_name,
+            name=self.chestName+"Top",
             side=self.side,
             hideAttrs=['s', 'v'],
             size=self.size,
@@ -178,7 +181,7 @@ class Spine(rigamajig2.maya.components.base.Base):
         self.chest.addTrs("len")
 
         self.hipTanget = rig_control.create(
-            name=self.hipTanget_name,
+            name=self.hipsName+"Tan",
             side=self.side,
             hideAttrs=['r', 's', 'v'],
             size=self.size,
@@ -190,7 +193,7 @@ class Spine(rigamajig2.maya.components.base.Base):
             )
 
         self.chestTanget = rig_control.create(
-            name=self.chestTanget_name,
+            name=self.chestName+"Tan",
             side=self.side,
             hideAttrs=['r', 's', 'v'],
             size=self.size,

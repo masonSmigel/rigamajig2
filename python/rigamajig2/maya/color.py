@@ -2,6 +2,7 @@
 Color Utilities
 """
 from collections import OrderedDict
+from typing import Union, List
 
 import maya.cmds as cmds
 
@@ -129,7 +130,7 @@ def setOverrideColor(nodes, color):
             cmds.setAttr("{}.overrideColorRGB".format(node), color[0], color[1], color[2])
 
 
-def setOutlinerColor(nodes, color):
+def setOutlinerColor(nodes:Union[List[str], str], color):
     """
     Sets the color of nodes in the outliner
     :param list nodes: nodes to set the override color to

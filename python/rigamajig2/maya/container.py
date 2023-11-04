@@ -2,6 +2,7 @@
 Functions for working with containers
 """
 import logging
+from typing import *
 
 import maya.cmds as cmds
 
@@ -10,10 +11,14 @@ import rigamajig2.shared.common as common
 logger = logging.getLogger(__name__)
 
 
-class InvalidContainer(Exception): pass
+class InvalidContainer(Exception):
+    pass
 
 
-def isContainer(name):
+Multiuse = Union[List[str], str]
+
+
+def isContainer(name: str) -> bool:
     """
     Check if the node is a valid Container
 
@@ -21,12 +26,14 @@ def isContainer(name):
     :return: True if Valid. False is invalid.
     :rtype: bool
     """
-    if not cmds.objExists(name): return False
-    if 'containerBase' not in cmds.nodeType(name, i=True): return False
+    if not cmds.objExists(name):
+        return False
+    if "containerBase" not in cmds.nodeType(name, inherited=True):
+        return False
     return True
 
 
-def create(name, nodes=None, dagContainer=False):
+def create(name: str, nodes=None, dagContainer=False):
     """
     Create a new container
 
@@ -37,23 +44,32 @@ def create(name, nodes=None, dagContainer=False):
     :rtype: str
     """
     if cmds.objExists(name):
-        raise InvalidContainer("Object {} already exists. Cannot create a container with that name".format(name))
+        raise InvalidContainer(
+            "Object {} already exists. Cannot create a container with that name".format(
+                name
+            )
+        )
     if nodes:
         for node in nodes:
             if not cmds.objExists(node):
-                raise RuntimeError("Node {} does not exist. Cannot add it to the container".format(node))
+                raise RuntimeError(
+                    "Node {} does not exist. Cannot add it to the container".format(
+                        node
+                    )
+                )
 
     if not dagContainer:
-        containerNode = cmds.container(n=name)
+        containerNode = cmds.container(name=name)
     else:
-        containerNode = cmds.container(n=name, typ='dagContainer')
+        containerNode = cmds.container(name=name, type="dagContainer")
 
-    if nodes: cmds.container(containerNode, e=True, addNode=nodes, f=True)
+    if nodes:
+        cmds.container(containerNode, edit=True, addNode=nodes, force=True)
 
     return containerNode
 
 
-def addNodes(nodes, container, addShape=True, force=False):
+def addNodes(nodes: Union[List[str], str], container, addShape=True, force=False):
     """
     Add nodes to a container.
 
@@ -66,14 +82,13 @@ def addNodes(nodes, container, addShape=True, force=False):
     if not isContainer(container):
         raise InvalidContainer("{} is not a container.".format(container))
 
-    cmds.container(container, e=True, addNode=nodes, force=force)
+    cmds.container(container, edit=True, addNode=nodes, force=force)
     if addShape:
         nodes = common.toList(nodes)
         for node in nodes:
-            shapes = cmds.listRelatives(node, s=True)
+            shapes = cmds.listRelatives(node, shapes=True)
             if shapes:
-                for shape in shapes:
-                    cmds.container(container, e=True, addNode=shape, force=force)
+                cmds.container(container, edit=True, addNode=shapes, force=force)
     return nodes
 
 
@@ -90,14 +105,13 @@ def removeNodes(nodes, container, removeShapes=True):
     if not isContainer(container):
         logger.error("{} is not a container.".format(container))
         return None
-    cmds.container(container, e=True, removeNode=nodes)
+    cmds.container(container, edit=True, removeNode=nodes)
     nodes = common.toList(nodes)
     if removeShapes:
         for node in nodes:
-            shapes = cmds.listRelatives(node, s=True)
+            shapes = cmds.listRelatives(node, shapes=True)
             if shapes:
-                for shape in shapes:
-                    cmds.container(container, e=True, removeNode=shape)
+                cmds.container(container, edit=True, removeNode=shapes)
 
 
 def getNodesInContainer(container, getSubContained=False):
@@ -111,19 +125,19 @@ def getNodesInContainer(container, getSubContained=False):
     """
     if not isContainer(container):
         raise InvalidContainer("{} is not a container.".format(container))
-    nodeList = cmds.container(container, q=True, nodeList=True) or []
+    nodeList = cmds.container(container, query=True, nodeList=True) or []
 
     # we also need to get nodes from subcontainers
     if getSubContained:
-        subContainers = cmds.ls(nodeList, type='container')
+        subContainers = cmds.ls(nodeList, type="container")
         for subContainer in subContainers:
-            subNodeList = cmds.container(subContainer, q=True, nodeList=True) or []
+            subNodeList = cmds.container(subContainer, query=True, nodeList=True) or []
             nodeList += subNodeList
 
     return nodeList
 
 
-def getContainerFromNode(node):
+def getContainerFromNode(node: Multiuse) -> str:
     """
     Get the parent container from a node
 
@@ -132,7 +146,7 @@ def getContainerFromNode(node):
     :rtype: list
     """
     node = common.getFirstIndex(node)
-    containerNode = cmds.container(q=True, findContainer=node)
+    containerNode = cmds.container(query=True, findContainer=node)
     return containerNode
 
 
@@ -145,17 +159,21 @@ def addPublishAttr(attr, assetAttrName=None, bind=True):
     :param bool bind: bind the publish node to the container
     """
     if not cmds.objExists(attr):
-        raise RuntimeError("Attribute {} does not exist. Cannot publish attribute".format(attr))
+        raise RuntimeError(
+            "Attribute {} does not exist. Cannot publish attribute".format(attr)
+        )
 
-    if not assetAttrName: assetAttrName = attr.replace('.', '_')
+    if not assetAttrName:
+        assetAttrName = attr.replace(".", "_")
 
-    node = cmds.ls(attr, o=True)
+    node = cmds.ls(attr, objectsOnly=True)
     containerNode = getContainerFromNode(node)
 
-    cmds.container(containerNode, e=True, publishName=assetAttrName)
-    if bind: cmds.container(containerNode, e=True, bindAttr=[attr, assetAttrName])
+    cmds.container(containerNode, edit=True, publishName=assetAttrName)
+    if bind:
+        cmds.container(containerNode, edit=True, bindAttr=(attr, assetAttrName))
 
-    return containerNode + '.' + assetAttrName
+    return containerNode + "." + assetAttrName
 
 
 def addPublishNodes(nodes, container=None, bind=True):
@@ -169,25 +187,35 @@ def addPublishNodes(nodes, container=None, bind=True):
     nodes = common.toList(nodes)
     for node in nodes:
         if not cmds.objExists(node):
-            raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
+            raise RuntimeError(
+                "Node {} does not exist. Cannot publish Node".format(node)
+            )
 
         assetNodeName = node
 
         containerNode = getContainerFromNode(node)
         if not containerNode:
-            if not container: raise Exception("{} is not a part of a container and no container specified".format(node))
+            if not container:
+                raise Exception(
+                    "{} is not a part of a container and no container specified".format(
+                        node
+                    )
+                )
             addNodes(node, container)
             containerNode = container
 
-        containedNodes = cmds.containerPublish(containerNode, q=True, publishNode=True)
+        containedNodes = cmds.containerPublish(
+            containerNode, query=True, publishNode=True
+        )
         if not containedNodes:
             containedNodes = list()
         if node not in containedNodes:
-            cmds.containerPublish(containerNode, publishNode=[node, 'transform'])
-            if bind: cmds.containerPublish(containerNode, bindNode=[node, assetNodeName])
+            cmds.containerPublish(containerNode, publishNode=(node, "transform"))
+            if bind:
+                cmds.containerPublish(containerNode, bindNode=(node, assetNodeName))
 
 
-def addParentAnchor(node, container=None, assetNodeName=None):
+def addParentAnchor(node, container=None, assetNodeName: str = None):
     """
     Publish a node as the parent Anchor
 
@@ -199,15 +227,21 @@ def addParentAnchor(node, container=None, assetNodeName=None):
     if not cmds.objExists(node):
         raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
 
-    if not assetNodeName: assetNodeName = 'parent'
+    if not assetNodeName:
+        assetNodeName = "parent"
 
     containerNode = getContainerFromNode(node)
     if not containerNode:
-        if not container: raise Exception("{} is not a part of a container and no container specified".format(node))
+        if not container:
+            raise Exception(
+                "{} is not a part of a container and no container specified".format(
+                    node
+                )
+            )
         addNodes(node, container)
         containerNode = container
 
-    cmds.container(containerNode, e=True, publishAsParent=[node, assetNodeName])
+    cmds.container(containerNode, edit=True, publishAsParent=(node, assetNodeName))
 
 
 def addChildAnchor(node, container=None, assetNodeName=None):
@@ -222,16 +256,21 @@ def addChildAnchor(node, container=None, assetNodeName=None):
     if not cmds.objExists(node):
         raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
 
-    if not assetNodeName: assetNodeName = 'child'
+    if not assetNodeName:
+        assetNodeName = "child"
 
     containerNode = getContainerFromNode(node)
     if not containerNode:
         if not container:
-            raise Exception("{} is not a part of a container and no container specified".format(node))
+            raise Exception(
+                "{} is not a part of a container and no container specified".format(
+                    node
+                )
+            )
         addNodes(node, container)
         containerNode = container
 
-    cmds.container(containerNode, e=True, publishAsChild=[node, assetNodeName])
+    cmds.container(containerNode, edit=True, publishAsChild=(node, assetNodeName))
 
 
 def safeDeleteContainer(container):
@@ -259,19 +298,19 @@ def sainityCheck():
     """
 
     # set 'use assets' OFF in the node editor
-    cmds.nodeEditor('nodeEditorPanel1NodeEditorEd', e=True, useAssets=False)
+    cmds.nodeEditor("nodeEditorPanel1NodeEditorEd", e=True, useAssets=False)
 
     # set 'show at top' OFF in the channel box editor
-    cmds.channelBox('mainChannelBox', e=True, containerAtTop=False)
+    cmds.channelBox("mainChannelBox", edit=True, containerAtTop=False)
 
     # set asset centric selection to be OFF in the maya preferences
     cmds.selectPref(containerCentricSelection=False)
 
     # set asset display is to 'under parent'
-    outliners = cmds.getPanel(typ='outlinerPanel')
+    outliners = cmds.getPanel(type="outlinerPanel")
     for outlinerPanel in outliners:
-        cmds.outlinerEditor(outlinerPanel, e=True, showContainerContents=0)
-        cmds.outlinerEditor(outlinerPanel, e=True, showContainedOnly=0)
+        cmds.outlinerEditor(outlinerPanel, edit=True, showContainerContents=False)
+        cmds.outlinerEditor(outlinerPanel, edit=True, showContainedOnly=False)
 
 
 class ActiveContainer(object):
@@ -291,7 +330,7 @@ class ActiveContainer(object):
         self.container = container
 
     def __enter__(self):
-        cmds.container(self.container, e=True, c=True)
+        cmds.container(self.container, edit=True, current=True)
 
     def __exit__(self, type, value, traceback):
-        cmds.container(self.container, e=True, c=False)
+        cmds.container(self.container, edit=True, current=False)

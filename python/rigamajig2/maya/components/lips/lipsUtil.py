@@ -35,12 +35,11 @@ def autoSkinLowCurve(crv, min, mid, max):
     maxParam = len(cvs)
 
     for i, cv in enumerate(cvs):
-
         # get the parameter of the current CV
         x = float(i) / (maxParam - 1)
 
         # here y is equal to the value of the middle control
-        y = (-((x * 2) - 1) ** 2) + 1
+        y = (-(((x * 2) - 1) ** 2)) + 1
 
         # to get the outer control use 1-y
         outer = 1 - y
@@ -113,7 +112,6 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
 
     # next we can start to find values for the orient constraint
     for jnt in jointsList:
-
         # get the joint parameter and find the closest control by comparing to the controlList
         jntPos = cmds.xform(jnt, q=True, ws=True, t=True)
         jntParam = curve.getClosestParameter(sampleCurve, jntPos)
@@ -142,7 +140,6 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
 
         # if the values are equal we can skip the orient weighting and go straight to the nearest joint
         if nextIndex is not None:
-
             # next grab the next control
             nextControl = controlsList[nextIndex]
 
@@ -166,8 +163,9 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
             # Finally we can build a simple hierarchy for the rotations. we will create two joints each constrained
             # to a different control then use a pair blend to rotate them!
             offset = cmds.createNode("transform", name="{}_offset".format(jnt), parent=parent)
-            closestJoint = cmds.createNode("transform", name="{}_{}_ort".format(jnt, closestControl.name),
-                                           parent=offset)
+            closestJoint = cmds.createNode(
+                "transform", name="{}_{}_ort".format(jnt, closestControl.name), parent=offset
+            )
             nextJoint = cmds.createNode("transform", name="{}_{}_ort".format(jnt, nextControl.name), parent=offset)
 
             # match the orientation of the new joint before we adjust them
@@ -241,17 +239,19 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
     triggers = {"r": list(), "l": list()}
     numJoints = len(uppJoints)
 
-    for side in 'rl':
+    for side in "rl":
         # setup the falloff
         delaySubtract = node.plusMinusAverage1D(
             [10, "{}.{}{}".format(paramsHolder, side, ZIPPER_FALLOFF_ATTR)],
-            operation='sub',
-            name="{}_l_delay".format(name))
+            operation="sub",
+            name="{}_l_delay".format(name),
+        )
 
         delayDivide = node.multDoubleLinear(
-            input1="{}.{}".format(delaySubtract, 'output1D'),
+            input1="{}.{}".format(delaySubtract, "output1D"),
             input2=1.0 / float(numJoints - 1),
-            name="{}_zipper_{}_div".format(name, side))
+            name="{}_zipper_{}_div".format(name, side),
+        )
 
         multTriggers = list()
         subTriggers = list()
@@ -262,14 +262,15 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
             indexName = "{}_{:02d}".format(name, index)
 
             delayMultName = "{}_zipper_{}".format(indexName, side)
-            delayMult = node.multDoubleLinear(index, "{}.{}".format(delayDivide, 'output'), name=delayMultName)
+            delayMult = node.multDoubleLinear(index, "{}.{}".format(delayDivide, "output"), name=delayMultName)
             multTriggers.append(delayMult)
 
             subDelayName = "{}_zipper_{}".format(indexName, side)
             subDelay = node.plusMinusAverage1D(
                 inputs=["{}.{}".format(delayMult, "output"), "{}.{}{}".format(paramsHolder, side, ZIPPER_FALLOFF_ATTR)],
-                operation='sum',
-                name=subDelayName)
+                operation="sum",
+                name=subDelayName,
+            )
             subTriggers.append(subDelay)
 
     for i in range(numJoints):
@@ -277,28 +278,37 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
         lIndex = numJoints - rIndex - 1
         indexName = "{}_zipper_{}".format(name, lIndex)
 
-        lMultTrigger, lSubTrigger = triggers['l'][0][lIndex], triggers['l'][1][lIndex]
-        rMultTrigger, rSubTrigger = triggers['r'][0][rIndex], triggers['r'][1][rIndex]
+        lMultTrigger, lSubTrigger = triggers["l"][0][lIndex], triggers["l"][1][lIndex]
+        rMultTrigger, rSubTrigger = triggers["r"][0][rIndex], triggers["r"][1][rIndex]
 
         # Setup the network for the left side
-        lRemap = node.remapValue("{}.{}{}".format(paramsHolder, 'l', ZIPPER_ATTR),
-                                 inMin="{}.{}".format(lMultTrigger, "output"),
-                                 inMax="{}.{}".format(lSubTrigger, "output1D"),
-                                 outMax=1, interp='smooth', name="{}_zipper_{}".format(indexName, 'l'))
+        lRemap = node.remapValue(
+            "{}.{}{}".format(paramsHolder, "l", ZIPPER_ATTR),
+            inMin="{}.{}".format(lMultTrigger, "output"),
+            inMax="{}.{}".format(lSubTrigger, "output1D"),
+            outMax=1,
+            interp="smooth",
+            name="{}_zipper_{}".format(indexName, "l"),
+        )
 
         # setup the nextwork for the right side
-        rSub = node.plusMinusAverage1D([1, "{}.{}".format(lRemap, "outValue")], operation='sub',
-                                       name="{}_offset_zipper_r_sub".format(indexName))
+        rSub = node.plusMinusAverage1D(
+            [1, "{}.{}".format(lRemap, "outValue")], operation="sub", name="{}_offset_zipper_r_sub".format(indexName)
+        )
 
-        rRemap = node.remapValue("{}.{}{}".format(paramsHolder, 'r', ZIPPER_ATTR),
-                                 inMin="{}.{}".format(rMultTrigger, "output"),
-                                 inMax="{}.{}".format(rSubTrigger, "output1D"),
-                                 outMax="{}.{}".format(rSub, "output1D"),
-                                 interp='smooth', name="{}_zipper_{}".format(indexName, 'r'))
+        rRemap = node.remapValue(
+            "{}.{}{}".format(paramsHolder, "r", ZIPPER_ATTR),
+            inMin="{}.{}".format(rMultTrigger, "output"),
+            inMax="{}.{}".format(rSubTrigger, "output1D"),
+            outMax="{}.{}".format(rSub, "output1D"),
+            interp="smooth",
+            name="{}_zipper_{}".format(indexName, "r"),
+        )
 
         # Add the outputs of both the left and right network together so we can zip from either side
-        total = node.plusMinusAverage1D(["{}.{}".format(rRemap, "outValue"), "{}.{}".format(lRemap, "outValue")],
-                                        name="{}_sum".format(indexName))
+        total = node.plusMinusAverage1D(
+            ["{}.{}".format(rRemap, "outValue"), "{}.{}".format(lRemap, "outValue")], name="{}_sum".format(indexName)
+        )
 
         # clamp the value to one so we cant overdrive the zip
         clamp = node.remapValue("{}.output1D".format(total), name="{}_clamp".format(indexName))
@@ -307,4 +317,4 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
         for jointList in [uppJoints, lowJoints]:
             jnt = jointList[i]
             blendMatrix = cmds.listConnections("{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False)[0]
-            cmds.connectAttr("{}.{}".format(clamp, 'outValue'), "{}.{}".format(blendMatrix, "envelope"), f=True)
+            cmds.connectAttr("{}.{}".format(clamp, "outValue"), "{}.{}".format(blendMatrix, "envelope"), f=True)

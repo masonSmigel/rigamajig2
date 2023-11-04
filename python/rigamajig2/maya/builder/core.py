@@ -11,16 +11,13 @@
 import glob
 import inspect
 import logging
-# PYTHON
 import os
 import pathlib
 import shutil
 import sys
 
-# MAYA
 import maya.cmds as cmds
 
-# RIGAMAJIG
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.data import abstract_data
 from rigamajig2.shared import common
@@ -29,15 +26,15 @@ from rigamajig2.shared import runScript
 
 logger = logging.getLogger(__name__)
 
-CMPT_PATH = os.path.abspath(os.path.join(__file__, '../../components'))
-_EXCLUDED_FOLDERS = ['face']
-_EXCLUDED_FILES = ['__init__.py', 'base.py']
-CMPT_ROOT_MODULE = 'components'
+CMPT_PATH = os.path.abspath(os.path.join(__file__, "../../components"))
+_EXCLUDED_FOLDERS = ["face"]
+_EXCLUDED_FILES = ["__init__.py", "base.py"]
+CMPT_ROOT_MODULE = "components"
 
-SCRIPT_FOLDER_CONSTANTS = ['pre_scripts', 'post_scripts', 'pub_scripts']
+SCRIPT_FOLDER_CONSTANTS = ["pre_scripts", "post_scripts", "pub_scripts"]
 
-DATA_PATH = os.path.abspath(os.path.join(__file__, '../../data'))
-DATA_EXCLUDE_FILES = ['__init__.py']
+DATA_PATH = os.path.abspath(os.path.join(__file__, "../../data"))
+DATA_EXCLUDE_FILES = ["__init__.py"]
 DATA_EXCLUDE_FOLDERS = []
 
 
@@ -65,7 +62,11 @@ def findComponents(path=CMPT_PATH, excludedFolders=None, excludedFiles=None):
             toReturn.update(res)
 
         # check if the item is a python file
-        if item.find('.py') != -1 and item.find('.pyc') == -1 and item not in excludedFiles:
+        if (
+            item.find(".py") != -1
+            and item.find(".pyc") == -1
+            and item not in excludedFiles
+        ):
             singleComponentDict = validateComponent(itemPath)
             if singleComponentDict:
                 toReturn.update(singleComponentDict)
@@ -120,7 +121,7 @@ def validateComponent(filePath):
         componentClassName = cls[0]
         if componentClassName == predictedName:
             resultDict = dict()
-            componentName = '.'.join([modulePath.rsplit('.')[-1], moduleName])
+            componentName = ".".join([modulePath.rsplit(".")[-1], moduleName])
             resultDict[componentName] = [fullModulename, componentClassName]
             return resultDict
 
@@ -137,7 +138,7 @@ def createComponentClassInstance(componentType):
 
     if componentType not in list(componentLookupDict.keys()):
         # HACK: this is a work around to account for the fact that some old .rig files use the cammel cased components
-        module, cls = componentType.split('.')
+        module, cls = componentType.split(".")
         newClass = cls[0].lower() + cls[1:]
         tempModuleName = module + "." + newClass
         if tempModuleName in list(componentLookupDict.keys()):
@@ -153,13 +154,15 @@ def createComponentClassInstance(componentType):
 
 # Data Type Utilities
 
+
 def getDataModules(path=None):
     """
     get a dictionary of data type and data module.
     This can be used to create instances of each data module to use in data loading.
     :return:
     """
-    if not path: path = DATA_PATH
+    if not path:
+        path = DATA_PATH
     path = rig_path.cleanPath(path)
 
     pathObj = pathlib.Path(path)
@@ -176,7 +179,7 @@ def getDataModules(path=None):
         filePath = pathlib.Path(os.path.join(path, file.name))
 
         # check the extension of the files.
-        if filePath.suffix == '.py' and filePath.name not in DATA_EXCLUDE_FILES:
+        if filePath.suffix == ".py" and filePath.name not in DATA_EXCLUDE_FILES:
             # get the path local to the python path
             relPath = pathlib.Path(filePath.relative_to(rigamajigRootPyPath))
 
@@ -210,7 +213,9 @@ def createDataClassInstance(dataType=None):
     """
     dataTypeInfo = getDataModules().get(dataType)
     if not dataTypeInfo:
-        raise ValueError(f"Data type {dataType} is not valid. Valid Types are {getDataModules()}")
+        raise ValueError(
+            f"Data type {dataType} is not valid. Valid Types are {getDataModules()}"
+        )
 
     modulePath = dataTypeInfo[0]
     className = dataTypeInfo[1]
@@ -220,6 +225,7 @@ def createDataClassInstance(dataType=None):
 
     # initialize the class when returning it to return it as a NEW instance.
     return classInstance()
+
 
 def loadRequiredPlugins():
     """
@@ -235,6 +241,7 @@ def loadRequiredPlugins():
 
 
 # Script List Utilities
+
 
 def validateScriptList(scriptsList=None):
     """
@@ -341,7 +348,11 @@ class GetCompleteScriptList(object):
                 archetypePath = os.sep.join([common.ARCHETYPES_PATH, baseArchetype])
                 archetypeRigFile = findRigFile(archetypePath)
 
-                cls.findScripts(archetypeRigFile, scriptType=scriptType, recursionLevel=recursionLevel + 1)
+                cls.findScripts(
+                    archetypeRigFile,
+                    scriptType=scriptType,
+                    recursionLevel=recursionLevel + 1,
+                )
 
 
 #
@@ -401,6 +412,7 @@ class GetCompleteScriptList(object):
 
 # Archetype Utilities
 
+
 def getAvailableArchetypes():
     """
     get a list of avaible archetypes. Archetypes are defined as a folder containng a .rig file.
@@ -419,7 +431,7 @@ def getAvailableArchetypes():
 
 
 def findRigFile(path):
-    """ find a rig file within the path"""
+    """find a rig file within the path"""
     if rig_path.isFile(path):
         return False
 
@@ -430,7 +442,7 @@ def findRigFile(path):
         if not rig_path.isDir(path):
             continue
         fileName, fileExt = os.path.splitext(os.path.join(path, f))
-        if fileExt != '.rig':
+        if fileExt != ".rig":
             continue
         return os.path.join(path, f)
     return False
@@ -448,7 +460,9 @@ def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
         raise RuntimeError("{} is not a valid archetype".format(archetype))
 
     archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
-    rigFile = createRigEnvironment(sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName)
+    rigFile = createRigEnvironment(
+        sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName
+    )
 
     data = abstract_data.AbstractData()
     data.read(rigFile)
@@ -465,7 +479,7 @@ def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
     # previous inheritance. Keeping them here will duplicate the execution.
     for scriptType in SCRIPT_FOLDER_CONSTANTS:
         path = os.sep.join([newEnv, rigName, scriptType])
-        files = glob.glob('{}/*'.format(path))
+        files = glob.glob("{}/*".format(path))
         for f in files:
             os.remove(f)
 
@@ -504,6 +518,7 @@ def createRigEnvironment(sourceEnviornment, targetEnviornment, rigName):
 
 # Rig File Utilities
 
+
 def getRigData(rigFile, key):
     """
     read the data from the self.rig_file
@@ -515,7 +530,7 @@ def getRigData(rigFile, key):
         return None
 
     if not os.path.exists(rigFile):
-        raise RuntimeError('rig file at {} does not exist'.format(rigFile))
+        raise RuntimeError("rig file at {} does not exist".format(rigFile))
 
     data = abstract_data.AbstractData()
     data.read(rigFile)

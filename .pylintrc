@@ -72,7 +72,7 @@ score=yes
 ignore-long-lines=^\s*(# )?<?https?://\S+>?$
 
 # Maximum number of characters on a single line.
-max-line-length=125
+max-line-length=120
 
 # Maximum number of lines in a module.
 max-module-lines=1000

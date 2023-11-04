@@ -8,6 +8,7 @@
     description: attribute functions and helpers.
 """
 import logging
+from typing import Union
 
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
@@ -16,9 +17,9 @@ import rigamajig2.shared.common as common
 
 logger = logging.getLogger(__name__)
 
-TRANSLATE = ['tx', 'ty', 'tz']
-ROTATE = ['rx', 'ry', 'rz']
-SCALE = ['sx', 'sy', 'sz']
+TRANSLATE = ["tx", "ty", "tz"]
+ROTATE = ["rx", "ry", "rz"]
+SCALE = ["sx", "sy", "sz"]
 TRANSFORMS = TRANSLATE + ROTATE + SCALE
 
 
@@ -30,8 +31,8 @@ def isAttr(plug):
     :return: True if Valid. False is invalid.
     :rtype: bool
     """
-    node = plug.split('.')[0]
-    attr = plug.replace(node + '.', '')
+    node = plug.split(".")[0]
+    attr = plug.replace(node + ".", "")
     attrNoCompound = attr.split("[")[0]
 
     if cmds.attributeQuery(attrNoCompound, node=node, exists=True):
@@ -41,8 +42,22 @@ def isAttr(plug):
 
 # We need alot of arguments here
 # pylint:disable=too-many-arguments
-def createAttr(node, longName, attributeType, value=None, niceName=None, shortName=None, minValue=None, maxValue=None,
-               keyable=True, readable=True, writable=True, storable=True, channelBox=False, locked=False):
+def createAttr(
+    node,
+    longName,
+    attributeType,
+    value=None,
+    niceName=None,
+    shortName=None,
+    minValue=None,
+    maxValue=None,
+    keyable=True,
+    readable=True,
+    writable=True,
+    storable=True,
+    channelBox=False,
+    locked=False,
+):
     """
     Add a new attribute to the provided node.
 
@@ -68,16 +83,20 @@ def createAttr(node, longName, attributeType, value=None, niceName=None, shortNa
         logger.warning("Attribute {1}, already exists on {0}".format(node, longName))
         return
     data = dict()
-    if shortName is not None: data["shortName"] = shortName
-    if niceName is not None:  data["niceName"] = niceName
+    if shortName is not None:
+        data["shortName"] = shortName
+    if niceName is not None:
+        data["niceName"] = niceName
 
     if attributeType in ["string"]:
         data["dataType"] = attributeType
     else:
         data["attributeType"] = attributeType
 
-    if minValue is not None and minValue is not False: data["minValue"] = minValue
-    if maxValue is not None and maxValue is not False: data["maxValue"] = maxValue
+    if minValue is not None and minValue is not False:
+        data["minValue"] = minValue
+    if maxValue is not None and maxValue is not False:
+        data["maxValue"] = maxValue
 
     data["keyable"] = keyable
     data["readable"] = readable
@@ -91,12 +110,12 @@ def createAttr(node, longName, attributeType, value=None, niceName=None, shortNa
 
     plug = str(node + "." + longName)
     if value:
-        if attributeType == 'string':
+        if attributeType == "string":
             cmds.setAttr(plug, value, type=attributeType)
         else:
             cmds.setAttr(plug, value)
     if channelBox:
-        cmds.setAttr(plug, cb=True)
+        cmds.setAttr(plug, channelBox=True)
     if locked:
         lock(node, longName)
 
@@ -105,8 +124,19 @@ def createAttr(node, longName, attributeType, value=None, niceName=None, shortNa
 
 # We need alot of arguments here
 # pylint:disable=too-many-arguments
-def createEnum(node, longName, enum, value=None, niceName=None, shortName=None,
-               keyable=True, readable=True, writable=True, storable=True, channelBox=False):
+def createEnum(
+    node,
+    longName,
+    enum,
+    value=None,
+    niceName=None,
+    shortName=None,
+    keyable=True,
+    readable=True,
+    writable=True,
+    storable=True,
+    channelBox=False,
+):
     """
     Add an Enum attribute
 
@@ -130,10 +160,12 @@ def createEnum(node, longName, enum, value=None, niceName=None, shortName=None,
         return
 
     data = dict()
-    if shortName is not None: data["shortName"] = shortName
-    if niceName is not None:  data["niceName"] = niceName
+    if shortName is not None:
+        data["shortName"] = shortName
+    if niceName is not None:
+        data["niceName"] = niceName
 
-    data["attributeType"] = 'enum'
+    data["attributeType"] = "enum"
     data["en"] = ":".join([str(x) for x in enum])
 
     data["keyable"] = keyable
@@ -143,8 +175,10 @@ def createEnum(node, longName, enum, value=None, niceName=None, shortName=None,
 
     cmds.addAttr(node, longName=longName, **data)
     plug = str(node + "." + longName)
-    if value: cmds.setAttr(plug, value)
-    if channelBox: cmds.setAttr(plug, cb=True)
+    if value:
+        cmds.setAttr(plug, value)
+    if channelBox:
+        cmds.setAttr(plug, channelBox=True)
     return plug
 
 
@@ -159,12 +193,12 @@ def addSeparator(node, label, repeat=4):
     :return: The plug of the separator added
     :rtype: str
     """
-    existing = [str(i) for i in cmds.listAttr(node, ud=True) or [] if i.startswith('sep')]
+    existing = [str(i) for i in cmds.listAttr(node, userDefined=True) or [] if i.startswith("sep")]
     sep = "sep" + str(len(existing))
 
     createEnum(node, longName=sep, niceName=("-" * repeat), enum=[label])
     plug = node + "." + sep
-    cmds.setAttr(plug, k=True, cb=True)
+    cmds.setAttr(plug, keyable=True, channelBox=True)
 
     return plug
 
@@ -183,20 +217,31 @@ def createProxy(sources, targets):
         for target in targets:
             attrName = cmds.attributeName(sourceAttr, long=True)
             # If an attribute already exits, a new attrName from the full attribute name.
-            if cmds.attributeQuery(attrName, n=target, exists=True):
-                attrName = "{}_{}".format(sourceAttr.split('.')[0], attrName)
+            if cmds.attributeQuery(attrName, node=target, exists=True):
+                attrName = "{}_{}".format(sourceAttr.split(".")[0], attrName)
 
             # Add the attribute if it does not exist. otherwise throw an error.
-            if not cmds.attributeQuery(attrName, n=target, exists=True):
-                cmds.addAttr(target, ln=attrName, pxy=sourceAttr)
+            if not cmds.attributeQuery(attrName, node=target, exists=True):
+                cmds.addAttr(target, longName=attrName, proxy=sourceAttr)
             else:
-                logger.error("Attribute {} already exists. Cannot make a proxy".format(target + '.' + attrName))
+                logger.error("Attribute {} already exists. Cannot make a proxy".format(target + "." + attrName))
 
 
 # We need alot of arguments here
 # pylint:disable=too-many-arguments
-def createColorAttr(node, longName, value=False, niceName=None, shortName=None,
-                    keyable=True, readable=True, storable=True, writable=True, channelBox=False, channelBoxType='rgb'):
+def createColorAttr(
+    node,
+    longName,
+    value=False,
+    niceName=None,
+    shortName=None,
+    keyable=True,
+    readable=True,
+    storable=True,
+    writable=True,
+    channelBox=False,
+    channelBoxType="rgb",
+):
     """
     Add a new attribute to the provided node.
 
@@ -218,63 +263,73 @@ def createColorAttr(node, longName, value=False, niceName=None, shortName=None,
     if hasAttr(node, longName):
         logger.warning("Attribute {1}, already exists on {0}".format(node, longName))
         return
-    data = {'attributeType': 'float3', "usedAsColor": True, "keyable": keyable, "readable": readable,
-            "storable": storable, "writable": writable}
+    data = {
+        "attributeType": "float3",
+        "usedAsColor": True,
+        "keyable": keyable,
+        "readable": readable,
+        "storable": storable,
+        "writable": writable,
+    }
 
-    dataChild = {"attributeType": 'float', "parent": longName}
+    dataChild = {"attributeType": "float", "parent": longName}
 
-    if shortName is not None: data["shortName"] = shortName
-    if niceName is not None:  data["niceName"] = niceName
+    if shortName is not None:
+        data["shortName"] = shortName
+    if niceName is not None:
+        data["niceName"] = niceName
 
-    cmds.addAttr(node, ln=longName, **data)
-    cmds.addAttr(node, ln=longName + '_r', **dataChild)
-    cmds.addAttr(node, ln=longName + '_g', **dataChild)
-    cmds.addAttr(node, ln=longName + '_b', **dataChild)
+    cmds.addAttr(node, longName=longName, **data)
+    cmds.addAttr(node, longName=longName + "_r", **dataChild)
+    cmds.addAttr(node, longName=longName + "_g", **dataChild)
+    cmds.addAttr(node, longName=longName + "_b", **dataChild)
 
     # if channel box is on. Make a couple float attributes to control the color.
     if channelBox:
-        if channelBoxType == 'rgb':
-            rChannel = createAttr(node, longName + 'R', attributeType='float', minValue=0, maxValue=1)
-            gChannel = createAttr(node, longName + 'G', attributeType='float', minValue=0, maxValue=1)
-            bChannel = createAttr(node, longName + 'B', attributeType='float', minValue=0, maxValue=1)
+        if channelBoxType == "rgb":
+            rChannel = createAttr(node, longName + "R", attributeType="float", minValue=0, maxValue=1)
+            gChannel = createAttr(node, longName + "G", attributeType="float", minValue=0, maxValue=1)
+            bChannel = createAttr(node, longName + "B", attributeType="float", minValue=0, maxValue=1)
 
-            cmds.connectAttr(rChannel, node + "." + longName + '_r', f=True)
-            cmds.connectAttr(gChannel, node + "." + longName + '_g', f=True)
-            cmds.connectAttr(bChannel, node + "." + longName + '_b', f=True)
+            cmds.connectAttr(rChannel, node + "." + longName + "_r", force=True)
+            cmds.connectAttr(gChannel, node + "." + longName + "_g", force=True)
+            cmds.connectAttr(bChannel, node + "." + longName + "_b", force=True)
 
             if value:
                 cmds.setAttr(rChannel, value[0])
                 cmds.setAttr(gChannel, value[1])
                 cmds.setAttr(bChannel, value[2])
 
-        elif channelBoxType == 'hsv':
-            hueChannel = createAttr(node, longName + 'Hue', attributeType='float', minValue=0, maxValue=1)
-            satChannel = createAttr(node, longName + 'Sat', attributeType='float', minValue=0, maxValue=1)
-            valChannel = createAttr(node, longName + 'Val', attributeType='float', minValue=0, maxValue=1)
-            hsvNode = cmds.createNode('hsvToRgb', n=node + "_" + longName + '_hsv')
-            hueMult = cmds.createNode('multDoubleLinear', n=node + "_" + longName + '_hue_mdl')
+        elif channelBoxType == "hsv":
+            hueChannel = createAttr(node, longName + "Hue", attributeType="float", minValue=0, maxValue=1)
+            satChannel = createAttr(node, longName + "Sat", attributeType="float", minValue=0, maxValue=1)
+            valChannel = createAttr(node, longName + "Val", attributeType="float", minValue=0, maxValue=1)
+            hsvNode = cmds.createNode("hsvToRgb", name=node + "_" + longName + "_hsv")
+            hueMult = cmds.createNode("multDoubleLinear", name=node + "_" + longName + "_hue_mdl")
 
-            cmds.connectAttr(hueChannel, hueMult + '.input1')
-            cmds.setAttr(hueMult + '.input2', 360)
+            cmds.connectAttr(hueChannel, hueMult + ".input1")
+            cmds.setAttr(hueMult + ".input2", 360)
 
-            cmds.connectAttr(hueMult + '.output', hsvNode + ".inHsvR", f=True)
-            cmds.connectAttr(satChannel, hsvNode + ".inHsvG", f=True)
-            cmds.connectAttr(valChannel, hsvNode + ".inHsvB", f=True)
-            cmds.connectAttr(hsvNode + '.outRgb', node + '.' + longName)
+            cmds.connectAttr(hueMult + ".output", hsvNode + ".inHsvR", force=True)
+            cmds.connectAttr(satChannel, hsvNode + ".inHsvG", force=True)
+            cmds.connectAttr(valChannel, hsvNode + ".inHsvB", force=True)
+            cmds.connectAttr(hsvNode + ".outRgb", node + "." + longName)
             if value:
                 cmds.setAttr(hueChannel, value[0])
                 cmds.setAttr(satChannel, value[1])
                 cmds.setAttr(valChannel, value[2])
 
         else:
-            logger.error("{} is not a valid channel box type. Channel box types are: 'rgb', 'hsv'".format(channelBoxType))
+            logger.error(
+                "{} is not a valid channel box type. Channel box types are: 'rgb', 'hsv'".format(channelBoxType)
+            )
     else:
         if value:
-            cmds.setAttr(node + '_r', value[0])
-            cmds.setAttr(node + '_g', value[1])
-            cmds.setAttr(node + '_b', value[2])
+            cmds.setAttr(node + "_r", value[0])
+            cmds.setAttr(node + "_g", value[1])
+            cmds.setAttr(node + "_b", value[2])
 
-    return str(node + '.' + longName)
+    return str(node + "." + longName)
 
 
 def copyAttribute(attr, source, target):
@@ -290,23 +345,23 @@ def copyAttribute(attr, source, target):
 
     if not cmds.objExists("{}.{}".format(target, attr)):
         kwargs = dict()
-        kwargs['niceName'] = cmds.attributeQuery(attr, n=source, nn=True)
-        kwargs['keyable'] = cmds.getAttr("{}.{}".format(source, attr), k=True)
-        kwargs['channelBox'] = cmds.getAttr("{}.{}".format(source, attr), cb=True)
+        kwargs["niceName"] = cmds.attributeQuery(attr, node=source, niceName=True)
+        kwargs["keyable"] = cmds.getAttr("{}.{}".format(source, attr), keyable=True)
+        kwargs["channelBox"] = cmds.getAttr("{}.{}".format(source, attr), channelBox=True)
         value = cmds.getAttr("{}.{}".format(source, attr))
 
         # add Enum
-        if cmds.attributeQuery(attr, n=source, le=True):
-            kwargs['enum'] = cmds.attributeQuery(attr, n=source, le=True)
+        if cmds.attributeQuery(attr, node=source, listEnum=True):
+            kwargs["enum"] = cmds.attributeQuery(attr, node=source, listEnum=True)
             createEnum(target, longName=attr, **kwargs)
 
         # add attr
         else:
-            kwargs['attributeType'] = cmds.attributeQuery(attr, n=source, at=True)
-            if cmds.attributeQuery(attr, n=source, mne=True):  # check if the attribute has a minimum
-                kwargs['minValue'] = cmds.attributeQuery(attr, n=source, min=True)[0]
-            if cmds.attributeQuery(attr, n=source, mxe=True):  # check if the attribute has a maximum
-                kwargs['maxValue'] = cmds.attributeQuery(attr, n=source, max=True)[0]
+            kwargs["attributeType"] = cmds.attributeQuery(attr, node=source, attributeType=True)
+            if cmds.attributeQuery(attr, node=source, minExists=True):  # check if the attribute has a minimum
+                kwargs["minValue"] = cmds.attributeQuery(attr, node=source, minimum=True)[0]
+            if cmds.attributeQuery(attr, node=source, maxExists=True):  # check if the attribute has a maximum
+                kwargs["maxValue"] = cmds.attributeQuery(attr, node=source, maximum=True)[0]
             createAttr(target, longName=attr, **kwargs)
 
         cmds.setAttr("{}.{}".format(target, attr), value)  # set the value of the attribtue
@@ -322,12 +377,18 @@ def moveAttribute(attr, source, target):
     """
     copyAttribute(attr=attr, source=source, target=target)
 
-    sourceConnections = cmds.listConnections("{}.{}".format(source, attr), s=True, d=False, plugs=True) or []
-    destConnections = cmds.listConnections("{}.{}".format(source, attr), d=True, s=False, plugs=True) or []
+    sourceConnections = (
+        cmds.listConnections("{}.{}".format(source, attr), source=True, destination=False, plugs=True) or []
+    )
+    destConnections = (
+        cmds.listConnections("{}.{}".format(source, attr), destination=True, source=False, plugs=True) or []
+    )
 
     # connect source and  destination attributes
-    for plug in sourceConnections: cmds.connectAttr(plug, "{}.{}".format(target, attr), f=True)
-    for plug in destConnections: cmds.connectAttr("{}.{}".format(target, attr), plug, f=True)
+    for plug in sourceConnections:
+        cmds.connectAttr(plug, "{}.{}".format(target, attr), force=True)
+    for plug in destConnections:
+        cmds.connectAttr("{}.{}".format(target, attr), plug, force=True)
 
 
 def driveAttribute(attr, source, target, forceVisable=False):
@@ -342,10 +403,10 @@ def driveAttribute(attr, source, target, forceVisable=False):
     """
     copyAttribute(attr=attr, source=source, target=target)
 
-    cmds.connectAttr("{}.{}".format(target, attr), "{}.{}".format(source, attr), f=True)
+    cmds.connectAttr("{}.{}".format(target, attr), "{}.{}".format(source, attr), force=True)
 
     if forceVisable:
-        cmds.setAttr("{}.{}".format(target, attr), k=True)
+        cmds.setAttr("{}.{}".format(target, attr), keyable=True)
 
 
 def unlock(nodes, attrs):
@@ -447,7 +508,7 @@ def setAttr(nodes, attrs, value):
 
     for node in nodes:
         for attr in attrs:
-            plug = node + '.' + attr
+            plug = node + "." + attr
             setPlugValue(plug, value)
 
 
@@ -535,7 +596,7 @@ def USER(node):
 
     :param str node: Node to retreive attributes from
     """
-    return list([str(a) for a in cmds.listAttr(node, ud=True) or [] if '.' not in a])
+    return list([str(a) for a in cmds.listAttr(node, userDefined=True) or [] if "." not in a])
 
 
 # disable the name checking because we want this to be like a constant
@@ -546,7 +607,7 @@ def KEYABLE(node):
 
     :param str node: Node to retreive attributes from
     """
-    return list([str(a) for a in cmds.listAttr(node, k=True) or [] if '.' not in a])
+    return list([str(a) for a in cmds.listAttr(node, keyable=True) or [] if "." not in a])
 
 
 # disable the name checking because we want this to be like a constant
@@ -557,7 +618,7 @@ def NONKEYABLE(node):
 
     :param str node: Node to retreive attributes from
     """
-    return list([str(a) for a in cmds.listAttr(node, cb=True) or [] if '.' not in a])
+    return list([str(a) for a in cmds.listAttr(node, channelBox=True) or [] if "." not in a])
 
 
 # disable the name checking because we want this to be like a constant
@@ -579,10 +640,10 @@ def ALL(node):
 
     :param str node: Node to retreive attributes from
     """
-    return list([str(a) for a in cmds.listAttr(node) or [] if '.' not in a])
+    return list([str(a) for a in cmds.listAttr(node) or [] if "." not in a])
 
 
-def _editAttrParams(nodes, attrs, channelBox=-1, lock=-1, keyable=-1):
+def _editAttrParams(nodes, attrs, channelBox: bool = -1, lock: bool = -1, keyable: bool = -1):
     if not isinstance(nodes, list):
         nodes = [nodes]
 
@@ -593,13 +654,16 @@ def _editAttrParams(nodes, attrs, channelBox=-1, lock=-1, keyable=-1):
         for attr in attrs:
             if isCompound("{}.{}".format(node, attr)):
                 childPlugs = getCompoundChildren("{}.{}".format(node, attr))
-                childAttrs = [a.split('.')[-1] for a in childPlugs]
+                childAttrs = [a.split(".")[-1] for a in childPlugs]
                 if childAttrs not in attrs:
                     attrs += childAttrs
 
-            if lock != -1: cmds.setAttr(node + "." + attr, lock=lock)
-            if keyable != -1: cmds.setAttr(node + "." + attr, keyable=keyable)
-            if channelBox != -1: cmds.setAttr(node + "." + attr, channelBox=channelBox)
+            if lock != -1:
+                cmds.setAttr(node + "." + attr, lock=lock)
+            if keyable != -1:
+                cmds.setAttr(node + "." + attr, keyable=keyable)
+            if channelBox != -1:
+                cmds.setAttr(node + "." + attr, channelBox=channelBox)
 
 
 def reorderToBottom(node, attr):
@@ -613,7 +677,7 @@ def reorderToBottom(node, attr):
     cmds.undo()
 
 
-def reorderAttr(plug, pos='bottom'):
+def reorderAttr(plug, pos="bottom"):
     """
     Reorder attributes
 
@@ -622,40 +686,44 @@ def reorderAttr(plug, pos='bottom'):
     """
     if not cmds.objExists(plug):
         raise RuntimeError('Attribute "' + plug + '" does not exist!')
-    node = plug.split('.')[0]
-    attr = plug.replace(node + '.', '')
+    node = plug.split(".")[0]
+    attr = plug.replace(node + ".", "")
 
     allAttrList = [i for i in USER(node) if KEYABLE(node).count(i) or CHANNELBOX(node).count(i)]
     allAttrLen = len(allAttrList)
     attrInd = allAttrList.index(attr)
 
     # reorder up
-    if pos == 'up':
-        if not attrInd: return
+    if pos == "up":
+        if not attrInd:
+            return
         reorderToBottom(node, allAttrList[attrInd - 1])
-        for i in allAttrList[attrInd + 1:]:
+        for i in allAttrList[attrInd + 1 :]:
             reorderToBottom(node, i)
 
     # reorder down
-    if pos == 'down':
-        if attrInd == (allAttrLen - 1): return
+    if pos == "down":
+        if attrInd == (allAttrLen - 1):
+            return
         reorderToBottom(node, allAttrList[attrInd])
-        if attrInd >= (allAttrLen - 1): return
+        if attrInd >= (allAttrLen - 1):
+            return
         for i in allAttrList[attrInd + 2:]:
             reorderToBottom(node, i)
 
     # reorder top
-    if pos == 'top':
+    if pos == "top":
         for i in range(len(allAttrList)):
-            if i == attrInd: return
+            if i == attrInd:
+                return
             reorderToBottom(node, allAttrList[i])
 
     # reorder bottom
-    if pos == 'bottom':
+    if pos == "bottom":
         reorderToBottom(node, allAttrList[attrInd])
 
     # Refresh UI
-    cmds.channelBox('mainChannelBox', e=True, update=True)
+    cmds.channelBox("mainChannelBox", edit=True, update=True)
 
 
 def getNextAvailableElement(plug):
@@ -671,12 +739,12 @@ def getNextAvailableElement(plug):
         plug = _getPlug(plug)
 
     if not plug:
-        raise RuntimeError('Plug not found')
+        raise RuntimeError("Plug not found")
 
     return plug.elementByLogicalIndex(plug.evaluateNumElements())
 
 
-def isCompound(plug):
+def isCompound(plug: Union[om2.MPlug, str]):
     """
     Check if the attribute is a multi attribute
 
@@ -699,7 +767,7 @@ def isCompound(plug):
     return False
 
 
-def getCompoundChildren(plug):
+def getCompoundChildren(plug: Union[om2.MPlug, str]):
     """
     Get the children of a compound plug.
     ie: 'pCube.t' will return ['pCube.tx', 'pCube.ty', 'pCube.tz']
@@ -732,10 +800,10 @@ def _getPlug(plug):
     :param str attr: The attribute to return the MPlug for
     """
     # Check attribute
-    parts = plug.split('.')
+    parts = plug.split(".")
     node = parts[0]
-    attr = '.'.join(parts[1:])
-    baseAttr = parts[1].split('[')[0]
+    attr = ".".join(parts[1:])
+    baseAttr = parts[1].split("[")[0]
 
     # get node function set
     selList = om2.MSelectionList()
@@ -744,10 +812,9 @@ def _getPlug(plug):
     nodeFn = om2.MFnDependencyNode(nodeObject)
 
     # get plug
-    if len(parts) > 2 or '[' in attr:
+    if len(parts) > 2 or "[" in attr:
         # compound attrs
         if nodeFn.hasAttribute(baseAttr):
-
             # child plugs iterator
             def _getChildPlugs(p):
                 a = p.attribute()
@@ -784,14 +851,14 @@ def _getPlug(plug):
             _getChildPlugs(basePlug)
 
             for childPlug in childPlugs:
-                if childPlug.name().partition('.')[-1] == attr:
+                if childPlug.name().partition(".")[-1] == attr:
                     return childPlug
     else:
         # simple attrs
         if nodeFn.hasAttribute(attr):
             return nodeFn.findPlug(attr, True)
 
-    logger.warning('Plug {} could not be found.'.format(plug))
+    logger.warning("Plug {} could not be found.".format(plug))
     return
 
 
@@ -799,7 +866,7 @@ def _getPlug(plug):
 def getPlugValue(plug):
     """
     Gets the value of the given plug.
-    
+
     :param MPlug plug:The node plug.
 
     :return: The value of the passed in node plug.
@@ -809,14 +876,13 @@ def getPlugValue(plug):
         plug = _getPlug(plug)
 
     if not plug:
-        raise RuntimeError('Plug not found')
+        raise RuntimeError("Plug not found")
 
     pAttribute = plug.attribute()
     apiType = pAttribute.apiType()
 
     # Float Groups - rotate, translate, scale; Compounds
     if apiType in [om2.MFn.kAttribute3Double, om2.MFn.kAttribute3Float, om2.MFn.kCompoundAttribute]:
-
         result = []
 
         if plug.isCompound:
@@ -854,8 +920,12 @@ def getPlugValue(plug):
         if pType == om2.MFnNumericData.kBoolean:
             return plug.asBool()
 
-        elif pType in [om2.MFnNumericData.kShort, om2.MFnNumericData.kInt, om2.MFnNumericData.kLong,
-                       om2.MFnNumericData.kByte]:
+        elif pType in [
+            om2.MFnNumericData.kShort,
+            om2.MFnNumericData.kInt,
+            om2.MFnNumericData.kLong,
+            om2.MFnNumericData.kByte,
+        ]:
             return plug.asInt()
         elif pType in [om2.MFnNumericData.kFloat, om2.MFnNumericData.kDouble, om2.MFnNumericData.kAddr]:
             return plug.asDouble()
@@ -899,8 +969,10 @@ def setPlugValue(plug, value):
                 setPlugValue(plug.child(2), value.z)
             else:
                 raise RuntimeError(
-                    '{0} :: Passed in value ( {1} ) is {2}. Needs to be type list.'.format(plug.info, value,
-                                                                                           type(value)))
+                    "{0} :: Passed in value ( {1} ) is {2}. Needs to be type list.".format(
+                        plug.info, value, type(value)
+                    )
+                )
 
     # Distance
     elif apiType in [om2.MFn.kDoubleLinearAttribute, om2.MFn.kFloatLinearAttribute]:
@@ -913,8 +985,10 @@ def setPlugValue(plug, value):
             plug.setMDistance(value)
         else:
             raise RuntimeError(
-                '{0} :: Passed in value ( {1} ) is {2}. Needs to be type float or int.'.format(plug.info, value,
-                                                                                               type(value)))
+                "{0} :: Passed in value ( {1} ) is {2}. Needs to be type float or int.".format(
+                    plug.info, value, type(value)
+                )
+            )
 
     # Angle
     elif apiType in [om2.MFn.kDoubleAngleAttribute, om2.MFn.kFloatAngleAttribute]:
@@ -927,8 +1001,8 @@ def setPlugValue(plug, value):
             plug.setMAngle(value)
         else:
             raise RuntimeError(
-                '{0} :: Passed in value ( {1} ) is {2}. Needs to be type float.'.format(plug.info, value,
-                                                                                        type(value)))
+                "{0} :: Passed in value ( {1} ) is {2}. Needs to be type float.".format(plug.info, value, type(value))
+            )
 
     # Typed - matrix WE DON'T HANDLE THIS CASE YET!!!!!!!!!
     elif apiType == om2.MFn.kTypedAttribute:
@@ -955,7 +1029,8 @@ def setPlugValue(plug, value):
             plug.setMObject(sourceValueAsMObject)
         else:
             raise RuntimeError(
-                'Value object is not an MPlug. To set a MMatrix value, both passed in variables must be MPlugs.')
+                "Value object is not an MPlug. To set a MMatrix value, both passed in variables must be MPlugs."
+            )
 
     # Numbers
     elif apiType == om2.MFn.kNumericAttribute:
@@ -969,11 +1044,17 @@ def setPlugValue(plug, value):
                 plug.setBool(bool(value))
             else:
                 raise RuntimeError(
-                    '{0} :: Passed in value ( {1} ) is {2}. Needs to be type bool.'.format(plug.info, value,
-                                                                                           type(value)))
+                    "{0} :: Passed in value ( {1} ) is {2}. Needs to be type bool.".format(
+                        plug.info, value, type(value)
+                    )
+                )
 
-        elif pType in [om2.MFnNumericData.kShort, om2.MFnNumericData.kInt, om2.MFnNumericData.kLong,
-                       om2.MFnNumericData.kByte]:
+        elif pType in [
+            om2.MFnNumericData.kShort,
+            om2.MFnNumericData.kInt,
+            om2.MFnNumericData.kLong,
+            om2.MFnNumericData.kByte,
+        ]:
             value = int(value)
             if isinstance(value, int):
                 plug.setInt(value)
@@ -981,8 +1062,10 @@ def setPlugValue(plug, value):
                 plug.setInt(int(value))
             else:
                 raise RuntimeError(
-                    '{0} :: Passed in value ( {1} ) is {2}. Needs to be type int or float.'.format(plug.info, value,
-                                                                                                   type(value)))
+                    "{0} :: Passed in value ( {1} ) is {2}. Needs to be type int or float.".format(
+                        plug.info, value, type(value)
+                    )
+                )
 
         elif pType in [om2.MFnNumericData.kFloat, om2.MFnNumericData.kDouble, om2.MFnNumericData.kAddr]:
             if isinstance(value, float):
@@ -991,8 +1074,10 @@ def setPlugValue(plug, value):
                 plug.setDouble(float(value))
             else:
                 raise RuntimeError(
-                    '{0} :: Passed in value ( {1} ) is {2}. Needs to be type float or int.'.format(plug.info, value,
-                                                                                                   type(value)))
+                    "{0} :: Passed in value ( {1} ) is {2}. Needs to be type float or int.".format(
+                        plug.info, value, type(value)
+                    )
+                )
 
     # Enums
     elif apiType == om2.MFn.kEnumAttribute:

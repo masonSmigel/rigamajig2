@@ -32,12 +32,13 @@ class Base(object):
     """
     Base component all components are subclassed from
     """
+
     VERSION_MAJOR = 1
     VERSION_MINOR = 0
     VERSION_PATCH = 0
 
     version_info = (VERSION_MAJOR, VERSION_MINOR, VERSION_PATCH)
-    version = '%i.%i.%i' % version_info
+    version = "%i.%i.%i" % version_info
     __version__ = version
 
     UI_COLOR = (200, 200, 200)
@@ -58,7 +59,7 @@ class Base(object):
         """
         self._componentParameters = {}
 
-        self.componentType = self.__module__.split('components.')[-1]
+        self.componentType = self.__module__.split("components.")[-1]
         self.name = name
         self.input = input
         self.enabled = enabled
@@ -67,7 +68,7 @@ class Base(object):
         self.componentTag = componentTag or str()
 
         # important global nodes
-        self.container = self.name + '_container'
+        self.container = self.name + "_container"
 
         # we will always need the container if it does not exist.
         if not cmds.objExists(self.container):
@@ -93,7 +94,7 @@ class Base(object):
         returnString = "-" * 80
         returnString += f"\nRigamajig Component: <{self.__class__.__module__} object at {hex(id(self))}>\n"
         for key in self._componentParameters:
-            tooltip = self._componentParameters[key].get('tooltip')
+            tooltip = self._componentParameters[key].get("tooltip")
             tooltipString = f"\t({tooltip})" if tooltip else ""
             returnString += f"\t{key} = {self._componentParameters[key]['value']} {tooltipString}\n"
 
@@ -102,7 +103,7 @@ class Base(object):
 
     @classmethod
     def fromContainer(cls, container):
-        """ Create a component instance from a container"""
+        """Create a component instance from a container"""
         metaNode = rigamajig2.maya.meta.MetaNode(container)
         containerData = metaNode.getAllData()
 
@@ -129,11 +130,13 @@ class Base(object):
         except KeyError as e:
             raise KeyError(f"failed to gather data from: {data}", e)
 
-        componentInstance = cls(name=name,
-                                input=input,
-                                rigParent=rigParent,
-                                size=size,
-                                componentTag=componentTag)
+        componentInstance = cls(
+            name=name,
+            input=input,
+            rigParent=rigParent,
+            size=size,
+            componentTag=componentTag,
+        )
 
         # gather other data from the class
         for key in componentInstance._componentParameters:
@@ -158,7 +161,7 @@ class Base(object):
             self.setStep(1)
 
         else:
-            logger.debug('component {} already initialized.'.format(self.name))
+            logger.debug("component {} already initialized.".format(self.name))
 
     def guideComponent(self):
         """
@@ -178,7 +181,7 @@ class Base(object):
             self.setStep(2)
 
         else:
-            logger.debug('component {} already guided.'.format(self.name))
+            logger.debug("component {} already guided.".format(self.name))
 
     def buildComponent(self):
         """
@@ -193,7 +196,6 @@ class Base(object):
         self._updateClassParameters()
 
         if self.getStep() < BUILD_STEP and self.enabled:
-
             # anything that manages or creates nodes should set the active container
             with rigamajig2.maya.container.ActiveContainer(self.container):
                 self._autoOrientGuides()
@@ -204,10 +206,10 @@ class Base(object):
                 self._setupAnimAttrs()
             self.setStep(3)
         else:
-            logger.debug('component {} already built.'.format(self.name))
+            logger.debug("component {} already built.".format(self.name))
 
     def connectComponent(self):
-        """ connect components within the rig"""
+        """connect components within the rig"""
         self._updateClassParameters()
 
         if self.getStep() < CONNECT_STEP and self.enabled:
@@ -217,7 +219,7 @@ class Base(object):
                 self._postConnect()
             self.setStep(4)
         else:
-            logger.debug('component {} already connected.'.format(self.name))
+            logger.debug("component {} already connected.".format(self.name))
 
     def finalizeComponent(self):
         """
@@ -240,11 +242,11 @@ class Base(object):
 
             # if we added a component tag build that now!
             if self.componentTag:
-                rigamajig2.maya.meta.tag(self.container, 'component', self.componentTag)
+                rigamajig2.maya.meta.tag(self.container, "component", self.componentTag)
 
             self.setStep(5)
         else:
-            logger.debug('component {} already finalized.'.format(self.name))
+            logger.debug("component {} already finalized.".format(self.name))
 
     def optimizeComponent(self):
         """
@@ -257,7 +259,7 @@ class Base(object):
             self._optimize()
             self.setStep(6)
         else:
-            logger.debug('component {} already optimized.'.format(self.name))
+            logger.debug("component {} already optimized.".format(self.name))
 
     # --------------------------------------------------------------------------------
     # functions
@@ -281,21 +283,25 @@ class Base(object):
         """Create a Container for the component"""
         if not cmds.objExists(self.container):
             self.container = rigamajig2.maya.container.create(self.container)
-            rigamajig2.maya.meta.tag(self.container, 'component')
+            rigamajig2.maya.meta.tag(self.container, "component")
 
             # tag the container with the proper component version
-            rigamajig2.maya.attr.createAttr(self.container, "__version__", "string",
-                                            value=self.__version__,
-                                            keyable=False,
-                                            locked=True
-                                            )
+            rigamajig2.maya.attr.createAttr(
+                self.container,
+                "__version__",
+                "string",
+                value=self.__version__,
+                keyable=False,
+                locked=True,
+            )
 
     def _createMetaNode(self, metaNodeName):
         """Create the metadata node. This will store any data we need to transfer across steps"""
         if not cmds.objExists(metaNodeName):
             self.metadataNode = cmds.createNode(METADATA_NODE_TYPE, name=metaNodeName)
-            rigamajig2.maya.meta.createMessageConnection(self.container, self.metadataNode,
-                                                         sourceAttr="metaDataNetworkNode")
+            rigamajig2.maya.meta.createMessageConnection(
+                self.container, self.metadataNode, sourceAttr="metaDataNetworkNode"
+            )
 
             rigamajig2.maya.container.addNodes(self.metadataNode, self.container, force=True)
 
@@ -304,19 +310,20 @@ class Base(object):
 
     def _initialHierarchy(self):
         """Setup the initial Hierarchy. implement in subclass"""
-        self.rootHierarchy = cmds.createNode('transform', n=self.name + '_cmpt')
-        self.paramsHierarchy = cmds.createNode('transform', n=self.name + '_params',
-                                               parent=self.rootHierarchy)
-        self.controlHierarchy = cmds.createNode('transform', n=self.name + '_control',
-                                                parent=self.rootHierarchy)
-        self.spacesHierarchy = cmds.createNode('transform', n=self.name + '_spaces',
-                                               parent=self.rootHierarchy)
+        self.rootHierarchy = cmds.createNode("transform", name=self.name + "_cmpt")
+        self.paramsHierarchy = cmds.createNode("transform", name=self.name + "_params", parent=self.rootHierarchy)
+        self.controlHierarchy = cmds.createNode("transform", name=self.name + "_control", parent=self.rootHierarchy)
+        self.spacesHierarchy = cmds.createNode("transform", name=self.name + "_spaces", parent=self.rootHierarchy)
 
         rigamajig2.maya.color.setOutlinerColor(self.rootHierarchy, [255, 255, 153])
 
         # lock and hide the attributes
-        for hierarchy in [self.paramsHierarchy, self.controlHierarchy, self.spacesHierarchy]:
-            rigamajig2.maya.attr.lockAndHide(hierarchy, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+        for hierarchy in [
+            self.paramsHierarchy,
+            self.controlHierarchy,
+            self.spacesHierarchy,
+        ]:
+            rigamajig2.maya.attr.lockAndHide(hierarchy, rigamajig2.maya.attr.TRANSFORMS + ["v"])
 
     def _preRigSetup(self):
         """Pre rig setup. implement in subclass"""
@@ -374,14 +381,14 @@ class Base(object):
         pass
 
     def deleteSetup(self):
-        """ delete the rig setup"""
+        """delete the rig setup"""
         logger.info("deleting component {}".format(self.name))
-        cmds.select(self.container, r=True)
+        cmds.select(self.container, replace=True)
         mel.eval("doDelete;")
 
         for input in self.input:
             if cmds.objExists(input):
-                rigamajig2.maya.attr.unlock(input, rigamajig2.maya.attr.TRANSFORMS + ['v'])
+                rigamajig2.maya.attr.unlock(input, rigamajig2.maya.attr.TRANSFORMS + ["v"])
 
     def setStep(self, step=0):
         """
@@ -398,26 +405,44 @@ class Base(object):
         :param step:
         :return:
         """
-        if not cmds.objExists("{}.{}".format(self.container, 'build_step')):
-            rigamajig2.maya.attr.createEnum(self.container, 'build_step', value=0,
-                                            enum=['unbuilt', 'initialize', 'guide', 'build', 'connect', 'finalize',
-                                                  'optimize'],
-                                            keyable=False, channelBox=False)
+        if not cmds.objExists("{}.{}".format(self.container, "build_step")):
+            rigamajig2.maya.attr.createEnum(
+                self.container,
+                "build_step",
+                value=0,
+                enum=[
+                    "unbuilt",
+                    "initialize",
+                    "guide",
+                    "build",
+                    "connect",
+                    "finalize",
+                    "optimize",
+                ],
+                keyable=False,
+                channelBox=False,
+            )
 
-        cmds.setAttr("{}.{}".format(self.container, 'build_step'), step)
+        cmds.setAttr("{}.{}".format(self.container, "build_step"), step)
 
     def getStep(self):
         """
         get the pipeline step
         :return:
         """
-        if self.container and cmds.objExists("{}.{}".format(self.container, 'build_step')):
-            return cmds.getAttr("{}.{}".format(self.container, 'build_step'))
+        if self.container and cmds.objExists("{}.{}".format(self.container, "build_step")):
+            return cmds.getAttr("{}.{}".format(self.container, "build_step"))
         return 0
 
     def defineParameter(
-            self, parameter: str, value: typing.Any, dataType: str = None,
-            hide: bool = True, lock: bool = False, tooltip: str = None):
+        self,
+        parameter: str,
+        value: typing.Any,
+        dataType: str = None,
+        hide: bool = True,
+        lock: bool = False,
+        tooltip: str = None,
+    ):
         """
         Define a parameter component. This makes up the core data structure of a component.
         This defines parameters and behaviors and is used to build the rest of the functionality but should NOT define the structre.
@@ -472,9 +497,17 @@ class Base(object):
 
         for var in allClassVariables:
             # ensure the variable is valid.
-            if var in self._componentParameters: continue
-            if var.startswith("_"): continue
-            if var in ["container", "metadataNode", "metaDataNetworkNode", "componentType"]: continue
+            if var in self._componentParameters:
+                continue
+            if var.startswith("_"):
+                continue
+            if var in [
+                "container",
+                "metadataNode",
+                "metaDataNetworkNode",
+                "componentType",
+            ]:
+                continue
 
             localComponentVariables.append(var)
 
@@ -514,7 +547,6 @@ class Base(object):
         """
         newComponentData = self._componentParameters.copy()
         for key in self._componentParameters.keys():
-
             metaNode = rigamajig2.maya.meta.MetaNode(self.container)
             data = metaNode.getAllData()
 
@@ -544,7 +576,7 @@ class Base(object):
         return rigamajig2.maya.meta.getMessageConnection(f"{self.container}.metaDataNetworkNode")
 
     def getComponentData(self):
-        """Get all component Data """
+        """Get all component Data"""
         # ensure we are saving the most up-to-date versions of our code
         self._updateClassParameters()
 
@@ -595,4 +627,3 @@ class Base(object):
     #         return metaNode.setData(propertyAttr, value=value)
     #
     #     return setter
-

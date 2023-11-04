@@ -3,6 +3,7 @@ Utilities for transforms
 """
 import logging
 import math
+from typing import Tuple
 
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
@@ -14,7 +15,8 @@ import rigamajig2.shared.common as common
 
 logger = logging.getLogger(__name__)
 
-ROTATEORDER = ['xyz', 'yzx', 'zxy', 'xzy', 'yxz', 'zyx']
+ROTATEORDER = ["xyz", "yzx", "zxy", "xzy", "yxz", "zyx"]
+ROTATEORDER_NEGATED = ["zyx", "xzy", "yxz", "yzx", "zxy", "xyz"]
 
 
 def matchTransform(source, target):
@@ -48,8 +50,8 @@ def matchRotate(source, target):
     :param str source: Source transfrom
     :param str target:  Target transform to match
     """
-    rotOrder = cmds.getAttr('{}.rotateOrder'.format(source))
-    matrixList = cmds.getAttr('{}.worldMatrix'.format(source))
+    rotOrder = cmds.getAttr("{}.rotateOrder".format(source))
+    matrixList = cmds.getAttr("{}.worldMatrix".format(source))
 
     # Create an empty MMatrix from the world space matrix:
     mMatrix = om2.MMatrix(matrixList)  # MMatrix
@@ -77,6 +79,34 @@ def matchScale(source, target):
     cmds.xform(target, ws=True, scale=decomposedScale)
 
 
+def getTranslate(node: str, worldSpace: bool = True) -> Tuple[float, float, float]:
+    """
+    Get the translation of a node
+
+    :param node: node to get the worldspace translation of
+    :param worldSpace: Get the translation in world space or local Space.
+
+    """
+    return cmds.xform(node, query=True, worldSpace=worldSpace, translation=True)
+
+
+def getRotate(node: str) -> Tuple[float, float, float]:
+    """Get the rotation of a node"""
+    rotOrder = cmds.getAttr("{}.rotateOrder".format(node))
+    matrixList = cmds.getAttr("{}.worldMatrix".format(node))
+
+    # Create an empty MMatrix from the world space matrix:
+    mMatrix = om2.MMatrix(matrixList)  # MMatrix
+    mTransformMtx = om2.MTransformationMatrix(mMatrix)
+    eulerRot = mTransformMtx.rotation()  # MEulerRotation
+
+    # Update rotate order to match original object
+    eulerRot.reorderIt(rotOrder)
+
+    angles = (math.degrees(angle) for angle in (eulerRot.x, eulerRot.y, eulerRot.z))
+    return angles[0], angles[1], angles[2]
+
+
 def freezeToParentOffset(nodes):
     """
     Freeze the given transform nodes by adding their values to the offsetParentMatrix
@@ -85,11 +115,11 @@ def freezeToParentOffset(nodes):
     """
     nodes = common.toList(nodes)
 
-    if cmds.about(api=True) < 20200000:
+    if cmds.about(apiVersion=True) < 20200000:
         raise RuntimeError("OffsetParentMatrix is only available in Maya 2020 and beyond")
     for node in nodes:
         offset = localOffset(node)
-        cmds.setAttr("{}.{}".format(node, 'offsetParentMatrix'), list(offset), type="matrix")
+        cmds.setAttr("{}.{}".format(node, "offsetParentMatrix"), list(offset), type="matrix")
         resetTransformations(node)
 
 
@@ -107,7 +137,7 @@ def unfreezeToTransform(nodes):
     for node in nodes:
         offest = localOffset(node)
         cmds.xform(node, m=offest)
-        cmds.setAttr("{}.offsetParentMatrix".format(node), identityMatrix, type='matrix')
+        cmds.setAttr("{}.offsetParentMatrix".format(node), identityMatrix, type="matrix")
 
 
 def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, sh=True):
@@ -133,10 +163,10 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
     driverIsAttr = True if rigamajig2.maya.attr.isAttr(driver) else False
 
     if not driverIsAttr:
-        driverAttr = "{}.{}".format(driver, 'worldMatrix')
+        driverAttr = "{}.{}".format(driver, "worldMatrix")
     else:
         driverAttr = driver
-        driver = driver.split('.')[0]
+        driver = driver.split(".")[0]
 
     for driven in drivens:
         offset = list()
@@ -147,32 +177,32 @@ def connectOffsetParentMatrix(driver, driven, mo=False, t=True, r=True, s=True, 
         parent = parentList[0] if parentList else None
 
         if not parent and not mo:
-            outputPlug = "{}.{}".format(driver, 'worldMatrix')
+            outputPlug = "{}.{}".format(driver, "worldMatrix")
         else:
             multMatrix = cmds.createNode("multMatrix", name="{}_{}_mm".format(driver, driven))
             if offset:
-                cmds.setAttr("{}.{}".format(multMatrix, "matrixIn[0]"), offset, type='matrix')
+                cmds.setAttr("{}.{}".format(multMatrix, "matrixIn[0]"), offset, type="matrix")
 
-            cmds.connectAttr(driverAttr, "{}.{}".format(multMatrix, 'matrixIn[1]'), f=True)
+            cmds.connectAttr(driverAttr, "{}.{}".format(multMatrix, "matrixIn[1]"), f=True)
 
             if parent:
-                cmds.connectAttr("{}.{}".format(parent, 'worldInverseMatrix'),
-                                 "{}.{}".format(multMatrix, 'matrixIn[2]'),
-                                 f=True)
-            outputPlug = "{}.{}".format(multMatrix, 'matrixSum')
+                cmds.connectAttr(
+                    "{}.{}".format(parent, "worldInverseMatrix"), "{}.{}".format(multMatrix, "matrixIn[2]"), f=True
+                )
+            outputPlug = "{}.{}".format(multMatrix, "matrixSum")
 
         pickMat = None
         if not t or not r or not s or not sh:
             # connect the output into a pick matrix node
-            pickMat = cmds.createNode('pickMatrix', name="{}_{}_pickMatrix".format(driver, driven))
+            pickMat = cmds.createNode("pickMatrix", name="{}_{}_pickMatrix".format(driver, driven))
             cmds.connectAttr(outputPlug, "{}.inputMatrix".format(pickMat))
-            cmds.setAttr(pickMat + '.useTranslate', t)
-            cmds.setAttr(pickMat + '.useRotate', r)
-            cmds.setAttr(pickMat + '.useScale', s)
-            cmds.setAttr(pickMat + '.useShear', sh)
-            outputPlug = pickMat + '.outputMatrix'
+            cmds.setAttr(pickMat + ".useTranslate", t)
+            cmds.setAttr(pickMat + ".useRotate", r)
+            cmds.setAttr(pickMat + ".useScale", s)
+            cmds.setAttr(pickMat + ".useShear", sh)
+            outputPlug = pickMat + ".outputMatrix"
 
-        cmds.connectAttr(outputPlug, "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
+        cmds.connectAttr(outputPlug, "{}.{}".format(driven, "offsetParentMatrix"), f=True)
 
         # now we need to reset the trs
         resetTransformations(driven)
@@ -235,8 +265,10 @@ def multiMatrixConstraint(driverList, driven, valueList, mo=True, t=True, r=True
     # check if the list of drivers and valyes are the same lengh
     if not len(driverList) == len(valueList):
         raise ValueError(
-            "Must provide an equal amount of drivers and values. drivers ({}) != values ({})".format(len(driverList),
-                                                                                                     len(valueList)))
+            "Must provide an equal amount of drivers and values. drivers ({}) != values ({})".format(
+                len(driverList), len(valueList)
+            )
+        )
 
     # for each driver in the list of drivers connect it to the wtAddMatrix
     for i in range(len(driverList)):
@@ -256,7 +288,7 @@ def multiMatrixConstraint(driverList, driven, valueList, mo=True, t=True, r=True
         cmds.setAttr("{}.wtMatrix[{}].weightIn".format(wtAddMatrix, i), value)
 
     # connect the wtAddMatrix to the driven offsetParentMatrix
-    cmds.connectAttr("{}.matrixSum".format(wtAddMatrix), "{}.{}".format(driven, 'offsetParentMatrix'), f=True)
+    cmds.connectAttr("{}.matrixSum".format(wtAddMatrix), "{}.{}".format(driven, "offsetParentMatrix"), f=True)
 
     return wtAddMatrix
 
@@ -269,17 +301,17 @@ def localOffset(node):
     :return: offset matrix between the given node and its parent
     :rtype: MMatrix
     """
-    offset = om2.MMatrix(cmds.getAttr('{}.{}'.format(node, 'worldMatrix')))
+    offset = om2.MMatrix(cmds.getAttr("{}.{}".format(node, "worldMatrix")))
     parent = cmds.listRelatives(node, parent=True, path=True) or None
     if parent:
-        parentInverse = om2.MMatrix(cmds.getAttr('{}.{}'.format(parent[0], 'worldInverseMatrix')))
+        parentInverse = om2.MMatrix(cmds.getAttr("{}.{}".format(parent[0], "worldInverseMatrix")))
         offset *= parentInverse
     return offset
 
 
 def offsetMatrix(node1, node2):
     """
-    Calculate an offset matrix between two nodes. 
+    Calculate an offset matrix between two nodes.
     Returns the matrix of node2 relative to node 1
 
     :param node1: first node
@@ -322,7 +354,7 @@ def getAveragePoint(transforms):
     return result.x, result.y, result.z
 
 
-def mirror(trs=None, axis='x', leftToken=None, rightToken=None, mode='rotate'):
+def mirror(trs=None, axis="x", leftToken=None, rightToken=None, mode="rotate"):
     """
     Mirrors transform axis vector. Searches for a destination node to mirror.
     The node "shouler_l_trs" mirror its position to "shouler_r_trs"
@@ -341,11 +373,11 @@ def mirror(trs=None, axis='x', leftToken=None, rightToken=None, mode='rotate'):
 
     trs = common.toList(trs)
     # Validate cmds which to mirror axis,
-    if axis.lower() not in ('x', 'y', 'z'):
+    if axis.lower() not in ("x", "y", "z"):
         raise ValueError("Keyword Argument: 'axis' not of accepted value ('x', 'y', 'z').")
 
     for transform in trs:
-        if not cmds.nodeType(transform) in ['transform', '']:
+        if not cmds.nodeType(transform) in ["transform", ""]:
             logger.warning("{} is not a transform and connot be mirrored".format(transform))
             return
 
@@ -362,24 +394,24 @@ def mirror(trs=None, axis='x', leftToken=None, rightToken=None, mode='rotate'):
         t = [n * -1 for n in mtx[12:15]]
 
         # Set matrix based on given cmds, and whether to include behaviour or not.
-        if axis.lower() == 'z':
+        if axis.lower() == "z":
             mtx[14] = t[2]  # set inverse of the Z translation
 
             # Set inverse of all rotation columns but for the one we've set translate to.
-            if mode == 'rotate':
+            if mode == "rotate":
                 mtx[0:9:4] = rx
                 mtx[1:10:4] = ry
 
-        elif axis.lower() == 'x':
+        elif axis.lower() == "x":
             mtx[12] = t[0]  # set inverse of the X translation
 
-            if mode == 'rotate':
+            if mode == "rotate":
                 mtx[1:10:4] = ry
                 mtx[2:11:4] = rz
         else:
             mtx[13] = t[1]  # set inverse of the Y translation
 
-            if mode == 'rotate':
+            if mode == "rotate":
                 mtx[0:9:4] = rx
                 mtx[2:11:4] = rz
 
@@ -399,9 +431,9 @@ def getAimAxis(transform, allowNegative=True, asVector=False):
     :return: aim axis
     :rtype: str
     """
-    child = cmds.listRelatives(transform, type='transform')
+    child = cmds.listRelatives(transform, type="transform")
     if not child:
-        raise RuntimeError('{} does not have a child to aim at'.format(transform))
+        raise RuntimeError("{} does not have a child to aim at".format(transform))
 
     axis = getClosestAxis(transform, child[0], allowNegative=allowNegative)
 
@@ -432,31 +464,39 @@ def getClosestAxis(transform, target, allowNegative=True):
 
     axis = None
     if (abs(tx) > abs(ty)) and (abs(tx) > abs(tz)):
-        if (tx > ty) and (tx > tz): axis = 'x'  # x
-        if (tx < ty) and (tx < tz): axis = '-x'  # -x
+        if (tx > ty) and (tx > tz):
+            axis = "x"  # x
+        if (tx < ty) and (tx < tz):
+            axis = "-x"  # -x
     # Y
     elif (abs(ty) > abs(tx)) and (abs(ty) > abs(tz)):
-        if (ty > tx) and (ty > tz): axis = 'y'  # y
-        if (ty < tx) and (ty < tz): axis = '-y'  # -y
+        if (ty > tx) and (ty > tz):
+            axis = "y"  # y
+        if (ty < tx) and (ty < tz):
+            axis = "-y"  # -y
     # Z
     else:
-        if (tz > tx) and (tz > ty): axis = 'z'  # z
-        if (tz < tx) and (tz < ty): axis = '-z'  # -z
+        if (tz > tx) and (tz > ty):
+            axis = "z"  # z
+        if (tz < tx) and (tz < ty):
+            axis = "-z"  # -z
 
     # if axis is still None then we failed to find one. This probably occured because the
     # transform and target are at the same location.
     if not axis:
         raise RuntimeError(
-            "Failed to calucate an axis between {} and {}. They may have the same transform".format(transform, target))
+            "Failed to calucate an axis between {} and {}. They may have the same transform".format(transform, target)
+        )
 
     # return the axis. If allow negetive is off, then just get the axis.
-    if not allowNegative: return axis[-1]
+    if not allowNegative:
+        return axis[-1]
 
     return axis
 
 
 # TODO: rewrite to account for offset parent matrix
-def decomposeRotation(node, twistAxis='x'):
+def decomposeRotation(node, twistAxis="x"):
     """
     decompose the swing and twist of a transform.
     :param str node: tranform to get the swing and twist from
@@ -466,12 +506,12 @@ def decomposeRotation(node, twistAxis='x'):
     node = common.getFirstIndex(node)
 
     # add the attributes
-    for attr in ['decomposeX', 'decomposeY', 'decomposeZ']:
+    for attr in ["decomposeX", "decomposeY", "decomposeZ"]:
         if not cmds.objExists("{}.{}".format(node, attr)):
             cmds.addAttr(node, ln=attr, k=False)
             cmds.setAttr("{}.{}".format(node, attr), cb=True)
 
-    mult = cmds.createNode('multMatrix', name="{}_local_{}".format(node, common.MULTMATRIX))
+    mult = cmds.createNode("multMatrix", name="{}_local_{}".format(node, common.MULTMATRIX))
     parentInverse = "{}.parentInverseMatrix[0]".format(node)
     worldMatrix = "{}.worldMatrix[0]".format(node)
     cmds.connectAttr(worldMatrix, "{}.matrixIn[0]".format(mult))
@@ -480,23 +520,22 @@ def decomposeRotation(node, twistAxis='x'):
     parentInverseMatrix = om2.MMatrix(cmds.getAttr(parentInverse))
     worldMatrix = om2.MMatrix(cmds.getAttr(worldMatrix))
     invLocalRest = (worldMatrix * parentInverseMatrix).inverse()
-    cmds.setAttr("{}.matrixIn[2]".format(mult), list(invLocalRest), type='matrix')
+    cmds.setAttr("{}.matrixIn[2]".format(mult), list(invLocalRest), type="matrix")
 
     # get the twist
-    rotation = cmds.createNode("decomposeMatrix", name='{}_rotation_{}'.format(node, common.DECOMPOSEMATRIX))
-    cmds.connectAttr("{}.matrixSum".format(mult),
-                     "{}.inputMatrix".format(rotation))
+    rotation = cmds.createNode("decomposeMatrix", name="{}_rotation_{}".format(node, common.DECOMPOSEMATRIX))
+    cmds.connectAttr("{}.matrixSum".format(mult), "{}.inputMatrix".format(rotation))
 
-    twist = cmds.createNode('quatNormalize', name='{}_twist_{}'.format(node, 'quatNormalize'))
+    twist = cmds.createNode("quatNormalize", name="{}_twist_{}".format(node, "quatNormalize"))
     cmds.connectAttr("{}.outputQuatW".format(rotation), "{}.inputQuatW".format(twist))
 
-    cmds.connectAttr("{}.outputQuat{}".format(rotation, twistAxis.upper()),
-                     "{}.inputQuat{}".format(twist, twistAxis.upper()))
+    cmds.connectAttr(
+        "{}.outputQuat{}".format(rotation, twistAxis.upper()), "{}.inputQuat{}".format(twist, twistAxis.upper())
+    )
 
     # swing = twist.inverse() * rotation
-    invTwist = cmds.createNode("quatInvert", name='{}_invertTwist_quatInvert'.format(node))
-    cmds.connectAttr("{}.outputQuat".format(twist),
-                     "{}.inputQuat".format(invTwist))
+    invTwist = cmds.createNode("quatInvert", name="{}_invertTwist_quatInvert".format(node))
+    cmds.connectAttr("{}.outputQuat".format(twist), "{}.inputQuat".format(invTwist))
     swing = cmds.createNode("quatProd", name="{}_swing_quatProd".format(node))
     cmds.connectAttr("{}.outputQuat".format(invTwist), "{}.input1Quat".format(swing))
     cmds.connectAttr("{}.outputQuat".format(rotation), "{}.input2Quat".format(swing))
@@ -505,7 +544,7 @@ def decomposeRotation(node, twistAxis='x'):
     # cmds.connectAttr("{}.outputQuat".format(swing), "{}.inputQuat".format(invSwing))
 
     # add the swing and twist to a new matrix
-    rotationProd = cmds.createNode('quatProd', name="{}_rotationProd_quatProd".format(node))
+    rotationProd = cmds.createNode("quatProd", name="{}_rotationProd_quatProd".format(node))
     cmds.connectAttr("{}.outputQuat".format(twist), "{}.input1Quat".format(rotationProd))
     cmds.connectAttr("{}.outputQuat".format(swing), "{}.input2Quat".format(rotationProd))
 
@@ -515,18 +554,19 @@ def decomposeRotation(node, twistAxis='x'):
     twistEuler = cmds.createNode("quatToEuler", name="{}_twistEuler_quatToEuler".format(node))
     cmds.setAttr("{}.inputRotateOrder".format(twistEuler), cmds.getAttr("{}.rotateOrder".format(node)))
     cmds.connectAttr("{}.outputQuatW".format(rotationProd), "{}.inputQuatW".format(twistEuler))
-    cmds.connectAttr("{}.outputQuat{}".format(rotationProd, twistAxis.upper()),
-                     "{}.inputQuatX".format(twistEuler, twistAxis.upper()))
+    cmds.connectAttr(
+        "{}.outputQuat{}".format(rotationProd, twistAxis.upper()), "{}.inputQuatX".format(twistEuler, twistAxis.upper())
+    )
 
-    rotationMatrix = cmds.createNode('composeMatrix', name='{}_rotationMatrix_compMatrix'.format(node))
+    rotationMatrix = cmds.createNode("composeMatrix", name="{}_rotationMatrix_compMatrix".format(node))
     cmds.setAttr("{}.useEulerRotation".format(rotationMatrix), 0)
     cmds.connectAttr("{}.outputQuat".format(rotationProd), "{}.inputQuat".format(rotationMatrix))
 
-    output = cmds.createNode("decomposeMatrix", name='{}_output_{}'.format(node, common.DECOMPOSEMATRIX))
+    output = cmds.createNode("decomposeMatrix", name="{}_output_{}".format(node, common.DECOMPOSEMATRIX))
     cmds.connectAttr("{}.outputMatrix".format(rotationMatrix), "{}.inputMatrix".format(output))
 
     # connect the output to the start
-    for axis in 'XYZ':
+    for axis in "XYZ":
         if axis == twistAxis.upper():
             cmds.connectAttr("{}.outputRotateX".format(twistEuler, axis), "{}.decompose{}".format(node, axis), f=True)
         else:
@@ -534,7 +574,7 @@ def decomposeRotation(node, twistAxis='x'):
         cmds.setAttr("{}.decompose{}".format(node, axis), lock=True)
 
     # return the three attributes
-    return ["{}.decompose{}".format(node, axis) for axis in 'XYZ']
+    return ["{}.decompose{}".format(node, axis) for axis in "XYZ"]
 
 
 def decomposeScale(driver, driven):
@@ -550,20 +590,20 @@ def decomposeScale(driver, driven):
 
     offset = offsetMatrix(driver, driven)
 
-    multMatrix = cmds.createNode("multMatrix", name=f'{driven}_scale_mm')
+    multMatrix = cmds.createNode("multMatrix", name=f"{driven}_scale_mm")
     decompMatrix = cmds.createNode("decomposeMatrix", name=f"{driven}_scale_decomp")
 
-    cmds.setAttr("{}.{}".format(multMatrix, "matrixIn[0]"), offset, type='matrix')
-    cmds.connectAttr(f"{driver}.worldMatrix[0]", "{}.{}".format(multMatrix, 'matrixIn[1]'), f=True)
+    cmds.setAttr("{}.{}".format(multMatrix, "matrixIn[0]"), offset, type="matrix")
+    cmds.connectAttr(f"{driver}.worldMatrix[0]", "{}.{}".format(multMatrix, "matrixIn[1]"), f=True)
 
     if parent:
-        cmds.connectAttr(f"{parent}.worldInverseMatrix[0]", "{}.{}".format(multMatrix, 'matrixIn[2]'), f=True)
+        cmds.connectAttr(f"{parent}.worldInverseMatrix[0]", "{}.{}".format(multMatrix, "matrixIn[2]"), f=True)
     cmds.connectAttr(f"{multMatrix}.matrixSum", f"{decompMatrix}.inputMatrix")
 
-    cmds.connectAttr(f'{decompMatrix}.outputScale', f"{driven}.scale", f=True)
+    cmds.connectAttr(f"{decompMatrix}.outputScale", f"{driven}.scale", f=True)
 
 
-def aimChain(chain, aimVector, upVector, worldUpObject=None, worldUpType='object', worldUpVector=(0, 1, 0)):
+def aimChain(chain, aimVector, upVector, worldUpObject=None, worldUpType="object", worldUpVector=(0, 1, 0)):
     """
     aim a series of transforms at its child.
     if its the child then reverse the aimVector and aim at the parent
@@ -587,13 +627,16 @@ def aimChain(chain, aimVector, upVector, worldUpObject=None, worldUpType='object
         else:
             aimTarget = chain[i + 1]
 
-        const = cmds.aimConstraint(aimTarget, chain[i],
-                                   aimVector=aimVector,
-                                   upVector=upVector,
-                                   worldUpType=worldUpType,
-                                   worldUpObject=worldUpObject,
-                                   worldUpVector=worldUpVector,
-                                   mo=False)
+        const = cmds.aimConstraint(
+            aimTarget,
+            chain[i],
+            aimVector=aimVector,
+            upVector=upVector,
+            worldUpType=worldUpType,
+            worldUpObject=worldUpObject,
+            worldUpVector=worldUpVector,
+            mo=False,
+        )
         cmds.delete(const)
 
 
@@ -605,10 +648,10 @@ def resetTransformations(nodes):
     """
     nodes = common.toList(nodes)
     for node in nodes:
-        for attr in ["jo", 'ra']:
+        for attr in ["jo", "ra"]:
             if cmds.objExists("{}.{}".format(node, attr)):
                 cmds.setAttr("{}.{}".format(node, attr), 0, 0, 0)
-        for attr in ["{}{}".format(x, y) for x in 'trs' for y in 'xyz']:
+        for attr in ["{}{}".format(x, y) for x in "trs" for y in "xyz"]:
             isLocked = cmds.getAttr("{}.{}".format(node, attr), lock=True)
             connection = cmds.listConnections("{}.{}".format(node, attr), s=True, d=False, plugs=True) or []
             isConnected = len(connection)
@@ -617,10 +660,12 @@ def resetTransformations(nodes):
             if isConnected:
                 cmds.disconnectAttr(connection[0], "{}.{}".format(node, attr))
 
-            value = 1.0 if attr.startswith('s') else 0.0
+            value = 1.0 if attr.startswith("s") else 0.0
             cmds.setAttr("{}.{}".format(node, attr), value)
-            if isConnected: cmds.connectAttr(connection[0], "{}.{}".format(node, attr), f=True)
-            if isLocked:  cmds.setAttr("{}.{}".format(node, attr), lock=True)
+            if isConnected:
+                cmds.connectAttr(connection[0], "{}.{}".format(node, attr), f=True)
+            if isLocked:
+                cmds.setAttr("{}.{}".format(node, attr), lock=True)
 
 
 def getVectorFromAxis(axis):
@@ -630,17 +675,17 @@ def getVectorFromAxis(axis):
     :param axis: Axis name. Valid values are ['x', 'y', 'z', '-x', '-y', '-z']
     :return list tuple: Axis
     """
-    if axis.lower() == 'x':
+    if axis.lower() == "x":
         vector = [1, 0, 0]
-    elif axis.lower() == 'y':
+    elif axis.lower() == "y":
         vector = [0, 1, 0]
-    elif axis.lower() == 'z':
+    elif axis.lower() == "z":
         vector = [0, 0, 1]
-    elif axis.lower() == '-x':
+    elif axis.lower() == "-x":
         vector = [-1, 0, 0]
-    elif axis.lower() == '-y':
+    elif axis.lower() == "-y":
         vector = [0, -1, 0]
-    elif axis.lower() == '-z':
+    elif axis.lower() == "-z":
         vector = [0, 0, -1]
     else:
         raise ValueError("Keyword Argument: 'axis' not of accepted value ('x', 'y', 'z', '-x', '-y', '-z').")

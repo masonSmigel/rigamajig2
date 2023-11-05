@@ -21,7 +21,7 @@ import rigamajig2.shared.common as common
 
 
 class AbstractData(object):
-    """ This class is a template for any data we need to save."""
+    """This class is a template for any data we need to save."""
 
     def __init__(self):
         """
@@ -38,8 +38,9 @@ class AbstractData(object):
         :type other: AbstractData
         """
         if not isinstance(other, AbstractData):
-            raise TypeError('{0} is of type {1}. It must be of type AbstractData'
-                            'or inherit from it.'.format(other, type(other)))
+            raise TypeError(
+                "{0} is of type {1}. It must be of type AbstractData" "or inherit from it.".format(other, type(other))
+            )
 
         # Copy the data and comp the two dictionares
         data = OrderedDict(**self._data)
@@ -59,8 +60,9 @@ class AbstractData(object):
         :type other: AbstractData
         """
         if not isinstance(other, AbstractData):
-            raise TypeError('{0} is of type {1}. It must be of type AbstractData'
-                            'or inherit from it.'.format(other, type(other)))
+            raise TypeError(
+                "{0} is of type {1}. It must be of type AbstractData" "or inherit from it.".format(other, type(other))
+            )
 
         # Copy the data and comp the two dictionares
         data = OrderedDict(**self._data)
@@ -118,6 +120,13 @@ class AbstractData(object):
         """
         pass
 
+    def applyAllData(self):
+        """
+        Apply all data stored in the data object
+        :return:
+        """
+        self.applyData(list(self._data.keys()))
+
     def write(self, filepath, createDirectory=True):
         """
         This will write the dictionary information to disc in .json format
@@ -130,21 +139,23 @@ class AbstractData(object):
 
         if not isinstance(self._data, (dict, OrderedDict)):
             raise TypeError("The data must be passed in as a dictionary.")
-        writeData = OrderedDict(user=getpass.getuser(),
-                                type=self.__class__.__name__,
-                                time=strftime("%Y-%m-%d %H:%M:%S", gmtime()))
-        writeData['data'] = self._data
+        writeData = OrderedDict(
+            user=getpass.getuser(),
+            type=self.__class__.__name__,
+            time=strftime("%Y-%m-%d %H:%M:%S", gmtime())
+        )
+        writeData["data"] = self._data
         data = json.dumps(writeData, indent=4, ensure_ascii=False)
 
         # Create path if needed
         directory = os.path.dirname(filepath)
         if createDirectory:
             if not os.path.isdir(directory):
-                print('making path{0}'.format(directory))
+                print("making path{0}".format(directory))
                 os.makedirs(directory)
 
         # Write Data
-        f = open(filepath, 'w')
+        f = open(filepath, "w")
         f.write(data)
         f.close()
 
@@ -165,16 +176,16 @@ class AbstractData(object):
         if not os.path.isfile(filepath):
             raise RuntimeError("The file {0} does not exists.".format(filepath))
 
-        f = open(filepath, 'r')
+        f = open(filepath, "r")
         if sys.version_info.major == 3:
             data = json.loads(f.read(), object_pairs_hook=OrderedDict)
         else:
-            data = json.loads(f.read().decode('utf-8'), object_pairs_hook=OrderedDict)
+            data = json.loads(f.read().decode("utf-8"), object_pairs_hook=OrderedDict)
         f.close()
 
         # Set the new filepath on the class
         self._filepath = filepath
-        self._data = common.convertDictKeys(data['data'])
+        self._data = common.convertDictKeys(data["data"])
         return self._data
 
     @classmethod
@@ -187,12 +198,12 @@ class AbstractData(object):
         :return: datatype of the given file
         :rtype: str
         """
-        f = open(filepath, 'r')
+        f = open(filepath, "r")
         if sys.version_info.major == 3:
             data = json.loads(f.read(), object_pairs_hook=OrderedDict)
         else:
-            data = json.loads(f.read().decode('utf-8'), object_pairs_hook=OrderedDict)
+            data = json.loads(f.read().decode("utf-8"), object_pairs_hook=OrderedDict)
         f.close()
 
-        datatype = data['type']
+        datatype = data["type"]
         return datatype

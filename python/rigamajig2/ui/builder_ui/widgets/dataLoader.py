@@ -450,7 +450,7 @@ class DataLoader(QtWidgets.QWidget):
 
             # read the data and apply all keys
             dataClass.read(filepath=path)
-            dataClass.applyData(dataClass.getKeys())
+            dataClass.applyAllData()
 
     def loadAllData(self):
 

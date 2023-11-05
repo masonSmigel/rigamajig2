@@ -8,15 +8,13 @@
     discription: 
 
 """
-import os
 
 import maya.cmds as cmds
-import rigamajig2.maya.data.deformLayer_data as deformLayer_data
-import rigamajig2.maya.rig.deformLayer as deformLayer
-import rigamajig2.maya.deformer as deformer
 
 import rigamajig2.maya.blendshape as blendshape
-
+import rigamajig2.maya.data.deformLayer_data as deformLayer_data
+import rigamajig2.maya.deformer as deformer
+import rigamajig2.maya.rig.deformLayer as deformLayer
 from rigamajig2.maya.test.mayaunittest import TestCase
 
 
@@ -104,7 +102,7 @@ class TestDeformLayers(TestCase):
         layerDataObj = deformLayer_data.DeformLayerData()
         layerDataObj.read(layerDataFile)
 
-        layerDataObj.applyData(layerDataObj.getKeys())
+        layerDataObj.applyAllData()
 
         self.assertTrue(cmds.objExists("d0_pSphere1_layer01"))
         self.assertTrue(cmds.objExists("d1_pSphere1_layer02"))

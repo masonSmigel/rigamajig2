@@ -15,6 +15,7 @@ import os
 import pathlib
 import shutil
 import sys
+from typing import Type
 
 import maya.cmds as cmds
 
@@ -62,11 +63,7 @@ def findComponents(path=CMPT_PATH, excludedFolders=None, excludedFiles=None):
             toReturn.update(res)
 
         # check if the item is a python file
-        if (
-            item.find(".py") != -1
-            and item.find(".pyc") == -1
-            and item not in excludedFiles
-        ):
+        if item.find(".py") != -1 and item.find(".pyc") == -1 and item not in excludedFiles:
             singleComponentDict = validateComponent(itemPath)
             if singleComponentDict:
                 toReturn.update(singleComponentDict)
@@ -205,7 +202,10 @@ def getDataModules(path=None):
     return toReturn
 
 
-def createDataClassInstance(dataType=None):
+_AbstractDataType = Type[abstract_data.AbstractData]
+
+
+def createDataClassInstance(dataType=None) -> _AbstractDataType:
     """
     Create a new and usable instance of a given data type to be actively used when loading new data
     :param dataType:
@@ -213,9 +213,7 @@ def createDataClassInstance(dataType=None):
     """
     dataTypeInfo = getDataModules().get(dataType)
     if not dataTypeInfo:
-        raise ValueError(
-            f"Data type {dataType} is not valid. Valid Types are {getDataModules()}"
-        )
+        raise ValueError(f"Data type {dataType} is not valid. Valid Types are {getDataModules()}")
 
     modulePath = dataTypeInfo[0]
     className = dataTypeInfo[1]
@@ -460,9 +458,7 @@ def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
         raise RuntimeError("{} is not a valid archetype".format(archetype))
 
     archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
-    rigFile = createRigEnvironment(
-        sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName
-    )
+    rigFile = createRigEnvironment(sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName)
 
     data = abstract_data.AbstractData()
     data.read(rigFile)

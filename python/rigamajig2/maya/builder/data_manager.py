@@ -273,7 +273,7 @@ def loadJointData(filepath: str = None) -> bool:
 
     dataObj = joint_data.JointData()
     dataObj.read(filepath)
-    dataObj.applyData(dataObj.getKeys())
+    dataObj.applyAllData()
 
     # tag all bind joints
     for jnt in cmds.ls(f"*_{common.BINDTAG}", type='joint'):
@@ -418,7 +418,7 @@ def loadGuideData(filepath=None) -> bool:
 
     dataObj = guide_data.GuideData()
     dataObj.read(filepath)
-    dataObj.applyData(nodes=dataObj.getKeys())
+    dataObj.applyAllData()
     return True
 
 
@@ -593,7 +593,7 @@ def loadSingleSkin(filepath) -> bool:
     if filepath:
         dataObj = skin_data.SkinData()
         dataObj.read(filepath)
-        dataObj.applyData(nodes=dataObj.getKeys())
+        dataObj.applyAllData()
     return True
 
 
@@ -646,7 +646,7 @@ def loadDeformationLayerData(filepath: str = None) -> bool:
 
     dataObj = deformLayer_data.DeformLayerData()
     dataObj.read(filepath)
-    dataObj.applyData(nodes=dataObj.getKeys())
+    dataObj.applyAllData()
     return True
 
 
@@ -669,5 +669,5 @@ def loadDeformer(filepath: str = None) -> bool:
 
     dataObj = core.createDataClassInstance(dataType)
     dataObj.read(filepath)
-    dataObj.applyData(nodes=dataObj.getKeys())
+    dataObj.applyAllData()
     return True

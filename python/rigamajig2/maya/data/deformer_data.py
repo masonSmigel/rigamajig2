@@ -183,7 +183,7 @@ class DeformerData(maya_data.MayaData):
                 # setup the lattice NodeData. This includeds the lattice and base.
                 nodeData = node_data.NodeData()
                 nodeData.setData(newData)
-                nodeData.applyData(nodeData.getKeys())
+                nodeData.applyAllData()
 
             if deformerType == 'cluster':
                 # if we did not create the deformer now we need to gather some data
@@ -200,7 +200,7 @@ class DeformerData(maya_data.MayaData):
                     # setup the cluster Handle data
                     nodeData = node_data.NodeData()
                     nodeData.setData(newData)
-                    nodeData.applyData(nodeData.getKeys())
+                    nodeData.applyAllData()
 
             # TODO: maybe handle non-linear deformers?
 

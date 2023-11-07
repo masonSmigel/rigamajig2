@@ -14,7 +14,7 @@ import sys
 from . import configureLoggers
 
 VERSION_MAJOR = 1
-VERSION_MINOR = 2
+VERSION_MINOR = 3
 VERSION_PATCH = 0
 
 # pylint: disable = invalid-name

@@ -11,7 +11,6 @@
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
-from maya.api import OpenMaya as om
 
 # RIGAMAJIG2
 from rigamajig2.shared import common
@@ -85,11 +84,11 @@ class BuilderSection(QtWidgets.QWidget):
 
     WIDGET_TITLE = "Builder Widget"
 
-    def __init__(self, sectionParent):
+    def __init__(self, builderDialog):
         """ Constructor"""
         super(BuilderSection, self).__init__()
 
-        self.sectionParent = sectionParent
+        self.builderDialog = builderDialog
 
         self.builder = None
         self.rigEnvironment = None
@@ -146,8 +145,6 @@ class BuilderSection(QtWidgets.QWidget):
 
     def postRigFileModifiedEvent(self):
         """Post the builder modified event"""
-        if self.sectionParent.rigFileIsModified:
+        if self.builderDialog.rigFileIsModified:
             return None
-
-        if om.MUserEventMessage.isUserEvent(self.sectionParent.rigFileModified):
-            om.MUserEventMessage.postUserEvent(self.sectionParent.rigFileModified)
+        self.builderDialog.rigFileModifiedSignal.emit()

@@ -127,6 +127,7 @@ class Actions(object):
     def saveRigFile(self):
         """ Save out a rig file """
         self.dialog.rigBuilder.saveRigFile()
+        self.dialog.rigFileSavedSignal.emit()
 
     def reloadRigFile(self):
         """ Reload rig file"""

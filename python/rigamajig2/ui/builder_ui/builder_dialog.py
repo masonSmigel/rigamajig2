@@ -25,14 +25,16 @@ from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.ui.builder_ui import actions
 from rigamajig2.ui.builder_ui import recent_files
-from rigamajig2.ui.builder_ui.sections import (model_section,
-                                               setup_section,
-                                               deformation_section,
-                                               controls_section,
-                                               skeleton_section,
-                                               build_section,
-                                               publish_section)
-from rigamajig2.ui.widgets import QLine, mayaMessageBox, pathSelector
+from rigamajig2.ui.builder_ui.sections import (
+    model_section,
+    setup_section,
+    deformation_section,
+    controls_section,
+    skeleton_section,
+    build_section,
+    publish_section,
+)
+from rigamajig2.ui.widgets import QLine, mayaMessageBox, pathSelector, stateImageWidget
 from rigamajig2.ui.widgets.workspace_control import DockableUI
 
 MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
@@ -49,8 +51,11 @@ class BuilderDialog(DockableUI):
 
     WINDOW_TITLE = "Rigamajig2 Builder  {}".format(rigamajig2.version)
 
-    rigFileModified = "rigFileModifiedEvent"
-    rigFileSaved = "rigFileSavedEvent"
+    # rigFileModified = "rigFileModifiedEvent"
+    # rigFileSaved = "rigFileSavedEvent"
+
+    rigFileModifiedSignal = QtCore.Signal()
+    rigFileSavedSignal = QtCore.Signal()
 
     def __init__(self):
         """Constructor for the builder dialog"""
@@ -117,6 +122,7 @@ class BuilderDialog(DockableUI):
         self.rigPathSelector = pathSelector.PathSelector(
             caption="Select a Rig File", fileFilter="Rig Files (*.rig)", fileMode=1
         )
+        self.rigFileSaveStatus = stateImageWidget.StateImageWidget()
 
         self.assetNameLineEdit = QtWidgets.QLineEdit()
         self.assetNameLineEdit.setPlaceholderText("asset_name")
@@ -130,7 +136,7 @@ class BuilderDialog(DockableUI):
             build_section.BuildSection(self),
             controls_section.ControlsSection(self),
             deformation_section.DeformationSection(self),
-            publish_section.PublishSection(self)
+            publish_section.PublishSection(self),
         ]
 
         self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
@@ -154,6 +160,10 @@ class BuilderDialog(DockableUI):
 
     def createLayouts(self):
         """Create Layouts"""
+        rigFileLayout = QtWidgets.QHBoxLayout()
+        rigFileLayout.addWidget(self.rigPathSelector)
+        rigFileLayout.addWidget(self.rigFileSaveStatus)
+
         rigNameLayout = QtWidgets.QHBoxLayout()
         rigNameLayout.addWidget(QtWidgets.QLabel("Rig Name:"))
         rigNameLayout.addWidget(self.assetNameLineEdit)
@@ -163,7 +173,7 @@ class BuilderDialog(DockableUI):
         rigNameLayout.addWidget(self.archetypeBaseLabel)
 
         rigEnvironmentLayout = QtWidgets.QVBoxLayout()
-        rigEnvironmentLayout.addWidget(self.rigPathSelector)
+        rigEnvironmentLayout.addLayout(rigFileLayout)
         rigEnvironmentLayout.addLayout(rigNameLayout)
 
         # add the collapsable widgets
@@ -220,10 +230,11 @@ class BuilderDialog(DockableUI):
 
         self.assetNameLineEdit.editingFinished.connect(self._setRigName)
 
+        self.rigFileModifiedSignal.connect(partial(self._setRigFileModified, True))
+        self.rigFileSavedSignal.connect(partial(self._setRigFileModified, False))
+
         for widget in self.builderSections:
-            widget.mainWidget.headerWidget.checkbox.clicked.connect(
-                partial(self.__handleBreakpoint, widget)
-            )
+            widget.mainWidget.headerWidget.checkbox.clicked.connect(partial(self.__handleBreakpoint, widget))
 
         self.rigPathSelector.selectPathButton.clicked.connect(self._pathSelectorLoadRigFile)
         self.runSelectedButton.clicked.connect(self._runSelected)
@@ -270,6 +281,9 @@ class BuilderDialog(DockableUI):
         # set paths and widgets relative to the rig env
         for widget in self.builderSections:
             widget._setBuilder(builder=self.rigBuilder)
+
+        # set the status icon back up to date
+        self._setRigFileModified(False)
 
     # BUILDER FUNCTIONS
     def __handleBreakpoint(self, selectedWidget):
@@ -337,37 +351,18 @@ class BuilderDialog(DockableUI):
 
     def _setRigFileModified(self, value=True):
         if value:
-            # TODO: replace this with some kind of icon 
-            self.statusLine.showMessage("Builder has unsaved changes")
+            self.rigFileSaveStatus.setState(stateImageWidget.State.WARNING, message="Rig file has unsaved changes")
         else:
-            self.statusLine.clearMessage()
+            self.rigFileSaveStatus.setState(stateImageWidget.State.GOOD, message="Rig file up to date")
         self._rigFileIsModified = value
 
     def _setupCallbacks(self):
         """Setup required builder callbacks"""
-        om.MUserEventMessage.registerUserEvent(self.rigFileModified)
-        om.MUserEventMessage.registerUserEvent(self.rigFileSaved)
-
-        self.callbackArray.append(
-            om.MUserEventMessage.addUserEventCallback(
-                self.rigFileModified,
-                self._setRigFileModified,
-                clientData=True
-            ))
-        logger.info(f"setup Callbacks: {self.callbackArray}")
+        logger.debug(f"setup Callbacks: {self.callbackArray}")
 
     def _teardownCallbacks(self):
         """tear down builder callbacks"""
-        logger.info(f"Teardown Callbacks: {self.callbackArray}")
-
-        om.MEventMessage.removeCallbacks(self.callbackArray)
-        self.callbackArray.clear()
-
-        if om.MUserEventMessage.isUserEvent(self.rigFileModified):
-            om.MUserEventMessage.deregisterUserEvent(self.rigFileModified)
-
-        if om.MUserEventMessage.isUserEvent(self.rigFileSaved):
-            om.MUserEventMessage.deregisterUserEvent(self.rigFileSaved)
+        logger.debug(f"Teardown Callbacks: {self.callbackArray}")
 
     def showEvent(self, event):
         """Show event for the Builder UI"""
@@ -406,7 +401,7 @@ def confirmBuildRig():
     :return: Returns True or False depending on the scene state and user input
     """
 
-    modified = cmds.file(q=True, anyModified=True)
+    modified = cmds.file(query=True, anyModified=True)
     if modified:
         confirmPublishMessage = mayaMessageBox.MayaMessageBox(
             title="Run Rig Build",

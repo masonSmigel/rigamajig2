@@ -16,9 +16,13 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
+import rigamajig2
 import rigamajig2.maya.qc as qc
-import rigamajig2.ui.builder_ui.recent_files as recent_files
-from rigamajig2.ui.builder_ui.dialogs.newRigFile_dialog import CreateRigEnvDialog
+from rigamajig2.maya.rig import rigcallbacks
+from rigamajig2.ui.builder_ui import recentFiles
+from rigamajig2.ui.builder_ui.dialogs import gitDialog
+from rigamajig2.ui.builder_ui.dialogs import mergeRigsDialog
+from rigamajig2.ui.builder_ui.dialogs import newRigFileDialog
 
 
 class Actions(object):
@@ -99,7 +103,7 @@ class Actions(object):
 
     def createRigEnvironment(self):
         """ Create Rig Environment"""
-        createDialog = CreateRigEnvDialog()
+        createDialog = newRigFileDialog.CreateRigEnvDialog()
         createDialog.newRigEnviornmentCreated.connect(self.dialog._setRigFile)
         createDialog.showDialog()
 
@@ -114,14 +118,14 @@ class Actions(object):
         if result:
             rigfile = fileDialog.selectedFiles()[0]
             self.dialog._setRigFile(rigfile)
-            recent_files.addRecentFile(rigfile)
+            recentFiles.addRecentFile(rigfile)
             self.updateRecentFiles()
 
     def loadRecentRigFile(self, rigfile):
         self.dialog._setRigFile(rigfile)
 
         # lets re-add the recent file. This will just move it to the top of the list. Then update the list
-        recent_files.addRecentFile(rigfile)
+        recentFiles.addRecentFile(rigfile)
         self.updateRecentFiles()
 
     def saveRigFile(self):
@@ -140,7 +144,7 @@ class Actions(object):
         self.recentRigFileMenu.clear()
 
         # add any new recent files to the submenu
-        for recentFile in recent_files.getRecentFileList():
+        for recentFile in recentFiles.getRecentFileList():
             openRecentFileAction = QtWidgets.QAction(recentFile, self.recentRigFileMenu)
             openRecentFileAction.triggered.connect(partial(self.loadRecentRigFile, recentFile))
 
@@ -162,30 +166,25 @@ class Actions(object):
         mel.eval("openEvaluationToolkit;")
 
     def openGitVersionControlDialog(self):
-        from rigamajig2.ui.builder_ui.dialogs import git_dialog
         rigEnv = self.dialog.rigEnvironment
-        git_dialog.GitDialog.showDialog()
+        gitDialog.GitDialog.showDialog()
 
         # set the rig repo
-        git_dialog.GitDialog.dlg_instance.setRepo(rigEnv)
+        gitDialog.GitDialog.dlg_instance.setRepo(rigEnv)
 
     def reloadRigamajigModules(self):
         """ Reload riamajig modules"""
-        import rigamajig2
         rigamajig2.reloadModule(log=True)
 
     def removeRigamajigCallbacks(self):
-        from rigamajig2.maya.rig import rigcallbacks
         rigcallbacks.clearRigamajigCallbacks()
 
     def showMergeRigFilesDialog(self):
         """ Show the merge rig files dialog"""
-        from rigamajig2.ui.builder_ui.dialogs import mergeRigsDialog
-
         mergeRigsDialog.MergeRigsDialog.showDialog()
 
     # SHOW HELP
-    @QtCore.Slot()
+
     def _openLogFile(self):
         """Open the log file by getting the first handler of the root rigamajig logger."""
         rigamajig2RootLogger = logging.getLogger("rigamajig2")

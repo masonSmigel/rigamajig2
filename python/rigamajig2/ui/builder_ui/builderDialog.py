@@ -24,15 +24,15 @@ import rigamajig2
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.ui.builder_ui import actions
-from rigamajig2.ui.builder_ui import recent_files
+from rigamajig2.ui.builder_ui import recentFiles
 from rigamajig2.ui.builder_ui.sections import (
-    model_section,
-    setup_section,
-    deformation_section,
-    controls_section,
-    skeleton_section,
-    build_section,
-    publish_section,
+    modelSection,
+    setupSection,
+    deformationSection,
+    controlsSection,
+    skeletonSection,
+    buildSection,
+    publishSection,
 )
 from rigamajig2.ui.widgets import QLine, mayaMessageBox, pathSelector, stateImageWidget
 from rigamajig2.ui.widgets.workspace_control import DockableUI
@@ -74,7 +74,7 @@ class BuilderDialog(DockableUI):
         self.resize(420, 800)
 
         # if we don't provide a rig file load the most recent one from the recent files list
-        recentFile = recent_files.getMostRecentFile()
+        recentFile = recentFiles.getMostRecentFile()
         if recentFile:
             self._setRigFile(recentFile)
 
@@ -130,13 +130,13 @@ class BuilderDialog(DockableUI):
         self.archetypeBaseLabel = QtWidgets.QLabel("None")
 
         self.builderSections = [
-            model_section.ModelSection(self),
-            skeleton_section.SkeletonSection(self),
-            setup_section.SetupSection(self),
-            build_section.BuildSection(self),
-            controls_section.ControlsSection(self),
-            deformation_section.DeformationSection(self),
-            publish_section.PublishSection(self),
+            modelSection.ModelSection(self),
+            skeletonSection.SkeletonSection(self),
+            setupSection.SetupSection(self),
+            buildSection.BuildSection(self),
+            controlsSection.ControlsSection(self),
+            deformationSection.DeformationSection(self),
+            publishSection.PublishSection(self),
         ]
 
         self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
@@ -241,18 +241,12 @@ class BuilderDialog(DockableUI):
         self.runButton.clicked.connect(self._runAll)
         self.publishButton.clicked.connect(self._publish)
 
-    # --------------------------------------------------------------------------------
-    # Connections
-    # --------------------------------------------------------------------------------
-
-    @QtCore.Slot()
     def _pathSelectorLoadRigFile(self):
         """Load a rig file from the path selector"""
         newPath = self.rigPathSelector.getPath()
         if newPath:
             self.actions.loadRecentRigFile(newPath)
 
-    @QtCore.Slot()
     def _setRigFile(self, path=None):
         """
         Set the rig file to the given path
@@ -292,7 +286,6 @@ class BuilderDialog(DockableUI):
             if section is not selectedWidget:
                 section.setChecked(False)
 
-    @QtCore.Slot()
     def _runSelected(self):
         """run selected steps"""
 
@@ -323,7 +316,6 @@ class BuilderDialog(DockableUI):
         runTime = time.time() - startTime
         print("Time Elapsed: {}".format(str(runTime)))
 
-    @QtCore.Slot()
     def _runAll(self):
         """Run builder and update the component manager"""
 
@@ -337,7 +329,6 @@ class BuilderDialog(DockableUI):
             self.statusLine.showMessage(f"Rig Build Failed: '{self.rigName}'")
             raise e
 
-    @QtCore.Slot()
     def _publish(self):
         """Run builder and update the component manager"""
         # for the rig build we can put the _publish into a try except block

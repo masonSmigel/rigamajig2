@@ -21,7 +21,7 @@ from rigamajig2.maya.builder import data_manager
 from rigamajig2.maya.builder.constants import SKINS, SHAPES, DEFORMERS, DEFORM_LAYERS, DEFORMER_DATA_TYPES
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
-from rigamajig2.ui.builder_ui.dialogs import deformationLayer_dialog
+from rigamajig2.ui.builder_ui.dialogs import deformationLayerDialog
 from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
 from rigamajig2.ui.widgets import pathSelector
 
@@ -208,7 +208,7 @@ class DeformationSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _onOpenDeformLayerManager(self):
-        dialogInstance = deformationLayer_dialog.DeformLayerDialog()
+        dialogInstance = deformationLayerDialog.DeformLayerDialog()
         dialogInstance.show()
 
     @QtCore.Slot()

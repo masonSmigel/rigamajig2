@@ -90,6 +90,10 @@ class SkinData(maya_data.MayaData):
                 continue
 
             meshShape = deformer.getDeformShape(node)
+            if not meshShape:
+                logger.error(f"'{node}' has no deformable shape")
+                continue
+
             mesh = cmds.listRelatives(meshShape, p=True)[0]
             meshSkin = skinCluster.getSkinCluster(mesh)
 

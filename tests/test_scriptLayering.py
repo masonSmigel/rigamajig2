@@ -9,15 +9,11 @@
 
 """
 
-import os
-import maya.cmds as cmds
-
-from rigamajig2.maya.test.mayaunittest import TestCase
-from rigamajig2.maya.builder import builder
-from rigamajig2.maya.builder import core
-from rigamajig2.shared import common
 from rigamajig2.maya.builder import constants
+from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import scriptManager
 from rigamajig2.maya.test import mayaunittest
+from rigamajig2.maya.test.mayaunittest import TestCase
 
 
 class TestBuilderScriptLayering(TestCase):
@@ -33,7 +29,7 @@ class TestBuilderScriptLayering(TestCase):
         rigFile = core.newRigEnviornmentFromArchetype(tempDir, "biped", "tempRig")
 
         for scriptType in [constants.PRE_SCRIPT, constants.POST_SCRIPT, constants.PUB_SCRIPT]:
-            archetypeScriptList = core.GetCompleteScriptList.getScriptList(rigFile, scriptType=scriptType)
+            archetypeScriptList = scriptManager.GetCompleteScriptList.getScriptList(rigFile, scriptType=scriptType)
 
             self.assertTrue(len(archetypeScriptList))
 

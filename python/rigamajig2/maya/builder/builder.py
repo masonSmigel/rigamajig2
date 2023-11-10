@@ -21,9 +21,10 @@ import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
 import rigamajig2.shared.common as common
 import rigamajig2.shared.path as path
+from rigamajig2.maya.builder import (componentManager, scriptManager)
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
-from rigamajig2.maya.builder import data_manager
+from rigamajig2.maya.builder import dataIO
 from rigamajig2.maya.builder import model
 from rigamajig2.maya.components import base
 
@@ -53,7 +54,7 @@ class Builder(object):
         self.rigEnvironment = None
         self.rigFile = None
 
-        self._availableComponents = core.findComponents()
+        self._availableComponents = componentManager.findComponents()
         self.componentList = []
 
         # rig file properties
@@ -285,7 +286,7 @@ class Builder(object):
 
         for filepath in common.toList(filePaths):
             absolutePath = self.getAbsolutePath(filepath)
-            data_manager.loadJointData(absolutePath)
+            dataIO.loadJointData(absolutePath)
             logger.info(f"Joints loaded : {filepath}")
 
     def initialize(self) -> None:
@@ -406,7 +407,7 @@ class Builder(object):
         self.setComponents([])
         for filepath in common.toList(filepaths):
             absolutePath = self.getAbsolutePath(filepath)
-            data_manager.loadComponentData(self, filepath=absolutePath)
+            dataIO.loadComponentData(self, filepath=absolutePath)
             logger.info(f"components loaded : {filepath}")
 
     def loadControlShapes(self, applyColor: bool = True) -> None:
@@ -421,7 +422,7 @@ class Builder(object):
             # make the path an absolute
 
             absPath = self.getAbsolutePath(filepath)
-            data_manager.loadControlShapeData(absPath, applyColor=applyColor)
+            dataIO.loadControlShapeData(absPath, applyColor=applyColor)
             self.updateMaya()
             logger.info(f"control shapes loaded: {filepath}")
 
@@ -433,7 +434,7 @@ class Builder(object):
 
         for filepath in common.toList(filepaths):
             absPath = self.getAbsolutePath(filepath)
-            if data_manager.loadGuideData(absPath):
+            if dataIO.loadGuideData(absPath):
                 logger.info(f"guides loaded: {filepath}")
 
     def loadPoseReaders(self, replace: bool = True) -> None:
@@ -446,7 +447,7 @@ class Builder(object):
 
         for filepath in common.toList(filepaths):
             absPath = self.getAbsolutePath(filepath)
-            if data_manager.loadPoseReaderData(absPath, replace=replace):
+            if dataIO.loadPoseReaderData(absPath, replace=replace):
                 logger.info(f"pose readers loaded: {filepath}")
 
     def loadDeformationLayers(self) -> None:
@@ -454,7 +455,7 @@ class Builder(object):
         Load the deformation layers from the `deformLayersFile` property
         """
         filepath = self.getAbsolutePath(self.deformLayersFile) or None
-        if data_manager.loadDeformationLayerData(filepath):
+        if dataIO.loadDeformationLayerData(filepath):
             logger.info("deformation layers loaded")
 
     def loadSkinWeights(self) -> None:
@@ -462,7 +463,7 @@ class Builder(object):
         Load the skin weights from the `skinsFile` property
         """
         filepath = self.getAbsolutePath(self.skinsFile) or None
-        if data_manager.loadSkinWeightData(filepath):
+        if dataIO.loadSkinWeightData(filepath):
             logger.info("skin weights loaded")
 
     def loadDeformers(self) -> None:
@@ -473,7 +474,7 @@ class Builder(object):
 
         for filepath in common.toList(deformerPaths):
             absPath = self.getAbsolutePath(filepath)
-            if data_manager.loadDeformer(absPath):
+            if dataIO.loadDeformer(absPath):
                 logger.info(f"deformers loaded: {filepath}")
 
     # TODO: Fix this or delete it.
@@ -545,12 +546,12 @@ class Builder(object):
             raise KeyError(f"'{scriptStep} is not a valid script type")
 
         absoluteScripts = [self.getAbsolutePath(script) for script in localScripts]
-        core.runAllScripts(absoluteScripts)
+        scriptManager.runAllScripts(absoluteScripts)
         if len(absoluteScripts):
             logger.info(f"{niceScriptStepName}: local scripts -- complete")
 
         # next get scripts to inherit
-        scriptDict = core.GetCompleteScriptList.getScriptList(self.rigFile, scriptStep)
+        scriptDict = scriptManager.GetCompleteScriptList.getScriptList(self.rigFile, scriptStep)
 
         inheritedScripts = {
             recursion: scripts
@@ -559,7 +560,7 @@ class Builder(object):
         }
         scripts = list(inheritedScripts.values())
         completeScriptList = common.joinLists(scripts)
-        core.runAllScripts(completeScriptList)
+        scriptManager.runAllScripts(completeScriptList)
         if len(completeScriptList):
             logger.info(f"{niceScriptStepName}: inherited scripts -- complete")
 

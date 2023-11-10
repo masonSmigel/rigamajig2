@@ -13,17 +13,15 @@ import os
 import pathlib
 import platform
 import subprocess
-import sys
 from functools import partial
+from typing import List
 
-import maya.OpenMayaUI as omui
 import maya.cmds as cmds
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
-from shiboken2 import wrapInstance
 
-from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import dataManager
 from rigamajig2.maya.data import abstract_data
 from rigamajig2.shared import common
 from rigamajig2.ui import showInFolder
@@ -49,7 +47,7 @@ JSON_FILTER = "Json Files (*.json)"
 class DataLoader(QtWidgets.QWidget):
     """ Widget to select valid file or folder paths """
 
-    DATA_TYPE_LIST = core.getDataModules()
+    DATA_TYPE_LIST = dataManager.getDataModules()
 
     # emit a list of files when updated
     filesUpdated = QtCore.Signal(object)
@@ -287,14 +285,14 @@ class DataLoader(QtWidgets.QWidget):
         """ Set the label text"""
         self.pathLabel.setText(text)
 
-    def getFileList(self, absolute=False, ):
+    def getFileList(self, absolute=False) -> List[str]:
         """
         Get a list of all files used in this widget.
         :return:
         """
         # check if there are items to get
         if not self.pathTreeWidget.topLevelItemCount() > 0:
-            return False
+            return []
 
         fileList = list()
         for item in self.getAllItems():
@@ -402,7 +400,7 @@ class DataLoader(QtWidgets.QWidget):
             )
 
         if newPath:
-            newData = core.createDataClassInstance(dataType=datatype)
+            newData = rigamajig2.maya.builder.data.createDataClassInstance(dataType=datatype)
             newData.write(filepath=newPath[0])
 
             self.addItem(newPath[0])
@@ -446,7 +444,7 @@ class DataLoader(QtWidgets.QWidget):
         """
         if pathlib.Path(path).exists() and pathlib.Path(path).is_file():
             dataType = abstract_data.AbstractData().getDataType(path)
-            dataClass = core.createDataClassInstance(dataType=dataType)
+            dataClass = rigamajig2.maya.builder.data.createDataClassInstance(dataType=dataType)
 
             # read the data and apply all keys
             dataClass.read(filepath=path)
@@ -483,7 +481,7 @@ class DataLoader(QtWidgets.QWidget):
         dataType = abstract_data.AbstractData.getDataType(dataFile)
 
         # read the current data into the data object
-        dataObj = core.createDataClassInstance(dataType)
+        dataObj = rigamajig2.maya.builder.data.createDataClassInstance(dataType)
         dataObj.read(dataFile)
 
         # gather data from the new selection
@@ -586,70 +584,4 @@ class DataLoader(QtWidgets.QWidget):
                 if filePath:
                     self.selectPath(filePath)
 
-
-class TestDialog(QtWidgets.QDialog):
-    """
-    Test dialog for the script executer
-    """
-    WINDOW_TITLE = "Test Dialog"
-
-    def __init__(self):
-
-        if sys.version_info.major < 3:
-            mayaMainWindow = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
-        else:
-            mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
-
-        super(TestDialog, self).__init__(mayaMainWindow)
-
-        self.setWindowTitle(self.WINDOW_TITLE)
-        if cmds.about(ntOS=True):
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        elif cmds.about(macOS=True):
-            self.setProperty("saveWindowPref", True)
-            self.setWindowFlags(QtCore.Qt.Tool)
-
-        self.setMinimumSize(250, 200)
-
-        self.createWidgets()
-        self.createLayouts()
-
-    def createWidgets(self):
-        """ Create widgets """
-        self.dataLoader = DataLoader("Deformers:")
-        self.dataLoader.setRelativePath("/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/")
-        self.dataLoader.setFilteringEnabled(True)
-        self.dataLoader.setDataFilter(["GuideData", "JointData"])
-        self.dataLoader.addItem(
-            "/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/components.json")
-        self.dataLoader.addItem(
-            "/Users/masonsmigel/Documents/dev/maya/rigamajig2/archetypes/biped/skeleton_pos.json")
-        self.loadButton = QtWidgets.QPushButton("Load All")
-        self.saveButton = QtWidgets.QPushButton("Save All")
-
-        self.loadButton.clicked.connect(self.dataLoader.loadAllData)
-        self.saveButton.clicked.connect(self.dataLoader.getFileList)
-
-    def createLayouts(self):
-        """ Create layouts"""
-        mainLayout = QtWidgets.QVBoxLayout(self)
-
-        mainLayout.addWidget(self.dataLoader)
-        mainLayout.addWidget(self.loadButton)
-        mainLayout.addWidget(self.saveButton)
-        mainLayout.addStretch()
-
-        mainLayout = QtWidgets.QVBoxLayout(self)
-        mainLayout.setContentsMargins(0, 0, 0, 0)
-
-
-if __name__ == "__main__":
-    try:
-        testDialog.close()  # pylint: disable=E0601
-        testDialog.deleteLater()
-    except:
-        pass
-    # pylint: disable=invalid-name
-    testDialog = TestDialog()
-    testDialog.show()
 

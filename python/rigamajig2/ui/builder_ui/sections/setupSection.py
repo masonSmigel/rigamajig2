@@ -33,10 +33,11 @@ from rigamajig2.maya import container as rig_container
 from rigamajig2.maya import meta as meta
 from rigamajig2.maya import naming as naming
 from rigamajig2.maya.builder import builder
+from rigamajig2.maya.builder import componentManager
 from rigamajig2.maya.builder import constants
-from rigamajig2.maya.builder import core
-from rigamajig2.maya.builder import data_manager
+from rigamajig2.maya.builder import dataIO
 from rigamajig2.ui.builder_ui import style
+from rigamajig2.ui.builder_ui.dialogs import editComponentDialog
 from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
 from rigamajig2.ui.widgets import QPushButton, mayaMessageBox
 
@@ -176,7 +177,7 @@ class SetupSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _onSaveComponents(self):
         """ Save component setup from json using the builder """
-        data_manager.saveComponents(self.builder, self.componentsDataLoader.getFileList(absolute=True))
+        dataIO.saveComponents(self.builder, self.componentsDataLoader.getFileList(absolute=True))
 
     @QtCore.Slot()
     def _onLoadGuides(self):
@@ -189,7 +190,7 @@ class SetupSection(builderSection.BuilderSection):
         """ Save guides setup to json using the builder """
         if not self.__validateGuidesInScene():
             return
-        data_manager.saveGuides(self.guideDataLoader.getFileList(absolute=True), method="merge")
+        dataIO.saveGuides(self.guideDataLoader.getFileList(absolute=True), method="merge")
 
     @QtCore.Slot()
     def _onSaveGuidesAsOverride(self):
@@ -208,7 +209,7 @@ class SetupSection(builderSection.BuilderSection):
 
         fileName = fileResults[0] if fileResults else None
 
-        savedFiles = data_manager.saveGuides(
+        savedFiles = dataIO.saveGuides(
             self.guideDataLoader.getFileList(absolute=True),
             method="overwrite",
             fileName=fileName
@@ -260,7 +261,7 @@ def _getComponentIcon(cmpt):
 
 def _getComponentColor(cmpt):
     """get the ui color for the component"""
-    tmpComponentObj = core.createComponentClassInstance(cmpt)
+    tmpComponentObj = componentManager.createComponentClassInstance(cmpt)
     uiColor = tmpComponentObj.UI_COLOR
     # after we get the UI color we can delte the tmp component instance
     del tmpComponentObj
@@ -491,7 +492,7 @@ class ComponentManager(QtWidgets.QWidget):
         :param rigParent: component rigParent
         :return:
         """
-        componentObject = core.createComponentClassInstance(componentType)
+        componentObject = componentManager.createComponentClassInstance(componentType)
         cmpt = componentObject(name=name, input=ast.literal_eval(str(input)), rigParent=rigParent)
 
         item = ComponentTreeWidgetItem(name=name,
@@ -579,7 +580,7 @@ class ComponentManager(QtWidgets.QWidget):
         """ Open the Edit component parameters dialog"""
 
         if not self.editComponentDialog:
-            self.editComponentDialog = editComponent_dialog.EditComponentDialog()
+            self.editComponentDialog = editComponentDialog.EditComponentDialog()
             self.editComponentDialog.windowClosedSignal.connect(self.resetComponentDialogInstance)
             self.editComponentDialog.show()
         else:
@@ -929,7 +930,7 @@ class CreateComponentDialog(QtWidgets.QDialog):
         self.discriptionTextEdit.clear()
 
         componentType = self.componentTypeComboBox.currentText()
-        componentObject = core.createComponentClassInstance(componentType)
+        componentObject = componentManager.createComponentClassInstance(componentType)
 
         classDocs = componentObject.__doc__ or ''
         initDocs = componentObject.__init__.__doc__ or ''

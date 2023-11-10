@@ -17,7 +17,7 @@ from PySide2 import QtWidgets
 # RIGAMAJIG2
 import rigamajig2.maya.builder.constants
 from rigamajig2.maya import skinCluster
-from rigamajig2.maya.builder import data_manager
+from rigamajig2.maya.builder import dataIO
 from rigamajig2.maya.builder.constants import SKINS, SHAPES, DEFORMERS, DEFORM_LAYERS, DEFORMER_DATA_TYPES
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
@@ -204,7 +204,7 @@ class DeformationSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _onSaveDeformationLayers(self):
         """ Save pose reader setup to json using the builder """
-        data_manager.saveDeformationLayers(self.deformLayerPathSelector.getPath())
+        dataIO.saveDeformationLayers(self.deformLayerPathSelector.getPath())
 
     @QtCore.Slot()
     def _onOpenDeformLayerManager(self):
@@ -227,12 +227,12 @@ class DeformationSection(builderSection.BuilderSection):
             dir=self.skinPathSelector.getPath()
         )
         if filepath:
-            data_manager.loadSingleSkin(filepath[0])
+            dataIO.loadSingleSkin(filepath[0])
 
     @QtCore.Slot()
     def _onSaveSkin(self):
         """Save the skin weights"""
-        data_manager.saveSkinWeights(self.skinPathSelector.getPath())
+        dataIO.saveSkinWeights(self.skinPathSelector.getPath())
 
     @QtCore.Slot()
     def _onCopySkins(self):

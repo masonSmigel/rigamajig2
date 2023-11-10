@@ -17,7 +17,7 @@ from maya import cmds as cmds
 from rigamajig2.maya import joint
 from rigamajig2.maya import meta
 from rigamajig2.maya import skinCluster
-from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import dataManager
 from rigamajig2.maya.builder.constants import DEFORMER_DATA_TYPES
 from rigamajig2.maya.data import (psd_data,
                                   skin_data,
@@ -67,7 +67,7 @@ def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileN
     :return: dictonary containing info about all nodes added, changed and removed from each file.
     """
 
-    dataModules = list(core.getDataModules(core.DATA_PATH).keys())
+    dataModules = list(dataManager.getDataModules(dataManager.DATA_PATH).keys())
     if dataType not in dataModules:
         raise ValueError(f"Data type {dataType} is not valid. Valid Types are {dataModules}")
 
@@ -90,7 +90,7 @@ def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileN
     sourceNodesDict = dict()
     sourceNodesList = set()
     for dataFile in filteredFileStack:
-        dataClass = core.createDataClassInstance(dataType=dataType)
+        dataClass = dataManager.createDataClassInstance(dataType=dataType)
         dataClass.read(dataFile)
         nodes = dataClass.getKeys()
         sourceNodesDict[dataFile] = nodes
@@ -226,12 +226,12 @@ def performLayeredSave(saveDataDict, dataType="AbstractData", prompt=True) -> ty
     for dataFile in saveDataDict:
 
         # read all the old data. Anything that is NOT updated it will stay the same as the previous file.
-        oldDataObj = core.createDataClassInstance(dataType=dataType)
+        oldDataObj = dataManager.createDataClassInstance(dataType=dataType)
         if os.path.exists(dataFile):
             oldDataObj.read(dataFile)
 
         # create a dictionary with data that is updated from our scene
-        newDataObj = core.createDataClassInstance(dataType=dataType)
+        newDataObj = dataManager.createDataClassInstance(dataType=dataType)
         changedNodes = saveDataDict[dataFile][CHANGED]
         addedNodes = saveDataDict[dataFile][ADDED]
         removedNodes = saveDataDict[dataFile][REMOVED]
@@ -667,7 +667,7 @@ def loadDeformer(filepath: str = None) -> bool:
     if dataType not in DEFORMER_DATA_TYPES:
         raise ValueError(f"{os.path.basename(filepath)} is not a type of deformer data")
 
-    dataObj = core.createDataClassInstance(dataType)
+    dataObj = dataManager.createDataClassInstance(dataType)
     dataObj.read(filepath)
     dataObj.applyAllData()
     return True

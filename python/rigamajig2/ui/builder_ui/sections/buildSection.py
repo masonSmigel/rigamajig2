@@ -13,8 +13,8 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-from rigamajig2.maya.builder import core
-from rigamajig2.maya.builder import data_manager
+from rigamajig2.maya.builder import dataIO
+from rigamajig2.maya.builder import scriptManager
 from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
 # RIGAMAJIG2
 from rigamajig2.shared import common
@@ -105,7 +105,7 @@ class BuildSection(builderSection.BuilderSection):
         self.postScriptRunner.clearScript()
         self.psdDataLoader.setRelativePath(self.builder.getRigEnvironment())
 
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT)
+        scripts = scriptManager.GetCompleteScriptList.getScriptList(self.builder.rigFile, POST_SCRIPT)
         self.postScriptRunner.addScriptsWithRecursionData(scripts)
 
         psdFiles = self.builder.getRigData(self.builder.getRigFile(), PSD)
@@ -141,7 +141,7 @@ class BuildSection(builderSection.BuilderSection):
     @QtCore.Slot()
     def _onSavePoseReaders(self):
         """ Save pose reader setup to JSON using the builder """
-        data_manager.savePoseReaders(self.psdDataLoader.getFileList(absolute=True))
+        dataIO.savePoseReaders(self.psdDataLoader.getFileList(absolute=True))
 
     @QtCore.Slot()
     def _onCompleteBuild(self):

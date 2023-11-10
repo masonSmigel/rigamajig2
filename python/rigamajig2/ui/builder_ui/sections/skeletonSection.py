@@ -20,7 +20,7 @@ import rigamajig2.maya.meta as meta
 import rigamajig2.maya.rig.live as live
 from rigamajig2.maya import decorators
 from rigamajig2.maya import naming
-from rigamajig2.maya.builder import data_manager
+from rigamajig2.maya.builder import dataIO
 from rigamajig2.maya.builder.constants import SKELETON_POS
 from rigamajig2.maya.components.base import GUIDE_STEP
 from rigamajig2.shared import common
@@ -187,7 +187,7 @@ class SkeletonSection(builderSection.BuilderSection):
         if not self.__validateJointsInScene():
             return
 
-        data_manager.saveJoints(self.jointPositionDataLoader.getFileList(absolute=True), method="merge")
+        dataIO.saveJoints(self.jointPositionDataLoader.getFileList(absolute=True), method="merge")
 
     @QtCore.Slot()
     def _onSaveJointPositionAsOverride(self):
@@ -206,7 +206,7 @@ class SkeletonSection(builderSection.BuilderSection):
 
         fileName = fileResults[0] if fileResults else None
 
-        savedFiles = data_manager.saveJoints(
+        savedFiles = dataIO.saveJoints(
             self.jointPositionDataLoader.getFileList(absolute=True),
             method="overwrite",
             fileName=fileName

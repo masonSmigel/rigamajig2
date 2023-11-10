@@ -36,9 +36,16 @@ RECURSION_COLORS = {0: None,
                     4: QtGui.QColor(85, 124, 131),
                     }
 
-
 FILEPATH_DATA_KEY = "filepath"
 CUSTOM_DATA_KEY = "customData"
+
+
+class ScriptListWidgetItem(QtWidgets.QListWidgetItem):
+    def __init__(self, scriptPath):
+        super().__init__()
+        # todo: implement
+        pass
+
 
 # ignore too many public methods to UI classes.
 # pylint: disable = too-many-public-methods
@@ -52,7 +59,7 @@ class ScriptRunner(QtWidgets.QWidget):
     def __init__(self, rootDirectory=None, title='Scripts', *args, **kwargs):
         """
         Script runner widget class.
-        The script runner conists of a list of scripts that can be modified, a scripts loaded in run in order.
+        The script runner consists of a list of scripts that can be modified, a scripts loaded in run in order.
         Paths relative to the root directory specified.
         :param rootDirectory: root directory of the script runner. All paths are relative to the script runner
         :param args:
@@ -110,6 +117,7 @@ class ScriptRunner(QtWidgets.QWidget):
         self.scriptList = QtWidgets.QListWidget()
         self.scriptList.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
         self.scriptList.setFixedHeight(155)
+        self.scriptList.setAcceptDrops(True)
         self.scriptList.setDragDropMode(QtWidgets.QListWidget.InternalMove)
         self.scriptList.setAlternatingRowColors(True)
 
@@ -127,7 +135,7 @@ class ScriptRunner(QtWidgets.QWidget):
 
     def createConnections(self):
         """ Create connections"""
-        pass
+        self.scriptList.model().rowsMoved.connect(self.emitScriptsUpdatedSignal)
         # self.addScriptButton.clicked.connect(self.addScriptBrowser)
         # self.reload_scripts_btn.clicked.connect(self.reload_scripts)
         # self.createNewScriptButton.clicked.connect(self.createNewScript)
@@ -276,7 +284,7 @@ class ScriptRunner(QtWidgets.QWidget):
             else:
                 subprocess.check_call(['xdg-open', filePath])
 
-    def emitScriptsUpdatedSignal(self,*args):
+    def emitScriptsUpdatedSignal(self, *args):
         """emit a signal with a list of all the scripts"""
         scriptsList = {}
         for item in self.getAllItems():
@@ -290,19 +298,13 @@ class ScriptRunner(QtWidgets.QWidget):
         else:
             event.ignore()
 
-    def dragMoveEvent(self, event):
-        """ Reimplementing event to accept plain text, """
-        if event.mimeData().hasUrls:
-            event.accept()
-        else:
-            event.ignore()
-
     def dropEvent(self, event):
         """ """
+        super().dropEvent(event)
         if event.mimeData().hasUrls:
             for url in event.mimeData().urls():
                 filePath = url.path()
-                if filePath:
-                    self._addScriptToWidget(filePath, top=True)
-                    self.currentScriptsList.append(filePath)
-            self.emitScriptsUpdatedSignal()
+
+                self._addScriptToWidget(filePath, top=True)
+                self.currentScriptsList.append(filePath)
+                self.emitScriptsUpdatedSignal()

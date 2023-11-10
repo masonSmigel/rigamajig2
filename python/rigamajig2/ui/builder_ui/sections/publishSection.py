@@ -14,7 +14,7 @@ from PySide2 import QtWidgets
 
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
-from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import scriptManager
 # RIGAMAJIG2
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
@@ -89,7 +89,7 @@ class PublishSection(builderSection.BuilderSection):
         self.outPathSelector.selectPath(outFile)
 
         # update the script runner
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PUB_SCRIPT)
+        scripts = scriptManager.GetCompleteScriptList.getScriptList(self.builder.rigFile, constants.PUB_SCRIPT)
         self.pubScriptRunner.addScriptsWithRecursionData(scripts)
 
         # set the default output file type

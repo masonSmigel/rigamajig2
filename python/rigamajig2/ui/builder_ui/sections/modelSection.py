@@ -17,7 +17,7 @@ import rigamajig2.maya.builder.constants
 import rigamajig2.maya.file as file
 import rigamajig2.shared.common
 from rigamajig2.maya.builder import constants
-from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import scriptManager
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style as ui_constants
 from rigamajig2.ui.builder_ui.widgets import builderSection, scriptRunner
@@ -89,7 +89,7 @@ class ModelSection(builderSection.BuilderSection):
         self.modelPathSelector.selectPath(modelFile)
 
         # update the script runner
-        scripts = core.GetCompleteScriptList.getScriptList(self.builder.getRigFile(), constants.PRE_SCRIPT)
+        scripts = scriptManager.GetCompleteScriptList.getScriptList(self.builder.getRigFile(), constants.PRE_SCRIPT)
         self.preScriptRunner.addScriptsWithRecursionData(scripts)
 
     @QtCore.Slot()

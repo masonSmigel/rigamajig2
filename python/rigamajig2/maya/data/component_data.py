@@ -10,7 +10,7 @@
 """
 import rigamajig2.maya.data.abstract_data as abstract_data
 from rigamajig2.maya import container
-from rigamajig2.maya.builder import core
+from rigamajig2.maya.builder import componentManager
 from rigamajig2.maya.components import base
 from rigamajig2.shared import common
 
@@ -52,7 +52,7 @@ class ComponentData(abstract_data.AbstractData):
         for node in nodes:
             moduleType = self._data[node]['type']
 
-            componentClass = core.createComponentClassInstance(moduleType)
+            componentClass = componentManager.createComponentClassInstance(moduleType)
             componentInstance = componentClass.fromData(self._data[node])
 
             createdInstances.append(componentInstance)

@@ -17,7 +17,7 @@ from PySide2 import QtWidgets
 import rigamajig2.maya.curve
 import rigamajig2.maya.rig.control
 from rigamajig2.maya import meta
-from rigamajig2.maya.builder import data_manager
+from rigamajig2.maya.builder import dataIO
 from rigamajig2.maya.builder.constants import CONTROL_SHAPES
 # RIGAMAJIG2
 from rigamajig2.shared import common
@@ -189,7 +189,7 @@ class ControlsSection(builderSection.BuilderSection):
         if not self.__validateControlsInScene():
             return
 
-        data_manager.saveControlShapes(self.controlDataLoader.getFileList(absolute=True), method="merge")
+        dataIO.saveControlShapes(self.controlDataLoader.getFileList(absolute=True), method="merge")
 
     @QtCore.Slot()
     def _onSaveControlShapesAsOverwrite(self) -> None:
@@ -210,7 +210,7 @@ class ControlsSection(builderSection.BuilderSection):
 
         fileName = fileResults[0] if fileResults else None
 
-        savedFiles = data_manager.saveControlShapes(
+        savedFiles = dataIO.saveControlShapes(
             self.controlDataLoader.getFileList(absolute=True),
             method="overwrite",
             fileName=fileName

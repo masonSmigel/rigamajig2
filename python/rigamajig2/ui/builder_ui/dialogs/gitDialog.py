@@ -8,15 +8,26 @@
     description:
 
 """
+import logging
 import os
 
-import git  # import the gitPython library
 from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 from rigamajig2.shared import common
 from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox
+
+logger = logging.getLogger(__name__)
+
+try:
+    import git
+
+    _gitLoaded = True
+except ModuleNotFoundError:
+    logger.error("python module 'git' not found. Git features are not available. (please install requirements.txt)")
+    _gitLoaded = False
+
 
 ITEM_HEIGHT = 18
 
@@ -34,7 +45,7 @@ def intializeRepo(repo_path):
     repo = git.Repo.init(repo_path)
 
     # add the .DS_Store to the .gitignore
-    gitignore_path = os.path.join(repo.working_tree_dir, '.gitignore')
+    gitignore_path = os.path.join(repo.working_tree_dir, ".gitignore")
 
     addToGitIgnore(repo_path, items_to_ignore=["*.DS_Store"])
 
@@ -45,19 +56,19 @@ def intializeRepo(repo_path):
 
 def addToGitIgnore(repo_path, items_to_ignore):
     repo = git.Repo(repo_path)
-    gitignore_path = os.path.join(repo.working_tree_dir, '.gitignore')
+    gitignore_path = os.path.join(repo.working_tree_dir, ".gitignore")
 
     # Check if .gitignore exists; create it if it doesn't
     if not os.path.exists(gitignore_path):
-        with open(gitignore_path, 'w') as gitignore_file:
+        with open(gitignore_path, "w") as gitignore_file:
             gitignore_file.write("# .gitignore file\n")
 
     # Read existing entries from .gitignore
-    with open(gitignore_path, 'r') as gitignore_file:
+    with open(gitignore_path, "r") as gitignore_file:
         existing_entries = gitignore_file.read().splitlines()
 
     # Add new items to .gitignore if they don't already exist
-    with open(gitignore_path, 'a') as gitignore_file:
+    with open(gitignore_path, "a") as gitignore_file:
         for item in items_to_ignore:
             if item not in existing_entries:
                 gitignore_file.write(f"{item}\n")
@@ -154,17 +165,14 @@ class GitDialog(mayaDialog.MayaDialog):
         isInitialized = isRepoInitialized(repoPath)
 
         if not isInitialized:
-
             confirmInitialize = mayaMessageBox.MayaMessageBox()
             confirmInitialize.setText("No Git Repo exists")
             confirmInitialize.setHelp()
 
-            confirmInitialize.setInformativeText(
-                f"No Git Repo exists yet. Would you like to initalize one?"
-                )
+            confirmInitialize.setInformativeText(f"No Git Repo exists yet. Would you like to initalize one?")
             confirmInitialize.setStandardButtons(
                 QtWidgets.QMessageBox.Yes | QtWidgets.QMessageBox.No | QtWidgets.QMessageBox.Cancel
-                )
+            )
 
             confirmInitialize.setDefaultButton(QtWidgets.QMessageBox.Save)
             res = confirmInitialize.exec_()
@@ -198,10 +206,10 @@ class GitDialog(mayaDialog.MayaDialog):
 
         # Add the files to the list with appropriate icons (if the head is valid. Otherwise just list untracked files
         if self.repo.head.is_valid():
-            for added_file in self.repo.git.diff('HEAD', name_only=True, diff_filter='AM').splitlines():
+            for added_file in self.repo.git.diff("HEAD", name_only=True, diff_filter="AM").splitlines():
                 self.addFileToChangelist(added_file, icon="git_file_modified.png")
 
-            for deleted_file in self.repo.git.diff('HEAD', name_only=True, diff_filter='D').splitlines():
+            for deleted_file in self.repo.git.diff("HEAD", name_only=True, diff_filter="D").splitlines():
                 self.addFileToChangelist(deleted_file, icon="git_file_deleted.png")
 
         # Also add any untracked files
@@ -216,10 +224,10 @@ class GitDialog(mayaDialog.MayaDialog):
 
         differences = self.getDifferencesBetweenLocalAndHead(file)
 
-        lines = differences.split('\n')  # Split the string into lines
+        lines = differences.split("\n")  # Split the string into lines
         if len(lines) > 35:
             truncated_lines = lines[:35]  # Truncate to the first 10 lines
-            differences = '\n'.join(truncated_lines)  # Join the truncated lines back into a string
+            differences = "\n".join(truncated_lines)  # Join the truncated lines back into a string
             differences += "\n ... (changes trunicated. Use Print Diff to see all changes)"
 
         item.setToolTip(differences)
@@ -239,7 +247,7 @@ class GitDialog(mayaDialog.MayaDialog):
 
         try:
             # Get the differences between the current local changes and the latest commit (HEAD) for the file
-            differences = self.repo.git.diff('HEAD', '--', file)
+            differences = self.repo.git.diff("HEAD", "--", file)
             if printIt:
                 print(differences)
             return differences
@@ -271,7 +279,7 @@ class GitDialog(mayaDialog.MayaDialog):
         commitMessage = self.commitEntry.toPlainText()
 
         # Stage changes respecting .gitignore
-        self.repo.git.add('--all', '.')
+        self.repo.git.add("--all", ".")
 
         # Commit the staged changes
         self.repo.index.commit(commitMessage)
@@ -282,15 +290,18 @@ class GitDialog(mayaDialog.MayaDialog):
         self.updateWatcherFiles(self.repo)
 
     def revertToCommit(self, commitId, mode="hard"):
-
         if mode == "hard":
             title = "Hard Revert Changes"
-            message = ("Hard Reverting will erease all changes in your default changelist. "
-                       "Are you sure you want to proceed?")
+            message = (
+                "Hard Reverting will erease all changes in your default changelist. "
+                "Are you sure you want to proceed?"
+            )
         else:
             title = "Soft Revert Changes"
-            message = ("Soft Reverting will move unsaved changes into the default changelist.  "
-                       "Are you sure you want to proceed?")
+            message = (
+                "Soft Reverting will move unsaved changes into the default changelist.  "
+                "Are you sure you want to proceed?"
+            )
 
         confirmPublishMessage = mayaMessageBox.MayaMessageBox(title=title, message=message, icon="warning")
         confirmPublishMessage.setButtonsYesNoCancel()
@@ -299,15 +310,14 @@ class GitDialog(mayaDialog.MayaDialog):
 
         if res == QtWidgets.QMessageBox.Yes:
             if mode == "hard":
-                self.repo.git.reset('--hard', commitId)
+                self.repo.git.reset("--hard", commitId)
             else:
-                self.repo.git.reset('--soft', commitId)
+                self.repo.git.reset("--soft", commitId)
             self.loadCommitHistory()
             self.loadFilesChangedSinceLastCommit()  # Refresh the list of files changed since the last commit
 
     def softRevertToCommit(self, commitId):
-
-        self.repo.git.reset('--soft', commitId)
+        self.repo.git.reset("--soft", commitId)
         self.loadCommitHistory()
         self.loadFilesChangedSinceLastCommit()  # Refresh the list of files changed since the last commit
 
@@ -378,14 +388,14 @@ class GitDialog(mayaDialog.MayaDialog):
         files = [item.text() for item in items]
 
         for file in files:
-
             isUntracked = file not in self.repo.untracked_files
 
             if isUntracked:
                 confirmRevert = mayaMessageBox.MayaMessageBox(
                     title=f"Revert Changes to: {file}",
                     message="Reverting will undo all changes. Are you sure you want to proceed?",
-                    icon="warning")
+                    icon="warning",
+                )
                 confirmRevert.setButtonsYesNoCancel()
 
                 res = confirmRevert.exec_()
@@ -397,7 +407,8 @@ class GitDialog(mayaDialog.MayaDialog):
                 confirmDelete = mayaMessageBox.MayaMessageBox(
                     title=f"Delete Untracked File: {file}",
                     message="This file is untracked by Git. Would you like to delete it?",
-                    icon="error")
+                    icon="error",
+                )
                 confirmDelete.setButtonsYesNoCancel()
 
                 res = confirmDelete.exec_()
@@ -410,7 +421,7 @@ class GitDialog(mayaDialog.MayaDialog):
             self.loadFilesChangedSinceLastCommit()
 
     def showEvent(self, event):
-        """ Setup the watcher"""
+        """Setup the watcher"""
         self.updateWatcherFiles(self.repo)
 
     def closeEvent(self, event):

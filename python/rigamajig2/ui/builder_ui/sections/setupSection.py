@@ -41,7 +41,8 @@ from rigamajig2.ui.builder_ui.dialogs import editComponentDialog
 from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
 from rigamajig2.ui.widgets import QPushButton, mayaMessageBox
 
-ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../icons'))
+# TODO: remove
+ICON_PATH = os.path.abspath(os.path.join(__file__, '../../../../../../icons'))
 
 COMPONENT_ROW_HEIGHT = 20
 

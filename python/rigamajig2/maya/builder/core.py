@@ -200,9 +200,6 @@ def createRigEnvironment(sourceEnviornment, targetEnviornment, rigName):
     return os.path.join(tgtEnvPath, rigFile)
 
 
-# Rig File Utilities
-
-
 def getRigData(rigFile, key):
     """
     read the data from the self.rig_file

@@ -9,10 +9,11 @@
 
 """
 import os
+import pathlib
 
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder.core import getRigData, getAvailableArchetypes, findRigFile
-from rigamajig2.shared import common, path as rig_path, runScript
+from rigamajig2.shared import common, runScript
 
 
 def validateScriptList(scriptsList=None):
@@ -29,15 +30,16 @@ def validateScriptList(scriptsList=None):
     scriptsList = common.toList(scriptsList)
 
     # add all scripts and directories in the script list to the builder
-    for item in scriptsList:
-        if not item:
+    for filePath in scriptsList:
+        filePath = pathlib.Path(filePath)
+        if not filePath.exists():
             continue
 
-        if rig_path.isFile(item):
-            resultList.insert(0, item)
+        if filePath.is_file():
+            resultList.insert(0, str(filePath))
 
-        if rig_path.isDir(item):
-            for script in runScript.findScripts(item):
+        if filePath.is_dir():
+            for script in runScript.findScripts(str(filePath)):
                 resultList.insert(0, script)
 
     return resultList

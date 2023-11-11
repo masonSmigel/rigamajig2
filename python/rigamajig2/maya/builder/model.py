@@ -7,14 +7,11 @@
     date: 07/2022
 
 """
-# PYTHON
 import os
 
 import maya.api.OpenMaya as om
-# MAYA
 import maya.cmds as cmds
 
-# RIGAMAJIG
 import rigamajig2.maya.file as file
 import rigamajig2.maya.mesh as mesh
 import rigamajig2.maya.meta as meta

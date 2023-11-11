@@ -10,6 +10,7 @@
 """
 import logging
 import os
+import pathlib
 from types import ModuleType
 from typing import Type, Dict
 
@@ -35,20 +36,17 @@ def findComponents(path: str = COMPONENTS_PATH) -> Dict[str, ModuleType]:
     """
 
     path = rig_path.cleanPath(path)
-    items = os.listdir(path)
+    pathContents = os.listdir(path)
 
     componentLookup = dict()
-    for item in items:
-        itemPath = os.path.join(path, item)
+    for filePathItem in pathContents:
+        filePath = pathlib.Path(path) / filePathItem
 
-        # ensure the item should not be excluded
-        if item not in EXCLUDED_FOLDERS and os.path.isdir(itemPath):
-            res = findComponents(itemPath)
-            componentLookup.update(res)
+        if str(filePath.name) not in EXCLUDED_FOLDERS and filePath.is_dir():
+            componentLookup.update(findComponents(str(filePath)))
 
-        # check if the item is a python file
-        if item.find(".py") != -1 and item.find(".pyc") == -1 and item not in EXCLUDED_FILES:
-            module = process.importModuleFromPath(itemPath)
+        if filePath.suffix == ".py" and filePath.name not in EXCLUDED_FILES:
+            module = process.importModuleFromPath(filePath)
             components = process.getSubclassesFromModule(module=module, classType=base.Base)
 
             logger.debug(f"Module:{module}: components: {components}")
@@ -57,10 +55,21 @@ def findComponents(path: str = COMPONENTS_PATH) -> Dict[str, ModuleType]:
                 if len(components) > 1:
                     logger.warning(f"Component modules should only contain one Component class. {module.__name__}")
 
-                componentTypeSplit = module.__name__.split(".")[-2:]
-                componentType = ".".join(componentTypeSplit)
+                componentType = formatComponentTypeFromModule(modulePath=module.__name__)
                 componentLookup[componentType] = module
     return componentLookup
+
+
+def formatComponentTypeFromModule(modulePath: str) -> str:
+    """
+    Format the module path into a component type string.
+
+    :param modulePath: module path. Should be a dot separated string `(path.to.component)`
+    :return: component name `(component.name)`
+    """
+    componentTypeSplit = modulePath.split(".")[-2:]
+    componentType = ".".join(componentTypeSplit)
+    return componentType
 
 
 def createComponentClassInstance(componentType: str) -> ComponentType:

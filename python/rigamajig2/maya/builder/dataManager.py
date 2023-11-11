@@ -38,16 +38,16 @@ def getDataModules(path: str = None) -> Dict[str, ModuleType]:
 
     pathObj = pathlib.Path(path)
 
-    files = [f for f in pathObj.iterdir() if f.is_file()]
+    files = [file for file in pathObj.iterdir() if file.is_file()]
 
     dataTypeLookup = dict()
     for file in files:
-        filePath = pathlib.Path(os.path.join(path, file.name))
+        filePath = pathlib.Path(path) / file.name
 
         # check the extension of the files.
         if filePath.suffix == ".py" and filePath.name not in DATA_EXCLUDE_FILES:
 
-            moduleObject = process.importModuleFromPath(str(filePath.resolve()))
+            moduleObject = process.importModuleFromPath(filePath)
             dataClasses = process.getSubclassesFromModule(moduleObject, abstract_data.AbstractData)
 
             if dataClasses:

@@ -16,7 +16,7 @@
       "level": "DEBUG",
       "formatter": "mayaGuiFormatter"
     },
-    "rotatingFileHandler":{
+    "rotatingFileHandler": {
       "class": "logging.handlers.RotatingFileHandler",
       "level": "DEBUG",
       "formatter": "verboseFormatter",
@@ -28,22 +28,30 @@
   "loggers": {
     "rigamajig2": {
       "level": "INFO",
-      "handlers" : ["rotatingFileHandler"],
-      "propagate" : false
+      "handlers": [
+        "rotatingFileHandler"
+      ],
+      "propagate": false
     },
     "rigamajig2.maya": {
       "level": "INFO",
-      "handlers": ["mayaGuiHandler"],
+      "handlers": [
+        "mayaGuiHandler"
+      ],
       "propagate": true
     },
     "rigamajig2.shared": {
       "level": "INFO",
-      "handlers": ["mayaGuiHandler"],
+      "handlers": [
+        "mayaGuiHandler"
+      ],
       "propagate": true
     },
     "rigamajig2.ui": {
       "level": "INFO",
-      "handlers": ["mayaGuiHandler"],
+      "handlers": [
+        "mayaGuiHandler"
+      ],
       "propagate": true
     }
   }

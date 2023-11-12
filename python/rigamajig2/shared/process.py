@@ -70,7 +70,7 @@ def isDottedPath(filepath: Union[Path, str]) -> bool:
     if isinstance(filepath, Path):
         filepath = str(filepath)
 
-    if os.path.sep in filepath:
+    if len(filepath.split(os.path.sep)) > 1:
         return False
     # check if it's greater than two because one can always be for the extension.
     elif len(filepath.split(".")) > 2:

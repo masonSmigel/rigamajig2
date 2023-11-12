@@ -1,0 +1,84 @@
+#!/usr/bin/env python3.9
+# -*- coding: utf-8 -*-
+"""
+    project: rigamajig2
+    file: configurePytest.py
+    author: masonsmigel
+    date: 11/2023
+    description: 
+
+"""
+import errno
+import os
+import shutil
+import stat
+import subprocess
+import tempfile
+import uuid
+from argparse import ArgumentParser
+
+RIGAMJIG_ROOT_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+
+
+def removeReadOnly(func, path, exc):
+    """
+    This is used by shutil.rmtree when it encounters a read only file
+    :param func:
+    :param path:
+    :param exc:
+    :return:
+    """
+    excvalue = exc[1]
+    if func in (os.rmdir, os.remove) and excvalue.errno == errno.EACCES:
+        os.chmod(path, stat.S_IRWXU | stat.S_IRWXG | stat.S_IRWXO)  # 0777
+        func(path)
+    else:
+        raise RuntimeError("Could not remove {0}".format(path))
+
+
+def createCleanMayaAppDir(directory=None):
+    """
+    Create a clean copy of out  MAYA_APP_DIR so we can create predictable results
+    :return: path the clean MAYA_APP_DIR
+    """
+    app_dir = os.path.join(RIGAMJIG_ROOT_DIR, "tests", "clean_maya_app_dir")
+    temp_dir = tempfile.gettempdir()
+    if not os.path.exists(temp_dir):
+        os.makedirs(temp_dir)
+    dst = directory if directory else os.path.join(temp_dir, "maya_app_dir{}".format(str(uuid.uuid4)))
+    if os.path.exists(dst):
+        shutil.rmtree(dst, ignore_errors=False, onerror=removeReadOnly)
+    shutil.copytree(app_dir, dst)
+    return dst
+
+
+def main():
+    parser = ArgumentParser("Run unit tests for a maya module")
+    parser.add_argument("-m", "--maya", help="Maya Version", type=int, default="2023")
+    parser.add_argument("-t", "--tests", help="pytest to run", type=str, default="tests/")
+    
+    parsedArgs = parser.parse_args()
+
+    testDir = os.path.join(RIGAMJIG_ROOT_DIR, "tests")
+    cmd = f'mayatest -m {parsedArgs.maya} --pytest="{parsedArgs.tests}"'
+
+    libPath = os.path.join(RIGAMJIG_ROOT_DIR, "python", "lib")
+    pythonPath = os.path.join(RIGAMJIG_ROOT_DIR, "python")
+    os.environ["PYTHONPATH"] = "{}:{}".format(libPath, pythonPath, os.environ["PYTHONPATH"])
+
+    mayaAppDir = createCleanMayaAppDir()
+    # Create clean prefs
+    os.environ["MAYA_APP_DIR"] = mayaAppDir
+    os.environ["MAYA_SCRIPT_PATH"] = ""
+    os.environ["MAYA_MODULE_PATH"] = RIGAMJIG_ROOT_DIR
+
+    try:
+        subprocess.check_call(cmd, shell=True)
+    except subprocess.CalledProcessError:
+        pass
+    finally:
+        shutil.rmtree(mayaAppDir)
+
+
+if __name__ == "__main__":
+    main()

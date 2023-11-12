@@ -1,8 +1,9 @@
 import os
-import rigamajig2.maya.data.curve_data as curve_data
-import maya.cmds as cmds
 
+import maya.cmds as cmds
 from rigamajig2.maya.test.mayaunittest import TestCase
+
+import rigamajig2.maya.data.curveData as curve_data
 
 
 class TestCurveData(TestCase):

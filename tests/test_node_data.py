@@ -1,9 +1,10 @@
 import os
-import rigamajig2.maya.data.node_data as node_data
-import rigamajig2.shared.common as common
-import maya.cmds as cmds
 
+import maya.cmds as cmds
 from rigamajig2.maya.test.mayaunittest import TestCase
+
+import rigamajig2.maya.data.nodeData as node_data
+import rigamajig2.shared.common as common
 
 
 class TestNodeData(TestCase):

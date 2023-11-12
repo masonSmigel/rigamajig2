@@ -1,0 +1,56 @@
+{
+  "version": 1,
+  "disable_existing_loggers": false,
+  "formatters": {
+    "verboseFormatter": {
+      "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+      "datefmt": "%Y-%m-%d %H:%M:%S"
+    },
+    "mayaGuiFormatter": {
+      "format": "%(name)s: %(message)s"
+    }
+  },
+  "handlers": {
+    "rotatingFileHandler": {
+      "class": "logging.handlers.RotatingFileHandler",
+      "level": "DEBUG",
+      "formatter": "verboseFormatter",
+      "filename": "logs/rigamajig.batch.log",
+      "maxBytes": 1048576,
+      "backupCount": 0
+    },
+    "consoleHandler": {
+      "class": "logging.StreamHandler",
+      "level": "DEBUG",
+      "formatter": "verboseFormatter"
+    }
+  },
+  "loggers": {
+    "rigamajig2": {
+      "level": "DEBUG",
+      "handlers": [
+        "rotatingFileHandler",
+        "consoleHandler"
+      ],
+      "propagate": false
+    },
+    "rigamajig2.maya": {
+      "level": "INFO",
+      "handlers": [
+      ],
+      "propagate": true
+    },
+    "rigamajig2.shared": {
+      "level": "INFO",
+      "handlers": [
+      ],
+      "propagate": true
+    },
+    "rigamajig2.ui": {
+      "level": "INFO",
+      "handlers": [
+      ],
+      "propagate": true
+    }
+  }
+}

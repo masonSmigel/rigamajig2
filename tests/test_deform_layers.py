@@ -10,12 +10,12 @@
 """
 
 import maya.cmds as cmds
-from rigamajig2.maya.test.mayaunittest import TestCase
 
 import rigamajig2.maya.blendshape as blendshape
 import rigamajig2.maya.data.deformLayerData as deformLayer_data
 import rigamajig2.maya.deformer as deformer
 import rigamajig2.maya.rig.deformLayer as deformLayer
+from rigamajig2.maya.test.mayaTestCase import TestCase
 
 
 class TestDeformLayers(TestCase):

@@ -16,8 +16,9 @@ import subprocess
 import tempfile
 import uuid
 from argparse import ArgumentParser
+from pathlib import Path
 
-RIGAMJIG_ROOT_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), ".."))
+RIGAMJIG_ROOT_DIR = (Path(__file__).parent / "../").resolve()
 
 
 def removeReadOnly(func, path, exc):
@@ -41,7 +42,7 @@ def createCleanMayaAppDir(directory=None):
     Create a clean copy of out  MAYA_APP_DIR so we can create predictable results
     :return: path the clean MAYA_APP_DIR
     """
-    app_dir = os.path.join(RIGAMJIG_ROOT_DIR, "tests", "clean_maya_app_dir")
+    app_dir = str(RIGAMJIG_ROOT_DIR / "tests" / "clean_maya_app_dir")
     temp_dir = tempfile.gettempdir()
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)
@@ -56,13 +57,12 @@ def main():
     parser = ArgumentParser("Run unit tests for a maya module")
     parser.add_argument("-m", "--maya", help="Maya Version", type=int, default="2023")
     parser.add_argument("-t", "--tests", help="pytest to run", type=str, default="tests/")
-    
+
     parsedArgs = parser.parse_args()
 
-    testDir = os.path.join(RIGAMJIG_ROOT_DIR, "tests")
     cmd = f'mayatest -m {parsedArgs.maya} --pytest="{parsedArgs.tests}"'
 
-    libPath = os.path.join(RIGAMJIG_ROOT_DIR, "python", "lib")
+    libPath = str(RIGAMJIG_ROOT_DIR / "python" / "lib")
     pythonPath = os.path.join(RIGAMJIG_ROOT_DIR, "python")
     os.environ["PYTHONPATH"] = "{}:{}".format(libPath, pythonPath, os.environ["PYTHONPATH"])
 
@@ -70,7 +70,7 @@ def main():
     # Create clean prefs
     os.environ["MAYA_APP_DIR"] = mayaAppDir
     os.environ["MAYA_SCRIPT_PATH"] = ""
-    os.environ["MAYA_MODULE_PATH"] = RIGAMJIG_ROOT_DIR
+    os.environ["MAYA_MODULE_PATH"] = str(RIGAMJIG_ROOT_DIR)
 
     try:
         subprocess.check_call(cmd, shell=True)

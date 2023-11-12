@@ -10,7 +10,7 @@
 """
 
 from rigamajig2.maya.components import base
-from rigamajig2.maya.test.mayaunittest import TestCase
+from rigamajig2.maya.test.mayaTestCase import TestCase
 
 
 class TestBaseComponent(TestCase):

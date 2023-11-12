@@ -1,10 +1,10 @@
 import os
 
 import maya.cmds as cmds
-from rigamajig2.maya.test.mayaunittest import TestCase
 
 import rigamajig2.maya.data.nodeData as node_data
 import rigamajig2.shared.common as common
+from rigamajig2.maya.test.mayaTestCase import TestCase
 
 
 class TestNodeData(TestCase):

@@ -12,28 +12,26 @@
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder import scriptManager
-from rigamajig2.maya.test import mayaunittest
-from rigamajig2.maya.test.mayaunittest import TestCase
+from rigamajig2.maya.test import mayaTestCase
 
 
-class TestBuilderScriptLayering(TestCase):
-    """ Test the builder script layering functionality"""
+class TestBuilderScriptLayering(mayaTestCase.TestCase):
+    """Test the builder script layering functionality"""
 
-    def test_builderlayering(self):
+    def test_builderLayering(self):
         """
         Ensure the script layering is resulting in two lists of equal length
         """
 
-        # with logger.DisableLogger():
-        tempDir = mayaunittest.Settings.temp_dir
+        tempDir = mayaTestCase.Settings.TempDirectory
         rigFile = core.newRigEnviornmentFromArchetype(tempDir, "biped", "tempRig")
 
         for scriptType in [constants.PRE_SCRIPT, constants.POST_SCRIPT, constants.PUB_SCRIPT]:
             archetypeScriptList = scriptManager.GetCompleteScriptList.getScriptList(rigFile, scriptType=scriptType)
 
-            self.assertTrue(len(archetypeScriptList))
+            assert bool(len(archetypeScriptList))
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     t = TestBuilderScriptLayering()
     t.test_builderlayering()

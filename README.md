@@ -83,10 +83,11 @@ python testrigamajig
 
 #### Creating new Unittests
 Added unittests must be subclasses of the base unittest class.To setup your own unittest 
-confugure your test as shown below: 
+confugure your test as shown below:
 
 ```python
-from rigamajig2.maya.test.mayaunittest import TestCase
+from rigamajig2.maya.test.mayaTestCase import TestCase
+
 
 class TestSomething(TestCase):
     def test_someSuperCoolTest(self):

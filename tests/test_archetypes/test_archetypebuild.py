@@ -11,10 +11,9 @@
 
 import os
 
-from rigamajig2.maya.test.mayaunittest import TestCase
-
 from rigamajig2.maya import file
 from rigamajig2.maya.builder import builder
+from rigamajig2.maya.test.mayaTestCase import TestCase
 
 ARCHETYPES_PATH = os.path.abspath(os.path.join(__file__, "../../../", 'archetypes'))
 

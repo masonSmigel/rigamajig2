@@ -26,20 +26,20 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def test_isDottedPath():
+def testIsDottedPath():
     """Test if a path is a dotted path"""
 
     for testPath in DOTPATHS:
         assert process.isDottedPath(testPath)
 
 
-def test_isNotDottedPath():
+def testIsNotDottedPath():
     """Ensure filepaths return False"""
     for testPath in FILEPATHS:
         assert process.isDottedPath(testPath) == False
 
 
-def test_convertToDotPath():
+def testConvertToDotPath():
     for i, filepath in enumerate(FILEPATHS):
         dotPath = Path(DOTPATHS[i])
         if dotPath.suffix in [".py", ".txt"]:
@@ -48,7 +48,7 @@ def test_convertToDotPath():
         assert process.asDottedPath(filepath) == str(dotPath)
 
 
-def test_importModule():
+def testImportModule():
     """Try to import a python module"""
 
     logger.debug(f"rootpath: {ROOT_PATH}")
@@ -66,7 +66,7 @@ def test_importModule():
         assert module.__name__ == process.asDottedPath(relativeModulePath)
 
 
-def test_listSubclasses():
+def testListSubclasses():
     """Try to import a python module"""
 
     from rigamajig2.maya.components import base
@@ -84,7 +84,7 @@ def test_listSubclasses():
         assert len(subclasses) > 0
 
 
-def test_listSubclassesIgnoreBase():
+def testListSubclassesIgnoreBase():
     """Ensure that listing subclasses will not list the base class type"""
     from rigamajig2.maya.data import abstractData
 

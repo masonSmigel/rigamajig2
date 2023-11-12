@@ -42,7 +42,7 @@ def createCleanMayaAppDir(directory=None):
     Create a clean copy of out  MAYA_APP_DIR so we can create predictable results
     :return: path the clean MAYA_APP_DIR
     """
-    app_dir = str(RIGAMJIG_ROOT_DIR / "tests" / "clean_maya_app_dir")
+    app_dir = str(RIGAMJIG_ROOT_DIR / "tests" / "cleanMayaAppDirectory")
     temp_dir = tempfile.gettempdir()
     if not os.path.exists(temp_dir):
         os.makedirs(temp_dir)

@@ -22,7 +22,7 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 from rigamajig2.maya.builder import dataManager
-from rigamajig2.maya.data import abstract_data
+from rigamajig2.maya.data import abstractData
 from rigamajig2.shared import common
 from rigamajig2.ui import showInFolder
 
@@ -372,7 +372,7 @@ class DataLoader(QtWidgets.QWidget):
             return
 
         # get the data type of the file and try to filter it.
-        newPathDataType = abstract_data.AbstractData().getDataType(newPath)
+        newPathDataType = abstractData.AbstractData().getDataType(newPath)
         if self.dataFilteringEnabled and newPathDataType not in self.dataFilter:
             logger.warning(f"{pathlib.Path(newPath).name}'s data type does not match filter {self.dataFilter}")
 
@@ -443,7 +443,7 @@ class DataLoader(QtWidgets.QWidget):
         :param path: path to the data file to load.
         """
         if pathlib.Path(path).exists() and pathlib.Path(path).is_file():
-            dataType = abstract_data.AbstractData().getDataType(path)
+            dataType = abstractData.AbstractData().getDataType(path)
             dataClass = rigamajig2.maya.builder.data.createDataClassInstance(dataType=dataType)
 
             # read the data and apply all keys
@@ -478,7 +478,7 @@ class DataLoader(QtWidgets.QWidget):
         sceneSelection = cmds.ls(sl=True)
 
         dataFile = item.data(0, QtCore.Qt.UserRole)
-        dataType = abstract_data.AbstractData.getDataType(dataFile)
+        dataType = abstractData.AbstractData.getDataType(dataFile)
 
         # read the current data into the data object
         dataObj = rigamajig2.maya.builder.data.createDataClassInstance(dataType)
@@ -518,7 +518,7 @@ class DataLoader(QtWidgets.QWidget):
                 logger.warning(f"Path '{path}' is already added to the dataLoader")
                 return
 
-        dataType = abstract_data.AbstractData.getDataType(fileInfo.filePath())
+        dataType = abstractData.AbstractData.getDataType(fileInfo.filePath())
 
         # if we are using a relaive path display that instead of the file name.
         fileName = fileInfo.fileName()
@@ -530,7 +530,7 @@ class DataLoader(QtWidgets.QWidget):
         item.setText(1, dataType)
 
         # get a data object and read the keys so we can add them to the UI
-        d = abstract_data.AbstractData()
+        d = abstractData.AbstractData()
         d.read(fileInfo.filePath())
 
         tooltipFormatting = fileInfo.filePath()

@@ -6,7 +6,7 @@ from collections import OrderedDict
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.data.abstract_data as abstract_data
+import rigamajig2.maya.data.abstractData as abstract_data
 
 logger = logging.getLogger(__name__)
 

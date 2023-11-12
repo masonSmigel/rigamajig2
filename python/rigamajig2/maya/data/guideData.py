@@ -14,7 +14,7 @@ from collections import OrderedDict
 import maya.cmds as cmds
 
 import rigamajig2.maya.attr
-import rigamajig2.maya.data.node_data as node_data
+import rigamajig2.maya.data.nodeData as node_data
 import rigamajig2.maya.joint
 
 if sys.version_info.major >= 3:

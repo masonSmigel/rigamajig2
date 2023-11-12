@@ -7,8 +7,8 @@ from collections import OrderedDict
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.data.maya_data as maya_data
-import rigamajig2.maya.data.node_data as node_data
+import rigamajig2.maya.data.mayaData as maya_data
+import rigamajig2.maya.data.nodeData as node_data
 from rigamajig2.maya import attr
 from rigamajig2.maya import deformer
 from rigamajig2.shared import common

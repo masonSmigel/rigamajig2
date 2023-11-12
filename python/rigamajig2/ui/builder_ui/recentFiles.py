@@ -12,7 +12,7 @@ import os
 
 import maya.cmds as cmds
 
-from rigamajig2.maya.data import abstract_data
+from rigamajig2.maya.data import abstractData
 
 RECENT_FILE_NAME = "rigamajig2_recentfiles.json"
 
@@ -31,7 +31,7 @@ def getRecentFilePrefsPath():
 
 def addRecentFile(newFile):
     """ Add a new file to the list of recent files """
-    dataObj = abstract_data.AbstractData()
+    dataObj = abstractData.AbstractData()
 
     # read any existing data from the prefs file
     if os.path.exists(getRecentFilePrefsPath()):
@@ -68,7 +68,7 @@ def getRecentFileList():
     :return: a list of all recent files
     """
     if os.path.exists(getRecentFilePrefsPath()):
-        dataObj = abstract_data.AbstractData()
+        dataObj = abstractData.AbstractData()
         dataObj.read(getRecentFilePrefsPath())
 
         return dataObj.getData()[RECENT_FILES_KEY]

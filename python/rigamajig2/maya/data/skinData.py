@@ -14,7 +14,7 @@ from collections import OrderedDict
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.data.maya_data as maya_data
+import rigamajig2.maya.data.mayaData as maya_data
 import rigamajig2.maya.deformer as deformer
 import rigamajig2.maya.skinCluster as skinCluster
 import rigamajig2.shared.common as common

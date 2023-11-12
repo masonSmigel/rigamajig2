@@ -15,7 +15,6 @@ from distutils.dir_util import copy_tree
 from rigamajig2.maya.builder import builder
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
-from rigamajig2.maya.data import abstract_data
 from rigamajig2.shared import path
 
 logger = logging.getLogger(__name__)

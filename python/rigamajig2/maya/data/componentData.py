@@ -8,7 +8,7 @@
     description: 
 
 """
-import rigamajig2.maya.data.abstract_data as abstract_data
+import rigamajig2.maya.data.abstractData as abstract_data
 from rigamajig2.maya import container
 from rigamajig2.maya.builder import componentManager
 from rigamajig2.maya.components import base

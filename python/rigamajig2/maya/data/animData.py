@@ -15,7 +15,7 @@ from collections import OrderedDict
 import maya.api.OpenMaya as om
 import maya.api.OpenMayaAnim as oma
 
-import rigamajig2.maya.data.maya_data as maya_data
+import rigamajig2.maya.data.mayaData as maya_data
 import rigamajig2.shared.common as common
 
 logger = logging.getLogger(__name__)

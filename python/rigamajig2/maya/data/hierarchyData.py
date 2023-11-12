@@ -10,7 +10,7 @@
 """
 from collections import OrderedDict
 
-import rigamajig2.maya.data.maya_data as maya_data
+import rigamajig2.maya.data.mayaData as maya_data
 import rigamajig2.maya.hierarchy as hierarchy
 import rigamajig2.shared.common as common
 

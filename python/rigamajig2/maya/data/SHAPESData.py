@@ -16,7 +16,7 @@ import uuid
 import maya.cmds as cmds
 import maya.mel as mel
 
-import rigamajig2.maya.data.maya_data as maya_data
+import rigamajig2.maya.data.mayaData as maya_data
 from rigamajig2.maya import blendshape
 from rigamajig2.shared import common
 from rigamajig2.shared import path as rig_path

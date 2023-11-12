@@ -13,7 +13,6 @@ import maya.cmds as cmds
 from rigamajig2.maya import attr
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import skinCluster
-from rigamajig2.maya.data import skin_data
 from rigamajig2.shared import common
 
 

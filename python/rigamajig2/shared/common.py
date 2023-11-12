@@ -7,72 +7,73 @@ import typing
 from collections import OrderedDict
 
 DEBUG = False
-REQUIRED_PLUGINS = ['quatNodes', 'matrixNodes']
+REQUIRED_PLUGINS = ["quatNodes", "matrixNodes"]
 
 # really important tags
-BINDTAG = 'bind'
-CONTROLTAG = 'control'
+BINDTAG = "bind"
+CONTROLTAG = "control"
 
 # Side constants
-LEFT = 'l'
-RIGHT = 'r'
-CENTER = 'c'
+LEFT = "l"
+RIGHT = "r"
+CENTER = "c"
 
-SIDES = {'left': LEFT, 'right': RIGHT, 'center': CENTER}
+SIDES = {"left": LEFT, "right": RIGHT, "center": CENTER}
 
 # Location constants
-FRONT = 'fr'
-BACK = 'bk'
-MIDDLE = 'md'
-TOP = 'tp'
-BOTTOM = 'bt'
+FRONT = "fr"
+BACK = "bk"
+MIDDLE = "md"
+TOP = "tp"
+BOTTOM = "bt"
 
-LOCATIONS = {'front': FRONT, 'back': BACK, 'middle': MIDDLE, 'top': TOP, 'bottom': BOTTOM}
+LOCATIONS = {"front": FRONT, "back": BACK, "middle": MIDDLE, "top": TOP, "bottom": BOTTOM}
 
 # Project path Constants
-CURRENT_FILE = __file__.replace('\\', '/')
+CURRENT_FILE = __file__.replace("\\", "/")
 
-ICONS_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/icons'
-SCRIPTS_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/scripts'
-ARCHETYPES_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/archetypes'
-BIN_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/bin'
-PLUGIN_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/plug-ins'
-MISC_PATH = '/'.join(CURRENT_FILE.split('/')[0:-4]) + '/misc'
+ROOT_PATH = "/".join(CURRENT_FILE.split("/")[0:-4])
+ICONS_PATH = "/".join(CURRENT_FILE.split("/")[0:-4]) + "/icons"
+PYTHON_PATH = "/".join(CURRENT_FILE.split("/")[0:-4]) + "/python"
+ARCHETYPES_PATH = "/".join(CURRENT_FILE.split("/")[0:-4]) + "/archetypes"
+BIN_PATH = "/".join(CURRENT_FILE.split("/")[0:-4]) + "/bin"
+PLUGIN_PATH = "/".join(CURRENT_FILE.split("/")[0:-4]) + "/plug-ins"
+MISC_PATH = "/".join(CURRENT_FILE.split("/")[0:-4]) + "/misc"
 
 # transform constants
-ORIG = 'orig'
-SPACES = 'spaces'
-TRS = 'trs'
-SDK = 'sdk'
+ORIG = "orig"
+SPACES = "spaces"
+TRS = "trs"
+SDK = "sdk"
 
 # Class Constants
-IK = 'ik'
-FK = 'fk'
-SKINCLUSTER = 'sc'
-PSD = 'psd'
-CLUSTER = 'cls'
-BLEND = 'blend'
-LATTICE = 'lat'
-SURFACE = 'srf'
-CURVE = 'crv'
-NURBS = 'nurbs'
-ROOT = 'root'
-GUIDES = 'guide'
-POLYGON = 'mesh'
-LOCATOR = 'loc'
-DRIVER = 'drv'
+IK = "ik"
+FK = "fk"
+SKINCLUSTER = "sc"
+PSD = "psd"
+CLUSTER = "cls"
+BLEND = "blend"
+LATTICE = "lat"
+SURFACE = "srf"
+CURVE = "crv"
+NURBS = "nurbs"
+ROOT = "root"
+GUIDES = "guide"
+POLYGON = "mesh"
+LOCATOR = "loc"
+DRIVER = "drv"
 PARENTCONSTRAINT = "parentConstraint"
 POINTCONSTRAINT = "pointConstraint"
 ORIENTCONSTRAINT = "orientConstraint"
 POINTONCURVEINFO = "pointOnCurveInfo"
 AIMCONSTRAINT = "aimConstraint"
 PAIRBLEND = "pairBlend"
-BLENDCOLOR = 'blend'
-BLENDTWOATTR = 'bta'
+BLENDCOLOR = "blend"
+BLENDTWOATTR = "bta"
 REVERSE = "rev"
 FOLLICLE = "fol"
-CONDITION = 'cond'
-CHOICE = 'choice'
+CONDITION = "cond"
+CHOICE = "choice"
 MULTIPLYDIVIDE = "multDiv"
 ADDDOUBLELINEAR = "adl"
 MULTDOUBLELINEAR = "mdl"
@@ -80,67 +81,121 @@ PLUSMINUSAVERAGE = "pma"
 CURVEINFO = "curveInfo"
 DISTANCEBETWEEN = "dist"
 VECTORPRODUCT = "vpn"
-DECOMPOSEMATRIX = 'dcmp'
-COMPOSEMATRIX = 'cmp'
-MULTMATRIX = 'mm'
-PICKMATRIX = 'pickMatrix'
-CLAMP = 'clamp'
-REMAP = 'rmv'
-QUATTOEULER = 'quatToEuler'
-EULERTOQUAT = 'eulerToQuat'
-UNITCONVERSION = 'uc'
+DECOMPOSEMATRIX = "dcmp"
+COMPOSEMATRIX = "cmp"
+MULTMATRIX = "mm"
+PICKMATRIX = "pickMatrix"
+CLAMP = "clamp"
+REMAP = "rmv"
+QUATTOEULER = "quatToEuler"
+EULERTOQUAT = "eulerToQuat"
+UNITCONVERSION = "uc"
 
 # Type Constants
-COMPONENT = 'cmpt'
-OFFSET = 'trsOffset'
-TRANSFORM = 'trs'
-TARGET = 'tgt'
-BUFFER = 'buffer'
-HIARCHY = 'hrc'
-SDK = 'sdk'
-NEGATE = 'neg'
+COMPONENT = "cmpt"
+OFFSET = "trsOffset"
+TRANSFORM = "trs"
+TARGET = "tgt"
+BUFFER = "buffer"
+HIARCHY = "hrc"
+SDK = "sdk"
+NEGATE = "neg"
 UTILITY = "util"
-CONTROL = 'ctl'
-JOINT = 'jnt'
-GEOMETRY = 'geo'
-DEFORMER = 'def'
-SHAPE = 'shape'
+CONTROL = "ctl"
+JOINT = "jnt"
+GEOMETRY = "geo"
+DEFORMER = "def"
+SHAPE = "shape"
 
 # Pipeline Constants
-MODEL = 'mod'
-RIG = 'rig'
-ANIMATION = 'anim'
-SIMULATION = 'sim'
+MODEL = "mod"
+RIG = "rig"
+ANIMATION = "anim"
+SIMULATION = "sim"
 
 # Naming Template
-DELIMINATOR = '_'
+DELIMINATOR = "_"
 # pylint:disable=line-too-long
-NAMETEMPLATE = '{BASE}' + DELIMINATOR + '{SIDE}' + DELIMINATOR + '{LOCATION}{WARBLE}{INDEX}' + DELIMINATOR + '{EXTENSION}'
+NAMETEMPLATE = (
+    "{BASE}" + DELIMINATOR + "{SIDE}" + DELIMINATOR + "{LOCATION}{WARBLE}{INDEX}" + DELIMINATOR + "{EXTENSION}"
+)
 PADDING = 2
 MAXITTERATIONS = 2000
-NAMETEMPLATETOKENS = ["BASE",
-                      "SIDE",
-                      "LOCATION",
-                      "WARBLE",
-                      "INDEX",
-                      "EXTENSION",
-                      ]
-FILE_VERSION_DELIMINATOR = '_v'
+NAMETEMPLATETOKENS = [
+    "BASE",
+    "SIDE",
+    "LOCATION",
+    "WARBLE",
+    "INDEX",
+    "EXTENSION",
+]
+FILE_VERSION_DELIMINATOR = "_v"
 
-L_TOKENS = ['left_', '_left', 'Left_', '_Left',
-            '_l_', 'lf_', '_lf', 'Lt_', '_Lt',
-            'lft_', '_lft', 'Lft_', '_Lft',
-            'Lf_', '_Lf', '_l', 'L_', '_L', '_L_', ]
+L_TOKENS = [
+    "left_",
+    "_left",
+    "Left_",
+    "_Left",
+    "_l_",
+    "lf_",
+    "_lf",
+    "Lt_",
+    "_Lt",
+    "lft_",
+    "_lft",
+    "Lft_",
+    "_Lft",
+    "Lf_",
+    "_Lf",
+    "_l",
+    "L_",
+    "_L",
+    "_L_",
+]
 
-R_TOKENS = ['right_', '_right', 'Right_', '_Right',
-            '_r_', 'rt_', '_rt', 'Rt_', '_Rt',
-            'rgt_', '_rgt', 'Rgt_', '_Rgt',
-            'Rt_', '_Rt', '_r', 'R_', '_R', '_R_']
+R_TOKENS = [
+    "right_",
+    "_right",
+    "Right_",
+    "_Right",
+    "_r_",
+    "rt_",
+    "_rt",
+    "Rt_",
+    "_Rt",
+    "rgt_",
+    "_rgt",
+    "Rgt_",
+    "_Rgt",
+    "Rt_",
+    "_Rt",
+    "_r",
+    "R_",
+    "_R",
+    "_R_",
+]
 
-C_TOKENS = ['center_', '_center', 'Center_', '_Center',
-            '_c_', 'cr_', '_cr', 'Cr_', '_Cr',
-            'ctr_', '_ctr', 'Ctr_', '_Ctr',
-            'Ct_', '_Ct', '_c', 'C_', '_C', '_C_']
+C_TOKENS = [
+    "center_",
+    "_center",
+    "Center_",
+    "_Center",
+    "_c_",
+    "cr_",
+    "_cr",
+    "Cr_",
+    "_Cr",
+    "ctr_",
+    "_ctr",
+    "Ctr_",
+    "_Ctr",
+    "Ct_",
+    "_Ct",
+    "_c",
+    "C_",
+    "_C",
+    "_C_",
+]
 
 if sys.version_info.major >= 3:
     basestring = str
@@ -160,7 +215,7 @@ def toList(values):
     return values
 
 
-def getFirstIndex(var:typing.Any)->typing.Any:
+def getFirstIndex(var: typing.Any) -> typing.Any:
     """
     Return the first index of a list
     :param var: list to get index from
@@ -221,7 +276,7 @@ def flattenList(selList):
             flatList.append(each)
             continue
 
-        begin, end = re.findall(r'\[(.*?)\]', each)[0].split(":")
+        begin, end = re.findall(r"\[(.*?)\]", each)[0].split(":")
         basepart = each.split("[")[0]
 
         for number in range(int(begin), int(end) + 1):

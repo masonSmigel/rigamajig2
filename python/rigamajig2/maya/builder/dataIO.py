@@ -19,14 +19,14 @@ from rigamajig2.maya import meta
 from rigamajig2.maya import skinCluster
 from rigamajig2.maya.builder import dataManager
 from rigamajig2.maya.builder.constants import DEFORMER_DATA_TYPES
-from rigamajig2.maya.data import (psd_data,
-                                  skin_data,
-                                  deformLayer_data,
-                                  joint_data,
-                                  curve_data,
-                                  guide_data,
-                                  abstract_data,
-                                  component_data
+from rigamajig2.maya.data import (psdData,
+                                  skinData,
+                                  deformLayerData,
+                                  jointData,
+                                  curveData,
+                                  guideData,
+                                  abstractData,
+                                  componentData
                                   )
 from rigamajig2.maya.rig import psd
 from rigamajig2.shared import common
@@ -80,7 +80,7 @@ def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileN
     # Here we need to filter only files of the data type we want
     filteredFileStack = []
     for dataFile in fileStack:
-        dataFileType = abstract_data.AbstractData.getDataType(dataFile)
+        dataFileType = abstractData.AbstractData.getDataType(dataFile)
         if dataFileType == dataType or dataFileType == "AbstractData":
             filteredFileStack.append(dataFile)
 
@@ -271,7 +271,7 @@ def loadJointData(filepath: str = None) -> bool:
         logger.error(f"filepath {filepath} is not a file")
         return False
 
-    dataObj = joint_data.JointData()
+    dataObj = jointData.JointData()
     dataObj.read(filepath)
     dataObj.applyAllData()
 
@@ -366,7 +366,7 @@ def saveComponents(builder: _Builder, fileStack: _StringList = None, method: str
 
     # ... next loop through the save dict and gather component data based on the component name.
     for dataFile in saveDict:
-        componentDataObj = component_data.ComponentData()
+        componentDataObj = componentData.ComponentData()
 
         # loop through the list of component names
         for componentName in saveDict[dataFile][CHANGED] + saveDict[dataFile][ADDED]:
@@ -389,7 +389,7 @@ def loadComponentData(builder: _Builder, filepath: str = None) -> None:
         logger.error(f"filepath {filepath} is not a file")
         return
 
-    componentDataObj = component_data.ComponentData()
+    componentDataObj = componentData.ComponentData()
     componentDataObj.read(filepath)
 
     # look through each component and add it to the builder list
@@ -416,7 +416,7 @@ def loadGuideData(filepath=None) -> bool:
         logger.error(f"filepath {filepath} is not a file")
         return False
 
-    dataObj = guide_data.GuideData()
+    dataObj = guideData.GuideData()
     dataObj.read(filepath)
     dataObj.applyAllData()
     return True
@@ -466,7 +466,7 @@ def loadControlShapeData(filepath: str = None, applyColor: bool = True) -> bool:
         logger.error(f"filepath {filepath} is not a file")
         return False
 
-    curveDataObj = curve_data.CurveData()
+    curveDataObj = curveData.CurveData()
     curveDataObj.read(filepath)
 
     controls = [ctl for ctl in curveDataObj.getKeys() if cmds.objExists(ctl)]
@@ -550,7 +550,7 @@ def loadPoseReaderData(filepath: str = None, replace: bool = True) -> bool:
         logger.error(f"filepath {filepath} is not a file")
         return False
 
-    dataObj = psd_data.PSDData()
+    dataObj = psdData.PSDData()
     dataObj.read(filepath)
     dataObj.applyData(nodes=dataObj.getData().keys(), replace=replace)
     return True
@@ -591,7 +591,7 @@ def loadSingleSkin(filepath) -> bool:
         return False
 
     if filepath:
-        dataObj = skin_data.SkinData()
+        dataObj = skinData.SkinData()
         dataObj.read(filepath)
         dataObj.applyAllData()
     return True
@@ -604,7 +604,7 @@ def saveSkinWeights(filepath: str = None) -> None:
     :param filepath: path to skin weights directory
     """
     if path.isFile(filepath):
-        dataObj = skin_data.SkinData()
+        dataObj = skinData.SkinData()
         dataObj.gatherDataIterate(cmds.ls(sl=True))
         dataObj.write(filepath)
 
@@ -612,7 +612,7 @@ def saveSkinWeights(filepath: str = None) -> None:
         for geo in cmds.ls(sl=True):
             if not skinCluster.getSkinCluster(geo):
                 continue
-            dataObj = skin_data.SkinData()
+            dataObj = skinData.SkinData()
             dataObj.gatherData(geo)
             dataObj.write("{}/{}.json".format(filepath, geo))
 
@@ -623,7 +623,7 @@ def saveDeformationLayers(filepath: str = None) -> None:
 
     :param filepath: path to the deformation layers file
     """
-    dataObj = deformLayer_data.DeformLayerData()
+    dataObj = deformLayerData.DeformLayerData()
     if os.path.exists(filepath):
         dataObj.read(filepath)
 
@@ -644,7 +644,7 @@ def loadDeformationLayerData(filepath: str = None) -> bool:
         logger.error(f"filepath {filepath} is not a file")
         return False
 
-    dataObj = deformLayer_data.DeformLayerData()
+    dataObj = deformLayerData.DeformLayerData()
     dataObj.read(filepath)
     dataObj.applyAllData()
     return True
@@ -663,7 +663,7 @@ def loadDeformer(filepath: str = None) -> bool:
         logger.error(f"filepath {filepath} is not a file")
         return False
 
-    dataType = abstract_data.AbstractData().getDataType(filepath)
+    dataType = abstractData.AbstractData().getDataType(filepath)
     if dataType not in DEFORMER_DATA_TYPES:
         raise ValueError(f"{os.path.basename(filepath)} is not a type of deformer data")
 

@@ -11,7 +11,7 @@ import rigamajig2.maya.color
 import rigamajig2.maya.connection
 import rigamajig2.maya.constrain
 import rigamajig2.maya.curve
-import rigamajig2.maya.data.curve_data
+import rigamajig2.maya.data.curveData
 import rigamajig2.maya.decorators
 import rigamajig2.maya.hierarchy
 import rigamajig2.maya.joint
@@ -487,7 +487,7 @@ def getAvailableControlShapes():
     """
     Get a list of available control shapes
     """
-    controlData = rigamajig2.maya.data.curve_data.CurveData()
+    controlData = rigamajig2.maya.data.curveData.CurveData()
     controlData.read(CONTROLSHAPES)
     controlData = controlData.getData()
     return controlData.keys()
@@ -608,7 +608,7 @@ def setControlShape(control, shape, clearExisting=True):
     if clearExisting:
         rigamajig2.maya.curve.wipeCurveShape(control)
 
-    controlDataObj = rigamajig2.maya.data.curve_data.CurveData()
+    controlDataObj = rigamajig2.maya.data.curveData.CurveData()
     controlDataObj.read(CONTROLSHAPES)
     if shape in controlDataObj.getData().keys():
         source = controlDataObj.applyData(shape, create=True)[0]

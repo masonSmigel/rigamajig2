@@ -7,7 +7,7 @@ from collections import OrderedDict
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.data.maya_data as maya_data
+import rigamajig2.maya.data.mayaData as maya_data
 
 logger = logging.getLogger(__name__)
 

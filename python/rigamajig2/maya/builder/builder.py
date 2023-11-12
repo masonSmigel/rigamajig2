@@ -16,7 +16,7 @@ import typing
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
 
-import rigamajig2.maya.data.abstract_data as abstract_data
+import rigamajig2.maya.data.abstractData as abstractData
 import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
 import rigamajig2.shared.common as common
@@ -829,7 +829,7 @@ class Builder(object):
             raise RuntimeError("'{0}' does not exist".format(rigFile))
         self.rigFile = rigFile
 
-        rigData = abstract_data.AbstractData()
+        rigData = abstractData.AbstractData()
         rigData.read(self.rigFile)
         data = rigData.getData()
         if "rig_env" not in data:
@@ -870,7 +870,7 @@ class Builder(object):
         """
         Save a rig file based on current instance property values.
         """
-        data = abstract_data.AbstractData()
+        data = abstractData.AbstractData()
         data.read(self.rigFile)
         newData = data.getData()
 

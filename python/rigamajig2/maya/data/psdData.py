@@ -12,7 +12,7 @@ from collections import OrderedDict
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.data.maya_data as maya_data
+import rigamajig2.maya.data.mayaData as maya_data
 import rigamajig2.maya.meta as meta
 import rigamajig2.maya.rig.psd as psd
 

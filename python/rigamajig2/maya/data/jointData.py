@@ -13,7 +13,7 @@ from collections import OrderedDict
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.data.node_data as node_data
+import rigamajig2.maya.data.nodeData as node_data
 
 
 class JointData(node_data.NodeData):

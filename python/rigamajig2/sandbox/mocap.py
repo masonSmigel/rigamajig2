@@ -11,7 +11,7 @@ from PySide2 import QtCore
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
-import rigamajig2.maya.data.abstract_data as abstract_data
+import rigamajig2.maya.data.abstractData as abstract_data
 import rigamajig2.maya.decorators
 import rigamajig2.maya.transform
 from rigamajig2.ui.widgets import pathSelector

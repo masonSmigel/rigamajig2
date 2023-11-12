@@ -13,12 +13,12 @@ import pathlib
 from types import ModuleType
 from typing import Type, Dict
 
-from rigamajig2.maya.data import abstract_data
+from rigamajig2.maya.data import abstractData
 from rigamajig2.shared import common
 from rigamajig2.shared import path as rig_path
 from rigamajig2.shared import process
 
-AbstractDataType = Type[abstract_data.AbstractData]
+AbstractDataType = Type[abstractData.AbstractData]
 
 
 DATA_PATH = os.path.abspath(os.path.join(__file__, "../../data"))
@@ -48,7 +48,7 @@ def getDataModules(path: str = None) -> Dict[str, ModuleType]:
         if filePath.suffix == ".py" and filePath.name not in DATA_EXCLUDE_FILES:
 
             moduleObject = process.importModuleFromPath(filePath)
-            dataClasses = process.getSubclassesFromModule(moduleObject, abstract_data.AbstractData)
+            dataClasses = process.getSubclassesFromModule(moduleObject, abstractData.AbstractData)
 
             if dataClasses:
                 dataClass = dataClasses[0]
@@ -67,5 +67,5 @@ def createDataClassInstance(dataType=None) -> AbstractDataType:
     if not moduleObject:
         raise ValueError(f"Data type {dataType} is not valid. Valid Types are {getDataModules()}")
 
-    dataTypeInstance = process.getSubclassesFromModule(moduleObject, classType=abstract_data.AbstractData)
+    dataTypeInstance = process.getSubclassesFromModule(moduleObject, classType=abstractData.AbstractData)
     return common.getFirstIndex(dataTypeInstance)()

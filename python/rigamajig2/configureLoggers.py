@@ -14,11 +14,19 @@ import logging.config
 import logging.handlers
 import os
 
+from rigamajig2.shared.enviornment import isInMaya
+
 
 def configureLoggers():
     # Get the absolute path of the script's directory
     rootDirectory = os.path.dirname(os.path.abspath(__file__))
-    loggerConfigFilePath = os.path.join(rootDirectory, 'logging_config.json')
+
+    if isInMaya():
+        loggerConfig = 'interactiveConfig.json'
+    else:
+        loggerConfig = "batchConfig.json"
+
+    loggerConfigFilePath = os.path.join(rootDirectory, loggerConfig)
 
     with open(loggerConfigFilePath, 'r') as f:
         config = json.load(f)

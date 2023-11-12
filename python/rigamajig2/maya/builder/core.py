@@ -16,7 +16,7 @@ import shutil
 import maya.cmds as cmds
 
 from rigamajig2.maya.builder import constants
-from rigamajig2.maya.data import abstract_data
+from rigamajig2.maya.data import abstractData
 from rigamajig2.shared import common
 from rigamajig2.shared import path as rig_path
 
@@ -148,7 +148,7 @@ def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
     archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
     rigFile = createRigEnvironment(sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName)
 
-    data = abstract_data.AbstractData()
+    data = abstractData.AbstractData()
     data.read(rigFile)
 
     newData = data.getData()
@@ -188,7 +188,7 @@ def createRigEnvironment(sourceEnviornment, targetEnviornment, rigName):
     # rename the .rig file and the rig_name within the .rig file
     os.rename(srcRigFile, rigFile)
 
-    data = abstract_data.AbstractData()
+    data = abstractData.AbstractData()
     data.read(rigFile)
 
     newData = data.getData()
@@ -213,7 +213,7 @@ def getRigData(rigFile, key):
     if not os.path.exists(rigFile):
         raise RuntimeError("rig file at {} does not exist".format(rigFile))
 
-    data = abstract_data.AbstractData()
+    data = abstractData.AbstractData()
     data.read(rigFile)
     if key in data.getData():
         return data.getData()[key]

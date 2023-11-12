@@ -11,8 +11,6 @@
 
 import maya.cmds as cmds
 
-from rigamajig2.maya.data import curve_data
-
 CURVE_DATA_PATH = '/Users/masonsmigel/Documents/dev/maya/rigamajig2/scripts/rigamajig2/maya/rig/controlShapes.data'
 
 cdata = curve_data.CurveData()

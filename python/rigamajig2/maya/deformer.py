@@ -15,6 +15,13 @@ import rigamajig2.shared.common as common
 logger = logging.getLogger(__name__)
 
 
+class DeformOrder:
+    after = "after"
+    before = "before"
+    parallel = "parallel"
+    split = "split"
+    foc="foc"
+
 def isDeformer(deformer):
     """
     Check if the deformer is a valid deformer

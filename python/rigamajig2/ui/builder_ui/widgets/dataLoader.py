@@ -400,7 +400,7 @@ class DataLoader(QtWidgets.QWidget):
             )
 
         if newPath:
-            newData = rigamajig2.maya.builder.data.createDataClassInstance(dataType=datatype)
+            newData = dataManager.createDataClassInstance(dataType=datatype)
             newData.write(filepath=newPath[0])
 
             self.addItem(newPath[0])
@@ -444,7 +444,7 @@ class DataLoader(QtWidgets.QWidget):
         """
         if pathlib.Path(path).exists() and pathlib.Path(path).is_file():
             dataType = abstractData.AbstractData().getDataType(path)
-            dataClass = rigamajig2.maya.builder.data.createDataClassInstance(dataType=dataType)
+            dataClass = dataManager.createDataClassInstance(dataType=dataType)
 
             # read the data and apply all keys
             dataClass.read(filepath=path)
@@ -481,7 +481,7 @@ class DataLoader(QtWidgets.QWidget):
         dataType = abstractData.AbstractData.getDataType(dataFile)
 
         # read the current data into the data object
-        dataObj = rigamajig2.maya.builder.data.createDataClassInstance(dataType)
+        dataObj = dataManager.createDataClassInstance(dataType)
         dataObj.read(dataFile)
 
         # gather data from the new selection

@@ -5,9 +5,11 @@
     file: blendshapeUtils.py
     author: masonsmigel
     date: 10/2022
-    description: A bunch of usefull utilities for working with blendshapes
+    description: A bunch of useful utilities for working with blendshapes
 
 """
+from typing import Union, List
+
 import maya.cmds as cmds
 
 from rigamajig2.maya import attr
@@ -15,36 +17,46 @@ from rigamajig2.maya import blendshape
 from rigamajig2.maya import skinCluster
 from rigamajig2.shared import common
 
+Multiuse = Union[List[str], str]
 
-def createSplitBlendshapes(targets, splitJoints, splitMesh, skinFile=None, base=None):
+
+def splitBlendshapeTargets(targets: Multiuse, splitMesh: str, splitJoints: Multiuse = None, skinFile: str = None):
     """
-    Create a collection of blendshapes split based on various input joints.
-    This function will create new blendshape targets based on the influence weight of the provided skin cluster.
+    Split blendshapes into sections based on the skinweights of the input joints. This will produce a number
+    of blendshapes split into individual targets with weights from the split joints.
 
-    You must first paint a split map on a mesh using ONLY joints you wish to use as split influences.
+    The skin cluster is determined from the splitMesh. All split joints must be a part of that skin cluster.
+    Ideally the skincluster should be split between only the split joints, but arbirary weights can be used as well
+    (understanding that the resulting blendshape targets will not be normalized)
+
+    Optionally users can pass in a skinFile instead of keeping the skinweights on the splitMesh. This results in a
+    more procedural approach.
+
+    The output targets will be named with the split joint as a suffix: (`frown_l`)
+
+
+    >>> splitBlendshapeTargets(targets=["smile", "frown"], splitMesh="body_geo", splitJoints=["l", "r"])
 
     :param targets: list of meshes to add as targets. They will be split!
     :param splitJoints: list of joints to use in the split. They must all be bound to the split mesh
     :param splitMesh: the mesh with the split weights painted on it.
-    :param skinFile: Skinweight file to load the weights from. if none is provided we will grab the weights from the splitmesh.
-    :param base: the base mesh to use as to create the splits
+    :param skinFile: Skin Weight file to load the weights from. otherwise grab the weights from the splitmesh.
     :return: a list of newly created blendshapeTargets
     """
     outputTargets = list()
 
     targets = common.toList(targets)
-    splitJoints = common.toList(splitJoints)
     splitMesh = common.getFirstIndex(splitMesh)
+    splitJoints = common.toList(splitJoints)
 
     if skinFile:
         skinData = skin_data.SkinData()
         skinData.read(skinFile)
 
         data = skinData.getData()
-        keys = list(data.keys())
-        # wen loading skinwaths from tthe file it should always be the first one.
-        skinWeights = data[keys[0]]['weights']
-        vertexCount = data[keys[0]]['vertexCount']
+        skinClusterNode = skinCluster.getSkinCluster(splitMesh)
+        skinWeights = data.get(skinClusterNode).get("weights")
+        vertexCount = data.get(skinClusterNode).get("vertexCount")
 
     else:
         skinClusterNode = skinCluster.getSkinCluster(splitMesh)
@@ -54,38 +66,37 @@ def createSplitBlendshapes(targets, splitJoints, splitMesh, skinFile=None, base=
 
         skinWeights, vertexCount = skinCluster.getWeights(splitMesh)
 
-    # create a temp group to put everything in
-    split_hrc = cmds.createNode("transform", name="tmp_split_hrc")
+    splitHierarchy = cmds.createNode("transform", name="tmp_split_hrc")
 
-    # now we will create a tempory duplicate of the base mesh to use as the blendshape base
-    bshpSplitMesh = createBaseFromSkinned(splitMesh, parent=split_hrc)
+    temporaryBaseMesh = createBaseFromSkinned(splitMesh, parent=splitHierarchy)
+
+    if not splitJoints:
+        splitJoints = skinCluster.getInfluenceJoints(skinClusterNode)
 
     for splitJoint in splitJoints:
-        # create a new dictionary to use to set the baseWeights of our new blendshape
-        # frist lets get a list of all the influence weights
         sourceWeights = skinWeights[splitJoint]
 
-        outputWeightList = list()
+        outputWeights = {}
         for i in range(vertexCount):
             value = sourceWeights.get(i) or sourceWeights.get(str(i)) or 0.0
-            outputWeightList.insert(i, value)
+            outputWeights[i] = value
 
         # now put them into a dictionary
         blendshapeDict = dict()
-        blendshapeDict['baseWeights'] = outputWeightList
+        blendshapeDict["baseWeights"] = outputWeights
 
-        blendshapeNode = blendshape.create(bshpSplitMesh, targets=targets, origin='local')
-        blendshape.setWeights(blendshapeNode, weights=blendshapeDict, targets=['baseWeights'])
+        blendshapeNode = blendshape.create(temporaryBaseMesh, targets=targets, origin="local")
+        blendshape.setWeights(blendshapeNode, weights=blendshapeDict, targets=["baseWeights"])
 
-        bshpTargetsList = blendshape.getTargetList(blendshapeNode)
+        targetsList = blendshape.getTargetList(blendshapeNode)
 
-        for target in bshpTargetsList:
+        for target in targetsList:
             # turn the blendshape ON
             cmds.setAttr("{}.{}".format(blendshapeNode, target), 1)
 
             # now create a duplicate, this will be the skinned version
             targetName = "{}_{}".format(target, splitJoint)
-            dup = cmds.duplicate(bshpSplitMesh)
+            dup = cmds.duplicate(temporaryBaseMesh)
             cmds.rename(dup, targetName)
 
             outputTargets.append(targetName)
@@ -94,7 +105,7 @@ def createSplitBlendshapes(targets, splitJoints, splitMesh, skinFile=None, base=
             cmds.setAttr("{}.{}".format(blendshapeNode, target), 0)
 
     # now we can delete the split mesh
-    cmds.delete(bshpSplitMesh)
+    cmds.delete(temporaryBaseMesh)
 
     return outputTargets
 
@@ -110,9 +121,11 @@ def createBaseFromSkinned(mesh, parent=None):
     """
     skinClusterNode = skinCluster.getSkinCluster(mesh)
 
-    if skinClusterNode:  cmds.setAttr("{}.envelope".format(skinClusterNode), 0)
+    if skinClusterNode:
+        cmds.setAttr("{}.envelope".format(skinClusterNode), 0)
     dup = cmds.duplicate(mesh)
-    if skinClusterNode:  cmds.setAttr("{}.envelope".format(skinClusterNode), 1)
+    if skinClusterNode:
+        cmds.setAttr("{}.envelope".format(skinClusterNode), 1)
 
     base = "{}_split_base".format(mesh)
     cmds.rename(dup, base)

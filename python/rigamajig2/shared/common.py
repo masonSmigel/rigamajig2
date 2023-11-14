@@ -3,8 +3,8 @@ This module contains functions common to all modules and constants
 """
 import re
 import sys
-import typing
 from collections import OrderedDict
+from typing import Any, List
 
 DEBUG = False
 REQUIRED_PLUGINS = ["quatNodes", "matrixNodes"]
@@ -204,7 +204,7 @@ else:
     UNICODE = unicode
 
 
-def toList(values):
+def toList(values: Any) -> List[Any]:
     """
     Converts values into a list
     :param values: values to convert into a list
@@ -212,10 +212,12 @@ def toList(values):
     """
     if not isinstance(values, (list, tuple)):
         values = [values]
+    if values is None:
+        values = []
     return values
 
 
-def getFirstIndex(var: typing.Any) -> typing.Any:
+def getFirstIndex(var: Any) -> Any:
     """
     Return the first index of a list
     :param var: list to get index from
@@ -226,6 +228,21 @@ def getFirstIndex(var: typing.Any) -> typing.Any:
         if not len(var):
             return var
         return var[0]
+    else:
+        return var
+
+
+def getLastIndex(var: Any) -> Any:
+    """
+    Return the last index of a list
+    :param var: list to get index from
+    :type var: list | tuple
+    :return: first index of a list or tuple
+    """
+    if isinstance(var, (list, tuple)):
+        if not len(var):
+            return var
+        return var[-1]
     else:
         return var
 

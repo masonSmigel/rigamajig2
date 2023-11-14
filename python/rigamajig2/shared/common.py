@@ -7,8 +7,6 @@ from collections import OrderedDict
 from typing import Any, List
 
 DEBUG = False
-REQUIRED_PLUGINS = ["quatNodes", "matrixNodes"]
-
 # really important tags
 BINDTAG = "bind"
 CONTROLTAG = "control"

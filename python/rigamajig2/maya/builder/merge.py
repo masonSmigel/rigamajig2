@@ -49,7 +49,7 @@ def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-delive
     rigName = rigName.split(".")[0]
 
     # for merged rig files the archetype is always built from base
-    rigFile = core.newRigEnviornmentFromArchetype(mergedPath, 'base', rigName=rigName)
+    rigFile = core.newRigEnvironmentFromArchetype(mergedPath, 'base', rigName=rigName)
     rigEnv = os.path.dirname(rigFile)
 
     rigFileData = abstract_data.AbstractData()

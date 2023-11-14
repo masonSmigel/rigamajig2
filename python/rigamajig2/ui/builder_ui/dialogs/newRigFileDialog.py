@@ -138,15 +138,15 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         rigName = self.rigNameLineEdit.text()
         if self.fromArchetypeRadioButton.isChecked():
             archetype = self.archetypeComboBox.currentText()
-            rigFile = core.newRigEnviornmentFromArchetype(
+            rigFile = core.newRigEnvironmentFromArchetype(
                 newEnv=destinationRigEnvironment,
                 archetype=archetype,
                 rigName=rigName)
         else:
             sourceEnvironment = self.sourcePath.getPath()
             rigFile = core.createRigEnvironment(
-                sourceEnviornment=sourceEnvironment,
-                targetEnviornment=destinationRigEnvironment,
+                sourceEnvironment=sourceEnvironment,
+                targetEnvironment=destinationRigEnvironment,
                 rigName=rigName)
         # noinspection PyUnresolvedReferences
         self.newRigEnviornmentCreated.emit(rigFile)

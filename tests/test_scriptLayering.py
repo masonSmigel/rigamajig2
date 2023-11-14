@@ -17,7 +17,7 @@ def test_builderLayering(tmpdir):
     """
     Ensure the script layering is resulting in two lists of equal length
     """
-    rigFile = core.newRigEnviornmentFromArchetype(str(tmpdir), "biped", "tempRig")
+    rigFile = core.newRigEnvironmentFromArchetype(str(tmpdir), "biped", "tempRig")
 
     for scriptType in [constants.PRE_SCRIPT, constants.POST_SCRIPT, constants.PUB_SCRIPT]:
         archetypeScriptList = scriptManager.GetCompleteScriptList.getScriptList(rigFile, scriptType=scriptType)

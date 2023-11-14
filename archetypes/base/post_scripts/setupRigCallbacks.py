@@ -10,7 +10,7 @@
 
 """
 import maya.cmds as cmds
-from rigamajig2.maya import meta
+
 from rigamajig2.maya import scriptNode
 from rigamajig2.maya.rig import rigcallbacks
 

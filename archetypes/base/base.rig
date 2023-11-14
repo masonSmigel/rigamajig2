@@ -8,11 +8,12 @@
         "model_file": null, 
         "skeleton_pos": null, 
         "pre_script": [
-            "pre_scripts/initalize_scene.py"
+            "pre_scripts/initializeScene.py",
+            "pre_scripts/loadPlugins.py"
         ], 
         "post_script": [
-            "post_scripts/finalize_scene.py",
-            "post_scripts/setup_rig_callbacks.py"
+            "post_scripts/finalizeScene.py",
+            "post_scripts/setupRigCallbacks.py"
         ], 
         "pub_script": [
             "pub_scripts/addContainerScriptNode.py",

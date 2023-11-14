@@ -13,8 +13,6 @@ import logging
 import os
 import shutil
 
-import maya.cmds as cmds
-
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.data import abstractData
 from rigamajig2.shared import common
@@ -25,83 +23,9 @@ logger = logging.getLogger(__name__)
 SCRIPT_FOLDER_CONSTANTS = ["pre_scripts", "post_scripts", "pub_scripts"]
 
 
-def loadRequiredPlugins():
-    """
-    loadSettings required plugins
-    NOTE: There are plugins REQUIRED for rigamajig such as matrix and quat nodes.
-          loading other plug-ins needed in production should be added into a pre-script file
-    """
-    loadedPlugins = cmds.pluginInfo(query=True, listPlugins=True)
-
-    for plugin in common.REQUIRED_PLUGINS:
-        if plugin not in loadedPlugins:
-            cmds.loadPlugin(plugin)
-
-
-# Script List Utilities
-
-
-#
-# class GetCompleteScriptList(object):
-#     """
-#     This class will get a list of all scripts for a given rigfile
-#     Including any upstream archetype parents script contents.
-#     """
-#
-#     scriptList = list()
-#     scriptDict = dict()
-#
-#     @classmethod
-#     def getScriptList(cls, rigFile, scriptType=None):
-#         """
-#         This function will get a list of all scripts for a given rigfile including any upstream archetype parents.
-#
-#         :param rigFile: rig file to get scripts for
-#         :param scriptType: key of scripts to get. Typical values are pre_script, post_script or pub_script.
-#         :return: list of scripts
-#         """
-#         cls.scriptList = list()
-#
-#         cls.findScripts(rigFile=rigFile, scriptType=scriptType)
-#
-#         # The list is reversed to provide scripts at the lowest level of inheritance first.
-#         return list(reversed(cls.scriptList))
-#
-#     @classmethod
-#     def findScripts(cls, rigFile, scriptType=None):
-#         """
-#         :param rigFile: directories at the current rig file level of the rig
-#         :param scriptType: key of scripts to get. Typical values are pre_script, post_script or pub_script.
-#         """
-#         scriptType = scriptType or constants.PRE_SCRIPT
-#
-#         localScriptPaths = getRigData(rigFile, scriptType)
-#         rigEnviornmentPath = os.path.abspath(os.path.join(rigFile, "../"))
-#
-#         # for each item in the prescript path append the scripts within that directory
-#         for localScriptPath in localScriptPaths:
-#             fullScriptPath = os.path.join(rigEnviornmentPath, localScriptPath)
-#             builderScripts = validateScriptList(fullScriptPath)
-#
-#             for script in builderScripts:
-#                 if script not in cls.scriptList:
-#                     cls.scriptList.insert(0, script)
-#
-#         baseArchetype = getRigData(rigFile, constants.BASE_ARCHETYPE)
-#         archetypeList = common.toList(baseArchetype)
-#         for baseArchetype in archetypeList:
-#             if baseArchetype and baseArchetype in getAvailableArchetypes():
-#                 archetypePath = os.sep.join([common.ARCHETYPES_PATH, baseArchetype])
-#                 archetypeRigFile = findRigFile(archetypePath)
-#
-#                 cls.findScripts(archetypeRigFile, scriptType=scriptType)
-
-# Archetype Utilities
-
-
 def getAvailableArchetypes():
     """
-    get a list of avaible archetypes. Archetypes are defined as a folder containng a .rig file.
+    get a list of available archetypes. Archetypes are defined as a folder containing a .rig file.
     :return: list of archetypes
     """
     archetypeList = list()
@@ -134,11 +58,11 @@ def findRigFile(path):
     return False
 
 
-def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
+def newRigEnvironmentFromArchetype(newEnv, archetype, rigName=None):
     """
-    Create a new rig envirnment from and archetype
-    :param newEnv: target driectory for the new rig enviornment
-    :param rigName: name of the new rig enviornment
+    Create a new rig environment from and archetype
+    :param newEnv: target directory for the new rig environment
+    :param rigName: name of the new rig environment
     :param archetype: archetype to copy
     :return: path to the rig file
     """
@@ -146,7 +70,7 @@ def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
         raise RuntimeError("{} is not a valid archetype".format(archetype))
 
     archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
-    rigFile = createRigEnvironment(sourceEnviornment=archetypePath, targetEnviornment=newEnv, rigName=rigName)
+    rigFile = createRigEnvironment(sourceEnvironment=archetypePath, targetEnvironment=newEnv, rigName=rigName)
 
     data = abstractData.AbstractData()
     data.read(rigFile)
@@ -170,22 +94,21 @@ def newRigEnviornmentFromArchetype(newEnv, archetype, rigName=None):
     return rigFile
 
 
-def createRigEnvironment(sourceEnviornment, targetEnviornment, rigName):
+def createRigEnvironment(sourceEnvironment, targetEnvironment, rigName):
     """
-    create a new rig enviornment from an existing rig enviornment.
-    :param sourceEnviornment: source rig enviornment
-    :param targetEnviornment: target rig direction
-    :param rigName: new name of the rig enviornment and .rig file
+    create a new rig environment from an existing rig enviornment.
+    :param sourceEnvironment: source rig environment
+    :param targetEnvironment: target rig direction
+    :param rigName: new name of the rig environment and .rig file
     :return: path to the rig file
     """
 
-    tgtEnvPath = os.path.join(targetEnviornment, rigName)
-    shutil.copytree(sourceEnviornment, tgtEnvPath)
+    tgtEnvPath = os.path.join(targetEnvironment, rigName)
+    shutil.copytree(sourceEnvironment, tgtEnvPath)
 
     srcRigFile = findRigFile(tgtEnvPath)
     rigFile = os.path.join(tgtEnvPath, "{}.rig".format(rigName))
 
-    # rename the .rig file and the rig_name within the .rig file
     os.rename(srcRigFile, rigFile)
 
     data = abstractData.AbstractData()

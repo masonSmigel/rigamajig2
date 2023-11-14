@@ -590,7 +590,6 @@ class Builder(object):
             f"\n" f"Begin Rig Build\n{'-' * 70}\n" f"build env: {self.rigEnvironment}\n"
         )
 
-        core.loadRequiredPlugins()
         self.runBuilderScripts(constants.PRE_SCRIPT)
 
         self.importModel()

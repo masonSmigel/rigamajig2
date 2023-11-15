@@ -14,6 +14,7 @@ from shiboken2 import wrapInstance
 
 import rigamajig2.shared.runScript as runScript
 from rigamajig2.ui import showInFolder
+from rigamajig2.ui.resources import Resources
 
 SCRIPT_FILE_FILTER = "Python (*.py) ;; Mel (*.mel)"
 
@@ -85,31 +86,31 @@ class ScriptRunner(QtWidgets.QWidget):
         self.titleLabel = QtWidgets.QLabel(self.title)
 
         self.executeAllAction = QtWidgets.QAction("Execute All Scripts", self)
-        self.executeAllAction.setIcon(QtGui.QIcon(":play_hover.png"))
+        self.executeAllAction.setIcon(Resources.getIcon(":play_hover.png"))
         self.executeAllAction.triggered.connect(self.executeAllScripts)
 
         self.executeSelectedAction = QtWidgets.QAction("Run Script", self)
-        self.executeSelectedAction.setIcon(QtGui.QIcon(":play_hover.png"))
+        self.executeSelectedAction.setIcon(Resources.getIcon(":play_hover.png"))
         self.executeSelectedAction.triggered.connect(self.runSelectedScripts)
 
         self.showInFolderAction = QtWidgets.QAction("Show in Folder", self)
-        self.showInFolderAction.setIcon(QtGui.QIcon(":folder-open.png"))
+        self.showInFolderAction.setIcon(Resources.getIcon(":folder-open.png"))
         self.showInFolderAction.triggered.connect(self.showInFolder)
 
         self.openScriptAction = QtWidgets.QAction("Open Script", self)
-        self.openScriptAction.setIcon(QtGui.QIcon(":openScript.png"))
+        self.openScriptAction.setIcon(Resources.getIcon(":openScript.png"))
         self.openScriptAction.triggered.connect(self.openScript)
 
         self.addScriptAction = QtWidgets.QAction("Add Existing Script", self)
-        self.addScriptAction.setIcon(QtGui.QIcon(":addCreateGeneric.png"))
+        self.addScriptAction.setIcon(Resources.getIcon(":addCreateGeneric.png"))
         self.addScriptAction.triggered.connect(self.addScriptBrowser)
 
         self.newScriptAction = QtWidgets.QAction("Create New Script", self)
-        self.newScriptAction.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
+        self.newScriptAction.setIcon(Resources.getIcon(":cmdWndIcon.png"))
         self.newScriptAction.triggered.connect(self.createNewScript)
 
         self.deleteScriptAction = QtWidgets.QAction("Remove Script", self)
-        self.deleteScriptAction.setIcon(QtGui.QIcon(":trash.png"))
+        self.deleteScriptAction.setIcon(Resources.getIcon(":trash.png"))
         self.deleteScriptAction.triggered.connect(self.deleteSelectedScripts)
 
     def createWidgets(self):
@@ -191,9 +192,9 @@ class ScriptRunner(QtWidgets.QWidget):
 
             # set the icon
             if script.endswith(".py"):
-                item.setIcon(QtGui.QIcon(":py_tab.png"))
+                item.setIcon(Resources.getIcon(":py_tab.png"))
             else:
-                item.setIcon(QtGui.QIcon(":mel_tab.png"))
+                item.setIcon(Resources.getIcon(":mel_tab.png"))
 
             # set the text color
             if color:

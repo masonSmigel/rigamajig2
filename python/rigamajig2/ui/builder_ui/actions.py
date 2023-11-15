@@ -23,6 +23,7 @@ from rigamajig2.ui.builder_ui import recentFiles
 from rigamajig2.ui.builder_ui.dialogs import gitDialog
 from rigamajig2.ui.builder_ui.dialogs import mergeRigsDialog
 from rigamajig2.ui.builder_ui.dialogs import newRigFileDialog
+from rigamajig2.ui.resources import Resources
 
 
 class Actions(object):
@@ -42,24 +43,24 @@ class Actions(object):
         """ Create the Actions"""
         # FILE
         self.newRigFileAction = QtWidgets.QAction("New Rig File", self.dialog)
-        self.newRigFileAction.setIcon(QtGui.QIcon(":fileNew.png"))
+        self.newRigFileAction.setIcon(Resources.getIcon(":fileNew.png"))
         self.newRigFileAction.triggered.connect(self.createRigEnvironment)
 
         self.loadRigFileAction = QtWidgets.QAction("Load Rig File", self.dialog)
-        self.loadRigFileAction.setIcon(QtGui.QIcon(":folder-open.png"))
+        self.loadRigFileAction.setIcon(Resources.getIcon(":folder-open.png"))
         self.loadRigFileAction.triggered.connect(self.loadRigFile)
 
         self.saveRigFileAction = QtWidgets.QAction("Save Rig File", self.dialog)
-        self.saveRigFileAction.setIcon(QtGui.QIcon(":save.png"))
+        self.saveRigFileAction.setIcon(Resources.getIcon(":save.png"))
         self.saveRigFileAction.triggered.connect(self.saveRigFile)
 
         # add a submenu to load recent rigFiles
         self.recentRigFileMenu = QtWidgets.QMenu("Recent Rig Files ...", self.dialog)
-        self.recentRigFileMenu.setIcon(QtGui.QIcon(":out_time.png"))
+        self.recentRigFileMenu.setIcon(Resources.getIcon(":out_time.png"))
         self.updateRecentFiles()
 
         self.reloadRigFileAction = QtWidgets.QAction("Reload Rig File", self.dialog)
-        self.reloadRigFileAction.setIcon(QtGui.QIcon(":refresh.png"))
+        self.reloadRigFileAction.setIcon(Resources.getIcon(":refresh.png"))
         self.reloadRigFileAction.triggered.connect(self.reloadRigFile)
 
         # UTILS

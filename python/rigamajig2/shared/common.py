@@ -31,7 +31,6 @@ LOCATIONS = {"front": FRONT, "back": BACK, "middle": MIDDLE, "top": TOP, "bottom
 CURRENT_FILE = __file__.replace("\\", "/")
 
 ROOT_PATH = "/".join(CURRENT_FILE.split("/")[0:-4])
-ICONS_PATH = "/".join(CURRENT_FILE.split("/")[0:-4]) + "/icons"
 PYTHON_PATH = "/".join(CURRENT_FILE.split("/")[0:-4]) + "/python"
 ARCHETYPES_PATH = "/".join(CURRENT_FILE.split("/")[0:-4]) + "/archetypes"
 BIN_PATH = "/".join(CURRENT_FILE.split("/")[0:-4]) + "/bin"
@@ -378,15 +377,6 @@ def fillList(values, fillName, amount):
             name = fillName + str(i - len(values))
             result.append(name)
     return result
-
-
-def getIcon(icon):
-    """
-    Get the icon path from the name
-    :param icon: name of the icon
-    """
-    iconPath = ICONS_PATH + "/" + icon
-    return iconPath
 
 
 MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"

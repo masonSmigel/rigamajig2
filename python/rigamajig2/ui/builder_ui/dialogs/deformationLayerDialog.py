@@ -19,7 +19,7 @@ from PySide2 import QtWidgets
 from rigamajig2.maya import deformer
 from rigamajig2.maya import meta
 from rigamajig2.maya.rig import deformLayer
-from rigamajig2.shared import common
+from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox, collapseableWidget
 
 logger = logging.getLogger(__name__)
@@ -36,30 +36,30 @@ DEFORMTREE_STYLESHEET = (f"""
                     }}
                     
                     QTreeView::indicator:unchecked {{
-                        image: url({common.ICONS_PATH}/eye_hidden.png);
+                        image: url(:hidden.png);
                     }}
                     
                     QTreeView::indicator:unchecked:hover {{
-                        image: url({common.ICONS_PATH}/eye_hidden.png);
+                        image: url(:hidden.png);
                     }}
                     
                     QTreeView::indicator:unchecked:pressed {{
-                        image: url({common.ICONS_PATH}/eye_hidden.png);
+                        image: url(:hidden.png);
                     }}
                     
                     QTreeView::indicator:checked {{
-                        image: url({common.ICONS_PATH}/eye_visable.png);
+                        image: url(:visible.png);
                     }}
                     
                     QTreeView::indicator:checked:hover {{
-                        image: url({common.ICONS_PATH}/eye_visable.png);
+                        image: url(:visible.png);
                     }}
                     
                     QTreeView::indicator:checked:pressed {{
-                        image: url({common.ICONS_PATH}/eye_visable.png);
+                        image: url(:visible.png);
                     }}
                     QTreeView::indicator:indeterminate {{
-                        image: url({common.ICONS_PATH}/eye_partiallyVisable.png);
+                        image: url(:partiallyVisible.png);
                     }}
                     
                     """)
@@ -87,7 +87,7 @@ class DeformerRenderMeshTreeItem(QtWidgets.QTreeWidgetItem):
 
         # set the name text
         self.setText(0, name)
-        self.setIcon(0, QtGui.QIcon(":polyPlane.svg"))
+        self.setIcon(0, Resources.getIcon(":polyPlane.svg"))
 
         # Create a QFont object with bold style
         font = QtGui.QFont()
@@ -117,7 +117,7 @@ class DeformLayerMeshTreeItem(QtWidgets.QTreeWidgetItem):
         self.setFlags(QtCore.Qt.ItemIsSelectable | QtCore.Qt.ItemIsUserCheckable | QtCore.Qt.ItemIsEnabled)
 
         self.setText(0, deformLayerMesh)
-        self.setIcon(0, QtGui.QIcon(":mesh.svg"))
+        self.setIcon(0, Resources.getIcon(":mesh.svg"))
         itemVisable = cmds.getAttr(f"{deformLayerMesh}.v")
 
         checkState = QtCore.Qt.Checked if itemVisable else QtCore.Qt.Unchecked
@@ -141,9 +141,9 @@ class DeformerTreeItem(QtWidgets.QTreeWidgetItem):
         # get the deformerType and set the icons
         deformerType = cmds.nodeType(deformerName)
         if deformerType == "skinCluster":
-            self.setIcon(0, QtGui.QIcon(f":smoothSkin.png"))
+            self.setIcon(0, Resources.getIcon(f":smoothSkin.png"))
         else:
-            self.setIcon(0, QtGui.QIcon(f":{deformerType}.png"))
+            self.setIcon(0, Resources.getIcon(f":{deformerType}.png"))
 
         # set the envelope
         self.setEnvelope(cmds.getAttr(f"{self.deformerName}.envelope"))
@@ -171,42 +171,42 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
 
     def createActions(self):
         self.selectNodeAction = QtWidgets.QAction("Select Node")
-        self.selectNodeAction.setIcon(QtGui.QIcon(":selectModel.png"))
+        self.selectNodeAction.setIcon(Resources.getIcon(":selectModel.png"))
         self.selectNodeAction.triggered.connect(self.selectNodes)
 
         self.selectGeometryAction = QtWidgets.QAction("Select Geometry")
-        self.selectGeometryAction.setIcon(QtGui.QIcon(":selectModel.png"))
+        self.selectGeometryAction.setIcon(Resources.getIcon(":selectModel.png"))
         self.selectGeometryAction.triggered.connect(self.selectGeometryNode)
 
         self.toggleDeformerAction = QtWidgets.QAction("Toggle Envelope")
         self.toggleDeformerAction.triggered.connect(self.performToggleDeformer)
 
         self.moveDeformerUp = QtWidgets.QAction("Move Deformer Up")
-        self.moveDeformerUp.setIcon(QtGui.QIcon(":moveUVUp.png"))
+        self.moveDeformerUp.setIcon(Resources.getIcon(":moveUVUp.png"))
         self.moveDeformerUp.triggered.connect(partial(self.performReorderDeformer, opperation="up"))
 
         self.moveDeformerDown = QtWidgets.QAction("Move Deformer Down")
-        self.moveDeformerDown.setIcon(QtGui.QIcon(":moveUVDown.png"))
+        self.moveDeformerDown.setIcon(Resources.getIcon(":moveUVDown.png"))
         self.moveDeformerDown.triggered.connect(partial(self.performReorderDeformer, opperation="down"))
 
         self.moveDeformerToTop = QtWidgets.QAction("Move Deformer to Top")
-        self.moveDeformerToTop.setIcon(QtGui.QIcon(":moveLayerUp.png"))
+        self.moveDeformerToTop.setIcon(Resources.getIcon(":moveLayerUp.png"))
         self.moveDeformerToTop.triggered.connect(partial(self.performReorderDeformer, opperation="top"))
 
         self.moveDeformerToBottom = QtWidgets.QAction("Move Deformer to Bottom")
-        self.moveDeformerToBottom.setIcon(QtGui.QIcon(":moveLayerDown.png"))
+        self.moveDeformerToBottom.setIcon(Resources.getIcon(":moveLayerDown.png"))
         self.moveDeformerToBottom.triggered.connect(partial(self.performReorderDeformer, opperation="bottom"))
 
         self.deleteDeformerAction = QtWidgets.QAction("Delete Deformer(s)")
-        self.deleteDeformerAction.setIcon(QtGui.QIcon(":trash.png"))
+        self.deleteDeformerAction.setIcon(Resources.getIcon(":trash.png"))
         self.deleteDeformerAction.triggered.connect(partial(self.deleteDeformers))
 
         self.addDeformLayerAction = QtWidgets.QAction("Add Deform Layer")
-        self.addDeformLayerAction.setIcon(QtGui.QIcon(":QR_add.png"))
+        self.addDeformLayerAction.setIcon(Resources.getIcon(":QR_add.png"))
         self.addDeformLayerAction.triggered.connect(partial(self.performAddLayer, False))
 
         self.createNewLayerGroupAction = QtWidgets.QAction("New Layer Group...")
-        self.createNewLayerGroupAction.setIcon(QtGui.QIcon(":QR_add.png"))
+        self.createNewLayerGroupAction.setIcon(Resources.getIcon(":QR_add.png"))
         self.createNewLayerGroupAction.triggered.connect(partial(self.performSetNewLayerGroup))
 
     def createWidgets(self):
@@ -215,14 +215,14 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         self.layerGroupComboBox.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
 
         self.filterButton = QtWidgets.QPushButton()
-        self.filterButton.setIcon(QtGui.QIcon(":filter.png"))
+        self.filterButton.setIcon(Resources.getIcon(":filter.png"))
         self.filterButton.setCheckable(True)
         self.filterButton.setChecked(False)
         self.filterButton.setMaximumSize(20, 20)
         self.filterButton.setFlat(True)
 
         self.refreshButton = QtWidgets.QPushButton()
-        self.refreshButton.setIcon(QtGui.QIcon(":refresh"))
+        self.refreshButton.setIcon(Resources.getIcon(":refresh"))
         self.refreshButton.setMaximumSize(20, 20)
         self.refreshButton.setFlat(True)
 
@@ -293,7 +293,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
                 actionsToAdd = list()
                 for layerGroup in deformLayer.getLayerGroups():
                     setLayerGroupAction = QtWidgets.QAction(layerGroup)
-                    setLayerGroupAction.setIcon(QtGui.QIcon(":displayLayer.svg"))
+                    setLayerGroupAction.setIcon(Resources.getIcon(":displayLayer.svg"))
                     setLayerGroupAction.triggered.connect(partial(self.performSetLayerGroup, layerGroup))
 
                     actionsToAdd.append(setLayerGroupAction)
@@ -328,7 +328,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
                 actionsToAdd = []
                 for otherDeformLayer in deformLayers:
                     transferAction = QtWidgets.QAction(otherDeformLayer)
-                    transferAction.setIcon(QtGui.QIcon(":mesh.svg"))
+                    transferAction.setIcon(Resources.getIcon(":mesh.svg"))
 
                     # find the target item by filtering the names
                     deformLayerMeshItems = self.getTreeWidgetItemsByType(DeformLayerMeshTreeItem)
@@ -346,7 +346,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
                 menu.addAction(self.deleteDeformerAction)
         else:
             sceneSelectionAddLayerAction = QtWidgets.QAction("Add Deform Layer from Scene Selection")
-            sceneSelectionAddLayerAction.setIcon(QtGui.QIcon(":QR_add.png"))
+            sceneSelectionAddLayerAction.setIcon(Resources.getIcon(":QR_add.png"))
             sceneSelectionAddLayerAction.triggered.connect(partial(self.performAddLayer, True))
 
             expandAllAction = QtWidgets.QAction("Expand All")
@@ -366,7 +366,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         actionsToAdd = list()
         for layerGroup in deformLayer.getLayerGroups():
             setLayerGroupAction = QtWidgets.QAction(layerGroup)
-            setLayerGroupAction.setIcon(QtGui.QIcon(":displayLayer.svg"))
+            setLayerGroupAction.setIcon(Resources.getIcon(":displayLayer.svg"))
             setLayerGroupAction.triggered.connect(partial(self.performSetLayerGroup, layerGroup))
 
             actionsToAdd.append(setLayerGroupAction)

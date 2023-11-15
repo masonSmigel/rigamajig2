@@ -8,19 +8,15 @@
     description:
 """
 from PySide2 import QtCore
-# PYTHON
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-# RIGAMAJIG2
-import rigamajig2.maya.builder.constants
 import rigamajig2.maya.file as file
-import rigamajig2.shared.common
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import scriptManager
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style as ui_constants
 from rigamajig2.ui.builder_ui.widgets import builderSection, scriptRunner
+from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import pathSelector
 
 
@@ -28,22 +24,19 @@ from rigamajig2.ui.widgets import pathSelector
 
 
 class ModelSection(builderSection.BuilderSection):
-    """ Model layout for the builder UI """
+    """Model layout for the builder UI"""
 
-    WIDGET_TITLE = 'Model/ Setup Scene'
+    WIDGET_TITLE = "Model/ Setup Scene"
 
     def createWidgets(self):
-        """ Create Widgets """
+        """Create Widgets"""
         self.modelPathSelector = pathSelector.PathSelector(
-            label="model:",
-            caption="Select a Model file",
-            fileFilter=rigamajig2.shared.common.MAYA_FILTER,
-            fileMode=1
-            )
-        self.importModelButton = QtWidgets.QPushButton('Import Model')
-        self.importModelButton.setIcon(QtGui.QIcon(common.getIcon('importCharacter.png')))
-        self.openModelButton = QtWidgets.QPushButton('Open Model')
-        self.openModelButton.setIcon(QtGui.QIcon(common.getIcon('openCharacter.png')))
+            label="model:", caption="Select a Model file", fileFilter=common.MAYA_FILTER, fileMode=1
+        )
+        self.importModelButton = QtWidgets.QPushButton("Import Model")
+        self.importModelButton.setIcon(Resources.getIcon(":importModel.png"))
+        self.openModelButton = QtWidgets.QPushButton("Open Model")
+        self.openModelButton.setIcon(Resources.getIcon(":openModel.png"))
         self.openModelButton.setFixedWidth(100)
 
         for button in [self.importModelButton, self.openModelButton]:
@@ -53,7 +46,7 @@ class ModelSection(builderSection.BuilderSection):
         self.preScriptRunner = scriptRunner.ScriptRunner(title="Pre-Scripts:")
 
     def createLayouts(self):
-        """ Create Layouts """
+        """Create Layouts"""
         self.mainWidget.addWidget(self.preScriptRunner)
 
         # setup the button layout
@@ -69,15 +62,14 @@ class ModelSection(builderSection.BuilderSection):
         self.mainWidget.addLayout(modelButtonLayout)
 
     def createConnections(self):
-        """ Create Connections """
+        """Create Connections"""
         self.preScriptRunner.scriptsUpdated.connect(self._setLocalPreScripts)
         self.modelPathSelector.pathUpdated.connect(self._setModelFile)
         self.importModelButton.clicked.connect(self._onImportModel)
         self.openModelButton.clicked.connect(self._onOpenModel)
 
-
     def _setBuilder(self, builder):
-        """ Set a builder for the model widget """
+        """Set a builder for the model widget"""
         super()._setBuilder(builder)
 
         # clear the ui
@@ -94,18 +86,18 @@ class ModelSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _runWidget(self):
-        """ Run this widget from the builder breakpoint runner """
+        """Run this widget from the builder breakpoint runner"""
         self.preScriptRunner.executeAllScripts()
         self._onImportModel()
 
     @QtCore.Slot()
     def _onImportModel(self):
-        """ Import model from builder """
+        """Import model from builder"""
         self.builder.importModel()
 
     @QtCore.Slot()
     def _onOpenModel(self):
-        """ Open the model file """
+        """Open the model file"""
         file.open_(self.modelPathSelector.getPath(), f=True)
 
     @QtCore.Slot()

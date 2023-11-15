@@ -1,0 +1,67 @@
+<!DOCTYPE RCC>
+<RCC version="1.0">
+    <qresource>
+        <file alias="arm.png">icons/components/arm.png</file>
+        <file alias="basic.png">icons/components/basic.png</file>
+        <file alias="brow.png">icons/components/brow.png</file>
+        <file alias="chain.png">icons/components/chain.png</file>
+        <file alias="cog.png">icons/components/cog.png</file>
+        <file alias="eyelid.png">icons/components/eyelid.png</file>
+        <file alias="hand.png">icons/components/hand.png</file>
+        <file alias="jaw.png">icons/components/jaw.png</file>
+        <file alias="leg.png">icons/components/leg.png</file>
+        <file alias="limb.png">icons/components/limb.png</file>
+        <file alias="lips.png">icons/components/lips.png</file>
+        <file alias="lookAt.png">icons/components/lookAt.png</file>
+        <file alias="main.png">icons/components/main.png</file>
+        <file alias="neck.png">icons/components/neck.png</file>
+        <file alias="spine.png">icons/components/spine.png</file>
+        <file alias="squash.png">icons/components/squash.png</file>
+
+        <file alias="importModel.png">icons/builder/importModel.png</file>
+        <file alias="loadAllSkins.png">icons/builder/loadAllSkins.png</file>
+        <file alias="loadComponents.png">icons/builder/loadComponents.png</file>
+        <file alias="loadControls.png">icons/builder/loadControls.png</file>
+        <file alias="loadDeformers.png">icons/builder/loadDeformers.png</file>
+        <file alias="loadDeformLayers.png">icons/builder/loadDeformLayers.png</file>
+        <file alias="loadGuides.png">icons/builder/loadGuides.png</file>
+        <file alias="loadJoints.png">icons/builder/loadJoints.png</file>
+        <file alias="loadPsd.png">icons/builder/loadPsd.png</file>
+        <file alias="loadSkinCluster.png">icons/builder/loadSkinCluster.png</file>
+        <file alias="openModel.png">icons/builder/openModel.png</file>
+        <file alias="mirrorControls.png">icons/builder/mirrorControls.png</file>
+        <file alias="manageDeformLayers.png">icons/builder/manageDeformLayers.png</file>
+
+        <file alias="saveComponents.png">icons/builder/saveComponents.png</file>
+        <file alias="saveControls.png">icons/builder/saveControls.png</file>
+        <file alias="saveDeformers.png">icons/builder/saveDeformers.png</file>
+        <file alias="saveDeformLayers.png">icons/builder/saveDeformLayers.png</file>
+        <file alias="saveGuides.png">icons/builder/saveGuides.png</file>
+        <file alias="saveJoints.png">icons/builder/saveJoints.png</file>
+        <file alias="savePsd.png">icons/builder/savePsd.png</file>
+        <file alias="saveSkinCluster.png">icons/builder/saveSkinCluster.png</file>
+
+        <file alias="hidden.png">icons/general/hidden.png</file>
+        <file alias="visible.png">icons/general/visible.png</file>
+        <file alias="partiallyVisible.png">icons/general/partiallyVisible.png</file>
+        <file alias="load.png">icons/general/load.png</file>
+        <file alias="save.png">icons/general/save.png</file>
+        <file alias="returnArrow.png">icons/general/returnArrow.png</file>
+
+        <file alias="breakpointChecked.png">icons/general/breakpointChecked.png</file>
+        <file alias="breakpointCheckedPress.png">icons/general/breakpointCheckedPress.png</file>
+        <file alias="breakpointDisabled.png">icons/general/breakpointDisabled.png</file>
+        <file alias="breakpointHover.png">icons/general/breakpointHover.png</file>
+        <file alias="breakpointUnchecked.png">icons/general/breakpointUnchecked.png</file>
+        <file alias="statusGood.png">icons/general/statusGood.png</file>
+
+
+        <file alias="branch.png">icons/git/branch.png</file>
+        <file alias="branchActive.png">icons/git/branchActive.png</file>
+        <file alias="fileAdded.png">icons/git/fileAdded.png</file>
+        <file alias="fileDeleted.png">icons/git/fileDeleted.png</file>
+        <file alias="fileModified.png">icons/git/fileModified.png</file>
+
+
+    </qresource>
+</RCC>

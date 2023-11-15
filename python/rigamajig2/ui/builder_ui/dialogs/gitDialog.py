@@ -12,10 +12,9 @@ import logging
 import os
 
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-from rigamajig2.shared import common
+from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox
 
 logger = logging.getLogger(__name__)
@@ -96,7 +95,7 @@ class GitDialog(mayaDialog.MayaDialog):
         self.repoLabel.setDisabled(True)
 
         self.refreshAllButton = QtWidgets.QPushButton()
-        self.refreshAllButton.setIcon(QtGui.QIcon(":refresh.png"))
+        self.refreshAllButton.setIcon(Resources.getIcon(":refresh.png"))
         self.refreshAllButton.setMaximumSize(20, 20)
         self.refreshAllButton.setFlat(True)
 
@@ -113,7 +112,7 @@ class GitDialog(mayaDialog.MayaDialog):
         self.commitEntry.setFixedHeight(40)
         self.commitEntry.setPlaceholderText("commit message... ")
         self.commitButton = QtWidgets.QPushButton("Commit")
-        self.commitButton.setIcon(QtGui.QIcon(":confirm.png"))
+        self.commitButton.setIcon(Resources.getIcon(":confirm.png"))
 
         # Commit history section
         self.commitHistory = QtWidgets.QListWidget()
@@ -207,20 +206,20 @@ class GitDialog(mayaDialog.MayaDialog):
         # Add the files to the list with appropriate icons (if the head is valid. Otherwise just list untracked files
         if self.repo.head.is_valid():
             for added_file in self.repo.git.diff("HEAD", name_only=True, diff_filter="AM").splitlines():
-                self.addFileToChangelist(added_file, icon="git_file_modified.png")
+                self.addFileToChangelist(added_file, icon=":fileModified.png")
 
             for deleted_file in self.repo.git.diff("HEAD", name_only=True, diff_filter="D").splitlines():
-                self.addFileToChangelist(deleted_file, icon="git_file_deleted.png")
+                self.addFileToChangelist(deleted_file, icon=":fileDeleted.png")
 
         # Also add any untracked files
         untrackedFiles = self.repo.untracked_files
         for untracked_file in untrackedFiles:
-            self.addFileToChangelist(untracked_file, icon="git_file_add.png")
+            self.addFileToChangelist(untracked_file, icon=":fileAdded.png")
 
     def addFileToChangelist(self, file, icon):
         item = QtWidgets.QListWidgetItem(file)
         item.setSizeHint(QtCore.QSize(0, ITEM_HEIGHT))  # set height
-        item.setIcon(QtGui.QIcon(common.getIcon(icon)))  # Replace with your added file icon path
+        item.setIcon(Resources.getIcon(icon))  # Replace with your added file icon path
 
         differences = self.getDifferencesBetweenLocalAndHead(file)
 
@@ -269,10 +268,10 @@ class GitDialog(mayaDialog.MayaDialog):
             commitItem.setToolTip("\n".join(commit.stats.files))  # Set tooltip with list of files changed
             if commit == current_commit:
                 # Use a special icon or marker for the currently active commit
-                commitItem.setIcon(QtGui.QIcon(common.getIcon("active_branch_icon.png")))
+                commitItem.setIcon(Resources.getIcon(":branchActive.png"))
             else:
                 # Use a regular commit icon
-                commitItem.setIcon(QtGui.QIcon(common.getIcon("branch_icon.png")))
+                commitItem.setIcon(Resources.getIcon(":branch.png"))
             self.commitHistory.addItem(commitItem)
 
     def commitChanges(self):
@@ -327,10 +326,10 @@ class GitDialog(mayaDialog.MayaDialog):
 
         menu = QtWidgets.QMenu(self.commitHistory)
         revertAction = QtWidgets.QAction(" Hard Revert to Commit", self)
-        revertAction.setIcon(QtGui.QIcon(":undo_s.png"))
+        revertAction.setIcon(Resources.getIcon(":undo_s.png"))
 
         softRevertAction = QtWidgets.QAction("Soft Revert to Commit", self)
-        softRevertAction.setIcon(QtGui.QIcon(":undo_s.png"))
+        softRevertAction.setIcon(Resources.getIcon(":undo_s.png"))
         # Extract commit ID
         softRevertAction.triggered.connect(lambda: self.revertToCommit(item.text().split()[0], mode="soft"))
         revertAction.triggered.connect(lambda: self.revertToCommit(item.text().split()[0], mode="hard"))
@@ -345,16 +344,16 @@ class GitDialog(mayaDialog.MayaDialog):
 
         menu = QtWidgets.QMenu(self.filesChangedList)
         revertFileAction = QtWidgets.QAction("Revert", self)
-        revertFileAction.setIcon(QtGui.QIcon(":undo_s.png"))
+        revertFileAction.setIcon(Resources.getIcon(":undo_s.png"))
 
         printDiffAction = QtWidgets.QAction("Print Diff to Script Editor", self)
-        printDiffAction.setIcon(QtGui.QIcon(":list.svg"))
+        printDiffAction.setIcon(Resources.getIcon(":list.svg"))
 
         addFileToGitIgnore = QtWidgets.QAction("Add File to .gitignore", self)
-        addFileToGitIgnore.setIcon(QtGui.QIcon(":nodeGrapherClose.png"))
+        addFileToGitIgnore.setIcon(Resources.getIcon(":nodeGrapherClose.png"))
 
         addDirToGitIgnore = QtWidgets.QAction("Add Dir to .gitignore", self)
-        addDirToGitIgnore.setIcon(QtGui.QIcon(":nodeGrapherClose.png"))
+        addDirToGitIgnore.setIcon(Resources.getIcon(":nodeGrapherClose.png"))
 
         revertFileAction.triggered.connect(lambda: self.revertSingleFile(items))
         printDiffAction.triggered.connect(lambda: self.getDifferencesBetweenLocalAndHead(item.text(), printIt=True))

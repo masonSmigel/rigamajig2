@@ -5,10 +5,10 @@ import os
 
 import maya.cmds as cmds
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 from rigamajig2.ui import showInFolder
+from rigamajig2.ui.resources import Resources
 
 
 class PathSelector(QtWidgets.QWidget):
@@ -52,13 +52,15 @@ class PathSelector(QtWidgets.QWidget):
         self.pathLineEdit.setPlaceholderText("path/to/file/or/folder")
         self.pathLineEdit.editingFinished.connect(self.emitPathUpdatedSignal)
 
-        self.selectPathButton = QtWidgets.QPushButton("...")
+        self.selectPathButton = QtWidgets.QPushButton()
+        self.selectPathButton.setIcon(Resources.getIcon(":returnArrow.png"))
         self.selectPathButton.setFixedSize(24, 19)
         self.selectPathButton.setToolTip(self.caption)
         self.selectPathButton.setFlat(True)
         self.selectPathButton.clicked.connect(self.pickPath)
 
-        self.showInFolderButton = QtWidgets.QPushButton(QtGui.QIcon(":fileOpen.png"), "")
+        self.showInFolderButton = QtWidgets.QPushButton()
+        self.showInFolderButton.setIcon(Resources.getIcon(":fileOpen.png"))
         self.showInFolderButton.setFixedSize(24, 19)
         self.showInFolderButton.setToolTip("Show in Folder")
         self.showInFolderButton.setFlat(True)

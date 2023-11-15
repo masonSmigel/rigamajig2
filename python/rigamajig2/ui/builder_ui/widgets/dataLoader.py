@@ -25,6 +25,7 @@ from rigamajig2.maya.builder import dataManager
 from rigamajig2.maya.data import abstractData
 from rigamajig2.shared import common
 from rigamajig2.ui import showInFolder
+from rigamajig2.ui.resources import Resources
 
 logger = logging.getLogger(__name__)
 
@@ -101,27 +102,27 @@ class DataLoader(QtWidgets.QWidget):
 
     def createActions(self):
         self.loadSelectedDataAction = QtWidgets.QAction("Load Selected", self)
-        self.loadSelectedDataAction.setIcon(QtGui.QIcon(":newLayerEmpty.png"))
+        self.loadSelectedDataAction.setIcon(Resources.getIcon(":newLayerEmpty.png"))
         self.loadSelectedDataAction.triggered.connect(self.loadSelectedData)
 
         self.saveSelectedAction = QtWidgets.QAction("Save Selected", self)
-        self.saveSelectedAction.setIcon(QtGui.QIcon(":save.png"))
+        self.saveSelectedAction.setIcon(Resources.getIcon(":save.png"))
         self.saveSelectedAction.triggered.connect(self.saveSelectedData)
 
         self.showInFolderAction = QtWidgets.QAction("Show in Folder", self)
-        self.showInFolderAction.setIcon(QtGui.QIcon(":fileOpen.png"))
+        self.showInFolderAction.setIcon(Resources.getIcon(":fileOpen.png"))
         self.showInFolderAction.triggered.connect(self.showInFolder)
 
         self.openFileAction = QtWidgets.QAction("Open Data", self)
-        self.openFileAction.setIcon(QtGui.QIcon(":openScript.png"))
+        self.openFileAction.setIcon(Resources.getIcon(":openScript.png"))
         self.openFileAction.triggered.connect(self.openScript)
 
         self.addExistingAction = QtWidgets.QAction("Add Existing Data", self)
-        self.addExistingAction.setIcon(QtGui.QIcon(":newPreset.png"))
+        self.addExistingAction.setIcon(Resources.getIcon(":newPreset.png"))
         self.addExistingAction.triggered.connect(self.pickPath)
 
         self.deleteFileAction = QtWidgets.QAction("Remove Data", self)
-        self.deleteFileAction.setIcon(QtGui.QIcon(":trash.png"))
+        self.deleteFileAction.setIcon(Resources.getIcon(":trash.png"))
         self.deleteFileAction.triggered.connect(self.deleteSelectedItems)
 
     def createWidgets(self):
@@ -153,19 +154,19 @@ class DataLoader(QtWidgets.QWidget):
         self.addPathButtton.setToolTip(self.caption)
         self.addPathButtton.setFlat(True)
 
-        self.showInFolderButton = QtWidgets.QPushButton(QtGui.QIcon(":fileOpen.png"), "")
+        self.showInFolderButton = QtWidgets.QPushButton(Resources.getIcon(":fileOpen.png"), "")
         self.showInFolderButton.setFixedSize(19, 19)
         self.showInFolderButton.setToolTip("Show in Folder")
         self.showInFolderButton.setFlat(True)
 
         # expand and contract buttons
         self.expandWidgetButton = QtWidgets.QPushButton()
-        self.expandWidgetButton.setIcon(QtGui.QIcon(":nodeGrapherArrowDown.png"))
+        self.expandWidgetButton.setIcon(Resources.getIcon(":nodeGrapherArrowDown.png"))
         self.expandWidgetButton.setFlat(True)
         self.expandWidgetButton.setFixedSize(15, 10)
         self.expandWidgetButton.setToolTip("Expand Data Loader")
         self.contractWidgetButton = QtWidgets.QPushButton()
-        self.contractWidgetButton.setIcon(QtGui.QIcon(":nodeGrapherArrowUp.png"))
+        self.contractWidgetButton.setIcon(Resources.getIcon(":nodeGrapherArrowUp.png"))
         self.contractWidgetButton.setFlat(True)
         self.contractWidgetButton.setFixedSize(15, 10)
         self.contractWidgetButton.setToolTip("Contract Data Loader")
@@ -215,7 +216,7 @@ class DataLoader(QtWidgets.QWidget):
         menu.addAction(self.addExistingAction)
 
         addNewMenu = QtWidgets.QMenu("Add New Data File")
-        addNewMenu.setIcon(QtGui.QIcon(":addCreateGeneric.png"))
+        addNewMenu.setIcon(Resources.getIcon(":addCreateGeneric.png"))
         for action in self.__getAddEmptyDatatypeActions():
             addNewMenu.addAction(action)
 
@@ -246,7 +247,7 @@ class DataLoader(QtWidgets.QWidget):
             if self.dataFilteringEnabled and dataType not in self.dataFilter:
                 continue
             action = QtWidgets.QAction(dataType, self)
-            action.setIcon(QtGui.QIcon(":fileNew.png"))
+            action.setIcon(Resources.getIcon(":fileNew.png"))
             action.triggered.connect(partial(self.addEmptyFile, dataType))
             actions.append(action)
         return actions
@@ -538,7 +539,7 @@ class DataLoader(QtWidgets.QWidget):
         item.setToolTip(0, tooltipFormatting)
 
         # icon
-        item.setIcon(0, QtGui.QIcon(":fileNew.png"))
+        item.setIcon(0, Resources.getIcon(":fileNew.png"))
 
         # we can set the data of the item to the relative path.
         item.setData(0, QtCore.Qt.UserRole, fileInfo.filePath())

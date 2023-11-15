@@ -34,6 +34,7 @@ from rigamajig2.ui.builder_ui.sections import (
     buildSection,
     publishSection,
 )
+from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import QLine, mayaMessageBox, pathSelector, stateImageWidget
 from rigamajig2.ui.widgets.workspace_control import DockableUI
 
@@ -139,22 +140,22 @@ class BuilderDialog(DockableUI):
             publishSection.PublishSection(self),
         ]
 
-        self.runSelectedButton = QtWidgets.QPushButton(QtGui.QIcon(":execute.png"), "Run Selected")
+        self.runSelectedButton = QtWidgets.QPushButton(Resources.getIcon(":execute.png"), "Run Selected")
         self.runSelectedButton.setToolTip("Run Rig steps up to the break point")
         self.runSelectedButton.setFixedSize(120, 22)
 
-        self.runButton = QtWidgets.QPushButton(QtGui.QIcon(":executeAll.png"), "Run")
+        self.runButton = QtWidgets.QPushButton(Resources.getIcon(":executeAll.png"), "Run")
         self.runButton.setToolTip("Run all build steps.")
         self.runButton.setFixedSize(80, 22)
 
-        self.publishButton = QtWidgets.QPushButton(QtGui.QIcon(":sourceScript.png"), "Publish")
+        self.publishButton = QtWidgets.QPushButton(Resources.getIcon(":sourceScript.png"), "Publish")
         self.publishButton.setToolTip("Publish the rig. This will build the rig and save it.")
         self.publishButton.setFixedSize(80, 22)
 
         self.openScriptEditorButton = QtWidgets.QPushButton()
         self.openScriptEditorButton.setFixedSize(18, 18)
         self.openScriptEditorButton.setFlat(True)
-        self.openScriptEditorButton.setIcon(QtGui.QIcon(":cmdWndIcon.png"))
+        self.openScriptEditorButton.setIcon(Resources.getIcon(":cmdWndIcon.png"))
 
         self.statusLine = QtWidgets.QStatusBar()
 

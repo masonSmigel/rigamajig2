@@ -15,12 +15,12 @@ from functools import partial
 import maya.cmds as cmds
 import maya.mel as mel
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 from rigamajig2.maya import meta
 from rigamajig2.maya.components.base import Base
 from rigamajig2.ui.builder_ui.widgets import mayaListWidget, mayaDictWidget, mayaStringWidget
+from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import mayaDialog
 
 logger = logging.getLogger(__name__)
@@ -69,7 +69,7 @@ class EditComponentDialog(mayaDialog.MayaDialog):
         self.typeLineEdit.setReadOnly(True)
 
         self.selectContainerButton = QtWidgets.QPushButton("Select Container")
-        self.selectContainerButton.setIcon(QtGui.QIcon(":container.svg"))
+        self.selectContainerButton.setIcon(Resources.getIcon(":container.svg"))
 
         self.closeButton = QtWidgets.QPushButton("Close")
 

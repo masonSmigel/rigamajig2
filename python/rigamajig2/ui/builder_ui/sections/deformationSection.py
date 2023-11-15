@@ -11,7 +11,6 @@
 # MAYA
 import maya.cmds as cmds
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 # RIGAMAJIG2
@@ -23,6 +22,7 @@ from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.dialogs import deformationLayerDialog
 from rigamajig2.ui.builder_ui.widgets import builderSection, dataLoader
+from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import pathSelector
 
 
@@ -40,11 +40,11 @@ class DeformationSection(builderSection.BuilderSection):
             fileMode=1)
 
         self.loadDeformLayersButton = QtWidgets.QPushButton("Load Deform Layers")
-        self.loadDeformLayersButton.setIcon(QtGui.QIcon(common.getIcon("loadDeformLayers.png")))
+        self.loadDeformLayersButton.setIcon(Resources.getIcon(":loadDeformLayers.png"))
         self.saveDeformLayersButton = QtWidgets.QPushButton("Save Deform Layers")
-        self.saveDeformLayersButton.setIcon(QtGui.QIcon(common.getIcon("saveDeformLayers.png")))
+        self.saveDeformLayersButton.setIcon(Resources.getIcon(":saveDeformLayers.png"))
         self.manageDeformLayersButton = QtWidgets.QPushButton("Manage")
-        self.manageDeformLayersButton.setIcon(QtGui.QIcon(common.getIcon("manageDeformLayers.png")))
+        self.manageDeformLayersButton.setIcon(Resources.getIcon(":manageDeformLayers.png"))
 
         self.skinPathSelector = pathSelector.PathSelector(
             "skin:",
@@ -52,11 +52,11 @@ class DeformationSection(builderSection.BuilderSection):
             fileFilter=common.JSON_FILTER,
             fileMode=2)
         self.loadAllSkinButton = QtWidgets.QPushButton("Load All Skins")
-        self.loadAllSkinButton.setIcon(QtGui.QIcon(common.getIcon("loadSkincluster.png")))
+        self.loadAllSkinButton.setIcon(Resources.getIcon(":loadSkinCluster.png"))
         self.loadSingleSkinButton = QtWidgets.QPushButton("Load Skin")
-        self.loadSingleSkinButton.setIcon(QtGui.QIcon(common.getIcon("loadSkincluster.png")))
+        self.loadSingleSkinButton.setIcon(Resources.getIcon(":loadSkinCluster.png"))
         self.saveSkinsButton = QtWidgets.QPushButton("Save Skin")
-        self.saveSkinsButton.setIcon(QtGui.QIcon(common.getIcon("saveSkincluster.png")))
+        self.saveSkinsButton.setIcon(Resources.getIcon(":saveSkinCluster.png"))
 
         self.loadDeformLayersButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.saveDeformLayersButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
@@ -77,7 +77,7 @@ class DeformationSection(builderSection.BuilderSection):
         self.skinEditWidget.setDarkPallete()
 
         self.copySkinWeightsButton = QtWidgets.QPushButton("Copy Skin Weights and Influences")
-        self.copySkinWeightsButton.setIcon(QtGui.QIcon(":copySkinWeight"))
+        self.copySkinWeightsButton.setIcon(Resources.getIcon(":copySkinWeight"))
         self.connectBpmsButton = QtWidgets.QPushButton("Connect BPMs on Skins")
 
         self.deformersDataLoader = dataLoader.DataLoader(
@@ -92,12 +92,12 @@ class DeformationSection(builderSection.BuilderSection):
         self.deformersDataLoader.changeTreeWidgetSize(40)
 
         self.saveDeformersButton = QtWidgets.QPushButton("Save Deformer")
-        self.saveDeformersButton.setIcon(QtGui.QIcon(common.getIcon("saveDeformers.png")))
+        self.saveDeformersButton.setIcon(Resources.getIcon(":saveDeformers.png"))
         self.saveDeformersButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.saveDeformersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
         self.loadDeformersButton = QtWidgets.QPushButton("Load Deformers")
-        self.loadDeformersButton.setIcon(QtGui.QIcon(common.getIcon("loadDeformers.png")))
+        self.loadDeformersButton.setIcon(Resources.getIcon(":loadDeformers.png"))
         self.loadDeformersButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.loadDeformersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 

@@ -9,9 +9,9 @@
 
 """
 
-from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
+
+from rigamajig2.ui.resources import Resources
 
 
 class MayaMessageBox(QtWidgets.QMessageBox):
@@ -31,16 +31,15 @@ class MayaMessageBox(QtWidgets.QMessageBox):
         iconToUse = None
 
         if icon == "help":
-            iconToUse = ":helpModal.png"
-        if icon == 'warning':
-            iconToUse = ":warningModal.png"
+            iconToUse = Resources.getIcon(":helpModal.png")
+        if icon == "warning":
+            iconToUse = Resources.getIcon(":warningModal.png")
         if icon == "error":
-            iconToUse = ":errorModal.png"
+            iconToUse = Resources.getIcon(":errorModal.png")
         if icon == "info":
-            iconToUse = ":infoModal.png"
+            iconToUse = Resources.getIcon(":infoModal.png")
 
-        pixmap = QtGui.QIcon(iconToUse).pixmap(QtCore.QSize(64, 64))
-        self.setIconPixmap(pixmap)
+        self.setIconPixmap(Resources.iconToPixmap(iconToUse, size=(64, 64)))
 
     def setInfo(self):
         self.setMayaIcon("info")
@@ -63,7 +62,8 @@ class MayaMessageBox(QtWidgets.QMessageBox):
             QtWidgets.QMessageBox.Save
         """
         self.setStandardButtons(
-            QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel)
+            QtWidgets.QMessageBox.Save | QtWidgets.QMessageBox.Discard | QtWidgets.QMessageBox.Cancel
+        )
         self.setDefaultButton(QtWidgets.QMessageBox.Save)
         self.confirmResultButton = QtWidgets.QMessageBox.Save
 
@@ -85,7 +85,9 @@ class MayaMessageBox(QtWidgets.QMessageBox):
         Must have used setButtonsSaveDiscardCancel or setButtonsYesNoCancel"""
 
         if not self.confirmResultButton:
-            raise ValueError("No default button setup intialized. Please use setButtonsSaveDiscardCancel or setButtonsYesNoCancel")
+            raise ValueError(
+                "No default button setup intialized. Please use setButtonsSaveDiscardCancel or setButtonsYesNoCancel"
+            )
 
         result = self.exec_()
 

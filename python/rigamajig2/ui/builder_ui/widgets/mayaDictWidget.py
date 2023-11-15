@@ -15,9 +15,10 @@ import maya.OpenMayaUI as omui
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
+
+from rigamajig2.ui.resources import Resources
 
 SCRIPT_FILE_FILTER = "Python (*.py) ;; Mel (*.mel)"
 
@@ -80,27 +81,27 @@ class MayaDict(QtWidgets.QWidget):
     def createActions(self):
         """ Create actions"""
         self.addNameAction = QtWidgets.QAction("Add New Item", self)
-        self.addNameAction.setIcon(QtGui.QIcon(":addCreateGeneric.png"))
+        self.addNameAction.setIcon(Resources.getIcon(":addCreateGeneric.png"))
         self.addNameAction.triggered.connect(self.addName)
 
         self.addMayaSelectionAction = QtWidgets.QAction("Add Item from Maya", self)
-        self.addMayaSelectionAction.setIcon(QtGui.QIcon(":addCreateGeneric.png"))
+        self.addMayaSelectionAction.setIcon(Resources.getIcon(":addCreateGeneric.png"))
         self.addMayaSelectionAction.triggered.connect(self.loadMayaSelection)
 
         self.selectInMayaAction = QtWidgets.QAction("Select in Maya", self)
-        self.selectInMayaAction.setIcon(QtGui.QIcon(":selectObject.png"))
+        self.selectInMayaAction.setIcon(Resources.getIcon(":selectObject.png"))
         self.selectInMayaAction.triggered.connect(self.selectInMaya)
 
         self.selectAllInMayaAction = QtWidgets.QAction("Select All in Maya", self)
-        self.selectAllInMayaAction.setIcon(QtGui.QIcon(":selectObject.png"))
+        self.selectAllInMayaAction.setIcon(Resources.getIcon(":selectObject.png"))
         self.selectAllInMayaAction.triggered.connect(self.selectAllInMaya)
 
         self.clearSelectionAction = QtWidgets.QAction("Clear Selection", self)
-        self.clearSelectionAction.setIcon(QtGui.QIcon(":trash.png"))
+        self.clearSelectionAction.setIcon(Resources.getIcon(":trash.png"))
         self.clearSelectionAction.triggered.connect(self.clearSelection)
 
         self.clearAllAction = QtWidgets.QAction("Clear All", self)
-        self.clearAllAction.setIcon(QtGui.QIcon(":trash.png"))
+        self.clearAllAction.setIcon(Resources.getIcon(":trash.png"))
         self.clearAllAction.triggered.connect(self.clearAll)
 
     def createWidgets(self):

@@ -14,8 +14,6 @@ from PySide2.QtCore import Qt
 from PySide2.QtGui import QPixmap
 from PySide2.QtWidgets import QWidget, QLabel, QVBoxLayout
 
-from rigamajig2.shared import common
-
 
 class State(Enum):
     GOOD = "good"
@@ -29,7 +27,7 @@ class StateImageWidget(QWidget):
         self.imageSize = image_size
 
         self.stateImages = {
-            State.GOOD: common.getIcon("statusGood.png"),
+            State.GOOD: ":statusGood.png",
             State.WARNING: ":warningModal.png",
             State.ERROR: ":errorModal.png",
         }

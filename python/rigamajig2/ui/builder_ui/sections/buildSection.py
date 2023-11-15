@@ -10,7 +10,6 @@
 
 # PYTHON
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 from rigamajig2.maya.builder import dataIO
@@ -20,6 +19,7 @@ from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import dataLoader, builderSection, scriptRunner
+from rigamajig2.ui.resources import Resources
 
 
 class BuildSection(builderSection.BuilderSection):
@@ -46,9 +46,9 @@ class BuildSection(builderSection.BuilderSection):
             dataFilter=["PSDData"])
 
         self.loadPsdButton = QtWidgets.QPushButton("Load Pose Readers")
-        self.loadPsdButton.setIcon(QtGui.QIcon(common.getIcon("loadPsd.png")))
+        self.loadPsdButton.setIcon(Resources.getIcon(":loadPsd.png"))
         self.savePsdButton = QtWidgets.QPushButton("Save Pose Readers")
-        self.savePsdButton.setIcon(QtGui.QIcon(common.getIcon("loadPsd.png")))
+        self.savePsdButton.setIcon(Resources.getIcon(":savePsd.png"))
 
         self.loadPsdButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.savePsdButton.setFixedHeight(style.LARGE_BTN_HEIGHT)

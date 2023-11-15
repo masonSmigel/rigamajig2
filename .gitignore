@@ -4,5 +4,5 @@
 .DS_Store
 
 # User
-icons/afdesign
 logs/
+resources/afdesign/

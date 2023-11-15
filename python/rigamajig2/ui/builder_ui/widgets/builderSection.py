@@ -13,7 +13,7 @@ from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 # RIGAMAJIG2
-from rigamajig2.shared import common
+from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import collapseableWidget
 
 breakpointStylesheet = (f"""
@@ -27,27 +27,27 @@ breakpointStylesheet = (f"""
                     }}
 
                     QCheckBox::indicator:unchecked {{
-                        image: url({common.ICONS_PATH}/breakpoint_unchecked.png);
+                        image: url(:breakpointUnchecked.png);
                     }}
 
                     QCheckBox::indicator:unchecked:hover {{
-                        image: url({common.ICONS_PATH}/breakpoint_hover.png);
+                        image: url(:breakpointHover.png);
                     }}
 
                     QCheckBox::indicator:unchecked:pressed {{
-                        image: url({common.ICONS_PATH}/breakpoint_checkedPress.png);
+                        image: url(:breakpointCheckedPress.png);
                     }}
 
                     QCheckBox::indicator:checked {{
-                        image: url({common.ICONS_PATH}/breakpoint_checked.png);
+                        image: url(:breakpointChecked.png);
                     }}
 
                     QCheckBox::indicator:checked:hover {{
-                        image: url({common.ICONS_PATH}/breakpoint_checked.png);
+                        image: url(:breakpointChecked.png);
                     }}
 
                     QCheckBox::indicator:checked:pressed {{
-                        image: url({common.ICONS_PATH}/breakpoint_checkedPress.png);
+                        image: url(:breakpointCheckedPress.png);
                     }}
                     """)
 
@@ -65,7 +65,7 @@ class BuilderHeader(collapseableWidget.CollapsibleWidget):
             self.headerWidget.checkbox.setStyleSheet(breakpointStylesheet)
 
         self.runWidgetButton = QtWidgets.QPushButton()
-        self.runWidgetButton.setIcon(QtGui.QIcon(":timestart.png"))
+        self.runWidgetButton.setIcon(Resources.getIcon(":timestart.png"))
         self.runWidgetButton.setFlat(True)
         self.runWidgetButton.setFixedSize(QtCore.QSize(16, 16))
 

@@ -8,10 +8,8 @@
     description: 
 
 """
-# MAYA
 import maya.cmds as cmds
 from PySide2 import QtCore
-from PySide2 import QtGui
 from PySide2 import QtWidgets
 
 import rigamajig2.maya.curve
@@ -19,10 +17,10 @@ import rigamajig2.maya.rig.control
 from rigamajig2.maya import meta
 from rigamajig2.maya.builder import dataIO
 from rigamajig2.maya.builder.constants import CONTROL_SHAPES
-# RIGAMAJIG2
 from rigamajig2.shared import common
 from rigamajig2.ui.builder_ui import style
 from rigamajig2.ui.builder_ui.widgets import dataLoader, builderSection, overrideColorer
+from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import QPushButton, mayaMessageBox
 
 
@@ -47,12 +45,12 @@ class ControlsSection(builderSection.BuilderSection):
         self.loadColorCheckBox.setChecked(True)
         self.loadColorCheckBox.setFixedWidth(25)
         self.loadControlsButton = QtWidgets.QPushButton("Load Controls")
-        self.loadControlsButton.setIcon(QtGui.QIcon(common.getIcon("loadControls.png")))
+        self.loadControlsButton.setIcon(Resources.getIcon(":loadControls.png"))
         self.loadControlsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.loadControlsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
         self.saveControlsButton = QPushButton.RightClickableButton("Save Controls")
-        self.saveControlsButton.setIcon(QtGui.QIcon(common.getIcon("saveControls.png")))
+        self.saveControlsButton.setIcon(Resources.getIcon(":saveControls.png"))
         self.saveControlsButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
         self.saveControlsButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
         self.saveControlsButton.setToolTip(
@@ -72,7 +70,7 @@ class ControlsSection(builderSection.BuilderSection):
         self.mirrorControlModeComboBox.addItem("replace")
         self.mirrorControlModeComboBox.addItem("match")
         self.mirrorControlButton = QtWidgets.QPushButton("Mirror")
-        self.mirrorControlButton.setIcon(QtGui.QIcon(common.getIcon("mirrorControls.png")))
+        self.mirrorControlButton.setIcon(Resources.getIcon(":mirrorControls.png"))
 
         self.controlColorOverrideColor = overrideColorer.OverrideColorer()
 

@@ -5,10 +5,10 @@ from collections import OrderedDict
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
 
-import rigamajig2.maya.decorators
-import rigamajig2.maya.openMayaUtils as openMayaUtils
-import rigamajig2.maya.shape as shape
-import rigamajig2.shared.common as common
+from rigamajig2.maya import general
+from rigamajig2.maya import shape
+from rigamajig2.maya.decorators import oneUndo, preserveSelection
+from rigamajig2.shared import common
 
 logger = logging.getLogger(__name__)
 
@@ -184,7 +184,7 @@ def getClosestParameter(curve, position, world=True):
     if not isinstance(position, (list, tuple)):
         position = cmds.xform(position, q=True, ws=True, t=True)
 
-    dagPath = openMayaUtils.getDagPath(curve)
+    dagPath = general.getDagPath(curve)
     dagPath.extendToShape()
     mFnNurbsCurve = om2.MFnNurbsCurve(dagPath)
 
@@ -276,8 +276,8 @@ def wipeCurveShape(curve):
             cmds.delete(shape)
 
 
-@rigamajig2.maya.decorators.oneUndo
-@rigamajig2.maya.decorators.preserveSelection
+@oneUndo
+@preserveSelection
 def copyShape(source, destinations):
     """
     copy the shapes on the shapes nodes of the source to the desination nodes
@@ -324,8 +324,8 @@ def copyShape(source, destinations):
             cmds.delete(curveTrs)
 
 
-@rigamajig2.maya.decorators.oneUndo
-@rigamajig2.maya.decorators.preserveSelection
+@oneUndo
+@preserveSelection
 def mirror(curves, axis='x', mode='replace'):
     """
     Mirror the curve shape from one node to an existionf transform with a matching name.

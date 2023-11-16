@@ -17,25 +17,25 @@ from rigamajig2.maya.builder import builder
 ARCHETYPES_PATH = os.path.abspath(os.path.join(__file__, "../../../", "archetypes"))
 
 
-def testBaseBuild():
+def test_baseBuild():
     file.new(f=True)
     b = builder.Builder(os.path.join(ARCHETYPES_PATH, "base", "base.rig"))
     b.run()
 
 
-def testBipedBuild():
+def test_bipedBuild():
     file.new(f=True)
     b = builder.Builder(os.path.join(ARCHETYPES_PATH, "biped", "biped.rig"))
     b.run()
 
 
-def testPropBuild():
+def test_propBuild():
     file.new(f=True)
     b = builder.Builder(os.path.join(ARCHETYPES_PATH, "prop", "prop.rig"))
     b.run()
 
 
-def testFaceBuild():
+def test_faceBuild():
     file.new(f=True)
     b = builder.Builder(os.path.join(ARCHETYPES_PATH, "face", "face.rig"))
     b.run()

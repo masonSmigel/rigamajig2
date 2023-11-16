@@ -13,7 +13,7 @@ from rigamajig2.maya import file
 from rigamajig2.maya.components import base
 
 
-def testRebuildFromContainer():
+def test_rebuildFromContainer():
     """
     This test will ensure that data is abstractly being maintained when build from the container
     :return:

@@ -6,9 +6,9 @@ import logging
 import maya.api.OpenMayaAnim as oma
 import maya.cmds as cmds
 
-import rigamajig2.maya.attr as attr
-import rigamajig2.maya.openMayaUtils as omu
-import rigamajig2.shared.common as common
+from rigamajig2.maya import attr
+from rigamajig2.maya import general
+from rigamajig2.shared import common
 
 logger = logging.getLogger(__name__)
 
@@ -113,7 +113,7 @@ def createSdk(driverPlug, drivenPlug, values, preInfinity=False, postInfinity=Fa
     animCurveName = '{}_{}_{}_{}_animCurve'.format(driverNode, driverAttr, drivenNode, drivenAttr)
     animCurveNode = cmds.createNode(DEFAULT_SDK_TYPE, n=animCurveName)
 
-    mObject = omu.getMObject(animCurveNode)
+    mObject = general.getMObject(animCurveNode)
     mfnAnimCurve = oma.MFnAnimCurve(mObject)
 
     # connect the driver into the animCurveNode

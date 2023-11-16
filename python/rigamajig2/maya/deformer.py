@@ -8,9 +8,8 @@ import maya.OpenMayaAnim as oma
 import maya.cmds as cmds
 
 import rigamajig2.maya.mesh
-import rigamajig2.maya.openMayaUtils as omu
 import rigamajig2.maya.shape
-import rigamajig2.shared.common as common
+from rigamajig2.shared import common
 
 logger = logging.getLogger(__name__)
 
@@ -300,7 +299,12 @@ def getAffectedGeo(deformer):
 
     affectedObjects = list()
 
-    deformerObj = omu.getOldMObject(deformer)
+    # Use the old method to get an MObject since there is no MfnGeometry filter in om2.
+    selList = om.MSelectionList()
+    selList.add(deformer)
+    deformerObj = om.MObject()
+    selList.getDependNode(0, mObject)
+
     deformFn = oma.MFnGeometryFilter(deformerObj)
 
     outputObjs = om.MObjectArray()

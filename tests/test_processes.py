@@ -26,7 +26,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-def testIsDottedPath():
+def test_isDottedPath():
     """Test if a path is a dotted path"""
 
     for testPath in DOTPATHS:

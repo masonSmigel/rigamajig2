@@ -16,8 +16,8 @@ import maya.cmds as cmds
 
 from rigamajig2.maya import connection
 from rigamajig2.maya import deformer
+from rigamajig2.maya import general
 from rigamajig2.maya import mesh
-from rigamajig2.maya import openMayaUtils as omu
 from rigamajig2.maya import shape
 from rigamajig2.shared import common
 
@@ -129,13 +129,13 @@ def addTarget(
 
     cmds.blendShape(blendshape, edit=True, target=(base, targetIndex, target, 1.0), topologyCheck=topologyCheck)
 
-    targetName = getTargetName(blendshape, target)
-
-    if targetWeight:
-        cmds.setAttr("{}.{}".format(blendshape, targetName), targetWeight)
+    targetName = targetAlias or getTargetName(blendshape, target)
 
     if targetAlias:
         renameTarget(blendshape, target, newName=targetAlias)
+
+    if targetWeight:
+        cmds.setAttr("{}.{}".format(blendshape, targetName), targetWeight)
 
     return "{}.{}".format(blendshape, targetName)
 
@@ -233,7 +233,7 @@ def getBaseGeometry(blendshape: str) -> str:
     if not isBlendshape(blendshape):
         raise Exception("{} is not a blendshape".format(blendshape))
 
-    deformerObj = omu.getMObject(blendshape)
+    deformerObj = general.getMObject(blendshape)
     deformFn = oma.MFnGeometryFilter(deformerObj)
 
     baseObject = deformFn.getOutputGeometry()
@@ -251,12 +251,12 @@ def getBaseIndex(blendshape: str, base: str) -> str:
     :return:
     """
     # get the blendshape as a geometry filter
-    deformerObj = omu.getMObject(blendshape)
+    deformerObj = general.getMObject(blendshape)
     deformFn = oma.MFnGeometryFilter(deformerObj)
 
     # get the deforming shape and an mObject for it.
     deformingShape = deformer.getDeformShape(base)
-    deformingShapeMObj = omu.getMObject(deformingShape)
+    deformingShapeMObj = general.getMObject(deformingShape)
 
     return deformFn.indexForOutputShape(deformingShapeMObj)
 

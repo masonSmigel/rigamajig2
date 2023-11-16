@@ -1,31 +1,31 @@
 import os
+from pathlib import Path
 
 import maya.cmds as cmds
 
 import rigamajig2.maya.data.curveData as curve_data
-from rigamajig2.maya.test.mayaTestCase import TestCase
 
 
-class TestCurveData(TestCase):
+def test_saveAndLoad(tmp_path):
+    """
+    Test the import and export of curve data
+    """
+    print(tmp_path)
 
-    def test_save_and_load_data(self):
-        """
-        Test the import and export of curve data
-        """
-        file_path = self.getTempFilename("test_curve_data.json")
-        cmds.circle(n='testCircle')
+    file_path = str(Path(tmp_path) / "testCurveData.json")
+    cmds.circle(name="testCircle")
 
-        d = curve_data.CurveData()
-        d.gatherData('testCircle')
-        d.write(file_path)
-        cmds.delete('testCircle')
+    d = curve_data.CurveData()
+    d.gatherData("testCircle")
+    d.write(file_path)
 
-        self.assertTrue(os.path.exists(file_path))
+    assert os.path.exists(file_path)
 
-        cmds.createNode('transform', n='testCircle')
+    cmds.delete("testCircle")
+    cmds.createNode("transform", name="testCircle")
 
-        d = curve_data.CurveData()
-        d.read(file_path)
-        d.applyData(['testCircle'], create=True)
+    d = curve_data.CurveData()
+    d.read(file_path)
+    d.applyData(["testCircle"], create=True)
 
-        self.assertEqual(True, True)
+    assert True

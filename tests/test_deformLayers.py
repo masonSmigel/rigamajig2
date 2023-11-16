@@ -10,118 +10,120 @@
 """
 
 import maya.cmds as cmds
+import pytest
 
-import rigamajig2.maya.blendshape as blendshape
-import rigamajig2.maya.data.deformLayerData as deformLayer_data
-import rigamajig2.maya.deformer as deformer
-import rigamajig2.maya.rig.deformLayer as deformLayer
-from rigamajig2.maya.test.mayaTestCase import TestCase
+from rigamajig2.maya import blendshape
+from rigamajig2.maya import deformer
+from rigamajig2.maya.data import deformLayerData
+from rigamajig2.maya.rig import deformLayer
+from rigamajig2.shared.pytestUtils import getTempFilePath
+
+EXPECTED_LAYERS = ["d0_pSphere1_layer01", "d1_pSphere1_layer02", "d2_pSphere1_layer03"]
+EXPECTED_BLENDSHAPE_TARGETS = ["target01", "target02", "target03"]
 
 
-class TestDeformLayers(TestCase):
-    EXPECTED_LAYERS = ['d0_pSphere1_layer01', 'd1_pSphere1_layer02', 'd2_pSphere1_layer03']
-    EXPECTED_BLENDSHAPE_TARGETS = ['target01', 'target02', 'target03']
+@pytest.fixture()
+def layerDataFile(tmp_path):
+    return getTempFilePath(tmp_path, filename="deformLayerData.json")
 
-    def setupScene(self):
-        """Setup the inital scene"""
-        cmds.file(new=True, force=True)
-        self.sphere = cmds.polySphere()[0]
-        cmds.delete(self.sphere, constructionHistory=True)
 
-        # create a joint
-        joint = cmds.createNode("joint")
+def setupScene():
+    """Setup the initial scene"""
+    cmds.file(newFile=True, force=True)
+    sphere = cmds.polySphere()[0]
+    cmds.delete(sphere, constructionHistory=True)
 
-        cmds.skinCluster(joint, self.sphere, name="pSphere1_skinCluster")
+    # create a joint
+    joint = cmds.createNode("joint")
 
-        # create a delta mush
-        cmds.deltaMush("pSphere1", name="pSphere1_deltaMush")
+    cmds.skinCluster(joint, sphere, name="pSphere1_skinCluster")
 
-        # create a blendshape
-        blendshapeNode = blendshape.create(self.sphere)
-        blendshape.addEmptyTarget(blendshapeNode, "target01")
-        blendshape.addEmptyTarget(blendshapeNode, "target02")
-        blendshape.addEmptyTarget(blendshapeNode, "target03")
+    # create a delta mush
+    cmds.deltaMush("pSphere1", name="pSphere1_deltaMush")
 
-    def setupDeformLayers(self, filePath):
-        """Setup the deformation layers"""
-        self.setupScene()
+    # create a blendshape
+    blendshapeNode = blendshape.create(sphere)
+    blendshape.addEmptyTarget(blendshapeNode, "target01")
+    blendshape.addEmptyTarget(blendshapeNode, "target02")
+    blendshape.addEmptyTarget(blendshapeNode, "target03")
 
-        # add the deform layers
-        sphereDeformLayers = deformLayer.DeformLayer(self.sphere)
-        sphereDeformLayers.createDeformLayer("layer01")
-        sphereDeformLayers.createDeformLayer("layer02")
-        sphereDeformLayers.createDeformLayer("layer03")
+    return sphere
 
-        # export the data
-        layerDataObj = deformLayer_data.DeformLayerData()
-        layerDataObj.gatherData(self.sphere)
 
-        layerDataObj.write(filePath)
+@pytest.fixture()
+def setupDeformLayers(layerDataFile):
+    """Setup the deformation layers"""
+    sphere = setupScene()
 
-    def testAddDeformationLayers(self):
-        """Test to see if we can add deformation layers"""
-        layerDataFile = self.getTempFilename("deformLayer_data.json")
-        self.setupScene()
-        self.setupDeformLayers(layerDataFile)
+    sphereDeformLayers = deformLayer.DeformLayer(sphere)
+    sphereDeformLayers.createDeformLayer("layer01")
+    sphereDeformLayers.createDeformLayer("layer02")
+    sphereDeformLayers.createDeformLayer("layer03")
 
-        sphereDeformLayers = deformLayer.DeformLayer(self.sphere)
+    layerDataObj = deformLayerData.DeformLayerData()
+    layerDataObj.gatherData(sphere)
+    layerDataObj.write(layerDataFile)
 
-        self.assertEqual(sphereDeformLayers.getDeformationLayers(), self.EXPECTED_LAYERS)
+    return sphere, layerDataFile
 
-    def testExportLayerData(self):
-        """Ensure the deform layer data can be exported """
 
-        layerDataFile = self.getTempFilename("deformLayer_data.json")
+def test_addDeformationLayers(setupDeformLayers):
+    """Test to see if we can add deformation layers"""
+    sphere, layerDataFile = setupDeformLayers
+    sphereDeformLayers = deformLayer.DeformLayer(sphere)
+    assert sphereDeformLayers.getDeformationLayers() == EXPECTED_LAYERS
 
-        self.setupScene()
-        self.setupDeformLayers(layerDataFile)
 
-        layerDataObj = deformLayer_data.DeformLayerData()
-        layerDataObj.gatherData(self.sphere)
+def test_exportLayerData(setupDeformLayers):
+    """Ensure the deform layer data can be exported"""
 
-        # check to make sure the file exists
-        self.assertFileExists(layerDataFile)
-        data = layerDataObj.getData()
+    sphere, layerDataFile = setupDeformLayers
 
-        # check to see if there are 5 keys in the layerData ('dagPath', 'deformLayerGroup' plus 3 deformationLayers)
-        self.assertEqual(len(data[self.sphere].keys()), 5)
+    layerDataObj = deformLayerData.DeformLayerData()
+    layerDataObj.gatherData(sphere)
+    data = layerDataObj.getData()
 
-    def testImportDeformLayerData(self):
-        """Make sure the deform layer data can be imported"""
+    # check to see if there are 5 keys in the layerData ('dagPath', 'deformLayerGroup' plus 3 deformationLayers)
+    assert len(data[sphere].keys()) == 5
 
-        # setup the scene and export the data
-        layerDataFile = self.getTempFilename("deformLayer_data.json")
-        self.setupScene()
-        self.setupDeformLayers(layerDataFile)
 
-        # clear the scene and try to import the layer data.
-        cmds.file(new=True, force=True)
+def test_importDeformLayerData(setupDeformLayers):
+    """Make sure the deform layer data can be imported"""
+    sphere, layerDataFile = setupDeformLayers
+    cmds.file(newFile=True, force=True)
 
-        self.setupScene()
+    # re setup the scene to  test importing the deformLayers
+    setupScene()
 
-        layerDataObj = deformLayer_data.DeformLayerData()
-        layerDataObj.read(layerDataFile)
+    layerDataObj = deformLayerData.DeformLayerData()
+    layerDataObj.read(layerDataFile)
 
-        layerDataObj.applyAllData()
+    layerDataObj.applyAllData()
 
-        self.assertTrue(cmds.objExists("d0_pSphere1_layer01"))
-        self.assertTrue(cmds.objExists("d1_pSphere1_layer02"))
-        self.assertTrue(cmds.objExists("d2_pSphere1_layer03"))
+    assert cmds.objExists("d0_pSphere1_layer01")
+    assert cmds.objExists("d1_pSphere1_layer02")
+    assert cmds.objExists("d2_pSphere1_layer03")
 
-    def testTransferDeformers(self):
-        """ Ensure that deformers can be transfered"""
 
-        self.testImportDeformLayerData()
+def test_transferDeformers(setupDeformLayers):
+    """Ensure that deformers can be transferred"""
 
-        # with logger.DisableLogger():
-        newBlendshape = deformLayer.transferAllDeformerTypes("pSphere1_bshp", "pSphere1", "d2_pSphere1_layer03")
-        newSkincluster = deformLayer.transferAllDeformerTypes("pSphere1_skinCluster", "pSphere1", "d2_pSphere1_layer03")
-        newDeltaMush = deformLayer.transferAllDeformerTypes("pSphere1_deltaMush", "pSphere1", "d2_pSphere1_layer03")
+    test_importDeformLayerData(setupDeformLayers)
 
-        deformerStack = deformer.getDeformerStack("d2_pSphere1_layer03")
+    newBlendshape = deformLayer.transferAllDeformerTypes(
+        deformerName="pSphere1_bshp", sourceGeo="pSphere1", targetGeo="d2_pSphere1_layer03"
+    )
+    newSkincluster = deformLayer.transferAllDeformerTypes(
+        deformerName="pSphere1_skinCluster", sourceGeo="pSphere1", targetGeo="d2_pSphere1_layer03"
+    )
+    newDeltaMush = deformLayer.transferAllDeformerTypes(
+        deformerName="pSphere1_deltaMush", sourceGeo="pSphere1", targetGeo="d2_pSphere1_layer03"
+    )
 
-        # check to see if there are 4 deformers in the deformerStack (3 deformers plus deformLayer input bshp)
-        self.assertEqual(len(deformerStack), 4)
+    deformerStack = deformer.getDeformerStack("d2_pSphere1_layer03")
 
-        # check to see if all blendshapes were transfered
-        self.assertEqual(blendshape.getTargetList(newBlendshape), self.EXPECTED_BLENDSHAPE_TARGETS)
+    # check to see if there are 4 deformers in the deformerStack (3 deformers plus deformLayer input blendhape)
+    assert len(deformerStack) == 4
+
+    # check to see if all blendshapes were transferred
+    assert blendshape.getTargetList(newBlendshape) == EXPECTED_BLENDSHAPE_TARGETS

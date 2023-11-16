@@ -54,7 +54,7 @@ def checkIfOverlapping(geometry):
     if rigamajig2.maya.shape.getType(geometry) != 'mesh':
         return False
 
-    uvComponentList = uvs = cmds.polyListComponentConversion(geometry, toUV=True)
+    uvComponentList = cmds.polyListComponentConversion(geometry, toUV=True)
     overlap = cmds.polyUVOverlap(uvComponentList, overlappingComponents=True) or []
     return True if len(overlap) > 0 else False
 

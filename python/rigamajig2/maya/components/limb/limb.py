@@ -329,8 +329,6 @@ class Limb(rigamajig2.maya.components.base.Base):
         self.ikfk = ikfk.IkFkLimb(self.input[1:4])
         self.ikfk.setGroup(self.name + "_ikfk")
         self.ikfk.create(params=self.paramsHierarchy)
-        self.ikJnts = self.ikfk.getIkJointList()
-        self.fkJnts = self.ikfk.getFkJointList()
 
         cmds.parent(self.ikfk.getGroup(), self.rootHierarchy)
 
@@ -347,7 +345,9 @@ class Limb(rigamajig2.maya.components.base.Base):
         rig_transform.connectOffsetParentMatrix(self.limbSwing.name, self._ikStartTgt)
 
         # connect fk controls to fk joints
-        for ctl, jnt in zip([self.joint1Fk.name, self.joint2Fk.name, self.joint3GimbleFk.name], self.fkJnts):
+        for ctl, jnt in zip(
+            [self.joint1Fk.name, self.joint2Fk.name, self.joint3GimbleFk.name], self.ikfk.getFkJointList()
+        ):
             rig_transform.connectOffsetParentMatrix(ctl, jnt)
             rig_attr.lock(jnt, rig_attr.TRANSFORMS + ["v"])
 
@@ -549,23 +549,21 @@ class Limb(rigamajig2.maya.components.base.Base):
     # --------------------------------------------------------------------------------
     def __createIkFkMatchSetup(self):
         """Setup the ikFKMatching"""
-        wristIkOffset = cmds.createNode("transform", name="{}_ikMatch".format(self.input[3]), p=self.fkJnts[-1])
-        fkJointsMatchList = self.fkJnts[:-1] + [wristIkOffset]
+        wristIkOffset = cmds.createNode(
+            "transform", name=f"{self.input[3]}_ikMatch", parent=self.ikfk.getFkJointList()[-1]
+        )
+        fkJointsMatchList = self.ikfk.getFkJointList()[:-1] + [wristIkOffset]
         rig_transform.matchTransform(self.limbIk.name, wristIkOffset)
         rig_attr.lock(wristIkOffset, ["t", "r", "s", "v"])
 
         # add required data to the ikFkSwitchGroup
-        # give the node that will store the ikfkSwitch attribute
-        meta.createMessageConnection(
-            self.ikfk.getGroup(), fkJointsMatchList, sourceAttr="fkMatchList", destAttr="matchNode"
-        )
-        meta.createMessageConnection(self.ikfk.getGroup(), self.ikJnts, sourceAttr="ikMatchList", destAttr="matchNode")
-        meta.createMessageConnection(
-            self.ikfk.getGroup(), self.fkControls, sourceAttr="fkControls", destAttr="matchNode"
-        )
-        meta.createMessageConnection(
-            self.ikfk.getGroup(), self.ikControls, sourceAttr="ikControls", destAttr="matchNode"
-        )
+        ikfkGroup = self.ikfk.getGroup()
+        ikJointsList = self.ikfk.getIkJointList()
+        meta.createMessageConnection(ikfkGroup, self.ikfkControl.name, sourceAttr="ikfkControl")
+        meta.createMessageConnection(ikfkGroup, fkJointsMatchList, sourceAttr="fkMatchList", destAttr="matchNode")
+        meta.createMessageConnection(ikfkGroup, ikJointsList, sourceAttr="ikMatchList", destAttr="matchNode")
+        meta.createMessageConnection(ikfkGroup, self.fkControls, sourceAttr="fkControls", destAttr="matchNode")
+        meta.createMessageConnection(ikfkGroup, self.ikControls, sourceAttr="ikControls", destAttr="matchNode")
 
     def __connectFkLimbStretch(self, attrHolder, lenTrs):
         """Connect the FK limb stretch"""
@@ -582,12 +580,20 @@ class Limb(rigamajig2.maya.components.base.Base):
         # calculate an inverted rotation to negate the upp twist start.
         # This gives a more natural twist down the limb
         twistMultMatrix, twistDecompose = rigamajig2.maya.node.multMatrix(
-            ["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(self.input[0])],
+            inputs=["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(self.input[0])],
             outputs=[""],
             name="{}_invStartTist".format(uppSpline._startTwist),
         )
         # add in a blendMatrix to allow us to
-        cmds.addAttr(self.paramsHierarchy, ln="uppCounterTwist", at="float", k=True, dv=1, min=0, max=1)
+        cmds.addAttr(
+            self.paramsHierarchy,
+            longName="uppCounterTwist",
+            attributeType="float",
+            keyable=True,
+            defaultValue=1,
+            minValue=0,
+            maxValue=1,
+        )
 
         blendMatrix = cmds.createNode("blendMatrix", name="{}_conterTwist".format(uppSpline._startTwist))
         cmds.connectAttr("{}.matrixSum".format(twistMultMatrix), "{}.target[0].targetMatrix".format(blendMatrix))

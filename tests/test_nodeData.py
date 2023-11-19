@@ -35,7 +35,7 @@ def sourceLocatorData(tmp_path):
 
     cmds.file(force=True, newFile=True)
     # Create a locator and move it somewhere
-    loc = common.getFirstIndex(cmds.spaceLocator(name="loc"))
+    loc = common.getFirst(cmds.spaceLocator(name="loc"))
     cmds.xform(loc, matrix=goalMatrix)
 
     d = nodeData.NodeData()
@@ -56,13 +56,13 @@ def test_exportData(sourceLocatorData, tmp_path):
     assert os.path.exists(file_path)
 
     # Create a new locator and attempt to apply data from it.
-    loc = common.getFirstIndex(cmds.spaceLocator(name="loc"))
+    loc = common.getFirst(cmds.spaceLocator(name="loc"))
     d = nodeData.NodeData()
     d.read(file_path)
     d.applyData(common.toList(loc))
 
     # Check if the new locator matches the source position
-    locatorMatrix = cmds.xform(common.getFirstIndex(loc), query=True, matrix=True)
+    locatorMatrix = cmds.xform(common.getFirst(loc), query=True, matrix=True)
     pytestUtils.assertListsAlmostEqual(locatorMatrix, goalMatrix)
 
 
@@ -74,11 +74,11 @@ def test_importWorldSpace(sourceLocatorData, tmp_path):
     # self.create_source_locator(file_path)
 
     # Create a new locator and attempt to apply data from it.
-    loc = common.getFirstIndex(cmds.spaceLocator(name="loc"))
+    loc = common.getFirst(cmds.spaceLocator(name="loc"))
     d = nodeData.NodeData()
     d.read(file_path)
     d.applyData(common.toList(loc), worldSpace=True)
 
     # Check if the new locator matches the source position
-    locatorMatrix = cmds.xform(common.getFirstIndex(loc), query=True, matrix=True)
+    locatorMatrix = cmds.xform(common.getFirst(loc), query=True, matrix=True)
     pytestUtils.assertListsAlmostEqual(locatorMatrix, goalMatrix)

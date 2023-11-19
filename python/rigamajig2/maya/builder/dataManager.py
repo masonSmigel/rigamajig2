@@ -68,4 +68,4 @@ def createDataClassInstance(dataType=None) -> AbstractDataType:
         raise ValueError(f"Data type {dataType} is not valid. Valid Types are {getDataModules()}")
 
     dataTypeInstance = process.getSubclassesFromModule(moduleObject, classType=abstractData.AbstractData)
-    return common.getFirstIndex(dataTypeInstance)()
+    return common.getFirst(dataTypeInstance)()

@@ -34,7 +34,7 @@ class CurveData(node_data.NodeData):
         :type node: str
         """
         if cmds.nodeType(node) == 'nurbsCurve':
-            node = common.getFirstIndex(cmds.listRelatives(node, p=True))
+            node = common.getFirst(cmds.listRelatives(node, p=True))
         super(CurveData, self).gatherData(node)
 
         # if the node has construction history... delete it

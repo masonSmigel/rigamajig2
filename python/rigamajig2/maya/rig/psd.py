@@ -27,7 +27,7 @@ def getAssociateJoint(node):
         raise RuntimeError("'{}' does not have a pose reader assiciated with it.".format(node))
     if meta.hasTag(node, "poseReader"):
         node = meta.getMessageConnection("{}.poseReaderRoot".format(node))
-        node = common.getFirstIndex(node)
+        node = common.getFirst(node)
 
     return node
 
@@ -85,7 +85,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParen
     # initialize an envornment for our Psds to go to
     initalizePsds()
 
-    joint = common.getFirstIndex(joint)
+    joint = common.getFirst(joint)
     aimJoint = joint
     if not cmds.listRelatives(joint, type="joint"):
         aimJoint = cmds.listRelatives(joint, type="joint", p=True)[0]

@@ -85,7 +85,7 @@ def _createSimpleMatrixConstraintNetwork(driver, driven):
     :param str driven: driven node
     :return: mult matrix, decompose matrix
     """
-    driven = common.getFirstIndex(driven)
+    driven = common.getFirst(driven)
     if cmds.objExists("{}.{}".format(driven, '{}_constraintMm'.format(driver))):
         multMatrix = meta.getMessageConnection('{}.{}'.format(driven, '{}_constraintMm'.format(driver)))
         decomposeMatrix = meta.getMessageConnection('{}.{}'.format(driven, '{}_constraintDcmp'.format(driver)))
@@ -122,7 +122,7 @@ def negate(driver, driven, t=False, r=False, s=False):
     :param bool r: negate the rotation
     :param bool s: negate the scale
     """
-    driver = common.getFirstIndex(driver)
+    driver = common.getFirst(driver)
     drivens = common.toList(driven)
 
     for driven in drivens:

@@ -81,7 +81,7 @@ def getUniqueName(name, side=None, indexPosition=-1):
     :param int indexPosition: where to add the index if one is not found. default is -2 (after the suffix)
     :return: returns a new unique name
     """
-    name = common.getFirstIndex(name)
+    name = common.getFirst(name)
 
     if side:
         name = "{}_{}".format(name, side)

@@ -214,7 +214,7 @@ def toList(values: Any) -> List[Any]:
     return values
 
 
-def getFirstIndex(var: Any) -> Any:
+def getFirst(var: Any) -> Any:
     """
     Return the first index of a list
     :param var: list to get index from
@@ -229,7 +229,7 @@ def getFirstIndex(var: Any) -> Any:
         return var
 
 
-def getLastIndex(var: Any) -> Any:
+def getLast(var: Any) -> Any:
     """
     Return the last index of a list
     :param var: list to get index from

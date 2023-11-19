@@ -22,7 +22,7 @@ def create(node, hierarchy=None, above=True, matchTransform=True, nodeType='tran
     :param str nodeType: Type of node to create
     """
 
-    node = common.getFirstIndex(node)
+    node = common.getFirst(node)
 
     if not cmds.objExists(node):
         logger.error("Node '{}' does not exist. cannot create a hierarchy".format(node))
@@ -120,7 +120,7 @@ class DictHierarchy(object):
         :return: hierarchy dictionary:
         :rtype: dict
         """
-        node = common.getFirstIndex(node)
+        node = common.getFirst(node)
         hierarchyDict = OrderedDict()
 
         def getChildren(n, hierarchyDict):

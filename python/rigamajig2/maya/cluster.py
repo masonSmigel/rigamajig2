@@ -15,7 +15,7 @@ def isCluster(cluster):
     :return: True if Valid. False is invalid.
     :rtype: bool
     """
-    cluster = common.getFirstIndex(cluster)
+    cluster = common.getFirst(cluster)
     if not cmds.objExists(cluster) or not cmds.nodeType(cluster) == 'cluster': return False
     return True
 

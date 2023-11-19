@@ -334,7 +334,7 @@ def createAtObject(name, side=None, shape='circle', orig=True, spaces=False, trs
             "Object {} does not exist. cannot create a control at a transform that doesnt exist".format(xformObj))
         return
 
-    xformObj = common.getFirstIndex(xformObj)
+    xformObj = common.getFirst(xformObj)
 
     position = cmds.xform(xformObj, q=True, ws=True, translation=True)
     controlObj = create(name=name, side=side, shape=shape, orig=orig, spaces=spaces, trs=trs, sdk=sdk,
@@ -472,7 +472,7 @@ def createMeshRivetAtObject(name, mesh, side=None, shape='circle', orig=True, sp
             "Object {} does not exist. cannot create a control at a transform that doesnt exist".format(xformObj))
         return
 
-    xformObj = common.getFirstIndex(xformObj)
+    xformObj = common.getFirst(xformObj)
     position = cmds.xform(xformObj, q=True, ws=True, translation=True)
     controlObj = createMeshRivet(name=name, mesh=mesh, side=side, shape=shape, orig=orig, spaces=spaces, neg=neg,
                                  sdk=sdk, parent=parent, position=position, size=size, rotation=[0, 0, 0],

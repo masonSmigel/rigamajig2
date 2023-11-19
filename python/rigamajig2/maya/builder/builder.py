@@ -90,7 +90,7 @@ class Builder(object):
         :param str filepath: Path to get relative to the rig environment
         """
         if filepath:
-            filepath = common.getFirstIndex(filepath)
+            filepath = common.getFirst(filepath)
             return os.path.realpath(os.path.join(self.rigEnvironment, filepath))
 
     @property

@@ -86,7 +86,7 @@ def hasTag(node, tag, type=None):
     :return: True if node has tag. false if it doesnt.
     :rtype: bool
     """
-    node = common.getFirstIndex(node)
+    node = common.getFirst(node)
 
     if type:
         tag = "{}_{}".format(type, tag)
@@ -177,7 +177,7 @@ def getMessageConnection(dataPlug, silent=True):
         if len(data) > 1:
             return data
         else:
-            return common.getFirstIndex(data)
+            return common.getFirst(data)
     elif not silent:
         raise RuntimeError('Plug "{}" does not exist'.format(dataPlug))
 

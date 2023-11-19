@@ -83,7 +83,7 @@ class SHAPESData(maya_data.MayaData):
 
             # TODO: add a warning about blendshapes connected to nurbs or other geometry types than mesh.
             shape = blendshape.getBaseGeometry(blendshapeNode)
-            mesh = common.getFirstIndex(cmds.listRelatives(shape, type='transform', p=True))
+            mesh = common.getFirst(cmds.listRelatives(shape, type='transform', p=True))
 
             # now we need to save the data we need.
             self._data[blendshapeNode]['mesh'] = mesh

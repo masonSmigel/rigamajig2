@@ -7,6 +7,7 @@ Thanks to:
 Charles Wardlaw: Deformation Layering in Maya’s Parallel GPU World 
 (https://medium.com/@kattkieru/deformation-layering-in-mayas-parallel-gpu-world-15c2e3d66d82)
 """
+from typing import Union, Dict, Tuple, Optional, List
 
 import maya.api.OpenMaya as om
 import maya.api.OpenMayaAnim as oma
@@ -14,10 +15,42 @@ import maya.cmds as cmds
 
 from rigamajig2.maya import deformer
 from rigamajig2.maya import general
-from rigamajig2.shared.common import toList
+from rigamajig2.shared.common import toList, getFirst
 
 
-def isSkinCluster(skinCluster):
+class SurfaceCopyMode:
+    ClosestPoint = "closestPoint"
+    RayCast = "rayCast"
+    ClosestComponent = "closestComponent"
+
+
+class InfluenceCopyMode:
+    ClosestJoint = "closestJoint"
+    ClosestBone = "closestBone"
+    JointLabel = "label"
+    JointName = "name"
+    OneToOne = "oneToOne"
+
+
+class BindMethod:
+    ClosestJoint = 0
+    ClosestInHierarchy = 1
+    HeatMap = 2
+    GeodesicVoxel = 3
+
+
+class NormalizationMode:
+    NoNormalization = 0
+    Interactive = 1
+    Post = 1
+
+
+class WeighDistribution:
+    Distance = 0
+    Neighbors = 1
+
+
+def isSkinCluster(skinCluster: str) -> bool:
     """
     Check if the skincluster is a valid skincluster
 
@@ -34,7 +67,51 @@ def isSkinCluster(skinCluster):
     return True
 
 
-def getAllSkinClusters(obj):
+def createSkinCluster(
+    geometry: str,
+    influences: List[str],
+    skinClusterName: Optional[str] = None,
+    bindMethod=BindMethod.ClosestJoint,
+    smoothWeights: float = 0.0,
+    normalizeWeights: int = NormalizationMode.Interactive,
+    maxInfluences: int = 3,
+    dropoffRate: float = 1.0,
+    weighDistribution=WeighDistribution.Neighbors,
+):
+    """
+    Create a skin cluster
+
+    :param geometry: geometry to skin
+    :param influences: influence joints
+    :param skinClusterName: skin cluster name
+    :param bindMethod: bind method to use (BindMethod)
+    :param smoothWeights: smooth the weights. Value between 0 and 1
+    :param normalizeWeights: weight normalization mode (NormaliationMode)
+    :param maxInfluences: Sets the maximum number of transforms that can influence a point
+    :param dropoffRate:Sets the rate at which the influence of a transform drops as the distance from that transform increases.
+    :param weighDistribution: Sets the weight DistributionMode
+    :return:
+    """
+    if not skinClusterName:
+        skinClusterName = f"{geometry}_skinCluster"
+
+    resultSkinCluster = cmds.skinCluster(
+        influences,
+        geometry,
+        name=skinClusterName,
+        toSelectedBones=True,
+        bindMethod=bindMethod,
+        smoothWeights=smoothWeights,
+        normalizeWeights=normalizeWeights,
+        maximumInfluences=maxInfluences,
+        dropoffRate=dropoffRate,
+        weightDistribution=weighDistribution,
+    )
+
+    return getFirst(resultSkinCluster)
+
+
+def getAllSkinClusters(obj: str) -> List[str]:
     """
     Get a list of all the skinclusters on a target object
 
@@ -50,7 +127,7 @@ def getAllSkinClusters(obj):
     return skins
 
 
-def getSkinCluster(obj):
+def getSkinCluster(obj: str) -> str:
     """
     Get the skincluster connected to this node
 
@@ -71,7 +148,7 @@ def getSkinCluster(obj):
     return skin
 
 
-def getMfnSkin(skinCluster):
+def getMfnSkin(skinCluster: str) -> oma.MFnSkinCluster:
     """
     Get a skin cluster function set from the skin cluster name
 
@@ -102,7 +179,7 @@ def getMfnShape(mesh):
         return om.MFnNurbsCurve(mObj)
 
 
-def getCompleteComponents(shape):
+def getCompleteComponents(shape: Union[str, om.MFnMesh, om.MFnNurbsCurve]) -> om.MFnSingleIndexedComponent:
     """
     Wrapper to get the complete component data from a mesh
 
@@ -130,7 +207,7 @@ def getCompleteComponents(shape):
         return completeComponentData
 
 
-def getWeights(mesh):
+def getWeights(mesh: str) -> Tuple[Dict[str, Dict[int, float]], int]:
     """
     Return a list of all skincluster weights on a mesh
 
@@ -139,7 +216,7 @@ def getWeights(mesh):
     :rtype: list
     """
     meshShape = deformer.getDeformShape(mesh)
-    mesh = cmds.listRelatives(meshShape, p=True)[0]
+    mesh = cmds.listRelatives(meshShape, parent=True)[0]
 
     meshSkin = getSkinCluster(mesh)
     assert meshSkin, "No Skin for mesh {} -- cannot save".format(mesh)
@@ -171,7 +248,7 @@ def getWeights(mesh):
     return weightDict, vertexCount
 
 
-def setWeights(mesh, skincluster, weightDict, compressed=True):
+def setWeights(mesh: str, skincluster: str, weightDict: Dict[str, Dict[int, float]], compressed=True):
     """
     Set the skin cluster weights of a given mesh
 
@@ -194,11 +271,11 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
     numInfluences = len(list(influences))
     numComponentsPerInfluence = int(len(weights) / numInfluences)
 
-    for importedIfluence, wtValues in weightDict.items():
+    for importedInfluence, wtValues in weightDict.items():
         for influence in range(len(influences)):
             influenceName = influences[influence]
             influenceNoNs = influenceName.split(":")[-1]
-            if influenceNoNs == importedIfluence:
+            if influenceNoNs == importedInfluence:
                 if compressed:
                     for i in range(numComponentsPerInfluence):
                         weight = wtValues.get(i) or wtValues.get(str(i)) or 0.0
@@ -210,12 +287,12 @@ def setWeights(mesh, skincluster, weightDict, compressed=True):
     # even though they mostly would not be noticable its safer to manually normalize any drift.
     cmds.skinPercent(skincluster, meshShape, normalize=True)
 
-    # Recache the bind matricies. This is from Charles Wardlaw.
-    # Ensures the skin behaves correctly durring playback
-    cmds.skinCluster(skincluster, e=True, recacheBindMatrices=True)
+    # Recache the bind matrices. This is from Charles Wardlaw.
+    # Ensures the skin behaves correctly during playback
+    cmds.skinCluster(skincluster, edit=True, recacheBindMatrices=True)
 
 
-def getBlendWeights(mesh):
+def getBlendWeights(mesh: str) -> Dict[int, float]:
     """
     Get the DQ blended weights
 
@@ -246,7 +323,7 @@ def getBlendWeights(mesh):
     return weightList
 
 
-def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
+def setBlendWeights(mesh: str, skincluster: str, weightDict: Dict[int, float], compressed: bool = True):
     """
     Set the Blended weights
 
@@ -276,7 +353,7 @@ def setBlendWeights(mesh, skincluster, weightDict, compressed=True):
     skinMfn.setBlendWeights(meshDag, components, blendedWeights)
 
 
-def getMatrixConnections(mesh, attribute="bindPreMatrix"):
+def getMatrixConnections(mesh: str, attribute: str = "bindPreMatrix") -> List[str]:
     """
     Get a list of the the nodes or values set on the prebind matrix of each influence joint
 
@@ -299,7 +376,7 @@ def getMatrixConnections(mesh, attribute="bindPreMatrix"):
     return matrixInputs
 
 
-def getMatrixValues(mesh, attribute="bindPreMatrix"):
+def getMatrixValues(mesh: str, attribute="bindPreMatrix") -> List[List[float]]:
     """
     Get a list of the the nodes or values set on the prebind matrix of each influence joint
 
@@ -322,7 +399,7 @@ def getMatrixValues(mesh, attribute="bindPreMatrix"):
     return matrixValues
 
 
-def setMatrixConnections(skinCluster, connectionsList, attribute="bindPreMatrix"):
+def setMatrixConnections(skinCluster: str, connectionsList: List[str], attribute: str = "bindPreMatrix"):
     """
     Set the preBind Matrix connections of a skin cluster
 
@@ -341,7 +418,7 @@ def setMatrixConnections(skinCluster, connectionsList, attribute="bindPreMatrix"
                 pass
 
 
-def setMatrixValues(skinCluster, valuesList, attribute="bindPreMatrx"):
+def setMatrixValues(skinCluster: str, valuesList: List[List[float]], attribute: str = "bindPreMatrx"):
     """
     Try to set the inital values of all connections for the matrix or bindPreMatrix
     """
@@ -352,7 +429,7 @@ def setMatrixValues(skinCluster, valuesList, attribute="bindPreMatrx"):
             pass
 
 
-def getInfluenceJoints(skinCluster):
+def getInfluenceJoints(skinCluster: str):
     """
     Get the influences of a skin cluster
 
@@ -368,7 +445,7 @@ def getInfluenceJoints(skinCluster):
     return infuenceNameArray
 
 
-def getInfluenceIndex(skinCluster, influence):
+def getInfluenceIndex(skinCluster: str, influence: str):
     """
     Get the index of an influence for a specified skin cluster
 
@@ -386,7 +463,7 @@ def getInfluenceIndex(skinCluster, influence):
     return skinClusterFn.indexForInfluenceObject(influencePath)
 
 
-def transferSkinCluster(sourceMesh, targetMesh, targetSkin):
+def transferSkinCluster(sourceMesh: str, targetMesh: str, targetSkin: str):
     """
     Copy our skinweights for identical meshes. Rather than a typical copy opperation this will rebuild the joint
     matrix connections
@@ -425,7 +502,7 @@ def transferSkinCluster(sourceMesh, targetMesh, targetSkin):
         cmds.setAttr("{}.{}".format(targetSkin, attr), value)
 
 
-def stackSkinCluster(sourceMesh, targetMesh, skinName=None):
+def stackSkinCluster(sourceMesh: str, targetMesh: str, skinName: Optional[str] = None):
     """
     Copy and stack the skincluster from the source mesh to the target mesh
 
@@ -457,7 +534,11 @@ def stackSkinCluster(sourceMesh, targetMesh, skinName=None):
 
 
 def copySkinClusterAndInfluences(
-    sourceMesh, targetMeshes, surfaceMode="closestPoint", influenceMode="closestJoint", uvSpace=False
+    sourceMesh: str,
+    targetMeshes: str,
+    surfaceMode: str = SurfaceCopyMode.ClosestPoint,
+    influenceMode: str = InfluenceCopyMode.ClosestJoint,
+    uvSpace: bool = False,
 ):
     """
     Copy skin cluster and all influences to a target mesh
@@ -480,7 +561,15 @@ def copySkinClusterAndInfluences(
         # if the target does not have a skin cluster create one with the input joints
         if not tgtSkinCluster:
             skinClusterName = tgtMesh + "_skinCluster"
-            tgtSkinCluster = cmds.skinCluster(srcInfluences, tgtMesh, n=skinClusterName, tsb=True, bm=0, sm=0, nw=1)[0]
+            tgtSkinCluster = cmds.skinCluster(
+                srcInfluences,
+                tgtMesh,
+                name=skinClusterName,
+                toSelectedBones=True,
+                bindMethod=BindMethod.ClosestJoint,
+                smoothWeights=0,
+                normalizeWeights=1,
+            )[0]
 
         # otherwise add the missing influences to the skin cluster.
         else:
@@ -495,7 +584,7 @@ def copySkinClusterAndInfluences(
             value = cmds.getAttr("{}.{}".format(srcSkinCluster, attr))
             cmds.setAttr("{}.{}".format(tgtSkinCluster, attr), value)
 
-        kwargs = {"sa": surfaceMode, "ia": influenceMode}
+        kwargs = {"surfaceAssociation": surfaceMode, "influenceAssociation": influenceMode}
         if uvSpace:
             sourceUVSet = cmds.polyUVSet(sourceMesh, q=True, currentUVSet=True)[0]
             DestUvSet = cmds.polyUVSet(tgtMesh, q=True, currentUVSet=True)[0]
@@ -503,13 +592,13 @@ def copySkinClusterAndInfluences(
             kwargs["uv"] = [sourceUVSet, DestUvSet]
 
         # copy the skin weights
-        cmds.copySkinWeights(ss=srcSkinCluster, ds=tgtSkinCluster, nm=True, **kwargs)
+        cmds.copySkinWeights(sourceSkin=srcSkinCluster, destinationSkin=tgtSkinCluster, normalize=True, **kwargs)
         print("weights copied: {}({}) -> {}({})".format(sourceMesh, srcSkinCluster, tgtMesh, tgtSkinCluster))
 
         return tgtSkinCluster
 
 
-def connectExistingBPMs(skinCluster, influences=None):
+def connectExistingBPMs(skinCluster: str, influences: List[str] = None):
     """
     Look for existist bpm nodes and connect them to the appropriate slot of the skincluster.
 

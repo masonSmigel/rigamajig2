@@ -39,8 +39,8 @@ def getSdkNode(driver, driven, type=None):
     else:
         type = common.toList(type)
 
-    driver = common.getFirstIndex(driver)
-    driven = common.getFirstIndex(driven)
+    driver = common.getFirst(driver)
+    driven = common.getFirst(driven)
     sdkSet = set()
     for obj in [driver, driven]:
         if not cmds.objExists(obj):
@@ -65,7 +65,7 @@ def getSdkDriver(sdk):
         return
     connList = cmds.listConnections(sdk, s=True, d=False, p=True, scn=True)
     if connList:
-        return common.getFirstIndex(connList)
+        return common.getFirst(connList)
     else:
         return None
 

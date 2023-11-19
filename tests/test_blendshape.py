@@ -16,15 +16,15 @@ import pytest
 
 from rigamajig2.maya import blendshape
 from rigamajig2.maya.data import blendshapeData
-from rigamajig2.shared.common import getFirstIndex
+from rigamajig2.shared.common import getFirst
 from rigamajig2.shared.pytestUtils import assertAlmostEqual, getTempFilePath
 
 
 @pytest.fixture
 def testScene():
     cmds.file(newFile=True, force=True)
-    sphere = getFirstIndex(cmds.polySphere(constructionHistory=False, name="mySphere"))
-    target = getFirstIndex(cmds.polySphere(constructionHistory=False, name="target"))
+    sphere = getFirst(cmds.polySphere(constructionHistory=False, name="mySphere"))
+    target = getFirst(cmds.polySphere(constructionHistory=False, name="target"))
     cmds.delete(sphere, constructionHistory=True)
 
     # create a blendshape
@@ -138,11 +138,11 @@ def test_importBlendshapeData(testScene, dataPath):
     test_exportBlendshapeData(testScene, dataPath)
 
     cmds.file(newFile=True, force=True)
-    sphere = getFirstIndex(cmds.polySphere(constructionHistory=False, name="mySphere"))
+    sphere = getFirst(cmds.polySphere(constructionHistory=False, name="mySphere"))
 
     data = blendshapeData.BlendshapeData()
     data.read(dataPath)
     data.applyAllData()
 
-    blendshapeNode = getFirstIndex(blendshape.getBlendshapeNodes(sphere))
+    blendshapeNode = getFirst(blendshape.getBlendshapeNodes(sphere))
     assert cmds.objExists(blendshapeNode) and bool(blendshape.getTargetList(blendshapeNode))

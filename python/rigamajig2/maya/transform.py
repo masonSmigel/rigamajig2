@@ -503,7 +503,7 @@ def decomposeRotation(node, twistAxis="x"):
     :param str twistAxis: local axis of the transform.
     :return: Decompose the rotation into separate XYZ rotations
     """
-    node = common.getFirstIndex(node)
+    node = common.getFirst(node)
 
     # add the attributes
     for attr in ["decomposeX", "decomposeY", "decomposeZ"]:

@@ -315,8 +315,8 @@ def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=
             reminder: to get the first target you must first acess the list. ex addTwistJoints[0][0]
     """
 
-    start = common.getFirstIndex(start)
-    end = common.getFirstIndex(end)
+    start = common.getFirst(start)
+    end = common.getFirst(end)
 
     startJnt = "{}_0".format(name)
     cmds.duplicate(start, parentOnly=True, returnRootsOnly=True, name=startJnt)

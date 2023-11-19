@@ -87,7 +87,7 @@ def createComponentClassInstance(componentType: str) -> ComponentType:
         raise ValueError(f"Component type {componentType} is not valid. Valid Types are {componentLookup.keys()}")
 
     componentInstances = process.getSubclassesFromModule(moduleObject, classType=base.BaseComponent)
-    return common.getFirstIndex(componentInstances)
+    return common.getFirst(componentInstances)
 
 
 def getComponentLookupKey(componentType: str, componentLookup: Dict[str, ModuleType]) -> str:

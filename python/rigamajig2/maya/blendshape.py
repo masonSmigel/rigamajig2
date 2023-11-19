@@ -35,7 +35,7 @@ def isBlendshape(blendshape: str) -> bool:
     :return: True if Valid. False is invalid.
     :rtype: bool
     """
-    blendshape = common.getFirstIndex(blendshape)
+    blendshape = common.getFirst(blendshape)
     if not cmds.objExists(blendshape) or not cmds.nodeType(blendshape) == "blendShape":
         return False
     return True
@@ -345,7 +345,7 @@ def getTargetGeo(
     if not targetGeoConn:
         targetGeoConn = [""]
 
-    return common.getFirstIndex(targetGeoConn)
+    return common.getFirst(targetGeoConn)
 
 
 def getTargetIndex(blendshape: str, target: str) -> int:
@@ -440,7 +440,7 @@ def getNextTargetIndex(blendshape):
     if not targetList:
         return 0
 
-    lastIndex = getTargetIndex(blendshape, common.getLastIndex(targetList))
+    lastIndex = getTargetIndex(blendshape, common.getLast(targetList))
     nextIndex = lastIndex + 1
 
     return nextIndex
@@ -525,7 +525,7 @@ def setWeights(blendshape: str, weights: Dict[str, Dict[int, float]], targets: L
     if not targets:
         targets = getTargetList(blendshape) + ["baseWeights"]
     if not geometry:
-        geometry = common.getFirstIndex(cmds.blendShape(blendshape, query=True, geometry=True))
+        geometry = common.getFirst(cmds.blendShape(blendshape, query=True, geometry=True))
 
     targets = common.toList(targets)
 
@@ -859,7 +859,7 @@ def transferBlendshape(
         cmds.setAttr(f"{targetBlendshape}.{target}", targetValue)
 
         if copyConnections:
-            inputTargetConnections = common.getLastIndex(connection.getPlugInput(f"{blendshape}.{target}"))
+            inputTargetConnections = common.getLast(connection.getPlugInput(f"{blendshape}.{target}"))
             if inputTargetConnections:
                 cmds.connectAttr(inputTargetConnections, f"{targetBlendshape}.{target}", force=True)
             outputs = connection.getPlugOutput(f"{blendshape}.{target}")

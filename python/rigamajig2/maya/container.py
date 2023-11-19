@@ -145,7 +145,7 @@ def getContainerFromNode(node: Multiuse) -> str:
     :return : The container that holds the given node
     :rtype: list
     """
-    node = common.getFirstIndex(node)
+    node = common.getFirst(node)
     containerNode = cmds.container(query=True, findContainer=node)
     return containerNode
 
@@ -223,7 +223,7 @@ def addParentAnchor(node, container=None, assetNodeName: str = None):
     :param str container: (Optional)- specify a container to add nodes to if nodes are not in a container
     :param str assetNodeName: (Optional)- alias name for the node attribute in the container
     """
-    node = common.getFirstIndex(node)
+    node = common.getFirst(node)
     if not cmds.objExists(node):
         raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
 
@@ -252,7 +252,7 @@ def addChildAnchor(node, container=None, assetNodeName=None):
     :param container: Optional- specify a container to add nodes to if nodes are not in a container
     :param assetNodeName: (Optional)- alias name for the node attribute in the container
     """
-    node = common.getFirstIndex(node)
+    node = common.getFirst(node)
     if not cmds.objExists(node):
         raise RuntimeError("Node {} does not exist. Cannot publish Node".format(node))
 

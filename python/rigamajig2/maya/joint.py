@@ -28,7 +28,7 @@ def isJoint(joint: str):
     :return: True if Valid. False is invalid.
     :rtype: bool
     """
-    joint = common.getFirstIndex(joint)
+    joint = common.getFirst(joint)
     if not cmds.objExists(joint) or not cmds.nodeType(joint) == "joint":
         return False
     return True
@@ -42,7 +42,7 @@ def isEndJoint(joint: str):
     :return: True if the joint is an end joint
     :rtype: bool
     """
-    joint = common.getFirstIndex(joint)
+    joint = common.getFirst(joint)
     if not isJoint(joint):
         return False
     decendents = cmds.ls(cmds.listRelatives(joint, ad=True) or [], type="joint")
@@ -60,7 +60,7 @@ def isClean(joint: str) -> bool:
     :return: True if the tranforms are clean
     :rtype: bool
     """
-    joint = common.getFirstIndex(joint)
+    joint = common.getFirst(joint)
     dirtyChannels = list()
     for attr in ["{}{}".format(x, y) for x in "tr" for y in "xyz"]:
         if abs(cmds.getAttr("{}.{}".format(joint, attr))) > 0.001:

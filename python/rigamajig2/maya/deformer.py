@@ -29,7 +29,7 @@ def isDeformer(deformer):
     :return: True if Valid. False is invalid.
     :rtype: bool
     """
-    deformer = common.getFirstIndex(deformer)
+    deformer = common.getFirst(deformer)
     if not cmds.objExists(deformer): return False
     if not cmds.nodeType(deformer, i=True).count('weightGeometryFilter'): return False
     return True
@@ -170,7 +170,7 @@ def getDeformerStack(geo, ignoreTypes=None):
     """
 
     ignoreTypes = ignoreTypes or ['tweak']
-    geo = common.getFirstIndex(geo)
+    geo = common.getFirst(geo)
 
     inputs = cmds.ls(cmds.listHistory(geo, pruneDagObjects=True, interestLevel=1), type="geometryFilter")
 
@@ -179,7 +179,7 @@ def getDeformerStack(geo, ignoreTypes=None):
     # we need to filter out any deformers from this list that dont affect the given geo.
     deformShape = getDeformShape(geo)
     for i in inputs:
-        tgtDeformShape = common.getFirstIndex(cmds.deformer(i, q=1, g=1, gi=1))
+        tgtDeformShape = common.getFirst(cmds.deformer(i, q=1, g=1, gi=1))
         if tgtDeformShape != deformShape:
             inputs.remove(i)
 
@@ -198,7 +198,7 @@ def getDeformersForShape(geo, ignoreTypes=None, ignoreTweaks=True):
     """
     ignoreTypes = ignoreTypes or list()
 
-    geo = common.getFirstIndex(geo)
+    geo = common.getFirst(geo)
     result = []
     if ignoreTweaks:
         ignoreTypes += ['tweak']
@@ -233,7 +233,7 @@ def getOrigShape(node):
     :return: orig shape or orig shape output plug
     """
     deformShape = getDeformShape(node)
-    origShape = common.getFirstIndex(cmds.deformableShape(deformShape, originalGeometry=True))
+    origShape = common.getFirst(cmds.deformableShape(deformShape, originalGeometry=True))
 
     origShape = origShape.split(".")[0]
     return origShape
@@ -363,7 +363,7 @@ def getWeights(deformer, geometry=None):
         logger.error("object '{}' is not a deformer".format(deformer))
         return
 
-    if not geometry: geometry = common.getFirstIndex(getAffectedGeo(deformer))
+    if not geometry: geometry = common.getFirst(getAffectedGeo(deformer))
 
     pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
 
@@ -402,7 +402,7 @@ def setWeights(deformer, weights, geometry=None):
         logger.error("object '{}' is not a deformer".format(deformer))
         return
 
-    if not geometry: geometry = common.getFirstIndex(getAffectedGeo(deformer))
+    if not geometry: geometry = common.getFirst(getAffectedGeo(deformer))
     pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
 
     geometryIndex = getGeoIndex(deformer, geometry)

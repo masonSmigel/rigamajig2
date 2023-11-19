@@ -395,7 +395,7 @@ def loadComponentData(builder: _Builder, filepath: str = None) -> None:
     # look through each component and add it to the builder list
     # check before adding it so only one instance of each exists in the list
     for component in componentDataObj.getKeys():
-        instance = common.getFirstIndex(componentDataObj.applyData(component))
+        instance = common.getFirst(componentDataObj.applyData(component))
 
         componentNameList = [component.name for component in builder.componentList]
         if instance.name not in componentNameList:

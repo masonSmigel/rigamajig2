@@ -100,7 +100,7 @@ def exportAnimationClip(mainNode, outputPath=None, upAxis='y', cleanTrsGlobal=Fa
     if not cmds.objExists(mainNode):
         raise Exception("The main node {} does not exist in the scene".format(mainNode))
 
-    mainNode = common.getFirstIndex(mainNode)
+    mainNode = common.getFirst(mainNode)
 
     bind = meta.getMessageConnection("{}.bind".format(mainNode))
     model = meta.getMessageConnection("{}.model".format(mainNode))
@@ -182,7 +182,7 @@ def transferTrsAnimToTrsShot(mainNode):
     :param mainNode:
     :return:
     """
-    mainNode = common.getFirstIndex(mainNode)
+    mainNode = common.getFirst(mainNode)
 
     if not cmds.objExists(mainNode):
         raise Exception("The main node {} does not exist in the scene".format(mainNode))
@@ -223,7 +223,7 @@ def bakeWholeCharacter(mainNode):
     :return:
     """
 
-    mainNode = common.getFirstIndex(mainNode)
+    mainNode = common.getFirst(mainNode)
 
     # get a lsit of all controls
     rigNs = namespace.getNamespace(mainNode)

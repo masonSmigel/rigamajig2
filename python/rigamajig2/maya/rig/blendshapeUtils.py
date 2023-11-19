@@ -46,7 +46,7 @@ def splitBlendshapeTargets(targets: Multiuse, splitMesh: str, splitJoints: Multi
     outputTargets = list()
 
     targets = common.toList(targets)
-    splitMesh = common.getFirstIndex(splitMesh)
+    splitMesh = common.getFirst(splitMesh)
     splitJoints = common.toList(splitJoints)
 
     if skinFile:

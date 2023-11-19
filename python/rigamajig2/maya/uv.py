@@ -49,7 +49,7 @@ def checkIfOverlapping(geometry):
     :param geometry: geometry to check if is overlapping
     :return: True if the mesh has overlapping Uvs False if it does not.
     """
-    geometry = common.getFirstIndex(geometry)
+    geometry = common.getFirst(geometry)
 
     if rigamajig2.maya.shape.getType(geometry) != 'mesh':
         return False
@@ -72,7 +72,7 @@ def transferUvsToRigged(source, targets):
     :param str source: mesh with the uvs to transfer to targets
     :param str targets: mesh(s) to transfer the Uvs to
     """
-    source = common.getFirstIndex(source)
+    source = common.getFirst(source)
     targets = common.toList(targets)
 
     for target in targets:

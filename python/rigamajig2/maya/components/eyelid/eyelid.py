@@ -12,7 +12,6 @@ import logging
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.components.base
 from rigamajig2.maya import attr
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import constrain
@@ -22,6 +21,7 @@ from rigamajig2.maya import mathUtils
 from rigamajig2.maya import meta
 from rigamajig2.maya import node
 from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
 from rigamajig2.maya.rig import control
 from rigamajig2.maya.rig import live
 from rigamajig2.shared import common
@@ -33,7 +33,7 @@ GUIDE_SCALE = 0.2
 WIRE_DROPOFF = 1000
 
 
-class Eyelid(rigamajig2.maya.components.base.Base):
+class Eyelid(base.BaseComponent):
     """
     A realistic eyelid component.
 

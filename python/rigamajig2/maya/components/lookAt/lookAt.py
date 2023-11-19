@@ -3,16 +3,16 @@ Look at Component
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.components.base
-import rigamajig2.maya.joint as joint
-import rigamajig2.maya.mathUtils as mathUtils
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.rig.spaces as spaces
-import rigamajig2.maya.transform as rig_transform
-import rigamajig2.shared.common as common
+from rigamajig2.maya import joint
+from rigamajig2.maya import mathUtils
+from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
+from rigamajig2.maya.rig import control
+from rigamajig2.maya.rig import spaces
+from rigamajig2.shared import common
 
 
-class LookAt(rigamajig2.maya.components.base.Base):
+class LookAt(base.BaseComponent):
     """
     Look at or Aim component.
     All joints within the same component will aim at the same target.
@@ -62,12 +62,12 @@ class LookAt(rigamajig2.maya.components.base.Base):
         """create build guides_hrc"""
         self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
 
-        self._lookAtTgt = rig_control.createGuide("{}_lookAtTgt".format(self.name), parent=self.guidesHierarchy)
-        rig_transform.matchTranslate(self.input[0], self._lookAtTgt)
+        self._lookAtTgt = control.createGuide("{}_lookAtTgt".format(self.name), parent=self.guidesHierarchy)
+        transform.matchTranslate(self.input[0], self._lookAtTgt)
         for input in self.input:
-            inputUpVector = rig_control.createGuide("{}_upVecTgt".format(input), parent=self.guidesHierarchy)
+            inputUpVector = control.createGuide("{}_upVecTgt".format(input), parent=self.guidesHierarchy)
             setattr(self, "_{}_upVecTgt".format(input), inputUpVector)
-            rig_transform.matchTranslate(input, inputUpVector)
+            transform.matchTranslate(input, inputUpVector)
 
     def _initialHierarchy(self):
         """
@@ -75,7 +75,7 @@ class LookAt(rigamajig2.maya.components.base.Base):
         """
         super(LookAt, self)._initialHierarchy()
 
-        self.aimTarget = rig_control.createAtObject(
+        self.aimTarget = control.createAtObject(
             self.aimTargetName,
             spaces=True,
             hideAttrs=["v", "s"],
@@ -90,8 +90,8 @@ class LookAt(rigamajig2.maya.components.base.Base):
         self.lookAtCtlList = list()
         for input in self.input:
             lookAtName = getattr(self, "{}Name".format(input))
-            aimAxis = rig_transform.getAimAxis(input)
-            lookAtControl = rig_control.createAtObject(
+            aimAxis = transform.getAimAxis(input)
+            lookAtControl = control.createAtObject(
                 lookAtName,
                 hideAttrs=["v"],
                 size=self.size,
@@ -104,8 +104,8 @@ class LookAt(rigamajig2.maya.components.base.Base):
             lookAtControl.addTrs("aim")
 
             # postion the control at the end joint. Get the aim vector from the input and mutiply by joint length.
-            translation = mathUtils.scalarMult(rig_transform.getVectorFromAxis(aimAxis), joint.length(input))
-            rig_control.translateShapes(lookAtControl.name, translation)
+            translation = mathUtils.scalarMult(transform.getVectorFromAxis(aimAxis), joint.length(input))
+            control.translateShapes(lookAtControl.name, translation)
 
             self.lookAtCtlList.append(lookAtControl)
 
@@ -116,15 +116,15 @@ class LookAt(rigamajig2.maya.components.base.Base):
         self.upVecObjList = list()
         for input, lookatControl in zip(self.input, self.lookAtCtlList):
             # gather component settings from the container
-            aimVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(input))
-            upVector = rig_transform.getVectorFromAxis(self.upAxis)
+            aimVector = transform.getVectorFromAxis(transform.getAimAxis(input))
+            upVector = transform.getVectorFromAxis(self.upAxis)
             upVectorGuide = getattr(self, "_{}_upVecTgt".format(input))
 
             # create an upvector and aim contraint
             upVectorTrs = cmds.createNode(
                 "transform", name="{}_upVec".format(lookatControl.trs), parent=self.spacesHierarchy
             )
-            rig_transform.matchTranslate(upVectorGuide, upVectorTrs)
+            transform.matchTranslate(upVectorGuide, upVectorTrs)
             self.upVecObjList.append(upVectorTrs)
 
             cmds.aimConstraint(
@@ -139,9 +139,7 @@ class LookAt(rigamajig2.maya.components.base.Base):
 
             # connect the control to input joint
             joint.connectChains(lookatControl.name, input)
-            # rig_transform.connectOffsetParentMatrix(lookAt_ctl[-1], input)
 
-        # Delete the proxy guides_hrc:
         cmds.delete(self.guidesHierarchy)
 
     def _connect(self):
@@ -151,15 +149,15 @@ class LookAt(rigamajig2.maya.components.base.Base):
         # connect the controls to the rig parent. Check if we have a rigParentList to override the default rig parent.
         if len(self.rigParentList) > 0:
             for ctl, rigParent in zip(self.lookAtCtlList, self.rigParentList):
-                rig_transform.connectOffsetParentMatrix(rigParent, ctl.orig, mo=True)
+                transform.connectOffsetParentMatrix(rigParent, ctl.orig, mo=True)
             for upVec, rigParent in zip(self.upVecObjList, self.rigParentList):
-                rig_transform.connectOffsetParentMatrix(rigParent, upVec, mo=True)
+                transform.connectOffsetParentMatrix(rigParent, upVec, mo=True)
 
         elif cmds.objExists(self.rigParent):
             for ctl in self.lookAtCtlList:
-                rig_transform.connectOffsetParentMatrix(self.rigParent, ctl.orig, mo=True)
+                transform.connectOffsetParentMatrix(self.rigParent, ctl.orig, mo=True)
             for upVec in self.upVecObjList:
-                rig_transform.connectOffsetParentMatrix(self.rigParent, upVec, mo=True)
+                transform.connectOffsetParentMatrix(self.rigParent, upVec, mo=True)
 
         spaces.create(self.aimTarget.spaces, self.aimTarget.name, parent=self.spacesHierarchy, defaultName="world")
 

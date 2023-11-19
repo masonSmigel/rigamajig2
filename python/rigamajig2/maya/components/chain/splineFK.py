@@ -10,16 +10,16 @@
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.attr as rig_attr
-import rigamajig2.maya.components.base
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.rig.spaces as spaces
-import rigamajig2.maya.rig.spline as spline
-import rigamajig2.maya.transform as rig_transform
-from rigamajig2.shared import common as common
+from rigamajig2.maya import attr
+from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
+from rigamajig2.maya.rig import control
+from rigamajig2.maya.rig import spaces
+from rigamajig2.maya.rig import spline
+from rigamajig2.shared import common
 
 
-class SplineFK(rigamajig2.maya.components.base.Base):
+class SplineFK(base.BaseComponent):
     """
     Spline fk chain  component.
     This component is made of a longer chain of joints connected through a spline ik handle
@@ -68,8 +68,8 @@ class SplineFK(rigamajig2.maya.components.base.Base):
 
         self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
 
-        pos = rig_transform.getTranslate(self.inputList[0], worldSpace=True)
-        self.upVectorGuide = rig_control.createGuide(self.name + "_upVector", parent=self.guidesHierarchy, position=pos)
+        pos = transform.getTranslate(self.inputList[0], worldSpace=True)
+        self.upVectorGuide = control.createGuide(self.name + "_upVector", parent=self.guidesHierarchy, position=pos)
 
     def _initialHierarchy(self):
         """Build the initial hierarchy"""
@@ -85,7 +85,7 @@ class SplineFK(rigamajig2.maya.components.base.Base):
             if i > 0:
                 parent = self.fkControlList[i - 1].name
                 addSpaces = False
-            fkControl = rig_control.create(
+            fkControl = control.create(
                 self.fkControlName,
                 spaces=addSpaces,
                 hideAttrs=hideAttrs,
@@ -95,7 +95,7 @@ class SplineFK(rigamajig2.maya.components.base.Base):
                 shapeAim="x",
                 shape="square",
             )
-            ikControl = rig_control.create(
+            ikControl = control.create(
                 self.ikControlName,
                 hideAttrs=hideAttrs,
                 size=self.size * 0.5,
@@ -116,16 +116,16 @@ class SplineFK(rigamajig2.maya.components.base.Base):
         self.ikSpline.create(clusters=self.numControls, params=self.paramsHierarchy)
         cmds.parent(self.ikSpline.getGroup(), self.rootHierarchy)
 
-        aimAxis = rig_transform.getAimAxis(self.inputList[0])
-        upAxis = rig_transform.getClosestAxis(self.inputList[0], self.upVectorGuide)
+        aimAxis = transform.getAimAxis(self.inputList[0])
+        upAxis = transform.getClosestAxis(self.inputList[0], self.upVectorGuide)
 
-        aimVector = rig_transform.getVectorFromAxis(aimAxis)
-        upVector = rig_transform.getVectorFromAxis(upAxis)
+        aimVector = transform.getVectorFromAxis(aimAxis)
+        upVector = transform.getVectorFromAxis(upAxis)
 
         # setup the controls
         for i in range(len(self.ikSpline.getClusters())):
             tempObject = cmds.createNode("transform", name="{}_temp_trs".format(self.name))
-            rig_transform.matchTransform(self.ikSpline.getClusters()[i], tempObject)
+            transform.matchTransform(self.ikSpline.getClusters()[i], tempObject)
 
             if i == len(self.ikSpline.getClusters()) - 1:
                 target = self.ikSpline.getClusters()[i - 1]
@@ -147,7 +147,7 @@ class SplineFK(rigamajig2.maya.components.base.Base):
             cmds.delete(const)
 
             # setup the rig connections
-            rig_transform.matchTransform(tempObject, self.fkControlList[i].orig)
+            transform.matchTransform(tempObject, self.fkControlList[i].orig)
             cmds.parent(self.ikSpline.getClusters()[i], self.ikControlList[i].name)
 
             cmds.orientConstraint(self.fkControlList[-1].name, self.ikSpline.getIkJointList()[-1])
@@ -158,10 +158,10 @@ class SplineFK(rigamajig2.maya.components.base.Base):
         cmds.orientConstraint(self.fkControlList[-1].name, self.ikSpline._endTwist, maintainOffset=True)
 
         # setup the ik visibility attribute
-        rig_attr.createAttr(self.fkControlList[0].name, "ikVis", "bool", value=0, keyable=False, channelBox=True)
+        attr.createAttr(self.fkControlList[0].name, "ikVis", "bool", value=0, keyable=False, channelBox=True)
 
         for control in self.ikControls:
-            rig_control.connectControlVisiblity(self.fkControls[0], "ikVis", control)
+            control.connectControlVisiblity(self.fkControls[0], "ikVis", control)
 
         # delete the guides
         cmds.delete(self.guidesHierarchy)
@@ -170,7 +170,7 @@ class SplineFK(rigamajig2.maya.components.base.Base):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(
+            transform.connectOffsetParentMatrix(
                 self.rigParent, self.fkControlList[0].orig, s=False, sh=False, mo=True
             )
 

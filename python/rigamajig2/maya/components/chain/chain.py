@@ -3,16 +3,15 @@ chain component
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.joint
-import rigamajig2.maya.node
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.rig.spaces as spaces
-import rigamajig2.maya.transform as rig_transform
-import rigamajig2.shared.common as common
+from rigamajig2.maya import joint
+from rigamajig2.maya import transform
 from rigamajig2.maya.components import base
+from rigamajig2.maya.rig import control
+from rigamajig2.maya.rig import spaces
+from rigamajig2.shared import common
 
 
-class Chain(base.Base):
+class Chain(base.BaseComponent):
     """
     Fk chain component.
     This is a simple chain component made of only a fk chain.
@@ -57,10 +56,10 @@ class Chain(base.Base):
             self.enabled = False
             return
 
-        self.inputList = rigamajig2.maya.joint.getInbetweenJoints(self.input[0], self.input[1])
+        self.inputList = joint.getInbetweenJoints(self.input[0], self.input[1])
         if not self.inputList:
             raise Exception("Input Joints dont exist")
-        if rigamajig2.maya.joint.isEndJoint(self.inputList[-1]):
+        if joint.isEndJoint(self.inputList[-1]):
             self.inputList.remove(self.inputList[-1])
 
         # setup base names for each joint we want to make controls for
@@ -92,7 +91,7 @@ class Chain(base.Base):
 
             inputBaseName = inputJoint.split("_")[0]
 
-            control = rig_control.createAtObject(
+            fkControl = control.createAtObject(
                 name=inputBaseName + "_fk",
                 side=self.side,
                 spaces=addSpaces,
@@ -106,13 +105,13 @@ class Chain(base.Base):
                 xformObj=self.inputList[i],
             )
 
-            self.fkControlList.append(control)
+            self.fkControlList.append(fkControl)
 
         self.controlsList = [ctl.name for ctl in self.fkControlList]
 
     def _rigSetup(self):
         """Add the rig setup"""
-        rigamajig2.maya.joint.connectChains(self.controlsList, self.inputList)
+        joint.connectChains(self.controlsList, self.inputList)
 
         if self.addBpm:
             # if needed we will add a bind pre matrix joint.
@@ -121,17 +120,17 @@ class Chain(base.Base):
             )
 
             bpmJointName = [x.rsplit("_", 1)[0] + "_bpm" for x in self.inputList]
-            self.bpmJointList = rigamajig2.maya.joint.duplicateChain(
+            self.bpmJointList = joint.duplicateChain(
                 self.inputList, parent=self.bpmHierarchy, names=bpmJointName
             )
 
-            rigamajig2.maya.joint.hideJoints(self.bpmJointList)
+            joint.hideJoints(self.bpmJointList)
 
     def _connect(self):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.fkControlList[0].orig, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.fkControlList[0].orig, mo=True)
 
         if self.addFKSpace:
             spaces.create(self.fkControlList[0].spaces, self.fkControlList[0].name, parent=self.spacesHierarchy)
@@ -143,4 +142,4 @@ class Chain(base.Base):
                 )
 
         if self.addBpm:
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)

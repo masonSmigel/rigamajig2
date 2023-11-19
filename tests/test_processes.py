@@ -80,7 +80,7 @@ def testListSubclasses():
         logger.debug(f"Module Path: {modulePath}")
         module = process.importModuleFromPath(modulePath.resolve())
 
-        subclasses = process.getSubclassesFromModule(module, classType=base.Base)
+        subclasses = process.getSubclassesFromModule(module, classType=base.BaseComponent)
         assert len(subclasses) > 0
 
 

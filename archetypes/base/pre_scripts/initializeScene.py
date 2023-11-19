@@ -1,10 +1,13 @@
 import maya.cmds as cmds
 
-import rigamajig2.maya.file
+from rigamajig2.maya import file
 
-rigamajig2.maya.file.new(f=True)
 
-# setup the camera
-cmds.setAttr('perspShape.focalLength', 55)
+def main():
+    file.new(f=True)
+    cmds.setAttr('perspShape.focalLength', 55)
 
+
+if __name__ == "__main__":
+    main()
 

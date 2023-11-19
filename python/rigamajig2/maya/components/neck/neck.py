@@ -3,22 +3,22 @@ neck component
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.attr as rig_attr
-import rigamajig2.maya.components.base
-import rigamajig2.maya.hierarchy as hierarchy
-import rigamajig2.maya.joint as rig_joint
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.rig.live as live
-import rigamajig2.maya.rig.spaces as spaces
-import rigamajig2.maya.rig.spline as spline
-import rigamajig2.maya.transform as rig_transform
-import rigamajig2.shared.common as common
+from rigamajig2.maya import attr
+from rigamajig2.maya import hierarchy
+from rigamajig2.maya import joint
+from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
+from rigamajig2.maya.rig import control
+from rigamajig2.maya.rig import live
+from rigamajig2.maya.rig import spaces
+from rigamajig2.maya.rig import spline
+from rigamajig2.shared import common
 
 HEAD_PERCENT = 0.7
 
 
 # pylint:disable = too-many-instance-attributes
-class Neck(rigamajig2.maya.components.base.Base):
+class Neck(base.BaseComponent):
     """
     Neck component
     The neck has a head and neck controls.
@@ -64,25 +64,25 @@ class Neck(rigamajig2.maya.components.base.Base):
         self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
 
         neckPos = cmds.xform(self.input[0], q=True, ws=True, t=True)
-        self.neckGuide = rig_control.createGuide(
+        self.neckGuide = control.createGuide(
             self.name + "_neck", side=self.side, parent=self.guidesHierarchy, position=neckPos
         )
-        rig_attr.lockAndHide(self.neckGuide, rig_attr.TRANSLATE + ["v"])
+        attr.lockAndHide(self.neckGuide, attr.TRANSLATE + ["v"])
 
-        self.headGuide = rig_control.createGuide(self.name + "_head", side=self.side, parent=self.guidesHierarchy)
+        self.headGuide = control.createGuide(self.name + "_head", side=self.side, parent=self.guidesHierarchy)
         live.slideBetweenTransforms(self.headGuide, start=self.input[0], end=self.input[-1], defaultValue=HEAD_PERCENT)
-        rig_attr.lock(self.headGuide, rig_attr.TRANSLATE + ["v"])
+        attr.lock(self.headGuide, attr.TRANSLATE + ["v"])
 
         skullPos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
-        self.skullGuide = rig_control.createGuide(
+        self.skullGuide = control.createGuide(
             self.name + "_skull", side=self.side, parent=self.guidesHierarchy, position=skullPos
         )
-        rig_attr.lockAndHide(self.skullGuide, rig_attr.TRANSLATE + ["v"])
+        attr.lockAndHide(self.skullGuide, attr.TRANSLATE + ["v"])
 
     def _initialHierarchy(self):
         super(Neck, self)._initialHierarchy()
 
-        self.neck = rig_control.createAtObject(
+        self.neck = control.createAtObject(
             name=self.neckName,
             side=self.side,
             spaces=True,
@@ -95,7 +95,7 @@ class Neck(rigamajig2.maya.components.base.Base):
             xformObj=self.neckGuide,
         )
 
-        self.head = rig_control.createAtObject(
+        self.head = control.createAtObject(
             name=self.headName,
             side=self.side,
             spaces=True,
@@ -108,7 +108,7 @@ class Neck(rigamajig2.maya.components.base.Base):
             xformObj=self.headGuide,
         )
 
-        self.headGimble = rig_control.createAtObject(
+        self.headGimble = control.createAtObject(
             self.headName + "Gimble",
             self.side,
             hideAttrs=["s", "v"],
@@ -120,7 +120,7 @@ class Neck(rigamajig2.maya.components.base.Base):
             xformObj=self.headGuide,
         )
 
-        self.skull = rig_control.createAtObject(
+        self.skull = control.createAtObject(
             self.skullName,
             self.side,
             hideAttrs=["v"],
@@ -132,7 +132,7 @@ class Neck(rigamajig2.maya.components.base.Base):
             xformObj=self.skullGuide,
         )
 
-        self.headTanget = rig_control.createAtObject(
+        self.headTanget = control.createAtObject(
             name=self.headName + "Tan",
             side=self.side,
             hideAttrs=["r", "s", "v"],
@@ -144,7 +144,7 @@ class Neck(rigamajig2.maya.components.base.Base):
             xformObj=self.skullGuide,
         )
 
-        self.neckTanget = rig_control.createAtObject(
+        self.neckTanget = control.createAtObject(
             name=self.neckName + "Tan",
             side=self.side,
             hideAttrs=["r", "s", "v"],
@@ -165,17 +165,17 @@ class Neck(rigamajig2.maya.components.base.Base):
         cmds.parent(self.ikspline.getGroup(), self.rootHierarchy)
 
         # connect the volume factor and tangents visability attributes
-        rig_attr.addSeparator(self.head.name, "----")
-        rig_attr.createAttr(self.head.name, "volumeFactor", attributeType="float", value=1, minValue=0, maxValue=10)
+        attr.addSeparator(self.head.name, "----")
+        attr.createAttr(self.head.name, "volumeFactor", attributeType="float", value=1, minValue=0, maxValue=10)
         cmds.connectAttr("{}.volumeFactor".format(self.head.name), "{}.volumeFactor".format(self.paramsHierarchy))
 
-        rig_attr.createAttr(self.neck.name, "tangentVis", attributeType="bool", value=1, channelBox=True, keyable=False)
+        attr.createAttr(self.neck.name, "tangentVis", attributeType="bool", value=1, channelBox=True, keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.neck.name), "{}.v".format(self.neckTanget.orig))
-        rig_transform.matchTransform(self.ikspline.getClusters()[1], self.neckTanget.orig)
+        transform.matchTransform(self.ikspline.getClusters()[1], self.neckTanget.orig)
 
-        rig_attr.createAttr(self.head.name, "tangentVis", attributeType="bool", value=1, channelBox=True, keyable=False)
+        attr.createAttr(self.head.name, "tangentVis", attributeType="bool", value=1, channelBox=True, keyable=False)
         cmds.connectAttr("{}.tangentVis".format(self.head.name), "{}.v".format(self.headTanget.orig))
-        rig_transform.matchTransform(self.ikspline.getClusters()[2], self.headTanget.orig)
+        transform.matchTransform(self.ikspline.getClusters()[2], self.headTanget.orig)
 
         # parent clusters to tangent controls
         cmds.parent(self.ikspline.getClusters()[1], self.neckTanget.name)
@@ -184,28 +184,28 @@ class Neck(rigamajig2.maya.components.base.Base):
 
         # connect the skull to the head joint
         self.skullTrs = hierarchy.create(self.skull.name, ["{}_trs".format(self.input[-1])], above=False)[0]
-        rig_transform.matchTransform(self.input[-1], self.skullTrs)
+        transform.matchTransform(self.input[-1], self.skullTrs)
         # delete exising parent constraint
         cmds.delete(cmds.ls(cmds.listConnections("{}.tx".format(self.input[-1])), type="parentConstraint"))
-        rig_joint.connectChains(self.skullTrs, self.input[-1])
+        joint.connectChains(self.skullTrs, self.input[-1])
 
         # connect the orient constraint to the twist controls
         cmds.orientConstraint(self.neck.name, self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.headGimble.name, self.ikspline._endTwist, mo=True)
 
-        rig_transform.connectOffsetParentMatrix(self.neck.name, self.ikspline.getGroup(), mo=True)
+        transform.connectOffsetParentMatrix(self.neck.name, self.ikspline.getGroup(), mo=True)
 
     def _setupAnimAttrs(self):
         # create a visability control for the ikGimble control
-        rig_attr.createAttr(self.head.name, "gimble", attributeType="bool", value=0, keyable=False, channelBox=True)
-        rig_control.connectControlVisiblity(self.head.name, "gimble", controls=self.headGimble.name)
+        attr.createAttr(self.head.name, "gimble", attributeType="bool", value=0, keyable=False, channelBox=True)
+        control.connectControlVisiblity(self.head.name, "gimble", controls=self.headGimble.name)
 
     def _connect(self):
         """Create the connection"""
 
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.neck.orig, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.neck.orig, mo=True)
 
         spaces.create(self.neck.spaces, self.neck.name, parent=self.spacesHierarchy)
         spaces.create(self.head.spaces, self.head.name, parent=self.spacesHierarchy)
@@ -226,5 +226,5 @@ class Neck(rigamajig2.maya.components.base.Base):
             )
 
     def _finalize(self):
-        rig_attr.lock(self.ikspline.getGroup(), rig_attr.TRANSFORMS + ["v"])
-        rig_attr.lockAndHide(self.paramsHierarchy, rig_attr.TRANSFORMS + ["v"])
+        attr.lock(self.ikspline.getGroup(), attr.TRANSFORMS + ["v"])
+        attr.lockAndHide(self.paramsHierarchy, attr.TRANSFORMS + ["v"])

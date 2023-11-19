@@ -18,7 +18,7 @@ from PySide2 import QtCore
 from PySide2 import QtWidgets
 
 from rigamajig2.maya import meta
-from rigamajig2.maya.components.base import Base
+from rigamajig2.maya.components.base import BaseComponent
 from rigamajig2.ui.builder_ui.widgets import mayaListWidget, mayaDictWidget, mayaStringWidget
 from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import mayaDialog
@@ -59,7 +59,7 @@ class EditComponentDialog(mayaDialog.MayaDialog):
 
         self.componentWidgets: typing.List[typing.Tuple[str, QtWidgets.QWidget]] = list()
 
-        self.currentComponent: Base or None = None
+        self.currentComponent: BaseComponent or None = None
 
     def createWidgets(self):
         """ Create Widgets"""
@@ -128,7 +128,7 @@ class EditComponentDialog(mayaDialog.MayaDialog):
         self.selectContainerButton.clicked.connect(self._selectContainer)
         self.closeButton.clicked.connect(self.close)
 
-    def setComponent(self, component: Base) -> None:
+    def setComponent(self, component: BaseComponent) -> None:
         """
         Set the active widget to display and edit the provided component.
 

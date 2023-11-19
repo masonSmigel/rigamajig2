@@ -10,7 +10,6 @@
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.components.base
 from rigamajig2.maya import attr
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import constrain
@@ -21,6 +20,7 @@ from rigamajig2.maya import mathUtils
 from rigamajig2.maya import meta
 from rigamajig2.maya import node
 from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
 from rigamajig2.maya.components.lips import lipsUtil
 from rigamajig2.maya.rig import control
 from rigamajig2.maya.rig import live
@@ -29,7 +29,7 @@ from rigamajig2.shared import common
 GUIDE_SCALE = 0.2
 
 
-class Lips(rigamajig2.maya.components.base.Base):
+class Lips(base.BaseComponent):
     """
     Lips component
 

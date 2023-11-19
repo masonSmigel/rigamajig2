@@ -11,7 +11,6 @@
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.components.lookAt.lookAt
 from rigamajig2.maya import attr
 from rigamajig2.maya import hierarchy
 from rigamajig2.maya import joint
@@ -19,6 +18,7 @@ from rigamajig2.maya import mathUtils
 from rigamajig2.maya import meta
 from rigamajig2.maya import node
 from rigamajig2.maya import transform
+from rigamajig2.maya.components.lookAt import lookAt
 from rigamajig2.maya.rig import control
 from rigamajig2.maya.rig import live
 from rigamajig2.shared import common
@@ -27,7 +27,7 @@ IRIS_PERCENT = 0.9
 PUPIL_PERCENT = 0.8
 
 
-class Eyeballs(rigamajig2.maya.components.lookAt.lookAt.LookAt):
+class Eyeballs(lookAt.LookAt):
     """
     The eyeballs component is a Sublcass of the lookAt component but it has extra options for the iris and pupil scaling
     """

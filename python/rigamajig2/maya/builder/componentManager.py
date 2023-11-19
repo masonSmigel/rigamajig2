@@ -25,7 +25,7 @@ EXCLUDED_FILES = ["__init__.py", "base.py"]
 
 logger = logging.getLogger(__name__)
 
-ComponentType = Type[base.Base]
+ComponentType = Type[base.BaseComponent]
 
 
 def findComponents(path: str = COMPONENTS_PATH) -> Dict[str, ModuleType]:
@@ -47,7 +47,7 @@ def findComponents(path: str = COMPONENTS_PATH) -> Dict[str, ModuleType]:
 
         if filePath.suffix == ".py" and filePath.name not in EXCLUDED_FILES:
             module = process.importModuleFromPath(filePath)
-            components = process.getSubclassesFromModule(module=module, classType=base.Base)
+            components = process.getSubclassesFromModule(module=module, classType=base.BaseComponent)
 
             logger.debug(f"Module:{module}: components: {components}")
 
@@ -86,7 +86,7 @@ def createComponentClassInstance(componentType: str) -> ComponentType:
     if not moduleObject:
         raise ValueError(f"Component type {componentType} is not valid. Valid Types are {componentLookup.keys()}")
 
-    componentInstances = process.getSubclassesFromModule(moduleObject, classType=base.Base)
+    componentInstances = process.getSubclassesFromModule(moduleObject, classType=base.BaseComponent)
     return common.getFirstIndex(componentInstances)
 
 

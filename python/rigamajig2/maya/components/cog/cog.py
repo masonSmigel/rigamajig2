@@ -3,16 +3,16 @@ COG component
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.components.base
-import rigamajig2.maya.constrain as constrain
-import rigamajig2.maya.hierarchy as hierarchy
-import rigamajig2.maya.joint as joint
-import rigamajig2.maya.transform as rig_transform
 from rigamajig2.maya import attr
+from rigamajig2.maya import constrain
+from rigamajig2.maya import hierarchy
+from rigamajig2.maya import joint
+from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
 from rigamajig2.maya.rig import control
 
 
-class Cog(rigamajig2.maya.components.base.Base):
+class Cog(base.BaseComponent):
     """
     Center of gravity (COG) component.
     """
@@ -51,7 +51,7 @@ class Cog(rigamajig2.maya.components.base.Base):
         super(Cog, self)._initialHierarchy()
 
         if len(self.input) >= 1:
-            pos = rig_transform.getTranslate(self.input[0], worldSpace=True)
+            pos = transform.getTranslate(self.input[0], worldSpace=True)
         else:
             pos = (0, 0, 0)
         self.cog = control.create(
@@ -96,7 +96,7 @@ class Cog(rigamajig2.maya.components.base.Base):
         constrain.negate(self.cogPivot.name, self.cogGimble.trs, t=True)
         if self.bindToInput and len(self.input) >= 1:
             self.inputTrs = hierarchy.create(self.cogGimble.name, ["{}_trs".format(self.input[0])], above=False)[0]
-            rig_transform.matchTransform(self.input[0], self.inputTrs)
+            transform.matchTransform(self.input[0], self.inputTrs)
             joint.connectChains(self.inputTrs, self.input[0])
 
     def _setupAnimAttrs(self):

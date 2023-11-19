@@ -26,9 +26,9 @@ def test_rebuildFromContainer():
     rigParent = "thisControl"
     componentTag = None
 
-    sourceComponent = base.Base(name=name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+    sourceComponent = base.BaseComponent(name=name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
 
-    targetComponent = base.Base.fromContainer(sourceComponent.getContainer())
+    targetComponent = base.BaseComponent.fromContainer(sourceComponent.getContainer())
 
     assert targetComponent.name == sourceComponent.name
     assert targetComponent.input == sourceComponent.input

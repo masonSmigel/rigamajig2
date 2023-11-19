@@ -29,7 +29,7 @@ class ComponentData(abstract_data.AbstractData):
         Gather component data from the class
         :param node:
         """
-        if not issubclass(type(node), base.Base):
+        if not issubclass(type(node), base.BaseComponent):
             if container.isContainer(name=node):
                 raise NotImplementedError
             else:

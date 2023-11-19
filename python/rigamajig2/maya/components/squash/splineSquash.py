@@ -11,17 +11,17 @@
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.attr as rig_attr
-import rigamajig2.maya.components.base
-import rigamajig2.maya.joint as joint
-import rigamajig2.maya.mathUtils as mathUtils
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.rig.spline as spline
-import rigamajig2.maya.transform as rig_transform
-import rigamajig2.shared.common as common
+from rigamajig2.maya import attr
+from rigamajig2.maya import joint
+from rigamajig2.maya import mathUtils
+from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
+from rigamajig2.maya.rig import control
+from rigamajig2.maya.rig import spline
+from rigamajig2.shared import common
 
 
-class SplineSquash(rigamajig2.maya.components.base.Base):
+class SplineSquash(base.BaseComponent):
     """
     Squash component.
     This is a simple squash component made of a single joint that will scale
@@ -62,24 +62,24 @@ class SplineSquash(rigamajig2.maya.components.base.Base):
         """Create the build guides"""
         self.guidesHierarchy = cmds.createNode("transform", name='{}_guide'.format(self.name))
 
-        botPos = rig_transform.getTranslate(self.input[0])
-        topPos = rig_transform.getTranslate(self.input[-1])
+        botPos = transform.getTranslate(self.input[0])
+        topPos = transform.getTranslate(self.input[-1])
 
         # get the average postion of the top and bottom positions
         averagePos = mathUtils.scalarMult(mathUtils.addVector(botPos, topPos), 0.5)
 
-        self.botGuide = rig_control.createGuide(self.name + "_bot",
+        self.botGuide = control.createGuide(self.name + "_bot",
                                                 side=self.side,
                                                 parent=self.guidesHierarchy,
                                                 position=botPos,
                                                 )
 
-        self.midGuide = rig_control.createGuide(self.name + "_mid",
+        self.midGuide = control.createGuide(self.name + "_mid",
                                                 side=self.side,
                                                 parent=self.guidesHierarchy,
                                                 position=averagePos,
                                                 )
-        self.topGuide = rig_control.createGuide(self.name + "_end",
+        self.topGuide = control.createGuide(self.name + "_end",
                                                 side=self.side,
                                                 parent=self.guidesHierarchy,
                                                 position=topPos,
@@ -88,17 +88,17 @@ class SplineSquash(rigamajig2.maya.components.base.Base):
     def _initialHierarchy(self):
         """ Build the initial heirarchy"""
         super(SplineSquash, self)._initialHierarchy()
-        self.botControl = rig_control.createAtObject(self.botControlName, side=self.side,
+        self.botControl = control.createAtObject(self.botControlName, side=self.side,
                                                      hideAttrs=['s', 'v'], size=self.size, color='yellow',
                                                      parent=self.controlHierarchy, shape='pyramid', shapeAim='x',
                                                      xformObj=self.botGuide)
 
-        self.midControl = rig_control.createAtObject(self.midControlName, side=self.side,
+        self.midControl = control.createAtObject(self.midControlName, side=self.side,
                                                      hideAttrs=['r', 's', 'v'], size=self.size, color='yellow',
                                                      parent=self.controlHierarchy, shape='diamond', shapeAim='x',
                                                      xformObj=self.midGuide)
 
-        self.topControl = rig_control.createAtObject(self.topControlName, side=self.side,
+        self.topControl = control.createAtObject(self.topControlName, side=self.side,
                                                      hideAttrs=['s', 'v'], size=self.size, color='yellow',
                                                      parent=self.controlHierarchy, shape='pyramid', shapeAim='x',
                                                      xformObj=self.topGuide)
@@ -123,7 +123,7 @@ class SplineSquash(rigamajig2.maya.components.base.Base):
         cmds.orientConstraint(self.topControl.name, self.spline._endTwist, mo=True)
 
         # connect the volume scale attribute to the top control
-        rig_attr.createAttr(self.topControl.name, 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
+        attr.createAttr(self.topControl.name, 'volumeFactor', attributeType='float', value=1, minValue=0, maxValue=10)
         cmds.connectAttr("{}.volumeFactor".format(self.topControl.name), "{}.volumeFactor".format(self.paramsHierarchy))
 
         if self.addBpm:
@@ -140,11 +140,11 @@ class SplineSquash(rigamajig2.maya.components.base.Base):
         :return:
         """
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.botControl.orig, mo=True)
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.midControl.orig, mo=True)
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.topControl.orig, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.botControl.orig, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.midControl.orig, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.topControl.orig, mo=True)
 
             if self.addBpm:
-                rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
+                transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
 
 

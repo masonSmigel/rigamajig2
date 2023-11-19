@@ -3,17 +3,17 @@ squash component
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.attr as rig_attr
-import rigamajig2.maya.components.base
-import rigamajig2.maya.joint as joint
-import rigamajig2.maya.mathUtils as mathUtils
-import rigamajig2.maya.node as node
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.transform as rig_transform
-import rigamajig2.shared.common as common
+from rigamajig2.maya import attr
+from rigamajig2.maya import joint
+from rigamajig2.maya import mathUtils
+from rigamajig2.maya import node
+from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
+from rigamajig2.maya.rig import control
+from rigamajig2.shared import common
 
 
-class SimpleSquash(rigamajig2.maya.components.base.Base):
+class SimpleSquash(base.BaseComponent):
     """
     Squash component.
     This is a simple squash component made of a single joint that will scale
@@ -58,10 +58,10 @@ class SimpleSquash(rigamajig2.maya.components.base.Base):
 
         startPos = mathUtils.addVector(pos, [0, 5, 0])
         endPos = mathUtils.addVector(pos, [0, -5, 0])
-        self.startGuide = rig_control.createGuide(
+        self.startGuide = control.createGuide(
             self.name + "_start", side=self.side, parent=self.guidesHierarchy, position=startPos, rotation=rot
         )
-        self.endGuide = rig_control.createGuide(
+        self.endGuide = control.createGuide(
             self.name + "_end", side=self.side, parent=self.guidesHierarchy, position=endPos, rotation=rot
         )
 
@@ -69,7 +69,7 @@ class SimpleSquash(rigamajig2.maya.components.base.Base):
         """Build the initial hirarchy"""
         super(SimpleSquash, self)._initialHierarchy()
 
-        self.squashStart = rig_control.createAtObject(
+        self.squashStart = control.createAtObject(
             self.startControlName,
             self.side,
             hideAttrs=["r", "s", "v"],
@@ -80,7 +80,7 @@ class SimpleSquash(rigamajig2.maya.components.base.Base):
             shapeAim="x",
             xformObj=self.startGuide,
         )
-        self.squashEnd = rig_control.createAtObject(
+        self.squashEnd = control.createAtObject(
             self.endControlName,
             self.side,
             hideAttrs=["r", "s", "v"],
@@ -102,17 +102,17 @@ class SimpleSquash(rigamajig2.maya.components.base.Base):
         squashJoint = cmds.createNode("joint", n="{}_squash_jnt".format(self.name), p=startJoint)
         endJoint = cmds.createNode("joint", n="{}_end_tgt".format(self.name), p=startJoint)
 
-        rig_transform.matchTransform(self.startGuide, startJoint)
-        rig_transform.matchTransform(self.endGuide, endJoint)
+        transform.matchTransform(self.startGuide, startJoint)
+        transform.matchTransform(self.endGuide, endJoint)
 
         # add parameters
-        volumeFactorAttr = rig_attr.createAttr(
+        volumeFactorAttr = attr.createAttr(
             self.paramsHierarchy, "volumeFactor", "float", value=1, minValue=0, maxValue=10
         )
 
         # orient the joints
         for jnt in [startJoint, endJoint, squashJoint]:
-            rig_transform.matchRotate(self.input[0], jnt)
+            transform.matchRotate(self.input[0], jnt)
 
         joint.toOrientation([startJoint, endJoint, squashJoint])
 
@@ -121,8 +121,8 @@ class SimpleSquash(rigamajig2.maya.components.base.Base):
         cmds.parent(self.ikHandle, self.ikHierarchy)
 
         # connect the ik handle
-        rig_transform.connectOffsetParentMatrix(self.squashEnd.name, self.ikHandle)
-        rig_transform.connectOffsetParentMatrix(self.squashStart.name, startJoint)
+        transform.connectOffsetParentMatrix(self.squashEnd.name, self.ikHandle)
+        transform.connectOffsetParentMatrix(self.squashStart.name, startJoint)
 
         # get the distance
         dcmp = node.decomposeMatrix("{}.worldMatrix".format(self.rootHierarchy), name="{}_scale".format(self.name))
@@ -137,7 +137,7 @@ class SimpleSquash(rigamajig2.maya.components.base.Base):
         )
 
         # set the translation to be half of the distance
-        aimAxis = rig_transform.getAimAxis(startJoint, allowNegative=True)
+        aimAxis = transform.getAimAxis(startJoint, allowNegative=True)
         posFactor = 0.5
         if "-" in aimAxis:
             posFactor = -0.5
@@ -180,9 +180,9 @@ class SimpleSquash(rigamajig2.maya.components.base.Base):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.squashStart.orig, mo=True)
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.squashEnd.orig, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.squashStart.orig, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.squashEnd.orig, mo=True)
 
     def _setupAnimAttrs(self):
-        rig_attr.addSeparator(self.squashEnd.name, "----")
-        rig_attr.driveAttribute("volumeFactor", self.paramsHierarchy, self.squashEnd.name)
+        attr.addSeparator(self.squashEnd.name, "----")
+        attr.driveAttribute("volumeFactor", self.paramsHierarchy, self.squashEnd.name)

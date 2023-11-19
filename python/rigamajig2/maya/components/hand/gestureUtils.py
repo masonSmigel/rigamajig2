@@ -8,16 +8,19 @@
     description:
 
 """
+from typing import List
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.attr as attr
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.sdk as sdk
-import rigamajig2.shared.common as common
+from rigamajig2.maya import attr
+from rigamajig2.maya import sdk
+from rigamajig2.maya.rig import control
+from rigamajig2.shared import common
 
 
-def setupSpreadSdk(controlsList, attrHolder, driverAttr, axis='y', multiplier=1.0):
+def setupSpreadSdk(
+    controlsList: List[str], attrHolder: str, driverAttr: str, axis: str = "y", multiplier: float = 1.0
+) -> None:
     """
     setup the spread on a list of controls.
     the list should contain a list of joints starting with the index finger and extend towards the pinky.
@@ -34,11 +37,11 @@ def setupSpreadSdk(controlsList, attrHolder, driverAttr, axis='y', multiplier=1.
     controlsList = common.toList(controlsList)
 
     if not cmds.objExists("{}.{}".format(attrHolder, driverAttr)):
-        attr.createAttr(attrHolder, driverAttr, attributeType='float', value=0)
+        attr.createAttr(attrHolder, driverAttr, attributeType="float", value=0)
 
     driverPlug = "{}.{}".format(attrHolder, driverAttr)
-    for i, control in enumerate(controlsList):
-        controlObj = rig_control.Control(control)
+    for i, eachControl in enumerate(controlsList):
+        controlObj = control.Control(eachControl)
         targetPlug = "{}.r{}".format(controlObj.sdk, axis)
 
         if i == 0:
@@ -48,16 +51,21 @@ def setupSpreadSdk(controlsList, attrHolder, driverAttr, axis='y', multiplier=1.
         if i == 2:
             value = float(1 * multiplier)
             valueList = [(-1, -value), (0, 0), (1, value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True,
-                          postInfinity=True)
+            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
         if i > 2:
-            value = float(2 * multiplier * (i-2))
+            value = float(2 * multiplier * (i - 2))
             valueList = [(-1, -value), (0, 0), (1, value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True,
-                          postInfinity=True)
+            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
 
 
-def setupCurlSdk(controlsList, attrHolder, driverAttr, axis='z', multiplier=1.0, metaControls=2):
+def setupCurlSdk(
+    controlsList: List[str],
+    attrHolder: str,
+    driverAttr: str,
+    axis: str = "z",
+    multiplier: float = 1.0,
+    metaControls: int = 2,
+) -> None:
     """
     setup the curl controls.
 
@@ -74,11 +82,11 @@ def setupCurlSdk(controlsList, attrHolder, driverAttr, axis='z', multiplier=1.0,
     controlsList = common.toList(controlsList)
 
     if not cmds.objExists("{}.{}".format(attrHolder, driverAttr)):
-        attr.createAttr(attrHolder, driverAttr, attributeType='float', value=0)
+        attr.createAttr(attrHolder, driverAttr, attributeType="float", value=0)
 
     driverPlug = "{}.{}".format(attrHolder, driverAttr)
-    for i, control in enumerate(controlsList):
-        controlObj = rig_control.Control(control)
+    for i, eachControl in enumerate(controlsList):
+        controlObj = control.Control(eachControl)
         targetPlug = "{}.r{}".format(controlObj.sdk, axis)
 
         if i < metaControls:
@@ -94,7 +102,9 @@ def setupCurlSdk(controlsList, attrHolder, driverAttr, axis='z', multiplier=1.0,
             sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
 
 
-def setupFanSdk(controlsList, attrHolder, driverAttr, axis='z', multiplier=1.0):
+def setupFanSdk(
+    controlsList: List[str], attrHolder: str, driverAttr: str, axis: str = "z", multiplier: float = 1.0
+) -> None:
     """
     setup the fan on a list of controls.
     the list should contain a list of joints starting with the index finger and extend towards the pinky.
@@ -111,17 +121,17 @@ def setupFanSdk(controlsList, attrHolder, driverAttr, axis='z', multiplier=1.0):
     controlsList = common.toList(controlsList)
 
     if not cmds.objExists("{}.{}".format(attrHolder, driverAttr)):
-        attr.createAttr(attrHolder, driverAttr, attributeType='float', value=0)
+        attr.createAttr(attrHolder, driverAttr, attributeType="float", value=0)
 
     driverPlug = "{}.{}".format(attrHolder, driverAttr)
-    for i, control in enumerate(controlsList):
-        controlObj = rig_control.Control(control)
+    for i, eachControl in enumerate(controlsList):
+        controlObj = control.Control(eachControl)
         targetPlug = "{}.r{}".format(controlObj.sdk, axis)
 
         if i == 0:
             value = float(1.5 * multiplier)
             valueList = [(-1, -value), (0, 0), (1, value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True,postInfinity=True)
+            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
         if i == 1:
             value = float(0.5 * multiplier)
             valueList = [(-1, -value), (0, 0), (1, value)]
@@ -131,12 +141,14 @@ def setupFanSdk(controlsList, attrHolder, driverAttr, axis='z', multiplier=1.0):
             valueList = [(-1, value), (0, 0), (1, -value)]
             sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
         if i > 2:
-            value = float(1.5 * multiplier * (i-2))
+            value = float(1.5 * multiplier * (i - 2))
             valueList = [(-1, value), (0, 0), (1, -value)]
             sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
 
 
-def setupSimple(controlsList, attrHolder, driverAttr, axis='x', multplier=1.0):
+def setupSimple(
+    controlsList: List[str], attrHolder: str, driverAttr: str, axis: str = "x", multplier: float = 1.0
+) -> None:
     """
     Setup a simple connection
     :param controlsList: list of controls to apply sdk to
@@ -148,25 +160,12 @@ def setupSimple(controlsList, attrHolder, driverAttr, axis='x', multplier=1.0):
     controlsList = common.toList(controlsList)
 
     if not cmds.objExists("{}.{}".format(attrHolder, driverAttr)):
-        attr.createAttr(attrHolder, driverAttr, attributeType='float', value=0)
+        attr.createAttr(attrHolder, driverAttr, attributeType="float", value=0)
 
     driverPlug = "{}.{}".format(attrHolder, driverAttr)
-    for i, control in enumerate(controlsList):
-        control = checkForSDK(control)
-        targetPlug = "{}.r{}".format(control, axis)
+    for i, eachControl in enumerate(controlsList):
+        targetPlug = "{}.r{}".format(eachControl, axis)
 
         value = float(1 * multplier)
         valueList = [(-1, -value), (0, 0), (1, value)]
         sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
-
-
-def checkForSDK(control):
-    """
-    Check if a control has an sdk already. If it doesnt create one.
-    :param control: control object to check for an existing sdk
-    :return: control object
-    """
-    if rig_control.isControl(control):
-        controlObj = rig_control.Control(control)
-        return controlObj.sdk
-    return control

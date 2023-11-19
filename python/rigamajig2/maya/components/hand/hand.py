@@ -3,20 +3,20 @@ hand component
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.attr as rig_attr
-import rigamajig2.maya.components.base
-import rigamajig2.maya.components.chain.chain
-import rigamajig2.maya.components.hand.gestureUtils as gestureUtils
-import rigamajig2.maya.meta as meta
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.rig.spaces as spaces
-import rigamajig2.maya.transform as rig_transform
-import rigamajig2.shared.common as common
+from rigamajig2.maya import attr
+from rigamajig2.maya import meta
+from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
+from rigamajig2.maya.components.chain import chain
+from rigamajig2.maya.components.hand import gestureUtils
+from rigamajig2.maya.rig import control
+from rigamajig2.maya.rig import spaces
+from rigamajig2.shared import common
 
 FINGER_NAMES = ["thumb", "index", "middle", "ring", "pinky"]
 
 
-class Hand(rigamajig2.maya.components.base.Base):
+class Hand(base.BaseComponent):
     """
     Hand component.
     The Hand is a system of chain components based on the input of each start finger joint.
@@ -67,8 +67,8 @@ class Hand(rigamajig2.maya.components.base.Base):
         """Show Advanced Proxy"""
         self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
 
-        self.thumbCupGuide = rig_control.createGuide("{}_thumbCup".format(self.name), parent=self.guidesHierarchy)
-        rig_transform.matchTranslate(self.input[0], self.thumbCupGuide)
+        self.thumbCupGuide = control.createGuide("{}_thumbCup".format(self.name), parent=self.guidesHierarchy)
+        transform.matchTranslate(self.input[0], self.thumbCupGuide)
 
         if self.side == "r":
             cmds.xform(self.thumbCupGuide, worldSpace=True, rotation=(180, 0, 0))
@@ -78,8 +78,8 @@ class Hand(rigamajig2.maya.components.base.Base):
         super(Hand, self)._initialHierarchy()
 
         # create the hand gesture controller
-        pos = rig_transform.getAveragePoint(self.input[1:])
-        self.wrist = rig_control.create(
+        pos = transform.getAveragePoint(self.input[1:])
+        self.wrist = control.create(
             "{}_poses".format(self.name),
             shape="square",
             position=pos,
@@ -100,7 +100,7 @@ class Hand(rigamajig2.maya.components.base.Base):
 
             # initialize a finger component
             fingerName = inputBaseNames[i] + "_" + self.side if self.side else inputBaseNames[i]
-            fingerComponent = rigamajig2.maya.components.chain.chain.Chain(
+            fingerComponent = chain.Chain(
                 fingerName, input=[self.input[i], endJoint], rigParent=self.wrist.name
             )
             fingerComponent.defineParameter("useScale", self.useScale)
@@ -121,7 +121,7 @@ class Hand(rigamajig2.maya.components.base.Base):
 
             # setup the cup controls
             if i == 0 and self.useFirstAsThumb:
-                cupControl = rig_control.createAtObject(
+                cupControl = control.createAtObject(
                     fingerComponent.name + "Cup",
                     shape="cube",
                     orig=True,
@@ -129,13 +129,13 @@ class Hand(rigamajig2.maya.components.base.Base):
                     parent=self.wrist.name,
                     xformObj=self.thumbCupGuide,
                 )
-                baseOffset = rig_control.Control(fingerComponent.controlsList[0]).orig
+                baseOffset = control.Control(fingerComponent.controlsList[0]).orig
                 cmds.parent(baseOffset, cupControl.name)
 
                 self.cupControls.append(cupControl)
 
             elif i == 1 or i == 0:
-                cupControl = rig_control.createAtObject(
+                cupControl = control.createAtObject(
                     fingerComponent.name + "Cup",
                     shape="cube",
                     orig=True,
@@ -143,7 +143,7 @@ class Hand(rigamajig2.maya.components.base.Base):
                     parent=self.wrist.name,
                     xformObj=self.input[i + 1],
                 )
-                baseOffset = rig_control.Control(fingerComponent.controlsList[0]).orig
+                baseOffset = control.Control(fingerComponent.controlsList[0]).orig
 
                 if i == 1:
                     cmds.parent(baseOffset, self.cupControls[0].orig, cupControl.name)
@@ -152,13 +152,13 @@ class Hand(rigamajig2.maya.components.base.Base):
                 self.cupControls.append(cupControl)
 
             elif i == 2:
-                baseOffset = rig_control.Control(fingerComponent.controlsList[0]).orig
+                baseOffset = control.Control(fingerComponent.controlsList[0]).orig
                 cmds.parent(baseOffset, self.wrist.name)
 
             elif i > 2:
                 parent = self.wrist.name if i < 4 else self.cupControls[-1].name
 
-                cupControl = rig_control.createAtObject(
+                cupControl = control.createAtObject(
                     fingerComponent.name + "Cup",
                     shape="cube",
                     orig=True,
@@ -166,7 +166,7 @@ class Hand(rigamajig2.maya.components.base.Base):
                     parent=parent,
                     xformObj=self.input[i - 1],
                 )
-                baseOffset = rig_control.Control(fingerComponent.controlsList[0]).orig
+                baseOffset = control.Control(fingerComponent.controlsList[0]).orig
                 cmds.parent(baseOffset, cupControl.name)
 
                 self.cupControls.append(cupControl)
@@ -186,7 +186,7 @@ class Hand(rigamajig2.maya.components.base.Base):
         fingerBaseList = [x.controlsList[metaControlsNum] for x in self.fingerComponentList]
 
         # setup the spreads
-        rig_attr.addSeparator(self.wrist.name, "spread")
+        attr.addSeparator(self.wrist.name, "spread")
         gestureUtils.setupSpreadSdk(metasList[1:], self.wrist.name, "fingerSpread", multiplier=0.1)
         gestureUtils.setupSpreadSdk(metaSecondList[1:], self.wrist.name, "fingerSpread", multiplier=0.05)
         gestureUtils.setupSpreadSdk(fingerBaseList[1:], self.wrist.name, "fingerSpread", multiplier=0.85)
@@ -196,18 +196,18 @@ class Hand(rigamajig2.maya.components.base.Base):
 
         gestureUtils.setupSpreadSdk(metaSecondList[1:], self.wrist.name, "palmSpread", multiplier=1)
 
-        rig_attr.addSeparator(self.wrist.name, "curl")
+        attr.addSeparator(self.wrist.name, "curl")
         fingerNameList = common.fillList(FINGER_NAMES, "finger", len(self.fingerComponentList))
         for finger, fingerComponent in zip(fingerNameList, self.fingerComponentList):
             gestureUtils.setupCurlSdk(
                 fingerComponent.controlsList, self.wrist.name, "{}Curl".format(finger), metaControls=metaControlsNum
             )
 
-        rig_attr.addSeparator(self.wrist.name, "splay")
+        attr.addSeparator(self.wrist.name, "splay")
         gestureUtils.setupFanSdk(metasList[1:], self.wrist.name, "MetaSplay", multiplier=1)
         gestureUtils.setupFanSdk(fingerBaseList[1:], self.wrist.name, "FingerSplay", multiplier=1)
 
-        rig_attr.addSeparator(self.wrist.name, "relax")
+        attr.addSeparator(self.wrist.name, "relax")
 
         # Setup the finger relax we should slowly decrease the influence from the pinky to the index.
         # the lenFingers variable is used to create a multiplier to stabilize the rotation when there are
@@ -220,7 +220,7 @@ class Hand(rigamajig2.maya.components.base.Base):
             )
 
         # setup the cupping control
-        rig_attr.addSeparator(self.wrist.name, "cup")
+        attr.addSeparator(self.wrist.name, "cup")
         for i in range(len(self.cupControls)):
             fingerName = self.cupControls[i].trs.split("_")[0]
             if i < 2:
@@ -231,19 +231,19 @@ class Hand(rigamajig2.maya.components.base.Base):
     def _setupAnimAttrs(self):
         """setup animation attributes"""
 
-        rigamajig2.maya.attr.addSeparator(self.wrist.name, "visibility")
+        attr.addSeparator(self.wrist.name, "visibility")
         # add an attribute to hide the finger controls
-        rigamajig2.maya.attr.createAttr(self.wrist.name, "cupPivots", "bool", value=0, keyable=False, channelBox=True)
+        attr.createAttr(self.wrist.name, "cupPivots", "bool", value=0, keyable=False, channelBox=True)
         cupControls = [x.name for x in self.cupControls]
-        rig_control.connectControlVisiblity(self.wrist.name, "cupPivots", cupControls)
+        control.connectControlVisiblity(self.wrist.name, "cupPivots", cupControls)
 
-        rigamajig2.maya.attr.createAttr(self.wrist.name, "fingers", "bool", value=1, keyable=False, channelBox=True)
+        attr.createAttr(self.wrist.name, "fingers", "bool", value=1, keyable=False, channelBox=True)
         fingerControls = [x.controlsList for x in self.fingerComponentList]
-        rig_control.connectControlVisiblity(self.wrist.name, "fingers", fingerControls)
+        control.connectControlVisiblity(self.wrist.name, "fingers", fingerControls)
 
     def _connect(self):
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.wrist.orig, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.wrist.orig, mo=True)
 
         if self.addFKSpace:
             self.wrist.addSdk()

@@ -28,7 +28,7 @@ from rigamajig2.maya.builder import dataIO
 from rigamajig2.maya.builder import model
 from rigamajig2.maya.components import base
 
-_Component = typing.Type[base.Base]
+_Component = typing.Type[base.BaseComponent]
 _StringList = typing.List[str]
 
 logger = logging.getLogger(__name__)

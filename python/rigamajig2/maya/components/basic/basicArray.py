@@ -10,13 +10,13 @@
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.components.base
 from rigamajig2.maya import meta
+from rigamajig2.maya.components import base
 from rigamajig2.maya.components.basic import basic
 from rigamajig2.shared import common
 
 
-class BasicArray(rigamajig2.maya.components.base.Base):
+class BasicArray(base.BaseComponent):
     """
     A wrapper of the basic component that will create several basic components with the same rig parent.
     """

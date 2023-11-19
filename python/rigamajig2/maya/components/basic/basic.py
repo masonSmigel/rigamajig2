@@ -3,15 +3,15 @@ basic component
 """
 import maya.cmds as cmds
 
-import rigamajig2.maya.components.base
-import rigamajig2.maya.joint as joint
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.rig.spaces as spaces
-import rigamajig2.maya.transform as rig_transform
-import rigamajig2.shared.common as common
+from rigamajig2.maya import joint
+from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
+from rigamajig2.maya.rig import control
+from rigamajig2.maya.rig import spaces
+from rigamajig2.shared import common
 
 
-class Basic(rigamajig2.maya.components.base.Base):
+class Basic(base.BaseComponent):
     """
     Single control component
     """
@@ -64,7 +64,7 @@ class Basic(rigamajig2.maya.components.base.Base):
     def _initialHierarchy(self):
         super(Basic, self)._initialHierarchy()
 
-        self.control = rig_control.create(
+        self.control = control.create(
             self.controlName,
             self.side,
             spaces=self.addSpaces,
@@ -75,9 +75,9 @@ class Basic(rigamajig2.maya.components.base.Base):
             shape=self.controlShape,
         )
 
-        rig_transform.matchTranslate(self.input[0], self.control.orig)
+        transform.matchTranslate(self.input[0], self.control.orig)
         if not self.worldOrient:
-            rig_transform.matchRotate(self.input[0], self.control.orig)
+            transform.matchRotate(self.input[0], self.control.orig)
 
     def _rigSetup(self):
         if self.worldOrient:
@@ -87,7 +87,7 @@ class Basic(rigamajig2.maya.components.base.Base):
                 name = "{}_trs".format(self.controlName)
 
             offset = cmds.createNode("transform", name=name)
-            rig_transform.matchTransform(self.input[0], offset)
+            transform.matchTransform(self.input[0], offset)
             cmds.parent(offset, self.control.name)
             joint.connectChains(offset, self.input[0])
         else:
@@ -108,11 +108,11 @@ class Basic(rigamajig2.maya.components.base.Base):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.control.orig, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.control.orig, mo=True)
 
         if self.addSpaces:
             spaces.create(self.control.spaces, self.control.name, parent=self.spacesHierarchy)
             spaces.addSpace(self.control.spaces, ["trs_motion"], nameList=["world"], constraintType=self.spaceType)
 
         if self.addBpm:
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)

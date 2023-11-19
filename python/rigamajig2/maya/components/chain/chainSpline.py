@@ -8,25 +8,19 @@
     description: 
 
 """
-
-"""
-chain component
-"""
 import maya.cmds as cmds
 
-import rigamajig2.maya.joint
-import rigamajig2.maya.joint as joint
-import rigamajig2.maya.node
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.transform as rig_transform
-import rigamajig2.shared.common as common
 from rigamajig2.maya import attr
 from rigamajig2.maya import curve
+from rigamajig2.maya import joint
 from rigamajig2.maya import node
+from rigamajig2.maya import transform
 from rigamajig2.maya.components import base
+from rigamajig2.maya.rig import control
+from rigamajig2.shared import common
 
 
-class ChainSpline(rigamajig2.maya.components.base.Base):
+class ChainSpline(base.BaseComponent):
     """
     Spline chain component.
     This is an ik spline that controls a bunch of joints.
@@ -95,10 +89,10 @@ class ChainSpline(rigamajig2.maya.components.base.Base):
 
         self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
 
-        self.upVectorGuide = rig_control.createGuide("{}_upVec".format(self.name), parent=self.guidesHierarchy)
+        self.upVectorGuide = control.createGuide("{}_upVec".format(self.name), parent=self.guidesHierarchy)
 
         form = "Closed" if self.closed else "Open"
-        self.inputList = rigamajig2.maya.joint.getInbetweenJoints(self.input[0], self.input[1])
+        self.inputList = joint.getInbetweenJoints(self.input[0], self.input[1])
         guideCurve = curve.createCurveFromTransform(
             self.inputList,
             degree=3,
@@ -113,7 +107,7 @@ class ChainSpline(rigamajig2.maya.components.base.Base):
 
         for i in range(self.numberMainControls):
             guideName = "{}_control_{}".format(self.name, i)
-            guide = rig_control.createGuide(guideName, parent=self.guidesHierarchy, hideAttrs=["s", "v"])
+            guide = control.createGuide(guideName, parent=self.guidesHierarchy, hideAttrs=["s", "v"])
 
             param = maxParam * float(i / float(self.numberMainControls))
             pointOnCurveInfo = curve.attatchToCurve(guide, guideCurve, parameter=param)
@@ -135,7 +129,7 @@ class ChainSpline(rigamajig2.maya.components.base.Base):
         for i in range(self.numberMainControls):
             # mainControlName = "{}_driver_{}".format(self.name, i)
             mainControlName = getattr(self, self.controlNameList[i])
-            mainControl = rig_control.createAtObject(
+            mainControl = control.createAtObject(
                 mainControlName,
                 xformObj=self.mainGuidesList[i],
                 size=self.size * 1.5,
@@ -153,7 +147,7 @@ class ChainSpline(rigamajig2.maya.components.base.Base):
 
         self.subControlers = list()
         for i, jnt in enumerate(self.inputList):
-            subControl = rig_control.createAtObject(
+            subControl = control.createAtObject(
                 "{}_0_ik".format(inputBaseNames[i]),
                 side=self.side,
                 spaces=False,
@@ -180,7 +174,7 @@ class ChainSpline(rigamajig2.maya.components.base.Base):
 
         # make the upVector for the tanget control
         self.upVectorTrs = cmds.createNode("transform", name="{}_upVec".format(self.name), parent=ikHierarchy)
-        rig_transform.matchTranslate(self.upVectorGuide, self.upVectorTrs)
+        transform.matchTranslate(self.upVectorGuide, self.upVectorTrs)
 
         # connect drivercontrols to the ikCurve
         cmds.skinCluster(ikCurve, self.mainDriverJoints, dr=1.0, mi=2, name="{}_skinCluster".format(ikCurve))
@@ -207,8 +201,8 @@ class ChainSpline(rigamajig2.maya.components.base.Base):
                 "{}.{}".format(pointOnCurveInfo, "result.position"), "{}.{}".format(pointOnCurveResult, "translate")
             )
 
-            aimVector = rig_transform.getVectorFromAxis(self.aimAxis)
-            upVector = rig_transform.getVectorFromAxis(self.upAxis)
+            aimVector = transform.getVectorFromAxis(self.aimAxis)
+            upVector = transform.getVectorFromAxis(self.upAxis)
             cmds.tangentConstraint(
                 ikCurve,
                 pointOnCurveResult,
@@ -218,7 +212,7 @@ class ChainSpline(rigamajig2.maya.components.base.Base):
                 worldUpObject=self.upVectorTrs,
             )
             # finally connect the point on curve result to the control
-            rig_transform.connectOffsetParentMatrix(
+            transform.connectOffsetParentMatrix(
                 pointOnCurveResult, subControl.name, t=True, r=True, s=False, sh=False, mo=True
             )
 
@@ -231,12 +225,12 @@ class ChainSpline(rigamajig2.maya.components.base.Base):
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
             for control in self.mainControls:
-                rig_transform.connectOffsetParentMatrix(self.rigParent, control.orig, mo=True)
+                transform.connectOffsetParentMatrix(self.rigParent, control.orig, mo=True)
 
-            rig_transform.connectOffsetParentMatrix(self.rigParent, self.upVectorTrs, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, self.upVectorTrs, mo=True)
 
     def _finalize(self):
         """Finalize the component"""
         attr.createAttr(self.paramsHierarchy, "subControls", "bool", value=0, keyable=False, channelBox=True)
         controls = [c.name for c in self.subControlers]
-        rig_control.connectControlVisiblity(self.paramsHierarchy, "subControls", controls)
+        control.connectControlVisiblity(self.paramsHierarchy, "subControls", controls)

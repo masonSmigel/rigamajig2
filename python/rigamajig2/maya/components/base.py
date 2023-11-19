@@ -8,10 +8,10 @@ from collections import OrderedDict
 import maya.cmds as cmds
 import maya.mel as mel
 
-import rigamajig2.maya.attr
-import rigamajig2.maya.color
-import rigamajig2.maya.container
-import rigamajig2.maya.meta
+from rigamajig2.maya import attr
+from rigamajig2.maya import color
+from rigamajig2.maya import container
+from rigamajig2.maya import meta
 from rigamajig2.maya.rig.control import CONTROLTAG
 
 logger = logging.getLogger(__name__)
@@ -28,7 +28,7 @@ METADATA_NODE_TYPE = "network"
 
 
 # pylint:disable=too-many-public-methods
-class Base(object):
+class BaseComponent(object):
     """
     Base component all components are subclassed from
     """
@@ -104,7 +104,7 @@ class Base(object):
     @classmethod
     def fromContainer(cls, container):
         """Create a component instance from a container"""
-        metaNode = rigamajig2.maya.meta.MetaNode(container)
+        metaNode = meta.MetaNode(container)
         containerData = metaNode.getAllData()
 
         componentInstance = cls.fromData(containerData)
@@ -175,7 +175,7 @@ class Base(object):
 
         if self.getStep() < GUIDE_STEP and self.enabled:
             # anything that manages or creates nodes should set the active container
-            with rigamajig2.maya.container.ActiveContainer(self.container):
+            with container.ActiveContainer(self.container):
                 self._createJoints()
                 self._createBuildGuides()
             self.setStep(2)
@@ -197,7 +197,7 @@ class Base(object):
 
         if self.getStep() < BUILD_STEP and self.enabled:
             # anything that manages or creates nodes should set the active container
-            with rigamajig2.maya.container.ActiveContainer(self.container):
+            with container.ActiveContainer(self.container):
                 self._autoOrientGuides()
                 self._initialHierarchy()
                 self._preRigSetup()
@@ -213,7 +213,7 @@ class Base(object):
         self._updateClassParameters()
 
         if self.getStep() < CONNECT_STEP and self.enabled:
-            with rigamajig2.maya.container.ActiveContainer(self.container):
+            with container.ActiveContainer(self.container):
                 self._preConnect()
                 self._connect()
                 self._postConnect()
@@ -236,13 +236,13 @@ class Base(object):
         if self.getStep() < FINALIZE_STEP and self.enabled:
             self._publishNodes()
             self._publishAttributes()
-            with rigamajig2.maya.container.ActiveContainer(self.container):
+            with container.ActiveContainer(self.container):
                 self._finalize()
                 self._setControlAttributes()
 
             # if we added a component tag build that now!
             if self.componentTag:
-                rigamajig2.maya.meta.tag(self.container, "component", self.componentTag)
+                meta.tag(self.container, "component", self.componentTag)
 
             self.setStep(5)
         else:
@@ -282,11 +282,11 @@ class Base(object):
     def _createContainer(self):
         """Create a Container for the component"""
         if not cmds.objExists(self.container):
-            self.container = rigamajig2.maya.container.create(self.container)
-            rigamajig2.maya.meta.tag(self.container, "component")
+            self.container = container.create(self.container)
+            meta.tag(self.container, "component")
 
             # tag the container with the proper component version
-            rigamajig2.maya.attr.createAttr(
+            attr.createAttr(
                 self.container,
                 "__version__",
                 "string",
@@ -299,11 +299,11 @@ class Base(object):
         """Create the metadata node. This will store any data we need to transfer across steps"""
         if not cmds.objExists(metaNodeName):
             self.metadataNode = cmds.createNode(METADATA_NODE_TYPE, name=metaNodeName)
-            rigamajig2.maya.meta.createMessageConnection(
+            meta.createMessageConnection(
                 self.container, self.metadataNode, sourceAttr="metaDataNetworkNode"
             )
 
-            rigamajig2.maya.container.addNodes(self.metadataNode, self.container, force=True)
+            container.addNodes(self.metadataNode, self.container, force=True)
 
     def _autoOrientGuides(self):
         """Automate positioning and orienting of the guides."""
@@ -315,7 +315,7 @@ class Base(object):
         self.controlHierarchy = cmds.createNode("transform", name=self.name + "_control", parent=self.rootHierarchy)
         self.spacesHierarchy = cmds.createNode("transform", name=self.name + "_spaces", parent=self.rootHierarchy)
 
-        rigamajig2.maya.color.setOutlinerColor(self.rootHierarchy, [255, 255, 153])
+        color.setOutlinerColor(self.rootHierarchy, [255, 255, 153])
 
         # lock and hide the attributes
         for hierarchy in [
@@ -323,7 +323,7 @@ class Base(object):
             self.controlHierarchy,
             self.spacesHierarchy,
         ]:
-            rigamajig2.maya.attr.lockAndHide(hierarchy, rigamajig2.maya.attr.TRANSFORMS + ["v"])
+            attr.lockAndHide(hierarchy, attr.TRANSFORMS + ["v"])
 
     def _preRigSetup(self):
         """Pre rig setup. implement in subclass"""
@@ -355,14 +355,14 @@ class Base(object):
 
     def _publishNodes(self):
         """Publish nodes. implement in subclass"""
-        rigamajig2.maya.container.addParentAnchor(self.rootHierarchy, container=self.container)
-        rigamajig2.maya.container.addChildAnchor(self.rootHierarchy, container=self.container)
+        container.addParentAnchor(self.rootHierarchy, container=self.container)
+        container.addChildAnchor(self.rootHierarchy, container=self.container)
 
         # for the containers we need to _publish all controls within a container.
-        allNodes = rigamajig2.maya.container.getNodesInContainer(self.container, getSubContained=True)
+        allNodes = container.getNodesInContainer(self.container, getSubContained=True)
         for currentNode in allNodes:
-            if rigamajig2.maya.meta.hasTag(currentNode, CONTROLTAG):
-                rigamajig2.maya.container.addPublishNodes(currentNode)
+            if meta.hasTag(currentNode, CONTROLTAG):
+                container.addPublishNodes(currentNode)
 
     def _publishAttributes(self):
         """_publish attributes. implement in subclass"""
@@ -388,7 +388,7 @@ class Base(object):
 
         for input in self.input:
             if cmds.objExists(input):
-                rigamajig2.maya.attr.unlock(input, rigamajig2.maya.attr.TRANSFORMS + ["v"])
+                attr.unlock(input, attr.TRANSFORMS + ["v"])
 
     def setStep(self, step=0):
         """
@@ -406,7 +406,7 @@ class Base(object):
         :return:
         """
         if not cmds.objExists("{}.{}".format(self.container, "build_step")):
-            rigamajig2.maya.attr.createEnum(
+            attr.createEnum(
                 self.container,
                 "build_step",
                 value=0,
@@ -456,7 +456,7 @@ class Base(object):
         """
 
         if not dataType:
-            dataType = rigamajig2.maya.meta.validateDataType(value)
+            dataType = meta.validateDataType(value)
 
         logger.debug(f"adding component parameter {parameter}, {value} ({dataType})")
         self._componentParameters[parameter] = {"value": value, "dataType": dataType}
@@ -484,7 +484,7 @@ class Base(object):
         if not dataType:
             raise TypeError(f"{parameter} data type cannot be None")
 
-        metaData = rigamajig2.maya.meta.MetaNode(self.container)
+        metaData = meta.MetaNode(self.container)
         metaData.setData(attr=parameter, value=value, attrType=dataType, hide=hide, lock=lock)
 
         setattr(self.__class__, parameter, value)
@@ -521,7 +521,7 @@ class Base(object):
         for localVariable in localComponentVariables:
             localComponentDataDict[localVariable] = self.__getattribute__(localVariable)
 
-        metaNode = rigamajig2.maya.meta.MetaNode(self.metadataNode)
+        metaNode = meta.MetaNode(self.metadataNode)
         metaNode.setDataDict(localComponentDataDict)
 
     def _retreiveLocalVariablesFromMetadata(self):
@@ -529,7 +529,7 @@ class Base(object):
         This function will rebuild the properties based on the data added to the metanode.
         :return:
         """
-        metaNode = rigamajig2.maya.meta.MetaNode(self.metadataNode)
+        metaNode = meta.MetaNode(self.metadataNode)
         dataDict = metaNode.getAllData()
 
         for key in dataDict.keys():
@@ -547,7 +547,7 @@ class Base(object):
         """
         newComponentData = self._componentParameters.copy()
         for key in self._componentParameters.keys():
-            metaNode = rigamajig2.maya.meta.MetaNode(self.container)
+            metaNode = meta.MetaNode(self.container)
             data = metaNode.getAllData()
 
             if not data:
@@ -573,7 +573,7 @@ class Base(object):
         return self.name
 
     def getMetaDataNode(self):
-        return rigamajig2.maya.meta.getMessageConnection(f"{self.container}.metaDataNetworkNode")
+        return meta.getMessageConnection(f"{self.container}.metaDataNetworkNode")
 
     def getComponentData(self):
         """Get all component Data"""
@@ -612,7 +612,7 @@ class Base(object):
     #     propertyHolderNode, propertyAttr = propertyPlug.split(".")
     #
     #     def getter(self):
-    #         metaNode = rigamajig2.maya.meta.MetaNode(propertyHolderNode)
+    #         metaNode = meta.MetaNode(propertyHolderNode)
     #         return metaNode.getData(propertyAttr)
     #
     #     return getter
@@ -623,7 +623,7 @@ class Base(object):
     #     propertyHolderNode, propertyAttr = propertyPlug.split(".")
     #
     #     def setter(self, value):
-    #         metaNode = rigamajig2.maya.meta.MetaNode(propertyHolderNode)
+    #         metaNode = meta.MetaNode(propertyHolderNode)
     #         return metaNode.setData(propertyAttr, value=value)
     #
     #     return setter

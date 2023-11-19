@@ -12,14 +12,14 @@ from collections import OrderedDict
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.components.base
-import rigamajig2.maya.joint as joint
-import rigamajig2.maya.rig.control as rig_control
-import rigamajig2.maya.transform as rig_transform
-import rigamajig2.shared.common as common
+from rigamajig2.maya import joint
+from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
+from rigamajig2.maya.rig import control
+from rigamajig2.shared import common
 
 
-class BasicTree(rigamajig2.maya.components.base.Base):
+class BasicTree(base.BaseComponent):
     """
     Basic Tree component.
 
@@ -89,9 +89,15 @@ class BasicTree(rigamajig2.maya.components.base.Base):
 
         # create the controls for the joints
         for jnt, data in self.hierarchyDict.items():
-            name = jnt.rsplit("_", 1)[0]
-            ctl = rig_control.createAtObject(
-                name, shape=self.controlShape, orig=True, trs=self.addTrs, sdk=self.addSdk, size=self.size, xformObj=jnt
+            ctl = control.createAtObject(
+                name=jnt.rsplit("_", 1)[0],
+                shape=self.controlShape,
+                orig=True,
+                trs=self.addTrs,
+                sdk=self.addSdk,
+                size=self.size,
+                xformObj=jnt,
+                shapeAim="x",
             )
             self.hierarchyDict[jnt]["control"] = ctl
 
@@ -121,4 +127,4 @@ class BasicTree(rigamajig2.maya.components.base.Base):
         if cmds.objExists(self.rigParent):
             firstKey, firstItem = list(self.hierarchyDict.items())[0]
             baseControl = firstItem["control"]
-            rig_transform.connectOffsetParentMatrix(self.rigParent, baseControl.orig, mo=True)
+            transform.connectOffsetParentMatrix(self.rigParent, baseControl.orig, mo=True)

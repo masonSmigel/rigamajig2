@@ -11,16 +11,16 @@
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.components.base
 from rigamajig2.maya import attr
 from rigamajig2.maya import joint
 from rigamajig2.maya import node
 from rigamajig2.maya import transform
+from rigamajig2.maya.components import base
 from rigamajig2.maya.rig import control
 from rigamajig2.shared import common
 
 
-class Jaw(rigamajig2.maya.components.base.Base):
+class Jaw(base.BaseComponent):
     """
     A simple jaw component
     """

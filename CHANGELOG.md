@@ -1,6 +1,38 @@
 # Change Log
 
-## 1.3.0 - NOT RELEASED
+## 1.3.1
+
+### Added:
+
+* replaced unittests with pytests:
+    * refactored existing tests to use pytests
+    * added `common.pytestUtils.py` to help out with assertions when needed
+    * `test_blendshapes.py`
+    * `test_skincluster.py`
+    * `test_process.py`
+
+### Changed:
+
+* refactored usage of icons
+    * Removed `common.getIcon` and replaced with `resources.Resources.getIcon` to pull icons from the resource path
+    * implemented qrc resource system for the icons.
+    * renamed `icons/` to `resources/icons`
+    * use: `pyside2-rcc resources.qrc -o ../python/rigamajig2/ui/resources_qrc.py ` to generate `resources_qrc.py`
+* renamed `openMayaUtils` to `general`
+* renamed `common.getFirstIndex` and `common.getLastIndex` to `common.getFirst` and `common.getLast`
+
+### Fixed:
+
+* Added a warning when trying to load skinData for a node that has no deformable shape
+* Added a try-except block around required third party imports and log a warning (git)
+* Fixed a bug with the data loader returning false when empty. Now returns an empty list
+* fixed an issue with script runner not emitting the changed signal when rows are reordered.
+
+### Removed:
+
+* Removed `maya.tests/mayaunittest.py` file since it has been replace with pytest
+
+## 1.3.0
 
 Lots of various fixes. This became a large update with some structural changes to it's a major version now.
 

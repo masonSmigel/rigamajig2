@@ -1,118 +1,159 @@
-# Rigamajig2
-Rigamajig2 is a modular data-centric rigging tool for Autodesk Maya. 
-It provides a straightforward method of creating and 
-connecting componets to create complex rigs. 
+# Overview
 
-* Rigamajig2 currently only supports Python 2. While compatiablity 
-with Python 3 is being developed if using Maya 2022 or 2033 
-please change your Python version to version 2 in the global variables. 
+Rigamajig2 is an advanced, modular data-centric rigging tool designed for Autodesk Maya. Empowering
+riggers, Rigamajig2 streamlines the complex process of creating intricate rigs by providing a
+user-friendly interface and a powerful set of features.
 
-## Installation 
-To install rigamajig2 on your computer: 
+- **Modular Data**: Rigamajig2 excels in modularity, allowing users to effortlessly store and manage data. This
+  modular approach facilitates the construction of sophisticated rigs with ease. While allowing data to be very potable,
+  saving time when facing similar rigging problems.
 
-1. Download the latest version from the git repository
 
+- **Designed with riggers**: With a focus on simplicity and efficiency, Rigamajig2 offers a straightforward method for
+  creating rigs. While also exposing an internal framework for artist who want to build additional components or
+  features.
+
+
+- **Rigs animators love**: With a focus on building well-designed systems and an emphasis on performance rigs built with
+  rigamajig allow for great deformations and real time playback.
+
+# Installation
+
+To install rigamajig2:
+
+1. Download the latest release from the git repository
 2. Unzip it
+3. Copy the rigamajig2-master folder somewhere on your hard drive.
+   If you're unsure of a good place the Maya modules folder is a good bet.
 
-3. Copy the rigamajig2-master folder somewhere on your hard drive. 
-If you're unsure of a good place the Maya modules folder is a good bet. 
-```
-Windows: Users<username>Documents/Mayamodules
-Linux: ~/maya/modules
-Mac OS X:/Users/<username>/Library/Preferences/Autodesk/maya/modules
-```
+    ```
+    Windows: Users<username>Documents/maya/modules
+    Linux: ~/maya/modules
+    Mac OS X:/Users/<username>/Library/Preferences/Autodesk/maya/modules
+    ```
 
-4. Open Autodesk Maya
+4. You will also need to install the third party requirements for rigamajig. (see the requires.txt).
 
-5. Navigate to the `drag_into_maya.py` file located within the package 
+   #### Note: These are only the requirements for a  general user, there are other recommendations if you plan to contribute
 
-6. drag the `drag_into_maya.py` file into your viewport
+    ```commandline
+    cd path/to/rigamajig2 
+    pip install -r  requirements-core.txt --target python/lib
+    ```
 
-## Lauching the tool
-Rigamajig2 has two methods to utilize the tool: 
+5. Open Autodesk Maya
+6. Navigate to the `drag_into_maya.py` file located within the rigamajig package
+7. drag the `drag_into_maya.py` file into your viewport
+
+# Lauching the tool
+
+Rigamajig2 has two methods to utilize the tool:
+
 1. The framework (available through python)
 2. The BuilderUI (a more straightforward PySide interface)
 
 To launch the UI run the following code in python
+
 ```python
-import rigamajig2.ui.builder_ui.dialog as builder_dialog
-builder_dialog.BuilderDialog.display()
+from rigamajig2.ui.builder_ui.builderDialog import BuilderDialog
+
+BuilderDialog.display()
 ```
 
-## Getting started 
+# Getting started
 
-More documentation to come 
+More documentation to come
 
-## Dev Tools
+# Dev Tools
 
-### Reloading the modules
-To reload all rigamajig2 modules in a python session run the following code 
+## installing additional packages
+
+When developing on rigamajig2 It is highly recomended to work within a virtual enviornment.
+Setup your venv to use python 3.9. You will also need to install the addional requirements for developers
+this includes addtional tools for testing and code style:
+
+```
+cd path/to/rigamajig/venv/bin
+pip install -r  requirements-dev.txt 
+```
+
+## Reloading the modules
+
+When developing you will often want test your changes by reloading your python packages.
+To reload the python packages within maya:
+
+#### Note: Due to the structure of data gathering functions within the builder UI you will also need to re-launch the UI for rigamajig2 to function properly.
+
 ```python 
 import rigamajig2
+
 rigamajig2.reloadModule()
 ```
 
-### Pylint 
-Rigamajig2 adheres to some general coding practices. To test any additions made
- the run the following command:
+## Code Formatting and style
+
+### Black
+
+In general rigamajig adheres to the black coding style to format code consitantly. For more information check out the
+black documentaiton.
+
+to reformat files with black
+
+```commandline
+cd path/to/rigamaijg2
+black path/to/python/module.py
+```
+
+### Pylint
+
+While black handles code formatting the pylint configuration helps to ensure consistant naming within files.
 
 ```commandline
 cd path/to/rigamajig2 
-pylint scripts/rigamajig2
+pylint python/rigamajig2
 ```
 
-Or if you using PyCharm configure your project to use the `rigamajig2/scripts` folder 
-as the content root. Then you can run: 
+### Testing
 
-```commandline
-pylint rigamajig2
-```
-
-### Testing 
-Rigamajig2 comes with unitesting capiblilities. 
-
+While testing is still incomplete rigamajig uses pytest (specifically the mayatest package) to ensure code quality
 
 #### Running the Unittests
-To run tests run the python command 
-located in the bin at `rigamajig2/bin/testrigamajig`. 
+
+To run tests run the python command
+located in the bin at `rigamajig2/bin/testrigamajig`.
 
 ```commandline
 cd path/to/rigamajig2/bin 
-python testrigamajig
+runmayatest -t ../tests/
+
+// you can also specify a maya version to test with
+runmayatest -m 2022 -t ../tests/
+
+// or specific test modules or functions
+runmayatest -t ../tests/test_module:test_func
 ```
 
-#### Creating new Unittests
-Added unittests must be subclasses of the base unittest class.To setup your own unittest 
-confugure your test as shown below:
+### Generating Documentation
 
-```python
-from rigamajig2.maya.test.mayaTestCase import TestCase
+Documentation can be auto-generated using sphinx.
 
+when new modules are added please cd into `rigamajig2/docs` and run the following to generate `.rst` files for all
+modules
 
-class TestSomething(TestCase):
-    def test_someSuperCoolTest(self):
-        """ Your awesome test goes here"""
-        pass
-```
-
-### Generating Documentation 
-Documentation can be auto-generated using sphinx. 
-
-
-when new modules are added please cd into `rigamajig2/docs` and run the following to generate `.rst` files for all modules
 ```commandline
 sphinx-apidoc -o source ../python
 ```
 
-To build the HTML Documentatino run: 
+To build the HTML Documentatino run:
+
 ```commandline
 make html
 ```
 
-
 ## More info
-Rigamajig2 development blog: 
+
+Rigamajig2 development blog:
 https://www.masonsmigel.com/blog
 
-Questions? 
-email me at mgsmigel@gmail.com! 
+Questions?
+email me at me@masonsmigel.com

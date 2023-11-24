@@ -1,2 +1,2 @@
 GitPython
-PyTest
+mayatest

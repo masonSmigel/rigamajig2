@@ -1,0 +1,4 @@
+-r requirements-core.txt
+black
+types-pyside2
+maya-stubs

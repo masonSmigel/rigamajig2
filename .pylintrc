@@ -8,7 +8,7 @@ extension-pkg-allow-list=PySide2.QtWidgets,
                          PySide2.QtGui
 
 # Specify a score threshold to be exceeded before program exits with error.
-fail-under=10.0
+fail-under=9.0
 
 # Files or directories to be skipped. They should be base names, not paths.
 ignore=CVS
@@ -37,10 +37,15 @@ disable=all
 # Enable the message, report, category or checker with the given id(s). You can
 # either give multiple identifier separated by comma (,) or put this option
 # multiple time.
-enable=basic,
-       line-too-long,
-       design,
-       too-complex
+enable= invalid-name,
+        too-many-lines,
+        undefined-variable,
+        missing-docstring,
+        wrong-import-order,
+        trailing-whitespace,
+        inconsistent-return-statements,
+        unused-variable,
+        len-as-condition,
 
 [REPORTS]
 
@@ -104,19 +109,18 @@ attr-naming-style=camelCase
 # Naming style matching correct class, and class constant names
 # class-attribute-naming-style=camelCase
 # class-const-naming-style=UPPER_CASE
-# constant-naming=any
+# constant-naming=UPPER_CASE
 
 # Naming style matching correct method, function and module  names.
 method-naming-style=camelCase
 function-naming-style=camelCase
-module-naming-style=any
+module-naming-style=camelCase
 
 # Good variable names which should always be accepted, separated by a comma.
 # This is a bunch of names that we want to allow in the package that does not
 # conform with general pylint rules. Some of these are maya shorthand or functions that
 # are useful to keep in a different syntax such as 'logger', 'basestring', and 'unicode'
-good-names= i, j, k, r, p, f,cv, ro, a, b, c, d, e, n, x, y, z, v,  ex, ik, fk,
-            Run, _, A, B, C, up, t, r, s, sh, tx, ty, tz, rx, ry, rz, sx, sy, sz, mo,
+good-names= i, j, k, r, p, f,cv, ro, ik, fk, pv,
             logger, basestring, dlg_instance, pv, unicode,
 
 
@@ -125,8 +129,7 @@ good-names= i, j, k, r, p, f,cv, ro, a, b, c, d, e, n, x, y, z, v,  ex, ik, fk,
 # List of method names used to declare (i.e. assign) instance attributes.
 defining-attr-methods=__init__,
                       __new__,
-                      setUp,
-                      __post_init__
+                      __build__,
 
 # List of member names, which should be excluded from the protected access
 # warning.

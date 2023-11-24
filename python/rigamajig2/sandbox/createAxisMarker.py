@@ -8,6 +8,8 @@
     description: 
 
 """
+import os
+
 from maya import cmds as cmds
 
 from rigamajig2.maya import transform as rig_transform

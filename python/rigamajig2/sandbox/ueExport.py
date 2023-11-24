@@ -105,8 +105,6 @@ def exportAnimationClip(mainNode, outputPath=None, upAxis='y', cleanTrsGlobal=Fa
     bind = meta.getMessageConnection("{}.bind".format(mainNode))
     model = meta.getMessageConnection("{}.model".format(mainNode))
 
-    # TODO: add some stuff to build the file path
-
     # before exporting it we need to setup the export options
     minFrame = cmds.playbackOptions(q=True, min=True)
     maxFrame = cmds.playbackOptions(q=True, max=True)

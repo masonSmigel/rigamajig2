@@ -5,8 +5,7 @@
     file: quickRename.py
     author: masonsmigel
     date: 04/2023
-    description: 
-
+    description:
 """
 
 import sys

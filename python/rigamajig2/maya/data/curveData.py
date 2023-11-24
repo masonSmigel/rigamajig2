@@ -20,12 +20,6 @@ import rigamajig2.shared.common as common
 class CurveData(node_data.NodeData):
     """ This class to save and load curve data"""
 
-    def __init__(self):
-        """
-        constructor for the curve data class
-        """
-        super(CurveData, self).__init__()
-
     def gatherData(self, node):
         """
         This method will gather data from the maya node passed as an argument.
@@ -48,7 +42,7 @@ class CurveData(node_data.NodeData):
             for shape in shapeList:
                 data['shapes'][shape] = OrderedDict()
                 data['shapes'][shape]['points'] = list()
-                for i, cv in enumerate(cmds.ls("{0}.cv[*]".format(shape), fl=True)):
+                for i, _ in enumerate(cmds.ls("{0}.cv[*]".format(shape), fl=True)):
                     data['shapes'][shape]['points'].append(cmds.getAttr("{}.controlPoints[{}]".format(shape, i))[0])
 
                 formNames = cmds.attributeQuery("f", node=shape, le=True)[0].split(":")
@@ -133,4 +127,3 @@ class CurveData(node_data.NodeData):
             super(CurveData, self).applyData(nodes, attributes=["overrideEnabled", "overrideRGBColors",
                                                                 "overrideColorRGB", "overrideColor"])
         return result
-

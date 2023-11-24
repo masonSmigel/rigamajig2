@@ -16,6 +16,7 @@ import maya.cmds as cmds
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import clean
 from rigamajig2.maya import deformer
+from rigamajig2.maya import mesh
 from rigamajig2.maya import meta
 from rigamajig2.maya import shape
 from rigamajig2.maya import skinCluster
@@ -182,7 +183,7 @@ def transferBlendshape(sourceModel, sourceDeformer, destModel):
         targetInfoDict[target] = {'value': defaultValue,
                                   'innConnections': innConnections,
                                   'outConnections': outConnections
-                                  }
+                                }
 
         # break the connetion and set the target to 0
         if innConnections:

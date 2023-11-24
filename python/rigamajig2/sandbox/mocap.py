@@ -268,8 +268,8 @@ class MocapImportDialog(QtWidgets.QDialog):
                                 x not in toExclude):
             namespaceDict.setdefault(len(namespacesFound.split(":")), []).append(namespacesFound)
 
-        for i, lvl in enumerate(reversed(namespaceDict.keys())):
+        for _, lvl in enumerate(reversed(namespaceDict.keys())):
             for namespace in namespaceDict[lvl]:
-                if not len(cmds.ls("{}:*".format(namespace))) > 0:
+                if cmds.ls("{}:*".format(namespace)):
                     cmds.namespace(removeNamespace=namespace, mergeNamespaceWithParent=True)
         self.updateNamespaces()

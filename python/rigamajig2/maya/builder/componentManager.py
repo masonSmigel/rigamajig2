@@ -19,7 +19,7 @@ from rigamajig2.shared import common
 from rigamajig2.shared import path as rig_path
 from rigamajig2.shared import process
 
-COMPONENTS_PATH = os.path.abspath(os.path.join(__file__, f"../../components"))
+COMPONENTS_PATH = os.path.abspath(os.path.join(__file__, "../../components"))
 EXCLUDED_FOLDERS = []
 EXCLUDED_FILES = ["__init__.py", "base.py"]
 

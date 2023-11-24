@@ -18,6 +18,11 @@ from rigamajig2.shared.enviornment import isInMaya
 
 
 def configureLoggers():
+    '''
+    Configure the loggers from the logger config files.
+    check if maya is interactive or launched through
+    mayapy or mayabatch and load either the interactive or batch configs.
+    '''
     # Get the absolute path of the script's directory
     rootDirectory = os.path.dirname(os.path.abspath(__file__))
 

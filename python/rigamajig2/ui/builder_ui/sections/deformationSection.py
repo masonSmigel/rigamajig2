@@ -185,8 +185,8 @@ class DeformationSection(builderSection.BuilderSection):
         SHAPESFile = self.builder.getRigData(self.builder.getRigFile(), SHAPES)
         self.deformersDataLoader.selectPath(SHAPESFile)
 
-        DeformerFiles = self.builder.getRigData(self.builder.getRigFile(), DEFORMERS)
-        self.deformersDataLoader.selectPaths(common.toList(DeformerFiles))
+        deformerFiles = self.builder.getRigData(self.builder.getRigFile(), DEFORMERS)
+        self.deformersDataLoader.selectPaths(common.toList(deformerFiles))
 
     @QtCore.Slot()
     def _runWidget(self):
@@ -247,8 +247,8 @@ class DeformationSection(builderSection.BuilderSection):
         Connect influence joints to their respective bindPreMatrix
         """
         for mesh in cmds.ls(sl=True):
-            sc = skinCluster.getSkinCluster(mesh)
-            skinCluster.connectExistingBPMs(sc)
+            skin = skinCluster.getSkinCluster(mesh)
+            skinCluster.connectExistingBPMs(skin)
 
     @QtCore.Slot()
     def _onLoadDeformerData(self):

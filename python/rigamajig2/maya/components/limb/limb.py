@@ -51,7 +51,9 @@ class Limb(base.BaseComponent):
         :param useScale: use scale on the controls
         :type useScale: bool
         """
-        super(Limb, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(Limb, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
         self.side = common.getSide(self.name)
 
         self.useCallbackSwitch = True
@@ -62,11 +64,19 @@ class Limb(base.BaseComponent):
         self.ikSpaces = {}
         self.pvSpaces = {}
 
-        self.defineParameter(parameter="useCallbackSwitch", value=self.useCallbackSwitch, dataType="bool")
+        self.defineParameter(
+            parameter="useCallbackSwitch", value=self.useCallbackSwitch, dataType="bool"
+        )
         self.defineParameter(parameter="useScale", value=self.useScale, dataType="bool")
-        self.defineParameter(parameter="addTwistJoints", value=self.addTwistJoints, dataType="bool")
-        self.defineParameter(parameter="addBendies", value=self.addBendies, dataType="bool")
-        self.defineParameter(parameter="localOrientIk", value=self.localOrientIk, dataType="bool")
+        self.defineParameter(
+            parameter="addTwistJoints", value=self.addTwistJoints, dataType="bool"
+        )
+        self.defineParameter(
+            parameter="addBendies", value=self.addBendies, dataType="bool"
+        )
+        self.defineParameter(
+            parameter="localOrientIk", value=self.localOrientIk, dataType="bool"
+        )
 
         self.defineParameter(parameter="ikSpaces", value=self.ikSpaces, dataType="dict")
         self.defineParameter(parameter="pvSpaces", value=self.pvSpaces, dataType="dict")
@@ -75,13 +85,19 @@ class Limb(base.BaseComponent):
         """Show Advanced Proxy"""
         import rigamajig2.maya.rig.live as live
 
-        self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
+        self.guidesHierarchy = cmds.createNode(
+            "transform", name="{}_guide".format(self.name)
+        )
         self.guidePoleVector = live.createlivePoleVector(self.input[1:4])
         cmds.parent(self.guidePoleVector, self.guidesHierarchy)
         pvLineName = "{}_pvLine".format(self.name)
         ikLineName = "{}_ikLine".format(self.name)
-        control.createDisplayLine(self.input[2], self.guidePoleVector, pvLineName, self.guidesHierarchy)
-        control.createDisplayLine(self.input[1], self.input[3], ikLineName, self.guidesHierarchy)
+        control.createDisplayLine(
+            self.input[2], self.guidePoleVector, pvLineName, self.guidesHierarchy
+        )
+        control.createDisplayLine(
+            self.input[1], self.input[3], ikLineName, self.guidesHierarchy
+        )
 
     def _initialHierarchy(self):
         """Build the initial hirarchy"""
@@ -180,8 +196,12 @@ class Limb(base.BaseComponent):
             color="blue",
             parent=self.controlHierarchy,
             shape="cube",
-            position=cmds.xform(self.input[3], query=True, worldSpace=True, translation=True),
-            rotation=cmds.xform(self.input[3], query=True, worldSpace=True, rotation=True)
+            position=cmds.xform(
+                self.input[3], query=True, worldSpace=True, translation=True
+            ),
+            rotation=cmds.xform(
+                self.input[3], query=True, worldSpace=True, rotation=True
+            )
             if self.localOrientIk
             else None,
         )
@@ -243,7 +263,9 @@ class Limb(base.BaseComponent):
 
         if self.addTwistJoints and self.addBendies:
             self.bendControlHierarchy = cmds.createNode(
-                "transform", name=self.name + "_bendControl", parent=self.controlHierarchy
+                "transform",
+                name=self.name + "_bendControl",
+                parent=self.controlHierarchy,
             )
 
             bendControlName = self.name.split("_")[0] + "_1_bend"
@@ -313,14 +335,32 @@ class Limb(base.BaseComponent):
             )
 
             # aim the controls down the chain
-            bendAimList = [b.orig for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]]
-            aimVector = transform.getVectorFromAxis(transform.getAimAxis(self.input[1], allowNegative=True))
-            transform.aimChain(bendAimList, aimVector=aimVector, upVector=(0, 0, 1), worldUpObject=self.limbPv.orig)
+            bendAimList = [
+                b.orig
+                for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]
+            ]
+            aimVector = transform.getVectorFromAxis(
+                transform.getAimAxis(self.input[1], allowNegative=True)
+            )
+            transform.aimChain(
+                bendAimList,
+                aimVector=aimVector,
+                upVector=(0, 0, 1),
+                worldUpObject=self.limbPv.orig,
+            )
 
-            self.bendControls = [b.name for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]]
+            self.bendControls = [
+                b.name
+                for b in [self.bend1, self.bend2, self.bend3, self.bend4, self.bend5]
+            ]
 
         # add the controls to our controller list
-        self.fkControls = [self.joint1Fk.name, self.joint2Fk.name, self.joint3Fk.name, self.joint3GimbleFk.name]
+        self.fkControls = [
+            self.joint1Fk.name,
+            self.joint2Fk.name,
+            self.joint3Fk.name,
+            self.joint3GimbleFk.name,
+        ]
         self.ikControls = [self.limbIk.name, self.limbGimbleIk.name, self.limbPv.name]
 
     # pylint:disable=too-many-statements
@@ -340,13 +380,18 @@ class Limb(base.BaseComponent):
         )
 
         # connect the limbSwing to the other chains
-        transform.connectOffsetParentMatrix(self.limbSwing.name, self.joint1Fk.orig, s=False, sh=False)
-        transform.connectOffsetParentMatrix(self.limbSwing.name, self.ikfk.getIkJointList()[0], s=False)
+        transform.connectOffsetParentMatrix(
+            self.limbSwing.name, self.joint1Fk.orig, s=False, sh=False
+        )
+        transform.connectOffsetParentMatrix(
+            self.limbSwing.name, self.ikfk.getIkJointList()[0], s=False
+        )
         transform.connectOffsetParentMatrix(self.limbSwing.name, self._ikStartTgt)
 
         # connect fk controls to fk joints
         for ctl, jnt in zip(
-            [self.joint1Fk.name, self.joint2Fk.name, self.joint3GimbleFk.name], self.ikfk.getFkJointList()
+            [self.joint1Fk.name, self.joint2Fk.name, self.joint3GimbleFk.name],
+            self.ikfk.getFkJointList(),
         ):
             transform.connectOffsetParentMatrix(ctl, jnt)
             attr.lock(jnt, attr.TRANSFORMS + ["v"])
@@ -354,10 +399,14 @@ class Limb(base.BaseComponent):
         # connect the IkHandle to the end Target
         cmds.pointConstraint(self.limbGimbleIk.name, self._ikEndTgt, mo=True)
         # TODO: think about a way to take this out. use OffsetParentMatrix instead
-        cmds.orientConstraint(self.limbGimbleIk.name, self.ikfk.getIkJointList()[-1], mo=True)
+        cmds.orientConstraint(
+            self.limbGimbleIk.name, self.ikfk.getIkJointList()[-1], mo=True
+        )
 
         # create the upperArmLength
-        upperArmLenTrs = cmds.createNode("transform", name=f"{self.joint2Fk.name}_len_trs")
+        upperArmLenTrs = cmds.createNode(
+            "transform", name=f"{self.joint2Fk.name}_len_trs"
+        )
         transform.matchTransform(self.joint2Fk.name, upperArmLenTrs)
         transform.matchRotate(self.joint1Fk.name, upperArmLenTrs)
         cmds.parent(upperArmLenTrs, self.joint1Fk.name)
@@ -365,7 +414,9 @@ class Limb(base.BaseComponent):
         self.__connectFkLimbStretch(self.joint1Fk.name, upperArmLenTrs)
 
         # create the lowerLimbLength Attr
-        lowerArmLenTrs = cmds.createNode("transform", name=f"{self.joint3Fk.name}_len_trs")
+        lowerArmLenTrs = cmds.createNode(
+            "transform", name=f"{self.joint3Fk.name}_len_trs"
+        )
         transform.matchTransform(self.joint3Fk.name, lowerArmLenTrs)
         transform.matchRotate(self.joint2Fk.name, lowerArmLenTrs)
         cmds.parent(lowerArmLenTrs, self.joint2Fk.name)
@@ -377,10 +428,15 @@ class Limb(base.BaseComponent):
 
         # connect twist of ikHandle to ik arm
         cmds.addAttr(self.paramsHierarchy, ln="twist", at="float", k=True)
-        cmds.connectAttr("{}.{}".format(self.paramsHierarchy, "twist"), "{}.{}".format(self.ikfk.getHandle(), "twist"))
+        cmds.connectAttr(
+            "{}.{}".format(self.paramsHierarchy, "twist"),
+            "{}.{}".format(self.ikfk.getHandle(), "twist"),
+        )
 
         if self.addTwistJoints:
-            self.twistHierarchy = cmds.createNode("transform", n="{}_twist".format(self.name), p=self.rootHierarchy)
+            self.twistHierarchy = cmds.createNode(
+                "transform", n="{}_twist".format(self.name), p=self.rootHierarchy
+            )
 
             uppTargets, uppSpline = spline.addTwistJoints(
                 self.input[1],
@@ -405,11 +461,19 @@ class Limb(base.BaseComponent):
                 meta.tag(jnt, common.BINDTAG)
             meta.untag([self.input[1], self.input[2]], common.BINDTAG)
 
-            aimVector = transform.getVectorFromAxis(transform.getAimAxis(self.input[1], allowNegative=True))
+            aimVector = transform.getVectorFromAxis(
+                transform.getAimAxis(self.input[1], allowNegative=True)
+            )
             if self.addBendies:
-                transform.connectOffsetParentMatrix(self.input[1], self.bend1.orig, mo=True)
-                transform.connectOffsetParentMatrix(self.input[2], self.bend3.orig, mo=True)
-                transform.connectOffsetParentMatrix(self.input[3], self.bend5.orig, mo=True)
+                transform.connectOffsetParentMatrix(
+                    self.input[1], self.bend1.orig, mo=True
+                )
+                transform.connectOffsetParentMatrix(
+                    self.input[2], self.bend3.orig, mo=True
+                )
+                transform.connectOffsetParentMatrix(
+                    self.input[3], self.bend5.orig, mo=True
+                )
 
                 # out aim contraints will use the offset groups as an up rotation vector
                 cmds.pointConstraint(self.bend1.name, self.bend3.name, self.bend2.orig)
@@ -434,33 +498,62 @@ class Limb(base.BaseComponent):
                 )
 
                 # create the twist setup
-                transform.connectOffsetParentMatrix(self.bend1.name, uppTargets[0], mo=True)
-                transform.connectOffsetParentMatrix(self.bend2.name, uppTargets[1], mo=True)
-                transform.connectOffsetParentMatrix(self.bend3.name, uppTargets[2], mo=True)
+                transform.connectOffsetParentMatrix(
+                    self.bend1.name, uppTargets[0], mo=True
+                )
+                transform.connectOffsetParentMatrix(
+                    self.bend2.name, uppTargets[1], mo=True
+                )
+                transform.connectOffsetParentMatrix(
+                    self.bend3.name, uppTargets[2], mo=True
+                )
 
-                transform.connectOffsetParentMatrix(self.bend3.name, lowTargets[0], mo=True)
-                transform.connectOffsetParentMatrix(self.bend4.name, lowTargets[1], mo=True)
-                transform.connectOffsetParentMatrix(self.bend5.name, lowTargets[2], mo=True)
+                transform.connectOffsetParentMatrix(
+                    self.bend3.name, lowTargets[0], mo=True
+                )
+                transform.connectOffsetParentMatrix(
+                    self.bend4.name, lowTargets[1], mo=True
+                )
+                transform.connectOffsetParentMatrix(
+                    self.bend5.name, lowTargets[2], mo=True
+                )
 
             # create attributes for the volume factor
-            volumePlug = attr.createAttr(self.paramsHierarchy, "volumeFactor", "float", value=1, minValue=0)
-            cmds.connectAttr(volumePlug, "{}.{}".format(uppSpline.getGroup(), "volumeFactor"))
-            cmds.connectAttr(volumePlug, "{}.{}".format(lowSpline.getGroup(), "volumeFactor"))
+            volumePlug = attr.createAttr(
+                self.paramsHierarchy, "volumeFactor", "float", value=1, minValue=0
+            )
+            cmds.connectAttr(
+                volumePlug, "{}.{}".format(uppSpline.getGroup(), "volumeFactor")
+            )
+            cmds.connectAttr(
+                volumePlug, "{}.{}".format(lowSpline.getGroup(), "volumeFactor")
+            )
 
             self.__unifyBendiesInterp(uppSpline, lowSpline)
 
             # if the module is using the twisty bendy controls then we need to create a visibly control
-            attr.createAttr(self.paramsHierarchy, "bendies", "bool", value=0, keyable=True, channelBox=True)
+            attr.createAttr(
+                self.paramsHierarchy,
+                "bendies",
+                "bool",
+                value=0,
+                keyable=True,
+                channelBox=True,
+            )
 
             for bendieCtl in self.bendControls:
-                control.connectControlVisiblity(self.paramsHierarchy, "bendies", bendieCtl)
+                control.connectControlVisiblity(
+                    self.paramsHierarchy, "bendies", bendieCtl
+                )
 
         self.__createIkFkMatchSetup()
 
     def _postRigSetup(self):
         """Connect the blend chain to the bind chain"""
         joint.connectChains(self.ikfk.getBlendJointList(), self.input[1:4])
-        ikfk.IkFkBase.connectVisibility(self.paramsHierarchy, "ikfk", ikList=self.ikControls, fkList=self.fkControls)
+        ikfk.IkFkBase.connectVisibility(
+            self.paramsHierarchy, "ikfk", ikList=self.ikControls, fkList=self.fkControls
+        )
 
         if self.addTwistJoints:
             for jnt in [self.input[1], self.input[2]]:
@@ -477,20 +570,38 @@ class Limb(base.BaseComponent):
         attr.driveAttribute("softStretch", self.paramsHierarchy, self.ikfkControl.name)
         attr.driveAttribute("pvPin", self.paramsHierarchy, self.ikfkControl.name)
         if self.addTwistJoints and self.addBendies:
-            attr.driveAttribute("volumeFactor", self.paramsHierarchy, self.ikfkControl.name)
+            attr.driveAttribute(
+                "volumeFactor", self.paramsHierarchy, self.ikfkControl.name
+            )
             attr.driveAttribute("bendies", self.paramsHierarchy, self.ikfkControl.name)
-            attr.driveAttribute("uppCounterTwist", self.paramsHierarchy, self.ikfkControl.name)
+            attr.driveAttribute(
+                "uppCounterTwist", self.paramsHierarchy, self.ikfkControl.name
+            )
 
         # create a visability control for the ikGimble control
         attr.createAttr(
-            self.limbIk.name, longName="gimble", attributeType="bool", value=0, keyable=False, channelBox=True
+            self.limbIk.name,
+            longName="gimble",
+            attributeType="bool",
+            value=0,
+            keyable=False,
+            channelBox=True,
         )
-        control.connectControlVisiblity(self.limbIk.name, driverAttr="gimble", controls=self.limbGimbleIk.name)
+        control.connectControlVisiblity(
+            self.limbIk.name, driverAttr="gimble", controls=self.limbGimbleIk.name
+        )
 
         attr.createAttr(
-            self.joint3Fk.name, longName="gimble", attributeType="bool", value=0, keyable=False, channelBox=True
+            self.joint3Fk.name,
+            longName="gimble",
+            attributeType="bool",
+            value=0,
+            keyable=False,
+            channelBox=True,
         )
-        control.connectControlVisiblity(self.joint3Fk.name, driverAttr="gimble", controls=self.joint3GimbleFk.name)
+        control.connectControlVisiblity(
+            self.joint3Fk.name, driverAttr="gimble", controls=self.joint3GimbleFk.name
+        )
 
     def _connect(self):
         """Create the connection"""
@@ -498,7 +609,9 @@ class Limb(base.BaseComponent):
         # if not using proxy attributes then setup our ikfk controller
 
         if self.useCallbackSwitch:
-            transform.connectOffsetParentMatrix(self.input[3], self.ikfkProxySwitch.orig)
+            transform.connectOffsetParentMatrix(
+                self.input[3], self.ikfkProxySwitch.orig
+            )
             transform.connectOffsetParentMatrix(self.input[0], self.ikfkControl.orig)
             meta.createMessageConnection(
                 self.ikfkProxySwitch.name,
@@ -511,26 +624,62 @@ class Limb(base.BaseComponent):
 
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            transform.connectOffsetParentMatrix(self.rigParent, self.limbBase.orig, s=False, sh=False, mo=True)
+            transform.connectOffsetParentMatrix(
+                self.rigParent, self.limbBase.orig, s=False, sh=False, mo=True
+            )
 
         # setup the spaces
-        spaces.create(self.limbSwing.spaces, self.limbSwing.name, parent=self.spacesHierarchy)
-        spaces.create(self.joint1Fk.spaces, self.joint1Fk.name, parent=self.spacesHierarchy)
-        spaces.create(self.limbIk.spaces, self.limbIk.name, parent=self.spacesHierarchy, defaultName="world")
-        spaces.create(self.limbPv.spaces, self.limbPv.name, parent=self.spacesHierarchy, defaultName="world")
+        spaces.create(
+            self.limbSwing.spaces, self.limbSwing.name, parent=self.spacesHierarchy
+        )
+        spaces.create(
+            self.joint1Fk.spaces, self.joint1Fk.name, parent=self.spacesHierarchy
+        )
+        spaces.create(
+            self.limbIk.spaces,
+            self.limbIk.name,
+            parent=self.spacesHierarchy,
+            defaultName="world",
+        )
+        spaces.create(
+            self.limbPv.spaces,
+            self.limbPv.name,
+            parent=self.spacesHierarchy,
+            defaultName="world",
+        )
 
         # if the main control exists connect the world space
         if cmds.objExists("trs_motion"):
-            spaces.addSpace(self.limbSwing.spaces, ["trs_motion"], nameList=["world"], constraintType="orient")
-            spaces.addSpace(self.joint1Fk.spaces, ["trs_motion"], nameList=["world"], constraintType="orient")
+            spaces.addSpace(
+                self.limbSwing.spaces,
+                ["trs_motion"],
+                nameList=["world"],
+                constraintType="orient",
+            )
+            spaces.addSpace(
+                self.joint1Fk.spaces,
+                ["trs_motion"],
+                nameList=["world"],
+                constraintType="orient",
+            )
 
         if self.ikSpaces:
             ikSpaceValues = [self.ikSpaces[k] for k in self.ikSpaces.keys()]
-            spaces.addSpace(self.limbIk.spaces, ikSpaceValues, list(self.ikSpaces.keys()), constraintType="parent")
+            spaces.addSpace(
+                self.limbIk.spaces,
+                ikSpaceValues,
+                list(self.ikSpaces.keys()),
+                constraintType="parent",
+            )
 
         if self.pvSpaces:
             pvSpaceValues = [self.pvSpaces[k] for k in self.pvSpaces.keys()]
-            spaces.addSpace(self.limbPv.spaces, pvSpaceValues, list(self.pvSpaces.keys()), constraintType="parent")
+            spaces.addSpace(
+                self.limbPv.spaces,
+                pvSpaceValues,
+                list(self.pvSpaces.keys()),
+                constraintType="parent",
+            )
 
     def _finalize(self):
         """Lock some attributes we dont want to see"""
@@ -550,7 +699,9 @@ class Limb(base.BaseComponent):
     def __createIkFkMatchSetup(self):
         """Setup the ikFKMatching"""
         wristIkOffset = cmds.createNode(
-            "transform", name=f"{self.input[3]}_ikMatch", parent=self.ikfk.getFkJointList()[-1]
+            "transform",
+            name=f"{self.input[3]}_ikMatch",
+            parent=self.ikfk.getFkJointList()[-1],
         )
         fkJointsMatchList = self.ikfk.getFkJointList()[:-1] + [wristIkOffset]
         transform.matchTransform(self.limbIk.name, wristIkOffset)
@@ -559,28 +710,50 @@ class Limb(base.BaseComponent):
         # add required data to the ikFkSwitchGroup
         ikfkGroup = self.ikfk.getGroup()
         ikJointsList = self.ikfk.getIkJointList()
-        meta.createMessageConnection(ikfkGroup, self.ikfkControl.name, sourceAttr="ikfkControl")
-        meta.createMessageConnection(ikfkGroup, fkJointsMatchList, sourceAttr="fkMatchList", destAttr="matchNode")
-        meta.createMessageConnection(ikfkGroup, ikJointsList, sourceAttr="ikMatchList", destAttr="matchNode")
-        meta.createMessageConnection(ikfkGroup, self.fkControls, sourceAttr="fkControls", destAttr="matchNode")
-        meta.createMessageConnection(ikfkGroup, self.ikControls, sourceAttr="ikControls", destAttr="matchNode")
+        meta.createMessageConnection(
+            ikfkGroup, self.ikfkControl.name, sourceAttr="ikfkControl"
+        )
+        meta.createMessageConnection(
+            ikfkGroup, fkJointsMatchList, sourceAttr="fkMatchList", destAttr="matchNode"
+        )
+        meta.createMessageConnection(
+            ikfkGroup, ikJointsList, sourceAttr="ikMatchList", destAttr="matchNode"
+        )
+        meta.createMessageConnection(
+            ikfkGroup, self.fkControls, sourceAttr="fkControls", destAttr="matchNode"
+        )
+        meta.createMessageConnection(
+            ikfkGroup, self.ikControls, sourceAttr="ikControls", destAttr="matchNode"
+        )
 
     def __connectFkLimbStretch(self, attrHolder, lenTrs):
         """Connect the FK limb stretch"""
-        lenAttr = attr.createAttr(attrHolder, longName="length", attributeType="float", value=1, minValue=0.001)
+        lenAttr = attr.createAttr(
+            attrHolder,
+            longName="length",
+            attributeType="float",
+            value=1,
+            minValue=0.001,
+        )
         aimAxis = transform.getAimAxis(attrHolder, allowNegative=False)
 
         defaultLength = cmds.getAttr(f"{lenTrs}.t{aimAxis}")
 
         node.multDoubleLinear(
-            input1=defaultLength, input2=lenAttr, output=f"{lenTrs}.t{aimAxis}", name=f"{lenTrs}_lengthScale"
+            input1=defaultLength,
+            input2=lenAttr,
+            output=f"{lenTrs}.t{aimAxis}",
+            name=f"{lenTrs}_lengthScale",
         )
 
     def __negateUpperLimbTwist(self, uppSpline):
         # calculate an inverted rotation to negate the upp twist start.
         # This gives a more natural twist down the limb
         twistMultMatrix, twistDecompose = node.multMatrix(
-            inputs=["{}.worldMatrix".format(self.input[1]), "{}.worldInverseMatrix".format(self.input[0])],
+            inputs=[
+                "{}.worldMatrix".format(self.input[1]),
+                "{}.worldInverseMatrix".format(self.input[0]),
+            ],
             outputs=[""],
             name="{}_invStartTist".format(uppSpline._startTwist),
         )
@@ -595,11 +768,23 @@ class Limb(base.BaseComponent):
             maxValue=1,
         )
 
-        blendMatrix = cmds.createNode("blendMatrix", name="{}_conterTwist".format(uppSpline._startTwist))
-        cmds.connectAttr("{}.matrixSum".format(twistMultMatrix), "{}.target[0].targetMatrix".format(blendMatrix))
-        cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.inputMatrix".format(twistDecompose), f=True)
+        blendMatrix = cmds.createNode(
+            "blendMatrix", name="{}_conterTwist".format(uppSpline._startTwist)
+        )
+        cmds.connectAttr(
+            "{}.matrixSum".format(twistMultMatrix),
+            "{}.target[0].targetMatrix".format(blendMatrix),
+        )
+        cmds.connectAttr(
+            "{}.outputMatrix".format(blendMatrix),
+            "{}.inputMatrix".format(twistDecompose),
+            f=True,
+        )
 
-        cmds.connectAttr("{}.uppCounterTwist".format(self.paramsHierarchy), "{}.envelope".format(blendMatrix))
+        cmds.connectAttr(
+            "{}.uppCounterTwist".format(self.paramsHierarchy),
+            "{}.envelope".format(blendMatrix),
+        )
 
         if "-" not in transform.getAimAxis(self.input[1]):
             node.unitConversion(
@@ -610,10 +795,18 @@ class Limb(base.BaseComponent):
             )
             rotateOrder = cmds.getAttr("{}.rotateOrder".format(self.input[1]))
             negatedRotateOrder = transform.ROTATEORDER_NEGATED[rotateOrder]
-            negatedRotateOrderIndex = transform.ROTATEORDER_NEGATED.index(negatedRotateOrder)
-            cmds.setAttr("{}.{}".format(uppSpline._startTwist, "rotateOrder"), negatedRotateOrderIndex)
+            negatedRotateOrderIndex = transform.ROTATEORDER_NEGATED.index(
+                negatedRotateOrder
+            )
+            cmds.setAttr(
+                "{}.{}".format(uppSpline._startTwist, "rotateOrder"),
+                negatedRotateOrderIndex,
+            )
         else:
-            cmds.connectAttr("{}.outputRotate".format(twistDecompose), "{}.r".format(uppSpline._startTwist))
+            cmds.connectAttr(
+                "{}.outputRotate".format(twistDecompose),
+                "{}.r".format(uppSpline._startTwist),
+            )
 
     def __unifyBendiesInterp(self, uppSpline, lowSpline):
         # re-create a smoother interpolation:
@@ -621,10 +814,20 @@ class Limb(base.BaseComponent):
         for i in range(len(scaleList)):
             percent = i / float(len(scaleList) - 1)
             value = mathUtils.lerp(0, 1, percent)
-            cmds.setAttr("{}.scale_{}".format(uppSpline._group, uppSpline._ikJointList.index(scaleList[i])), value)
+            cmds.setAttr(
+                "{}.scale_{}".format(
+                    uppSpline._group, uppSpline._ikJointList.index(scaleList[i])
+                ),
+                value,
+            )
 
         scaleList = list(lowSpline._ikJointList)
         for i in range(len(scaleList)):
             percent = i / float(len(scaleList) - 1)
             value = mathUtils.lerp(1, 0, percent)
-            cmds.setAttr("{}.scale_{}".format(lowSpline._group, lowSpline._ikJointList.index(scaleList[i])), value)
+            cmds.setAttr(
+                "{}.scale_{}".format(
+                    lowSpline._group, lowSpline._ikJointList.index(scaleList[i])
+                ),
+                value,
+            )

@@ -28,19 +28,19 @@ from rigamajig2.shared import common
 logger = logging.getLogger(__name__)
 
 
-LAYER_HRC = 'deformLayers'
-LAYERS_ATTR = 'deformationLayers'
-LAYER_ATTR = 'deformationLayer'
+LAYER_HRC = "deformLayers"
+LAYERS_ATTR = "deformationLayers"
+LAYER_ATTR = "deformationLayer"
 LAYER_GROUP_ATTR = "deformLayerGroup"
 LAYERS_STACKED_ATTR = "layersStacked"
 
-MAIN_NODE_NAME = 'main'
+MAIN_NODE_NAME = "main"
 
 DEFORM_LAYER_BSHP_TAG = "deformLayerBshp"
 
-CONNECTION_METHOD_LIST = ['bshp', 'inmesh']
+CONNECTION_METHOD_LIST = ["bshp", "inmesh"]
 
-DUMMY_JOINT = 'world_dummy_bind'
+DUMMY_JOINT = "world_dummy_bind"
 
 
 def _safeSetVisablity(node, value):
@@ -58,17 +58,19 @@ def _safeSetVisablity(node, value):
 
 def transferAllDeformerTypes(deformerName, sourceGeo, targetGeo, override=False):
     """
-   Transfer a deformer of any tupe to another geometry
+    Transfer a deformer of any tupe to another geometry
 
-   :param deformerName: name of the deformer to transfer
-   :param str sourceGeo: name of the geometry copy from
-   :param str targetGeo: name of the geometry to transfer to
-   :param bool override: If True override the existing skin cluster
-   :return: name of the transfered deformer
-   """
+    :param deformerName: name of the deformer to transfer
+    :param str sourceGeo: name of the geometry copy from
+    :param str targetGeo: name of the geometry to transfer to
+    :param bool override: If True override the existing skin cluster
+    :return: name of the transfered deformer
+    """
 
     if deformerName not in deformer.getDeformerStack(sourceGeo):
-        raise ValueError(f"'{deformerName}' is not part of the deformer stack for {sourceGeo}")
+        raise ValueError(
+            f"'{deformerName}' is not part of the deformer stack for {sourceGeo}"
+        )
 
     if blendshape.isBlendshape(deformerName):
         layerId = targetGeo.split("_")[0]
@@ -77,7 +79,8 @@ def transferAllDeformerTypes(deformerName, sourceGeo, targetGeo, override=False)
             targetMesh=targetGeo,
             blendshapeName=f"{deformerName}",
             copyConnections=True,
-            deformOrder="before")  # We will need to apply the blendshape before the skin cluster to avoid bad deformation stacking.
+            deformOrder="before",
+        )  # We will need to apply the blendshape before the skin cluster to avoid bad deformation stacking.
 
         cmds.delete(deformerName)
         cmds.rename(newDeformer, deformerName)
@@ -85,13 +88,19 @@ def transferAllDeformerTypes(deformerName, sourceGeo, targetGeo, override=False)
 
     elif skinCluster.isSkinCluster(deformerName):
         if skinCluster.getSkinCluster(targetGeo) and not override:
-            logger.warning(f"{deformerName} was not transfered because it would override the skincluster")
+            logger.warning(
+                f"{deformerName} was not transfered because it would override the skincluster"
+            )
             return None
-        newDeformer = skinCluster.copySkinClusterAndInfluences(sourceMesh=sourceGeo, targetMeshes=targetGeo)
+        newDeformer = skinCluster.copySkinClusterAndInfluences(
+            sourceMesh=sourceGeo, targetMeshes=targetGeo
+        )
         cmds.skinCluster(deformerName, e=True, unbind=True, unbindKeepHistory=False)
 
     elif deformer.isDeformer(deformerName):
-        newDeformer = deformer.transferDeformer(deformer=deformerName, sourceMesh=sourceGeo, targetMesh=targetGeo)
+        newDeformer = deformer.transferDeformer(
+            deformer=deformerName, sourceMesh=sourceGeo, targetMesh=targetGeo
+        )
         deformer.removeGeoFromDeformer(deformerName, geo=sourceGeo)
 
     else:
@@ -153,20 +162,35 @@ class DeformLayer(object):
         """
 
         if not mesh.isMesh(model):
-            raise Exception("{} is not a mesh. Please provide a valid mesh to use deform layers.".format(model))
+            raise Exception(
+                "{} is not a mesh. Please provide a valid mesh to use deform layers.".format(
+                    model
+                )
+            )
 
         self.model = model
         self.deformShape = deformer.getDeformShape(self.model)
 
         # tag the model as one that has deformation layers
-        meta.tag(self.model, tag='hasDeformLayers')
+        meta.tag(self.model, tag="hasDeformLayers")
 
         # all layers MUST belong to a layer group, so if one is not assigned, assign it to "main"
 
         if not cmds.objExists(f"{self.model}.{LAYER_GROUP_ATTR}"):
             layerGroup = layerGroup or "main"
-            attr.createAttr(self.model, longName=LAYER_GROUP_ATTR, attributeType="string", value=layerGroup)
-            attr.createAttr(self.model, longName=LAYERS_STACKED_ATTR, attributeType="bool", value=False, keyable=False)
+            attr.createAttr(
+                self.model,
+                longName=LAYER_GROUP_ATTR,
+                attributeType="string",
+                value=layerGroup,
+            )
+            attr.createAttr(
+                self.model,
+                longName=LAYERS_STACKED_ATTR,
+                attributeType="bool",
+                value=False,
+                keyable=False,
+            )
             attr.lock(self.model, attrs=LAYER_GROUP_ATTR)
 
     def _intialzeLayersSetup(self):
@@ -201,7 +225,7 @@ class DeformLayer(object):
             return cmds.getAttr(f"{self.model}.{LAYER_GROUP_ATTR}")
         return None
 
-    def createDeformLayer(self, suffix=None, connectionMethod='bshp'):
+    def createDeformLayer(self, suffix=None, connectionMethod="bshp"):
         """
         Create a  new deformation Layer
         :param suffix: optional name to add to the deformation layer mesh name.
@@ -240,7 +264,9 @@ class DeformLayer(object):
             joint.hideJoints([dummyJoint, bpmJoint])
 
         if suffix:
-            meshDup = "d{index}_{model}_{suffix}".format(index=index, model=self.model, suffix=suffix)
+            meshDup = "d{index}_{model}_{suffix}".format(
+                index=index, model=self.model, suffix=suffix
+            )
         else:
             meshDup = "d{index}_{model}".format(index=index, model=self.model)
 
@@ -248,7 +274,7 @@ class DeformLayer(object):
         tmpDup = cmds.duplicate(self.model)
         cmds.rename(tmpDup, meshDup)
         cmds.parent(meshDup, deformLayerName)
-        meta.untag(meshDup, tag='hasDeformLayers')
+        meta.untag(meshDup, tag="hasDeformLayers")
         if cmds.objExists(f"{meshDup}.{LAYER_GROUP_ATTR}"):
             attr.unlock(meshDup, attrs=LAYER_GROUP_ATTR)
             cmds.deleteAttr(meshDup, attribute=LAYER_GROUP_ATTR)
@@ -271,25 +297,42 @@ class DeformLayer(object):
         meta.addMessageListConnection(self.model, [meshDup], LAYERS_ATTR, LAYER_ATTR)
 
         # add additional metadata
-        attr.createAttr(meshDup, longName='suffix', attributeType='string', value=suffix, locked=True)
+        attr.createAttr(
+            meshDup,
+            longName="suffix",
+            attributeType="string",
+            value=suffix,
+            locked=True,
+        )
 
         # add the connection method to the target
         if connectionMethod not in CONNECTION_METHOD_LIST:
             raise KeyError(
-                "{} is not a valid connection type. Use: {}".format(connectionMethod, CONNECTION_METHOD_LIST))
+                "{} is not a valid connection type. Use: {}".format(
+                    connectionMethod, CONNECTION_METHOD_LIST
+                )
+            )
 
         defaultConnectionMethod = CONNECTION_METHOD_LIST.index(connectionMethod)
-        attr.createEnum(meshDup, longName='connectionMethod', enum=CONNECTION_METHOD_LIST,
-                        value=defaultConnectionMethod)
+        attr.createEnum(
+            meshDup,
+            longName="connectionMethod",
+            enum=CONNECTION_METHOD_LIST,
+            value=defaultConnectionMethod,
+        )
 
         # connect the previous layer to the new layer
         # we can assume the layer before this is the source
         if self.getNumberOfDeformationLayers() > 1:
             previousLayer = self.getDeformationLayers()[-2]
             blendshapeName = "d{}_{}_layer".format(index, self.model)
-            blendshapeNode = blendshape.create(base=meshDup, targets=None, name=blendshapeName)
+            blendshapeNode = blendshape.create(
+                base=meshDup, targets=None, name=blendshapeName
+            )
 
-            blendshape.addTarget(blendshape=blendshapeNode, target=previousLayer, targetWeight=1.0)
+            blendshape.addTarget(
+                blendshape=blendshapeNode, target=previousLayer, targetWeight=1.0
+            )
 
             # add a tag to makr the blendshape as NOT part of the deformation chain.
             meta.tag(blendshapeNode, tag=DEFORM_LAYER_BSHP_TAG)
@@ -299,16 +342,15 @@ class DeformLayer(object):
         return meshDup
 
     def getDeformationLayers(self):
-        """ return the names of all the deformation layers on a given model"""
+        """return the names of all the deformation layers on a given model"""
 
         layers = meta.getMessageConnection("{}.{}".format(self.model, LAYERS_ATTR))
         return sorted(common.toList(layers)) if layers else None
 
     def getNumberOfDeformationLayers(self):
-        """ return the number of deformation layers on a given node"""
+        """return the number of deformation layers on a given node"""
         # get the index of the layer
         if cmds.objExists("{}.{}".format(self.model, LAYERS_ATTR)):
-
             mPlug = attr._getPlug("{}.{}".format(self.model, LAYERS_ATTR))
             numberLayers = mPlug.evaluateNumElements()
 
@@ -318,7 +360,7 @@ class DeformLayer(object):
         return numberLayers
 
     def deleteDeformationLayer(self, layerIndex):
-        """ delete a deformation layer at the given index"""
+        """delete a deformation layer at the given index"""
         raise NotImplementedError("Deleting deform layers has not yet been implemented")
 
     def setLayerVisability(self, value, layerIndex):
@@ -326,7 +368,6 @@ class DeformLayer(object):
         deformLayerMeshes = self.getDeformationLayers()
 
         for i, deformLayerMesh in enumerate(deformLayerMeshes):
-
             cmds.setAttr(f"{deformLayerMesh}.v", False)
             if value and i == layerIndex:
                 cmds.setAttr(f"{deformLayerMesh}.v", True)
@@ -368,11 +409,16 @@ class DeformLayer(object):
                         targetMesh=self.model,
                         blendshapeName=blendshapeName,
                         copyConnections=True,
-                        deformOrder="after")
+                        deformOrder="after",
+                    )
                 elif skinCluster.isSkinCluster(deformer_):
-                    skinCluster.stackSkinCluster(layer, self.model, skinName=f"stacked__{layer}_skinCluster")
+                    skinCluster.stackSkinCluster(
+                        layer, self.model, skinName=f"stacked__{layer}_skinCluster"
+                    )
                 elif deformer.isDeformer(deformer_):
-                    deformer.transferDeformer(deformer=deformer_, sourceMesh=layer, targetMesh=self.model)
+                    deformer.transferDeformer(
+                        deformer=deformer_, sourceMesh=layer, targetMesh=self.model
+                    )
                 else:
                     logger.warning(f"{deformer_} is not stackable.")
                     continue
@@ -385,7 +431,9 @@ class DeformLayer(object):
         attr.setPlugValue(f"{self.model}.{LAYERS_STACKED_ATTR}", True)
 
         # send out a message that the stack was successful
-        logger.info(f"deform layers successfully stacked '{self.model}' ({len(layers)} layers, {deformerCount} deformers)")
+        logger.info(
+            f"deform layers successfully stacked '{self.model}' ({len(layers)} layers, {deformerCount} deformers)"
+        )
 
         if cleanup:
             cmds.delete(layers)

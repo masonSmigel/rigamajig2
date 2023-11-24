@@ -22,7 +22,7 @@ def rgbToHex(color):
 
     :param list tuple color: RGB color in 0-255 space
     """
-    return '#{:02X}{:02X}{:02X}'.format(color.red, color.green, color.blue)
+    return "#{:02X}{:02X}{:02X}".format(color.red, color.green, color.blue)
 
 
 COLORS = OrderedDict(
@@ -56,7 +56,6 @@ COLORS = OrderedDict(
     skyblue=(8, 35, 90),
     purple=(41, 8, 90),
     magenta=(90, 8, 36),
-
     aqua=(0, 128, 128),
     banana=(255, 255, 32),
     crimson=(220, 20, 60),
@@ -78,11 +77,37 @@ COLORS = OrderedDict(
 )
 
 MAYA_INDEX_COLORS = OrderedDict(
-    black=1, darkgray=2, lightgray=3, maroon=4, blue=6, darkgreen=7, darkpurple=8,
-    brightpurple=9, brown=10, darkbrown=11, brick=12, red=13, green=14, cobalt=15, white=16,
-    yellow=17, lightblue=18, lightgreen=19, lightpink=20, lightorange=21, lightyellow=22,
-    grass=23, darkorange=24, yellowgreen=25, greenyellow=26, springgreen=27, turquoise=28,
-    skyblue=29, purple=30, magenta=31)
+    black=1,
+    darkgray=2,
+    lightgray=3,
+    maroon=4,
+    blue=6,
+    darkgreen=7,
+    darkpurple=8,
+    brightpurple=9,
+    brown=10,
+    darkbrown=11,
+    brick=12,
+    red=13,
+    green=14,
+    cobalt=15,
+    white=16,
+    yellow=17,
+    lightblue=18,
+    lightgreen=19,
+    lightpink=20,
+    lightorange=21,
+    lightyellow=22,
+    grass=23,
+    darkorange=24,
+    yellowgreen=25,
+    greenyellow=26,
+    springgreen=27,
+    turquoise=28,
+    skyblue=29,
+    purple=30,
+    magenta=31,
+)
 
 
 def getAvailableColors():
@@ -127,10 +152,12 @@ def setOverrideColor(nodes, color):
             cmds.setAttr("{}.overrideColor".format(node), color)
         else:
             cmds.setAttr("{}.overrideRGBColors".format(node), 1)
-            cmds.setAttr("{}.overrideColorRGB".format(node), color[0], color[1], color[2])
+            cmds.setAttr(
+                "{}.overrideColorRGB".format(node), color[0], color[1], color[2]
+            )
 
 
-def setOutlinerColor(nodes:Union[List[str], str], color):
+def setOutlinerColor(nodes: Union[List[str], str], color):
     """
     Sets the color of nodes in the outliner
     :param list nodes: nodes to set the override color to

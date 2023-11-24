@@ -19,7 +19,11 @@ from rigamajig2.shared import common
 
 
 def setupSpreadSdk(
-    controlsList: List[str], attrHolder: str, driverAttr: str, axis: str = "y", multiplier: float = 1.0
+    controlsList: List[str],
+    attrHolder: str,
+    driverAttr: str,
+    axis: str = "y",
+    multiplier: float = 1.0,
 ) -> None:
     """
     setup the spread on a list of controls.
@@ -47,15 +51,33 @@ def setupSpreadSdk(
         if i == 0:
             value = float(1 * multiplier)
             valueList = [(-1, value), (0, 0), (1, -value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
+            sdk.createSdk(
+                driverPlug,
+                targetPlug,
+                values=valueList,
+                preInfinity=True,
+                postInfinity=True,
+            )
         if i == 2:
             value = float(1 * multiplier)
             valueList = [(-1, -value), (0, 0), (1, value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
+            sdk.createSdk(
+                driverPlug,
+                targetPlug,
+                values=valueList,
+                preInfinity=True,
+                postInfinity=True,
+            )
         if i > 2:
             value = float(2 * multiplier * (i - 2))
             valueList = [(-1, -value), (0, 0), (1, value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
+            sdk.createSdk(
+                driverPlug,
+                targetPlug,
+                values=valueList,
+                preInfinity=True,
+                postInfinity=True,
+            )
 
 
 def setupCurlSdk(
@@ -95,15 +117,31 @@ def setupCurlSdk(
             else:
                 value = float(0.1 * multiplier)
             valueList = [(-1, value), (0, 0), (1, -value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
+            sdk.createSdk(
+                driverPlug,
+                targetPlug,
+                values=valueList,
+                preInfinity=True,
+                postInfinity=True,
+            )
         else:
             value = float(1.0 * multiplier)
             valueList = [(-1, value), (0, 0), (1, -value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
+            sdk.createSdk(
+                driverPlug,
+                targetPlug,
+                values=valueList,
+                preInfinity=True,
+                postInfinity=True,
+            )
 
 
 def setupFanSdk(
-    controlsList: List[str], attrHolder: str, driverAttr: str, axis: str = "z", multiplier: float = 1.0
+    controlsList: List[str],
+    attrHolder: str,
+    driverAttr: str,
+    axis: str = "z",
+    multiplier: float = 1.0,
 ) -> None:
     """
     setup the fan on a list of controls.
@@ -131,23 +169,51 @@ def setupFanSdk(
         if i == 0:
             value = float(1.5 * multiplier)
             valueList = [(-1, -value), (0, 0), (1, value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
+            sdk.createSdk(
+                driverPlug,
+                targetPlug,
+                values=valueList,
+                preInfinity=True,
+                postInfinity=True,
+            )
         if i == 1:
             value = float(0.5 * multiplier)
             valueList = [(-1, -value), (0, 0), (1, value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
+            sdk.createSdk(
+                driverPlug,
+                targetPlug,
+                values=valueList,
+                preInfinity=True,
+                postInfinity=True,
+            )
         if i == 2:
             value = float(0.5 * multiplier)
             valueList = [(-1, value), (0, 0), (1, -value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
+            sdk.createSdk(
+                driverPlug,
+                targetPlug,
+                values=valueList,
+                preInfinity=True,
+                postInfinity=True,
+            )
         if i > 2:
             value = float(1.5 * multiplier * (i - 2))
             valueList = [(-1, value), (0, 0), (1, -value)]
-            sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
+            sdk.createSdk(
+                driverPlug,
+                targetPlug,
+                values=valueList,
+                preInfinity=True,
+                postInfinity=True,
+            )
 
 
 def setupSimple(
-    controlsList: List[str], attrHolder: str, driverAttr: str, axis: str = "x", multplier: float = 1.0
+    controlsList: List[str],
+    attrHolder: str,
+    driverAttr: str,
+    axis: str = "x",
+    multplier: float = 1.0,
 ) -> None:
     """
     Setup a simple connection
@@ -168,4 +234,10 @@ def setupSimple(
 
         value = float(1 * multplier)
         valueList = [(-1, -value), (0, 0), (1, value)]
-        sdk.createSdk(driverPlug, targetPlug, values=valueList, preInfinity=True, postInfinity=True)
+        sdk.createSdk(
+            driverPlug,
+            targetPlug,
+            values=valueList,
+            preInfinity=True,
+            postInfinity=True,
+        )

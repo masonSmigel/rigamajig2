@@ -40,7 +40,9 @@ class Basic(base.BaseComponent):
         :param worldOrient: Orient the control to the world. Default: False
         :param spaceType: Control the type of space switch added. Value values are "orient" or "parent"
         """
-        super(Basic, self).__init__(name, input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(Basic, self).__init__(
+            name, input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
         self.side = common.getSide(self.name)
 
         self.controlName = [x.split("_")[0] for x in self.input][0]
@@ -52,11 +54,21 @@ class Basic(base.BaseComponent):
         self.addSdk = False
         self.addBpm = False
 
-        self.defineParameter(parameter="controlName", value=self.controlName, dataType="string")
-        self.defineParameter(parameter="controlShape", value=self.controlShape, dataType="string")
-        self.defineParameter(parameter="worldOrient", value=self.worldOrient, dataType="bool")
-        self.defineParameter(parameter="addSpaces", value=self.addSpaces, dataType="bool")
-        self.defineParameter(parameter="spaceType", value=self.spaceType, dataType="string")
+        self.defineParameter(
+            parameter="controlName", value=self.controlName, dataType="string"
+        )
+        self.defineParameter(
+            parameter="controlShape", value=self.controlShape, dataType="string"
+        )
+        self.defineParameter(
+            parameter="worldOrient", value=self.worldOrient, dataType="bool"
+        )
+        self.defineParameter(
+            parameter="addSpaces", value=self.addSpaces, dataType="bool"
+        )
+        self.defineParameter(
+            parameter="spaceType", value=self.spaceType, dataType="string"
+        )
         self.defineParameter(parameter="addTrs", value=self.addTrs, dataType="bool")
         self.defineParameter(parameter="addSdk", value=self.addSdk, dataType="bool")
         self.defineParameter(parameter="addBpm", value=self.addBpm, dataType="bool")
@@ -96,11 +108,15 @@ class Basic(base.BaseComponent):
         if self.addBpm:
             # if needed we will add a bind pre matrix joint.
             self.bpmHierarchy = cmds.createNode(
-                "transform", name="{}_bpm_hrc".format(self.name), parent=self.rootHierarchy
+                "transform",
+                name="{}_bpm_hrc".format(self.name),
+                parent=self.rootHierarchy,
             )
 
             bpmJointName = [x.rsplit("_", 1)[0] + "_bpm" for x in self.input]
-            self.bpmJointList = joint.duplicateChain(self.input, parent=self.bpmHierarchy, names=bpmJointName)
+            self.bpmJointList = joint.duplicateChain(
+                self.input, parent=self.bpmHierarchy, names=bpmJointName
+            )
 
             joint.hideJoints(self.bpmJointList)
 
@@ -108,11 +124,22 @@ class Basic(base.BaseComponent):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            transform.connectOffsetParentMatrix(self.rigParent, self.control.orig, mo=True)
+            transform.connectOffsetParentMatrix(
+                self.rigParent, self.control.orig, mo=True
+            )
 
         if self.addSpaces:
-            spaces.create(self.control.spaces, self.control.name, parent=self.spacesHierarchy)
-            spaces.addSpace(self.control.spaces, ["trs_motion"], nameList=["world"], constraintType=self.spaceType)
+            spaces.create(
+                self.control.spaces, self.control.name, parent=self.spacesHierarchy
+            )
+            spaces.addSpace(
+                self.control.spaces,
+                ["trs_motion"],
+                nameList=["world"],
+                constraintType=self.spaceType,
+            )
 
         if self.addBpm:
-            transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
+            transform.connectOffsetParentMatrix(
+                self.rigParent, self.bpmJointList[0], mo=True
+            )

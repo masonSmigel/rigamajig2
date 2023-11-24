@@ -6,7 +6,6 @@
     author: masonsmigel
     date: 07/2023
     description: 
-
 """
 import logging
 import os

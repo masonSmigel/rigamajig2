@@ -286,7 +286,9 @@ def mirror(joints: Multiuse, axis="x", mode="rotate", zeroRotation=True):
 
     # Validate cmds which to mirror axis,
     if axis.lower() not in ("x", "y", "z"):
-        raise ValueError("Keyword Argument: 'axis' not of accepted value ('x', 'y', 'z').")
+        raise ValueError(
+            "Keyword Argument: 'axis' not of accepted value ('x', 'y', 'z')."
+        )
 
     trsVector = ()
     rotVector = ()
@@ -318,7 +320,11 @@ def mirror(joints: Multiuse, axis="x", mode="rotate", zeroRotation=True):
 
             # set rotation orientation
             cmds.xform(destination, ws=1, matrix=matrix)
-            cmds.xform(destination, ws=True, t=(trs[0] * trsVector[0], trs[1] * trsVector[1], trs[2] * trsVector[2]))
+            cmds.xform(
+                destination,
+                ws=True,
+                t=(trs[0] * trsVector[0], trs[1] * trsVector[1], trs[2] * trsVector[2]),
+            )
             cmds.xform(destination, ws=True, r=True, ro=rotVector)
 
             # Mirror mode translate
@@ -328,7 +334,9 @@ def mirror(joints: Multiuse, axis="x", mode="rotate", zeroRotation=True):
                     cmds.setAttr(destination + ".rz", 180)
                     cmds.makeIdentity(destination, apply=1, r=1)
                 except:
-                    raise RuntimeError("Could not zeroRotation out {}".format(destination))
+                    raise RuntimeError(
+                        "Could not zeroRotation out {}".format(destination)
+                    )
 
             # set prefered angle
             if cmds.objExists("{}.{}".format(jnt, "preferredAngle")):
@@ -354,7 +362,9 @@ def mirror(joints: Multiuse, axis="x", mode="rotate", zeroRotation=True):
 
 
 @decorators.preserveSelection
-def orientJoints(joints, aimAxis="x", upAxis="y", worldUpVector=(0, 1, 0), autoUpVector=False):
+def orientJoints(
+    joints, aimAxis="x", upAxis="y", worldUpVector=(0, 1, 0), autoUpVector=False
+):
     """
     Orient joints using an aim constraint. If using autoUpVector select the only joints you want to orient together.
 
@@ -380,7 +390,11 @@ def orientJoints(joints, aimAxis="x", upAxis="y", worldUpVector=(0, 1, 0), autoU
         if parent not in joints:
             parent = None
 
-        allChildren = cmds.listRelatives(joint, c=True) if cmds.listRelatives(joint, c=True) else list()
+        allChildren = (
+            cmds.listRelatives(joint, c=True)
+            if cmds.listRelatives(joint, c=True)
+            else list()
+        )
         children = [child for child in allChildren if cmds.nodeType(child) == "joint"]
         if len(children) > 0:
             # get the aim target
@@ -393,13 +407,19 @@ def orientJoints(joints, aimAxis="x", upAxis="y", worldUpVector=(0, 1, 0), autoU
                 if autoUpVector or worldUpVector == (0, 0, 0):
                     # Now we need to get three joints to caluclate the cross product
                     jointPos = cmds.xform(joint, q=True, ws=True, rp=True)
-                    parentPos = cmds.xform(parent, q=True, ws=True, rp=True) if parent else jointPos
+                    parentPos = (
+                        cmds.xform(parent, q=True, ws=True, rp=True)
+                        if parent
+                        else jointPos
+                    )
 
                     # If were not using the parent, or if the parent is in the same position as the currentJoint ...
                     if not parent or mathUtils.pointsEqual(jointPos, parentPos):
                         # ... Then get the first child joint of the aim target.
                         aimChildren = (
-                            cmds.listRelatives(aimTarget, c=True) if cmds.listRelatives(aimTarget, c=True) else list()
+                            cmds.listRelatives(aimTarget, c=True)
+                            if cmds.listRelatives(aimTarget, c=True)
+                            else list()
                         )
                         aimChild = None
                         for child in aimChildren:
@@ -432,7 +452,10 @@ def orientJoints(joints, aimAxis="x", upAxis="y", worldUpVector=(0, 1, 0), autoU
 
             if i > 0 and dot < 0.0:
                 # rotate the joint around the aim axis 180 degrees if we flipped.
-                cmds.xform(joint, ra=[aimVector[0] * 180, aimVector[1] * 180, aimVector[2] * 180])
+                cmds.xform(
+                    joint,
+                    ra=[aimVector[0] * 180, aimVector[1] * 180, aimVector[2] * 180],
+                )
                 prevUp = mathUtils.scalarMult(prevUp, -1)
 
             # Apply rotation values to joint orientation
@@ -503,7 +526,9 @@ def connectChains(source: Multiuse, destination: Multiuse, connectScale=True):
     source = common.toList(source)
     destination = common.toList(destination)
     if not len(source) == len(destination):
-        raise RuntimeError("List mismatch. Source and destination must have equal lengths")
+        raise RuntimeError(
+            "List mismatch. Source and destination must have equal lengths"
+        )
 
     for driver, driven in zip(source, destination):
         attr.unlock(driven, attr.TRANSFORMS + ["v"])
@@ -512,7 +537,9 @@ def connectChains(source: Multiuse, destination: Multiuse, connectScale=True):
         if connectScale:
             parent = "bind" if cmds.objExists("bind") else None
 
-            mult = cmds.createNode("multMatrix", name="{}_local_{}".format(driven, "mm"))
+            mult = cmds.createNode(
+                "multMatrix", name="{}_local_{}".format(driven, "mm")
+            )
             worldMatrix = "{}.worldMatrix[0]".format(driver)
             cmds.connectAttr(worldMatrix, "{}.matrixIn[0]".format(mult))
             if parent:
@@ -543,7 +570,9 @@ def hideJoints(joints):
             cmds.setAttr("{}.drawStyle".format(joint), 2)
 
 
-def createInterpJoint(joint, parentJoint=None, value=0.5, t=False, r=True, s=False, sh=False, bind=True):
+def createInterpJoint(
+    joint, parentJoint=None, value=0.5, t=False, r=True, s=False, sh=False, bind=True
+):
     """
     Add an interpolation rotation joint on the given joint. We will
     also add an attribute to the joint to blend between the joint and
@@ -571,7 +600,9 @@ def createInterpJoint(joint, parentJoint=None, value=0.5, t=False, r=True, s=Fal
         parentJoint = parentJoint[0] if parentJoint else None
 
     if not parentJoint:
-        raise Exception("Please provide a valid parent joint or set a hierarchy parent. ")
+        raise Exception(
+            "Please provide a valid parent joint or set a hierarchy parent. "
+        )
 
     interpJointName = naming.getUniqueName("{}_interp".format(joint))
 
@@ -587,18 +618,29 @@ def createInterpJoint(joint, parentJoint=None, value=0.5, t=False, r=True, s=Fal
     cmds.parent(interpJoint, joint)
 
     # create an attribute to control the blending
-    blendAttr = attr.createAttr(interpJoint, "interpBlend", "float", value=value, minValue=0, maxValue=1.0)
+    blendAttr = attr.createAttr(
+        interpJoint, "interpBlend", "float", value=value, minValue=0, maxValue=1.0
+    )
 
     # blend the rotation between the two joints
     multMatrix, pickMatrix = transform.connectOffsetParentMatrix(
         parentJoint, interpJoint, mo=True, t=t, r=r, s=s, sh=sh
     )
-    blendMatrix = cmds.createNode("blendMatrix", n="{}_{}_blendMatrix".format(parentJoint, joint))
-    cmds.connectAttr("{}.matrixSum".format(multMatrix), "{}.target[0].targetMatrix".format(blendMatrix))
+    blendMatrix = cmds.createNode(
+        "blendMatrix", n="{}_{}_blendMatrix".format(parentJoint, joint)
+    )
+    cmds.connectAttr(
+        "{}.matrixSum".format(multMatrix),
+        "{}.target[0].targetMatrix".format(blendMatrix),
+    )
     cmds.connectAttr(blendAttr, "{}.envelope".format(blendMatrix))
 
     # connect the blendMatrix to the pick matrix (and therefore the interp joint)
-    cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.inputMatrix".format(pickMatrix), f=True)
+    cmds.connectAttr(
+        "{}.outputMatrix".format(blendMatrix),
+        "{}.inputMatrix".format(pickMatrix),
+        f=True,
+    )
 
     if bind:
         meta.tag(interpJoint, "bind")

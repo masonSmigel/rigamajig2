@@ -29,7 +29,7 @@ class SplineBase(object):
     base class for ik spline
     """
 
-    def __init__(self, jointList, curve=None, name='splineIk', scaleFactor=1.0):
+    def __init__(self, jointList, curve=None, name="splineIk", scaleFactor=1.0):
         """
         default constructor
         :param jointList: list of joints to create ik spline setup from
@@ -39,7 +39,7 @@ class SplineBase(object):
         """
         self.setJointList(jointList)
         self._name = name
-        self._group = name + '_hrc'
+        self._group = name + "_hrc"
         self._curve = curve
         self._handle = str()
         self._ikJointList = list()
@@ -144,7 +144,7 @@ class SplineBase(object):
         ikParent = self._group
 
         if clusters < 4:
-            logger.warning('Cannot create ikSpline with less than 4 controls')
+            logger.warning("Cannot create ikSpline with less than 4 controls")
             clusters = 4
 
         for joint in self._jointList:
@@ -157,10 +157,10 @@ class SplineBase(object):
         if not params:
             params = self._group
 
-        cmds.addAttr(params, ln='stretchy', at='double', dv=1, min=0, max=1, k=True)
-        cmds.addAttr(params, ln='volumeFactor', at='double', dv=1, min=0, k=True)
-        stretchyAttr = '{}.stretchy'.format(params)
-        volumeAttr = '{}.volumeFactor'.format(params)
+        cmds.addAttr(params, ln="stretchy", at="double", dv=1, min=0, max=1, k=True)
+        cmds.addAttr(params, ln="volumeFactor", at="double", dv=1, min=0, k=True)
+        stretchyAttr = "{}.stretchy".format(params)
+        volumeAttr = "{}.volumeFactor".format(params)
 
         # create a duplicate joint chain, if we dont have an ikJointChain
         for i, joint in enumerate(self._jointList):
@@ -179,13 +179,26 @@ class SplineBase(object):
         endJoint = self._ikJointList[-1]
 
         # create a curve from our joints and make an IkHandle
-        curve = rig_curve.createCurveFromTransform([self._ikJointList[0], self._ikJointList[1],
-                                                    self._ikJointList[-2], self._ikJointList[-1]],
-                                                   degree=1, name="{}_crv".format(self._name))
-        self._handle, self._effector, self._curve = cmds.ikHandle(name="{}_handle".format(self._name),
-                                                                  pcv=0, ns=(clusters - 3), sol='ikSplineSolver',
-                                                                  sj=startJoint, ee=endJoint, curve=curve,
-                                                                  freezeJoints=True)
+        curve = rig_curve.createCurveFromTransform(
+            [
+                self._ikJointList[0],
+                self._ikJointList[1],
+                self._ikJointList[-2],
+                self._ikJointList[-1],
+            ],
+            degree=1,
+            name="{}_crv".format(self._name),
+        )
+        self._handle, self._effector, self._curve = cmds.ikHandle(
+            name="{}_handle".format(self._name),
+            pcv=0,
+            ns=(clusters - 3),
+            sol="ikSplineSolver",
+            sj=startJoint,
+            ee=endJoint,
+            curve=curve,
+            freezeJoints=True,
+        )
 
         self._curve = cmds.rename(self._curve, "{}_crv".format(self._name))
 
@@ -193,85 +206,140 @@ class SplineBase(object):
 
         cvs = rig_curve.getCvs(self._curve)
         for i, cv in enumerate(cvs):
-            cluster, handle = cmds.cluster(cv, n='{}_cls_{}'.format(self._name, i))
+            cluster, handle = cmds.cluster(cv, n="{}_cls_{}".format(self._name, i))
             self._clusters.append(handle)
             cmds.parent(handle, self._group)
-            rig_cluster.localize(cluster, self._group, self._group, weightedCompensation=True)
+            rig_cluster.localize(
+                cluster, self._group, self._group, weightedCompensation=True
+            )
 
         # CLUSTERS SCALE
 
         # STRETCH
-        curveInfo = cmds.rename(cmds.arclen(self._curve, ch=True), self._name + '_curveInfo')
-        cmds.connectAttr(self._curve + '.local', curveInfo + '.inputCurve', f=True)
-        arcLen = cmds.getAttr("{}.{}".format(curveInfo, 'arcLength'))
-        stretchBta = node.blendTwoAttrs(arcLen, "{}.arcLength".format(curveInfo), weight=stretchyAttr,
-                                        name="{}_stretch".format(self._name))
+        curveInfo = cmds.rename(
+            cmds.arclen(self._curve, ch=True), self._name + "_curveInfo"
+        )
+        cmds.connectAttr(self._curve + ".local", curveInfo + ".inputCurve", f=True)
+        arcLen = cmds.getAttr("{}.{}".format(curveInfo, "arcLength"))
+        stretchBta = node.blendTwoAttrs(
+            arcLen,
+            "{}.arcLength".format(curveInfo),
+            weight=stretchyAttr,
+            name="{}_stretch".format(self._name),
+        )
 
-        scaleAll = node.multiplyDivide(["{}.output".format(stretchBta), 1, 1], [arcLen, 1, 1], operation='div',
-                                       name="{}_scale".format(self._name))
+        scaleAll = node.multiplyDivide(
+            ["{}.output".format(stretchBta), 1, 1],
+            [arcLen, 1, 1],
+            operation="div",
+            name="{}_scale".format(self._name),
+        )
 
         # get aim axis and rotate order
-        isNegative = True if '-' in rig_transform.getAimAxis(self._ikJointList[1], allowNegative=True) else False
+        isNegative = (
+            True
+            if "-" in rig_transform.getAimAxis(self._ikJointList[1], allowNegative=True)
+            else False
+        )
         aimAxis = rig_transform.getAimAxis(self._ikJointList[1], allowNegative=False)
-        rotOrder = cmds.getAttr('{}.ro'.format(self._ikJointList[1]))
 
         for i, joint in enumerate(self._ikJointList[1:]):
             if i > 0:
-                jntLen = mathUtils.distanceNodes(self._ikJointList[i], self._ikJointList[i + 1])
+                jntLen = mathUtils.distanceNodes(
+                    self._ikJointList[i], self._ikJointList[i + 1]
+                )
             else:
-                jntLen = mathUtils.distanceNodes(self._ikJointList[0], self._ikJointList[i + 1])
+                jntLen = mathUtils.distanceNodes(
+                    self._ikJointList[0], self._ikJointList[i + 1]
+                )
 
             if isNegative:
                 jntLen *= -1
 
             # Connect the stretch to the joint translation
-            node.multDoubleLinear("{}.outputX".format(scaleAll), jntLen,
-                                  output="{}.t{}".format(joint, aimAxis),
-                                  name='{}_stretch'.format(joint))
+            node.multDoubleLinear(
+                "{}.outputX".format(scaleAll),
+                jntLen,
+                output="{}.t{}".format(joint, aimAxis),
+                name="{}_stretch".format(joint),
+            )
         # start twist decompose
-        startgrp = cmds.createNode('transform', n=self._name + '_start_buffer', p=self._group)
-        start = cmds.createNode('joint', n=self._name + '_start_' + common.TARGET, p=startgrp)
+        startgrp = cmds.createNode(
+            "transform", n=self._name + "_start_buffer", p=self._group
+        )
+        start = cmds.createNode(
+            "joint", n=self._name + "_start_" + common.TARGET, p=startgrp
+        )
         self._startTwist = start
         rig_transform.matchTransform(self._ikJointList[0], startgrp)
-        startTwist = rig_transform.decomposeRotation(self._startTwist, aimAxis)[list('xyz').index(aimAxis)]
+        startTwist = rig_transform.decomposeRotation(self._startTwist, aimAxis)[
+            list("xyz").index(aimAxis)
+        ]
 
         # end twist decompose
-        endgrp = cmds.createNode('transform', n=self._name + '_end_buffer', p=self._group)
-        end = cmds.createNode('joint', n=self._name + '_end_' + common.TARGET, p=endgrp)
+        endgrp = cmds.createNode(
+            "transform", n=self._name + "_end_buffer", p=self._group
+        )
+        end = cmds.createNode("joint", n=self._name + "_end_" + common.TARGET, p=endgrp)
         self._endTwist = end
         rig_transform.matchTransform(self._ikJointList[-1], endgrp)
-        endTwist = rig_transform.decomposeRotation(self._endTwist, aimAxis)[list('xyz').index(aimAxis)]
+        endTwist = rig_transform.decomposeRotation(self._endTwist, aimAxis)[
+            list("xyz").index(aimAxis)
+        ]
 
         # The overall twist is calculated as roll = startTwist, twist =  (endTwist - startTwist)
         twistMultipler = -1 if isNegative else -1
-        reverseStartTwist = node.multDoubleLinear(startTwist, twistMultipler,
-                                                  name="{}_reverseStart".format(self._name))
+        reverseStartTwist = node.multDoubleLinear(
+            startTwist, twistMultipler, name="{}_reverseStart".format(self._name)
+        )
         if isNegative:
-            endReverse = node.multDoubleLinear(endTwist, -1, name="{}_reverseEnd".format(self._name))
+            endReverse = node.multDoubleLinear(
+                endTwist, -1, name="{}_reverseEnd".format(self._name)
+            )
             endTwist = "{}.output".format(endReverse)
-        twistSum = node.addDoubleLinear(endTwist, "{}.output".format(reverseStartTwist),
-                                        name="{}_addTwist".format(self._name))
+        twistSum = node.addDoubleLinear(
+            endTwist,
+            "{}.output".format(reverseStartTwist),
+            name="{}_addTwist".format(self._name),
+        )
         cmds.connectAttr(startTwist, "{}.roll".format(self._handle))
         cmds.connectAttr("{}.output".format(twistSum), "{}.twist".format(self._handle))
-        scaleInvert = node.multiplyDivide(1, "{}.outputX".format(scaleAll), operation='div',
-                                          name="{}_scaleInvert".format(self._name))
+        scaleInvert = node.multiplyDivide(
+            1,
+            "{}.outputX".format(scaleAll),
+            operation="div",
+            name="{}_scaleInvert".format(self._name),
+        )
         # Connect the ikTo the bind joints
         i = 0
-        for ik, bind in zip(self._ikJointList, self._jointList):
+        for ik in self._ikJointList:
             # Calculate the volume perservation
-            cmds.addAttr(self._group, ln="scale_{}".format(i), at='double', min=0, max=1, dv=1)
+            cmds.addAttr(
+                self._group, ln="scale_{}".format(i), at="double", min=0, max=1, dv=1
+            )
 
-            scaleReversed = node.reverse("{}.scale_{}".format(self._group, i), name='{}_scaleRev'.format(ik))
-            exponent = node.plusMinusAverage1D([1, "{}.outputX".format(scaleReversed)], operation='sub',
-                                               name='{}_exponent'.format(ik))
-            volume = node.multDoubleLinear("{}.output1D".format(exponent), volumeAttr, name='{}_volume'.format(ik))
-            factor = node.multiplyDivide("{}.outputX".format(scaleInvert), "{}.output".format(volume), operation='pow',
-                                         name='{}_factor'.format(ik))
+            scaleReversed = node.reverse(
+                "{}.scale_{}".format(self._group, i), name="{}_scaleRev".format(ik)
+            )
+            exponent = node.plusMinusAverage1D(
+                [1, "{}.outputX".format(scaleReversed)],
+                operation="sub",
+                name="{}_exponent".format(ik),
+            )
+            volume = node.multDoubleLinear(
+                "{}.output1D".format(exponent), volumeAttr, name="{}_volume".format(ik)
+            )
+            factor = node.multiplyDivide(
+                "{}.outputX".format(scaleInvert),
+                "{}.output".format(volume),
+                operation="pow",
+                name="{}_factor".format(ik),
+            )
 
-            scaleAttrs = ['x', 'y', 'z']
+            scaleAttrs = ["x", "y", "z"]
             scaleAttrs.pop(scaleAttrs.index(aimAxis))
             for attr in scaleAttrs:
-                cmds.connectAttr(".outputX".format(factor), '{}.s{}'.format(ik, attr))
+                cmds.connectAttr(".outputX".format(factor), "{}.s{}".format(ik, attr))
 
             i += 1
 
@@ -285,13 +353,18 @@ class SplineBase(object):
         for i in range(size):
             percent = i / float(size - 1)
             value = mathUtils.parabolainterp(0, 1, percent)
-            cmds.setAttr("{}.scale_{}".format(self._group, self._ikJointList.index(setScaleList[i])), value)
+            cmds.setAttr(
+                "{}.scale_{}".format(
+                    self._group, self._ikJointList.index(setScaleList[i])
+                ),
+                value,
+            )
 
         # Hide the targets and parent them under the group.
         for jnt in [start, end]:
-            cmds.setAttr('{}.drawStyle'.format(jnt), 2)
+            cmds.setAttr("{}.drawStyle".format(jnt), 2)
         for cls in self._clusters:
-            cmds.setAttr('{}.v'.format(cls), 0)
+            cmds.setAttr("{}.v".format(cls), 0)
         debug.hide(self._ikJointList)
         cmds.setAttr("{}.v".format(self._handle), 0)
         cmds.setAttr("{}.overrideEnabled".format(self._curve), 1)
@@ -300,7 +373,15 @@ class SplineBase(object):
         meta.untag(self._ikJointList, "bind")
 
 
-def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=None, useLegacyNaming=False):
+def addTwistJoints(
+    start,
+    end,
+    jnts=4,
+    name="twist",
+    bindParent=None,
+    rigParent=None,
+    useLegacyNaming=False,
+):
     """
     add twist and bend joints between a start and end joint
     :param start: start joint
@@ -321,10 +402,10 @@ def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=
     startJnt = "{}_0".format(name)
     cmds.duplicate(start, parentOnly=True, returnRootsOnly=True, name=startJnt)
     rig_attr.unlock(startJnt, rig_attr.KEYABLE(startJnt))
-    # cmds.parent(startJnt, bind_grp)
 
     endJnt = "{}_{}".format(name, jnts + 1)
-    if useLegacyNaming: endJnt = "{}_{}".format(end, jnts + 1)
+    if useLegacyNaming:
+        endJnt = "{}_{}".format(end, jnts + 1)
     cmds.duplicate(end, parentOnly=True, returnRootsOnly=True, name=endJnt)
     rig_attr.unlock(endJnt, rig_attr.KEYABLE(endJnt))
     cmds.parent(endJnt, startJnt)
@@ -344,8 +425,6 @@ def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=
     rigGroup = spline.getGroup()
     if bindParent and cmds.objExists(bindParent):
         cmds.parent(jointList[0], bindParent)
-    else:
-        rigGroup = [rigGroup] + [bind_grp]
 
     # parent the rig group
     if rigParent and cmds.objExists(rigParent):
@@ -354,14 +433,16 @@ def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=
     spline.create()
 
     # create three output joints
-    startTgt = cmds.createNode('joint', n="{}_start_spline_{}".format(name, common.TARGET))
+    startTgt = cmds.createNode(
+        "joint", n="{}_start_spline_{}".format(name, common.TARGET)
+    )
     rig_transform.matchTransform(jointList[0], startTgt)
 
-    midTgt = cmds.createNode('joint', n="{}_mid_spline_{}".format(name, common.TARGET))
-    rig_transform.matchTranslate(jointList[::len(jointList) - 1], midTgt)
+    midTgt = cmds.createNode("joint", n="{}_mid_spline_{}".format(name, common.TARGET))
+    rig_transform.matchTranslate(jointList[:: len(jointList) - 1], midTgt)
     rig_transform.matchRotate(jointList[0], midTgt)
 
-    endTgt = cmds.createNode('joint', n="{}_end_spline_{}".format(name, common.TARGET))
+    endTgt = cmds.createNode("joint", n="{}_end_spline_{}".format(name, common.TARGET))
     rig_transform.matchTransform(jointList[-1], endTgt)
 
     cmds.parent(startTgt, midTgt, endTgt, spline.getGroup())
@@ -377,6 +458,6 @@ def addTwistJoints(start, end, jnts=4, name="twist", bindParent=None, rigParent=
 
     # general cleanup
     for jnt in [startTgt, midTgt, endTgt]:
-        cmds.setAttr('{}.drawStyle'.format(jnt), 2)
+        cmds.setAttr("{}.drawStyle".format(jnt), 2)
 
     return [startTgt, midTgt, endTgt], spline

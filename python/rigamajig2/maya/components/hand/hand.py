@@ -47,7 +47,9 @@ class Hand(base.BaseComponent):
         :param bool useSubMeta: use th subMeta controls between the meta and the first finger joint
         :param bool useFirstAsThumb: use the first input as a thumb. (it has special rules)
         """
-        super(Hand, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(Hand, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
         self.side = common.getSide(self.name)
 
         self.useScale = False
@@ -56,18 +58,28 @@ class Hand(base.BaseComponent):
         self.useFirstAsThumb = True
 
         self.defineParameter(parameter="useScale", value=self.useScale, dataType="bool")
-        self.defineParameter(parameter="addFKSpace", value=self.addFKSpace, dataType="bool")
-        self.defineParameter(parameter="useSubMeta", value=self.useSubMeta, dataType="bool")
-        self.defineParameter(parameter="useFirstAsThumb", value=self.useFirstAsThumb, dataType="bool")
+        self.defineParameter(
+            parameter="addFKSpace", value=self.addFKSpace, dataType="bool"
+        )
+        self.defineParameter(
+            parameter="useSubMeta", value=self.useSubMeta, dataType="bool"
+        )
+        self.defineParameter(
+            parameter="useFirstAsThumb", value=self.useFirstAsThumb, dataType="bool"
+        )
 
         # initialize some other variables we need
         self.fingerComponentList = list()
 
     def _createBuildGuides(self):
         """Show Advanced Proxy"""
-        self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
+        self.guidesHierarchy = cmds.createNode(
+            "transform", name="{}_guide".format(self.name)
+        )
 
-        self.thumbCupGuide = control.createGuide("{}_thumbCup".format(self.name), parent=self.guidesHierarchy)
+        self.thumbCupGuide = control.createGuide(
+            "{}_thumbCup".format(self.name), parent=self.guidesHierarchy
+        )
         transform.matchTranslate(self.input[0], self.thumbCupGuide)
 
         if self.side == "r":
@@ -99,7 +111,9 @@ class Hand(base.BaseComponent):
             endJoint = cmds.ls(allDescendants, type="joint")[-1]
 
             # initialize a finger component
-            fingerName = inputBaseNames[i] + "_" + self.side if self.side else inputBaseNames[i]
+            fingerName = (
+                inputBaseNames[i] + "_" + self.side if self.side else inputBaseNames[i]
+            )
             fingerComponent = chain.Chain(
                 fingerName, input=[self.input[i], endJoint], rigParent=self.wrist.name
             )
@@ -108,7 +122,12 @@ class Hand(base.BaseComponent):
             fingerComponent.defineParameter("addFKSpace", self.addFKSpace)
 
             fingerComponent.initializeComponent()
-            cmds.container(self.container, edit=True, force=True, addNode=fingerComponent.getContainer())
+            cmds.container(
+                self.container,
+                edit=True,
+                force=True,
+                addNode=fingerComponent.getContainer(),
+            )
             meta.tag(fingerComponent.getContainer(), "subComponent")
             self.fingerComponentList.append(fingerComponent)
 
@@ -183,29 +202,52 @@ class Hand(base.BaseComponent):
         metaControlsNum = 2 if self.useSubMeta else 1
         metasList = [x.controlsList[0] for x in self.fingerComponentList]
         metaSecondList = [x.controlsList[1] for x in self.fingerComponentList]
-        fingerBaseList = [x.controlsList[metaControlsNum] for x in self.fingerComponentList]
+        fingerBaseList = [
+            x.controlsList[metaControlsNum] for x in self.fingerComponentList
+        ]
 
         # setup the spreads
         attr.addSeparator(self.wrist.name, "spread")
-        gestureUtils.setupSpreadSdk(metasList[1:], self.wrist.name, "fingerSpread", multiplier=0.1)
-        gestureUtils.setupSpreadSdk(metaSecondList[1:], self.wrist.name, "fingerSpread", multiplier=0.05)
-        gestureUtils.setupSpreadSdk(fingerBaseList[1:], self.wrist.name, "fingerSpread", multiplier=0.85)
+        gestureUtils.setupSpreadSdk(
+            metasList[1:], self.wrist.name, "fingerSpread", multiplier=0.1
+        )
+        gestureUtils.setupSpreadSdk(
+            metaSecondList[1:], self.wrist.name, "fingerSpread", multiplier=0.05
+        )
+        gestureUtils.setupSpreadSdk(
+            fingerBaseList[1:], self.wrist.name, "fingerSpread", multiplier=0.85
+        )
 
-        gestureUtils.setupSpreadSdk(metasList[1:], self.wrist.name, "metaSpread", multiplier=0.7)
-        gestureUtils.setupSpreadSdk(metaSecondList[1:], self.wrist.name, "metaSpread", multiplier=0.3)
+        gestureUtils.setupSpreadSdk(
+            metasList[1:], self.wrist.name, "metaSpread", multiplier=0.7
+        )
+        gestureUtils.setupSpreadSdk(
+            metaSecondList[1:], self.wrist.name, "metaSpread", multiplier=0.3
+        )
 
-        gestureUtils.setupSpreadSdk(metaSecondList[1:], self.wrist.name, "palmSpread", multiplier=1)
+        gestureUtils.setupSpreadSdk(
+            metaSecondList[1:], self.wrist.name, "palmSpread", multiplier=1
+        )
 
         attr.addSeparator(self.wrist.name, "curl")
-        fingerNameList = common.fillList(FINGER_NAMES, "finger", len(self.fingerComponentList))
+        fingerNameList = common.fillList(
+            FINGER_NAMES, "finger", len(self.fingerComponentList)
+        )
         for finger, fingerComponent in zip(fingerNameList, self.fingerComponentList):
             gestureUtils.setupCurlSdk(
-                fingerComponent.controlsList, self.wrist.name, "{}Curl".format(finger), metaControls=metaControlsNum
+                fingerComponent.controlsList,
+                self.wrist.name,
+                "{}Curl".format(finger),
+                metaControls=metaControlsNum,
             )
 
         attr.addSeparator(self.wrist.name, "splay")
-        gestureUtils.setupFanSdk(metasList[1:], self.wrist.name, "MetaSplay", multiplier=1)
-        gestureUtils.setupFanSdk(fingerBaseList[1:], self.wrist.name, "FingerSplay", multiplier=1)
+        gestureUtils.setupFanSdk(
+            metasList[1:], self.wrist.name, "MetaSplay", multiplier=1
+        )
+        gestureUtils.setupFanSdk(
+            fingerBaseList[1:], self.wrist.name, "FingerSplay", multiplier=1
+        )
 
         attr.addSeparator(self.wrist.name, "relax")
 
@@ -216,7 +258,11 @@ class Hand(base.BaseComponent):
         for i, fingerComponent in enumerate(self.fingerComponentList[1:]):
             value = offset * (i + 1)
             gestureUtils.setupCurlSdk(
-                fingerComponent.controlsList, self.wrist.name, "relax", multiplier=value, metaControls=metaControlsNum
+                fingerComponent.controlsList,
+                self.wrist.name,
+                "relax",
+                multiplier=value,
+                metaControls=metaControlsNum,
             )
 
         # setup the cupping control
@@ -224,34 +270,62 @@ class Hand(base.BaseComponent):
         for i in range(len(self.cupControls)):
             fingerName = self.cupControls[i].trs.split("_")[0]
             if i < 2:
-                gestureUtils.setupSimple(self.cupControls[i].trs, self.wrist.name, fingerName + "Cup", multplier=1)
+                gestureUtils.setupSimple(
+                    self.cupControls[i].trs,
+                    self.wrist.name,
+                    fingerName + "Cup",
+                    multplier=1,
+                )
             else:
-                gestureUtils.setupSimple(self.cupControls[i].trs, self.wrist.name, fingerName + "Cup", multplier=-1)
+                gestureUtils.setupSimple(
+                    self.cupControls[i].trs,
+                    self.wrist.name,
+                    fingerName + "Cup",
+                    multplier=-1,
+                )
 
     def _setupAnimAttrs(self):
         """setup animation attributes"""
 
         attr.addSeparator(self.wrist.name, "visibility")
         # add an attribute to hide the finger controls
-        attr.createAttr(self.wrist.name, "cupPivots", "bool", value=0, keyable=False, channelBox=True)
+        attr.createAttr(
+            self.wrist.name,
+            "cupPivots",
+            "bool",
+            value=0,
+            keyable=False,
+            channelBox=True,
+        )
         cupControls = [x.name for x in self.cupControls]
         control.connectControlVisiblity(self.wrist.name, "cupPivots", cupControls)
 
-        attr.createAttr(self.wrist.name, "fingers", "bool", value=1, keyable=False, channelBox=True)
+        attr.createAttr(
+            self.wrist.name, "fingers", "bool", value=1, keyable=False, channelBox=True
+        )
         fingerControls = [x.controlsList for x in self.fingerComponentList]
         control.connectControlVisiblity(self.wrist.name, "fingers", fingerControls)
 
     def _connect(self):
         if cmds.objExists(self.rigParent):
-            transform.connectOffsetParentMatrix(self.rigParent, self.wrist.orig, mo=True)
+            transform.connectOffsetParentMatrix(
+                self.rigParent, self.wrist.orig, mo=True
+            )
 
         if self.addFKSpace:
             self.wrist.addSdk()
-            spaces.create(self.wrist.spaces, self.wrist.name, parent=self.spacesHierarchy)
+            spaces.create(
+                self.wrist.spaces, self.wrist.name, parent=self.spacesHierarchy
+            )
 
             # if the main control exists connect the world space
             if cmds.objExists("trs_motion"):
-                spaces.addSpace(self.wrist.spaces, ["trs_motion"], nameList=["world"], constraintType="orient")
+                spaces.addSpace(
+                    self.wrist.spaces,
+                    ["trs_motion"],
+                    nameList=["world"],
+                    constraintType="orient",
+                )
 
     def _finalize(self):
         # navigate around container parenting since we have already parented the containers to the hand container
@@ -263,8 +337,8 @@ class Hand(base.BaseComponent):
         for fingerComponent in self.fingerComponentList:
             fingerComponent.optimizeComponent()
 
-    def __deleteSetup(self):
+    def deleteSetup(self):
         """Delete the rig setup"""
         for fingerComponent in self.fingerComponentList:
-            fingerComponent.__deleteSetup()
-        super(Hand, self).__deleteSetup()
+            fingerComponent.deleteSetup()
+        super(Hand, self).deleteSetup()

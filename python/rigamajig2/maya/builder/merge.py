@@ -19,13 +19,17 @@ from rigamajig2.shared import path
 
 logger = logging.getLogger(__name__)
 
-mergableFeilds = [constants.SKELETON_POS,
-                  constants.CONTROL_SHAPES,
-                  constants.GUIDES,
-                  constants.COMPONENTS]
+mergableFeilds = [
+    constants.SKELETON_POS,
+    constants.CONTROL_SHAPES,
+    constants.GUIDES,
+    constants.COMPONENTS,
+]
 
 
-def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-deliver', method='game'):
+def mergeRigs(
+    rigFile1, rigFile2, rigName, mergedPath, outputSuffix="_rig-deliver", method="game"
+):
     """
     Merge two rig files into a single rig file. The order of rig files in vital! the first one will be used when there
     are discrepencies!
@@ -49,7 +53,7 @@ def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-delive
     rigName = rigName.split(".")[0]
 
     # for merged rig files the archetype is always built from base
-    rigFile = core.newRigEnvironmentFromArchetype(mergedPath, 'base', rigName=rigName)
+    rigFile = core.newRigEnvironmentFromArchetype(mergedPath, "base", rigName=rigName)
     rigEnv = os.path.dirname(rigFile)
 
     rigFileData = abstract_data.AbstractData()
@@ -66,28 +70,51 @@ def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-delive
         rigFileDict[constants.BASE_ARCHETYPE] = [file1Archetype, file2Archetype]
 
     # setup some important initial data!
-    rigFileDict[constants.RIG_NAME] = builder.Builder.getRigData(rigFile1, constants.RIG_NAME)
+    rigFileDict[constants.RIG_NAME] = builder.Builder.getRigData(
+        rigFile1, constants.RIG_NAME
+    )
     rigFileDict[constants.OUTPUT_FILE_SUFFIX] = outputSuffix
-    rigFileDict[constants.OUTPUT_RIG_FILE_TYPE] = builder.Builder.getRigData(rigFile1, constants.OUTPUT_RIG_FILE_TYPE)
-    rigFileDict[constants.OUTPUT_RIG] = builder.Builder.getRigData(rigFile1, constants.OUTPUT_RIG)
+    rigFileDict[constants.OUTPUT_RIG_FILE_TYPE] = builder.Builder.getRigData(
+        rigFile1, constants.OUTPUT_RIG_FILE_TYPE
+    )
+    rigFileDict[constants.OUTPUT_RIG] = builder.Builder.getRigData(
+        rigFile1, constants.OUTPUT_RIG
+    )
 
     # now starting from the top we'll start to merge things.
 
     # merge the model file
-    rigFileDict[constants.MODEL_FILE] = mergeModelFile(rigFile1=rigFile1, rigFile2=rigFile2, rigEnv=rigEnv)
+    rigFileDict[constants.MODEL_FILE] = mergeModelFile(
+        rigFile1=rigFile1, rigFile2=rigFile2, rigEnv=rigEnv
+    )
 
     # merge the json files
-    rigFileDict[constants.SKELETON_POS] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.SKELETON_POS)
-    rigFileDict[constants.GUIDES] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.GUIDES)
-    rigFileDict[constants.COMPONENTS] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.COMPONENTS)
-    rigFileDict[constants.CONTROL_SHAPES] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv,
-                                                          key=constants.CONTROL_SHAPES)
-    rigFileDict[constants.PSD] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.PSD)
-    rigFileDict[constants.DEFORM_LAYERS] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.DEFORM_LAYERS)
-    rigFileDict[constants.SHAPES] = mergeJsonFile(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.SHAPES)
+    rigFileDict[constants.SKELETON_POS] = mergeJsonFile(
+        rigFile1, rigFile2, rigEnv=rigEnv, key=constants.SKELETON_POS
+    )
+    rigFileDict[constants.GUIDES] = mergeJsonFile(
+        rigFile1, rigFile2, rigEnv=rigEnv, key=constants.GUIDES
+    )
+    rigFileDict[constants.COMPONENTS] = mergeJsonFile(
+        rigFile1, rigFile2, rigEnv=rigEnv, key=constants.COMPONENTS
+    )
+    rigFileDict[constants.CONTROL_SHAPES] = mergeJsonFile(
+        rigFile1, rigFile2, rigEnv=rigEnv, key=constants.CONTROL_SHAPES
+    )
+    rigFileDict[constants.PSD] = mergeJsonFile(
+        rigFile1, rigFile2, rigEnv=rigEnv, key=constants.PSD
+    )
+    rigFileDict[constants.DEFORM_LAYERS] = mergeJsonFile(
+        rigFile1, rigFile2, rigEnv=rigEnv, key=constants.DEFORM_LAYERS
+    )
+    rigFileDict[constants.SHAPES] = mergeJsonFile(
+        rigFile1, rigFile2, rigEnv=rigEnv, key=constants.SHAPES
+    )
 
     # merge the skins and SHAPES
-    rigFileDict[constants.SKINS] = mergeSkinWeights(rigFile1, rigFile2, rigEnv=rigEnv, method=method)
+    rigFileDict[constants.SKINS] = mergeSkinWeights(
+        rigFile1, rigFile2, rigEnv=rigEnv, method=method
+    )
     # rigFileDict[constants.SHAPES] = mergeContentBased(rigFile1, rigFile2, rigEnv=rigEnv, key=constants.SHAPES)
 
     # lets merge the script lists.
@@ -104,7 +131,9 @@ def mergeRigs(rigFile1, rigFile2, rigName, mergedPath, outputSuffix='_rig-delive
     filename1 = os.path.basename(rigFile1)
     filename2 = os.path.basename(rigFile2)
 
-    Builder_Logger.info(f"Rig files: '{filename1}' and '{filename2}' sucessfully merged! Output: {rigEnv}")
+    Builder_Logger.info(
+        f"Rig files: '{filename1}' and '{filename2}' sucessfully merged! Output: {rigEnv}"
+    )
 
     return rigFile
 
@@ -118,10 +147,14 @@ def mergeModelFile(rigFile1, rigFile2, rigEnv):
 
     # get the absolute paths of both models.
     rigFile1Model = builder.Builder.getRigData(rigFile1, constants.MODEL_FILE)
-    modelFile1 = os.path.realpath(os.path.join(os.path.dirname(rigFile1), rigFile1Model))
+    modelFile1 = os.path.realpath(
+        os.path.join(os.path.dirname(rigFile1), rigFile1Model)
+    )
 
     rigFile2Model = builder.Builder.getRigData(rigFile2, constants.MODEL_FILE)
-    modelFile2 = os.path.realpath(os.path.join(os.path.dirname(rigFile2), rigFile2Model))
+    modelFile2 = os.path.realpath(
+        os.path.join(os.path.dirname(rigFile2), rigFile2Model)
+    )
 
     # next we can compare the two model files. if theyre different throw a warning. They should match to merge properly!
     if modelFile1 != modelFile2:
@@ -132,20 +165,24 @@ def mergeModelFile(rigFile1, rigFile2, rigEnv):
 
 
 def mergeJsonFile(rigFile1, rigFile2, rigEnv, key):
-    """Merge a two json files. """
+    """Merge a two json files."""
 
     # get the data for rig file 1
     rigFile1Data = abstract_data.AbstractData()
     file1Relative = builder.Builder.getRigData(rigFile1, key)
     if file1Relative:
-        file1Absolute = os.path.realpath(os.path.join(os.path.dirname(rigFile1), file1Relative))
+        file1Absolute = os.path.realpath(
+            os.path.join(os.path.dirname(rigFile1), file1Relative)
+        )
         rigFile1Data.read(file1Absolute)
 
     # get the data for rig file 2
     rigFile2Data = abstract_data.AbstractData()
     file2Relative = builder.Builder.getRigData(rigFile2, key)
     if file2Relative:
-        file2Absolute = os.path.realpath(os.path.join(os.path.dirname(rigFile2), file2Relative))
+        file2Absolute = os.path.realpath(
+            os.path.join(os.path.dirname(rigFile2), file2Relative)
+        )
         rigFile2Data.read(file2Absolute)
 
     # combine the data and write it
@@ -161,26 +198,31 @@ def mergeJsonFile(rigFile1, rigFile2, rigEnv, key):
     return file1Relative
 
 
-def mergeSkinWeights(rigFile1, rigFile2, rigEnv, method='game'):
+def mergeSkinWeights(rigFile1, rigFile2, rigEnv, method="game"):
     """
     Do a sloppy merge of the skin weights. The method
     """
 
-    if method == 'game':
-        relativePath = mergeContentBased(rigFile1, rigFile2, rigEnv, key=constants.SKINS)
+    if method == "game":
+        relativePath = mergeContentBased(
+            rigFile1, rigFile2, rigEnv, key=constants.SKINS
+        )
 
     else:
-        raise NotImplementedError("merging with stacked skins has not yet been implemented.")
+        raise NotImplementedError(
+            "merging with stacked skins has not yet been implemented."
+        )
 
     return relativePath
 
 
 def mergeContentBased(rigFile1, rigFile2, rigEnv, key):
-    """ Merge types that are content based ie skinweights, blendshapes or SHAPES"""
+    """Merge types that are content based ie skinweights, blendshapes or SHAPES"""
     # build a skins folder from the first rig file
     relativePath = builder.Builder.getRigData(rigFile1, key)
     relativePath2 = builder.Builder.getRigData(rigFile2, key)
-    if not relativePath: relativePath = relativePath2
+    if not relativePath:
+        relativePath = relativePath2
     destPath = os.path.realpath(os.path.join(rigEnv, relativePath))
     os.makedirs(destPath)
 
@@ -216,13 +258,17 @@ def copyScripts(rigFile1, rigFile2, rigFile, dataKey):
     for fileToMerge in [rigFile1, rigFile2]:
         relativePaths = builder.Builder.getRigData(fileToMerge, dataKey)
         for relativePath in relativePaths:
-            absoultePath = os.path.realpath(os.path.join(os.path.dirname(fileToMerge), relativePath))
+            absoultePath = os.path.realpath(
+                os.path.join(os.path.dirname(fileToMerge), relativePath)
+            )
             copy_tree(absoultePath, destPath)
 
 
 def getAbsoultePathFromRigFile(rigFile, dataKey):
-    """ get the absoulte path from a rig file """
+    """get the absoulte path from a rig file"""
     relativePath = builder.Builder.getRigData(rigFile, dataKey)
     if relativePath:
-        absoultePath = os.path.realpath(os.path.join(os.path.dirname(rigFile), relativePath))
+        absoultePath = os.path.realpath(
+            os.path.join(os.path.dirname(rigFile), relativePath)
+        )
         return absoultePath

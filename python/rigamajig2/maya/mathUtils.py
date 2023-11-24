@@ -6,10 +6,13 @@ import math
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
 
+# close enough approximation (we keep around 8 decimals in maya)
+PI = 3.14159265359
+
 
 def isEqual(float0, float1, tol=0.0001):
     """
-    Check if two values are close enough to be considered equal 
+    Check if two values are close enough to be considered equal
 
     :param float float0: first float
     :param float float1: second float
@@ -24,12 +27,16 @@ def pointsEqual(point0, point1):
     """
     Check if two points are equal
 
-    :param point0: 
-    :param point1: 
+    :param point0:
+    :param point1:
     :return: True if the values are equal. False if not
     :rtype: bool
     """
-    if isEqual(point0[0], point1[0]) and isEqual(point0[1], point1[1]) and isEqual(point0[2], point1[2]):
+    if (
+        isEqual(point0[0], point1[0])
+        and isEqual(point0[1], point1[1])
+        and isEqual(point0[2], point1[2])
+    ):
         return True
     else:
         return False
@@ -121,13 +128,13 @@ def addVector(vector0, vector1):
 
 def subtractVector(vector0, vector1):
     """
-   Returns the subtraction of two vectors
+    Returns the subtraction of two vectors
 
-   :param vector0: minuhend vector
-   :param vector1: subtrahend vector
-   :return: difference of two vectors
-   :rtype: tuple list:
-   """
+    :param vector0: minuhend vector
+    :param vector1: subtrahend vector
+    :return: difference of two vectors
+    :rtype: tuple list:
+    """
     vector0 = om2.MVector(vector0[0], vector0[1], vector0[2])
     vector1 = om2.MVector(vector1[0], vector1[1], vector1[2])
     return vector1 - vector0
@@ -192,7 +199,7 @@ def remapValue(value, nMin, nMax, oMin=0, oMax=1):
 
     portion = (value - oldMin) * (newMax - newMin) / (oldMax - oldMin)
     if reverseInput:
-        portion = (oldMax - x) * (newMax - newMin) / (oldMax - oldMin)
+        portion = (oldMax - value) * (newMax - newMin) / (oldMax - oldMin)
 
     result = portion + newMin
     if reverseOutput:
@@ -279,8 +286,10 @@ def closestPointOnLine(point, lineA, lineB, clamp=False):
 
     # clamp the return to the line segment. if not false the result vector can be any point on the line.
     if clamp:
-        if dot < 0.0: dot = 0.0
-        if dot > 1.0: dot = 1.0
+        if dot < 0.0:
+            dot = 0.0
+        if dot > 1.0:
+            dot = 1.0
 
     # get the closest distance from the point to the line (offset from line to point at closest distance)
     offsetVector = scalarMult(lineVector, dot)
@@ -366,7 +375,7 @@ def degreeToRad(angle):
     :param angle: angle in degrees
     :return: angle in radians
     """
-    return [degree * (pi / 180) for degree in angle]
+    return [degree * (PI / 180) for degree in angle]
 
 
 def quaternionToEuler(x, y, z, w, asDegrees=True):
@@ -384,9 +393,9 @@ def quaternionToEuler(x, y, z, w, asDegrees=True):
     """
 
     # Calculate the Euler angles
-    roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x ** 2 + y ** 2))
+    roll = math.atan2(2 * (w * x + y * z), 1 - 2 * (x**2 + y**2))
     pitch = math.asin(2 * (w * y - z * x))
-    yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (y ** 2 + z ** 2))
+    yaw = math.atan2(2 * (w * z + x * y), 1 - 2 * (y**2 + z**2))
 
     # Return the Euler angles
     if asDegrees:

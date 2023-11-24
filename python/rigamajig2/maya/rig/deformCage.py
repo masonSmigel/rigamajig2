@@ -28,7 +28,15 @@ from rigamajig2.shared import common
 logger = logging.getLogger(__name__)
 
 
-def createCageControlPoint(name, side=None, size=1, position=None, color='slategray', rotation=None, parent=None):
+def createCageControlPoint(
+    name,
+    side=None,
+    size=1,
+    position=None,
+    color="slategray",
+    rotation=None,
+    parent=None,
+):
     """
     Build a single cageControlPoint
 
@@ -43,8 +51,18 @@ def createCageControlPoint(name, side=None, size=1, position=None, color='slateg
     return: control, bindJoint, bpmJoint
     """
 
-    ctl = control.create(name, side, shape='sphere', orig=True, trs=True, parent=parent,
-                         size=size, position=position, rotation=rotation, color=color)
+    ctl = control.create(
+        name,
+        side,
+        shape="sphere",
+        orig=True,
+        trs=True,
+        parent=parent,
+        size=size,
+        position=position,
+        rotation=rotation,
+        color=color,
+    )
 
     # create the bind joint and tag it
     bindJoint = cmds.createNode("joint", name="{}_bind".format(name), parent=ctl.name)
@@ -78,7 +96,11 @@ def smoothSkinCluster(polyMesh, intensity=0.1, itterations=30):
             cmds.loadPlugin("ngSkinTools2")
         import ngSkinTools2.api as ngst
     except:
-        raise Warning("Unable to load ngSkinTools2 python module. Cannot smooth mesh {}".format(polyMesh))
+        raise Warning(
+            "Unable to load ngSkinTools2 python module. Cannot smooth mesh {}".format(
+                polyMesh
+            )
+        )
 
     # we need a layer reference for this, so we'll take first layer from our sample mesh
     layers = ngst.init_layers(polyMesh)
@@ -128,11 +150,17 @@ class DeformationCage(object):
         outputGeoName = "{}_output_cageGeo".format(self.name)
 
         # store the heirarchy into class variables to reuse later
-        self.rootHierarchy = cmds.createNode("transform", name=rootName, parent=self.parent)
-        self.controlsHierarchy = cmds.createNode("transform", name=controlsName, parent=self.rootHierarchy)
-        self.outputGeoHierarchy = cmds.createNode("transform", name=outputGeoName, parent=self.rootHierarchy)
+        self.rootHierarchy = cmds.createNode(
+            "transform", name=rootName, parent=self.parent
+        )
+        self.controlsHierarchy = cmds.createNode(
+            "transform", name=controlsName, parent=self.rootHierarchy
+        )
+        self.outputGeoHierarchy = cmds.createNode(
+            "transform", name=outputGeoName, parent=self.rootHierarchy
+        )
 
-    def createCageControlPoints(self, size=1, color='slategray', orientToNormal=True):
+    def createCageControlPoints(self, size=1, color="slategray", orientToNormal=True):
         """
         Create a system of cage points for a given mesh
         :param size: set the size of the controls
@@ -140,10 +168,16 @@ class DeformationCage(object):
         :param orientToNormal: orient the controls to the vertex normals
         """
         if not mesh.isMesh(self.cageMesh):
-            raise ValueError("The provided mesh MUST be a polyMesh. {} is not a poly mesh".format(self.cageMesh))
+            raise ValueError(
+                "The provided mesh MUST be a polyMesh. {} is not a poly mesh".format(
+                    self.cageMesh
+                )
+            )
         skin = skinCluster.getSkinCluster(self.cageMesh)
         if not skin:
-            raise Exception("the input mesh: {} must have a skincluster.".format(self.cageMesh))
+            raise Exception(
+                "the input mesh: {} must have a skincluster.".format(self.cageMesh)
+            )
 
         # check the max influences for a skin cluster
         # if len(cmds.skinCluster(skin, q=True, mi=True)) > 2:
@@ -182,11 +216,24 @@ class DeformationCage(object):
             rotation = None
             if orientToNormal:
                 vtxNormal = mesh.getVertexNormal(self.cageMesh, componentId, world=True)
-                mtxConstruct = (vtxNormal.x, vtxNormal.y, vtxNormal.z, 0,
-                                0, 1, 0, 0,
-                                0, 0, 1, 0,
-                                0, 0, 0, 1
-                                )
+                mtxConstruct = (
+                    vtxNormal.x,
+                    vtxNormal.y,
+                    vtxNormal.z,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                    0,
+                    0,
+                    0,
+                    0,
+                    1,
+                )
                 vtxMMatrix = om2.MMatrix(mtxConstruct)
                 vtxMtransMtx = om2.MTransformationMatrix(vtxMMatrix)
                 rotationRadians = vtxMtransMtx.rotation(asQuaternion=False)
@@ -199,13 +246,12 @@ class DeformationCage(object):
                 position=[position.x, position.y, position.z],
                 rotation=rotation,
                 parent=self.controlsHierarchy,
-                color=color
-                )
+                color=color,
+            )
 
             # connect the control to the influences of the skinCluster
             currentInfluences = list(weightDict.keys())
             if len(currentInfluences) > 1:
-
                 influenceList = list()
                 valueList = list()
                 for influence in currentInfluences:
@@ -213,22 +259,30 @@ class DeformationCage(object):
                     influenceList.append(influence)
                     valueList.append(weight)
 
-                transform.multiMatrixConstraint(driverList=influenceList, driven=ctl.orig, valueList=valueList, mo=True)
-
+                transform.multiMatrixConstraint(
+                    driverList=influenceList,
+                    driven=ctl.orig,
+                    valueList=valueList,
+                    mo=True,
+                )
 
                 weight = weightDict[currentInfluences[-1]]
                 # driver1 = currentInfluences[0]
                 # driver2 = currentInfluences[-1]
                 # transform.blendedOffsetParentMatrix(driver1, driver2, ctl.orig, mo=True, blend=weight)
             else:
-                transform.connectOffsetParentMatrix(currentInfluences[0], ctl.orig, mo=True)
+                transform.connectOffsetParentMatrix(
+                    currentInfluences[0], ctl.orig, mo=True
+                )
 
             # add the important data to out lists
             self.controlList.append(ctl)
             self.bindJointList.append(bind)
             self.bpmJointList.append(bpm)
 
-        logger.info("Create a new control cage with {} points".format(len(self.controlList)))
+        logger.info(
+            "Create a new control cage with {} points".format(len(self.controlList))
+        )
 
     def createConnectivityDisplay(self):
         """
@@ -237,7 +291,7 @@ class DeformationCage(object):
 
         conectivityMap = list()
         for i in range(len(mesh.getVerts(self.cageMesh))):
-            connectedVerts = meshnav.getConnectedVerticies(self.cageMesh, i)
+            connectedVerts = meshnav.getConnectedVertices(self.cageMesh, i)
             # for each connected vert check if there is already a connection between those two verts.
             # we can do this by counting the number of times the inverse appears, if its zero append the point.
             for vert in connectedVerts:
@@ -246,8 +300,11 @@ class DeformationCage(object):
                 if conectivityMap.count(inversePoint) == 0:
                     conectivityMap.append(connectedPoint)
 
-        cageTransform = cmds.createNode("transform", name="{}_cageDisplay".format(self.cageMesh),
-                                        parent=self.rootHierarchy)
+        cageTransform = cmds.createNode(
+            "transform",
+            name="{}_cageDisplay".format(self.cageMesh),
+            parent=self.rootHierarchy,
+        )
         cmds.setAttr("{}.overrideEnabled".format(cageTransform), True)
         cmds.setAttr("{}.overrideDisplayType".format(cageTransform), 1)
         for point in conectivityMap:
@@ -257,7 +314,9 @@ class DeformationCage(object):
             control2 = self.controlList[point[1]].name
 
             lineName = "cageLine_{}_{}".format(point[0], point[1])
-            displayLine = control.createDisplayLine(point1=control1, point2=control2, parent=None, name=lineName)
+            displayLine = control.createDisplayLine(
+                point1=control1, point2=control2, parent=None, name=lineName
+            )
             shape = cmds.listRelatives(displayLine, s=True)[0]
             cmds.parent(shape, cageTransform, r=True, s=True)
             cmds.delete(displayLine)
@@ -268,8 +327,12 @@ class DeformationCage(object):
         """
         meshesToBind = common.toList(meshesToBind)
 
-        lowOutput = cmds.duplicate(self.cageMesh, name="{}_low_output".format(self.name))[0]
-        highOutput = cmds.duplicate(self.cageMesh, name="{}_high_output".format(self.name))[0]
+        lowOutput = cmds.duplicate(
+            self.cageMesh, name="{}_low_output".format(self.name)
+        )[0]
+        highOutput = cmds.duplicate(
+            self.cageMesh, name="{}_high_output".format(self.name)
+        )[0]
         cmds.parent([lowOutput, highOutput], self.outputGeoHierarchy)
 
         # subdivide the high output a couple times so we can smooth it!
@@ -281,7 +344,14 @@ class DeformationCage(object):
         # cmds.show(highOutput)
 
         # bind the output meshes to the joints
-        cmds.skinCluster(self.bindJointList, lowOutput, dr=1, mi=2, bm=1, name="{}_skinCluster".format(lowOutput))
+        cmds.skinCluster(
+            self.bindJointList,
+            lowOutput,
+            dr=1,
+            mi=2,
+            bm=1,
+            name="{}_skinCluster".format(lowOutput),
+        )
         skinCluster.copySkinClusterAndInfluences(lowOutput, highOutput)
 
         # smooth the skin cluster
@@ -290,7 +360,9 @@ class DeformationCage(object):
         # now that we have the bind mesh we can
         for geo in meshesToBind:
             # create a duplicate to store the copied skin data
-            tempDup = cmds.duplicate(geo, name="{}_tempToCopy".format(geo), renameChildren=True)
+            tempDup = cmds.duplicate(
+                geo, name="{}_tempToCopy".format(geo), renameChildren=True
+            )
             cmds.parent(tempDup, world=True)
 
             # copy the skin data to the duplicate

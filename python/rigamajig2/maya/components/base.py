@@ -12,7 +12,7 @@ from rigamajig2.maya import attr
 from rigamajig2.maya import color
 from rigamajig2.maya import container
 from rigamajig2.maya import meta
-from rigamajig2.maya.rig.control import CONTROLTAG
+from rigamajig2.maya.rig.control import CONTROL_TAG
 
 logger = logging.getLogger(__name__)
 
@@ -43,7 +43,9 @@ class BaseComponent(object):
 
     UI_COLOR = (200, 200, 200)
 
-    def __init__(self, name, input, size=1, rigParent=None, componentTag=None, enabled=True):
+    def __init__(
+        self, name, input, size=1, rigParent=None, componentTag=None, enabled=True
+    ):
         """
         constructor of the base class.
 
@@ -80,12 +82,18 @@ class BaseComponent(object):
 
         # define component parameters
         self.defineParameter(parameter="name", value=self.name, dataType="string")
-        self.defineParameter(parameter="type", value=self.componentType, dataType="type")
+        self.defineParameter(
+            parameter="type", value=self.componentType, dataType="type"
+        )
         self.defineParameter(parameter="input", value=self.input, dataType="list")
         self.defineParameter(parameter="enabled", value=self.enabled, dataType="bool")
         self.defineParameter(parameter="size", value=self.size, dataType="int")
-        self.defineParameter(parameter="rigParent", value=self.rigParent, dataType="string")
-        self.defineParameter(parameter="componentTag", value=self.componentTag, dataType="string")
+        self.defineParameter(
+            parameter="rigParent", value=self.rigParent, dataType="string"
+        )
+        self.defineParameter(
+            parameter="componentTag", value=self.componentTag, dataType="string"
+        )
 
     def help(self):
         """
@@ -96,7 +104,9 @@ class BaseComponent(object):
         for key in self._componentParameters:
             tooltip = self._componentParameters[key].get("tooltip")
             tooltipString = f"\t({tooltip})" if tooltip else ""
-            returnString += f"\t{key} = {self._componentParameters[key]['value']} {tooltipString}\n"
+            returnString += (
+                f"\t{key} = {self._componentParameters[key]['value']} {tooltipString}\n"
+            )
 
         returnString += "-" * 80
         print(returnString)
@@ -142,7 +152,9 @@ class BaseComponent(object):
         for key in componentInstance._componentParameters:
             if key not in REQUIRED_PARAMETERS:
                 if key not in data.keys():
-                    logger.warning(f"{componentInstance.name}: Failed to get value for: {key}. Skipping parameter")
+                    logger.warning(
+                        f"{componentInstance.name}: Failed to get value for: {key}. Skipping parameter"
+                    )
                     continue
                 value = data.get(key)
                 componentInstance.setParameterValue(parameter=key, value=value)
@@ -311,9 +323,15 @@ class BaseComponent(object):
     def _initialHierarchy(self):
         """Setup the initial Hierarchy. implement in subclass"""
         self.rootHierarchy = cmds.createNode("transform", name=self.name + "_cmpt")
-        self.paramsHierarchy = cmds.createNode("transform", name=self.name + "_params", parent=self.rootHierarchy)
-        self.controlHierarchy = cmds.createNode("transform", name=self.name + "_control", parent=self.rootHierarchy)
-        self.spacesHierarchy = cmds.createNode("transform", name=self.name + "_spaces", parent=self.rootHierarchy)
+        self.paramsHierarchy = cmds.createNode(
+            "transform", name=self.name + "_params", parent=self.rootHierarchy
+        )
+        self.controlHierarchy = cmds.createNode(
+            "transform", name=self.name + "_control", parent=self.rootHierarchy
+        )
+        self.spacesHierarchy = cmds.createNode(
+            "transform", name=self.name + "_spaces", parent=self.rootHierarchy
+        )
 
         color.setOutlinerColor(self.rootHierarchy, [255, 255, 153])
 
@@ -361,7 +379,7 @@ class BaseComponent(object):
         # for the containers we need to _publish all controls within a container.
         allNodes = container.getNodesInContainer(self.container, getSubContained=True)
         for currentNode in allNodes:
-            if meta.hasTag(currentNode, CONTROLTAG):
+            if meta.hasTag(currentNode, CONTROL_TAG):
                 container.addPublishNodes(currentNode)
 
     def _publishAttributes(self):
@@ -430,7 +448,9 @@ class BaseComponent(object):
         get the pipeline step
         :return:
         """
-        if self.container and cmds.objExists("{}.{}".format(self.container, "build_step")):
+        if self.container and cmds.objExists(
+            "{}.{}".format(self.container, "build_step")
+        ):
             return cmds.getAttr("{}.{}".format(self.container, "build_step"))
         return 0
 
@@ -466,7 +486,9 @@ class BaseComponent(object):
 
         self.setParameterValue(parameter=parameter, value=value, hide=hide, lock=lock)
 
-    def setParameterValue(self, parameter: str, value: typing.Any, hide: bool = True, lock: bool = False) -> None:
+    def setParameterValue(
+        self, parameter: str, value: typing.Any, hide: bool = True, lock: bool = False
+    ) -> None:
         """
         Set the parameter value. unlike define parameter this will attempt to set the parameter to the given data type
         :param parameter:
@@ -476,7 +498,9 @@ class BaseComponent(object):
         :return:
         """
         if parameter not in self._componentParameters.keys():
-            logger.warning(f"Parameter {parameter} does not exist on {self.__class__.__name__}")
+            logger.warning(
+                f"Parameter {parameter} does not exist on {self.__class__.__name__}"
+            )
             return
 
         self._componentParameters[parameter]["value"] = value
@@ -485,7 +509,9 @@ class BaseComponent(object):
             raise TypeError(f"{parameter} data type cannot be None")
 
         metaData = meta.MetaNode(self.container)
-        metaData.setData(attr=parameter, value=value, attrType=dataType, hide=hide, lock=lock)
+        metaData.setData(
+            attr=parameter, value=value, attrType=dataType, hide=hide, lock=lock
+        )
 
         setattr(self.__class__, parameter, value)
 

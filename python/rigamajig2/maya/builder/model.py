@@ -29,9 +29,9 @@ def importModel(path=None):
 
     # get top level nodes in the skeleton
     if nodes:
-        for node in cmds.ls(nodes, l=True, type='transform'):
-            if not len(node.split('|')) > 2:
-                meta.tag(node, 'model_root')
+        for node in cmds.ls(nodes, l=True, type="transform"):
+            if not len(node.split("|")) > 2:
+                meta.tag(node, "model_root")
 
     # Once we have loaded the model lets frame in on it
     if not om.MGlobal.mayaState():
@@ -44,7 +44,7 @@ def getModelGeo():
     :return:
     """
 
-    modelRoots = meta.getTagged('model_root')
+    modelRoots = meta.getTagged("model_root")
 
     modelList = list()
     for modelRoot in modelRoots:
@@ -52,7 +52,9 @@ def getModelGeo():
         modelChildren = cmds.listRelatives(modelRoot, ad=True, shapes=False, ni=True)
 
         # filter out any shapes or intermediates then filter out plain transforms
-        transformsList = cmds.ls(modelChildren, type="transform")  # filter out any shapes or intermediates
+        transformsList = cmds.ls(
+            modelChildren, type="transform"
+        )  # filter out any shapes or intermediates
         meshes = [m for m in transformsList if mesh.isMesh(m)]
 
         # add the meshes list to the model list

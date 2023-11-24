@@ -44,7 +44,9 @@ class Neck(base.BaseComponent):
         :param str rigParent: connect the component to a rigParent.
         """
 
-        super(Neck, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(Neck, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
         self.side = common.getSide(self.name)
 
         self.neckSpaces = {}
@@ -56,26 +58,45 @@ class Neck(base.BaseComponent):
         self.defineParameter(parameter="neckName", value="neck", dataType="string")
         self.defineParameter(parameter="headName", value="head", dataType="string")
         self.defineParameter(parameter="skullName", value="skull", dataType="string")
-        self.defineParameter(parameter="neckSpaces", value=self.neckSpaces, dataType="dict")
-        self.defineParameter(parameter="headSpaces", value=self.headSpaces, dataType="dict")
+        self.defineParameter(
+            parameter="neckSpaces", value=self.neckSpaces, dataType="dict"
+        )
+        self.defineParameter(
+            parameter="headSpaces", value=self.headSpaces, dataType="dict"
+        )
 
     def _createBuildGuides(self):
         """Create the build guides"""
-        self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
+        self.guidesHierarchy = cmds.createNode(
+            "transform", name="{}_guide".format(self.name)
+        )
 
         neckPos = cmds.xform(self.input[0], q=True, ws=True, t=True)
         self.neckGuide = control.createGuide(
-            self.name + "_neck", side=self.side, parent=self.guidesHierarchy, position=neckPos
+            self.name + "_neck",
+            side=self.side,
+            parent=self.guidesHierarchy,
+            position=neckPos,
         )
         attr.lockAndHide(self.neckGuide, attr.TRANSLATE + ["v"])
 
-        self.headGuide = control.createGuide(self.name + "_head", side=self.side, parent=self.guidesHierarchy)
-        live.slideBetweenTransforms(self.headGuide, start=self.input[0], end=self.input[-1], defaultValue=HEAD_PERCENT)
+        self.headGuide = control.createGuide(
+            self.name + "_head", side=self.side, parent=self.guidesHierarchy
+        )
+        live.slideBetweenTransforms(
+            self.headGuide,
+            start=self.input[0],
+            end=self.input[-1],
+            defaultValue=HEAD_PERCENT,
+        )
         attr.lock(self.headGuide, attr.TRANSLATE + ["v"])
 
         skullPos = cmds.xform(self.input[-1], q=True, ws=True, t=True)
         self.skullGuide = control.createGuide(
-            self.name + "_skull", side=self.side, parent=self.guidesHierarchy, position=skullPos
+            self.name + "_skull",
+            side=self.side,
+            parent=self.guidesHierarchy,
+            position=skullPos,
         )
         attr.lockAndHide(self.skullGuide, attr.TRANSLATE + ["v"])
 
@@ -166,15 +187,43 @@ class Neck(base.BaseComponent):
 
         # connect the volume factor and tangents visability attributes
         attr.addSeparator(self.head.name, "----")
-        attr.createAttr(self.head.name, "volumeFactor", attributeType="float", value=1, minValue=0, maxValue=10)
-        cmds.connectAttr("{}.volumeFactor".format(self.head.name), "{}.volumeFactor".format(self.paramsHierarchy))
+        attr.createAttr(
+            self.head.name,
+            "volumeFactor",
+            attributeType="float",
+            value=1,
+            minValue=0,
+            maxValue=10,
+        )
+        cmds.connectAttr(
+            "{}.volumeFactor".format(self.head.name),
+            "{}.volumeFactor".format(self.paramsHierarchy),
+        )
 
-        attr.createAttr(self.neck.name, "tangentVis", attributeType="bool", value=1, channelBox=True, keyable=False)
-        cmds.connectAttr("{}.tangentVis".format(self.neck.name), "{}.v".format(self.neckTanget.orig))
+        attr.createAttr(
+            self.neck.name,
+            "tangentVis",
+            attributeType="bool",
+            value=1,
+            channelBox=True,
+            keyable=False,
+        )
+        cmds.connectAttr(
+            "{}.tangentVis".format(self.neck.name), "{}.v".format(self.neckTanget.orig)
+        )
         transform.matchTransform(self.ikspline.getClusters()[1], self.neckTanget.orig)
 
-        attr.createAttr(self.head.name, "tangentVis", attributeType="bool", value=1, channelBox=True, keyable=False)
-        cmds.connectAttr("{}.tangentVis".format(self.head.name), "{}.v".format(self.headTanget.orig))
+        attr.createAttr(
+            self.head.name,
+            "tangentVis",
+            attributeType="bool",
+            value=1,
+            channelBox=True,
+            keyable=False,
+        )
+        cmds.connectAttr(
+            "{}.tangentVis".format(self.head.name), "{}.v".format(self.headTanget.orig)
+        )
         transform.matchTransform(self.ikspline.getClusters()[2], self.headTanget.orig)
 
         # parent clusters to tangent controls
@@ -183,22 +232,40 @@ class Neck(base.BaseComponent):
         cmds.parent(self.ikspline.getClusters()[3], self.headGimble.name)
 
         # connect the skull to the head joint
-        self.skullTrs = hierarchy.create(self.skull.name, ["{}_trs".format(self.input[-1])], above=False)[0]
+        self.skullTrs = hierarchy.create(
+            self.skull.name, ["{}_trs".format(self.input[-1])], above=False
+        )[0]
         transform.matchTransform(self.input[-1], self.skullTrs)
         # delete exising parent constraint
-        cmds.delete(cmds.ls(cmds.listConnections("{}.tx".format(self.input[-1])), type="parentConstraint"))
+        cmds.delete(
+            cmds.ls(
+                cmds.listConnections("{}.tx".format(self.input[-1])),
+                type="parentConstraint",
+            )
+        )
         joint.connectChains(self.skullTrs, self.input[-1])
 
         # connect the orient constraint to the twist controls
         cmds.orientConstraint(self.neck.name, self.ikspline._startTwist, mo=True)
         cmds.orientConstraint(self.headGimble.name, self.ikspline._endTwist, mo=True)
 
-        transform.connectOffsetParentMatrix(self.neck.name, self.ikspline.getGroup(), mo=True)
+        transform.connectOffsetParentMatrix(
+            self.neck.name, self.ikspline.getGroup(), mo=True
+        )
 
     def _setupAnimAttrs(self):
         # create a visability control for the ikGimble control
-        attr.createAttr(self.head.name, "gimble", attributeType="bool", value=0, keyable=False, channelBox=True)
-        control.connectControlVisiblity(self.head.name, "gimble", controls=self.headGimble.name)
+        attr.createAttr(
+            self.head.name,
+            "gimble",
+            attributeType="bool",
+            value=0,
+            keyable=False,
+            channelBox=True,
+        )
+        control.connectControlVisiblity(
+            self.head.name, "gimble", controls=self.headGimble.name
+        )
 
     def _connect(self):
         """Create the connection"""
@@ -212,17 +279,33 @@ class Neck(base.BaseComponent):
 
         # if the main control exists connect the world space
         if cmds.objExists("trs_motion"):
-            spaces.addSpace(self.neck.spaces, ["trs_motion"], nameList=["world"], constraintType="orient")
-            spaces.addSpace(self.head.spaces, ["trs_motion"], nameList=["world"], constraintType="orient")
+            spaces.addSpace(
+                self.neck.spaces,
+                ["trs_motion"],
+                nameList=["world"],
+                constraintType="orient",
+            )
+            spaces.addSpace(
+                self.head.spaces,
+                ["trs_motion"],
+                nameList=["world"],
+                constraintType="orient",
+            )
 
         if self.neckSpaces:
             spaces.addSpace(
-                self.head.spaces, [self.neckSpaces[k] for k in self.neckSpaces.keys()], self.neckSpaces.keys(), "orient"
+                self.head.spaces,
+                [self.neckSpaces[k] for k in self.neckSpaces.keys()],
+                self.neckSpaces.keys(),
+                "orient",
             )
 
         if self.headSpaces:
             spaces.addSpace(
-                self.head.spaces, [self.headSpaces[k] for k in self.headSpaces.keys()], self.headSpaces.keys(), "orient"
+                self.head.spaces,
+                [self.headSpaces[k] for k in self.headSpaces.keys()],
+                self.headSpaces.keys(),
+                "orient",
             )
 
     def _finalize(self):

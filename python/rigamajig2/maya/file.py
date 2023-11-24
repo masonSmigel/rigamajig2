@@ -8,19 +8,26 @@ import sys
 import maya.OpenMaya as om
 import maya.cmds as cmds
 
-MAYA_FILE_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;All Files (*.*);;"
-IMPORT_FILE_FILTER = "All Files (*.*);;{0};;Obj (*.obj);; FBX (*.fbx);;".format(MAYA_FILE_FILTER)
-DELIMINATOR = '_'
-VERSION_TOKEN = 'v'
+MAYA_FILE_FILTER = (
+    "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb);;All Files (*.*);;"
+)
+IMPORT_FILE_FILTER = "All Files (*.*);;{0};;Obj (*.obj);; FBX (*.fbx);;".format(
+    MAYA_FILE_FILTER
+)
+DELIMINATOR = "_"
+VERSION_TOKEN = "v"
 
 
-def _pathDialog(cap='Select a file',
-                acceptCaption='Do Stuff',
-                cancleCaption='Cancel',
-                fileMode=1,
-                fileFilter=MAYA_FILE_FILTER
-                ):
-    file = cmds.fileDialog2(ds=2, cap=cap, okc=acceptCaption, cc=cancleCaption, fm=fileMode, ff=fileFilter)
+def _pathDialog(
+    cap="Select a file",
+    acceptCaption="Do Stuff",
+    cancleCaption="Cancel",
+    fileMode=1,
+    fileFilter=MAYA_FILE_FILTER,
+):
+    file = cmds.fileDialog2(
+        ds=2, cap=cap, okc=acceptCaption, cc=cancleCaption, fm=fileMode, ff=fileFilter
+    )
     if file:
         return file[0]
     return None
@@ -35,7 +42,9 @@ def new(f=False):
     cmds.file(new=True, f=f)
     # run the container sainity check
     import rigamajig2.maya.container as container
-    if om.MGlobal.mayaState(): return
+
+    if om.MGlobal.mayaState():
+        return
     container.sainityCheck()
 
 
@@ -50,7 +59,10 @@ def open_(path=None, f=False):
     :param f: force the opperation to occur
     """
     if not path:
-        path = _pathDialog(cap='Open', acceptCaption='Open', )
+        path = _pathDialog(
+            cap="Open",
+            acceptCaption="Open",
+        )
     cmds.file(path, o=True, f=f, ignoreVersion=True)
 
 
@@ -62,17 +74,18 @@ def save(log=True):
     :rtype: str
     """
     sceneName = cmds.file(q=True, sn=True)
-    extension = sceneName.split('.')[-1]
+    extension = sceneName.split(".")[-1]
 
-    if extension == 'ma':
-        fileType = 'mayaAscii'
-    elif extension == 'mb':
-        fileType = 'mayaBinary'
+    if extension == "ma":
+        fileType = "mayaAscii"
+    elif extension == "mb":
+        fileType = "mayaBinary"
     else:
         raise RuntimeError("Must save using a maya file type: mayaAscii or mayaBinary")
 
     file = cmds.file(s=True, typ=fileType)
-    if log: print('File saved to "{}"'.format(file))
+    if log:
+        print('File saved to "{}"'.format(file))
     return file
 
 
@@ -86,11 +99,12 @@ def saveAs(path=None, log=True):
     :rtype: str
     """
     if not path:
-        path = _pathDialog(cap='Save As', acceptCaption='Save As', fileMode=0)
+        path = _pathDialog(cap="Save As", acceptCaption="Save As", fileMode=0)
 
     if path:
         cmds.file(rename=path)
         return save(log=log)
+    return None
 
 
 def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
@@ -109,7 +123,7 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
     if not path:
         path = cmds.file(q=True, loc=True)
     # if we dont have a scene open give the user the option to save the scene
-    if path == 'unknown':
+    if path == "unknown":
         return saveAs()
 
     # Get the directory and file
@@ -117,9 +131,9 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
     file = os.path.basename(path)
 
     # Separate out the base name, the extension and any exta
-    baseName = file.split('.')[0]
-    extension = file.split('.')[-1]
-    warble = '.'.join(file.split('.')[1:-1])
+    baseName = file.split(".")[0]
+    extension = file.split(".")[-1]
+    warble = ".".join(file.split(".")[1:-1])
 
     fileSplit = baseName.split(DELIMINATOR)
     indexStr = [s for s in fileSplit if s.startswith(VERSION_TOKEN)]
@@ -127,7 +141,7 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
     if indexStr:
         indexPosition = fileSplit.index(str(indexStr[-1]))
         oldIndexStr = indexStr[-1] if indexStr else -1
-        oldIndexInt = int(oldIndexStr.replace(VERSION_TOKEN, ''))
+        oldIndexInt = int(oldIndexStr.replace(VERSION_TOKEN, ""))
         newIndex = oldIndexInt + 1
     else:
         newIndex = 1
@@ -142,15 +156,15 @@ def incrimentSave(path=None, padding=3, indexPosition=-1, log=True):
             indexPosition = -1
 
     # validate the new name
-    for i in range(2000):
+    for _ in range(2000):
         newIndexStr = "v{}".format(str(newIndex).zfill(padding))
         fileSplit[indexPosition] = newIndexStr
         nameBase = DELIMINATOR.join(fileSplit)
 
         if warble:
-            newFileName = '.'.join([nameBase, warble, extension])
+            newFileName = ".".join([nameBase, warble, extension])
         else:
-            newFileName = '.'.join([nameBase, extension])
+            newFileName = ".".join([nameBase, extension])
 
         path = os.path.join(dir, newFileName)
         if not isUniqueFile(path):
@@ -174,14 +188,19 @@ def import_(path=None, useNamespace=False, namespace=None, force=False):
     :rtype: str
     """
     if not path:
-        path = _pathDialog(cap='Import', acceptCaption='Import', fileMode=0, fileFilter=IMPORT_FILE_FILTER)
+        path = _pathDialog(
+            cap="Import",
+            acceptCaption="Import",
+            fileMode=0,
+            fileFilter=IMPORT_FILE_FILTER,
+        )
 
     kwargs = {"i": True, "f": force, "rnn": True}
     if namespace or useNamespace:
-        namespace = namespace or os.path.basename(path).split('.')[0]
+        namespace = namespace or os.path.basename(path).split(".")[0]
         kwargs["ns"] = namespace
 
-    file = cmds.file(path, ignoreVersion=True,  **kwargs)
+    file = cmds.file(path, ignoreVersion=True, **kwargs)
     return file
 
 
@@ -194,8 +213,13 @@ def reference(path=None):
     :rtype: str
     """
     if not path:
-        path = _pathDialog(cap='Reference', acceptCaption='Reference', fileMode=0, fileFilter=MAYA_FILE_FILTER)
-    namespace = os.path.basename(path).split('.')[0]
+        path = _pathDialog(
+            cap="Reference",
+            acceptCaption="Reference",
+            fileMode=0,
+            fileFilter=MAYA_FILE_FILTER,
+        )
+    namespace = os.path.basename(path).split(".")[0]
     return cmds.file(path, r=True, ns=namespace)
 
 
@@ -216,19 +240,19 @@ def getEnvironment():
     """
     import platform
 
-    if platform == 'win32':
-        sep = sep
-    elif platform == 'darwin':
-        sep = ':'
+    if platform == "win32":
+        sep = os.sep
+    elif platform == "darwin":
+        sep = ":"
     else:
-        sep = ':'
+        sep = ":"
 
-    scriptPaths = os.getenv("MAYA_SCRIPT_PATH") or ''
-    plugInPaths = os.getenv("MAYA_PLUG_IN_PATH") or ''
-    pythonPaths = os.getenv("PYTHONPATH") or ''
-    shelfPath = os.getenv("MAYA_SHELF_PATH") or ''
-    iconPaths = os.getenv("XBMLANGPATH") or ''
-    pathPaths = os.getenv("PATH") or ''
+    scriptPaths = os.getenv("MAYA_SCRIPT_PATH") or ""
+    plugInPaths = os.getenv("MAYA_PLUG_IN_PATH") or ""
+    pythonPaths = os.getenv("PYTHONPATH") or ""
+    shelfPath = os.getenv("MAYA_SHELF_PATH") or ""
+    iconPaths = os.getenv("XBMLANGPATH") or ""
+    pathPaths = os.getenv("PATH") or ""
     sysPaths = sys.path
 
     allScriptPaths = scriptPaths.split(sep)

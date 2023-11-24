@@ -9,7 +9,7 @@ user-friendly interface and a powerful set of features.
   saving time when facing similar rigging problems.
 
 
-- **Designed with riggers**: With a focus on simplicity and efficiency, Rigamajig2 offers a straightforward method for
+- **Designed for riggers**: With a focus on simplicity and efficiency, Rigamajig2 offers a straightforward method for
   creating rigs. While also exposing an internal framework for artist who want to build additional components or
   features.
 

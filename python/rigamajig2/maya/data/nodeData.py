@@ -33,21 +33,30 @@ class NodeData(maya_data.MayaData):
         super(NodeData, self).gatherData(node)
 
         data = OrderedDict()
-        for attr in ['translate', 'rotate', 'scale']:
-            data[attr] = [round(value, 4) for value in cmds.getAttr("{0}.{1}".format(node, attr))[0]]
+        for attr in ["translate", "rotate", "scale"]:
+            data[attr] = [
+                round(value, 4)
+                for value in cmds.getAttr("{0}.{1}".format(node, attr))[0]
+            ]
 
         if cmds.about(api=True) > 20200000:
-            data['offsetParentMatrix'] = cmds.getAttr("{0}.offsetParentMatrix".format(node))
-        data['world_translate'] = cmds.xform(node, q=True, ws=True, t=True)
-        data['world_rotate'] = cmds.xform(node, q=True, ws=True, ro=True)
-        data['rotateOrder'] = cmds.getAttr("{0}.rotateOrder".format(node))
-        data['overrideEnabled'] = cmds.getAttr("{}.overrideEnabled".format(node))
+            data["offsetParentMatrix"] = cmds.getAttr(
+                "{0}.offsetParentMatrix".format(node)
+            )
+        data["world_translate"] = cmds.xform(node, q=True, ws=True, t=True)
+        data["world_rotate"] = cmds.xform(node, q=True, ws=True, ro=True)
+        data["rotateOrder"] = cmds.getAttr("{0}.rotateOrder".format(node))
+        data["overrideEnabled"] = cmds.getAttr("{}.overrideEnabled".format(node))
         if cmds.getAttr("{}.overrideEnabled".format(node)):
-            data['overrideRGBColors'] = cmds.getAttr("{}.overrideRGBColors".format(node))
-            if data['overrideRGBColors']:
-                data['overrideColorRGB'] = cmds.getAttr("{}.overrideColorRGB".format(node))[0]
+            data["overrideRGBColors"] = cmds.getAttr(
+                "{}.overrideRGBColors".format(node)
+            )
+            if data["overrideRGBColors"]:
+                data["overrideColorRGB"] = cmds.getAttr(
+                    "{}.overrideColorRGB".format(node)
+                )[0]
             else:
-                data['overrideColor'] = cmds.getAttr("{}.overrideColor".format(node))
+                data["overrideColor"] = cmds.getAttr("{}.overrideColor".format(node))
 
         self._data[node].update(data)
 
@@ -59,7 +68,9 @@ class NodeData(maya_data.MayaData):
         for item in items:
             self.gatherData(item)
 
-    def applyData(self, nodes, attributes=None, worldSpace=False, applyColorOverrides=True):
+    def applyData(
+        self, nodes, attributes=None, worldSpace=False, applyColorOverrides=True
+    ):
         """
         Applies the data for given nodes.
         :param nodes: Array of nodes to apply the data to
@@ -85,30 +96,43 @@ class NodeData(maya_data.MayaData):
                 attributes = list(self._data[node].keys())
 
             if worldSpace:
-                if 'translate' not in attributes or 'world_translate' not in self._data[node]:
-                    cmds.xform(node, ws=True, t=self._data[node]['world_translate'])
-                    attributes.remove('translate')
-                if 'rotate' in attributes and 'world_rotate' in self._data[node]:
-                    cmds.xform(node, ws=True, ro=self._data[node]['world_rotate'])
-                    attributes.remove('rotate')
+                if (
+                    "translate" not in attributes
+                    or "world_translate" not in self._data[node]
+                ):
+                    cmds.xform(node, ws=True, t=self._data[node]["world_translate"])
+                    attributes.remove("translate")
+                if "rotate" in attributes and "world_rotate" in self._data[node]:
+                    cmds.xform(node, ws=True, ro=self._data[node]["world_rotate"])
+                    attributes.remove("rotate")
 
             # get set the offset parent matrix
             if cmds.about(api=True) > 20200000:
-                if 'offsetParentMatrix' in attributes:
-                    offsetParentMatrix = self._data[node]['offsetParentMatrix']
-                    cmds.setAttr("{}.offsetParentMatrix".format(node), offsetParentMatrix, type='matrix')
-                    attributes.remove('offsetParentMatrix')
+                if "offsetParentMatrix" in attributes:
+                    offsetParentMatrix = self._data[node]["offsetParentMatrix"]
+                    cmds.setAttr(
+                        "{}.offsetParentMatrix".format(node),
+                        offsetParentMatrix,
+                        type="matrix",
+                    )
+                    attributes.remove("offsetParentMatrix")
 
             for attribute in attributes:
                 if not applyColorOverrides:
-                    if attribute in ['overrideEnabled', 'overrideRGBColors', 'overrideColorRGB','overrideColor']:
+                    if attribute in [
+                        "overrideEnabled",
+                        "overrideRGBColors",
+                        "overrideColorRGB",
+                        "overrideColor",
+                    ]:
                         continue
 
                 if attribute in self._data[node] and attribute in cmds.listAttr(node):
                     setAttr = True
                     for attr in cmds.listAttr("{0}.{1}".format(node, attribute)):
-                        if cmds.listConnections("{0}.{1}".format(node, attr), d=False, s=True) or \
-                                cmds.getAttr("{0}.{1}".format(node, attr), l=True):
+                        if cmds.listConnections(
+                            "{0}.{1}".format(node, attr), d=False, s=True
+                        ) or cmds.getAttr("{0}.{1}".format(node, attr), l=True):
                             setAttr = False
                             break
                     if not setAttr:
@@ -116,14 +140,34 @@ class NodeData(maya_data.MayaData):
 
                     value = self._data[node][attribute]
                     if isinstance(value, (list, tuple)):
-                        try:cmds.setAttr("{0}.{1}".format(node, attribute), *value)
-                        except: logger.warning("failed to set attribute: '{}.{}'".format(node, attribute))
+                        try:
+                            cmds.setAttr("{0}.{1}".format(node, attribute), *value)
+                        except:
+                            logger.warning(
+                                "failed to set attribute: '{}.{}'".format(
+                                    node, attribute
+                                )
+                            )
                     elif isinstance(value, basestring):
-                        try: cmds.setAttr("{0}.{1}".format(node, attribute), value, type="string")
-                        except: logger.warning("failed to set attribute: '{}.{}'".format(node, attribute))
+                        try:
+                            cmds.setAttr(
+                                "{0}.{1}".format(node, attribute), value, type="string"
+                            )
+                        except:
+                            logger.warning(
+                                "failed to set attribute: '{}.{}'".format(
+                                    node, attribute
+                                )
+                            )
                     else:
-                        try: cmds.setAttr("{0}.{1}".format(node, attribute), value)
-                        except: logger.warning("failed to set attribute: '{}.{}'".format(node, attribute))
+                        try:
+                            cmds.setAttr("{0}.{1}".format(node, attribute), value)
+                        except:
+                            logger.warning(
+                                "failed to set attribute: '{}.{}'".format(
+                                    node, attribute
+                                )
+                            )
 
             # clear out attributes if getting from file
             if gatherAttrsFromFile:

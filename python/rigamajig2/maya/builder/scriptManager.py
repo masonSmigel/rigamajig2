@@ -5,8 +5,7 @@
     file: scripts.py
     author: masonsmigel
     date: 11/2023
-    description: 
-
+    description:
 """
 import os
 import pathlib

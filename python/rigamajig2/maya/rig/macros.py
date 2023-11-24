@@ -14,8 +14,13 @@ from rigamajig2.maya import attr
 from rigamajig2.maya import sdk
 
 
-def createMacroPose(driverPlug, drivenControls=None, preInfinity=False, postInfinity=False,
-                    tangent='linear'):
+def createMacroPose(
+    driverPlug,
+    drivenControls=None,
+    preInfinity=False,
+    postInfinity=False,
+    tangent="linear",
+):
     """
     Create a new macro pose with the given controls and driver. The pose is set based on the CURRENT values of the controls.
 
@@ -34,12 +39,16 @@ def createMacroPose(driverPlug, drivenControls=None, preInfinity=False, postInfi
     if driverValue == 0:
         raise Exception("The driver value cannot equal zero".format(driverPlug))
 
-    for drivenControl in drivenControls:
-        pass
 
-
-def createSdkPose(driverPlug, drivenPlug, driverValue, drivenValue, preInfinity=False, postInfinity=False,
-                  tangent='linear'):
+def createSdkPose(
+    driverPlug,
+    drivenPlug,
+    driverValue,
+    drivenValue,
+    preInfinity=False,
+    postInfinity=False,
+    tangent="linear",
+):
     """
     Add a new macro pose with the given driver and driven plug and values
 
@@ -56,13 +65,14 @@ def createSdkPose(driverPlug, drivenPlug, driverValue, drivenValue, preInfinity=
     # first lets make a new valueList with the rest pose set at 0
     valueList = [(0, 0), (driverValue, drivenValue)]
 
-    sdkNode = sdk.createSdk(driverPlug=driverPlug,
-                            drivenPlug=drivenPlug,
-                            values=valueList,
-                            preInfinity=preInfinity,
-                            postInfinity=postInfinity,
-                            tangent=tangent
-                            )
+    sdkNode = sdk.createSdk(
+        driverPlug=driverPlug,
+        drivenPlug=drivenPlug,
+        values=valueList,
+        preInfinity=preInfinity,
+        postInfinity=postInfinity,
+        tangent=tangent,
+    )
 
     return sdkNode
 
@@ -82,13 +92,19 @@ def createCombo(drivers, name=None, method="mult"):
     # set the combination method
     methodDict = {"mult": 0, "lowest": 1, "smooth": 2}
     if method not in list(methodDict.keys()):
-        raise Exception("{} is not a valid method type. Valid types are: {}".format(method, list(methodDict.keys())))
+        raise Exception(
+            "{} is not a valid method type. Valid types are: {}".format(
+                method, list(methodDict.keys())
+            )
+        )
 
     cmds.setAttr("{}.combinationMethod".format(comboNode), methodDict[method])
 
     for driver in drivers:
         if cmds.objExists(driver):
-            nextAvailable = attr.getNextAvailableElement("{}.inputWeight".format(comboNode))
+            nextAvailable = attr.getNextAvailableElement(
+                "{}.inputWeight".format(comboNode)
+            )
             cmds.connectAttr(driver, nextAvailable)
 
     return comboNode + ".outputWeight"

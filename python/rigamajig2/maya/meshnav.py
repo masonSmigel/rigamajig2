@@ -21,7 +21,7 @@ def getClosestFace(mesh, point):
     :rtype: tuple
     """
     faceId = getClosestFacePoint(mesh, point)[-1]
-    return mesh + '.f[{}]'.format(faceId)
+    return mesh + ".f[{}]".format(faceId)
 
 
 def getClosestFacePoint(mesh, point):
@@ -57,12 +57,15 @@ def getClosestVertex(mesh, point, returnDistance=False):
 
     index = mfnMesh.getClosestPoint(pos, space=om2.MSpace.kWorld)[1]
     faceVtx = mfnMesh.getPolygonVertices(index)
-    vtxDist = [(vtx, mfnMesh.getPoint(vtx, om2.MSpace.kWorld).distanceTo(pos)) for vtx in faceVtx]
+    vtxDist = [
+        (vtx, mfnMesh.getPoint(vtx, om2.MSpace.kWorld).distanceTo(pos))
+        for vtx in faceVtx
+    ]
 
     vertexId, dist = min(vtxDist, key=operator.itemgetter(1))
     if returnDistance:
-        return mesh + '.vtx[{}]'.format(vertexId), dist
-    return mesh + '.vtx[{}]'.format(vertexId)
+        return mesh + ".vtx[{}]".format(vertexId), dist
+    return mesh + ".vtx[{}]".format(vertexId)
 
 
 def getClosestUV(mesh, point):
@@ -99,11 +102,17 @@ def getBboxCenter(obj):
     return center
 
 
-def getConnectedVerticies(mesh, id):
+def getConnectedVertices(mesh, vertexId):
+    """
+    Get vertices connected to a given vertex
+
+    :param mesh: mesh to get vert connectivity from
+    :param vertexId: vertex Id to get the connected vertices of
+    """
     # Get the active selection
     mSel = om.MSelectionList()
 
-    om.MGlobal.getSelectionListByName("{}.vtx[{}]".format(mesh, id), mSel)
+    om.MGlobal.getSelectionListByName("{}.vtx[{}]".format(mesh, vertexId), mSel)
     dagPath = om.MDagPath()
     component = om.MObject()
     mSel.getDagPath(0, dagPath, component)

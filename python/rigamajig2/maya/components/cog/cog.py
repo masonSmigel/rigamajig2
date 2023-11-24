@@ -36,14 +36,20 @@ class Cog(base.BaseComponent):
         :param bool bindToInput: connect the output position of the COG component to the input.
                             This should be False in most rigs as the hips will be controlled by the spine.
         """
-        super(Cog, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(Cog, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
 
         self.bindToInput = False
         self.cogControlShape = "cube"
         self.cogName = "cog"
 
-        self.defineParameter(parameter="bindToInput", value=self.bindToInput, dataType="bool")
-        self.defineParameter(parameter="cogControlShape", value=self.cogControlShape, dataType="string")
+        self.defineParameter(
+            parameter="bindToInput", value=self.bindToInput, dataType="bool"
+        )
+        self.defineParameter(
+            parameter="cogControlShape", value=self.cogControlShape, dataType="string"
+        )
         self.defineParameter(parameter="cogName", value=self.cogName, dataType="string")
 
     def _initialHierarchy(self):
@@ -90,12 +96,16 @@ class Cog(base.BaseComponent):
         # create the pivot negate
 
         negateOffsetName = self.cogGimble.trs + "_trs"
-        negativeTrs = hierarchy.create(self.cogGimble.trs, [negateOffsetName], above=True, matchTransform=True)[0]
+        negativeTrs = hierarchy.create(
+            self.cogGimble.trs, [negateOffsetName], above=True, matchTransform=True
+        )[0]
         constrain.parentConstraint(driver=self.cogPivot.name, driven=negativeTrs)
 
-        constrain.negate(self.cogPivot.name, self.cogGimble.trs, t=True)
+        constrain.negate(self.cogPivot.name, self.cogGimble.trs, translate=True)
         if self.bindToInput and len(self.input) >= 1:
-            self.inputTrs = hierarchy.create(self.cogGimble.name, ["{}_trs".format(self.input[0])], above=False)[0]
+            self.inputTrs = hierarchy.create(
+                self.cogGimble.name, ["{}_trs".format(self.input[0])], above=False
+            )[0]
             transform.matchTransform(self.input[0], self.inputTrs)
             joint.connectChains(self.inputTrs, self.input[0])
 
@@ -105,11 +115,29 @@ class Cog(base.BaseComponent):
         # create a visibility control for the ikGimble control
         attr.addSeparator(self.cog.name, "----")
 
-        attr.createAttr(self.cog.name, "movablePivot", attributeType="bool", value=0, keyable=False, channelBox=True)
-        control.connectControlVisiblity(self.cog.name, "movablePivot", controls=self.cogPivot.name)
+        attr.createAttr(
+            self.cog.name,
+            "movablePivot",
+            attributeType="bool",
+            value=0,
+            keyable=False,
+            channelBox=True,
+        )
+        control.connectControlVisiblity(
+            self.cog.name, "movablePivot", controls=self.cogPivot.name
+        )
 
-        attr.createAttr(self.cog.name, "gimble", attributeType="bool", value=0, keyable=False, channelBox=True)
-        control.connectControlVisiblity(self.cog.name, "gimble", controls=self.cogGimble.name)
+        attr.createAttr(
+            self.cog.name,
+            "gimble",
+            attributeType="bool",
+            value=0,
+            keyable=False,
+            channelBox=True,
+        )
+        control.connectControlVisiblity(
+            self.cog.name, "gimble", controls=self.cogGimble.name
+        )
 
     def _connect(self):
         if cmds.objExists(self.rigParent):

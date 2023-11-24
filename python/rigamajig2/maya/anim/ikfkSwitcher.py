@@ -11,23 +11,22 @@ from PySide2 import QtCore
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
-import rigamajig2.maya.meta as meta
 from rigamajig2.maya import container
 from rigamajig2.maya import decorators
+from rigamajig2.maya import meta
 from rigamajig2.maya.rig import control
+from rigamajig2.shared import common
 
 logger = logger.getLogger(__name__)
 
 
 VALID_IKFK_COMPONENTS = ["arm.arm", "leg.leg", "limb.limb"]
 
-IDENTITY_MATRIX = [1, 0, 0, 0,
-                   0, 1, 0, 0,
-                   0, 0, 1, 0,
-                   0, 0, 0, 1]
+IDENTITY_MATRIX = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1]
 
 
 # TODO: add a check to see if Pole vector position flips and compensate it.
+
 
 def getIkFkSwitchNode(controlNode):
     """
@@ -47,8 +46,11 @@ def getIkFkSwitchNode(controlNode):
     # Check the component type to make sure it is a valid IKFK switchable component.
     componentType = cmds.getAttr("{}.type".format(componentContainer))
     if componentType not in VALID_IKFK_COMPONENTS:
-        raise Exception("The component {} is not an ikfk switchable component. Valid types are: {}".
-                        format(componentContainer, VALID_IKFK_COMPONENTS))
+        raise Exception(
+            "The component {} is not an ikfk switchable component. Valid types are: {}".format(
+                componentContainer, VALID_IKFK_COMPONENTS
+            )
+        )
 
     # Now get the ikfk group. This node stores the data for the ikfk switch.
     nodesInComponent = container.getNodesInContainer(componentContainer)
@@ -74,7 +76,7 @@ def switchSelectedComponent(controlNodes=None, ik=None, fk=None):
     """
 
     if controlNodes is None:
-        if len(cmds.ls(sl=True)) > 0:
+        if cmds.ls(sl=True):
             controlNodes = cmds.ls(sl=True)
         else:
             raise Exception("Please select a control to switch components")
@@ -101,6 +103,7 @@ def switchSelectedComponent(controlNodes=None, ik=None, fk=None):
 # allowing it to be used within script nodes in maya
 # pylint:disable=duplicate-code
 
+
 class IkFkSwitch(object):
     """Class to switch IKFK components"""
 
@@ -110,18 +113,28 @@ class IkFkSwitch(object):
         self.gatherInfo()
 
     def gatherInfo(self):
-        """Gather Ikfk component data """
+        """Gather Ikfk component data"""
         # By default the ikfkControl will  be the ikfk group.
         # However if the ikfkGroup has a message connection to an ikfkControl
         # then the connected control will be used.
         self.ikfkControl = self.node
         if cmds.attributeQuery("ikfkControl", node=self.node, ex=True):
-            self.ikfkControl = meta.getMessageConnection("{}.{}".format(self.node, 'ikfkControl'))
+            self.ikfkControl = meta.getMessageConnection(
+                "{}.{}".format(self.node, "ikfkControl")
+            )
 
-        self.ikControls = meta.getMessageConnection("{}.{}".format(self.node, 'ikControls'))
-        self.fkControls = meta.getMessageConnection("{}.{}".format(self.node, 'fkControls'))
-        self.ikMatchList = meta.getMessageConnection("{}.{}".format(self.node, 'ikMatchList'))
-        self.fkMatchList = meta.getMessageConnection("{}.{}".format(self.node, 'fkMatchList'))
+        self.ikControls = meta.getMessageConnection(
+            "{}.{}".format(self.node, "ikControls")
+        )
+        self.fkControls = meta.getMessageConnection(
+            "{}.{}".format(self.node, "fkControls")
+        )
+        self.ikMatchList = meta.getMessageConnection(
+            "{}.{}".format(self.node, "ikMatchList")
+        )
+        self.fkMatchList = meta.getMessageConnection(
+            "{}.{}".format(self.node, "fkMatchList")
+        )
 
     @decorators.oneUndo
     def switchRange(self, value, startFrame, endFrame):
@@ -136,7 +149,11 @@ class IkFkSwitch(object):
         currentFrame = cmds.currentTime(q=True)
 
         if startFrame > endFrame:
-            raise Exception("Start time cannot be after the end time. {}>{}".format(startFrame, endFrame))
+            raise Exception(
+                "Start time cannot be after the end time. {}>{}".format(
+                    startFrame, endFrame
+                )
+            )
 
         framesList = [x + 1 for x in range(startFrame, endFrame)]
         for frame in framesList:
@@ -148,7 +165,7 @@ class IkFkSwitch(object):
 
             # key all the controls we switched
             for switchedControl in switchedControls:
-                for channel in ['tx', 'ty', 'tz', 'rx', 'ry', 'rz']:
+                for channel in ["tx", "ty", "tz", "rx", "ry", "rz"]:
                     cmds.setKeyframe(switchedControl, attribute=channel, time=frame)
 
         # set the frame back to the frame we started on
@@ -164,17 +181,22 @@ class IkFkSwitch(object):
         """
 
         if value == 0:
-            self._setSourceAttr('{}.ikfk'.format(self.ikfkControl), value)
-            self._setSourceAttr('{}.pvPin'.format(self.ikfkControl), 0)
+            self._setSourceAttr("{}.ikfk".format(self.ikfkControl), value)
+            self._setSourceAttr("{}.pvPin".format(self.ikfkControl), 0)
             # self._setSourceAttr('{}.twist'.format(self.ikfkControl), 0)
-            self._setSourceAttr('{}.stretch'.format(self.ikfkControl), 1)
-            self._setSourceAttr('{}.stretchTop'.format(self.ikfkControl), 1)
-            self._setSourceAttr('{}.stretchBot'.format(self.ikfkControl), 1)
+            self._setSourceAttr("{}.stretch".format(self.ikfkControl), 1)
+            self._setSourceAttr("{}.stretchTop".format(self.ikfkControl), 1)
+            self._setSourceAttr("{}.stretchBot".format(self.ikfkControl), 1)
 
-            controls = self.ikMatchFk(self.fkMatchList, self.ikControls[0], self.ikControls[1], self.ikControls[2])
+            controls = self.ikMatchFk(
+                self.fkMatchList,
+                self.ikControls[0],
+                self.ikControls[1],
+                self.ikControls[2],
+            )
             logger.info("switched {}: ik -> fk".format(self.ikfkControl))
         else:
-            self._setSourceAttr('{}.ikfk'.format(self.ikfkControl), value)
+            self._setSourceAttr("{}.ikfk".format(self.ikfkControl), value)
             controls = self.fkMatchIk(self.fkControls, self.ikMatchList)
             logger.info("switched {}: fk -> ik".format(self.ikfkControl))
 
@@ -190,7 +212,9 @@ class IkFkSwitch(object):
         :return:
         """
         if not isinstance(fkControls, (list, tuple)):
-            raise RuntimeError("{} must be a list of 4 fkControls controls".format(fkControls))
+            raise RuntimeError(
+                "{} must be a list of 4 fkControls controls".format(fkControls)
+            )
         if len(fkControls) < 3:
             raise RuntimeError("{} must be a length of 3 or more".format(fkControls))
 
@@ -239,21 +263,23 @@ class IkFkSwitch(object):
         midVector = om2.MVector(*mid)
         endVector = om2.MVector(*end)
 
-        line = (endVector - startVector)
-        point = (midVector - startVector)
+        line = endVector - startVector
+        point = midVector - startVector
 
         scaleValue = (line * point) / (line * line)
         projVector = (line * scaleValue) + startVector
 
-        avLen = ((startVector - midVector).length() + (midVector - endVector).length())
-        pvPositions = ((midVector - projVector).normal() * (magnitude + avLen)) + midVector
+        avLen = (startVector - midVector).length() + (midVector - endVector).length()
+        pvPositions = (
+            (midVector - projVector).normal() * (magnitude + avLen)
+        ) + midVector
 
         return pvPositions
 
     @staticmethod
     def _setSourceAttr(attribute, value):
         connection = cmds.listConnections(attribute, s=True, d=False)
-        if connection and len(connection) > 0:
+        if connection:
             src = cmds.listConnections(attribute, s=True, d=False, plugs=True)[0]
             cmds.setAttr(src, value)
         else:
@@ -261,7 +287,8 @@ class IkFkSwitch(object):
 
 
 class IkFkMatchRangeDialog(QtWidgets.QDialog):
-    """ Dialog for the mocap import """
+    """Dialog for the mocap import"""
+
     WINDOW_TITLE = "Ik Fk Match Range"
 
     dlg_instance = None
@@ -281,18 +308,26 @@ class IkFkMatchRangeDialog(QtWidgets.QDialog):
 
     def __init__(self):
         if sys.version_info.major < 3:
-            mayaMainWindow = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+            mayaMainWindow = wrapInstance(
+                long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget
+            )
         else:
-            mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
+            mayaMainWindow = wrapInstance(
+                int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget
+            )
 
         super(IkFkMatchRangeDialog, self).__init__(mayaMainWindow)
 
         self.setWindowTitle(self.WINDOW_TITLE)
         if cmds.about(ntOS=True):
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+            self.setWindowFlags(
+                self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint
+            )
         elif cmds.about(macOS=True):
             self.setProperty("saveWindowPref", True)
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
+            self.setWindowFlags(
+                self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint
+            )
         self.setMinimumSize(300, 100)
 
         self.createWidgets()
@@ -310,10 +345,10 @@ class IkFkMatchRangeDialog(QtWidgets.QDialog):
         self.endFrameSpinBox = QtWidgets.QSpinBox()
 
         # set the minimum to an incredibly small number
-        self.startFrameSpinBox.setMinimum(-1e+6)
-        self.endFrameSpinBox.setMinimum(-1e+6)
-        self.startFrameSpinBox.setMaximum(1e+6)
-        self.endFrameSpinBox.setMaximum(1e+6)
+        self.startFrameSpinBox.setMinimum(-1e6)
+        self.endFrameSpinBox.setMinimum(-1e6)
+        self.startFrameSpinBox.setMaximum(1e6)
+        self.endFrameSpinBox.setMaximum(1e6)
 
         self.doMatchButton = QtWidgets.QPushButton("Match Range")
 
@@ -348,7 +383,7 @@ class IkFkMatchRangeDialog(QtWidgets.QDialog):
         self.doMatchButton.clicked.connect(self.doMatch)
 
     def updateUi(self):
-
+        """Update the UI time slider ranges"""
         startFrame = cmds.playbackOptions(q=True, min=True)
         endFrame = cmds.playbackOptions(q=True, max=True)
 
@@ -356,12 +391,14 @@ class IkFkMatchRangeDialog(QtWidgets.QDialog):
         self.endFrameSpinBox.setValue(endFrame)
 
     def doMatch(self):
-
-        if len(cmds.ls(sl=True)) > 0:
-            controlNode = cmds.ls(sl=True)[0]
+        """Perform the IK FK match"""
+        if cmds.ls(sl=True):
+            controlNode = common.getFirst(cmds.ls(sl=True))
             # add a warning that only the first node will be matched
             if len(cmds.ls(sl=True)) > 1:
-                logger.warning("Only the First control in the selection will be matched.")
+                logger.warning(
+                    "Only the First control in the selection will be matched."
+                )
         else:
             raise Exception("Please select a control to switch components")
 
@@ -372,12 +409,14 @@ class IkFkMatchRangeDialog(QtWidgets.QDialog):
 
         switchValue = 0 if self.matchToIkRadioButton.isChecked() else 1
 
-        switcher.switchRange(value=switchValue,
-                             startFrame=self.startFrameSpinBox.value(),
-                             endFrame=self.endFrameSpinBox.value())
+        switcher.switchRange(
+            value=switchValue,
+            startFrame=self.startFrameSpinBox.value(),
+            endFrame=self.endFrameSpinBox.value(),
+        )
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     switchSelectedComponent("skeleton_rig:arm_ik_l")
     # switcher = IkFkSwitch('arm_l_ikfk')
     # switcher.switch(not cmds.getAttr('{}.ikfk'.format('arm_l_ikfk')))

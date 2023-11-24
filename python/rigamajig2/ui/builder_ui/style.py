@@ -6,7 +6,6 @@
     author: masonsmigel
     date: 07/2022
     description: 
-
 """
 from PySide2 import QtCore
 from PySide2 import QtGui

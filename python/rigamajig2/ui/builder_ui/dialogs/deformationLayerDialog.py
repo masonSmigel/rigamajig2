@@ -6,7 +6,6 @@
     author: masonsmigel
     date: 09/2023
     description: 
-
 """
 import logging
 from functools import partial

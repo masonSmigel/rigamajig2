@@ -21,11 +21,21 @@ def parentConstraint(driver, driven):
     :param str driven: node driven by the parent constraint
     :return: mult matrix and decompose matrix used in the constraint
     """
-    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
+    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(
+        driver=driver, driven=driven
+    )
 
     # connect the translate and rotate
-    cmds.connectAttr("{}.{}".format(decompMatrix, 'outputTranslate'), "{}.{}".format(driven, 'translate'), f=True)
-    cmds.connectAttr("{}.{}".format(decompMatrix, 'outputRotate'), "{}.{}".format(driven, 'rotate'), f=True)
+    cmds.connectAttr(
+        "{}.{}".format(decompMatrix, "outputTranslate"),
+        "{}.{}".format(driven, "translate"),
+        f=True,
+    )
+    cmds.connectAttr(
+        "{}.{}".format(decompMatrix, "outputRotate"),
+        "{}.{}".format(driven, "rotate"),
+        f=True,
+    )
 
     return multMatrix, decompMatrix
 
@@ -38,10 +48,16 @@ def pointConstraint(driver, driven):
     :param str driven: node driven by the point constraint
     :return: mult matrix and decompose matrix used in the constraint
     """
-    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
+    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(
+        driver=driver, driven=driven
+    )
 
     # connect the translate and rotate
-    cmds.connectAttr("{}.{}".format(decompMatrix, 'outputTranslate'), "{}.{}".format(driven, 'translate'), f=True)
+    cmds.connectAttr(
+        "{}.{}".format(decompMatrix, "outputTranslate"),
+        "{}.{}".format(driven, "translate"),
+        f=True,
+    )
 
     return multMatrix, decompMatrix
 
@@ -54,10 +70,16 @@ def orientConstraint(driver, driven):
     :param str driven: node driven by the orient constraint
     :return: mult matrix and decompose matrix used in the constraint
     """
-    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
+    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(
+        driver=driver, driven=driven
+    )
 
     # connect the translate and rotate
-    cmds.connectAttr("{}.{}".format(decompMatrix, 'outputRotate'), "{}.{}".format(driven, 'rotate'), f=True)
+    cmds.connectAttr(
+        "{}.{}".format(decompMatrix, "outputRotate"),
+        "{}.{}".format(driven, "rotate"),
+        f=True,
+    )
 
     return multMatrix, decompMatrix
 
@@ -70,9 +92,15 @@ def scaleConstraint(driver, driven):
     :param str driven: node driven by the scale constraint
     :return: mult matrix and decompose matrix used in the constraint
     """
-    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(driver=driver, driven=driven)
+    multMatrix, decompMatrix = _createSimpleMatrixConstraintNetwork(
+        driver=driver, driven=driven
+    )
     # connect the translate and rotate
-    cmds.connectAttr("{}.{}".format(decompMatrix, 'outputScale'), "{}.{}".format(driven, 'scale'), f=True)
+    cmds.connectAttr(
+        "{}.{}".format(decompMatrix, "outputScale"),
+        "{}.{}".format(driven, "scale"),
+        f=True,
+    )
 
     return multMatrix, decompMatrix
 
@@ -86,29 +114,46 @@ def _createSimpleMatrixConstraintNetwork(driver, driven):
     :return: mult matrix, decompose matrix
     """
     driven = common.getFirst(driven)
-    if cmds.objExists("{}.{}".format(driven, '{}_constraintMm'.format(driver))):
-        multMatrix = meta.getMessageConnection('{}.{}'.format(driven, '{}_constraintMm'.format(driver)))
-        decomposeMatrix = meta.getMessageConnection('{}.{}'.format(driven, '{}_constraintDcmp'.format(driver)))
+    if cmds.objExists("{}.{}".format(driven, "{}_constraintMm".format(driver))):
+        multMatrix = meta.getMessageConnection(
+            "{}.{}".format(driven, "{}_constraintMm".format(driver))
+        )
+        decomposeMatrix = meta.getMessageConnection(
+            "{}.{}".format(driven, "{}_constraintDcmp".format(driver))
+        )
     else:
-        multMatrix = cmds.createNode('multMatrix', name=driven + '_mm')
-        decomposeMatrix = cmds.createNode('decomposeMatrix', name=driven + '_dcmp')
+        multMatrix = cmds.createNode("multMatrix", name=driven + "_mm")
+        decomposeMatrix = cmds.createNode("decomposeMatrix", name=driven + "_dcmp")
 
         # convert the driver's world matrix into the parent space of the driven
-        cmds.connectAttr("{}.{}".format(driver, 'worldMatrix'), "{}.{}".format(multMatrix, 'matrixIn[0]'))
-        cmds.connectAttr("{}.{}".format(driven, 'parentInverseMatrix'), "{}.{}".format(multMatrix, 'matrixIn[1]'))
+        cmds.connectAttr(
+            "{}.{}".format(driver, "worldMatrix"),
+            "{}.{}".format(multMatrix, "matrixIn[0]"),
+        )
+        cmds.connectAttr(
+            "{}.{}".format(driven, "parentInverseMatrix"),
+            "{}.{}".format(multMatrix, "matrixIn[1]"),
+        )
 
         # connect the new matrix to the decompose matrix
-        cmds.connectAttr("{}.{}".format(multMatrix, 'matrixSum'), "{}.{}".format(decomposeMatrix, 'inputMatrix'))
+        cmds.connectAttr(
+            "{}.{}".format(multMatrix, "matrixSum"),
+            "{}.{}".format(decomposeMatrix, "inputMatrix"),
+        )
 
         # create message connections to the mult matrix and decompose matrix.
         # this is used if we ever create another constraint to re-use the old nodes
-        meta.createMessageConnection(driven, multMatrix, '{}_constraintMm'.format(driver))
-        meta.createMessageConnection(driven, decomposeMatrix, '{}_constraintDcmp'.format(driver))
+        meta.createMessageConnection(
+            driven, multMatrix, "{}_constraintMm".format(driver)
+        )
+        meta.createMessageConnection(
+            driven, decomposeMatrix, "{}_constraintDcmp".format(driver)
+        )
 
     return multMatrix, decomposeMatrix
 
 
-def negate(driver, driven, t=False, r=False, s=False):
+def negate(driver, driven, translate=False, rotate=False, scale=False):
     """
     Negating a transform will add the inverse of any values to the driver to each of its driven objects.
 
@@ -118,26 +163,41 @@ def negate(driver, driven, t=False, r=False, s=False):
     :param str driver: transform to drive the negation. This will have its transfrom values inverted
     :param str list driven: transforms to have their transfroms negated.
         Its transforms will be populated with the inverse of the driver.
-    :param bool t: negate the translation
-    :param bool r: negate the rotation
-    :param bool s: negate the scale
+    :param bool translate: negate the translation
+    :param bool rotate: negate the rotation
+    :param bool scale: negate the scale
     """
     driver = common.getFirst(driver)
     drivens = common.toList(driven)
 
     for driven in drivens:
-        if t:
-            node.unitConversion('{}.{}'.format(driver, 't'), '{}.{}'.format(driven, 't'), -1, name=driven + '_t_neg')
+        if translate:
+            node.unitConversion(
+                "{}.{}".format(driver, "t"),
+                "{}.{}".format(driven, "t"),
+                -1,
+                name=driven + "_t_neg",
+            )
 
-        if r:
-            node.unitConversion('{}.{}'.format(driver, 'r'), '{}.{}'.format(driven, 'r'), -1, name=driven + '_r_neg')
+        if rotate:
+            node.unitConversion(
+                "{}.{}".format(driver, "r"),
+                "{}.{}".format(driven, "r"),
+                -1,
+                name=driven + "_r_neg",
+            )
             # get the opposite rotate order. this is hard coded.
-            ro = [5, 3, 4, 1, 2, 0][cmds.getAttr('%s.rotateOrder' % driver)]
-            cmds.setAttr("{}.{}".format(driven, 'rotateOrder'), ro)
+            ro = [5, 3, 4, 1, 2, 0][cmds.getAttr("%s.rotateOrder" % driver)]
+            cmds.setAttr("{}.{}".format(driven, "rotateOrder"), ro)
 
-        if s:
-            node.multiplyDivide([1, 1, 1], '{}.{}'.format(driver, 's'), operation='div',
-                                output='{}.{}'.format(driven, 's'), name=driven + '_s_neg')
+        if scale:
+            node.multiplyDivide(
+                [1, 1, 1],
+                "{}.{}".format(driver, "s"),
+                operation="div",
+                output="{}.{}".format(driven, "s"),
+                name=driven + "_s_neg",
+            )
 
 
 def uvPin(meshVertex):
@@ -166,17 +226,30 @@ def uvPin(meshVertex):
 
     # check if the deform shape is connected to a UV Pin node
     uvPinNode = None
-    connections = cmds.listConnections("{}.worldMesh".format(deformShape), d=True, s=False, p=False) or []
+    connections = (
+        cmds.listConnections(
+            "{}.worldMesh".format(deformShape), d=True, s=False, p=False
+        )
+        or []
+    )
     for node in connections:
-        if cmds.nodeType(node) == 'uvPin':
+        if cmds.nodeType(node) == "uvPin":
             uvPinNode = node
 
     # if we dont have one then we can create one
     if not uvPinNode:
         name = naming.getUniqueName("{}_uvPin".format(meshName))
         uvPinNode = cmds.createNode("uvPin", name=name)
-        cmds.connectAttr("{}.worldMesh[0]".format(deformShape), "{}.deformedGeometry".format(uvPinNode), f=True)
-        cmds.connectAttr("{}.outMesh".format(origShape), "{}.originalGeometry".format(uvPinNode), f=True)
+        cmds.connectAttr(
+            "{}.worldMesh[0]".format(deformShape),
+            "{}.deformedGeometry".format(uvPinNode),
+            f=True,
+        )
+        cmds.connectAttr(
+            "{}.outMesh".format(origShape),
+            "{}.originalGeometry".format(uvPinNode),
+            f=True,
+        )
 
     # now we can finally add in the coordinates for the selected vertex.
     vertexId = meshVertex.split(".")[-1].split("[")[-1].split("]")[0]
@@ -196,7 +269,7 @@ def uvPin(meshVertex):
     return "{}.outputMatrix[{}]".format(uvPinNode, index)
 
 
-def uvPinConstraint(target, meshName, mo=False):
+def uvPinConstraint(target, meshName, maintainOffset=False):
     """
     Create a uv pin constraint between the target and the mesh
 
@@ -217,29 +290,42 @@ def uvPinConstraint(target, meshName, mo=False):
 
     # check if the deform shape is connected to a UV Pin node
     uvPinNode = None
-    connections = cmds.listConnections("{}.worldMesh".format(deformShape), d=True, s=False, p=False) or []
+    connections = (
+        cmds.listConnections(
+            "{}.worldMesh".format(deformShape), d=True, s=False, p=False
+        )
+        or []
+    )
     for node in connections:
-        if cmds.nodeType(node) == 'uvPin':
+        if cmds.nodeType(node) == "uvPin":
             uvPinNode = node
 
         # if we dont have one then we can create one
     if not uvPinNode:
         name = naming.getUniqueName("{}_uvPin".format(meshName))
         uvPinNode = cmds.createNode("uvPin", name=name)
-        cmds.connectAttr("{}.worldMesh[0]".format(deformShape), "{}.deformedGeometry".format(uvPinNode), f=True)
-        cmds.connectAttr("{}.outMesh".format(origShape), "{}.originalGeometry".format(uvPinNode), f=True)
+        cmds.connectAttr(
+            "{}.worldMesh[0]".format(deformShape),
+            "{}.deformedGeometry".format(uvPinNode),
+            f=True,
+        )
+        cmds.connectAttr(
+            "{}.outMesh".format(origShape),
+            "{}.originalGeometry".format(uvPinNode),
+            f=True,
+        )
 
     # now lets connect the coorindates to the uv pin. We can use pen maya to get the closest uv coords
     point = om2.MPoint(cmds.xform(target, q=True, t=True, ws=True))
 
     mfnMesh = mesh.getMeshFn(meshName)
-    closestPoint, closestVertex = mfnMesh.getClosestPoint(point, space=om2.MSpace.kWorld)
+    closestPoint, _ = mfnMesh.getClosestPoint(point, space=om2.MSpace.kWorld)
     uvCoords = mfnMesh.getUVAtPoint(closestPoint, space=om2.MSpace.kWorld)
 
     # get the next available index on the coordinate plug
     nextIndex = attr.getNextAvailableElement("{}.coordinate".format(uvPinNode))
 
-    # set the coortinate attributes
+    # set the coordinate attributes
     cmds.setAttr("{}.coordinateU".format(nextIndex), uvCoords[0])
     cmds.setAttr("{}.coordinateV".format(nextIndex), uvCoords[1])
 
@@ -249,7 +335,9 @@ def uvPinConstraint(target, meshName, mo=False):
     index = plug.evaluateNumElements() - 1
     outputPlug = "{}.outputMatrix[{}]".format(uvPinNode, index)
 
-    transform.connectOffsetParentMatrix(outputPlug, driven=target, mo=mo, s=False, sh=False)
+    transform.connectOffsetParentMatrix(
+        outputPlug, driven=target, mo=maintainOffset, s=False, sh=False
+    )
 
     # return the uv pin node and the output plug
     return uvPinNode, outputPlug

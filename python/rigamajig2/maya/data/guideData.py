@@ -22,7 +22,7 @@ if sys.version_info.major >= 3:
 
 
 class GuideData(node_data.NodeData):
-    """ This class to save and load curve data"""
+    """This class to save and load curve data"""
 
     def __init__(self):
         """
@@ -42,7 +42,9 @@ class GuideData(node_data.NodeData):
 
         # if the guide is a joint we can gather the joint orient as well.
         if rigamajig2.maya.joint.isJoint(node):
-            data['jointOrient'] = [round(value, 4) for value in cmds.getAttr("{0}.jo".format(node))[0]]
+            data["jointOrient"] = [
+                round(value, 4) for value in cmds.getAttr("{0}.jo".format(node))[0]
+            ]
 
         attrs = cmds.listAttr(node, ud=True)
         for attr in attrs:
@@ -53,4 +55,6 @@ class GuideData(node_data.NodeData):
         self._data[node].update(data)
 
     def applyData(self, nodes, attributes=None, worldSpace=False):
-        super(GuideData, self).applyData(nodes, attributes, worldSpace, applyColorOverrides=False)
+        super(GuideData, self).applyData(
+            nodes, attributes, worldSpace, applyColorOverrides=False
+        )

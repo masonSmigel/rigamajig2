@@ -66,7 +66,9 @@ class Lips(base.BaseComponent):
         :param addZipperLips: add the setup to do zipper lips
         :param sparseTweakers: add minimal tweakers. If false add tweakers below the main level controls.
         """
-        super(Lips, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(Lips, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
         self.side = common.getSide(self.name)
 
         self.lipSpans = 17
@@ -79,19 +81,29 @@ class Lips(base.BaseComponent):
         self.defineParameter(parameter="lipSpans", value=self.lipSpans, dataType="int")
         self.defineParameter(parameter="addSdk", value=self.addSdk, dataType="bool")
         self.defineParameter(parameter="useJaw", value=self.useJaw, dataType="bool")
-        self.defineParameter(parameter="jawJoints", value=self.jawJoints, dataType="list")
-        self.defineParameter(parameter="addZipperLips", value=self.addZipperLips, dataType="bool")
-        self.defineParameter(parameter="sparseTweakers", value=self.sparseTweakers, dataType="bool")
+        self.defineParameter(
+            parameter="jawJoints", value=self.jawJoints, dataType="list"
+        )
+        self.defineParameter(
+            parameter="addZipperLips", value=self.addZipperLips, dataType="bool"
+        )
+        self.defineParameter(
+            parameter="sparseTweakers", value=self.sparseTweakers, dataType="bool"
+        )
 
     def _createBuildGuides(self):
         """create all build guides"""
-        self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
+        self.guidesHierarchy = cmds.createNode(
+            "transform", name="{}_guide".format(self.name)
+        )
 
         lipsPos = cmds.xform(self.input[0], q=True, ws=True, t=True)
 
         # create the up vector
         self.upVectorGuide = control.createGuide(
-            "{}_upVecTgt".format(self.name), parent=self.guidesHierarchy, position=lipsPos
+            "{}_upVecTgt".format(self.name),
+            parent=self.guidesHierarchy,
+            position=lipsPos,
         )
 
         self.upperLipGuide = control.createGuide(
@@ -113,30 +125,55 @@ class Lips(base.BaseComponent):
         self.upperGuideList, self.lowerGuideList = self.createLipGuides()
 
         uppGuideCurve = live.createLiveCurve(
-            self.upperGuideList, curveName="{}_upper_guideCrv".format(self.name), parent=self.guidesHierarchy
+            self.upperGuideList,
+            curveName="{}_upper_guideCrv".format(self.name),
+            parent=self.guidesHierarchy,
         )
         lowGuideCurve = live.createLiveCurve(
-            self.lowerGuideList, curveName="{}_lower_guideCrv".format(self.name), parent=self.guidesHierarchy
+            self.lowerGuideList,
+            curveName="{}_lower_guideCrv".format(self.name),
+            parent=self.guidesHierarchy,
         )
         # build the lip controls
         hierarchyName = "{}_Control_guides".format(self.name)
-        controlHierarchy = cmds.createNode("transform", name=hierarchyName, p=self.guidesHierarchy)
+        controlHierarchy = cmds.createNode(
+            "transform", name=hierarchyName, p=self.guidesHierarchy
+        )
 
-        mainControlNames = ["r_corner", "r_upp", "upp", "l_upp", "l_corner", "r_low", "low", "l_low"]
+        mainControlNames = [
+            "r_corner",
+            "r_upp",
+            "upp",
+            "l_upp",
+            "l_corner",
+            "r_low",
+            "low",
+            "l_low",
+        ]
         mainControlParams = [0, 0.25, 0.5, 0.75, 1, 0.25, 0.5, 0.75]
 
         # create the main controls
         upperLipMain = self.createControlGuides(
-            uppGuideCurve, mainControlNames[:5], mainControlParams[:5], controlHierarchy, size=self.size
+            uppGuideCurve,
+            mainControlNames[:5],
+            mainControlParams[:5],
+            controlHierarchy,
+            size=self.size,
         )
         lowerLipMain = self.createControlGuides(
-            lowGuideCurve, mainControlNames[5:], mainControlParams[5:], controlHierarchy, size=self.size
+            lowGuideCurve,
+            mainControlNames[5:],
+            mainControlParams[5:],
+            controlHierarchy,
+            size=self.size,
         )
         self.mainControlGuides = upperLipMain + lowerLipMain
 
         # create the sub controls
         hierarchyName = "{}_subControl_guides".format(self.name)
-        subControlHierarchy = cmds.createNode("transform", name=hierarchyName, p=self.guidesHierarchy)
+        subControlHierarchy = cmds.createNode(
+            "transform", name=hierarchyName, p=self.guidesHierarchy
+        )
 
         uppSubControlNames = ["r_uppOut", "r_uppInn", "l_uppInn", "l_uppOut"]
 
@@ -162,14 +199,20 @@ class Lips(base.BaseComponent):
             size=0.5 * self.size,
         )
 
-        self.subControlGuides = [upperLipMain[0]] + upperSubControls + [upperLipMain[-1]] + lowerSubControls
+        self.subControlGuides = (
+            [upperLipMain[0]] + upperSubControls + [upperLipMain[-1]] + lowerSubControls
+        )
 
     def createLipGuides(self):
         """Create the guides around the lips"""
 
         lipsPos = cmds.xform(self.input[0], q=True, ws=True, t=True)
 
-        parent = cmds.createNode("transform", name="{}_lip_guide".format(self.name), parent=self.guidesHierarchy)
+        parent = cmds.createNode(
+            "transform",
+            name="{}_lip_guide".format(self.name),
+            parent=self.guidesHierarchy,
+        )
 
         upperList = list()
         lowerList = list()
@@ -218,14 +261,18 @@ class Lips(base.BaseComponent):
             "{}_lCorner".format(self.name),
             parent=parent,
             hideAttrs=["s"],
-            position=mathUtils.addVector((((midpoint + 1) * (GUIDE_SCALE * 2)), 0, 0), lipsPos),
+            position=mathUtils.addVector(
+                (((midpoint + 1) * (GUIDE_SCALE * 2)), 0, 0), lipsPos
+            ),
             size=guideSize,
         )
         cornerR = control.createGuide(
             "{}_rCorner".format(self.name),
             parent=parent,
             hideAttrs=["s"],
-            position=mathUtils.addVector((((-midpoint - 1) * (GUIDE_SCALE * 2)), 0, 0), lipsPos),
+            position=mathUtils.addVector(
+                (((-midpoint - 1) * (GUIDE_SCALE * 2)), 0, 0), lipsPos
+            ),
             size=guideSize,
         )
 
@@ -234,7 +281,9 @@ class Lips(base.BaseComponent):
 
         return uppGuideList, lowGuideList
 
-    def createControlGuides(self, targetCurve, nameList, paramList, parent, color="salmon", size=1.0):
+    def createControlGuides(
+        self, targetCurve, nameList, paramList, parent, color="salmon", size=1.0
+    ):
         """Create the control guides"""
 
         returnList = list()
@@ -243,14 +292,29 @@ class Lips(base.BaseComponent):
             suffix = nameList[i]
 
             guideName = "{}_{}".format(self.name, suffix)
-            guide = control.createGuide(guideName, shape="sphere", size=GUIDE_SCALE * size, parent=parent, color=color)
+            guide = control.createGuide(
+                guideName,
+                shape="sphere",
+                size=GUIDE_SCALE * size,
+                parent=parent,
+                color=color,
+            )
             # find the appropriate parameters
             minParam, maxParam = curve.getRange(targetCurve)
             param = maxParam * paramList[i]
-            pointOnCurveInfo = curve.attatchToCurve(guide, targetCurve, toClosestParam=False, parameter=param)
+            pointOnCurveInfo = curve.attatchToCurve(
+                guide, targetCurve, toClosestParam=False, parameter=param
+            )
 
             # create a slide attribute so we can easily slide the controls along the shape of the eyelid
-            slideAttr = attr.createAttr(guide, "param", "float", value=param, minValue=minParam, maxValue=maxParam)
+            slideAttr = attr.createAttr(
+                guide,
+                "param",
+                "float",
+                value=param,
+                minValue=minParam,
+                maxValue=maxParam,
+            )
             cmds.connectAttr(slideAttr, "{}.{}".format(pointOnCurveInfo, "parameter"))
 
             # check if the controls are on the right side and if so mirror them
@@ -368,11 +432,15 @@ class Lips(base.BaseComponent):
     def _preRigSetup(self):
         """Setup the joints and curves needed for the setup"""
         # create the upVector
-        self.upVector = cmds.createNode("transform", name="{}_upVec".format(self.name), p=self.spacesHierarchy)
+        self.upVector = cmds.createNode(
+            "transform", name="{}_upVec".format(self.name), p=self.spacesHierarchy
+        )
         transform.matchTranslate(self.upVectorGuide, self.upVector)
 
         curvesHierarchyName = "{}_curves".format(self.name)
-        self.curvesHierarchy = cmds.createNode("transform", name=curvesHierarchyName, p=self.rootHierarchy)
+        self.curvesHierarchy = cmds.createNode(
+            "transform", name=curvesHierarchyName, p=self.rootHierarchy
+        )
         cmds.setAttr("{}.inheritsTransform".format(self.curvesHierarchy), False)
 
         topHighCurve = "{}_upperLip_high".format(self.name)
@@ -429,7 +497,9 @@ class Lips(base.BaseComponent):
         self.botMidCurve = cmds.duplicate(self.botHighCurve, name=botMidCurve)[0]
 
         # setup joints for each span of the lips
-        self.targetHierarchy = cmds.createNode("transform", name="{}_aimTgts".format(self.name), p=self.rootHierarchy)
+        self.targetHierarchy = cmds.createNode(
+            "transform", name="{}_aimTgts".format(self.name), p=self.rootHierarchy
+        )
         cmds.setAttr("{}.inheritsTransform".format(self.targetHierarchy), False)
 
         # setup the joints for the eyelid
@@ -439,15 +509,23 @@ class Lips(base.BaseComponent):
         for guide in self.upperGuideList + self.lowerGuideList[1:-1]:
             guideName = guide.split("_guide")[0]
 
-            endJoint = cmds.createNode("joint", name="{}_{}".format(guideName, common.BINDTAG), p=self.input[0])
+            endJoint = cmds.createNode(
+                "joint", name="{}_{}".format(guideName, common.BINDTAG), p=self.input[0]
+            )
             transform.matchTranslate(guide, endJoint)
             joint.setRadius([endJoint], GUIDE_SCALE)
             meta.tag(endJoint, common.BINDTAG)
 
-            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(guideName), p=self.targetHierarchy)
+            targetLoc = cmds.createNode(
+                "transform",
+                name="{}_trsTarget".format(guideName),
+                p=self.targetHierarchy,
+            )
             transform.matchTransform(guide, targetLoc)
 
-            targetCurve = self.botHighCurve if "lower" in guideName else self.topHighCurve
+            targetCurve = (
+                self.botHighCurve if "lower" in guideName else self.topHighCurve
+            )
             curve.attatchToCurve(targetLoc, curve=targetCurve, toClosestParam=True)
 
             joint.connectChains([targetLoc], [endJoint], connectScale=False)
@@ -475,16 +553,24 @@ class Lips(base.BaseComponent):
         # setup the main joint hierarchy
         jointsHierarchyName = "{}_joints".format(self.name)
         cornerHierarchyName = "{}_corners".format(self.name)
-        self.jointsHierarchy = cmds.createNode("transform", name=jointsHierarchyName, parent=self.rootHierarchy)
-        self.cornersHierarchy = cmds.createNode("transform", name=cornerHierarchyName, parent=self.rootHierarchy)
+        self.jointsHierarchy = cmds.createNode(
+            "transform", name=jointsHierarchyName, parent=self.rootHierarchy
+        )
+        self.cornersHierarchy = cmds.createNode(
+            "transform", name=cornerHierarchyName, parent=self.rootHierarchy
+        )
 
         # the first portion of this setup is to build a system to wrap the corner of the lips around the teeth.
         # this is accomplished by created a separate hierarchy at the lips joint which aims at the mouth control (giving an expected rotation)
         # however once the rotation reaches a limit the transformation instead becomes a translation
 
         attr.addSeparator(self.paramsHierarchy, "corners")
-        wideLimit = attr.createAttr(self.paramsHierarchy, "rotLimitWide", "float", value=2, minValue=0)
-        narrowLimit = attr.createAttr(self.paramsHierarchy, "rotLimitNarrow", "float", value=-2, maxValue=0)
+        wideLimit = attr.createAttr(
+            self.paramsHierarchy, "rotLimitWide", "float", value=2, minValue=0
+        )
+        narrowLimit = attr.createAttr(
+            self.paramsHierarchy, "rotLimitNarrow", "float", value=-2, maxValue=0
+        )
 
         dummyJoints = list()
         self.cornerSetups = list()
@@ -492,20 +578,36 @@ class Lips(base.BaseComponent):
         for side in "lr":
             ctl = self.rCorner if side == "r" else self.lCorner
 
-            jawConnecter = cmds.createNode("transform", name="{}_setup".format(ctl.name), parent=self.cornersHierarchy)
+            jawConnecter = cmds.createNode(
+                "transform",
+                name="{}_setup".format(ctl.name),
+                parent=self.cornersHierarchy,
+            )
             transform.matchTransform(ctl.name, jawConnecter)
             setupOffset = hierarchy.create(
-                jawConnecter, hierarchy=["{}_offset".format(jawConnecter)], matchTransform=True
+                jawConnecter,
+                hierarchy=["{}_offset".format(jawConnecter)],
+                matchTransform=True,
             )
 
-            aimOffset = cmds.createNode("transform", name="{}_aimTrs_offset".format(ctl.name), parent=jawConnecter)
-            aimTrs = cmds.createNode("transform", name="{}_aimTrs".format(ctl.name), parent=aimOffset)
+            aimOffset = cmds.createNode(
+                "transform",
+                name="{}_aimTrs_offset".format(ctl.name),
+                parent=jawConnecter,
+            )
+            aimTrs = cmds.createNode(
+                "transform", name="{}_aimTrs".format(ctl.name), parent=aimOffset
+            )
             transform.matchTranslate(self.input[0], aimOffset)
 
             # create a duplicate of the corner contorl
-            aimDummy = cmds.createNode("transform", name="{}_dummy_trs".format(ctl.name), parent=jawConnecter)
+            aimDummy = cmds.createNode(
+                "transform", name="{}_dummy_trs".format(ctl.name), parent=jawConnecter
+            )
             transform.matchTransform(ctl.name, aimDummy)
-            hierarchy.create(aimDummy, hierarchy=["{}_offset".format(aimDummy)], matchTransform=True)
+            hierarchy.create(
+                aimDummy, hierarchy=["{}_offset".format(aimDummy)], matchTransform=True
+            )
 
             node.clamp(
                 "{}.tx".format(ctl.name),
@@ -517,17 +619,34 @@ class Lips(base.BaseComponent):
 
             # create a temportary aim constraint to orient the offset
             aimVector = (-1, 0, 0) if side == "r" else (1, 0, 0)
-            const = cmds.aimConstraint(ctl.name, aimOffset, aim=aimVector, u=(0, 1, 0), wut="object", wuo=self.upVector)
+            const = cmds.aimConstraint(
+                ctl.name,
+                aimOffset,
+                aim=aimVector,
+                u=(0, 1, 0),
+                wut="object",
+                wuo=self.upVector,
+            )
             cmds.delete(const)
             cmds.aimConstraint(
-                aimDummy, aimTrs, aim=aimVector, u=(0, 1, 0), wut="object", wuo=self.upVector, skip=["x", "z"]
+                aimDummy,
+                aimTrs,
+                aim=aimVector,
+                u=(0, 1, 0),
+                wut="object",
+                wuo=self.upVector,
+                skip=["x", "z"],
             )
 
             # next we need to make a dummy joint to constrain to
-            dummyJoint = cmds.createNode("joint", name="{}_dummy_joint".format(ctl.name), parent=jawConnecter)
+            dummyJoint = cmds.createNode(
+                "joint", name="{}_dummy_joint".format(ctl.name), parent=jawConnecter
+            )
             transform.matchTransform(ctl.name, dummyJoint)
             dummyOffset = hierarchy.create(
-                dummyJoint, hierarchy=["{}_offset".format(dummyJoint), "{}_sdk".format(dummyJoint)], matchTransform=True
+                dummyJoint,
+                hierarchy=["{}_offset".format(dummyJoint), "{}_sdk".format(dummyJoint)],
+                matchTransform=True,
             )
             cmds.parentConstraint(aimTrs, dummyOffset[0], mo=True)
             # hide the dummy joint
@@ -542,9 +661,15 @@ class Lips(base.BaseComponent):
                 operation=">",
                 name="{}_narrowOrWide".format(ctl.name),
             )
-            mdl = node.multDoubleLinear("{}.outColorR".format(narrowWideCond), -1, name="{}_neg".format(ctl.name))
+            mdl = node.multDoubleLinear(
+                "{}.outColorR".format(narrowWideCond),
+                -1,
+                name="{}_neg".format(ctl.name),
+            )
             adl = node.addDoubleLinear(
-                "{}.tx".format(ctl.name), "{}.output".format(mdl), name="{}_off".format(ctl.name)
+                "{}.tx".format(ctl.name),
+                "{}.output".format(mdl),
+                name="{}_off".format(ctl.name),
             )
 
             translateCondition = node.condition(
@@ -554,17 +679,28 @@ class Lips(base.BaseComponent):
                 ifFalse=[0, 0, 0],
                 name="{}_translateOffset".format(ctl.name),
             )
-            cmds.connectAttr("{}.outColorG".format(narrowWideCond), "{}.{}".format(translateCondition, "operation"))
+            cmds.connectAttr(
+                "{}.outColorG".format(narrowWideCond),
+                "{}.{}".format(translateCondition, "operation"),
+            )
 
             # now we can connect to the driver joint
-            cmds.connectAttr("{}.outColorR".format(translateCondition), "{}.tx".format(dummyJoint))
+            cmds.connectAttr(
+                "{}.outColorR".format(translateCondition), "{}.tx".format(dummyJoint)
+            )
             cmds.connectAttr("{}.ty".format(ctl.name), "{}.ty".format(dummyJoint))
             cmds.connectAttr("{}.tz".format(ctl.name), "{}.tz".format(dummyJoint))
 
             if self.addSdk:
-                cmds.connectAttr("{}.tx".format(ctl.sdk), "{}.tx".format(dummyOffset[1]))
-                cmds.connectAttr("{}.ty".format(ctl.sdk), "{}.ty".format(dummyOffset[1]))
-                cmds.connectAttr("{}.tz".format(ctl.sdk), "{}.tz".format(dummyOffset[1]))
+                cmds.connectAttr(
+                    "{}.tx".format(ctl.sdk), "{}.tx".format(dummyOffset[1])
+                )
+                cmds.connectAttr(
+                    "{}.ty".format(ctl.sdk), "{}.ty".format(dummyOffset[1])
+                )
+                cmds.connectAttr(
+                    "{}.tz".format(ctl.sdk), "{}.tz".format(dummyOffset[1])
+                )
 
             # constrain it to the lips group
             transform.connectOffsetParentMatrix(self.lipsAll.name, setupOffset, mo=True)
@@ -574,26 +710,57 @@ class Lips(base.BaseComponent):
             self.cornerSetups.append(jawConnecter)
 
         # create a a list of driver joints for the lowres curve
-        mainJointsList = [dummyJoints[-1], self.uppLips.name, dummyJoints[0], self.lowLips.name]
+        mainJointsList = [
+            dummyJoints[-1],
+            self.uppLips.name,
+            dummyJoints[0],
+            self.lowLips.name,
+        ]
         self.mainDriverJnts = self.createJointsForCurve(mainJointsList, suffix="main")
 
         uppLidJoints = self.mainDriverJnts[:3]
-        lowLidJoints = [self.mainDriverJnts[0], self.mainDriverJnts[3], self.mainDriverJnts[2]]
+        lowLidJoints = [
+            self.mainDriverJnts[0],
+            self.mainDriverJnts[3],
+            self.mainDriverJnts[2],
+        ]
 
         # for theese controls we need to set the skinning method to dual quaternion
         # so that we can get a nice rotation around the teeth (skinningMethod=1 for DQ skinning)
         uppSkinClusterName = "{}_skinCluster".format(self.topLowCurve)
         lowSkinClusterName = "{}_skinCluster".format(self.botLowCurve)
-        cmds.skinCluster(uppLidJoints, self.topLowCurve, dr=1, mi=2, bm=0, name=uppSkinClusterName, skinMethod=1)
-        cmds.skinCluster(lowLidJoints, self.botLowCurve, dr=1, mi=2, bm=0, name=lowSkinClusterName, skinMethod=1)
+        cmds.skinCluster(
+            uppLidJoints,
+            self.topLowCurve,
+            dr=1,
+            mi=2,
+            bm=0,
+            name=uppSkinClusterName,
+            skinMethod=1,
+        )
+        cmds.skinCluster(
+            lowLidJoints,
+            self.botLowCurve,
+            dr=1,
+            mi=2,
+            bm=0,
+            name=lowSkinClusterName,
+            skinMethod=1,
+        )
 
         # autoskin the curves! Based on "the art of moving points" to create a 'football' shape for the curve.
         # we can do that by setting the skinweights using the equation: y=-(x-1)^{2.4} +1
         lipsUtil.autoSkinLowCurve(
-            self.topLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[1], self.mainDriverJnts[2]
+            self.topLowCurve,
+            self.mainDriverJnts[0],
+            self.mainDriverJnts[1],
+            self.mainDriverJnts[2],
         )
         lipsUtil.autoSkinLowCurve(
-            self.botLowCurve, self.mainDriverJnts[0], self.mainDriverJnts[3], self.mainDriverJnts[2]
+            self.botLowCurve,
+            self.mainDriverJnts[0],
+            self.mainDriverJnts[3],
+            self.mainDriverJnts[2],
         )
 
     def setupMidCurve(self):
@@ -603,16 +770,36 @@ class Lips(base.BaseComponent):
         self.connectControlsToCurve(self.mainControls[5:], self.botLowCurve)
 
         # create a bunch of driver joints
-        midDriverJoints = self.createJointsForCurve(self.mainControls[1:4] + self.mainControls[5:], suffix="mid")
+        midDriverJoints = self.createJointsForCurve(
+            self.mainControls[1:4] + self.mainControls[5:], suffix="mid"
+        )
 
         # bind the joints to the curve
-        uppLidJoints = [self.mainDriverJnts[0]] + midDriverJoints[:3] + [self.mainDriverJnts[2]]
-        lowLidJoints = [self.mainDriverJnts[0]] + midDriverJoints[3:] + [self.mainDriverJnts[2]]
+        uppLidJoints = (
+            [self.mainDriverJnts[0]] + midDriverJoints[:3] + [self.mainDriverJnts[2]]
+        )
+        lowLidJoints = (
+            [self.mainDriverJnts[0]] + midDriverJoints[3:] + [self.mainDriverJnts[2]]
+        )
 
         uppMidSkinClusterName = "{}_skinCluster".format(self.topMidCurve)
         lowMidSkinClusterName = "{}_skinCluster".format(self.botMidCurve)
-        cmds.skinCluster(uppLidJoints, self.topMidCurve, dr=1.5, mi=2, bm=0, name=uppMidSkinClusterName)
-        cmds.skinCluster(lowLidJoints, self.botMidCurve, dr=1.5, mi=2, bm=0, name=lowMidSkinClusterName)
+        cmds.skinCluster(
+            uppLidJoints,
+            self.topMidCurve,
+            dr=1.5,
+            mi=2,
+            bm=0,
+            name=uppMidSkinClusterName,
+        )
+        cmds.skinCluster(
+            lowLidJoints,
+            self.botMidCurve,
+            dr=1.5,
+            mi=2,
+            bm=0,
+            name=lowMidSkinClusterName,
+        )
 
         # connect the secondary controls to this curve
         self.connectControlsToCurve(self.subControls[:5], self.topMidCurve)
@@ -620,16 +807,48 @@ class Lips(base.BaseComponent):
 
         # add in the orientation for the sub controls.
         cmds.parent(self.subControls[0].orig, self.mainControls[0].name)
-        lipsUtil.noFlipOrient(self.mainControls[0].name, self.mainControls[1].name, self.subControls[1].trs)
-        lipsUtil.noFlipOrient(self.mainControls[1].name, self.mainControls[2].name, self.subControls[2].trs)
-        lipsUtil.noFlipOrient(self.mainControls[2].name, self.mainControls[3].name, self.subControls[3].trs)
-        lipsUtil.noFlipOrient(self.mainControls[3].name, self.mainControls[4].name, self.subControls[4].trs)
+        lipsUtil.noFlipOrient(
+            self.mainControls[0].name,
+            self.mainControls[1].name,
+            self.subControls[1].trs,
+        )
+        lipsUtil.noFlipOrient(
+            self.mainControls[1].name,
+            self.mainControls[2].name,
+            self.subControls[2].trs,
+        )
+        lipsUtil.noFlipOrient(
+            self.mainControls[2].name,
+            self.mainControls[3].name,
+            self.subControls[3].trs,
+        )
+        lipsUtil.noFlipOrient(
+            self.mainControls[3].name,
+            self.mainControls[4].name,
+            self.subControls[4].trs,
+        )
         cmds.parent(self.subControls[5].orig, self.mainControls[4].name)
 
-        lipsUtil.noFlipOrient(self.mainControls[0].name, self.mainControls[5].name, self.subControls[6].trs)
-        lipsUtil.noFlipOrient(self.mainControls[5].name, self.mainControls[6].name, self.subControls[7].trs)
-        lipsUtil.noFlipOrient(self.mainControls[6].name, self.mainControls[7].name, self.subControls[8].trs)
-        lipsUtil.noFlipOrient(self.mainControls[7].name, self.mainControls[4].name, self.subControls[9].trs)
+        lipsUtil.noFlipOrient(
+            self.mainControls[0].name,
+            self.mainControls[5].name,
+            self.subControls[6].trs,
+        )
+        lipsUtil.noFlipOrient(
+            self.mainControls[5].name,
+            self.mainControls[6].name,
+            self.subControls[7].trs,
+        )
+        lipsUtil.noFlipOrient(
+            self.mainControls[6].name,
+            self.mainControls[7].name,
+            self.subControls[8].trs,
+        )
+        lipsUtil.noFlipOrient(
+            self.mainControls[7].name,
+            self.mainControls[4].name,
+            self.subControls[9].trs,
+        )
 
         # if we add additionalTweakers we need to parent them to their respective joints(similar to the corners)
         if not self.sparseTweakers:
@@ -691,14 +910,25 @@ class Lips(base.BaseComponent):
                 self.subControls[5],
             ]
 
-        self.uppSubJoints = self.createJointsForCurve(uppControlsForJoints, suffix="sub")
-        self.lowSubJoints = self.createJointsForCurve(lowControlsForJoints[1:-1], suffix="sub")
+        self.uppSubJoints = self.createJointsForCurve(
+            uppControlsForJoints, suffix="sub"
+        )
+        self.lowSubJoints = self.createJointsForCurve(
+            lowControlsForJoints[1:-1], suffix="sub"
+        )
 
         # skin the upper and lower driver curves.
         # For the lower curve we'll use the corners from the upper curve to avoid duplicate controls.
         uppDriverSkinClusterName = "{}_skinCluster".format(self.topHighCurve)
         lowDriverSkinClusterName = "{}_skinCluster".format(self.botHighCurve)
-        cmds.skinCluster(self.uppSubJoints, self.topHighCurve, dr=1.5, mi=1, bm=0, name=uppDriverSkinClusterName)
+        cmds.skinCluster(
+            self.uppSubJoints,
+            self.topHighCurve,
+            dr=1.5,
+            mi=1,
+            bm=0,
+            name=uppDriverSkinClusterName,
+        )
         cmds.skinCluster(
             [self.uppSubJoints[0]] + self.lowSubJoints + [self.uppSubJoints[-1]],
             self.botHighCurve,
@@ -775,13 +1005,19 @@ class Lips(base.BaseComponent):
     def connectControlsToCurve(self, controlsList, targetCurve):
         """Connect the controls to the curve"""
         for ctl in controlsList:
-            targetLoc = cmds.createNode("transform", name="{}_trsTarget".format(ctl.name), p=self.targetHierarchy)
+            targetLoc = cmds.createNode(
+                "transform",
+                name="{}_trsTarget".format(ctl.name),
+                p=self.targetHierarchy,
+            )
             transform.matchTranslate(ctl.name, targetLoc)
 
             curve.attatchToCurve(targetLoc, targetCurve)
             constrain.orientConstraint(self.lipsAll.name, targetLoc)
 
-            transform.connectOffsetParentMatrix(targetLoc, ctl.trs, mo=False, r=False, s=False, sh=False)
+            transform.connectOffsetParentMatrix(
+                targetLoc, ctl.trs, mo=False, r=False, s=False, sh=False
+            )
 
     def createJointsForCurve(self, controlList, suffix=""):
         """Create a bunch of joints to use for a curve"""
@@ -790,7 +1026,11 @@ class Lips(base.BaseComponent):
             if isinstance(ctl, control.Control):
                 ctl = ctl.name
 
-            jnt = cmds.createNode("joint", name="{}_{}_driver".format(ctl, suffix), parent=self.jointsHierarchy)
+            jnt = cmds.createNode(
+                "joint",
+                name="{}_{}_driver".format(ctl, suffix),
+                parent=self.jointsHierarchy,
+            )
             transform.matchTransform(ctl, jnt)
             transform.connectOffsetParentMatrix(ctl, jnt)
 
@@ -813,29 +1053,65 @@ class Lips(base.BaseComponent):
         zipperLowCurve = cmds.duplicate(self.botHighCurve, name=zipperLowCurveName)[0]
 
         zipperHierarchyName = "{}_zipper".format(self.name)
-        self.zipperHierarchy = cmds.createNode("transform", name=zipperHierarchyName, parent=self.rootHierarchy)
+        self.zipperHierarchy = cmds.createNode(
+            "transform", name=zipperHierarchyName, parent=self.rootHierarchy
+        )
 
         cmds.setAttr("{}.inheritsTransform".format(self.zipperHierarchy), False)
 
         # setup attributes for the zipper
         zipName = lipsUtil.ZIPPER_ATTR
         falloffName = lipsUtil.ZIPPER_FALLOFF_ATTR
-        attr.createAttr(self.paramsHierarchy, "l{}".format(zipName), "float", minValue=0, maxValue=10, value=0)
-        attr.createAttr(self.paramsHierarchy, "r{}".format(zipName), "float", minValue=0, maxValue=10, value=0)
-        attr.createAttr(self.paramsHierarchy, "l{}".format(falloffName), "float", minValue=0.001, maxValue=10, value=4)
-        attr.createAttr(self.paramsHierarchy, "r{}".format(falloffName), "float", minValue=0.001, maxValue=10, value=4)
+        attr.createAttr(
+            self.paramsHierarchy,
+            "l{}".format(zipName),
+            "float",
+            minValue=0,
+            maxValue=10,
+            value=0,
+        )
+        attr.createAttr(
+            self.paramsHierarchy,
+            "r{}".format(zipName),
+            "float",
+            minValue=0,
+            maxValue=10,
+            value=0,
+        )
+        attr.createAttr(
+            self.paramsHierarchy,
+            "l{}".format(falloffName),
+            "float",
+            minValue=0.001,
+            maxValue=10,
+            value=4,
+        )
+        attr.createAttr(
+            self.paramsHierarchy,
+            "r{}".format(falloffName),
+            "float",
+            minValue=0.001,
+            maxValue=10,
+            value=4,
+        )
 
         # we need to make a duplicate of the high curve so we can drive the joints that move the actull high curve without causing a cycle
         zipJntsHierarchyName = "{}_zipper_joints".format(self.name)
-        self.zipJntsHierarchy = cmds.createNode("transform", name=zipJntsHierarchyName, parent=self.zipperHierarchy)
+        self.zipJntsHierarchy = cmds.createNode(
+            "transform", name=zipJntsHierarchyName, parent=self.zipperHierarchy
+        )
 
         # create the joints we need for the duplicated hierarchy
         zipUppJointNames = [x.replace("driver", "zipper") for x in self.uppSubJoints]
         zipLowJointNames = [x.replace("driver", "zipper") for x in self.lowSubJoints]
-        uppZipperDriverJoints = joint.duplicateChain(self.uppSubJoints, self.zipJntsHierarchy, zipUppJointNames)
+        uppZipperDriverJoints = joint.duplicateChain(
+            self.uppSubJoints, self.zipJntsHierarchy, zipUppJointNames
+        )
         cmds.parent(uppZipperDriverJoints[1:], self.zipJntsHierarchy)
 
-        lowZipperDriverJoints = joint.duplicateChain(self.lowSubJoints, self.zipJntsHierarchy, zipLowJointNames)
+        lowZipperDriverJoints = joint.duplicateChain(
+            self.lowSubJoints, self.zipJntsHierarchy, zipLowJointNames
+        )
         cmds.parent(lowZipperDriverJoints[1:], self.zipJntsHierarchy)
 
         # hide the zipper joints
@@ -850,9 +1126,18 @@ class Lips(base.BaseComponent):
         # skin the duplicates to the curves
         uppSkinClusterName = "{}_skinCluster".format(zipperUppCurve)
         lowSkinClusterName = "{}_skinCluster".format(zipperLowCurve)
-        cmds.skinCluster(uppZipperDriverJoints, zipperUppCurve, dr=1.5, mi=1, bm=0, name=uppSkinClusterName)
         cmds.skinCluster(
-            [uppZipperDriverJoints[0]] + lowZipperDriverJoints + [uppZipperDriverJoints[-1]],
+            uppZipperDriverJoints,
+            zipperUppCurve,
+            dr=1.5,
+            mi=1,
+            bm=0,
+            name=uppSkinClusterName,
+        )
+        cmds.skinCluster(
+            [uppZipperDriverJoints[0]]
+            + lowZipperDriverJoints
+            + [uppZipperDriverJoints[-1]],
             zipperLowCurve,
             dr=1.5,
             mi=1,
@@ -869,19 +1154,29 @@ class Lips(base.BaseComponent):
             jntName = jntName.replace("_upp", "_mid")
             jntName = jntName.replace("_driver", "_zipper")
 
-            targetLoc = cmds.createNode("transform", name="{}_trs".format(jntName), p=self.zipperHierarchy)
+            targetLoc = cmds.createNode(
+                "transform", name="{}_trs".format(jntName), p=self.zipperHierarchy
+            )
             transform.matchTransform(jnt, targetLoc)
 
             curve.attatchToCurve(targetLoc, curve=zipperCurve, toClosestParam=True)
             zipperTargets.append(targetLoc)
 
         # setup the zipper blendshape
-        self.zipperBlendshape = blendshape.create(zipperCurve, name="{}_zipper".format(zipperCurve))
-        blendshape.addTarget(self.zipperBlendshape, target=zipperUppCurve, targetWeight=0.5)
-        blendshape.addTarget(self.zipperBlendshape, target=zipperLowCurve, targetWeight=0.5)
+        self.zipperBlendshape = blendshape.create(
+            zipperCurve, name="{}_zipper".format(zipperCurve)
+        )
+        blendshape.addTarget(
+            self.zipperBlendshape, target=zipperUppCurve, targetWeight=0.5
+        )
+        blendshape.addTarget(
+            self.zipperBlendshape, target=zipperLowCurve, targetWeight=0.5
+        )
 
         # setup a blending hierarchy for the zipper joints
-        lipsUtil.setupZipperBlending(self.uppSubJoints[1:-1], zipperTargets=zipperTargets)
+        lipsUtil.setupZipperBlending(
+            self.uppSubJoints[1:-1], zipperTargets=zipperTargets
+        )
         lipsUtil.setupZipperBlending(self.lowSubJoints, zipperTargets=zipperTargets)
 
         # setup the zipper lips
@@ -896,12 +1191,21 @@ class Lips(base.BaseComponent):
         """setup the animator parameters"""
         # create a visability control for the ikGimble control
         attr.addSeparator(self.lipsAll.name, "----")
-        attr.createAttr(self.lipsAll.name, "tweakers", attributeType="bool", value=0, keyable=False, channelBox=True)
+        attr.createAttr(
+            self.lipsAll.name,
+            "tweakers",
+            attributeType="bool",
+            value=0,
+            keyable=False,
+            channelBox=True,
+        )
         subControls = [x.name for x in self.subControls]
         # if using non-sparse tweakers add the additional controls
         if not self.sparseTweakers:
             subControls += [x.name for x in self.extraTweakers]
-        control.connectControlVisiblity(self.lipsAll.name, "tweakers", controls=subControls)
+        control.connectControlVisiblity(
+            self.lipsAll.name, "tweakers", controls=subControls
+        )
 
         # add the lip zipper to the controls
         if self.addZipperLips:
@@ -910,14 +1214,28 @@ class Lips(base.BaseComponent):
                 attr.addSeparator(ctl.name, "---")
 
                 zipAttr = attr.createAttr(
-                    ctl.name, longName="zip", attributeType="float", value=0, minValue=0, maxValue=10
+                    ctl.name,
+                    longName="zip",
+                    attributeType="float",
+                    value=0,
+                    minValue=0,
+                    maxValue=10,
                 )
-                cmds.connectAttr(zipAttr, "{}.{}Zipper".format(self.paramsHierarchy, side))
+                cmds.connectAttr(
+                    zipAttr, "{}.{}Zipper".format(self.paramsHierarchy, side)
+                )
 
                 falloffAttr = attr.createAttr(
-                    ctl.name, longName="zipperFalloff", attributeType="float", value=3, minValue=0, maxValue=10
+                    ctl.name,
+                    longName="zipperFalloff",
+                    attributeType="float",
+                    value=3,
+                    minValue=0,
+                    maxValue=10,
                 )
-                cmds.connectAttr(falloffAttr, "{}.{}ZipperFalloff".format(self.paramsHierarchy, side))
+                cmds.connectAttr(
+                    falloffAttr, "{}.{}ZipperFalloff".format(self.paramsHierarchy, side)
+                )
 
         # setup some lip curl attributes
         for side in "lr":
@@ -935,7 +1253,9 @@ class Lips(base.BaseComponent):
 
         # connect the lips all
         if cmds.objExists(self.rigParent):
-            transform.connectOffsetParentMatrix(self.rigParent, self.lipsAll.orig, mo=True)
+            transform.connectOffsetParentMatrix(
+                self.rigParent, self.lipsAll.orig, mo=True
+            )
 
         # connect the up vector to the lips control
         transform.connectOffsetParentMatrix(self.lipsAll.name, self.upVector, mo=True)
@@ -944,9 +1264,18 @@ class Lips(base.BaseComponent):
         # the jaw to the transform of the lipsAll so that both have full influence of the controls. To do this we will
         # create a simple hierarchy to combine transforms and a local rig to extract the movement of the jaw.
         if self.useJaw:
-            jawConnectControls = [self.uppLips, self.lowLips, self.mainControls[4], self.mainControls[0]]
+            jawConnectControls = [
+                self.uppLips,
+                self.lowLips,
+                self.mainControls[4],
+                self.mainControls[0],
+            ]
 
-            jawOffset = cmds.createNode("transform", name="{}_jaw_space".format(self.name), parent=self.spacesHierarchy)
+            jawOffset = cmds.createNode(
+                "transform",
+                name="{}_jaw_space".format(self.name),
+                parent=self.spacesHierarchy,
+            )
 
             # if the rig parent exists connect it to the offset control
             if cmds.objExists(self.rigParent):
@@ -955,9 +1284,16 @@ class Lips(base.BaseComponent):
             for i, ctl in enumerate(jawConnectControls):
                 # first we can create the local rig to extract the jaw transformation
                 # create an offset transform node
-                jawTrs = cmds.createNode("transform", name="{}_jawTrs".format(ctl.name), parent=jawOffset)
+                jawTrs = cmds.createNode(
+                    "transform", name="{}_jawTrs".format(ctl.name), parent=jawOffset
+                )
                 transform.matchTransform(ctl.name, jawTrs)
-                hierarchy.create(jawTrs, hierarchy=["{}_offset".format(jawTrs)], above=True, matchTransform=True)
+                hierarchy.create(
+                    jawTrs,
+                    hierarchy=["{}_offset".format(jawTrs)],
+                    above=True,
+                    matchTransform=True,
+                )
 
                 # connect the offset transforms to the jaw joints (Must drive the transforms directly!! use a constraint)
                 cmds.parentConstraint(self.jawJoints[i], jawTrs, mo=True)
@@ -965,14 +1301,20 @@ class Lips(base.BaseComponent):
                 # Finally, connect the jaw offsets to the control trs groups. We can use the direct connections here to add
                 # the transformation of the jaws to the positions that theyre in from the lipsAll.
                 for channel in attr.TRANSLATE + attr.ROTATE:
-                    cmds.connectAttr("{}.{}".format(jawTrs, channel), "{}.{}".format(ctl.trs, channel))
+                    cmds.connectAttr(
+                        "{}.{}".format(jawTrs, channel),
+                        "{}.{}".format(ctl.trs, channel),
+                    )
 
                     # if we are on the corners then we need to connect the offsets as well to the jaw translation
                     if i > 1:
                         # we can use i by subtracting 2 from the index to get the proper one for the corners.
                         # (leftCorner setup = self.cornerSetups[0], right corner setup = self.cornerSetups[1])
                         cornerSetup = self.cornerSetups[i - 2]
-                        cmds.connectAttr("{}.{}".format(jawTrs, channel), "{}.{}".format(cornerSetup, channel))
+                        cmds.connectAttr(
+                            "{}.{}".format(jawTrs, channel),
+                            "{}.{}".format(cornerSetup, channel),
+                        )
 
     def _finalize(self):
         """Finalize the rig setup"""

@@ -20,7 +20,12 @@ from rigamajig2.shared import common
 Multiuse = Union[List[str], str]
 
 
-def splitBlendshapeTargets(targets: Multiuse, splitMesh: str, splitJoints: Multiuse = None, skinFile: str = None):
+def splitBlendshapeTargets(
+    targets: Multiuse,
+    splitMesh: str,
+    splitJoints: Multiuse = None,
+    skinFile: str = None,
+):
     """
     Split blendshapes into sections based on the skinweights of the input joints. This will produce a number
     of blendshapes split into individual targets with weights from the split joints.
@@ -62,7 +67,9 @@ def splitBlendshapeTargets(targets: Multiuse, splitMesh: str, splitJoints: Multi
         skinClusterNode = skinCluster.getSkinCluster(splitMesh)
 
         if not skinClusterNode:
-            raise Exception("Your split mesh ({}) MUST have a skinCluster".format(splitMesh))
+            raise Exception(
+                "Your split mesh ({}) MUST have a skinCluster".format(splitMesh)
+            )
 
         skinWeights, vertexCount = skinCluster.getWeights(splitMesh)
 
@@ -85,8 +92,12 @@ def splitBlendshapeTargets(targets: Multiuse, splitMesh: str, splitJoints: Multi
         blendshapeDict = dict()
         blendshapeDict["baseWeights"] = outputWeights
 
-        blendshapeNode = blendshape.create(temporaryBaseMesh, targets=targets, origin="local")
-        blendshape.setWeights(blendshapeNode, weights=blendshapeDict, targets=["baseWeights"])
+        blendshapeNode = blendshape.create(
+            temporaryBaseMesh, targets=targets, origin="local"
+        )
+        blendshape.setWeights(
+            blendshapeNode, weights=blendshapeDict, targets=["baseWeights"]
+        )
 
         targetsList = blendshape.getTargetList(blendshapeNode)
 

@@ -35,7 +35,9 @@ class Chain(base.BaseComponent):
         :param bool addFKSpace: add a world/local space switch to the base of the fk chain
         :param str rigParent: node to parent to connect the component to in the hierarchy
         """
-        super(Chain, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(Chain, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
         self.side = common.getSide(self.name)
 
         self.useScale = True
@@ -45,7 +47,9 @@ class Chain(base.BaseComponent):
 
         self.defineParameter(parameter="useScale", value=self.useScale, dataType="bool")
         self.defineParameter(parameter="addSdk", value=self.addSdk, dataType="bool")
-        self.defineParameter(parameter="addFKSpace", value=self.addFKSpace, dataType="bool")
+        self.defineParameter(
+            parameter="addFKSpace", value=self.addFKSpace, dataType="bool"
+        )
         self.defineParameter(parameter="addBpm", value=self.addBpm, dataType="bool")
 
         if len(self.input) != 2:
@@ -69,7 +73,11 @@ class Chain(base.BaseComponent):
         for i in range(len(self.inputList)):
             jointNameStr = "joint{}Name".format(i)
             self.controlNameList.append(jointNameStr)
-            self.defineParameter(parameter=jointNameStr, value=inputBaseNames[i] + "_fk", dataType="string")
+            self.defineParameter(
+                parameter=jointNameStr,
+                value=inputBaseNames[i] + "_fk",
+                dataType="string",
+            )
 
     def _initialHierarchy(self):
         """Build the initial hierarchy"""
@@ -116,7 +124,9 @@ class Chain(base.BaseComponent):
         if self.addBpm:
             # if needed we will add a bind pre matrix joint.
             self.bpmHierarchy = cmds.createNode(
-                "transform", name="{}_bpm_hrc".format(self.name), parent=self.rootHierarchy
+                "transform",
+                name="{}_bpm_hrc".format(self.name),
+                parent=self.rootHierarchy,
             )
 
             bpmJointName = [x.rsplit("_", 1)[0] + "_bpm" for x in self.inputList]
@@ -130,16 +140,27 @@ class Chain(base.BaseComponent):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            transform.connectOffsetParentMatrix(self.rigParent, self.fkControlList[0].orig, mo=True)
+            transform.connectOffsetParentMatrix(
+                self.rigParent, self.fkControlList[0].orig, mo=True
+            )
 
         if self.addFKSpace:
-            spaces.create(self.fkControlList[0].spaces, self.fkControlList[0].name, parent=self.spacesHierarchy)
+            spaces.create(
+                self.fkControlList[0].spaces,
+                self.fkControlList[0].name,
+                parent=self.spacesHierarchy,
+            )
 
             # if the main control exists connect the world space
             if cmds.objExists("trs_motion"):
                 spaces.addSpace(
-                    self.fkControlList[0].spaces, ["trs_motion"], nameList=["world"], constraintType="orient"
+                    self.fkControlList[0].spaces,
+                    ["trs_motion"],
+                    nameList=["world"],
+                    constraintType="orient",
                 )
 
         if self.addBpm:
-            transform.connectOffsetParentMatrix(self.rigParent, self.bpmJointList[0], mo=True)
+            transform.connectOffsetParentMatrix(
+                self.rigParent, self.bpmJointList[0], mo=True
+            )

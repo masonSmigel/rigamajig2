@@ -41,7 +41,7 @@ def getTranslation(matrix):
     return decompMatrix(matrix)[0]
 
 
-def getRotation(matrix, rotateOrder='xyz'):
+def getRotation(matrix, rotateOrder="xyz"):
     """
     Get the rotation of a matrix. Must provide a rotate order for accurate Euler values
 
@@ -64,7 +64,7 @@ def getScale(matrix):
     return decompMatrix(matrix)[2]
 
 
-def decompMatrix(matrix, rotateOrder='xyz'):
+def decompMatrix(matrix, rotateOrder="xyz"):
     """
     Decomposes a MMatrix. Returns an list of translation,rotation and scale in world space.
 
@@ -76,7 +76,7 @@ def decompMatrix(matrix, rotateOrder='xyz'):
     """
     if not isinstance(matrix, om2.MMatrix):
         matrix = om2.MMatrix(matrix)
-    rotOrderDict = {'xyz': 0, 'yzx': 1, 'zxy': 2, 'xzy': 3, 'yxz': 4, 'zyx': 5}
+    rotOrderDict = {"xyz": 0, "yzx": 1, "zxy": 2, "xzy": 3, "yxz": 4, "zyx": 5}
     # Puts matrix into transformation matrix
     mTransformMtx = om2.MTransformationMatrix(matrix)
 
@@ -93,4 +93,3 @@ def decompMatrix(matrix, rotateOrder='xyz'):
 
     # Return Values
     return [trans.x, trans.y, trans.z], angles, scale
-

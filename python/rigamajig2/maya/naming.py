@@ -9,7 +9,7 @@ import rigamajig2.shared.common as common
 
 logger = logging.getLogger(__name__)
 
-DELIMINATOR = '_'
+DELIMINATOR = "_"
 
 
 def normalize(string):
@@ -33,29 +33,29 @@ def normalize(string):
 def getLongName(obj):
     """
     Returns the full name of a given object
-    
+
     :param str obj: object path
     :returns: long
     :rtype: str | None
     """
     if not cmds.objExists(obj):
         logger.warning("Object {} does not exist.".format(obj))
-        return
+        return None
     return str(cmds.ls(obj, l=True)[0])
 
 
 def getShortName(obj):
     """
     Returns the short name of a given object
-    
+
     :param str obj: object path
     :returns: long
     :rtype: str | None
     """
     if not cmds.objExists(obj):
         logger.warning("Object {} does not exist.".format(obj))
-        return
-    return str(cmds.ls(obj, l=True)[0].split('|')[-1])
+        return None
+    return str(cmds.ls(obj, l=True)[0].split("|")[-1])
 
 
 def isUniqueName(name):
@@ -74,7 +74,7 @@ def isUniqueName(name):
 def getUniqueName(name, side=None, indexPosition=-1):
     """
     Generate a unique name for the given string.
-    Add an index to the given name. The last interger found in the string will be used as the index.
+    Add an index to the given name. The last integer found in the string will be used as the index.
 
     :param str name: name to check
     :param side side: side to add to the name
@@ -97,7 +97,7 @@ def getUniqueName(name, side=None, indexPosition=-1):
         # Get the location in the name the index appears.
         # Then incriment the index and replace the original in the nameSplit
         indexPosition = nameSplit.index(str(indexStr[-1]))
-        oldIndex = (int(indexStr[-1]) if indexStr else -1)
+        oldIndex = int(indexStr[-1]) if indexStr else -1
         newIndex = oldIndex + 1
     else:
         # if the index is '-1' add the new index to the end of the string instead of inserting it.
@@ -112,13 +112,14 @@ def getUniqueName(name, side=None, indexPosition=-1):
             indexPosition = -1
 
     # check if an object exists with the name until we find a unique name.
-    for i in range(2000):
+    for _ in range(2000):
         nameSplit[indexPosition] = str(newIndex)
         newName = DELIMINATOR.join(nameSplit)
         if cmds.objExists(newName):
             newIndex += 1
         else:
             return newName
+    return None
 
 
 def formatName(base=None, side=None, location=None, warble=None, index=None, ext=None):
@@ -128,30 +129,33 @@ def formatName(base=None, side=None, location=None, warble=None, index=None, ext
     if not base:
         raise RuntimeError("Must supply a base to create a name.")
     if not side:
-        side = ''
+        side = ""
     if not location:
-        location = ''
+        location = ""
     if not warble:
-        warble = ''
+        warble = ""
     if not ext:
-        ext = ''
+        ext = ""
     if not index:
-        index = ''
+        index = ""
     else:
         index = str(index).zfill(common.PADDING)
 
     name = str(
-        common.NAMETEMPLATE.format(BASE=base,
-                                   SIDE=side,
-                                   LOCATION=location,
-                                   WARBLE=warble,
-                                   INDEX=index,
-                                   EXTENSION=ext))
+        common.NAMETEMPLATE.format(
+            BASE=base,
+            SIDE=side,
+            LOCATION=location,
+            WARBLE=warble,
+            INDEX=index,
+            EXTENSION=ext,
+        )
+    )
 
     # Look through the string and remove any double underscores.
     # These may appear if some attributes are not provided
-    rx = re.compile(r'_{2,}')
-    name = rx.sub('_', name)
+    regExpression = re.compile(r"_{2,}")
+    name = regExpression.sub("_", name)
 
     return normalize(name)
 

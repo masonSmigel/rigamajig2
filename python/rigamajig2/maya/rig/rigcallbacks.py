@@ -83,7 +83,9 @@ def setupSelectionOverrideCallback():
             if not cmds.objExists(f"{s}.selectionOverride"):
                 continue
 
-            itemToSelect = cmds.listConnections(f"{s}.selectionOverride", destination=True)
+            itemToSelect = cmds.listConnections(
+                f"{s}.selectionOverride", destination=True
+            )
             if not itemToSelect:
                 continue
 
@@ -93,5 +95,7 @@ def setupSelectionOverrideCallback():
             cmds.select(s, deselect=True)
             cmds.select(itemToSelect, add=True)
 
-    callbackID = om2.MEventMessage.addEventCallback("SelectionChanged", selectionOverrideCallback, None)
+    callbackID = om2.MEventMessage.addEventCallback(
+        "SelectionChanged", selectionOverrideCallback, None
+    )
     addCallbackToEnviornmentVar(callbackID=callbackID)

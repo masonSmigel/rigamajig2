@@ -5,6 +5,5 @@
     file: __init__.py.py
     author: masonsmigel
     date: 07/2022
-    description: 
-
+    description: hand component
 """

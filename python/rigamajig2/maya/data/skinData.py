@@ -41,13 +41,21 @@ class SkinData(maya_data.MayaData):
         super(SkinData, self).gatherData(node)
         data = OrderedDict()
 
-        data["namespace"] = skinCls.split(":")[0] if len(skinCls.split(":")) >= 2 else ""
+        data["namespace"] = (
+            skinCls.split(":")[0] if len(skinCls.split(":")) >= 2 else ""
+        )
         data["skinClusterName"] = skinCls
 
-        skinningMethodNames = cmds.attributeQuery("skinningMethod", node=skinCls, le=True)[0].split(":")
-        data["skinningMethod"] = skinningMethodNames[cmds.getAttr("{}.skinningMethod".format(skinCls))]
+        skinningMethodNames = cmds.attributeQuery(
+            "skinningMethod", node=skinCls, le=True
+        )[0].split(":")
+        data["skinningMethod"] = skinningMethodNames[
+            cmds.getAttr("{}.skinningMethod".format(skinCls))
+        ]
         data["normalizeWeights"] = cmds.getAttr("{}.normalizeWeights".format(skinCls))
-        data["dqsSupportNonRigid"] = cmds.getAttr("{}.dqsSupportNonRigid".format(skinCls))
+        data["dqsSupportNonRigid"] = cmds.getAttr(
+            "{}.dqsSupportNonRigid".format(skinCls)
+        )
         data["objects"] = cmds.skinCluster(skinCls, q=True, g=True)
 
         skinClsPreBindAttr = "{}.bindPreMatrix".format(skinCls)
@@ -57,7 +65,9 @@ class SkinData(maya_data.MayaData):
         for influence in skinCluster.getInfluenceJoints(skinCls):
             influenceIndex = skinCluster.getInfluenceIndex(skinCls, influence)
             preBindAttr = "{}[{}]".format(skinClsPreBindAttr, influenceIndex)
-            preBindJoint = cmds.listConnections(preBindAttr, plugs=True, s=True, d=False)
+            preBindJoint = cmds.listConnections(
+                preBindAttr, plugs=True, s=True, d=False
+            )
             preBindInputs[influence] = preBindJoint[0] if preBindJoint else None
 
         data["preBindInputs"] = preBindInputs
@@ -85,7 +95,9 @@ class SkinData(maya_data.MayaData):
 
         for node in nodes:
             if not cmds.objExists(node):
-                logger.error(f"'{node}' does not exist in scene. Cannot load skinweights")
+                logger.error(
+                    f"'{node}' does not exist in scene. Cannot load skinweights"
+                )
                 continue
 
             meshShape = deformer.getDeformShape(node)
@@ -106,7 +118,9 @@ class SkinData(maya_data.MayaData):
             if rebind and meshSkin:
                 cmds.delete(meshSkin)
             if not rebind and not meshSkin:
-                raise RuntimeError("No skin assosicated with the given node. Use the rebind argument to re-bind.")
+                raise RuntimeError(
+                    "No skin assosicated with the given node. Use the rebind argument to re-bind."
+                )
             # preform the rebind
             # check for missing influences
             realInfluences = [inf for inf in influenceObjects if cmds.objExists(inf)]
@@ -114,7 +128,9 @@ class SkinData(maya_data.MayaData):
             if len(realInfluences) != len(influenceObjects):
                 influenceDifferenge = set(influenceObjects) - set(realInfluences)
                 missingInfluences = list(influenceDifferenge)
-                logger.warning(f"Skin cluster {meshSkin} is missing {missingInfluences} influences.")
+                logger.warning(
+                    f"Skin cluster {meshSkin} is missing {missingInfluences} influences."
+                )
 
             if rebind:
                 meshSkin = skinCluster.createSkinCluster(
@@ -135,27 +151,53 @@ class SkinData(maya_data.MayaData):
             if isinstance(self._data[node]["preBindInputs"], OrderedDict):
                 for influence, bindInput in self._data[node]["preBindInputs"].items():
                     if bindInput:
-                        influenceIndex = skinCluster.getInfluenceIndex(skinCluster=meshSkin, influence=influence)
-                        cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, influenceIndex), f=True)
+                        influenceIndex = skinCluster.getInfluenceIndex(
+                            skinCluster=meshSkin, influence=influence
+                        )
+                        cmds.connectAttr(
+                            bindInput,
+                            "{}.bindPreMatrix[{}]".format(meshSkin, influenceIndex),
+                            f=True,
+                        )
 
             elif isinstance(self._data[node]["preBindInputs"], list):
                 # # for complete ness this includes a depreciated workflow for a preBind inputs stored as a list.
                 # TODO: this should be depreiciated.
-                logger.warning(f"{node} is using a depreciated workflow. Please save the skin file to update!")
-                for index, bindInput in zip(range(len(influenceObjects)), self._data[node]["preBindInputs"]):
+                logger.warning(
+                    f"{node} is using a depreciated workflow. Please save the skin file to update!"
+                )
+                for index, bindInput in zip(
+                    range(len(influenceObjects)), self._data[node]["preBindInputs"]
+                ):
                     if bindInput:
-                        cmds.connectAttr(bindInput, "{}.bindPreMatrix[{}]".format(meshSkin, index), f=True)
+                        cmds.connectAttr(
+                            bindInput,
+                            "{}.bindPreMatrix[{}]".format(meshSkin, index),
+                            f=True,
+                        )
 
             # set other the attributes
-            cmds.setAttr("{}.{}".format(meshSkin, "normalizeWeights"), self._data[node]["normalizeWeights"])
+            cmds.setAttr(
+                "{}.{}".format(meshSkin, "normalizeWeights"),
+                self._data[node]["normalizeWeights"],
+            )
             # cmds.skinCluster(meshSkin, edit=True, recacheBindMatrices=True)
 
-            skinningMethodNames = cmds.attributeQuery("skinningMethod", node=meshSkin, le=True)[0].split(":")
-            skinningMethod = skinningMethodNames.index(self._data[node]["skinningMethod"])
+            skinningMethodNames = cmds.attributeQuery(
+                "skinningMethod", node=meshSkin, le=True
+            )[0].split(":")
+            skinningMethod = skinningMethodNames.index(
+                self._data[node]["skinningMethod"]
+            )
             cmds.setAttr("{}.{}".format(meshSkin, "skinningMethod"), skinningMethod)
             if skinningMethod > 0:
-                cmds.setAttr("{}.{}".format(meshSkin, "dqsSupportNonRigid"), self._data[node]["dqsSupportNonRigid"])
+                cmds.setAttr(
+                    "{}.{}".format(meshSkin, "dqsSupportNonRigid"),
+                    self._data[node]["dqsSupportNonRigid"],
+                )
 
             if skinningMethod == 2:
-                skinCluster.setBlendWeights(mesh, meshSkin, self._data[node]["dqBlendWeights"])
+                skinCluster.setBlendWeights(
+                    mesh, meshSkin, self._data[node]["dqBlendWeights"]
+                )
             logger.info(f"Loaded Skin Weights for: {node}")

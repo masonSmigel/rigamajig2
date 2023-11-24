@@ -16,7 +16,8 @@ def isCluster(cluster):
     :rtype: bool
     """
     cluster = common.getFirst(cluster)
-    if not cmds.objExists(cluster) or not cmds.nodeType(cluster) == 'cluster': return False
+    if not cmds.objExists(cluster) or not cmds.nodeType(cluster) == "cluster":
+        return False
     return True
 
 
@@ -37,20 +38,25 @@ def localize(cluster, transform, modelTransform, weightedCompensation=False):
     :param bool weightedCompensation: Turn on the weigh compensation. Default is false.
     """
     for i, geometry in enumerate(cmds.cluster(cluster, q=True, geometry=True)):
-        parentTransform = cmds.listRelatives(geometry, p=True) or list()
-        
-        clusterGeometryMatrixAttr = "{}.{}[{}]".format(cluster, 'geomMatrix', i)
+        parentTransform = common.toList(cmds.listRelatives(geometry, p=True))
+        clusterGeometryMatrixAttr = "{}.{}[{}]".format(cluster, "geomMatrix", i)
         if parentTransform:
-            parentWorldMatrixAttr = "{}.{}".format(parentTransform[0], 'worldMatrix')
+            parentWorldMatrixAttr = "{}.{}".format(parentTransform[0], "worldMatrix")
             cmds.connectAttr(parentWorldMatrixAttr, clusterGeometryMatrixAttr, f=True)
         else:
-            modelWorldMatrixAttr = "{}.{}".format(modelTransform, 'worldMatrix')
+            modelWorldMatrixAttr = "{}.{}".format(modelTransform, "worldMatrix")
             cmds.connectAttr(modelWorldMatrixAttr, clusterGeometryMatrixAttr, f=True)
-        
-        transformWorldMatrixAttr = "{}.{}".format(transform, 'worldInverseMatrix')
-        clusterPreBindMatrixAttr = "{}.{}".format(cluster, 'bindPreMatrix')
+
+        transformWorldMatrixAttr = "{}.{}".format(transform, "worldInverseMatrix")
+        clusterPreBindMatrixAttr = "{}.{}".format(cluster, "bindPreMatrix")
         cmds.connectAttr(transformWorldMatrixAttr, clusterPreBindMatrixAttr, f=True)
         if weightedCompensation:
-            transformWorldInverseMatrixAttr = "{}.{}".format(transform, 'worldInverseMatrix')
-            weightedCompensationMatrixAttr = "{}.{}".format(cluster, 'weightedCompensationMatrix')
-            cmds.connectAttr(transformWorldInverseMatrixAttr, weightedCompensationMatrixAttr, f=True)
+            transformWorldInverseMatrixAttr = "{}.{}".format(
+                transform, "worldInverseMatrix"
+            )
+            weightedCompensationMatrixAttr = "{}.{}".format(
+                cluster, "weightedCompensationMatrix"
+            )
+            cmds.connectAttr(
+                transformWorldInverseMatrixAttr, weightedCompensationMatrixAttr, f=True
+            )

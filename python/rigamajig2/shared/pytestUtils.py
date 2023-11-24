@@ -23,7 +23,9 @@ def getTempFilePath(tmp_path: str, filename: str) -> str:
     return str(Path(tmp_path) / filename)
 
 
-def assertListsAlmostEqual(list1: List[Any], list2: List[Any], tolerance: float = 1e-6) -> bool:
+def assertListsAlmostEqual(
+    list1: List[Any], list2: List[Any], tolerance: float = 1e-6
+) -> bool:
     """
     Check if two lists are almost equal element-wise within a specified tolerance.
 
@@ -42,7 +44,9 @@ def assertListsAlmostEqual(list1: List[Any], list2: List[Any], tolerance: float 
     return True
 
 
-def assertAlmostEqual(value1: Union[int, float], value2: Union[int, float], tolerance: float = 1e-3):
+def assertAlmostEqual(
+    value1: Union[int, float], value2: Union[int, float], tolerance: float = 1e-3
+):
     """
     Assert that two values are almost equal within a specified tolerance.
 

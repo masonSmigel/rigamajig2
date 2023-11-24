@@ -12,7 +12,9 @@ import os
 import platform
 import sys
 
-RIGAMJIG_ROOT_DIR = os.path.normpath(os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../../"))
+RIGAMJIG_ROOT_DIR = os.path.normpath(
+    os.path.join(os.path.dirname(os.path.realpath(__file__)), "../../../")
+)
 
 
 def isInMaya() -> bool:

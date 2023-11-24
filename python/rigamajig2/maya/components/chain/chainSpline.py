@@ -5,8 +5,7 @@
     file: chainSpline.py
     author: masonsmigel
     date: 11/2022
-    description: 
-
+    description:
 """
 import maya.cmds as cmds
 
@@ -52,7 +51,9 @@ class ChainSpline(base.BaseComponent):
         :param str rigParent: node to parent to connect the component to in the heirarchy
         """
 
-        super(ChainSpline, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(ChainSpline, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
         self.side = common.getSide(self.name)
 
         self.numberMainControls = 4
@@ -60,7 +61,11 @@ class ChainSpline(base.BaseComponent):
         self.aimAxis = "x"
         self.upAxis = "y"
 
-        self.defineParameter(parameter="numberMainControls", value=self.numberMainControls, dataType="int")
+        self.defineParameter(
+            parameter="numberMainControls",
+            value=self.numberMainControls,
+            dataType="int",
+        )
         self.defineParameter(parameter="closed", value=self.closed, dataType="bool")
         self.defineParameter(parameter="aimAxis", value=self.aimAxis, dataType="string")
         self.defineParameter(parameter="upAxis", value=self.upAxis, dataType="string")
@@ -70,13 +75,16 @@ class ChainSpline(base.BaseComponent):
             raise RuntimeError("Input list must have a length of 2")
 
     def setupInitialData(self):
+        """Setup the intial data for the spline control name"""
         # setup a list of main controller names
         # TODO: refactor this
         self.controlNameList = list()
         for i in range(self.numberMainControls):
             controlName = "mainControl{}Name".format(i)
             self.controlNameList.append(controlName)
-            self.defineParameter(parameter=controlName, value="{}Driver_{}".format(self.name, i))
+            self.defineParameter(
+                parameter=controlName, value="{}Driver_{}".format(self.name, i)
+            )
 
         # here we need to forcibly save the new component settings and load the parameters back to the class
         # to manually add the componentSettings we just added
@@ -87,18 +95,21 @@ class ChainSpline(base.BaseComponent):
         # load the component name stuff
         self.setupInitialData()
 
-        self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
+        self.guidesHierarchy = cmds.createNode(
+            "transform", name="{}_guide".format(self.name)
+        )
 
-        self.upVectorGuide = control.createGuide("{}_upVec".format(self.name), parent=self.guidesHierarchy)
+        self.upVectorGuide = control.createGuide(
+            "{}_upVec".format(self.name), parent=self.guidesHierarchy
+        )
 
-        form = "Closed" if self.closed else "Open"
         self.inputList = joint.getInbetweenJoints(self.input[0], self.input[1])
         guideCurve = curve.createCurveFromTransform(
             self.inputList,
             degree=3,
             name="{}_guideCurve".format(self.name),
             form="Open",
-            ep=True,
+            editPoints=True,
             parent=self.guidesHierarchy,
         )
 
@@ -107,13 +118,22 @@ class ChainSpline(base.BaseComponent):
 
         for i in range(self.numberMainControls):
             guideName = "{}_control_{}".format(self.name, i)
-            guide = control.createGuide(guideName, parent=self.guidesHierarchy, hideAttrs=["s", "v"])
+            guide = control.createGuide(
+                guideName, parent=self.guidesHierarchy, hideAttrs=["s", "v"]
+            )
 
             param = maxParam * float(i / float(self.numberMainControls))
             pointOnCurveInfo = curve.attatchToCurve(guide, guideCurve, parameter=param)
 
             # create a slide attribute so we can easily slide the controls along the shape of the eyelid
-            slideAttr = attr.createAttr(guide, "param", "float", value=param, minValue=minParam, maxValue=maxParam)
+            slideAttr = attr.createAttr(
+                guide,
+                "param",
+                "float",
+                value=param,
+                minValue=minParam,
+                maxValue=maxParam,
+            )
             cmds.connectAttr(slideAttr, "{}.{}".format(pointOnCurveInfo, "parameter"))
             attr.lock(guide, attr.TRANSLATE)
 
@@ -136,7 +156,11 @@ class ChainSpline(base.BaseComponent):
                 shape="sphere",
                 parent=self.controlHierarchy,
             )
-            driverJoint = cmds.createNode("joint", name="{}_drvrTrs".format(mainControlName), parent=mainControl.name)
+            driverJoint = cmds.createNode(
+                "joint",
+                name="{}_drvrTrs".format(mainControlName),
+                parent=mainControl.name,
+            )
             joint.hideJoints(driverJoint)
 
             self.mainControls.append(mainControl)
@@ -165,40 +189,65 @@ class ChainSpline(base.BaseComponent):
         """Do the rig setup"""
 
         form = "Closed" if self.closed else "Open"
-        ikHierarchy = cmds.createNode("transform", name="{}_ik".format(self.name), parent=self.rootHierarchy)
-        ikCurve = curve.createCurveFromTransform(self.inputList, degree=3, name="{}_ikCrv".format(self.name), form=form)
+        ikHierarchy = cmds.createNode(
+            "transform", name="{}_ik".format(self.name), parent=self.rootHierarchy
+        )
+        ikCurve = curve.createCurveFromTransform(
+            self.inputList, degree=3, name="{}_ikCrv".format(self.name), form=form
+        )
         cmds.setAttr("{}.{}".format(ikCurve, "inheritsTransform"), 0)
         cmds.setAttr("{}.{}".format(ikCurve, "v"), 0)
         ikCurveShape = cmds.listRelatives(ikCurve, s=True)[0]
         cmds.parent(ikCurve, ikHierarchy)
 
         # make the upVector for the tanget control
-        self.upVectorTrs = cmds.createNode("transform", name="{}_upVec".format(self.name), parent=ikHierarchy)
+        self.upVectorTrs = cmds.createNode(
+            "transform", name="{}_upVec".format(self.name), parent=ikHierarchy
+        )
         transform.matchTranslate(self.upVectorGuide, self.upVectorTrs)
 
         # connect drivercontrols to the ikCurve
-        cmds.skinCluster(ikCurve, self.mainDriverJoints, dr=1.0, mi=2, name="{}_skinCluster".format(ikCurve))
+        cmds.skinCluster(
+            ikCurve,
+            self.mainDriverJoints,
+            dr=1.0,
+            mi=2,
+            name="{}_skinCluster".format(ikCurve),
+        )
 
         for subControl in self.subControlers:
             closestParameter = curve.getClosestParameter(ikCurve, subControl.name)
 
-            slideAttr = attr.createAttr(subControl.name, "slide", attributeType="float", value=0)
+            slideAttr = attr.createAttr(
+                subControl.name, "slide", attributeType="float", value=0
+            )
 
             # create the locators to ride along the curve
-            pointOnCurveResult = cmds.createNode("transform", name="{}_pocResult".format(subControl.name))
+            pointOnCurveResult = cmds.createNode(
+                "transform", name="{}_pocResult".format(subControl.name)
+            )
             cmds.setAttr("{}.{}".format(pointOnCurveResult, "inheritsTransform"), 0)
             cmds.parent(pointOnCurveResult, ikHierarchy)
 
             # connect the subcontrols to the curve
-            slideAdl = node.addDoubleLinear(slideAttr, closestParameter, name="{}_slide".format(subControl.name))
-
-            pointOnCurveInfo = cmds.createNode("pointOnCurveInfo", name="{}_pointOnCurveInfo".format(subControl.name))
-            cmds.connectAttr(
-                "{}.{}".format(ikCurveShape, "worldSpace[0]"), "{}.{}".format(pointOnCurveInfo, "inputCurve")
+            slideAdl = node.addDoubleLinear(
+                slideAttr, closestParameter, name="{}_slide".format(subControl.name)
             )
-            cmds.connectAttr("{}.{}".format(slideAdl, "output"), "{}.{}".format(pointOnCurveInfo, "parameter"))
+
+            pointOnCurveInfo = cmds.createNode(
+                "pointOnCurveInfo", name="{}_pointOnCurveInfo".format(subControl.name)
+            )
             cmds.connectAttr(
-                "{}.{}".format(pointOnCurveInfo, "result.position"), "{}.{}".format(pointOnCurveResult, "translate")
+                "{}.{}".format(ikCurveShape, "worldSpace[0]"),
+                "{}.{}".format(pointOnCurveInfo, "inputCurve"),
+            )
+            cmds.connectAttr(
+                "{}.{}".format(slideAdl, "output"),
+                "{}.{}".format(pointOnCurveInfo, "parameter"),
+            )
+            cmds.connectAttr(
+                "{}.{}".format(pointOnCurveInfo, "result.position"),
+                "{}.{}".format(pointOnCurveResult, "translate"),
             )
 
             aimVector = transform.getVectorFromAxis(self.aimAxis)
@@ -213,7 +262,13 @@ class ChainSpline(base.BaseComponent):
             )
             # finally connect the point on curve result to the control
             transform.connectOffsetParentMatrix(
-                pointOnCurveResult, subControl.name, t=True, r=True, s=False, sh=False, mo=True
+                pointOnCurveResult,
+                subControl.name,
+                t=True,
+                r=True,
+                s=False,
+                sh=False,
+                mo=True,
             )
 
         # connect the controls to the bind joints
@@ -225,12 +280,23 @@ class ChainSpline(base.BaseComponent):
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
             for control in self.mainControls:
-                transform.connectOffsetParentMatrix(self.rigParent, control.orig, mo=True)
+                transform.connectOffsetParentMatrix(
+                    self.rigParent, control.orig, mo=True
+                )
 
-            transform.connectOffsetParentMatrix(self.rigParent, self.upVectorTrs, mo=True)
+            transform.connectOffsetParentMatrix(
+                self.rigParent, self.upVectorTrs, mo=True
+            )
 
     def _finalize(self):
         """Finalize the component"""
-        attr.createAttr(self.paramsHierarchy, "subControls", "bool", value=0, keyable=False, channelBox=True)
+        attr.createAttr(
+            self.paramsHierarchy,
+            "subControls",
+            "bool",
+            value=0,
+            keyable=False,
+            channelBox=True,
+        )
         controls = [c.name for c in self.subControlers]
         control.connectControlVisiblity(self.paramsHierarchy, "subControls", controls)

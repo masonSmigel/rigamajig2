@@ -51,7 +51,7 @@ def findRigFile(path):
             continue
         if not rig_path.isDir(path):
             continue
-        fileName, fileExt = os.path.splitext(os.path.join(path, f))
+        _, fileExt = os.path.splitext(os.path.join(path, f))
         if fileExt != ".rig":
             continue
         return os.path.join(path, f)
@@ -70,7 +70,9 @@ def newRigEnvironmentFromArchetype(newEnv, archetype, rigName=None):
         raise RuntimeError("{} is not a valid archetype".format(archetype))
 
     archetypePath = os.path.join(common.ARCHETYPES_PATH, archetype)
-    rigFile = createRigEnvironment(sourceEnvironment=archetypePath, targetEnvironment=newEnv, rigName=rigName)
+    rigFile = createRigEnvironment(
+        sourceEnvironment=archetypePath, targetEnvironment=newEnv, rigName=rigName
+    )
 
     data = abstractData.AbstractData()
     data.read(rigFile)

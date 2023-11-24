@@ -18,7 +18,7 @@ import rigamajig2.maya.rig.psd as psd
 
 
 class PSDData(maya_data.MayaData):
-    """ This class to save and load pose space deformer reader data"""
+    """This class to save and load pose space deformer reader data"""
 
     def __init__(self):
         super(PSDData, self).__init__()
@@ -36,13 +36,23 @@ class PSDData(maya_data.MayaData):
         data = OrderedDict()
 
         outputAttrs = cmds.listAttr(outputNode, ud=True)
-        data['useTwist'] = True if True in [True if 'twist' in x else False for x in outputAttrs] else False
-        data['useSwing'] = True if True in [True if 'swing' in x else False for x in outputAttrs] else False
+        data["useTwist"] = (
+            True
+            if True in [True if "twist" in x else False for x in outputAttrs]
+            else False
+        )
+        data["useSwing"] = (
+            True
+            if True in [True if "swing" in x else False for x in outputAttrs]
+            else False
+        )
 
         overwriteParent = None
         if cmds.objExists("{}.{}".format(outputNode, "overwriteParentJoint")):
-            overwriteParent = str(cmds.getAttr("{}.{}".format(outputNode, "overwriteParentJoint")))
-        data['overwriteParent'] = overwriteParent
+            overwriteParent = str(
+                cmds.getAttr("{}.{}".format(outputNode, "overwriteParentJoint"))
+            )
+        data["overwriteParent"] = overwriteParent
 
         self._data[node].update(data)
 
@@ -62,9 +72,11 @@ class PSDData(maya_data.MayaData):
             if not cmds.objExists(node):
                 continue
 
-            psd.createPsdReader(node,
-                                twist=self._data[node]['useTwist'],
-                                swing=self._data[node]['useSwing'],
-                                overwriteParent=self._data[node].get("overwriteParent"))
+            psd.createPsdReader(
+                node,
+                twist=self._data[node]["useTwist"],
+                swing=self._data[node]["useSwing"],
+                overwriteParent=self._data[node].get("overwriteParent"),
+            )
 
             # TODO: This might need more complexity later... we'll see!

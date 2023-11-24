@@ -35,13 +35,23 @@ class Leg(limb.Limb):
         :param dict pvSpaces: dictionary of key and space for the pv control. formatted as {"attrName": object}
         :param bool useProxyAttrs: use proxy attributes instead of an ikfk control
         """
-        super(Leg, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(Leg, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
 
         # TODO: jaw control names
-        self.defineParameter(parameter="toes_fkName", value="toes_fk", dataType="string")
-        self.defineParameter(parameter="toes_ikName", value="toes_ik", dataType="string")
-        self.defineParameter(parameter="ball_ikName", value="ball_ik", dataType="string")
-        self.defineParameter(parameter="heel_ikName", value="heel_ik", dataType="string")
+        self.defineParameter(
+            parameter="toes_fkName", value="toes_fk", dataType="string"
+        )
+        self.defineParameter(
+            parameter="toes_ikName", value="toes_ik", dataType="string"
+        )
+        self.defineParameter(
+            parameter="ball_ikName", value="ball_ik", dataType="string"
+        )
+        self.defineParameter(
+            parameter="heel_ikName", value="heel_ik", dataType="string"
+        )
 
         # noinspection PyTypeChecker
         if len(self.input) != 6:
@@ -51,29 +61,54 @@ class Leg(limb.Limb):
         """create build guides_hrc"""
         super(Leg, self)._createBuildGuides()
 
-        self.heelGuide = control.createGuide("{}_heel".format(self.name), parent=self.guidesHierarchy)
-        self.innGuide = control.createGuide("{}_inn".format(self.name), parent=self.guidesHierarchy)
-        self.outGuide = control.createGuide("{}_out".format(self.name), parent=self.guidesHierarchy)
-        self.ballGuide = control.createGuide("{}_ball".format(self.name), parent=self.guidesHierarchy)
-        self.toeGuide = control.createGuide("{}_toe".format(self.name), parent=self.guidesHierarchy)
+        self.heelGuide = control.createGuide(
+            "{}_heel".format(self.name), parent=self.guidesHierarchy
+        )
+        self.innGuide = control.createGuide(
+            "{}_inn".format(self.name), parent=self.guidesHierarchy
+        )
+        self.outGuide = control.createGuide(
+            "{}_out".format(self.name), parent=self.guidesHierarchy
+        )
+        self.ballGuide = control.createGuide(
+            "{}_ball".format(self.name), parent=self.guidesHierarchy
+        )
+        self.toeGuide = control.createGuide(
+            "{}_toe".format(self.name), parent=self.guidesHierarchy
+        )
 
     def _autoOrientGuides(self):
         """Auto orient the foot pivot guides"""
         # auto aim the guides. these should ALWAYS be in world space.
         cmds.delete(
             cmds.aimConstraint(
-                self.toeGuide, self.heelGuide, aimVector=(0, 0, 1), upVector=(0, 1, 0), worldUpType="scene", mo=False
+                self.toeGuide,
+                self.heelGuide,
+                aimVector=(0, 0, 1),
+                upVector=(0, 1, 0),
+                worldUpType="scene",
+                mo=False,
             )
         )
         transform.matchTransform(self.input[4], self.ballGuide)
         cmds.delete(
             cmds.aimConstraint(
-                self.input[5], self.ballGuide, aimVector=(0, 0, 1), upVector=(0, 1, 0), worldUpType="scene", mo=False
+                self.input[5],
+                self.ballGuide,
+                aimVector=(0, 0, 1),
+                upVector=(0, 1, 0),
+                worldUpType="scene",
+                mo=False,
             )
         )
         cmds.delete(
             cmds.aimConstraint(
-                self.heelGuide, self.toeGuide, aimVector=(0, 0, -1), upVector=(0, 1, 0), worldUpType="scene", mo=False
+                self.heelGuide,
+                self.toeGuide,
+                aimVector=(0, 0, -1),
+                upVector=(0, 1, 0),
+                worldUpType="scene",
+                mo=False,
             )
         )
 
@@ -138,12 +173,17 @@ class Leg(limb.Limb):
         super(Leg, self)._rigSetup()
         # setup the foot Ik
         self.footIkFk = ikfk.IkFkFoot(
-            jointList=self.input[3:], heelPivot=self.heelGuide, innPivot=self.innGuide, outPivot=self.outGuide
+            jointList=self.input[3:],
+            heelPivot=self.heelGuide,
+            innPivot=self.innGuide,
+            outPivot=self.outGuide,
         )
         self.footIkFk.setGroup(self.ikfk.getGroup())
         self.footIkFk.create(params=self.paramsHierarchy)
         ikfk.IkFkFoot.createFootRoll(
-            self.footIkFk.getPivotDict(), self.footIkFk.getGroup(), params=self.paramsHierarchy
+            self.footIkFk.getPivotDict(),
+            self.footIkFk.getGroup(),
+            params=self.paramsHierarchy,
         )
 
         # connect the Foot IKFK to the ankle IK
@@ -163,16 +203,23 @@ class Leg(limb.Limb):
         cmds.parent(self.footIkFk.getPivotDict()["ankle"], self.ballIk.name)
 
         # setup the toes
-        transform.connectOffsetParentMatrix(self.footIkFk.getBlendJointList()[2], self.toesFk.orig, mo=True)
+        transform.connectOffsetParentMatrix(
+            self.footIkFk.getBlendJointList()[2], self.toesFk.orig, mo=True
+        )
         # TODO: this is alittle hacky... maybe fix it later
-        cmds.setAttr("{}.{}".format(self.footIkFk.getIkJointList()[1], "segmentScaleCompensate"), 0)
+        cmds.setAttr(
+            "{}.{}".format(self.footIkFk.getIkJointList()[1], "segmentScaleCompensate"),
+            0,
+        )
 
     def _postRigSetup(self):
         """Connect the blend chain to the bind chain"""
         blendJoints = self.ikfk.getBlendJointList() + [self.toesFk.name]
         joint.connectChains(blendJoints, self.input[1:-1])
         attr.lock(self.input[-1], attr.TRANSFORMS + ["v"])
-        ikfk.IkFkBase.connectVisibility(self.paramsHierarchy, "ikfk", ikList=self.ikControls, fkList=self.fkControls)
+        ikfk.IkFkBase.connectVisibility(
+            self.paramsHierarchy, "ikfk", ikList=self.ikControls, fkList=self.fkControls
+        )
 
         if self.addTwistJoints:
             for jnt in [self.input[1], self.input[2]]:
@@ -192,8 +239,17 @@ class Leg(limb.Limb):
         attr.driveAttribute("ballAngle", self.paramsHierarchy, self.limbIk.name)
         attr.driveAttribute("toeStraightAngle", self.paramsHierarchy, self.limbIk.name)
 
-        attr.createAttr(self.limbIk.name, "footPivots", "bool", value=0, keyable=False, channelBox=True)
-        control.connectControlVisiblity(self.limbIk.name, "footPivots", self.footPivotControls)
+        attr.createAttr(
+            self.limbIk.name,
+            "footPivots",
+            "bool",
+            value=0,
+            keyable=False,
+            channelBox=True,
+        )
+        control.connectControlVisiblity(
+            self.limbIk.name, "footPivots", self.footPivotControls
+        )
 
         super(Leg, self)._setupAnimAttrs()
 

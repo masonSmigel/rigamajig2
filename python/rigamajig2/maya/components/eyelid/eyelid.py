@@ -151,7 +151,9 @@ class Eyelid(base.BaseComponent):
                 lowGuides=self.lowCreaseGuideList,
             )
 
-    def _createGuides(self, part="", startPos=[0.0, 0.0, 0.0], offset=1.0, color="turquoise"):
+    def _createGuides(
+        self, part="", startPos=[0.0, 0.0, 0.0], offset=1.0, color="turquoise"
+    ):
         """This creates a series of guides to be used for the eyelid or crease"""
 
         sideMultipler = -1 if self.side == "r" else 1
@@ -170,16 +172,16 @@ class Eyelid(base.BaseComponent):
         lowerList = list()
 
         for section in ["upper", "lower"]:
-            for x in range(self.eyelidSpans - 2):
+            for i in range(self.eyelidSpans - 2):
                 # first we can caluclate the position of the guides at the origin
                 # then multiply them by the postion of the socket joint to position them around the eyeball.
-                translateX = float(-midpoint + (x * GUIDE_SCALE)) * sideMultipler
+                translateX = float(-midpoint + (i * GUIDE_SCALE)) * sideMultipler
                 translateY = offset if section == "upper" else -offset
                 localPos = (translateX, translateY, 0)
                 guidePos = mathUtils.addVector(localPos, startPos)
 
                 guide = control.createGuide(
-                    name="{}_{}{}_{}".format(self.name, section, part, x),
+                    name="{}_{}{}_{}".format(self.name, section, part, i),
                     parent=parent,
                     position=guidePos,
                     size=guideSize,
@@ -1042,7 +1044,7 @@ class Eyelid(base.BaseComponent):
             cmds.connectAttr(creaseBiasAttr, "{}.envelope".format(creaseBlend))
 
             # connect the outputTrs into the creaseTrs node and add a blend so we can turn it on or off
-            mm, pick = transform.connectOffsetParentMatrix(
+            _, pickMatrix = transform.connectOffsetParentMatrix(
                 outputTrs,
                 creaseControl.trs,
                 mo=True,
@@ -1057,7 +1059,7 @@ class Eyelid(base.BaseComponent):
                 name="{}_{}creaseFollow_blendMatrix".format(self.name, part),
             )
             cmds.connectAttr(
-                "{}.outputMatrix".format(pick),
+                "{}.outputMatrix".format(pickMatrix),
                 "{}.target[0].targetMatrix".format(blend),
             )
             cmds.connectAttr(

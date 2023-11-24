@@ -24,7 +24,9 @@ def getAssociateJoint(node):
     """
     # first check what node we got. it should be the joint.
     if not cmds.objExists("{}.poseReaderRoot".format(node)):
-        raise RuntimeError("'{}' does not have a pose reader assiciated with it.".format(node))
+        raise RuntimeError(
+            "'{}' does not have a pose reader assiciated with it.".format(node)
+        )
     if meta.hasTag(node, "poseReader"):
         node = meta.getMessageConnection("{}.poseReaderRoot".format(node))
         node = common.getFirst(node)
@@ -45,7 +47,9 @@ def deletePsdReader(joints):
 
         if not cmds.objExists("{}.{}".format(jnt, "poseReaderRoot")):
             continue
-        readerHierarchy = meta.getMessageConnection("{}.{}".format(jnt, "poseReaderRoot"))
+        readerHierarchy = meta.getMessageConnection(
+            "{}.{}".format(jnt, "poseReaderRoot")
+        )
         if readerHierarchy:
             cmds.delete(readerHierarchy)
 
@@ -69,7 +73,7 @@ def getAllPoseReaders():
 
     :return: a list of pose readers
     """
-    return meta.getTagged('poseReader')
+    return meta.getTagged("poseReader")
 
 
 def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParent=None):
@@ -92,7 +96,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParen
     if not aimJoint:
         raise RuntimeError("Could not determine axis from joint {}".format(joint))
     if not parent:
-        parent = 'pose_readers'
+        parent = "pose_readers"
 
     if cmds.objExists("{}.{}".format(joint, "poseReaderRoot")):
         logger.warning("Joint {} already has a pose reader".format(joint))
@@ -104,14 +108,14 @@ def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParen
         hrc = cmds.createNode("transform", n="{}_poseReader_hrc".format(joint))
     # setup the hirarchy node.
     rig_transform.matchTransform(joint, hrc)
-    attr.lock(hrc, attr.TRANSFORMS + ['v'])
+    attr.lock(hrc, attr.TRANSFORMS + ["v"])
     meta.createMessageConnection(joint, hrc, sourceAttr="poseReaderRoot")
     meta.tag(hrc, "poseReader")
 
     # create and setup the output parameter node.
     # This is stored on a separate node to reduce any cycle clusters in parallel eval.
     output = cmds.createNode("transform", n="{}_poseReader_out".format(joint))
-    attr.lockAndHide(output, attr.TRANSFORMS + ['v'])
+    attr.lockAndHide(output, attr.TRANSFORMS + ["v"])
     cmds.parent(output, hrc)
     meta.createMessageConnection(joint, output, sourceAttr="poseReaderOut")
 
@@ -123,8 +127,8 @@ def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParen
     aimAxis = rig_transform.getAimAxis(aimJoint, allowNegative=False)
     if twist:
         if not cmds.objExists("{}.twist_{}".format(output, aimAxis)):
-            cmds.addAttr(output, longName='twist_{}'.format(aimAxis), k=True)
-        twistPlug = "{}.{}".format(output, 'twist_{}'.format(aimAxis))
+            cmds.addAttr(output, longName="twist_{}".format(aimAxis), k=True)
+        twistPlug = "{}.{}".format(output, "twist_{}".format(aimAxis))
         createTwistPsdReader(joint, aimAxis=aimAxis, outputAttr=twistPlug)
         attr.lock(output, "twist_{}".format(aimAxis))
 
@@ -132,12 +136,18 @@ def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParen
         if not cmds.objExists("{}.{}".format(joint, "swingPsdReaderNurbs")):
             outputPlugsList = list()
             # build the attributes and add them to a list!
-            for axis in [a for a in 'xyz' if a != aimAxis]:
+            for axis in [a for a in "xyz" if a != aimAxis]:
                 if not cmds.objExists("{}.swing_{}".format(output, axis)):
-                    cmds.addAttr(output, longName='swing_{}'.format(axis), k=True)
-                outputPlugsList.append("{}.{}".format(output, 'swing_{}'.format(axis)))
+                    cmds.addAttr(output, longName="swing_{}".format(axis), k=True)
+                outputPlugsList.append("{}.{}".format(output, "swing_{}".format(axis)))
 
-            createSwingPsdReader(joint, aimAxis=aimAxis, parent=hrc, outputAttrs=outputPlugsList, parentJoint=overwriteParent)
+            createSwingPsdReader(
+                joint,
+                aimAxis=aimAxis,
+                parent=hrc,
+                outputAttrs=outputPlugsList,
+                parentJoint=overwriteParent,
+            )
 
             for plug in outputPlugsList:
                 attrName = plug.split(".")[-1]
@@ -147,7 +157,7 @@ def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParen
             logger.warning("Pose reader already exists on the joint '{}'".format(joint))
 
     if parent and cmds.objExists(parent):
-        hierarchyParent = cmds.listRelatives(hrc, p=True) or ['']
+        hierarchyParent = cmds.listRelatives(hrc, p=True) or [""]
         if hierarchyParent[0] != parent:
             cmds.parent(hrc, parent)
 
@@ -159,18 +169,24 @@ def createPsdReader(joint, twist=False, swing=True, parent=False, overwriteParen
             swingInput = cmds.listConnections(swingPlug, s=True, d=False, p=True)
             swingAttrName = swingPlug.split(".")[-1]
             twistAttrName = twistPlug.split(".")[-1]
-            cmds.addAttr(output, longName="{}_{}_combo".format(swingAttrName, twistAttrName), k=True)
+            cmds.addAttr(
+                output,
+                longName="{}_{}_combo".format(swingAttrName, twistAttrName),
+                k=True,
+            )
             comboOutputAttr = "{}_{}_combo".format(swingAttrName, twistAttrName)
             comboOutputPlug = "{}.{}".format(output, comboOutputAttr)
 
             mdlName = "{}_{}_{}_combo".format(joint, swingAttrName, twistAttrName)
-            node.multDoubleLinear(swingInput[0], twistInput[0], comboOutputPlug, name=mdlName)
+            node.multDoubleLinear(
+                swingInput[0], twistInput[0], comboOutputPlug, name=mdlName
+            )
             attr.lock(output, comboOutputAttr)
 
     logger.info("Created pose reader on joint '{}'".format(joint, twist, swing))
 
 
-def createTwistPsdReader(joint, aimAxis='x', outputAttr=None):
+def createTwistPsdReader(joint, aimAxis="x", outputAttr=None):
     """
     Function to create a twist pose reader.
     For actual use Please use createPsdReader() instead. This function is used within the createPsdReader().
@@ -191,22 +207,40 @@ def createTwistPsdReader(joint, aimAxis='x', outputAttr=None):
         parentInverseMatrix = om2.MMatrix(cmds.getAttr(parentInverseAttr))
         matrix = om2.MMatrix(cmds.getAttr(worldMatrix))
         invLocalRest = (matrix * parentInverseMatrix).inverse()
-        cmds.setAttr("{}.matrixIn[2]".format(multMatrix), list(invLocalRest), type='matrix')
+        cmds.setAttr(
+            "{}.matrixIn[2]".format(multMatrix), list(invLocalRest), type="matrix"
+        )
 
-    rotation = cmds.createNode("decomposeMatrix", name='{}_rotation_{}'.format(joint, "dcmp"))
+    rotation = cmds.createNode(
+        "decomposeMatrix", name="{}_rotation_{}".format(joint, "dcmp")
+    )
 
-    cmds.connectAttr("{}.matrixSum".format(multMatrix), "{}.inputMatrix".format(rotation))
-    twist = cmds.createNode('quatNormalize', name='{}_twist_{}'.format(joint, 'quatNormalize'))
+    cmds.connectAttr(
+        "{}.matrixSum".format(multMatrix), "{}.inputMatrix".format(rotation)
+    )
+    twist = cmds.createNode(
+        "quatNormalize", name="{}_twist_{}".format(joint, "quatNormalize")
+    )
     cmds.connectAttr("{}.outputQuatW".format(rotation), "{}.inputQuatW".format(twist))
 
-    cmds.connectAttr("{}.outputQuat{}".format(rotation, aimAxis.upper()),
-                     "{}.inputQuat{}".format(twist, aimAxis.upper()))
-    twistEuler = cmds.createNode("quatToEuler", name="{}_twistEuler_quatToEuler".format(joint))
-    cmds.setAttr("{}.inputRotateOrder".format(twistEuler), cmds.getAttr("{}.rotateOrder".format(joint)))
+    cmds.connectAttr(
+        "{}.outputQuat{}".format(rotation, aimAxis.upper()),
+        "{}.inputQuat{}".format(twist, aimAxis.upper()),
+    )
+    twistEuler = cmds.createNode(
+        "quatToEuler", name="{}_twistEuler_quatToEuler".format(joint)
+    )
+    cmds.setAttr(
+        "{}.inputRotateOrder".format(twistEuler),
+        cmds.getAttr("{}.rotateOrder".format(joint)),
+    )
     cmds.connectAttr("{}.outputQuat".format(twist), "{}.inputQuat".format(twistEuler))
 
     remap = cmds.createNode("remapValue", name="{}_normalizeValue_remap".format(joint))
-    cmds.connectAttr("{}.outputRotate{}".format(twistEuler, aimAxis.upper()), "{}.inputValue".format(remap))
+    cmds.connectAttr(
+        "{}.outputRotate{}".format(twistEuler, aimAxis.upper()),
+        "{}.inputValue".format(remap),
+    )
     cmds.setAttr("{}.inputMin".format(remap), -180)
     cmds.setAttr("{}.inputMax".format(remap), 180)
     cmds.setAttr("{}.outputMin".format(remap), -2)
@@ -219,7 +253,9 @@ def createTwistPsdReader(joint, aimAxis='x', outputAttr=None):
 
 # pylint: disable=too-many-statements
 # pylint: disable=too-many-locals
-def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, parentJoint=None, outputAttrs=None):
+def createSwingPsdReader(
+    joint, aimJoint=None, aimAxis="x", parent=None, parentJoint=None, outputAttrs=None
+):
     """
     Create a swing pose reader
     For actual use Please use createPsdReader() instead. This function is used within the createPsdReader().
@@ -232,9 +268,13 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, parentJ
     aimAxisVector = rig_transform.getVectorFromAxis(rig_transform.getAimAxis(aimJoint))
 
     # create the pose reader nurbs.
-    poseReader = cmds.sphere(s=2, nsp=2, axis=aimAxisVector, n=joint + "_poseReader", ch=False)[0]
+    poseReader = cmds.sphere(
+        s=2, nsp=2, axis=aimAxisVector, n=joint + "_poseReader", ch=False
+    )[0]
     cmds.rebuildSurface(poseReader, ch=0, rpo=1, end=1, kr=0, kcp=1, su=2, sv=2)
-    poseReaderShape = cmds.ls(cmds.listRelatives(poseReader, c=True), type='nurbsSurface')[0]
+    poseReaderShape = cmds.ls(
+        cmds.listRelatives(poseReader, c=True), type="nurbsSurface"
+    )[0]
     rig_transform.matchTransform(joint, poseReader)
     cmds.parent(poseReader, parent)
 
@@ -243,98 +283,166 @@ def createSwingPsdReader(joint, aimJoint=None, aimAxis='x', parent=None, parentJ
     # then create a offset matrix relationship and hijack the output and delete the created node.
     readerPoint = cmds.createNode("transform", n="{}_posePoint".format(joint))
     rig_transform.matchTransform(joint, readerPoint)
-    cmds.move(aimAxisVector[0], aimAxisVector[1], aimAxisVector[2], readerPoint, r=True, os=True)
-    multMatrix, decompMatrix = rig_transform.connectOffsetParentMatrix(joint, readerPoint, mo=True)
+    cmds.move(
+        aimAxisVector[0],
+        aimAxisVector[1],
+        aimAxisVector[2],
+        readerPoint,
+        r=True,
+        os=True,
+    )
+    multMatrix, _ = rig_transform.connectOffsetParentMatrix(joint, readerPoint, mo=True)
 
     # Create the closest point node network
     vprod = cmds.createNode("vectorProduct", n="{}_vprod".format(joint))
-    closest = cmds.createNode("closestPointOnSurface", n="{}_closestPointOnSurface".format(joint))
+    closest = cmds.createNode(
+        "closestPointOnSurface", n="{}_closestPointOnSurface".format(joint)
+    )
 
     cmds.connectAttr("{}.matrixSum".format(multMatrix), "{}.matrix".format(vprod))
     cmds.setAttr("{}.operation".format(vprod), 4)
     cmds.connectAttr("{}.output".format(vprod), "{}.inPosition".format(closest))
-    cmds.connectAttr("{}.worldSpace".format(poseReaderShape), "{}.inputSurface".format(closest))
+    cmds.connectAttr(
+        "{}.worldSpace".format(poseReaderShape), "{}.inputSurface".format(closest)
+    )
 
     # after we use the reader point delete the node
     cmds.delete(readerPoint)
 
-    suffixList = ["z_neg", 'y_neg', 'z_pos', 'y_pos']
+    suffixList = ["z_neg", "y_neg", "z_pos", "y_pos"]
     zoneNumber = 4
 
     # create four sets of texture maps
     zoneOutputList = list()
     for i in range(zoneNumber):
-        uRamp = cmds.createNode('ramp', n='{}_uRamp_{}'.format(joint, suffixList[i]))
-        vRamp = cmds.createNode('ramp', n='{}_vRamp_{}'.format(joint, suffixList[i]))
+        uRamp = cmds.createNode("ramp", n="{}_uRamp_{}".format(joint, suffixList[i]))
+        vRamp = cmds.createNode("ramp", n="{}_vRamp_{}".format(joint, suffixList[i]))
 
         # connect the attributes
-        cmds.connectAttr("{}.{}".format(closest, "parameterU"), "{}.{}".format(uRamp, "uCoord"))
-        cmds.connectAttr("{}.{}".format(closest, "parameterV"), "{}.{}".format(vRamp, "vCoord"))
+        cmds.connectAttr(
+            "{}.{}".format(closest, "parameterU"), "{}.{}".format(uRamp, "uCoord")
+        )
+        cmds.connectAttr(
+            "{}.{}".format(closest, "parameterV"), "{}.{}".format(vRamp, "vCoord")
+        )
 
         # setup the U ramp
         cmds.setAttr("{}.type".format(uRamp), 1)
-        cmds.setAttr("{}.colorEntryList[1].color".format(uRamp), 1, 1, 1, type="double3")
-        cmds.setAttr("{}.colorEntryList[0].color".format(uRamp), 0, 0, 0, type="double3")
+        cmds.setAttr(
+            "{}.colorEntryList[1].color".format(uRamp), 1, 1, 1, type="double3"
+        )
+        cmds.setAttr(
+            "{}.colorEntryList[0].color".format(uRamp), 0, 0, 0, type="double3"
+        )
         cmds.setAttr("{}.colorEntryList[0].position".format(uRamp), 1)
 
         # setup the V ramp
         cmds.setAttr("{}.type".format(vRamp), 0)
         for zone in range(0, zoneNumber + 1):
             if zone == i:
-                cmds.setAttr("{}.colorEntryList[{}].color".format(vRamp, zone), 1, 1, 1, type="double3")
+                cmds.setAttr(
+                    "{}.colorEntryList[{}].color".format(vRamp, zone),
+                    1,
+                    1,
+                    1,
+                    type="double3",
+                )
             else:
-                cmds.setAttr("{}.colorEntryList[{}].color".format(vRamp, zone), 0, 0, 0, type="double3")
+                cmds.setAttr(
+                    "{}.colorEntryList[{}].color".format(vRamp, zone),
+                    0,
+                    0,
+                    0,
+                    type="double3",
+                )
 
             # if it is the first zone make the last zone white too
-            if i == 0: cmds.setAttr("{}.colorEntryList[{}].color".format(vRamp, zoneNumber), 1, 1, 1, type="double3")
-            cmds.setAttr("{}.colorEntryList[{}].position".format(vRamp, zone), float(zone) * 1 / float(zoneNumber))
+            if i == 0:
+                cmds.setAttr(
+                    "{}.colorEntryList[{}].color".format(vRamp, zoneNumber),
+                    1,
+                    1,
+                    1,
+                    type="double3",
+                )
+            cmds.setAttr(
+                "{}.colorEntryList[{}].position".format(vRamp, zone),
+                float(zone) * 1 / float(zoneNumber),
+            )
 
-        mdl = cmds.createNode("multDoubleLinear", n='{}_{}_mdl'.format(joint, suffixList[i]))
-        cmds.connectAttr("{}.{}".format(uRamp, "outColorR"), "{}.{}".format(mdl, "input1"))
-        cmds.connectAttr("{}.{}".format(vRamp, "outColorR"), "{}.{}".format(mdl, "input2"))
+        mdl = cmds.createNode(
+            "multDoubleLinear", n="{}_{}_mdl".format(joint, suffixList[i])
+        )
+        cmds.connectAttr(
+            "{}.{}".format(uRamp, "outColorR"), "{}.{}".format(mdl, "input1")
+        )
+        cmds.connectAttr(
+            "{}.{}".format(vRamp, "outColorR"), "{}.{}".format(mdl, "input2")
+        )
 
         # create a multiplier
-        rev = cmds.createNode("multDoubleLinear", n='{}_{}_reverse_mdl'.format(joint, suffixList[i]))
+        rev = cmds.createNode(
+            "multDoubleLinear", n="{}_{}_reverse_mdl".format(joint, suffixList[i])
+        )
         cmds.connectAttr("{}.{}".format(mdl, "output"), "{}.{}".format(rev, "input1"))
 
         # TODO: check if the axis semi-aligns with the world axises.
-        if 'neg' in suffixList[i]:
+        if "neg" in suffixList[i]:
             cmds.setAttr("{}.{}".format(rev, "input2"), -2)
         else:
             cmds.setAttr("{}.{}".format(rev, "input2"), 2)
         zoneOutputList.append(rev)
 
     # create a conditional
-    for i, axis in enumerate([a for a in 'xyz' if a != aimAxis]):
+    for i, axis in enumerate([a for a in "xyz" if a != aimAxis]):
         zones = zoneOutputList[i::2]
         negativeZone = zones[0]
         positiveZone = zones[-1]
 
         # setup the condition node
         cond = cmds.createNode("condition", n="{}_{}_cond".format(joint, axis))
-        cmds.connectAttr("{}.{}".format(positiveZone, 'output'), "{}.{}".format(cond, "firstTerm"))
+        cmds.connectAttr(
+            "{}.{}".format(positiveZone, "output"), "{}.{}".format(cond, "firstTerm")
+        )
         cmds.setAttr("{}.{}".format(cond, "operation"), 2)
-        cmds.connectAttr("{}.{}".format(negativeZone, 'output'), "{}.{}".format(cond, "colorIfFalseR"))
-        cmds.connectAttr("{}.{}".format(positiveZone, 'output'), "{}.{}".format(cond, "colorIfTrueR"))
+        cmds.connectAttr(
+            "{}.{}".format(negativeZone, "output"),
+            "{}.{}".format(cond, "colorIfFalseR"),
+        )
+        cmds.connectAttr(
+            "{}.{}".format(positiveZone, "output"), "{}.{}".format(cond, "colorIfTrueR")
+        )
         cmds.connectAttr("{}.{}".format(cond, "outColorR"), outputAttrs[i], f=True)
 
         rig_transform.matchTranslate(joint, poseReader)
 
     # connect the setup to the parent joint
-    transformMultMatrix, transformPick = rig_transform.connectOffsetParentMatrix(joint, poseReader, r=False)
-    jointParents = cmds.ls(cmds.listRelatives(joint, p=True), type='joint')
+    _, transformPick = rig_transform.connectOffsetParentMatrix(
+        joint, poseReader, r=False
+    )
+    jointParents = cmds.ls(cmds.listRelatives(joint, p=True), type="joint")
 
     if not parentJoint and jointParents:
         parentJoint = jointParents[0]
 
     if parentJoint:
-        rotateMultMatrix, rotatePick = rig_transform.connectOffsetParentMatrix(parentJoint, poseReader, mo=True,
-                                                                               t=False, r=True, s=False, sh=False)
-        multMatrix = cmds.createNode("multMatrix", n='{}_mergeMat'.format(joint))
-        cmds.connectAttr("{}.{}".format(transformPick, "outputMatrix"), "{}.{}".format(multMatrix, 'matrixIn[1]'))
-        cmds.connectAttr("{}.{}".format(rotatePick, "outputMatrix"), "{}.{}".format(multMatrix, 'matrixIn[0]'))
-        cmds.connectAttr("{}.{}".format(multMatrix, 'matrixSum'), "{}.{}".format(poseReader, 'offsetParentMatrix'),
-                         f=True)
+        _, rotatePick = rig_transform.connectOffsetParentMatrix(
+            parentJoint, poseReader, mo=True, t=False, r=True, s=False, sh=False
+        )
+        multMatrix = cmds.createNode("multMatrix", n="{}_mergeMat".format(joint))
+        cmds.connectAttr(
+            "{}.{}".format(transformPick, "outputMatrix"),
+            "{}.{}".format(multMatrix, "matrixIn[1]"),
+        )
+        cmds.connectAttr(
+            "{}.{}".format(rotatePick, "outputMatrix"),
+            "{}.{}".format(multMatrix, "matrixIn[0]"),
+        )
+        cmds.connectAttr(
+            "{}.{}".format(multMatrix, "matrixSum"),
+            "{}.{}".format(poseReader, "offsetParentMatrix"),
+            f=True,
+        )
 
     # cleanup the setup
     attr.lockAndHide(poseReader, attr.TRANSFORMS)

@@ -38,12 +38,18 @@ class SimpleSquash(base.BaseComponent):
         :param bool addFKSpace: add a world/local space switch to the base of the fk chain
         :param str rigParent: node to parent to connect the component to in the heirarchy
         """
-        super(SimpleSquash, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(SimpleSquash, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
         self.side = common.getSide(self.name)
 
         # initialize cmpt settings.
-        self.defineParameter(parameter="startControlName", value=f"{self.name}Start", dataType="string")
-        self.defineParameter(parameter="endControlName", value=f"{self.name}End", dataType="string")
+        self.defineParameter(
+            parameter="startControlName", value=f"{self.name}Start", dataType="string"
+        )
+        self.defineParameter(
+            parameter="endControlName", value=f"{self.name}End", dataType="string"
+        )
 
         # noinspection PyTypeChecker
         if len(self.input) != 1:
@@ -51,7 +57,9 @@ class SimpleSquash(base.BaseComponent):
 
     def _createBuildGuides(self):
         """Create the build guides"""
-        self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
+        self.guidesHierarchy = cmds.createNode(
+            "transform", name="{}_guide".format(self.name)
+        )
 
         pos = cmds.xform(self.input[0], q=True, ws=True, t=True)
         rot = cmds.xform(self.input[0], q=True, ws=True, ro=True)
@@ -59,10 +67,18 @@ class SimpleSquash(base.BaseComponent):
         startPos = mathUtils.addVector(pos, [0, 5, 0])
         endPos = mathUtils.addVector(pos, [0, -5, 0])
         self.startGuide = control.createGuide(
-            self.name + "_start", side=self.side, parent=self.guidesHierarchy, position=startPos, rotation=rot
+            self.name + "_start",
+            side=self.side,
+            parent=self.guidesHierarchy,
+            position=startPos,
+            rotation=rot,
         )
         self.endGuide = control.createGuide(
-            self.name + "_end", side=self.side, parent=self.guidesHierarchy, position=endPos, rotation=rot
+            self.name + "_end",
+            side=self.side,
+            parent=self.guidesHierarchy,
+            position=endPos,
+            rotation=rot,
         )
 
     def _initialHierarchy(self):
@@ -96,18 +112,31 @@ class SimpleSquash(base.BaseComponent):
 
     def _rigSetup(self):
         """Add the rig setup"""
-        self.ikHierarchy = cmds.createNode("transform", n=self.name + "_ik", parent=self.rootHierarchy)
+        self.ikHierarchy = cmds.createNode(
+            "transform", n=self.name + "_ik", parent=self.rootHierarchy
+        )
 
-        startJoint = cmds.createNode("joint", n="{}_start_tgt".format(self.name), p=self.ikHierarchy)
-        squashJoint = cmds.createNode("joint", n="{}_squash_jnt".format(self.name), p=startJoint)
-        endJoint = cmds.createNode("joint", n="{}_end_tgt".format(self.name), p=startJoint)
+        startJoint = cmds.createNode(
+            "joint", n="{}_start_tgt".format(self.name), p=self.ikHierarchy
+        )
+        squashJoint = cmds.createNode(
+            "joint", n="{}_squash_jnt".format(self.name), p=startJoint
+        )
+        endJoint = cmds.createNode(
+            "joint", n="{}_end_tgt".format(self.name), p=startJoint
+        )
 
         transform.matchTransform(self.startGuide, startJoint)
         transform.matchTransform(self.endGuide, endJoint)
 
         # add parameters
         volumeFactorAttr = attr.createAttr(
-            self.paramsHierarchy, "volumeFactor", "float", value=1, minValue=0, maxValue=10
+            self.paramsHierarchy,
+            "volumeFactor",
+            "float",
+            value=1,
+            minValue=0,
+            maxValue=10,
         )
 
         # orient the joints
@@ -117,7 +146,9 @@ class SimpleSquash(base.BaseComponent):
         joint.toOrientation([startJoint, endJoint, squashJoint])
 
         # create an ik handle to control the angle
-        self.ikHandle, self.effector = cmds.ikHandle(sj=startJoint, ee=endJoint, sol="ikSCsolver")
+        self.ikHandle, self.effector = cmds.ikHandle(
+            sj=startJoint, ee=endJoint, sol="ikSCsolver"
+        )
         cmds.parent(self.ikHandle, self.ikHierarchy)
 
         # connect the ik handle
@@ -125,9 +156,18 @@ class SimpleSquash(base.BaseComponent):
         transform.connectOffsetParentMatrix(self.squashStart.name, startJoint)
 
         # get the distance
-        dcmp = node.decomposeMatrix("{}.worldMatrix".format(self.rootHierarchy), name="{}_scale".format(self.name))
-        distance = node.distance(self.squashStart.name, self.squashEnd.name, name="{}_stretch".format(self.name))
-        distanceFloat = mathUtils.distanceNodes(self.squashStart.name, self.squashEnd.name)
+        dcmp = node.decomposeMatrix(
+            "{}.worldMatrix".format(self.rootHierarchy),
+            name="{}_scale".format(self.name),
+        )
+        distance = node.distance(
+            self.squashStart.name,
+            self.squashEnd.name,
+            name="{}_stretch".format(self.name),
+        )
+        distanceFloat = mathUtils.distanceNodes(
+            self.squashStart.name, self.squashEnd.name
+        )
 
         normalizedDistance = node.multiplyDivide(
             "{}.distance".format(distance),
@@ -158,7 +198,9 @@ class SimpleSquash(base.BaseComponent):
             output="{}.s{}".format(squashJoint, aimAxis[-1]),
         )
 
-        volumeLossPercent = node.multDoubleLinear(-0.666, volumeFactorAttr, name="{}_volume".format(self.name))
+        volumeLossPercent = node.multDoubleLinear(
+            -0.666, volumeFactorAttr, name="{}_volume".format(self.name)
+        )
         volumePower = node.multiplyDivide(
             "{}.outputX".format(stretchMult),
             "{}.output".format(volumeLossPercent),
@@ -167,7 +209,9 @@ class SimpleSquash(base.BaseComponent):
         )
 
         for axis in [x for x in "xyz" if x != aimAxis[-1]]:
-            cmds.connectAttr("{}.outputX".format(volumePower), "{}.s{}".format(squashJoint, axis))
+            cmds.connectAttr(
+                "{}.outputX".format(volumePower), "{}.s{}".format(squashJoint, axis)
+            )
 
         # connect the squash joint to the bind joint
         joint.connectChains(squashJoint, self.input[0])
@@ -180,8 +224,12 @@ class SimpleSquash(base.BaseComponent):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            transform.connectOffsetParentMatrix(self.rigParent, self.squashStart.orig, mo=True)
-            transform.connectOffsetParentMatrix(self.rigParent, self.squashEnd.orig, mo=True)
+            transform.connectOffsetParentMatrix(
+                self.rigParent, self.squashStart.orig, mo=True
+            )
+            transform.connectOffsetParentMatrix(
+                self.rigParent, self.squashEnd.orig, mo=True
+            )
 
     def _setupAnimAttrs(self):
         attr.addSeparator(self.squashEnd.name, "----")

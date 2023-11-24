@@ -2,7 +2,6 @@
 Functions for shapes in maya
 """
 import maya.cmds as cmds
-import maya.OpenMaya as om
 
 import rigamajig2.shared.common as common
 
@@ -17,13 +16,13 @@ def getType(node):
     """
 
     nodeType = cmds.nodeType(node)
-    if nodeType == 'transform':
+    if nodeType == "transform":
         shapes = common.toList(getShapes(node))
         shapeTypes = list()
         for shape in shapes:
             shapeTypes.append(cmds.nodeType(shape))
         if len(shapeTypes) > 1:
-            nodeType = 'mixed'
+            nodeType = "mixed"
         else:
             nodeType = list(shapeTypes)[0]
 
@@ -38,15 +37,16 @@ def getShapes(node):
     :return: list of shape nodes for a given node
     :rtype: str
     """
-    shapeTypes = ['mesh', 'nurbsSurface', 'nurbsCurve', 'subdiv']
+    shapeTypes = ["mesh", "nurbsSurface", "nurbsCurve", "subdiv"]
     nodeType = cmds.nodeType(node)
     if nodeType in shapeTypes:
         return node
 
-    if nodeType == 'transform':
+    if nodeType == "transform":
         shape = cmds.listRelatives(node, s=1, ni=1)
         if shape:
             return shape[0]
+    return None
 
 
 def getPointCount(shape):
@@ -56,15 +56,15 @@ def getPointCount(shape):
     :param shape: name of the shape node
     :return: number of points within the shape node
     """
-    if cmds.nodeType(shape) == 'transform':
+    if cmds.nodeType(shape) == "transform":
         shape = cmds.listRelatives(shape, s=True, ni=True)[0]
 
     shapeType = cmds.nodeType(shape)
-    if shapeType == 'mesh':
+    if shapeType == "mesh":
         pointCount = cmds.polyEvaluate(shape, v=True)
-    if shapeType == 'nurbsCurve':
-        degs = cmds.getAttr('{}.degree'.format(shape))
-        spans = cmds.getAttr('{}.spans'.format(shape))
+    if shapeType == "nurbsCurve":
+        degs = cmds.getAttr("{}.degree".format(shape))
+        spans = cmds.getAttr("{}.spans".format(shape))
 
         pointCount = degs + spans
     return pointCount

@@ -46,9 +46,10 @@ def getDataModules(path: str = None) -> Dict[str, ModuleType]:
 
         # check the extension of the files.
         if filePath.suffix == ".py" and filePath.name not in DATA_EXCLUDE_FILES:
-
             moduleObject = process.importModuleFromPath(filePath)
-            dataClasses = process.getSubclassesFromModule(moduleObject, abstractData.AbstractData)
+            dataClasses = process.getSubclassesFromModule(
+                moduleObject, abstractData.AbstractData
+            )
 
             if dataClasses:
                 dataClass = dataClasses[0]
@@ -65,7 +66,11 @@ def createDataClassInstance(dataType=None) -> AbstractDataType:
     """
     moduleObject = getDataModules().get(dataType)
     if not moduleObject:
-        raise ValueError(f"Data type {dataType} is not valid. Valid Types are {getDataModules()}")
+        raise ValueError(
+            f"Data type {dataType} is not valid. Valid Types are {getDataModules()}"
+        )
 
-    dataTypeInstance = process.getSubclassesFromModule(moduleObject, classType=abstractData.AbstractData)
+    dataTypeInstance = process.getSubclassesFromModule(
+        moduleObject, classType=abstractData.AbstractData
+    )
     return common.getFirst(dataTypeInstance)()

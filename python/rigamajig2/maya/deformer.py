@@ -19,7 +19,8 @@ class DeformOrder:
     before = "before"
     parallel = "parallel"
     split = "split"
-    foc="foc"
+    foc = "foc"
+
 
 def isDeformer(deformer):
     """
@@ -30,8 +31,10 @@ def isDeformer(deformer):
     :rtype: bool
     """
     deformer = common.getFirst(deformer)
-    if not cmds.objExists(deformer): return False
-    if not cmds.nodeType(deformer, i=True).count('weightGeometryFilter'): return False
+    if not cmds.objExists(deformer):
+        return False
+    if not cmds.nodeType(deformer, i=True).count("weightGeometryFilter"):
+        return False
     return True
 
 
@@ -45,7 +48,7 @@ def isSetMember(deformer, geo):
     :rtype: bool
     """
     shape = geo
-    if cmds.nodeType(geo) == 'transform':
+    if cmds.nodeType(geo) == "transform":
         shape = cmds.listRelatives(geo, s=True, ni=True)[0]
 
     if shape in getAffectedGeo(deformer):
@@ -61,14 +64,16 @@ def getDeformShape(node):
     :param str node: Name of the node to retreive shape node from
     """
 
-    if cmds.nodeType(node) in ['nurbsSurface', 'mesh', 'nurbsCurve']:
+    if cmds.nodeType(node) in ["nurbsSurface", "mesh", "nurbsCurve"]:
         node = cmds.listRelatives(node, p=True)
     shapes = cmds.listRelatives(node, s=True, ni=False) or []
 
     if len(shapes) == 1:
         return shapes[0]
     else:
-        realShapes = [x for x in shapes if not cmds.getAttr('{}.intermediateObject'.format(x))]
+        realShapes = [
+            x for x in shapes if not cmds.getAttr("{}.intermediateObject".format(x))
+        ]
         return realShapes[0] if len(realShapes) else None
 
 
@@ -84,10 +89,18 @@ def reorderToTop(geometry, deformer):
         stack = getDeformerStack(geo)
 
         if len(stack) < 2:
-            logger.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geometry))
+            logger.warning(
+                "Only One deformer found on geometry {}. Nothing to reorder".format(
+                    geometry
+                )
+            )
 
         if deformer not in stack:
-            logger.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geometry))
+            logger.error(
+                "Deformer '{}' was not found on the geometry '{}'".format(
+                    deformer, geometry
+                )
+            )
             continue
 
         stack = [d for d in stack if d != deformer]
@@ -97,7 +110,7 @@ def reorderToTop(geometry, deformer):
         cmds.reorderDeformers(deformer, stack[0], geo)
 
     # Refresh UI
-    cmds.channelBox('mainChannelBox', e=True, update=True)
+    cmds.channelBox("mainChannelBox", e=True, update=True)
 
 
 def reorderToBottom(geometry, deformer):
@@ -112,10 +125,14 @@ def reorderToBottom(geometry, deformer):
         stack = getDeformerStack(geometry)
 
         if len(stack) < 2:
-            logger.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geo))
+            logger.warning(
+                "Only One deformer found on geometry {}. Nothing to reorder".format(geo)
+            )
 
         if deformer not in stack:
-            logger.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geo))
+            logger.error(
+                "Deformer '{}' was not found on the geometry '{}'".format(deformer, geo)
+            )
             continue
 
         stack = [d for d in stack if d != deformer]
@@ -123,7 +140,7 @@ def reorderToBottom(geometry, deformer):
         cmds.reorderDeformers(stack[-1], deformer, geo)
 
     # Refresh UI
-    cmds.channelBox('mainChannelBox', e=True, update=True)
+    cmds.channelBox("mainChannelBox", e=True, update=True)
 
 
 def reorderSlide(geometry, deformer, up=True):
@@ -139,16 +156,28 @@ def reorderSlide(geometry, deformer, up=True):
         stack = getDeformerStack(geo)
 
         if len(stack) < 2:
-            logger.warning('Only One deformer found on geometry {}. Nothing to reorder'.format(geometry))
+            logger.warning(
+                "Only One deformer found on geometry {}. Nothing to reorder".format(
+                    geometry
+                )
+            )
 
         if deformer not in stack:
-            logger.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geometry))
+            logger.error(
+                "Deformer '{}' was not found on the geometry '{}'".format(
+                    deformer, geometry
+                )
+            )
             continue
 
-        if stack.index(deformer) == 0 and up: return
-        if stack.index(deformer) == len(stack) - 1 and not up: return
+        if stack.index(deformer) == 0 and up:
+            return
+        if stack.index(deformer) == len(stack) - 1 and not up:
+            return
 
-        neighbor = stack[stack.index(deformer) - 1] if up else stack[stack.index(deformer) + 1]
+        neighbor = (
+            stack[stack.index(deformer) - 1] if up else stack[stack.index(deformer) + 1]
+        )
         # reorder the deformer
         if up:
             cmds.reorderDeformers(deformer, neighbor, geo)
@@ -156,7 +185,7 @@ def reorderSlide(geometry, deformer, up=True):
             cmds.reorderDeformers(neighbor, deformer, geo)
 
     # Refresh UI
-    cmds.channelBox('mainChannelBox', e=True, update=True)
+    cmds.channelBox("mainChannelBox", e=True, update=True)
 
 
 def getDeformerStack(geo, ignoreTypes=None):
@@ -169,10 +198,13 @@ def getDeformerStack(geo, ignoreTypes=None):
     :rtype: list
     """
 
-    ignoreTypes = ignoreTypes or ['tweak']
+    ignoreTypes = ignoreTypes or ["tweak"]
     geo = common.getFirst(geo)
 
-    inputs = cmds.ls(cmds.listHistory(geo, pruneDagObjects=True, interestLevel=1), type="geometryFilter")
+    inputs = cmds.ls(
+        cmds.listHistory(geo, pruneDagObjects=True, interestLevel=1),
+        type="geometryFilter",
+    )
 
     # sometimes deformers can be connected to inputs that dont affect the deformation of the given geo.
     # This happens alot in blendshapes where one blendshape drives a bunch of others for small details.
@@ -201,18 +233,20 @@ def getDeformersForShape(geo, ignoreTypes=None, ignoreTweaks=True):
     geo = common.getFirst(geo)
     result = []
     if ignoreTweaks:
-        ignoreTypes += ['tweak']
+        ignoreTypes += ["tweak"]
 
     geometryFilters = cmds.ls(cmds.listHistory(geo), type="geometryFilter")
     shape = getDeformShape(geo)
 
     if shape is not None:
-        shapeSets = cmds.ls(cmds.listConnections(shape), type='objectSet')
+        shapeSets = cmds.ls(cmds.listConnections(shape), type="objectSet")
 
     for deformer in geometryFilters:
         # first lets try to use this using the old version from Maya2020.
         # if that fails we can ty another method.
-        deformerSet = cmds.ls(cmds.listConnections(deformer), type="objectSet") or list()
+        deformerSet = (
+            cmds.ls(cmds.listConnections(deformer), type="objectSet") or list()
+        )
         if deformerSet:
             if deformerSet[0] in shapeSets:
                 # in almost every case we
@@ -233,7 +267,9 @@ def getOrigShape(node):
     :return: orig shape or orig shape output plug
     """
     deformShape = getDeformShape(node)
-    origShape = common.getFirst(cmds.deformableShape(deformShape, originalGeometry=True))
+    origShape = common.getFirst(
+        cmds.deformableShape(deformShape, originalGeometry=True)
+    )
 
     origShape = origShape.split(".")[0]
     return origShape
@@ -248,7 +284,8 @@ def createCleanGeo(geo, name=None):
     :return:
     """
     dupGeo = cmds.duplicate(geo)[0]
-    if not name: name = "{}_clean".format(geo)
+    if not name:
+        name = "{}_clean".format(geo)
 
     dupGeo = cmds.rename(dupGeo, name)
     origShape = getOrigShape(geo)
@@ -363,7 +400,8 @@ def getWeights(deformer, geometry=None):
         logger.error("object '{}' is not a deformer".format(deformer))
         return
 
-    if not geometry: geometry = common.getFirst(getAffectedGeo(deformer))
+    if not geometry:
+        geometry = common.getFirst(getAffectedGeo(deformer))
 
     pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
 
@@ -402,12 +440,15 @@ def setWeights(deformer, weights, geometry=None):
         logger.error("object '{}' is not a deformer".format(deformer))
         return
 
-    if not geometry: geometry = common.getFirst(getAffectedGeo(deformer))
+    if not geometry:
+        geometry = common.getFirst(getAffectedGeo(deformer))
     pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
 
     geometryIndex = getGeoIndex(deformer, geometry)
     if geometryIndex is None:
-        raise Exception(f"The geometry '{geometry}' is not part of the deformer set for '{deformer}'")
+        raise Exception(
+            f"The geometry '{geometry}' is not part of the deformer set for '{deformer}'"
+        )
 
     tmpWeights = list()
     for i in range(pointCount + 1):
@@ -421,7 +462,8 @@ def setWeights(deformer, weights, geometry=None):
         else:
             tmpWeight = 1.0
 
-        if tmpWeight is None: tmpWeight = 1.0
+        if tmpWeight is None:
+            tmpWeight = 1.0
         # finally append the weight to the list
         tmpWeights.append(tmpWeight)
 
@@ -481,8 +523,12 @@ def transferDeformer(deformer, sourceMesh, targetMesh):
         logger.error("object '{}' does not exist".format(geo))
         return
 
-    if not rigamajig2.maya.shape.getPointCount(sourceMesh) == rigamajig2.maya.shape.getPointCount(targetMesh):
-        logger.error(f"'{sourceMesh}' and '{targetMesh}' meshes do not match vertex count")
+    if not rigamajig2.maya.shape.getPointCount(
+        sourceMesh
+    ) == rigamajig2.maya.shape.getPointCount(targetMesh):
+        logger.error(
+            f"'{sourceMesh}' and '{targetMesh}' meshes do not match vertex count"
+        )
 
     addGeoToDeformer(deformer=deformer, geo=targetMesh)
 

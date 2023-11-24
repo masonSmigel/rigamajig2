@@ -39,7 +39,9 @@ class LookAt(base.BaseComponent):
                                    This can be useful for things like eyes where each input should have a different rig parent.
         """
 
-        super(LookAt, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(LookAt, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
         self.side = common.getSide(self.name)
 
         self.aimTargetName = self.name + "_aim"
@@ -47,25 +49,39 @@ class LookAt(base.BaseComponent):
         self.rigParentList = []
         self.upAxis = "y"
 
-        self.defineParameter(parameter="aimTargetName", value=self.aimTargetName, dataType="string")
-        self.defineParameter(parameter="lookAtSpaces", value=self.lookAtSpaces, dataType="dict")
-        self.defineParameter(parameter="rigParentList", value=self.rigParentList, dataType="list")
+        self.defineParameter(
+            parameter="aimTargetName", value=self.aimTargetName, dataType="string"
+        )
+        self.defineParameter(
+            parameter="lookAtSpaces", value=self.lookAtSpaces, dataType="dict"
+        )
+        self.defineParameter(
+            parameter="rigParentList", value=self.rigParentList, dataType="list"
+        )
         self.defineParameter(parameter="upAxis", value=self.upAxis, dataType="string")
 
         for input in self.input:
             if cmds.objExists(input):
                 parameterName = "{}Name".format(input)
                 parameterValue = "_".join(input.split("_")[:-1])
-                self.defineParameter(parameter=parameterName, value=parameterValue, dataType="string")
+                self.defineParameter(
+                    parameter=parameterName, value=parameterValue, dataType="string"
+                )
 
     def _createBuildGuides(self):
         """create build guides_hrc"""
-        self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
+        self.guidesHierarchy = cmds.createNode(
+            "transform", name="{}_guide".format(self.name)
+        )
 
-        self._lookAtTgt = control.createGuide("{}_lookAtTgt".format(self.name), parent=self.guidesHierarchy)
+        self._lookAtTgt = control.createGuide(
+            "{}_lookAtTgt".format(self.name), parent=self.guidesHierarchy
+        )
         transform.matchTranslate(self.input[0], self._lookAtTgt)
         for input in self.input:
-            inputUpVector = control.createGuide("{}_upVecTgt".format(input), parent=self.guidesHierarchy)
+            inputUpVector = control.createGuide(
+                "{}_upVecTgt".format(input), parent=self.guidesHierarchy
+            )
             setattr(self, "_{}_upVecTgt".format(input), inputUpVector)
             transform.matchTranslate(input, inputUpVector)
 
@@ -104,7 +120,9 @@ class LookAt(base.BaseComponent):
             lookAtControl.addTrs("aim")
 
             # postion the control at the end joint. Get the aim vector from the input and mutiply by joint length.
-            translation = mathUtils.scalarMult(transform.getVectorFromAxis(aimAxis), joint.length(input))
+            translation = mathUtils.scalarMult(
+                transform.getVectorFromAxis(aimAxis), joint.length(input)
+            )
             control.translateShapes(lookAtControl.name, translation)
 
             self.lookAtCtlList.append(lookAtControl)
@@ -122,7 +140,9 @@ class LookAt(base.BaseComponent):
 
             # create an upvector and aim contraint
             upVectorTrs = cmds.createNode(
-                "transform", name="{}_upVec".format(lookatControl.trs), parent=self.spacesHierarchy
+                "transform",
+                name="{}_upVec".format(lookatControl.trs),
+                parent=self.spacesHierarchy,
             )
             transform.matchTranslate(upVectorGuide, upVectorTrs)
             self.upVecObjList.append(upVectorTrs)
@@ -147,7 +167,7 @@ class LookAt(base.BaseComponent):
         connect to the rig parent
         """
         # connect the controls to the rig parent. Check if we have a rigParentList to override the default rig parent.
-        if len(self.rigParentList) > 0:
+        if self.rigParentList:
             for ctl, rigParent in zip(self.lookAtCtlList, self.rigParentList):
                 transform.connectOffsetParentMatrix(rigParent, ctl.orig, mo=True)
             for upVec, rigParent in zip(self.upVecObjList, self.rigParentList):
@@ -159,7 +179,12 @@ class LookAt(base.BaseComponent):
             for upVec in self.upVecObjList:
                 transform.connectOffsetParentMatrix(self.rigParent, upVec, mo=True)
 
-        spaces.create(self.aimTarget.spaces, self.aimTarget.name, parent=self.spacesHierarchy, defaultName="world")
+        spaces.create(
+            self.aimTarget.spaces,
+            self.aimTarget.name,
+            parent=self.spacesHierarchy,
+            defaultName="world",
+        )
 
         if self.lookAtSpaces:
             spaceValues = [self.lookAtSpaces[k] for k in self.lookAtSpaces.keys()]

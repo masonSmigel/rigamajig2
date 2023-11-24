@@ -6,7 +6,6 @@
     author: masonsmigel
     date: 07/2022
     description: 
-
 """
 # MAYA
 import maya.cmds as cmds

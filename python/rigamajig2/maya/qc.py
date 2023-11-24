@@ -50,7 +50,11 @@ def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
         keyableAttrs = cmds.listAttr(node, k=True)
         if not keyableAttrs:
             continue
-        keyables = [x for x in keyableAttrs if cmds.getAttr("{}.{}".format(node, x), type=True) not in SKIPS]
+        keyables = [
+            x
+            for x in keyableAttrs
+            if cmds.getAttr("{}.{}".format(node, x), type=True) not in SKIPS
+        ]
 
         translates = cmds.attributeQuery("translate", node=node, listChildren=True)
         rotates = cmds.attributeQuery("rotate", node=node, listChildren=True)
@@ -59,7 +63,9 @@ def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
         for attr in keyables:
             if attr in scales or hasScaleToken(node, attr):
                 timeStart, timeEnd = 1.0, 1.2
-            elif attr in rotates or "Angle" in cmds.getAttr("{}.{}".format(node, attr), type=True):
+            elif attr in rotates or "Angle" in cmds.getAttr(
+                "{}.{}".format(node, attr), type=True
+            ):
                 timeStart, timeEnd = -10, 10
             elif attr in translates:
                 timeStart, timeEnd = -1, 1
@@ -71,7 +77,11 @@ def generateRandomAnim(nodes=None, start=None, end=None, keysIncriment=10):
                 value = random.uniform(timeStart, timeEnd)
                 cmds.setKeyframe(node, attribute=attr, v=value, t=frame)
 
-    print("Generated Test animation for {} nodes with time range of {}-{}.".format(len(nodes), start, end))
+    print(
+        "Generated Test animation for {} nodes with time range of {}-{}.".format(
+            len(nodes), start, end
+        )
+    )
 
 
 def runPerformanceTest():
@@ -79,6 +89,7 @@ def runPerformanceTest():
     wrapper to run the performace test within the maya evaluation toolkit.
     """
     import maya.app.evaluationToolkit.evaluationToolkit as et
+
     # query the playback speed, so we can set it back to default after the performace test.
     playbackSpeed = cmds.playbackOptions(q=True, ps=True)
     cmds.playbackOptions(ps=0.0)

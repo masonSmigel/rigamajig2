@@ -17,11 +17,8 @@ def hasUvs(obj):
     :return: True if an object has UVs
     :rtype: uvs
     """
-
-    if isinstance(obj, (list, tuple)):
-        obj = obj[0]
-
-    uvs = cmds.polyEvaluate(obj, uvComponent=True)
+    obj = common.getFirst(obj)
+    return bool(cmds.polyEvaluate(obj, uvcoord=True))
 
 
 def getUvCoordsFromVertex(geometry, vertexId):
@@ -34,9 +31,9 @@ def getUvCoordsFromVertex(geometry, vertexId):
     :rtype: tuple
     """
 
-    if rigamajig2.maya.shape.getType(geometry) != 'mesh':
-        return
-    cmds.select('{}.vtx[{}]'.format(geometry, vertexId), r=True)
+    if rigamajig2.maya.shape.getType(geometry) != "mesh":
+        return None
+    cmds.select("{}.vtx[{}]".format(geometry, vertexId), r=True)
     mel.eval("ConvertSelectionToUVs()")
     uvs = cmds.polyEditUV(q=True)
     cmds.select(clear=True)
@@ -51,12 +48,14 @@ def checkIfOverlapping(geometry):
     """
     geometry = common.getFirst(geometry)
 
-    if rigamajig2.maya.shape.getType(geometry) != 'mesh':
+    if rigamajig2.maya.shape.getType(geometry) != "mesh":
         return False
 
     uvComponentList = cmds.polyListComponentConversion(geometry, toUV=True)
-    overlap = cmds.polyUVOverlap(uvComponentList, overlappingComponents=True) or []
-    return True if len(overlap) > 0 else False
+    overlap = common.toList(
+        cmds.polyUVOverlap(uvComponentList, overlappingComponents=True)
+    )
+    return bool(overlap)
 
 
 def transferUvsToRigged(source, targets):
@@ -79,7 +78,7 @@ def transferUvsToRigged(source, targets):
         targetShapes = cmds.listRelatives(target, s=True, pa=True)
         orig = None
         for shape in targetShapes:
-            if cmds.getAttr('{}.intermediateObject'.format(shape)):
+            if cmds.getAttr("{}.intermediateObject".format(shape)):
                 orig = shape
                 break
 
@@ -108,28 +107,42 @@ def transferUVs(sourceMesh, targetMesh, checkVertCount=True, constructionHistory
     """
 
     if not rigamajig2.maya.mesh.isMesh(sourceMesh):
-        raise Exception("{} is not a mesh object. Cannot transfer UVs on non-mesh objects.".format(sourceMesh))
+        raise Exception(
+            "{} is not a mesh object. Cannot transfer UVs on non-mesh objects.".format(
+                sourceMesh
+            )
+        )
 
     if not rigamajig2.maya.mesh.isMesh(targetMesh):
-        raise Exception("{} is not a mesh object. Cannot transfer UVs on non-mesh objects.".format(targetMesh))
+        raise Exception(
+            "{} is not a mesh object. Cannot transfer UVs on non-mesh objects.".format(
+                targetMesh
+            )
+        )
 
     if checkVertCount:
         sourceVertCount = len(rigamajig2.maya.mesh.getVerts(sourceMesh))
         targetVertCount = len(rigamajig2.maya.mesh.getVerts(targetMesh))
 
         if sourceVertCount != targetVertCount:
-            raise Exception("vertex count of target {} does not match source {}".format(targetMesh, sourceMesh))
+            raise Exception(
+                "vertex count of target {} does not match source {}".format(
+                    targetMesh, sourceMesh
+                )
+            )
 
     # finally after all the checks we can do the transfer. This command used units instead of bools...
     # its probaly to account for any future additions.
     # Just to be super safe I'm using units even though True and False return 1 and 0.
-    cmds.transferAttributes(sourceMesh,
-                            targetMesh,
-                            transferUVs=1,
-                            transferColors=0,
-                            transferNormals=0,
-                            transferPositions=0,
-                            searchMethod=3)
+    cmds.transferAttributes(
+        sourceMesh,
+        targetMesh,
+        transferUVs=1,
+        transferColors=0,
+        transferNormals=0,
+        transferPositions=0,
+        searchMethod=3,
+    )
 
     # next we need to delete the extra color sets that seem to always transfer anyway
     colorSets = cmds.polyColorSet(targetMesh, q=True, allColorSets=True) or []
@@ -140,4 +153,3 @@ def transferUVs(sourceMesh, targetMesh, checkVertCount=True, constructionHistory
         cmds.delete(targetMesh, constructionHistory=True)
 
     print("transfered UVs from {}  to {}".format(sourceMesh, targetMesh))
-

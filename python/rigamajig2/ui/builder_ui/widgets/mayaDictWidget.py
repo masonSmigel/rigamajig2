@@ -6,7 +6,6 @@
     author: masonsmigel
     date: 08/2022
     description: 
-
 """
 
 import sys

@@ -18,9 +18,9 @@ logger = logging.getLogger(__name__)
 if sys.version_info.major >= 3:
     basestring = str
 
-IGNORE_TYPES = ['blendShape', 'skinCluster']
+IGNORE_TYPES = ["blendShape", "skinCluster"]
 
-SPECIAL_DEFORMERS = ['ffd', 'cluster']
+SPECIAL_DEFORMERS = ["ffd", "cluster"]
 
 GATHER_ATTRS = {
     "ffd": [
@@ -32,10 +32,9 @@ GATHER_ATTRS = {
         "usePartialResolution",
         "partialResolution",
         "bindToOriginalGeometry",
-        "freezeGeometry"],
-    "cluster": [
-        "relative",
-        "angleInterpolation"],
+        "freezeGeometry",
+    ],
+    "cluster": ["relative", "angleInterpolation"],
     "deltaMush": [
         "smoothingIterations",
         "smoothingStep",
@@ -46,9 +45,9 @@ GATHER_ATTRS = {
         "scaleZ",
         "inwardConstraint",
         "outwardConstraint",
-        "distanceWeight"
-        ],
-    'tension': [
+        "distanceWeight",
+    ],
+    "tension": [
         "smoothingIterations",
         "smoothingStep",
         "pinBorderVertices",
@@ -58,8 +57,9 @@ GATHER_ATTRS = {
         "stretchConstraint",
         "relative",
         "shearStrength",
-        "bendStrength"]
-    }
+        "bendStrength",
+    ],
+}
 
 
 class DeformerData(maya_data.MayaData):
@@ -83,32 +83,40 @@ class DeformerData(maya_data.MayaData):
 
             data = OrderedDict()
 
-            data['deformerType'] = cmds.nodeType(node)
-            data['envelope'] = cmds.getAttr(f"{node}.envelope")
-            data['affectedGeo'] = deformer.getAffectedGeo(node)
+            data["deformerType"] = cmds.nodeType(node)
+            data["envelope"] = cmds.getAttr(f"{node}.envelope")
+            data["affectedGeo"] = deformer.getAffectedGeo(node)
 
-            gatherAttrs = GATHER_ATTRS.get(data['deformerType'])
+            gatherAttrs = GATHER_ATTRS.get(data["deformerType"])
             if not gatherAttrs:
-                logger.warning(f"Deformers type '{data['deformerType']}' is not currently supported")
+                logger.warning(
+                    f"Deformers type '{data['deformerType']}' is not currently supported"
+                )
                 gatherAttrs = list()
 
             for deformerAttr in gatherAttrs:
                 data[deformerAttr] = cmds.getAttr(f"{node}.{deformerAttr}")
 
             deformerWeightsDict = dict()
-            for affectedGeo in data['affectedGeo']:
-                deformerWeightsDict[affectedGeo] = deformer.getWeights(node, affectedGeo)
+            for affectedGeo in data["affectedGeo"]:
+                deformerWeightsDict[affectedGeo] = deformer.getWeights(
+                    node, affectedGeo
+                )
 
-            data['deformerWeights'] = deformerWeightsDict
+            data["deformerWeights"] = deformerWeightsDict
             # now we can do some specialty Cases:
-            if data['deformerType'] == 'ffd':
-                lattice = cmds.listConnections(f"{node}.deformedLattice.deformedLatticePoints", s=True)[0]
+            if data["deformerType"] == "ffd":
+                lattice = cmds.listConnections(
+                    f"{node}.deformedLattice.deformedLatticePoints", s=True
+                )[0]
 
-                data['sDivisions'] = cmds.getAttr(f"{lattice}.sDivisions")
-                data['tDivisions'] = cmds.getAttr(f"{lattice}.tDivisions")
-                data['uDivisions'] = cmds.getAttr(f"{lattice}.uDivisions")
+                data["sDivisions"] = cmds.getAttr(f"{lattice}.sDivisions")
+                data["tDivisions"] = cmds.getAttr(f"{lattice}.tDivisions")
+                data["uDivisions"] = cmds.getAttr(f"{lattice}.uDivisions")
 
-                base = cmds.listConnections(f"{node}.baseLattice.baseLatticeMatrix", s=True)[0]
+                base = cmds.listConnections(
+                    f"{node}.baseLattice.baseLatticeMatrix", s=True
+                )[0]
 
                 # gather nodeData for the lattice base
                 nodeData = node_data.NodeData()
@@ -120,9 +128,9 @@ class DeformerData(maya_data.MayaData):
                 nodeData.gatherData(lattice)
                 data["latticeData"] = nodeData.getData()[lattice]
 
-            if data['deformerType'] == 'cluster':
+            if data["deformerType"] == "cluster":
                 clusterHandle = cmds.listConnections(f"{node}.clusterXforms", s=True)[0]
-                data['origin'] = list(cmds.getAttr(f"{clusterHandle}.origin")[0])
+                data["origin"] = list(cmds.getAttr(f"{clusterHandle}.origin")[0])
 
                 # gather nodeData for the lattice Shape
                 nodeData = node_data.NodeData()
@@ -131,7 +139,7 @@ class DeformerData(maya_data.MayaData):
 
             # TODO: maybe handle nonlinear deformers
 
-            if data['deformerType'] == 'nonlinear':
+            if data["deformerType"] == "nonlinear":
                 pass
 
             # gather deformer weights for each
@@ -153,28 +161,40 @@ class DeformerData(maya_data.MayaData):
         for node in nodes:
             # if the deformer doesnt exist try to create one
             created = False
-            deformerType = self._data[node]['deformerType']
+            deformerType = self._data[node]["deformerType"]
             if not cmds.objExists(node):
                 # if we dont want to create one print out a warning and
                 if not create:
-                    logger.warning(f"The deformer '{node}' does not exist in the scene. Please use the 'create' flag")
+                    logger.warning(
+                        f"The deformer '{node}' does not exist in the scene. Please use the 'create' flag"
+                    )
                     return
 
                 created = True
                 if deformerType not in SPECIAL_DEFORMERS:
-                    node = cmds.deformer(type=deformerType, name=node, ignoreSelected=True)[0]
+                    node = cmds.deformer(
+                        type=deformerType, name=node, ignoreSelected=True
+                    )[0]
                 else:
-                    if deformerType == 'ffd':
-                        node, lattice, latticeBase = cmds.lattice(n=node, ignoreSelected=True)
-                    if deformerType == 'cluster':
-                        node, clusterHandle = cmds.cluster(name=node, ignoreSelected=True)
+                    if deformerType == "ffd":
+                        node, lattice, latticeBase = cmds.lattice(
+                            n=node, ignoreSelected=True
+                        )
+                    if deformerType == "cluster":
+                        node, clusterHandle = cmds.cluster(
+                            name=node, ignoreSelected=True
+                        )
 
             # setup the handle node data
-            if deformerType == 'ffd':
+            if deformerType == "ffd":
                 # if we did not create the deformer now we need to gather some data
                 if not created:
-                    lattice = cmds.listConnections(f"{node}.deformedLattice.deformedLatticePoints", s=True)[0]
-                    latticeBase = cmds.listConnections(f"{node}.baseLattice.baseLatticeMatrix", s=True)[0]
+                    lattice = cmds.listConnections(
+                        f"{node}.deformedLattice.deformedLatticePoints", s=True
+                    )[0]
+                    latticeBase = cmds.listConnections(
+                        f"{node}.baseLattice.baseLatticeMatrix", s=True
+                    )[0]
 
                 newData = dict()
                 newData[latticeBase] = self._data[node]["baseData"]
@@ -185,14 +205,16 @@ class DeformerData(maya_data.MayaData):
                 nodeData.setData(newData)
                 nodeData.applyAllData()
 
-            if deformerType == 'cluster':
+            if deformerType == "cluster":
                 # if we did not create the deformer now we need to gather some data
                 if not created:
                     # setup the cluster handle
-                    clusterHandle = cmds.listConnections(f"{node}.clusterXforms", s=True)[0]
+                    clusterHandle = cmds.listConnections(
+                        f"{node}.clusterXforms", s=True
+                    )[0]
 
                     # setup the cluster origin
-                    cmds.setAttr(f"{clusterHandle}.origin", *self._data[node]['origin'])
+                    cmds.setAttr(f"{clusterHandle}.origin", *self._data[node]["origin"])
 
                     newData = dict()
                     newData[clusterHandle] = self._data[node]["clusterHandleData"]
@@ -205,11 +227,13 @@ class DeformerData(maya_data.MayaData):
             # TODO: maybe handle non-linear deformers?
 
             # add all the geometry to the deformer and load the weights
-            for geo in list(self._data[node]['affectedGeo']):
+            for geo in list(self._data[node]["affectedGeo"]):
                 # add the geometry to the deformer
                 deformer.addGeoToDeformer(node, geo)
                 # load the deformer weights
-                deformer.setWeights(node, self._data[node]['deformerWeights'][geo], geometry=geo)
+                deformer.setWeights(
+                    node, self._data[node]["deformerWeights"][geo], geometry=geo
+                )
 
             # load the additional attributes from the deformer
             if not attributes:

@@ -6,7 +6,6 @@
     author: masonsmigel
     date: 07/2022
     description: 
-
 """
 # PYTHON
 from PySide2 import QtCore

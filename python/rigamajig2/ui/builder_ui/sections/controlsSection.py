@@ -6,7 +6,6 @@
     author: masonsmigel
     date: 07/2022
     description: 
-
 """
 import maya.cmds as cmds
 from PySide2 import QtCore

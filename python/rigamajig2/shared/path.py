@@ -5,8 +5,8 @@ import os
 import pathlib
 import typing
 
-RelativePath = typing.TypeVar('RelativePath', str, pathlib.Path)
-AbsolutePath = typing.TypeVar('AbsolutePath', str, pathlib.Path)
+RelativePath = typing.TypeVar("RelativePath", str, pathlib.Path)
+AbsolutePath = typing.TypeVar("AbsolutePath", str, pathlib.Path)
 
 
 def cleanPath(path):
@@ -28,7 +28,8 @@ def isFile(path):
     if isinstance(path, (list, tuple)):
         path = path[0]
 
-    if not path: return False
+    if not path:
+        return False
     root, ext = os.path.splitext(path)
     if ext:
         return True
@@ -41,7 +42,8 @@ def isDir(path):
     if isinstance(path, (list, tuple)):
         path = path[0]
 
-    if not path: return False
+    if not path:
+        return False
     root, ext = os.path.splitext(path)
     if ext:
         return False
@@ -82,7 +84,8 @@ def getAbsoultePath(rel, start):
 
     return normalizedPath
 
-def validatePathExists(filepath:str) -> bool:
+
+def validatePathExists(filepath: str) -> bool:
     """
     Check to see if a file path is passed in and exists
 

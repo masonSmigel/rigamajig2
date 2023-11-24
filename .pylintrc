@@ -80,7 +80,7 @@ ignore-long-lines=^\s*(# )?<?https?://\S+>?$
 max-line-length=120
 
 # Maximum number of lines in a module.
-max-module-lines=1000
+max-module-lines=1500
 
 
 [SIMILARITIES]
@@ -120,8 +120,8 @@ module-naming-style=camelCase
 # This is a bunch of names that we want to allow in the package that does not
 # conform with general pylint rules. Some of these are maya shorthand or functions that
 # are useful to keep in a different syntax such as 'logger', 'basestring', and 'unicode'
-good-names= i, j, k, r, p, f,cv, ro, ik, fk, pv,
-            logger, basestring, dlg_instance, pv, unicode,
+good-names= i, j, k, r, p, f,cv, ro, ik, fk, pv, _, w,, x, y, z,
+            logger, basestring, dlg_instance, unicode,
 
 
 [CLASSES]

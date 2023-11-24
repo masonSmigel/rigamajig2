@@ -41,8 +41,8 @@ def createProxyGeo(joints):
     for jnt in joints:
         if joint.isEndJoint(jnt):
             continue
-        node, shape = cmds.polyCube(n=jnt + '_prxyGeo')
-        decendents = cmds.ls(cmds.listRelatives(jnt, c=True) or [], type='joint')
+        node, _ = cmds.polyCube(n=jnt + "_prxyGeo")
+        decendents = cmds.ls(cmds.listRelatives(jnt, c=True) or [], type="joint")
         childJoint = decendents[0]
         rig_transform.matchTranslate([jnt, childJoint], node)
         rig_transform.matchRotate(jnt, node)
@@ -51,8 +51,6 @@ def createProxyGeo(joints):
         cmds.setAttr("{}.s{}".format(node, axis), joint.length(jnt))
         cmds.setAttr("{}.s{}".format(node, axis), lock=True)
 
-        for attr in ["{}{}".format(x, y) for x in 'tr' for y in 'xyz']:
+        for attr in ["{}{}".format(x, y) for x in "tr" for y in "xyz"]:
             cmds.setAttr("{}.{}".format(node, attr), lock=True, k=False)
             cmds.setAttr("{}.{}".format(node, attr), cb=False)
-
-

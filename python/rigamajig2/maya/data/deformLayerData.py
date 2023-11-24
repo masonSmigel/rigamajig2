@@ -20,7 +20,7 @@ from rigamajig2.shared import common
 
 
 class DeformLayerData(maya_data.MayaData):
-    """ Class to store  maya data"""
+    """Class to store  maya data"""
 
     def gatherData(self, node):
         """
@@ -47,9 +47,13 @@ class DeformLayerData(maya_data.MayaData):
         if layers:
             for layer in layers:
                 data[layer] = OrderedDict()
-                data[layer]['suffix'] = cmds.getAttr("{}.suffix".format(layer))
-                connectionMethodIndex = cmds.getAttr("{}.connectionMethod".format(layer))
-                data[layer]['connectionMethod'] = deformLayer.CONNECTION_METHOD_LIST[connectionMethodIndex]
+                data[layer]["suffix"] = cmds.getAttr("{}.suffix".format(layer))
+                connectionMethodIndex = cmds.getAttr(
+                    "{}.connectionMethod".format(layer)
+                )
+                data[layer]["connectionMethod"] = deformLayer.CONNECTION_METHOD_LIST[
+                    connectionMethodIndex
+                ]
 
         self._data[node].update(data)
 
@@ -60,7 +64,6 @@ class DeformLayerData(maya_data.MayaData):
 
         nodes = common.toList(nodes)
         for node in nodes:
-
             # we need to ensure the key for this exisits since it may not in some old files!
             layerGroup = None
             if "deformLayerGroup" in self._data[node]:
@@ -68,10 +71,10 @@ class DeformLayerData(maya_data.MayaData):
             deformLayerObj = deformLayer.DeformLayer(node, layerGroup=layerGroup)
 
             for layer in list(self._data[node].keys()):
-                if layer == 'dagPath' or layer == "deformLayerGroup":
+                if layer == "dagPath" or layer == "deformLayerGroup":
                     continue
 
                 deformLayerObj.createDeformLayer(
-                    suffix=self._data[node][layer]['suffix'],
-                    connectionMethod=self._data[node][layer]["connectionMethod"]
-                    )
+                    suffix=self._data[node][layer]["suffix"],
+                    connectionMethod=self._data[node][layer]["connectionMethod"],
+                )

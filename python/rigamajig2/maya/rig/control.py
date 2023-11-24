@@ -2,34 +2,30 @@
 Controller functions
 """
 import logging
-import os
+from pathlib import Path
 
 import maya.cmds as cmds
 
-import rigamajig2.maya.attr
-import rigamajig2.maya.color
-import rigamajig2.maya.connection
-import rigamajig2.maya.constrain
-import rigamajig2.maya.curve
-import rigamajig2.maya.data.curveData
-import rigamajig2.maya.decorators
-import rigamajig2.maya.hierarchy
-import rigamajig2.maya.joint
-import rigamajig2.maya.meshnav as meshnav
-import rigamajig2.maya.meta as meta
-import rigamajig2.maya.naming
-import rigamajig2.maya.shape
-import rigamajig2.maya.transform
-import rigamajig2.maya.uv
-import rigamajig2.shared.common as common
-import rigamajig2.shared.path
+from rigamajig2.maya import attr
+from rigamajig2.maya import connection
+from rigamajig2.maya import constrain
+from rigamajig2.maya import curve
+from rigamajig2.maya import hierarchy
+from rigamajig2.maya import meshnav
+from rigamajig2.maya import meta
+from rigamajig2.maya import naming
 from rigamajig2.maya import node
+from rigamajig2.maya import transform
+from rigamajig2.maya.color import setOverrideColor
+from rigamajig2.maya.data import curveData
+from rigamajig2.maya.decorators import oneUndo
+from rigamajig2.shared import common
 
 logger = logging.getLogger(__name__)
 
-CONTROLSHAPES = os.path.join(os.path.dirname(__file__), "controlShapes.data").replace("\\", "/")
+CONTROL_SHAPES_DATA = str(Path(__file__).parent / "controlShapes.data")
 
-CONTROLTAG = 'control'
+CONTROL_TAG = "control"
 
 
 class Control(object):
@@ -62,8 +58,15 @@ class Control(object):
         if cmds.objExists("{}.__{}__".format(self.control, common.ORIG)):
             return None
 
-        orig = rigamajig2.maya.hierarchy.create(self.control, [self.control + "_" + common.ORIG], above=True)
-        meta.createMessageConnection(sourceNode=self.control, destNode=orig[0], sourceAttr="__{}__".format(common.ORIG))
+        orig = hierarchy.create(
+            self.control, [self.control + "_" + common.ORIG], above=True
+        )
+        meta.createMessageConnection(
+            sourceNode=self.control,
+            destNode=orig[0],
+            sourceAttr="__{}__".format(common.ORIG),
+        )
+        return common.getFirst(orig)
 
     def addSpaces(self):
         """
@@ -83,9 +86,15 @@ class Control(object):
         else:
             child = self.control
 
-        spaces = rigamajig2.maya.hierarchy.create(child, [self.control + "_" + common.SPACES], above=True)
-        meta.createMessageConnection(sourceNode=self.control, destNode=spaces[0],
-                                     sourceAttr="__{}__".format(common.SPACES))
+        spaces = hierarchy.create(
+            child, [self.control + "_" + common.SPACES], above=True
+        )
+        meta.createMessageConnection(
+            sourceNode=self.control,
+            destNode=spaces[0],
+            sourceAttr="__{}__".format(common.SPACES),
+        )
+        return common.getFirst(spaces)
 
     def addSdk(self):
         """
@@ -96,9 +105,15 @@ class Control(object):
         if cmds.objExists("{}.__{}__".format(self.control, common.SDK)):
             return None
 
-        sdk = rigamajig2.maya.hierarchy.create(self.control, [self.control + "_" + common.SDK], above=True)
-        meta.createMessageConnection(sourceNode=self.control, destNode=sdk[0], sourceAttr="__{}__".format(common.SDK))
-        return sdk[0]
+        sdk = hierarchy.create(
+            self.control, [self.control + "_" + common.SDK], above=True
+        )
+        meta.createMessageConnection(
+            sourceNode=self.control,
+            destNode=sdk[0],
+            sourceAttr="__{}__".format(common.SDK),
+        )
+        return common.getFirst(sdk)
 
     def addTrs(self, name=None):
         """
@@ -117,8 +132,14 @@ class Control(object):
             trsChild = self.control
 
         trsSuffix = "_{}Trs".format(name) if name else "_trs"
-        trs = rigamajig2.maya.hierarchy.create(trsChild, [self.control + trsSuffix], above=True)
-        meta.createMessageConnection(sourceNode=self.control, destNode=trs[0], sourceAttr="__{}__".format(common.TRS))
+        trs = hierarchy.create(trsChild, [self.control + trsSuffix], above=True)
+        meta.createMessageConnection(
+            sourceNode=self.control,
+            destNode=trs[0],
+            sourceAttr="__{}__".format(common.TRS),
+        )
+
+        return common.getFirst(trs)
 
     def getNode(self, node):
         """
@@ -129,6 +150,7 @@ class Control(object):
 
         if cmds.objExists("{}.__{}__".format(self.control, node)):
             return meta.getMessageConnection("{}.__{}__".format(self.control, node))
+        return None
 
     @property
     def name(self):
@@ -181,9 +203,26 @@ def isControl(control):
 
 
 # pylint:disable=too-many-arguments
-def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, sdk=False, parent=None,
-           position=None, rotation=None, size=1, hideAttrs=None, color='blue', type=None, rotateOrder='xyz',
-           trasformType='transform', shapeAim='y', addRotateOrder=True):
+def create(
+    name,
+    side=None,
+    shape="circle",
+    orig=True,
+    spaces=False,
+    trs=False,
+    sdk=False,
+    parent=None,
+    position=None,
+    rotation=None,
+    size=1,
+    hideAttrs=None,
+    color="blue",
+    type=None,
+    rotateOrder="xyz",
+    trasformType="transform",
+    shapeAim="y",
+    addRotateOrder=True,
+):
     """
     Create a control. This will return an instance of the Control class.
     The Control class allows you to manage and add transforms into the hierarchy above.
@@ -217,12 +256,12 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     if rotation is None:
         rotation = [0, 0, 0]
     if hideAttrs is None:
-        hideAttrs = ['v']
+        hideAttrs = ["v"]
 
     if side:
-        name = rigamajig2.maya.naming.getUniqueName("{}_{}".format(name, side))
+        name = naming.getUniqueName("{}_{}".format(name, side))
     else:
-        name = rigamajig2.maya.naming.getUniqueName(name)
+        name = naming.getUniqueName(name)
     control = cmds.createNode(trasformType, name=name)
     tagAsControl(control, type=type)
     topNode = control
@@ -241,13 +280,13 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     if sdk:
         controlObj.addSdk()
 
-    if trasformType == 'joint':
+    if trasformType == "joint":
         cmds.setAttr("{}.drawStyle".format(control), 2)
-        hideAttrs.append('radius')
+        hideAttrs.append("radius")
 
-    for attr in hideAttrs:
-        if cmds.objExists("{}.{}".format(control, attr)):
-            rigamajig2.maya.attr.lockAndHide(control, attr)
+    for hideAttr in hideAttrs:
+        if cmds.objExists("{}.{}".format(control, hideAttr)):
+            attr.lockAndHide(control, hideAttr)
             # cmds.setAttr("{}.{}".format(control, attr), channelBox=False, keyable=False, lock=True)
 
     if parent:
@@ -257,35 +296,38 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
     if rotation:
         cmds.xform(topNode, ws=True, rotation=rotation)
     if color:
-        rigamajig2.maya.color.setOverrideColor(control, color)
+        setOverrideColor(control, color)
 
     # add a rotate order control to the control
-    if rotateOrder in rigamajig2.maya.transform.ROTATEORDER and addRotateOrder:
-        rotOrderAttr = rigamajig2.maya.attr.createEnum(control,"rotOrder", enum=rigamajig2.maya.transform.ROTATEORDER,
-                                                       value=rigamajig2.maya.transform.ROTATEORDER.index(rotateOrder),
-                                                       keyable=False,
-                                                       channelBox=True)
+    if rotateOrder in transform.ROTATEORDER and addRotateOrder:
+        rotOrderAttr = attr.createEnum(
+            control,
+            "rotOrder",
+            enum=transform.ROTATEORDER,
+            value=transform.ROTATEORDER.index(rotateOrder),
+            keyable=False,
+            channelBox=True,
+        )
 
         cmds.connectAttr(rotOrderAttr, "{}.rotateOrder".format(control))
 
-    elif rotateOrder in rigamajig2.maya.transform.ROTATEORDER:
-        cmds.setAttr("{}.rotateOrder".format(control), rigamajig2.maya.transform.ROTATEORDER.index(rotateOrder))
+    elif rotateOrder in transform.ROTATEORDER:
+        cmds.setAttr(
+            "{}.rotateOrder".format(control),
+            transform.ROTATEORDER.index(rotateOrder),
+        )
 
-    # if rotateOrder in rigamajig2.maya.transform.ROTATEORDER:
-    #     cmds.setAttr("{}.rotateOrder".format(control), rigamajig2.maya.transform.ROTATEORDER.index(rotateOrder))
-
-    # scale the control shape
     if size > 0:
         scaleShapes(control, [size, size, size])
 
     # aim the control shape
-    if shapeAim == 'x':
+    if shapeAim == "x":
         rotateVector = (0, 0, 90)
-    if shapeAim == '-x':
+    elif shapeAim == "-x":
         rotateVector = (0, 0, -90)
-    elif shapeAim == 'z':
+    elif shapeAim == "z":
         rotateVector = (90, 0, 0)
-    elif shapeAim == '-z':
+    elif shapeAim == "-z":
         rotateVector = (-90, 0, 0)
     else:
         rotateVector = (0, 0, 0)
@@ -297,9 +339,24 @@ def create(name, side=None, shape='circle', orig=True, spaces=False, trs=False, 
 
 
 # pylint:disable=too-many-arguments
-def createAtObject(name, side=None, shape='circle', orig=True, spaces=False, trs=False, sdk=False, parent=None,
-                   xformObj=None, size=1, hideAttrs=None, color='blue', type=None, rotateOrder='xyz',
-                   trasformType='transform', shapeAim='y'):
+def createAtObject(
+    name,
+    side=None,
+    shape="circle",
+    orig=True,
+    spaces=False,
+    trs=False,
+    sdk=False,
+    parent=None,
+    xformObj=None,
+    size=1,
+    hideAttrs=None,
+    color="blue",
+    type=None,
+    rotateOrder="xyz",
+    transformType="transform",
+    shapeAim="y",
+):
     """
     Wrapper to create a control at the position of a node.
     This will return an instance of the Control class.
@@ -319,36 +376,73 @@ def createAtObject(name, side=None, shape='circle', orig=True, spaces=False, trs
     :param str int color: Optional- Color of the control
     :param str type: Optional- Specifiy a control type.
     :param str rotateOrder: Specify a rotation order. Default is 'xyz'
-    :param str trasformType: Type of transform to use as a control. "transform", "joint"
+    :param str transformType: Type of transform to use as a control. "transform", "joint"
     :param str shapeAim: Set the direction to aim the control
 
     :return: control object
     :rtype: Control
     """
     if not xformObj:
-        logger.error("You must pass an xform object to create a control at. Otherwise use control.create")
-        return
+        logger.error(
+            "You must pass an xform object to create a control at. Otherwise use control.create"
+        )
+        return None
 
     if not cmds.objExists(xformObj):
         logger.error(
-            "Object {} does not exist. cannot create a control at a transform that doesnt exist".format(xformObj))
-        return
+            "Object {} does not exist. cannot create a control at a transform that doesnt exist".format(
+                xformObj
+            )
+        )
+        return None
 
     xformObj = common.getFirst(xformObj)
 
     position = cmds.xform(xformObj, q=True, ws=True, translation=True)
-    controlObj = create(name=name, side=side, shape=shape, orig=orig, spaces=spaces, trs=trs, sdk=sdk,
-                        parent=parent, position=position, size=size, rotation=[0, 0, 0],
-                        hideAttrs=hideAttrs, color=color, type=type, rotateOrder=rotateOrder,
-                        trasformType=trasformType, shapeAim=shapeAim)
+    controlObj = create(
+        name=name,
+        side=side,
+        shape=shape,
+        orig=orig,
+        spaces=spaces,
+        trs=trs,
+        sdk=sdk,
+        parent=parent,
+        position=position,
+        size=size,
+        rotation=[0, 0, 0],
+        hideAttrs=hideAttrs,
+        color=color,
+        type=type,
+        rotateOrder=rotateOrder,
+        trasformType=transformType,
+        shapeAim=shapeAim,
+    )
     orig = controlObj.getNode(common.ORIG)
-    rigamajig2.maya.transform.matchRotate(xformObj, orig)
+    transform.matchRotate(xformObj, orig)
     return controlObj
 
 
-def createMeshRivet(name, mesh, side=None, shape='circle', orig=True, spaces=False, neg=True, sdk=False, parent=None,
-                    position=None, rotation=None, size=1, hideAttrs=None, color='blue', type=None, rotateOrder='xyz',
-                    trasformType='transform', shapeAim='y'):
+def createMeshRivet(
+    name,
+    mesh,
+    side=None,
+    shape="circle",
+    orig=True,
+    spaces=False,
+    neg=True,
+    sdk=False,
+    parent=None,
+    position=None,
+    rotation=None,
+    size=1,
+    hideAttrs=None,
+    color="blue",
+    type=None,
+    rotateOrder="xyz",
+    trasformType="transform",
+    shapeAim="y",
+):
     """
     Create a mesh rivet control. The rivet control will snap to the vertex nearest to the control.
     This control will transform along with a deforming mesh.
@@ -376,7 +470,9 @@ def createMeshRivet(name, mesh, side=None, shape='circle', orig=True, spaces=Fal
     :rtype: Control
     """
 
-    closestVertex = meshnav.getClosestVertex(mesh=mesh, point=position, returnDistance=False)
+    closestVertex = meshnav.getClosestVertex(
+        mesh=mesh, point=position, returnDistance=False
+    )
 
     # For now I'm going to use the new UV pin nodes. After doing a couple tests heres what I found:
     # If the Uv pin turns out to be less reliable than the folicle I think the difference may be negligable as most
@@ -393,13 +489,28 @@ def createMeshRivet(name, mesh, side=None, shape='circle', orig=True, spaces=Fal
     #       Paralell: 84.269 fps
     #       Multiple outputs can be connected to the uvPin node, which allows it to only evaluate ONCE!
 
-    controlObj = create(name=name, side=side, shape=shape, orig=orig, spaces=spaces, trs=False, sdk=sdk,
-                        parent=parent, position=[0, 0, 0], size=size, rotation=[0, 0, 0],
-                        hideAttrs=hideAttrs, color=color, type=type, rotateOrder=rotateOrder,
-                        trasformType=trasformType, shapeAim=shapeAim)
+    controlObj = create(
+        name=name,
+        side=side,
+        shape=shape,
+        orig=orig,
+        spaces=spaces,
+        trs=False,
+        sdk=sdk,
+        parent=parent,
+        position=[0, 0, 0],
+        size=size,
+        rotation=[0, 0, 0],
+        hideAttrs=hideAttrs,
+        color=color,
+        type=type,
+        rotateOrder=rotateOrder,
+        trasformType=trasformType,
+        shapeAim=shapeAim,
+    )
 
     # create a uv pin node and connect ONLY the translate into the controls orig
-    uvPinNodeOutput = rigamajig2.maya.constrain.uvPin(closestVertex)
+    uvPinNodeOutput = constrain.uvPin(closestVertex)
 
     pickMatrix = cmds.createNode("pickMatrix", n="{}_uvPin_pickMatrix".format(name))
     cmds.setAttr("{}.useRotate".format(pickMatrix), 0)
@@ -408,18 +519,31 @@ def createMeshRivet(name, mesh, side=None, shape='circle', orig=True, spaces=Fal
 
     # if the node as a parent we need to compensate for the parentInverse matrix.
     if parent:
-        multMatrix = cmds.createNode("multMatrix", name="{}_{}_uvPin_mm".format(controlObj.name, parent))
+        multMatrix = cmds.createNode(
+            "multMatrix", name="{}_{}_uvPin_mm".format(controlObj.name, parent)
+        )
 
         cmds.connectAttr(uvPinNodeOutput, "{}.matrixIn[1]".format(multMatrix))
-        cmds.connectAttr("{}.{}".format(parent, "worldInverseMatrix"), "{}.matrixIn[2]".format(multMatrix))
-        cmds.connectAttr("{}.{}".format(multMatrix, "matrixSum"), "{}.inputMatrix".format(pickMatrix))
-        cmds.connectAttr("{}.outputMatrix".format(pickMatrix), "{}.offsetParentMatrix".format(controlObj.orig))
+        cmds.connectAttr(
+            "{}.{}".format(parent, "worldInverseMatrix"),
+            "{}.matrixIn[2]".format(multMatrix),
+        )
+        cmds.connectAttr(
+            "{}.{}".format(multMatrix, "matrixSum"), "{}.inputMatrix".format(pickMatrix)
+        )
+        cmds.connectAttr(
+            "{}.outputMatrix".format(pickMatrix),
+            "{}.offsetParentMatrix".format(controlObj.orig),
+        )
 
-        rigamajig2.maya.transform.resetTransformations(controlObj.orig)
+        transform.resetTransformations(controlObj.orig)
 
     else:
         cmds.connectAttr(uvPinNodeOutput, "{}.inputMatrix".format(pickMatrix))
-        cmds.connectAttr("{}.outputMatrix".format(pickMatrix), "{}.offsetParentMatrix".format(controlObj.orig))
+        cmds.connectAttr(
+            "{}.outputMatrix".format(pickMatrix),
+            "{}.offsetParentMatrix".format(controlObj.orig),
+        )
 
     # add the negate stuff
     if neg:
@@ -429,57 +553,94 @@ def createMeshRivet(name, mesh, side=None, shape='circle', orig=True, spaces=Fal
         #                     '{}.{}'.format(controlObj.trs, 't'), -1,
         #                     name=controlObj.trs + '_t_neg')
 
-        rigamajig2.maya.constrain.negate(controlObj.control, driven=controlObj.trs, t=True)
+        constrain.negate(controlObj.control, driven=controlObj.trs, translate=True)
 
     return controlObj
 
 
-def createMeshRivetAtObject(name, mesh, side=None, shape='circle', orig=True, spaces=False, neg=True, sdk=False,
-                            parent=None, xformObj=None, size=1, hideAttrs=None, color='blue', type=None,
-                            rotateOrder='xyz', trasformType='transform', shapeAim='y'):
+def createMeshRivetAtObject(
+    name,
+    mesh,
+    side=None,
+    shape="circle",
+    orig=True,
+    spaces=False,
+    neg=True,
+    sdk=False,
+    parent=None,
+    xformObj=None,
+    size=1,
+    hideAttrs=None,
+    color="blue",
+    type=None,
+    rotateOrder="xyz",
+    trasformType="transform",
+    shapeAim="y",
+):
     """
-    Create a mesh rivet control from a provided xform object. This becomes most usefull for setting up facial controls.
-    so the user can only worry about the postion and allow the tool to find the appropriate vertex.
+     Create a mesh rivet control from a provided xform object. This becomes most usefull for setting up facial controls.
+     so the user can only worry about the postion and allow the tool to find the appropriate vertex.
 
-   :param str name: Name of the control.
-   :param str list mesh: mesh to connect the control to.
-   :param str side: Optional name of the side
-   :param str shape: Shape of the control.
-   :param bool orig: add an orig node
-   :param bool spaces: add spaces node
-   :param bool neg: negate the transformation of the control. This will use a trs node on the controller
-   :param bool sdk: add an sdk node
-   :param str parent: Optional- Parent the control under this node in the hierarchy
-   :param str list  xformObj: object to snap the control to. The control will be snapped to the nearest vertex.
-   :param int float size: Optional- Size of the control
-   :param list hideAttrs: Optional- list of attributes to lock and hide. Default is ['v']
-   :param str int color: Optional- Color of the control
-   :param str type: Optional- Specifiy a control type.
-   :param str rotateOrder: Specify a rotation order. Default is 'xyz'
-   :param str trasformType: Type of transform to use as a control. "transform", "joint"
-   :param str shapeAim: Set the direction to aim the control
+    :param str name: Name of the control.
+    :param str list mesh: mesh to connect the control to.
+    :param str side: Optional name of the side
+    :param str shape: Shape of the control.
+    :param bool orig: add an orig node
+    :param bool spaces: add spaces node
+    :param bool neg: negate the transformation of the control. This will use a trs node on the controller
+    :param bool sdk: add an sdk node
+    :param str parent: Optional- Parent the control under this node in the hierarchy
+    :param str list  xformObj: object to snap the control to. The control will be snapped to the nearest vertex.
+    :param int float size: Optional- Size of the control
+    :param list hideAttrs: Optional- list of attributes to lock and hide. Default is ['v']
+    :param str int color: Optional- Color of the control
+    :param str type: Optional- Specifiy a control type.
+    :param str rotateOrder: Specify a rotation order. Default is 'xyz'
+    :param str trasformType: Type of transform to use as a control. "transform", "joint"
+    :param str shapeAim: Set the direction to aim the control
 
-   :return: control object
-   :rtype: Control
-   """
+    :return: control object
+    :rtype: Control
+    """
 
     if not xformObj:
-        logger.error("You must pass an xform object to create a control at. Otherwise use control.createMeshRivet")
-        return
+        logger.error(
+            "You must pass an xform object to create a control at. Otherwise use control.createMeshRivet"
+        )
+        return None
 
     if not cmds.objExists(xformObj):
         logger.error(
-            "Object {} does not exist. cannot create a control at a transform that doesnt exist".format(xformObj))
-        return
+            "Object {} does not exist. cannot create a control at a transform that doesnt exist".format(
+                xformObj
+            )
+        )
+        return None
 
     xformObj = common.getFirst(xformObj)
     position = cmds.xform(xformObj, q=True, ws=True, translation=True)
-    controlObj = createMeshRivet(name=name, mesh=mesh, side=side, shape=shape, orig=orig, spaces=spaces, neg=neg,
-                                 sdk=sdk, parent=parent, position=position, size=size, rotation=[0, 0, 0],
-                                 hideAttrs=hideAttrs, color=color, type=type, rotateOrder=rotateOrder,
-                                 trasformType=trasformType, shapeAim=shapeAim)
+    controlObj = createMeshRivet(
+        name=name,
+        mesh=mesh,
+        side=side,
+        shape=shape,
+        orig=orig,
+        spaces=spaces,
+        neg=neg,
+        sdk=sdk,
+        parent=parent,
+        position=position,
+        size=size,
+        rotation=[0, 0, 0],
+        hideAttrs=hideAttrs,
+        color=color,
+        type=type,
+        rotateOrder=rotateOrder,
+        trasformType=trasformType,
+        shapeAim=shapeAim,
+    )
     orig = controlObj.getNode(common.ORIG)
-    rigamajig2.maya.transform.matchRotate(xformObj, orig)
+    transform.matchRotate(xformObj, orig)
     return controlObj
 
 
@@ -487,8 +648,8 @@ def getAvailableControlShapes():
     """
     Get a list of available control shapes
     """
-    controlData = rigamajig2.maya.data.curveData.CurveData()
-    controlData.read(CONTROLSHAPES)
+    controlData = curveData.CurveData()
+    controlData.read(CONTROL_SHAPES_DATA)
     controlData = controlData.getData()
     return controlData.keys()
 
@@ -521,7 +682,7 @@ def getControls(namespace=None):
     return meta.getTagged(common.CONTROLTAG, namespace=namespace)
 
 
-def createDisplayLine(point1, point2, name=None, parent=None, displayType='temp'):
+def createDisplayLine(point1, point2, name=None, parent=None, displayType="temp"):
     """
     Create a display line between two points
     :param point1: First node to connect the line to.
@@ -531,38 +692,46 @@ def createDisplayLine(point1, point2, name=None, parent=None, displayType='temp'
     :param displayType: Set the display type. Valid values are: 'norm', 'temp', 'ref'
     :return: name of the curve created.
     """
-    if displayType not in ['norm', 'temp', 'ref']:
-        logger.error("{} is not a valid display type. Valid values are: ['norm', 'temp', 'ref']".format(displayType))
-        return
+    if displayType not in ["norm", "temp", "ref"]:
+        logger.error(
+            "{} is not a valid display type. Valid values are: ['norm', 'temp', 'ref']".format(
+                displayType
+            )
+        )
+        displayType = "temp"
     if not name:
-        name = rigamajig2.maya.naming.getUniqueName("displayLine")
+        name = naming.getUniqueName("displayLine")
 
-    displayLine = rigamajig2.maya.curve.createCurveFromTransform([point1, point2], name=name, degree=1)
+    displayLine = curve.createCurveFromTransform([point1, point2], name=name, degree=1)
 
-    displayTypeDict = {'norm': 0, 'temp': 1, 'ref': 2}
+    displayTypeDict = {"norm": 0, "temp": 1, "ref": 2}
 
-    cmds.setAttr(displayLine + '.overrideEnabled', 1)
-    cmds.setAttr(displayLine + '.overrideDisplayType', displayTypeDict[displayType])
+    cmds.setAttr(displayLine + ".overrideEnabled", 1)
+    cmds.setAttr(displayLine + ".overrideDisplayType", displayTypeDict[displayType])
     if parent:
         cmds.parent(displayLine, parent)
 
     # create some decompose matrix nodes
-    mm1 = cmds.createNode('multMatrix', n=displayLine + "_1_mm")
-    mm2 = cmds.createNode('multMatrix', n=displayLine + "_2_mm")
-    dcmp1 = cmds.createNode('decomposeMatrix', n=displayLine + "_1_dcmp")
-    dcmp2 = cmds.createNode('decomposeMatrix', n=displayLine + "_2_dcmp")
+    mm1 = cmds.createNode("multMatrix", n=displayLine + "_1_mm")
+    mm2 = cmds.createNode("multMatrix", n=displayLine + "_2_mm")
+    dcmp1 = cmds.createNode("decomposeMatrix", n=displayLine + "_1_dcmp")
+    dcmp2 = cmds.createNode("decomposeMatrix", n=displayLine + "_2_dcmp")
 
     # connect the attributes
-    cmds.connectAttr(point1 + '.worldMatrix', mm1 + ".matrixIn[0]", f=True)
-    cmds.connectAttr(displayLine + '.worldInverseMatrix', mm1 + ".matrixIn[1]", f=True)
-    cmds.connectAttr(point2 + '.worldMatrix', mm2 + ".matrixIn[0]", f=True)
-    cmds.connectAttr(displayLine + '.worldInverseMatrix', mm2 + ".matrixIn[1]", f=True)
-    cmds.connectAttr(mm1 + '.matrixSum', dcmp1 + '.inputMatrix')
-    cmds.connectAttr(mm2 + '.matrixSum', dcmp2 + '.inputMatrix')
+    cmds.connectAttr(point1 + ".worldMatrix", mm1 + ".matrixIn[0]", f=True)
+    cmds.connectAttr(displayLine + ".worldInverseMatrix", mm1 + ".matrixIn[1]", f=True)
+    cmds.connectAttr(point2 + ".worldMatrix", mm2 + ".matrixIn[0]", f=True)
+    cmds.connectAttr(displayLine + ".worldInverseMatrix", mm2 + ".matrixIn[1]", f=True)
+    cmds.connectAttr(mm1 + ".matrixSum", dcmp1 + ".inputMatrix")
+    cmds.connectAttr(mm2 + ".matrixSum", dcmp2 + ".inputMatrix")
 
     displayLineShape = cmds.listRelatives(displayLine, s=True) or []
-    cmds.connectAttr(dcmp1 + '.outputTranslate', displayLineShape[0] + '.controlPoints[0]', f=True)
-    cmds.connectAttr(dcmp2 + '.outputTranslate', displayLineShape[0] + '.controlPoints[1]', f=True)
+    cmds.connectAttr(
+        dcmp1 + ".outputTranslate", displayLineShape[0] + ".controlPoints[0]", f=True
+    )
+    cmds.connectAttr(
+        dcmp2 + ".outputTranslate", displayLineShape[0] + ".controlPoints[1]", f=True
+    )
     return displayLine
 
 
@@ -585,19 +754,31 @@ def connectControlVisiblity(driverNode, driverAttr, controls, force=True):
         if not shapes:
             continue
 
-        existingConnections = rigamajig2.maya.connection.getPlugInput("{}.v".format(shapes[0]))
-        if len(existingConnections) > 0:
+        existingConnections = connection.getPlugInput("{}.v".format(shapes[0]))
+        if existingConnections:
             existingDriver = existingConnections[0]
-            mdlName = "{}_{}_visability".format(driverNode, existingDriver.split(".")[0])
-            multipliedVis = node.multDoubleLinear(existingDriver,"{}.{}".format(driverNode, driverAttr), name=mdlName)
+            mdlName = "{}_{}_visability".format(
+                driverNode, existingDriver.split(".")[0]
+            )
+            multipliedVis = node.multDoubleLinear(
+                existingDriver, "{}.{}".format(driverNode, driverAttr), name=mdlName
+            )
             for shape in shapes:
-                cmds.connectAttr("{}.{}".format(multipliedVis, 'output'), "{}.{}".format(shape, 'v'), f=force)
+                cmds.connectAttr(
+                    "{}.{}".format(multipliedVis, "output"),
+                    "{}.{}".format(shape, "v"),
+                    f=force,
+                )
         else:
             for shape in shapes:
-                cmds.connectAttr("{}.{}".format(driverNode, driverAttr), "{}.{}".format(shape, 'v'), f=force)
+                cmds.connectAttr(
+                    "{}.{}".format(driverNode, driverAttr),
+                    "{}.{}".format(shape, "v"),
+                    f=force,
+                )
 
 
-@rigamajig2.maya.decorators.oneUndo
+@oneUndo
 def setControlShape(control, shape, clearExisting=True):
     """
     Set the control shape
@@ -606,13 +787,13 @@ def setControlShape(control, shape, clearExisting=True):
     :param clearExisting: clear any existing shapes
     """
     if clearExisting:
-        rigamajig2.maya.curve.wipeCurveShape(control)
+        curve.wipeCurveShape(control)
 
-    controlDataObj = rigamajig2.maya.data.curveData.CurveData()
-    controlDataObj.read(CONTROLSHAPES)
+    controlDataObj = curveData.CurveData()
+    controlDataObj.read(CONTROL_SHAPES_DATA)
     if shape in controlDataObj.getData().keys():
         source = controlDataObj.applyData(shape, create=True)[0]
-        rigamajig2.maya.curve.copyShape(source, control)
+        curve.copyShape(source, control)
         cmds.delete(source)
     else:
         cmds.setAttr("{}.displayHandle".format(control), 1)
@@ -629,13 +810,23 @@ def translateShapes(shape, translation=(0, 0, 0), world=False):
 
     for shape in shapes:
         if world:
-            cmds.move(translation[0], translation[1], translation[2],
-                      rigamajig2.maya.curve.getCvs(shape),
-                      relative=True, worldSpace=True)
+            cmds.move(
+                translation[0],
+                translation[1],
+                translation[2],
+                curve.getCvs(shape),
+                relative=True,
+                worldSpace=True,
+            )
         else:
-            cmds.move(translation[0], translation[1], translation[2],
-                      rigamajig2.maya.curve.getCvs(shape),
-                      relative=True, objectSpace=True)
+            cmds.move(
+                translation[0],
+                translation[1],
+                translation[2],
+                curve.getCvs(shape),
+                relative=True,
+                objectSpace=True,
+            )
 
 
 def rotateShapes(shape, rotation=(0, 0, 0)):
@@ -647,9 +838,14 @@ def rotateShapes(shape, rotation=(0, 0, 0)):
     shapes = cmds.listRelatives(shape, s=True) or []
 
     for shape in shapes:
-        cmds.rotate(rotation[0], rotation[1], rotation[2],
-                    rigamajig2.maya.curve.getCvs(shape),
-                    relative=True, objectSpace=True)
+        cmds.rotate(
+            rotation[0],
+            rotation[1],
+            rotation[2],
+            curve.getCvs(shape),
+            relative=True,
+            objectSpace=True,
+        )
 
 
 def scaleShapes(shape, scale=(1, 1, 1)):
@@ -661,9 +857,14 @@ def scaleShapes(shape, scale=(1, 1, 1)):
     shapes = cmds.listRelatives(shape, s=True) or []
 
     for shape in shapes:
-        cmds.scale(scale[0], scale[1], scale[2],
-                   rigamajig2.maya.curve.getCvs(shape),
-                   relative=True, objectSpace=True)
+        cmds.scale(
+            scale[0],
+            scale[1],
+            scale[2],
+            curve.getCvs(shape),
+            relative=True,
+            objectSpace=True,
+        )
 
 
 def setLineWidth(controls, lineWidth=1):
@@ -681,9 +882,19 @@ def setLineWidth(controls, lineWidth=1):
 
 
 # pylint:disable=too-many-arguments
-def createGuide(name, side=None, shape="loc", type=None, parent=None, joint=False,
-                position=None, rotation=None, size=1,
-                hideAttrs=None, color='turquoise'):
+def createGuide(
+    name,
+    side=None,
+    shape="loc",
+    type=None,
+    parent=None,
+    joint=False,
+    position=None,
+    rotation=None,
+    size=1,
+    hideAttrs=None,
+    color="turquoise",
+):
     """
     Create a guide controler
     :param name: Name of the guide
@@ -707,14 +918,14 @@ def createGuide(name, side=None, shape="loc", type=None, parent=None, joint=Fals
     if rotation is None:
         rotation = [0, 0, 0]
     if hideAttrs is None:
-        hideAttrs = ['sx', 'sy', 'sz', 'v']
+        hideAttrs = ["sx", "sy", "sz", "v"]
 
-    name = rigamajig2.maya.naming.getUniqueName(name, side=side)
-    guide = cmds.createNode('joint', name=name + "_guide")
+    name = naming.getUniqueName(name, side=side)
+    guide = cmds.createNode("joint", name=name + "_guide")
 
     # set the control shape
     if shape == "loc":
-        loc = cmds.createNode('locator', p=guide, n="{}Shape".format(name))
+        loc = cmds.createNode("locator", p=guide, n="{}Shape".format(name))
         cmds.setAttr("{}.localScale".format(loc), size, size, size, type="double3")
     elif shape != "joint":
         setControlShape(guide, shape)
@@ -722,13 +933,13 @@ def createGuide(name, side=None, shape="loc", type=None, parent=None, joint=Fals
 
     if not joint:
         cmds.setAttr("{}.drawStyle".format(guide), 2)
-        hideAttrs.append('radius')
+        hideAttrs.append("radius")
     else:
-        rigamajig2.maya.joint.addJointOrientToChannelBox(guide)
+        joint.addJointOrientToChannelBox(guide)
 
-    for attr in hideAttrs:
-        if cmds.objExists("{}.{}".format(guide, attr)):
-            rigamajig2.maya.attr.lockAndHide(guide, attr)
+    for hideAttr in hideAttrs:
+        if cmds.objExists("{}.{}".format(guide, hideAttr)):
+            attr.lockAndHide(guide, hideAttr)
 
     if parent:
         cmds.parent(guide, parent)
@@ -737,8 +948,8 @@ def createGuide(name, side=None, shape="loc", type=None, parent=None, joint=Fals
     if rotation:
         cmds.xform(guide, ws=True, rotation=rotation)
     if color:
-        rigamajig2.maya.color.setOverrideColor(guide, color)
+        setOverrideColor(guide, color)
 
-    meta.tag(guide, 'guide', type=type)
+    meta.tag(guide, "guide", type=type)
 
     return guide

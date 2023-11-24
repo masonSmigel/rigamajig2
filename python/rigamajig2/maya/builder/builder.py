@@ -21,7 +21,7 @@ import rigamajig2.maya.file as file
 import rigamajig2.maya.meta as meta
 import rigamajig2.shared.common as common
 import rigamajig2.shared.path as path
-from rigamajig2.maya.builder import (componentManager, scriptManager)
+from rigamajig2.maya.builder import componentManager, scriptManager
 from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import core
 from rigamajig2.maya.builder import dataIO
@@ -551,7 +551,9 @@ class Builder(object):
             logger.info(f"{niceScriptStepName}: local scripts -- complete")
 
         # next get scripts to inherit
-        scriptDict = scriptManager.GetCompleteScriptList.getScriptList(self.rigFile, scriptStep)
+        scriptDict = scriptManager.GetCompleteScriptList.getScriptList(
+            self.rigFile, scriptStep
+        )
 
         inheritedScripts = {
             recursion: scripts
@@ -760,7 +762,9 @@ class Builder(object):
 
         # Iterate over all files in the directory
         for filename in os.listdir(versionsDirectory):
-            if filename.startswith(self.rigName) and filename.lower().endswith((".ma", ".mb")):
+            if filename.startswith(self.rigName) and filename.lower().endswith(
+                (".ma", ".mb")
+            ):
                 existingVersionFiles.append(filename)
 
         existingVersionFiles.sort(reverse=True)

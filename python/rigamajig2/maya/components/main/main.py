@@ -36,24 +36,48 @@ class Main(base.BaseComponent):
         :param input: inputs to the component. This is ignored in the component but is required for base component.
         :param rigParent:
         """
-        super(Main, self).__init__(name=name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(Main, self).__init__(
+            name=name,
+            input=input,
+            size=size,
+            rigParent=rigParent,
+            componentTag=componentTag,
+        )
 
     def _initialHierarchy(self):
         """Build the initial hirarchy"""
         self.rootHierarchy = cmds.createNode("transform", name=self.name)
-        self.rigHierarchy = cmds.createNode("transform", name=RIG_HRC_NAME, parent=self.rootHierarchy)
-        self.bindHierarchy = cmds.createNode("transform", name=BIND_HRC_NAME, parent=self.rootHierarchy)
-        self.modelHierarchy = cmds.createNode("transform", name=MOD_HRC_NAME, parent=self.rootHierarchy)
+        self.rigHierarchy = cmds.createNode(
+            "transform", name=RIG_HRC_NAME, parent=self.rootHierarchy
+        )
+        self.bindHierarchy = cmds.createNode(
+            "transform", name=BIND_HRC_NAME, parent=self.rootHierarchy
+        )
+        self.modelHierarchy = cmds.createNode(
+            "transform", name=MOD_HRC_NAME, parent=self.rootHierarchy
+        )
 
         # Build our controls
         self.trsGlobal = control.create(
-            "trs_global", orig=False, size=self.size * 1.2, color="yellow", parent=self.rootHierarchy
+            "trs_global",
+            orig=False,
+            size=self.size * 1.2,
+            color="yellow",
+            parent=self.rootHierarchy,
         )
         self.trsShot = control.create(
-            "trs_shot", orig=False, size=self.size * 1.1, color="lightgreenyellow", parent=self.trsGlobal.name
+            "trs_shot",
+            orig=False,
+            size=self.size * 1.1,
+            color="lightgreenyellow",
+            parent=self.trsGlobal.name,
         )
         self.trsMotion = control.create(
-            "trs_motion", orig=False, size=self.size, color="yellowgreen", parent=self.trsShot.name
+            "trs_motion",
+            orig=False,
+            size=self.size,
+            color="yellowgreen",
+            parent=self.trsShot.name,
         )
         # add the trs to the top of our outliner
         cmds.reorder(self.trsGlobal.name, front=True)
@@ -62,11 +86,15 @@ class Main(base.BaseComponent):
         """Add the self.rig setup"""
         # Setup the main scaling
         node.multMatrix(
-            [self.trsMotion.name + ".matrix", self.trsShot.name + ".matrix", self.trsGlobal.name + ".matrix"],
+            [
+                self.trsMotion.name + ".matrix",
+                self.trsShot.name + ".matrix",
+                self.trsGlobal.name + ".matrix",
+            ],
             outputs=[self.rigHierarchy, self.bindHierarchy],
-            t=True,
-            r=True,
-            s=True,
+            translate=True,
+            rotate=True,
+            scale=True,
             name="main",
         )
 
@@ -84,19 +112,36 @@ class Main(base.BaseComponent):
         )
 
         cmds.setAttr(self.modelHierarchy + ".overrideEnabled", 1)
-        cmds.connectAttr(overrideModelAttr, self.modelHierarchy + ".overrideDisplayType")
+        cmds.connectAttr(
+            overrideModelAttr, self.modelHierarchy + ".overrideDisplayType"
+        )
 
         # create some attributes for the geo and rig visablity
         modVisAttr = attr.createAttr(
-            self.rootHierarchy, longName="model", attributeType="bool", value=True, keyable=True, channelBox=True
+            self.rootHierarchy,
+            longName="model",
+            attributeType="bool",
+            value=True,
+            keyable=True,
+            channelBox=True,
         )
 
         rigVisAttr = attr.createAttr(
-            self.rootHierarchy, longName="rig", attributeType="bool", value=True, keyable=True, channelBox=True
+            self.rootHierarchy,
+            longName="rig",
+            attributeType="bool",
+            value=True,
+            keyable=True,
+            channelBox=True,
         )
 
         bindVisAttr = attr.createAttr(
-            self.rootHierarchy, longName="bind", attributeType="bool", value=True, keyable=True, channelBox=True
+            self.rootHierarchy,
+            longName="bind",
+            attributeType="bool",
+            value=True,
+            keyable=True,
+            channelBox=True,
         )
 
         cmds.connectAttr(modVisAttr, "{}.v".format(self.modelHierarchy))
@@ -111,7 +156,8 @@ class Main(base.BaseComponent):
 
         self.addMetadataToMain()
 
-    def __deleteSetup(self):
+    def deleteSetup(self):
+        """Delete the component setup"""
         if cmds.objExists(BIND_HRC_NAME):
             skeletonChildren = cmds.listRelatives(BIND_HRC_NAME, children=True)
             if skeletonChildren:
@@ -127,7 +173,7 @@ class Main(base.BaseComponent):
             if modelChildred:
                 cmds.parent(modelChildred, world=True)
 
-        super(Main, self).__deleteSetup()
+        super(Main, self).deleteSetup()
 
     def addMetadataToMain(self):
         """
@@ -143,10 +189,20 @@ class Main(base.BaseComponent):
         meta.tag(self.rootHierarchy, "__rig_root__")
 
         attr.createAttr(
-            self.rootHierarchy, "__rigamajigVersion__", "string", value=rigamajig2.version, keyable=False, locked=True
+            self.rootHierarchy,
+            "__rigamajigVersion__",
+            "string",
+            value=rigamajig2.version,
+            keyable=False,
+            locked=True,
         )
         attr.createAttr(
-            self.rootHierarchy, "__creationUser__", "string", value=getpass.getuser(), keyable=False, locked=True
+            self.rootHierarchy,
+            "__creationUser__",
+            "string",
+            value=getpass.getuser(),
+            keyable=False,
+            locked=True,
         )
         attr.createAttr(
             self.rootHierarchy,

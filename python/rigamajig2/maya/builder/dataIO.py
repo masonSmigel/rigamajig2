@@ -19,15 +19,16 @@ from rigamajig2.maya import meta
 from rigamajig2.maya import skinCluster
 from rigamajig2.maya.builder import dataManager
 from rigamajig2.maya.builder.constants import DEFORMER_DATA_TYPES
-from rigamajig2.maya.data import (psdData,
-                                  skinData,
-                                  deformLayerData,
-                                  jointData,
-                                  curveData,
-                                  guideData,
-                                  abstractData,
-                                  componentData
-                                  )
+from rigamajig2.maya.data import (
+    psdData,
+    skinData,
+    deformLayerData,
+    jointData,
+    curveData,
+    guideData,
+    abstractData,
+    componentData,
+)
 from rigamajig2.maya.rig import psd
 from rigamajig2.shared import common
 from rigamajig2.shared import path
@@ -39,7 +40,7 @@ CHANGED = "changed"
 ADDED = "added"
 REMOVED = "removed"
 
-DATA_MERGE_METHODS = ['new', 'merge', 'overwrite']
+DATA_MERGE_METHODS = ["new", "merge", "overwrite"]
 
 LayeredDataInfoDict = typing.Dict[str, typing.Dict[str, typing.List]]
 
@@ -47,7 +48,9 @@ _StringList = typing.List[str]
 _Builder = typing.Type["Builder"]
 
 
-def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileName=None) -> LayeredDataInfoDict:
+def gatherLayeredSaveData(
+    dataToSave, fileStack, dataType, method="merge", fileName=None
+) -> LayeredDataInfoDict:
     """
     gather data for a layered data save. This can be used on nearly any node data class to save a list of data into the
     source files where they originally came from. If the node data appears in multiple files it will be saved in the
@@ -69,10 +72,14 @@ def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileN
 
     dataModules = list(dataManager.getDataModules(dataManager.DATA_PATH).keys())
     if dataType not in dataModules:
-        raise ValueError(f"Data type {dataType} is not valid. Valid Types are {dataModules}")
+        raise ValueError(
+            f"Data type {dataType} is not valid. Valid Types are {dataModules}"
+        )
 
-    if method not in ['new', 'merge', 'overwrite']:
-        raise ValueError(f"Merge method '{method}' is not valid. Use {DATA_MERGE_METHODS}")
+    if method not in ["new", "merge", "overwrite"]:
+        raise ValueError(
+            f"Merge method '{method}' is not valid. Use {DATA_MERGE_METHODS}"
+        )
 
     fileStack = common.toList(fileStack)
 
@@ -125,16 +132,16 @@ def gatherLayeredSaveData(dataToSave, fileStack, dataType, method="merge", fileN
     unsavedNodes = set(dataToSave) - set(previouslySavedNodes)
 
     # now we need to do something with the new nodes!
-    if method == 'merge':
+    if method == "merge":
         layeredDataInfo[searchFileStack[0]][ADDED] += unsavedNodes
 
-    if method == 'new':
+    if method == "new":
         if not fileName:
             raise Exception("Please provide a file path to save data to a new file")
 
         layeredDataInfo[fileName][ADDED] += unsavedNodes
 
-    if method == 'overwrite':
+    if method == "overwrite":
         # save the data to the new filename
         if not fileName:
             raise UserWarning("Must specify an override file if one is not proved.")
@@ -162,7 +169,9 @@ def validateLayeredSaveData(layeredDataInfo: LayeredDataInfoDict) -> bool:
 
     resultsList = list()
     for file in layeredDataInfo:
-        resultsList.append(all(key in layeredDataInfo[file] for key in [CHANGED, ADDED, REMOVED]))
+        resultsList.append(
+            all(key in layeredDataInfo[file] for key in [CHANGED, ADDED, REMOVED])
+        )
 
     return all(resultsList)
 
@@ -198,14 +207,21 @@ def layeredSavePrompt(layeredDataInfo: LayeredDataInfoDict, dataType: str) -> bo
         totalNodesToSave += numberChangedNodes
         totalNodesToSave += numberAddedNodes
 
-    mainMessage = f"Save {totalNodesToSave} nodes to {len(layeredDataInfo.keys())} files\n" + message
-    popupConfirm = mayaMessageBox.MayaMessageBox(title=f"Save {dataType}", message=mainMessage, icon="info")
+    mainMessage = (
+        f"Save {totalNodesToSave} nodes to {len(layeredDataInfo.keys())} files\n"
+        + message
+    )
+    popupConfirm = mayaMessageBox.MayaMessageBox(
+        title=f"Save {dataType}", message=mainMessage, icon="info"
+    )
     popupConfirm.setButtonsSaveDiscardCancel()
 
     return popupConfirm.getResult()
 
 
-def performLayeredSave(saveDataDict, dataType="AbstractData", prompt=True) -> typing.List[str] or None:
+def performLayeredSave(
+    saveDataDict, dataType="AbstractData", prompt=True
+) -> typing.List[str] or None:
     """
     Perform a layered data save.
     Takes a dictonary of filepaths that contain a dictonary of nodes added, changed and removed.
@@ -224,7 +240,6 @@ def performLayeredSave(saveDataDict, dataType="AbstractData", prompt=True) -> ty
             return None
 
     for dataFile in saveDataDict:
-
         # read all the old data. Anything that is NOT updated it will stay the same as the previous file.
         oldDataObj = dataManager.createDataClassInstance(dataType=dataType)
         if os.path.exists(dataFile):
@@ -276,7 +291,7 @@ def loadJointData(filepath: str = None) -> bool:
     dataObj.applyAllData()
 
     # tag all bind joints
-    for jnt in cmds.ls(f"*_{common.BINDTAG}", type='joint'):
+    for jnt in cmds.ls(f"*_{common.BINDTAG}", type="joint"):
         meta.tag(jnt, common.BINDTAG)
 
     dataObj.getData().keys()
@@ -285,12 +300,14 @@ def loadJointData(filepath: str = None) -> bool:
         joint.addJointOrientToChannelBox(node)
 
         # find joints without a parent and make them a root
-        if not len(node.split('|')) > 2:
-            meta.tag(node, 'skeleton_root')
+        if not len(node.split("|")) > 2:
+            meta.tag(node, "skeleton_root")
     return True
 
 
-def saveJoints(fileStack: _StringList = None, method="merge", fileName=None) -> _StringList:
+def saveJoints(
+    fileStack: _StringList = None, method="merge", fileName=None
+) -> _StringList:
     """
     Save the joint Data to a json file
 
@@ -308,7 +325,8 @@ def saveJoints(fileStack: _StringList = None, method="merge", fileName=None) -> 
         fileStack=fileStack,
         dataType="JointData",
         method=method,
-        fileName=fileName)
+        fileName=fileName,
+    )
 
     savedFiles = performLayeredSave(layeredSaveInfo, dataType="JointData", prompt=True)
 
@@ -322,7 +340,7 @@ def gatherJoints() -> _StringList:
     """
 
     # find all skeleton roots and get the positions of their children
-    skeletonRoots = common.toList(meta.getTagged('skeleton_root'))
+    skeletonRoots = common.toList(meta.getTagged("skeleton_root"))
 
     if not skeletonRoots:
         skeletonRoots = cmds.ls(sl=True)
@@ -330,19 +348,26 @@ def gatherJoints() -> _StringList:
     allJoints = list()
     if skeletonRoots:
         for root in skeletonRoots:
-            childJoints = cmds.listRelatives(root, allDescendents=True, type='joint') or list()
+            childJoints = (
+                cmds.listRelatives(root, allDescendents=True, type="joint") or list()
+            )
             allJoints.append(root)
             for eachJoint in childJoints:
                 allJoints.append(eachJoint)
     else:
         raise RuntimeError(
-            "the rootHierarchy joint {} does not exists. Please select some joints.".format(skeletonRoots))
+            "the rootHierarchy joint {} does not exists. Please select some joints.".format(
+                skeletonRoots
+            )
+        )
 
     return allJoints
 
 
 # Components
-def saveComponents(builder: _Builder, fileStack: _StringList = None, method: str = "merge") -> _StringList or None:
+def saveComponents(
+    builder: _Builder, fileStack: _StringList = None, method: str = "merge"
+) -> _StringList or None:
     """
     Save out components to a file.
     This only saves component settings such as name, inputs, spaces and names.
@@ -358,7 +383,8 @@ def saveComponents(builder: _Builder, fileStack: _StringList = None, method: str
         dataToSave=componentNameList,
         fileStack=fileStack,
         dataType="ComponentData",
-        method=method)
+        method=method,
+    )
 
     # if we escape from the save then we can return
     if not layeredSavePrompt(layeredDataInfo=saveDict, dataType="ComponentData"):
@@ -406,7 +432,7 @@ def loadComponentData(builder: _Builder, filepath: str = None) -> None:
 def loadGuideData(filepath=None) -> bool:
     """
     Load guide data
-    
+
     :param filepath: path to guide data to save
     :return: True if the data was loaded. False if no data was loaded
     """
@@ -422,7 +448,9 @@ def loadGuideData(filepath=None) -> bool:
     return True
 
 
-def saveGuides(fileStack: _StringList = None, method: str = "merge", fileName: str = None) -> _StringList:
+def saveGuides(
+    fileStack: _StringList = None, method: str = "merge", fileName: str = None
+) -> _StringList:
     """
     Save guides data
 
@@ -437,9 +465,11 @@ def saveGuides(fileStack: _StringList = None, method: str = "merge", fileName: s
         fileStack=fileStack,
         dataType="GuideData",
         method=method,
-        fileName=fileName
+        fileName=fileName,
     )
-    savedFiles = performLayeredSave(saveDataDict=layeredSaveInfo, dataType="GuideData", prompt=True)
+    savedFiles = performLayeredSave(
+        saveDataDict=layeredSaveInfo, dataType="GuideData", prompt=True
+    )
 
     return savedFiles
 
@@ -474,7 +504,9 @@ def loadControlShapeData(filepath: str = None, applyColor: bool = True) -> bool:
     return True
 
 
-def saveControlShapes(fileStack: _StringList = None, method: str = 'merge', fileName: str = None) -> _StringList:
+def saveControlShapes(
+    fileStack: _StringList = None, method: str = "merge", fileName: str = None
+) -> _StringList:
     """
     Save the control shapes
 
@@ -489,7 +521,7 @@ def saveControlShapes(fileStack: _StringList = None, method: str = 'merge', file
         fileStack=fileStack,
         dataType="CurveData",
         method=method,
-        fileName=fileName
+        fileName=fileName,
     )
 
     savedFiles = performLayeredSave(layeredSaveInfo, dataType="CurveData", prompt=True)
@@ -519,7 +551,8 @@ def savePoseReaders(fileStack: _StringList = None) -> _StringList:
         dataToSave=allPoseReaders,
         fileStack=fileStack,
         dataType="PSDData",
-        method="merge")
+        method="merge",
+    )
 
     savedFiles = performLayeredSave(layeredSaveInfo, dataType="PSDData", prompt=True)
 
@@ -575,7 +608,7 @@ def loadSkinWeightData(filepath=None) -> bool:
         for f in files:
             eachFile = os.path.join(filepath, f)
             _, fileExtension = os.path.splitext(eachFile)
-            if fileExtension == '.json':
+            if fileExtension == ".json":
                 loadSingleSkin(eachFile)
     return True
 

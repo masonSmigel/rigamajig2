@@ -67,9 +67,15 @@ def noFlipOrient(driver1, driver2, target, blend=0.5):
     parent = cmds.listRelatives(target, parent=True)
 
     # a simple hierarchy for the rotations. we will create two joints each constrained to a different control then use a pair blend to rotate them!
-    offset = cmds.createNode("transform", name="{}_offset".format(target), parent=parent[0])
-    driver1Jnt = cmds.createNode("transform", name="{}_{}_ort".format(target, driver1), parent=offset)
-    driver2Jnt = cmds.createNode("transform", name="{}_{}_ort".format(target, driver2), parent=offset)
+    offset = cmds.createNode(
+        "transform", name="{}_offset".format(target), parent=parent[0]
+    )
+    driver1Jnt = cmds.createNode(
+        "transform", name="{}_{}_ort".format(target, driver1), parent=offset
+    )
+    driver2Jnt = cmds.createNode(
+        "transform", name="{}_{}_ort".format(target, driver2), parent=offset
+    )
 
     transform.matchTransform(target, offset)
 
@@ -162,11 +168,19 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
 
             # Finally we can build a simple hierarchy for the rotations. we will create two joints each constrained
             # to a different control then use a pair blend to rotate them!
-            offset = cmds.createNode("transform", name="{}_offset".format(jnt), parent=parent)
-            closestJoint = cmds.createNode(
-                "transform", name="{}_{}_ort".format(jnt, closestControl.name), parent=offset
+            offset = cmds.createNode(
+                "transform", name="{}_offset".format(jnt), parent=parent
             )
-            nextJoint = cmds.createNode("transform", name="{}_{}_ort".format(jnt, nextControl.name), parent=offset)
+            closestJoint = cmds.createNode(
+                "transform",
+                name="{}_{}_ort".format(jnt, closestControl.name),
+                parent=offset,
+            )
+            nextJoint = cmds.createNode(
+                "transform",
+                name="{}_{}_ort".format(jnt, nextControl.name),
+                parent=offset,
+            )
 
             # match the orientation of the new joint before we adjust them
             for newJoint in [closestJoint, nextJoint]:
@@ -176,7 +190,9 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
             # lets grab the pointOnCurveInfo node to drive our offset
             transform.matchTransform(jnt, offset)
             jntPci = cmds.listConnections("{}.t".format(jnt), type="pointOnCurveInfo")
-            cmds.connectAttr("{}.result.position".format(jntPci[0]), "{}.t".format(offset))
+            cmds.connectAttr(
+                "{}.result.position".format(jntPci[0]), "{}.t".format(offset)
+            )
 
             cmds.orientConstraint(closestControl.name, closestJoint, mo=True, w=1)
             cmds.orientConstraint(nextControl.name, nextJoint, mo=True, w=1)
@@ -184,7 +200,9 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
             pairBlend = cmds.createNode("pairBlend", n="{}_ort_pairBlend".format(jnt))
 
             # connect our two driver joints
-            cmds.connectAttr("{}.r".format(closestJoint), "{}.inRotate1".format(pairBlend))
+            cmds.connectAttr(
+                "{}.r".format(closestJoint), "{}.inRotate1".format(pairBlend)
+            )
             cmds.connectAttr("{}.r".format(nextJoint), "{}.inRotate2".format(pairBlend))
 
             # set the rotation interpolation to quaternions and connect the weight
@@ -192,7 +210,9 @@ def autoWeightOrientation(sampleCurve, controlsList, jointsList, parent):
             cmds.setAttr("{}.weight".format(pairBlend), closeWeight)
 
             # finally connect the output to the joint
-            cmds.connectAttr("{}.outRotate".format(pairBlend), "{}.r".format(jnt), f=True)
+            cmds.connectAttr(
+                "{}.outRotate".format(pairBlend), "{}.r".format(jnt), f=True
+            )
 
         else:
             cmds.orientConstraint(closestControl.name, jnt, mo=False, w=1)
@@ -207,17 +227,32 @@ def setupZipperBlending(joints, zipperTargets):
     :return:
     """
     for i, jnt in enumerate(joints):
-        mm = cmds.listConnections("{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False)[0]
-        zipperMM, dcmp = transform.connectOffsetParentMatrix(zipperTargets[i], jnt, mo=True)
+        multMatrix = cmds.listConnections(
+            "{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False
+        )[0]
+        zipperMultMatrix, _ = transform.connectOffsetParentMatrix(
+            zipperTargets[i], jnt, mo=True
+        )
 
-        blendMatrix = cmds.createNode("blendMatrix", n="{}_zipper_blendMatrix".format(jnt))
+        blendMatrix = cmds.createNode(
+            "blendMatrix", n="{}_zipper_blendMatrix".format(jnt)
+        )
 
         # connect the other two matricies into the blendMatrix
-        cmds.connectAttr("{}.matrixSum".format(mm), "{}.inputMatrix".format(blendMatrix))
-        cmds.connectAttr("{}.matrixSum".format(zipperMM), "{}.target[0].targetMatrix".format(blendMatrix))
+        cmds.connectAttr(
+            "{}.matrixSum".format(multMatrix), "{}.inputMatrix".format(blendMatrix)
+        )
+        cmds.connectAttr(
+            "{}.matrixSum".format(zipperMultMatrix),
+            "{}.target[0].targetMatrix".format(blendMatrix),
+        )
 
         # connect the blend matrix back to the joint
-        cmds.connectAttr("{}.outputMatrix".format(blendMatrix), "{}.offsetParentMatrix".format(jnt), f=True)
+        cmds.connectAttr(
+            "{}.outputMatrix".format(blendMatrix),
+            "{}.offsetParentMatrix".format(jnt),
+            f=True,
+        )
 
 
 ZIPPER_ATTR = "Zipper"
@@ -262,12 +297,17 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
             indexName = "{}_{:02d}".format(name, index)
 
             delayMultName = "{}_zipper_{}".format(indexName, side)
-            delayMult = node.multDoubleLinear(index, "{}.{}".format(delayDivide, "output"), name=delayMultName)
+            delayMult = node.multDoubleLinear(
+                index, "{}.{}".format(delayDivide, "output"), name=delayMultName
+            )
             multTriggers.append(delayMult)
 
             subDelayName = "{}_zipper_{}".format(indexName, side)
             subDelay = node.plusMinusAverage1D(
-                inputs=["{}.{}".format(delayMult, "output"), "{}.{}{}".format(paramsHolder, side, ZIPPER_FALLOFF_ATTR)],
+                inputs=[
+                    "{}.{}".format(delayMult, "output"),
+                    "{}.{}{}".format(paramsHolder, side, ZIPPER_FALLOFF_ATTR),
+                ],
                 operation="sum",
                 name=subDelayName,
             )
@@ -293,7 +333,9 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
 
         # setup the nextwork for the right side
         rSub = node.plusMinusAverage1D(
-            [1, "{}.{}".format(lRemap, "outValue")], operation="sub", name="{}_offset_zipper_r_sub".format(indexName)
+            [1, "{}.{}".format(lRemap, "outValue")],
+            operation="sub",
+            name="{}_offset_zipper_r_sub".format(indexName),
         )
 
         rRemap = node.remapValue(
@@ -307,14 +349,23 @@ def setupZipper(name, uppJoints, lowJoints, paramsHolder):
 
         # Add the outputs of both the left and right network together so we can zip from either side
         total = node.plusMinusAverage1D(
-            ["{}.{}".format(rRemap, "outValue"), "{}.{}".format(lRemap, "outValue")], name="{}_sum".format(indexName)
+            ["{}.{}".format(rRemap, "outValue"), "{}.{}".format(lRemap, "outValue")],
+            name="{}_sum".format(indexName),
         )
 
         # clamp the value to one so we cant overdrive the zip
-        clamp = node.remapValue("{}.output1D".format(total), name="{}_clamp".format(indexName))
+        clamp = node.remapValue(
+            "{}.output1D".format(total), name="{}_clamp".format(indexName)
+        )
 
         # Connect the clamp node to our blendMatrix node
         for jointList in [uppJoints, lowJoints]:
             jnt = jointList[i]
-            blendMatrix = cmds.listConnections("{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False)[0]
-            cmds.connectAttr("{}.{}".format(clamp, "outValue"), "{}.{}".format(blendMatrix, "envelope"), f=True)
+            blendMatrix = cmds.listConnections(
+                "{}.offsetParentMatrix".format(jnt), s=True, d=False, plugs=False
+            )[0]
+            cmds.connectAttr(
+                "{}.{}".format(clamp, "outValue"),
+                "{}.{}".format(blendMatrix, "envelope"),
+                f=True,
+            )

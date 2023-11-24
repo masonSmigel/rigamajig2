@@ -27,7 +27,7 @@ SUBFOLDER_PATH = "SHAPES"
 
 
 class SHAPESData(maya_data.MayaData):
-    """ Class to store maya data"""
+    """Class to store maya data"""
 
     def __init__(self):
         super(SHAPESData, self).__init__()
@@ -35,9 +35,7 @@ class SHAPESData(maya_data.MayaData):
         # if we could loaded SHAPES then source the required mel scripts.
         # SHAPES has a built in proc to do this so we can just source the main file and call those procs.
         if self.__validateSHAPES():
-            mel.eval("source SHAPES;"
-                     "shapesSourceScripts;"
-                     "shapesLoadScripts;")
+            mel.eval("source SHAPES;" "shapesSourceScripts;" "shapesLoadScripts;")
 
         self.filepath = None
 
@@ -70,10 +68,11 @@ class SHAPESData(maya_data.MayaData):
 
         if not self.__validateSHAPES():
             logger.warning(
-                "SHAPES plugin is not available. SHAPES data can still be loaded, but you cannot save new data")
+                "SHAPES plugin is not available. SHAPES data can still be loaded, but you cannot save new data"
+            )
             return
 
-        if cmds.nodeType(node) == 'transform':
+        if cmds.nodeType(node) == "transform":
             blendshapeNodes = blendshape.getBlendshapeNodes(node)
         else:
             blendshapeNodes = [node]
@@ -83,13 +82,13 @@ class SHAPESData(maya_data.MayaData):
 
             # TODO: add a warning about blendshapes connected to nurbs or other geometry types than mesh.
             shape = blendshape.getBaseGeometry(blendshapeNode)
-            mesh = common.getFirst(cmds.listRelatives(shape, type='transform', p=True))
+            mesh = common.getFirst(cmds.listRelatives(shape, type="transform", p=True))
 
             # now we need to save the data we need.
-            self._data[blendshapeNode]['mesh'] = mesh
-            self._data[blendshapeNode]['setupFile'] = None
-            self._data[blendshapeNode]['useDeltas'] = useDeltas
-            self._data[blendshapeNode]['deltasFile'] = None
+            self._data[blendshapeNode]["mesh"] = mesh
+            self._data[blendshapeNode]["setupFile"] = None
+            self._data[blendshapeNode]["useDeltas"] = useDeltas
+            self._data[blendshapeNode]["deltasFile"] = None
 
             self.gatheredItems.append(blendshapeNode)
 
@@ -107,17 +106,19 @@ class SHAPESData(maya_data.MayaData):
 
         if not self.filepath:
             raise RuntimeError(
-                "SHAPES data needs to be written or read before you can load it. Please write or read a file")
+                "SHAPES data needs to be written or read before you can load it. Please write or read a file"
+            )
 
         baseFolder = os.path.dirname(self.filepath)
         for blendshapeNode in nodes:
-
             # check if the blendshape node exists and delete it if we want to rebuild
             if cmds.objExists(blendshapeNode) and rebuild:
                 cmds.delete(blendshapeNode)
 
             # get the setup path from the shapes file
-            setupPath = os.sep.join([baseFolder, self._data[blendshapeNode]['setupFile']])
+            setupPath = os.sep.join(
+                [baseFolder, self._data[blendshapeNode]["setupFile"]]
+            )
 
             if autoLocalize:
                 # create a duplicate with localized paths then rebuild from that file
@@ -131,8 +132,10 @@ class SHAPESData(maya_data.MayaData):
             else:
                 rebuildSetup(setupPath)
 
-            if self._data[blendshapeNode]['useDeltas']:
-                deltasPath = os.sep.join([baseFolder, self._data[blendshapeNode]['deltasFile']])
+            if self._data[blendshapeNode]["useDeltas"]:
+                deltasPath = os.sep.join(
+                    [baseFolder, self._data[blendshapeNode]["deltasFile"]]
+                )
                 importBlendshapeDeltas(blendshapeNode, deltasPath)
 
     def write(self, filepath, createDirectory=True):
@@ -154,21 +157,29 @@ class SHAPESData(maya_data.MayaData):
         for blendshapeNode in self.gatheredItems:
             # for each blendshape export its setup and a optionally a delta's file
             setupPath = os.sep.join([baseFolder, SUBFOLDER_PATH])
-            exportCompleteSetup(mesh=self._data[blendshapeNode]['mesh'], filePath=setupPath, specifyBlendshape=blendshapeNode)
+            exportCompleteSetup(
+                mesh=self._data[blendshapeNode]["mesh"],
+                filePath=setupPath,
+                specifyBlendshape=blendshapeNode,
+            )
 
             # set the setup file data to be the path to the mel file for the blendshape!
             filename = "{}.mel".format(blendshapeNode)
-            setupRelativePath = os.path.relpath(os.path.join(setupPath, filename), baseFolder)
+            setupRelativePath = os.path.relpath(
+                os.path.join(setupPath, filename), baseFolder
+            )
 
-            self._data[blendshapeNode]['setupFile'] = setupRelativePath
+            self._data[blendshapeNode]["setupFile"] = setupRelativePath
 
             # export the deltas too
-            deltasPath = os.sep.join([baseFolder, SUBFOLDER_PATH, "{}_deltas.json".format(blendshapeNode)])
+            deltasPath = os.sep.join(
+                [baseFolder, SUBFOLDER_PATH, "{}_deltas.json".format(blendshapeNode)]
+            )
             exportBlendShapeDeltas(blendshapeNode, deltasPath)
 
             # set the file path in the json file
             relativeDeltasPath = os.path.relpath(deltasPath, baseFolder)
-            self._data[blendshapeNode]['deltasFile'] = relativeDeltasPath
+            self._data[blendshapeNode]["deltasFile"] = relativeDeltasPath
 
         super(SHAPESData, self).write(filepath=filepath)
         self.filepath = filepath
@@ -190,7 +201,10 @@ class SHAPESData(maya_data.MayaData):
 # Blend shape setup export and import.
 # ----------------------------------------------------------------------
 
-def exportCompleteSetup(mesh, filePath, specifyBlendshape=None, rebuild=False, forceFileType="mayaAscii"):
+
+def exportCompleteSetup(
+    mesh, filePath, specifyBlendshape=None, rebuild=False, forceFileType="mayaAscii"
+):
     """Exports all blend shape nodes from the given mesh with their
     respective setup.
     The rebuild of the setup is optional.
@@ -213,8 +227,12 @@ def exportCompleteSetup(mesh, filePath, specifyBlendshape=None, rebuild=False, f
     options["SHAPESFileType"] = cmds.optionVar(query="SHAPESFileType")
     options["SHAPESUseCustomDataPath"] = cmds.optionVar(query="SHAPESUseCustomDataPath")
     options["SHAPESCustomDataPath"] = cmds.optionVar(query="SHAPESCustomDataPath")
-    options["SHAPESUseCustomNodeDataExportPath"] = cmds.optionVar(query="SHAPESUseCustomNodeDataExportPath")
-    options["SHAPESCustomNodeDataExportPath"] = cmds.optionVar(query="SHAPESCustomNodeDataExportPath")
+    options["SHAPESUseCustomNodeDataExportPath"] = cmds.optionVar(
+        query="SHAPESUseCustomNodeDataExportPath"
+    )
+    options["SHAPESCustomNodeDataExportPath"] = cmds.optionVar(
+        query="SHAPESCustomNodeDataExportPath"
+    )
     options["SHAPESExportOptions"] = cmds.optionVar(query="SHAPESExportOptions")
 
     # Shapes will also check for the current maya file type. To force this we can set the filetype of the unsaved file
@@ -231,7 +249,7 @@ def exportCompleteSetup(mesh, filePath, specifyBlendshape=None, rebuild=False, f
     cmds.optionVar(stringValue=("SHAPESExportOptions", "1,1,1"))
 
     # Make sure that the export path is existing.
-    filePath = mel.eval("shapesUtil_getExportPath(\"\", 1)")
+    filePath = mel.eval('shapesUtil_getExportPath("", 1)')
 
     # Load the SHAPES UI.
     mel.eval("SHAPES")
@@ -254,16 +272,30 @@ def exportCompleteSetup(mesh, filePath, specifyBlendshape=None, rebuild=False, f
         cmds.optionMenu("shpUI_bsOption", edit=True, value=node)
         mel.eval("shapesMain_updateSelectedBsNode")
         mel.eval("shapesUI_buildExportUI 1")
-        mel.eval("shapesUtil_exportShapeSetup 1 \"{}\" \"\"".format(filePath))
+        mel.eval('shapesUtil_exportShapeSetup 1 "{}" ""'.format(filePath))
         if rebuild:
             mel.eval("shapesAction_deleteBlendShapeNode")
 
     # Set the preferences back.
     cmds.optionVar(intValue=("SHAPESFileType", options["SHAPESFileType"]))
-    cmds.optionVar(intValue=("SHAPESUseCustomDataPath", options["SHAPESUseCustomDataPath"]))
-    cmds.optionVar(stringValue=("SHAPESCustomDataPath", options["SHAPESCustomDataPath"]))
-    cmds.optionVar(intValue=("SHAPESUseCustomNodeDataExportPath", options["SHAPESUseCustomNodeDataExportPath"]))
-    cmds.optionVar(stringValue=("SHAPESCustomNodeDataExportPath", options["SHAPESCustomNodeDataExportPath"]))
+    cmds.optionVar(
+        intValue=("SHAPESUseCustomDataPath", options["SHAPESUseCustomDataPath"])
+    )
+    cmds.optionVar(
+        stringValue=("SHAPESCustomDataPath", options["SHAPESCustomDataPath"])
+    )
+    cmds.optionVar(
+        intValue=(
+            "SHAPESUseCustomNodeDataExportPath",
+            options["SHAPESUseCustomNodeDataExportPath"],
+        )
+    )
+    cmds.optionVar(
+        stringValue=(
+            "SHAPESCustomNodeDataExportPath",
+            options["SHAPESCustomNodeDataExportPath"],
+        )
+    )
     cmds.optionVar(stringValue=("SHAPESExportOptions", options["SHAPESExportOptions"]))
 
     # Rebuild the setup.
@@ -334,7 +366,7 @@ def exportBlendShapeDeltas(bsNode, filePath):
     # Restore the previous the blend shape node.
     mel.eval('$gShapes_bsNode = "{}"'.format(temp))
 
-    logger.info(f"SHAPES Data Exported Deltas for '{temp}\' to '{filePath}' ")
+    logger.info(f"SHAPES Data Exported Deltas for '{temp}' to '{filePath}' ")
     return bool(result)
 
 
@@ -344,8 +376,11 @@ def importBlendshapeDeltas(bsNode, filePath):
     """
     # once again mel can be silly so reformat the path to have properly facing slashes
     melPath = filePath.replace("\\", "/")
-    mel.eval('br_blendShapeImportData -delta -fileName "{filePath}" "{blendshape}";'.format(filePath=melPath,
-                                                                                            blendshape=bsNode))
+    mel.eval(
+        'br_blendShapeImportData -delta -fileName "{filePath}" "{blendshape}";'.format(
+            filePath=melPath, blendshape=bsNode
+        )
+    )
     filename = os.path.basename(melPath)
     logger.info(f"Imported Deltas to '{bsNode}' from '{filename}'")
 
@@ -385,7 +420,7 @@ def localizeSHAPESFile(melFile):
         sourceLines = f.readlines()
 
     for lookup in [lookup1, lookup2]:
-        f = open(melFile, 'r')
+        f = open(melFile, "r")
         line_num = 0
 
         # find the line above the line we want to replace.
@@ -404,8 +439,8 @@ def localizeSHAPESFile(melFile):
         fileName = os.path.basename(problemFilePath)
         newFilePath = os.path.join(baseDirectory, fileName)
 
-        ext = fileName.split('.')[-1]
-        mayaFileType = 'mayaBinary' if ext == "mb" else 'mayaAscii'
+        ext = fileName.split(".")[-1]
+        mayaFileType = "mayaBinary" if ext == "mb" else "mayaAscii"
 
         # fix the path because mel likes to mess up the paths
         melFormmatedPath = newFilePath.replace("\\", "//")

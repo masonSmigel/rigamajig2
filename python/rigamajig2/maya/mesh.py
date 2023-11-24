@@ -21,13 +21,18 @@ def isMesh(node):
     :return: If the provided node is a mesh
     :rtype: bool
     """
-    if not cmds.objExists(node): return False
+    if not cmds.objExists(node):
+        return False
 
-    if 'transform' in cmds.nodeType(node, i=True):
-        shape = cmds.ls(cmds.listRelatives(node, s=True, ni=True, pa=True) or [], type='mesh')
-        if not shape: return False
+    if "transform" in cmds.nodeType(node, i=True):
+        shape = cmds.ls(
+            cmds.listRelatives(node, s=True, ni=True, pa=True) or [], type="mesh"
+        )
+        if not shape:
+            return False
         node = shape[0]
-    if cmds.objExists(cmds.objExists(node) != 'mesh'): return False
+    if cmds.objExists(cmds.objExists(node) != "mesh"):
+        return False
 
     return True
 
@@ -60,8 +65,12 @@ def getVertPositions(mesh, world=True):
     if isinstance(mesh, (list, tuple)):
         mesh = mesh[0]
 
-    if shape.getType(mesh) != 'mesh':
-        logger.error("Node must be of type 'mesh'. {} is of type {}".format(mesh, shape.getType(mesh)))
+    if shape.getType(mesh) != "mesh":
+        logger.error(
+            "Node must be of type 'mesh'. {} is of type {}".format(
+                mesh, shape.getType(mesh)
+            )
+        )
 
     sel = om2.MGlobal.getSelectionListByName(mesh)
     dagPath = sel.getDagPath(0)
@@ -75,7 +84,9 @@ def getVertPositions(mesh, world=True):
 
     vertPos = list()
     for i in range((len(points))):
-        vertPos.append([round(points[i].x, 5), round(points[i].y, 5), round(points[i].z, 5)])
+        vertPos.append(
+            [round(points[i].x, 5), round(points[i].y, 5), round(points[i].z, 5)]
+        )
 
     return vertPos
 
@@ -125,8 +136,12 @@ def getVertexNormal(mesh, vertex, world=True):
     if isinstance(mesh, (list, tuple)):
         mesh = mesh[0]
 
-    if shape.getType(mesh) != 'mesh':
-        logger.error("Node must be of type 'mesh'. {} is of type {}".format(mesh, shape.getType(mesh)))
+    if shape.getType(mesh) != "mesh":
+        logger.error(
+            "Node must be of type 'mesh'. {} is of type {}".format(
+                mesh, shape.getType(mesh)
+            )
+        )
 
     mfnMesh = getMeshFn(mesh)
 

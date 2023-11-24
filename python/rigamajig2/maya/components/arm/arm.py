@@ -36,7 +36,9 @@ class Arm(limb.Limb):
         if len(input) != 4:
             raise RuntimeError("Input list must have a length of 4")
 
-        super(Arm, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(Arm, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
 
     def _initialHierarchy(self):
         """Build the initial hierarchy"""
@@ -59,12 +61,22 @@ class Arm(limb.Limb):
         """Add the rig setup"""
         super(Arm, self)._rigSetup()
 
-        cmds.delete(cmds.listRelatives(self.ikfk.getIkJointList()[-1], allParents=True, type="orientConstraint"))
-        cmds.orientConstraint(self.limbAutoAim.name, self.ikfk.getIkJointList()[-1], maintainOffset=True)
+        cmds.delete(
+            cmds.listRelatives(
+                self.ikfk.getIkJointList()[-1], allParents=True, type="orientConstraint"
+            )
+        )
+        cmds.orientConstraint(
+            self.limbAutoAim.name, self.ikfk.getIkJointList()[-1], maintainOffset=True
+        )
 
         # Setup the autoAim stuff. This is basically like the interpolation joint stuff.
-        attr.createAttr(self.paramsHierarchy, "autoWrist", "float", value=0, minValue=0, maxValue=1)
-        control.connectControlVisiblity(self.paramsHierarchy, "autoWrist", self.limbAutoAim.name)
+        attr.createAttr(
+            self.paramsHierarchy, "autoWrist", "float", value=0, minValue=0, maxValue=1
+        )
+        control.connectControlVisiblity(
+            self.paramsHierarchy, "autoWrist", self.limbAutoAim.name
+        )
 
         multMatrix, pickMatrix = transform.connectOffsetParentMatrix(
             self.ikfk.getIkJointList()[1],
@@ -76,7 +88,9 @@ class Arm(limb.Limb):
             sh=False,
         )
 
-        blendMatrixNodeName = "{}_{}_blendMatrix".format(self.ikfk.getIkJointList()[2], self.limbAutoAim.trs)
+        blendMatrixNodeName = "{}_{}_blendMatrix".format(
+            self.ikfk.getIkJointList()[2], self.limbAutoAim.trs
+        )
         blendMatrix = cmds.createNode("blendMatrix", name=blendMatrixNodeName)
         cmds.connectAttr(
             "{}.matrixSum".format(multMatrix),

@@ -44,7 +44,9 @@ class SplineFK(base.BaseComponent):
         :param int numControls: number of controls to add along the spline
         :param bool addFKSpace: add a world/local space switch to the fk chain
         """
-        super(SplineFK, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(SplineFK, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
         self.side = common.getSide(self.name)
 
         self.numControls = 4
@@ -52,13 +54,23 @@ class SplineFK(base.BaseComponent):
         self.ikControlName = f"{self.name}_ik_0"
         self.addFkSpace = False
 
-        self.defineParameter(parameter="numControls", value=self.numControls, dataType="int")
+        self.defineParameter(
+            parameter="numControls", value=self.numControls, dataType="int"
+        )
 
-        self.defineParameter(parameter="fkControlName", value=self.fkControlName, dataType="string")
-        self.defineParameter(parameter="ikControlName", value=self.ikControlName, dataType="string")
-        self.defineParameter(parameter="addFKSpace", value=self.addFkSpace, dataType="bool")
+        self.defineParameter(
+            parameter="fkControlName", value=self.fkControlName, dataType="string"
+        )
+        self.defineParameter(
+            parameter="ikControlName", value=self.ikControlName, dataType="string"
+        )
+        self.defineParameter(
+            parameter="addFKSpace", value=self.addFkSpace, dataType="bool"
+        )
 
-        self.inputList = rigamajig2.maya.joint.getInbetweenJoints(self.input[0], self.input[1])
+        self.inputList = rigamajig2.maya.joint.getInbetweenJoints(
+            self.input[0], self.input[1]
+        )
 
         if len(self.input) != 2:
             raise RuntimeError("Input list must have a length of 2")
@@ -66,10 +78,14 @@ class SplineFK(base.BaseComponent):
     def _createBuildGuides(self):
         """Create the build guides"""
 
-        self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
+        self.guidesHierarchy = cmds.createNode(
+            "transform", name="{}_guide".format(self.name)
+        )
 
         pos = transform.getTranslate(self.inputList[0], worldSpace=True)
-        self.upVectorGuide = control.createGuide(self.name + "_upVector", parent=self.guidesHierarchy, position=pos)
+        self.upVectorGuide = control.createGuide(
+            self.name + "_upVector", parent=self.guidesHierarchy, position=pos
+        )
 
     def _initialHierarchy(self):
         """Build the initial hierarchy"""
@@ -124,7 +140,9 @@ class SplineFK(base.BaseComponent):
 
         # setup the controls
         for i in range(len(self.ikSpline.getClusters())):
-            tempObject = cmds.createNode("transform", name="{}_temp_trs".format(self.name))
+            tempObject = cmds.createNode(
+                "transform", name="{}_temp_trs".format(self.name)
+            )
             transform.matchTransform(self.ikSpline.getClusters()[i], tempObject)
 
             if i == len(self.ikSpline.getClusters()) - 1:
@@ -150,15 +168,28 @@ class SplineFK(base.BaseComponent):
             transform.matchTransform(tempObject, self.fkControlList[i].orig)
             cmds.parent(self.ikSpline.getClusters()[i], self.ikControlList[i].name)
 
-            cmds.orientConstraint(self.fkControlList[-1].name, self.ikSpline.getIkJointList()[-1])
+            cmds.orientConstraint(
+                self.fkControlList[-1].name, self.ikSpline.getIkJointList()[-1]
+            )
             cmds.delete(tempObject)
 
         # connect the orientation of the controls to the rig
-        cmds.orientConstraint(self.fkControlList[0].name, self.ikSpline._startTwist, maintainOffset=True)
-        cmds.orientConstraint(self.fkControlList[-1].name, self.ikSpline._endTwist, maintainOffset=True)
+        cmds.orientConstraint(
+            self.fkControlList[0].name, self.ikSpline._startTwist, maintainOffset=True
+        )
+        cmds.orientConstraint(
+            self.fkControlList[-1].name, self.ikSpline._endTwist, maintainOffset=True
+        )
 
         # setup the ik visibility attribute
-        attr.createAttr(self.fkControlList[0].name, "ikVis", "bool", value=0, keyable=False, channelBox=True)
+        attr.createAttr(
+            self.fkControlList[0].name,
+            "ikVis",
+            "bool",
+            value=0,
+            keyable=False,
+            channelBox=True,
+        )
 
         for control in self.ikControls:
             control.connectControlVisiblity(self.fkControls[0], "ikVis", control)
@@ -175,10 +206,17 @@ class SplineFK(base.BaseComponent):
             )
 
         if self.addFKSpace:
-            spaces.create(self.fkControlList[0].spaces, self.fkControlList[0].name, parent=self.spacesHierarchy)
+            spaces.create(
+                self.fkControlList[0].spaces,
+                self.fkControlList[0].name,
+                parent=self.spacesHierarchy,
+            )
 
             # if the main control exists connect the world space
             if cmds.objExists("trs_motion"):
                 spaces.addSpace(
-                    self.fkControlList[0].spaces, ["trs_motion"], nameList=["world"], constraintType="orient"
+                    self.fkControlList[0].spaces,
+                    ["trs_motion"],
+                    nameList=["world"],
+                    constraintType="orient",
                 )

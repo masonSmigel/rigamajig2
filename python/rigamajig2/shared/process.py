@@ -16,7 +16,9 @@ from types import ModuleType
 from typing import Union, Any
 
 
-def importModuleFromPath(absolutePath: Union[Path, str], moduleName: str = None) -> ModuleType:
+def importModuleFromPath(
+    absolutePath: Union[Path, str], moduleName: str = None
+) -> ModuleType:
     """
     Import a Python module from an absolute path.
 
@@ -33,7 +35,9 @@ def importModuleFromPath(absolutePath: Union[Path, str], moduleName: str = None)
     if not moduleName:
         # get a list of all python paths that are a part of the modulePath
         sysPaths = sys.path
-        pythonPathsInModulePath = [sysPath for sysPath in sysPaths if sysPath in str(absolutePath)]
+        pythonPathsInModulePath = [
+            sysPath for sysPath in sysPaths if sysPath in str(absolutePath)
+        ]
         # Get the longest found python path.
         modulePythonRoot = max(pythonPathsInModulePath, key=len)
 

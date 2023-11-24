@@ -11,7 +11,8 @@ import rigamajig2.shared.common as common
 
 logger = logging.getLogger(__name__)
 
-def create(node, hierarchy=None, above=True, matchTransform=True, nodeType='transform'):
+
+def create(node, hierarchy=None, above=True, matchTransform=True, nodeType="transform"):
     """
     Build a hirachy of transforms around a given node
 
@@ -26,11 +27,11 @@ def create(node, hierarchy=None, above=True, matchTransform=True, nodeType='tran
 
     if not cmds.objExists(node):
         logger.error("Node '{}' does not exist. cannot create a hierarchy".format(node))
-        return
+        return None
 
-    if not cmds.nodeType(node) in ['transform', 'joint']:
+    if not cmds.nodeType(node) in ["transform", "joint"]:
         logger.error("{} must be a transform".format(node))
-        return
+        return None
 
     parent = getParent(node)
 
@@ -47,7 +48,8 @@ def create(node, hierarchy=None, above=True, matchTransform=True, nodeType='tran
         if i > 0:
             cmds.parent(new, newHierachy[i - 1])
 
-    if parent and above: cmds.parent(newHierachy[0], parent)
+    if parent and above:
+        cmds.parent(newHierachy[0], parent)
 
     if above:
         cmds.parent(node, newHierachy[-1])
@@ -61,7 +63,15 @@ class DictHierarchy(object):
     """
     Hierarchy Dictionary class.
     """
-    def __init__(self, hierarchy=None, parent=None, prefix=None, suffix=None, nodeType='transform'):
+
+    def __init__(
+        self,
+        hierarchy=None,
+        parent=None,
+        prefix=None,
+        suffix=None,
+        nodeType="transform",
+    ):
         """
         Constructor for the DictHierarchy class
 
@@ -123,21 +133,21 @@ class DictHierarchy(object):
         node = common.getFirst(node)
         hierarchyDict = OrderedDict()
 
-        def getChildren(n, hierarchyDict):
+        def getChildren(node, hierarchyDict):
             """
             get children of a hierachy
-            :param n: node
-            :param hierarchyDict: hierarchy dict 
+            :param node: node
+            :param hierarchyDict: hierarchy dict
             :return: dict
             """
-            children = cmds.listRelatives(n, c=True, pa=True, type='transform')
+            children = cmds.listRelatives(node, c=True, pa=True, type="transform")
             if children:
-                hierarchyDict[n] = OrderedDict()
+                hierarchyDict[node] = OrderedDict()
                 for child in children:
-                    hierarchyDict[n][child] = OrderedDict()
-                    getChildren(child, hierarchyDict[n])
+                    hierarchyDict[node][child] = OrderedDict()
+                    getChildren(child, hierarchyDict[node])
             else:
-                hierarchyDict[n] = None
+                hierarchyDict[node] = None
 
         getChildren(node, hierarchyDict)
 
@@ -152,7 +162,7 @@ def getTopParent(node):
     :return: top parent of the node
     :rtype: str
     """
-    return cmds.ls(node, long=True)[0].split('|')[1]
+    return cmds.ls(node, long=True)[0].split("|")[1]
 
 
 def getAllParents(node):
@@ -163,7 +173,7 @@ def getAllParents(node):
     :return: list of all parents above a node
     :rtype: List
     """
-    parents = cmds.ls(node, long=True)[0].split('|')[1:-1]
+    parents = cmds.ls(node, long=True)[0].split("|")[1:-1]
     parents.reverse()
     return parents
 
@@ -176,7 +186,11 @@ def getParent(node):
     :return: name of parent of the given node
     :rtype: str None
     """
-    return cmds.listRelatives(node, p=True)[0] if cmds.listRelatives(node, p=True) else None
+    return (
+        cmds.listRelatives(node, p=True)[0]
+        if cmds.listRelatives(node, p=True)
+        else None
+    )
 
 
 def getChildren(node):
@@ -210,4 +224,5 @@ def getChild(node):
     :param str node: input node to search
     :return: the first child of a given node
     """
-    return cmds.listRelatives(node, c=True)[0] if len(cmds.listRelatives(node, c=True)) > 0 else list()
+    children = cmds.listRelatives(node, children=True)
+    return common.getFirst(children) if children else None

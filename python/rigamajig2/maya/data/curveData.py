@@ -18,7 +18,7 @@ import rigamajig2.shared.common as common
 
 
 class CurveData(node_data.NodeData):
-    """ This class to save and load curve data"""
+    """This class to save and load curve data"""
 
     def gatherData(self, node):
         """
@@ -27,7 +27,7 @@ class CurveData(node_data.NodeData):
         :param node: Node to gather data from
         :type node: str
         """
-        if cmds.nodeType(node) == 'nurbsCurve':
+        if cmds.nodeType(node) == "nurbsCurve":
             node = common.getFirst(cmds.listRelatives(node, p=True))
         super(CurveData, self).gatherData(node)
 
@@ -36,18 +36,26 @@ class CurveData(node_data.NodeData):
             cmds.delete(node, ch=True)
 
         data = OrderedDict()
-        shapeList = cmds.listRelatives(node, c=True, shapes=True, type="nurbsCurve", pa=True)
-        data['shapes'] = OrderedDict()
+        shapeList = cmds.listRelatives(
+            node, c=True, shapes=True, type="nurbsCurve", pa=True
+        )
+        data["shapes"] = OrderedDict()
         if shapeList:
             for shape in shapeList:
-                data['shapes'][shape] = OrderedDict()
-                data['shapes'][shape]['points'] = list()
+                data["shapes"][shape] = OrderedDict()
+                data["shapes"][shape]["points"] = list()
                 for i, _ in enumerate(cmds.ls("{0}.cv[*]".format(shape), fl=True)):
-                    data['shapes'][shape]['points'].append(cmds.getAttr("{}.controlPoints[{}]".format(shape, i))[0])
+                    data["shapes"][shape]["points"].append(
+                        cmds.getAttr("{}.controlPoints[{}]".format(shape, i))[0]
+                    )
 
                 formNames = cmds.attributeQuery("f", node=shape, le=True)[0].split(":")
-                data['shapes'][shape]['form'] = formNames[cmds.getAttr("{}.form".format(shape))]
-                data['shapes'][shape]['degree'] = cmds.getAttr("{}.degree".format(shape))
+                data["shapes"][shape]["form"] = formNames[
+                    cmds.getAttr("{}.form".format(shape))
+                ]
+                data["shapes"][shape]["degree"] = cmds.getAttr(
+                    "{}.degree".format(shape)
+                )
         self._data[node].update(data)
 
     def applyData(self, nodes, attributes=None, create=False, applyColor=True):
@@ -77,36 +85,47 @@ class CurveData(node_data.NodeData):
                 attributes = list(self._data[node].keys()) + ["points"]
 
             for attribute in attributes:
-                if attribute == 'points':
-                    form = 'Open'
-                    if 'shapes' not in self._data[node]:
+                if attribute == "points":
+                    form = "Open"
+                    if "shapes" not in self._data[node]:
                         continue
 
                     connections = None
-                    for shape in self._data[node]['shapes'].keys():
+                    for shape in self._data[node]["shapes"].keys():
                         created = False
                         if create:
                             # if the node does not exist in the scene. Create it.
                             if not cmds.objExists(node):
-                                cmds.createNode('transform', n=node)
+                                cmds.createNode("transform", n=node)
 
                             # check if the shape exists but there is a mismatch in the number of cvs
-                            numSourceCvs = len(self._data[node]['shapes'][shape][attribute])
-                            if cmds.objExists(shape) and len(curve.getCvs(shape)) != numSourceCvs:
+                            numSourceCvs = len(
+                                self._data[node]["shapes"][shape][attribute]
+                            )
+                            if (
+                                cmds.objExists(shape)
+                                and len(curve.getCvs(shape)) != numSourceCvs
+                            ):
                                 # get the input connections to the shape
                                 shapeVisiable = "{}.v".format(shape)
-                                connections = cmds.listConnections(shapeVisiable, d=False, s=True, p=True)
+                                connections = cmds.listConnections(
+                                    shapeVisiable, d=False, s=True, p=True
+                                )
                                 cmds.delete(shape)
 
                             if not cmds.objExists(shape):
-                                if 'form' in self._data[node]['shapes'][shape]:
-                                    form = self._data[node]['shapes'][shape]['form']
-                                curveTrs = curve.createCurve(points=self._data[node]['shapes'][shape][attribute],
-                                                             degree=self._data[node]['shapes'][shape]['degree'],
-                                                             name=node + '_temp',
-                                                             transformType='transform',
-                                                             form=form)
-                                shapeNode = cmds.listRelatives(curveTrs, c=True, s=True, type='nurbsCurve')[0]
+                                if "form" in self._data[node]["shapes"][shape]:
+                                    form = self._data[node]["shapes"][shape]["form"]
+                                curveTrs = curve.createCurve(
+                                    points=self._data[node]["shapes"][shape][attribute],
+                                    degree=self._data[node]["shapes"][shape]["degree"],
+                                    name=node + "_temp",
+                                    transformType="transform",
+                                    form=form,
+                                )
+                                shapeNode = cmds.listRelatives(
+                                    curveTrs, c=True, s=True, type="nurbsCurve"
+                                )[0]
                                 cmds.rename(shapeNode, shape)
                                 cmds.parent(shape, node, r=True, s=True)
                                 cmds.delete(curveTrs)
@@ -114,16 +133,29 @@ class CurveData(node_data.NodeData):
                                 # rebuild the connections if the original node had any
                                 if connections:
                                     for connection in connections:
-                                        cmds.connectAttr(connection, "{}.v".format(shape), f=True)
+                                        cmds.connectAttr(
+                                            connection, "{}.v".format(shape), f=True
+                                        )
 
                                 created = True
 
                         if not created and cmds.objExists(shape):
-                            for i, position in enumerate(self._data[node]['shapes'][shape][attribute]):
-                                cmds.setAttr('{}.controlPoints[{}]'.format(shape, i), *position)
+                            for i, position in enumerate(
+                                self._data[node]["shapes"][shape][attribute]
+                            ):
+                                cmds.setAttr(
+                                    "{}.controlPoints[{}]".format(shape, i), *position
+                                )
                 result.append(node)
 
         if applyColor:
-            super(CurveData, self).applyData(nodes, attributes=["overrideEnabled", "overrideRGBColors",
-                                                                "overrideColorRGB", "overrideColor"])
+            super(CurveData, self).applyData(
+                nodes,
+                attributes=[
+                    "overrideEnabled",
+                    "overrideRGBColors",
+                    "overrideColorRGB",
+                    "overrideColor",
+                ],
+            )
         return result

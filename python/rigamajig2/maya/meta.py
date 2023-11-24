@@ -14,7 +14,7 @@ import rigamajig2.shared.common as common
 
 logger = logging.getLogger(__name__)
 
-EXCLUDED_JSON_ATTRS = ['attributeAliasList']
+EXCLUDED_JSON_ATTRS = ["attributeAliasList"]
 
 if sys.version_info.major >= 3:
     basestring = str
@@ -34,9 +34,9 @@ def tag(nodes, tag, type=None):
         if cmds.objExists(node):
             if type:
                 if not cmds.objExists("{}.__{}_{}__".format(node, type, tag)):
-                    cmds.addAttr(node, ln='__{}_{}__'.format(type, tag), at='message')
+                    cmds.addAttr(node, ln="__{}_{}__".format(type, tag), at="message")
             elif not cmds.objExists("{}.__{}__".format(node, tag)):
-                cmds.addAttr(node, ln='__{}__'.format(tag), at='message')
+                cmds.addAttr(node, ln="__{}__".format(tag), at="message")
 
 
 def untag(nodes, tag):
@@ -111,7 +111,9 @@ def createMessageConnection(sourceNode, destNode, sourceAttr, destAttr=None):
     :param destAttr: name of the destination attribute
     """
     if cmds.objExists("{}.{}".format(destNode, destAttr)):
-        raise RuntimeError("The desination '{}.{}' already exist".format(destNode, destAttr))
+        raise RuntimeError(
+            "The desination '{}.{}' already exist".format(destNode, destAttr)
+        )
 
     asMessageList = False
     if isinstance(destNode, (list, tuple)):
@@ -119,7 +121,7 @@ def createMessageConnection(sourceNode, destNode, sourceAttr, destAttr=None):
         destList = destNode
 
     if not cmds.objExists("{}.{}".format(sourceNode, sourceAttr)):
-        cmds.addAttr(sourceNode, ln=sourceAttr, at='message', m=asMessageList)
+        cmds.addAttr(sourceNode, ln=sourceAttr, at="message", m=asMessageList)
 
     if destAttr is None:
         destAttr = sourceAttr
@@ -127,14 +129,18 @@ def createMessageConnection(sourceNode, destNode, sourceAttr, destAttr=None):
     # if the destNode is a list then create a complex message connection.
     if asMessageList:
         for destNode in destList:
-            nextIndex = rig_attr.getNextAvailableElement("{}.{}".format(sourceNode, sourceAttr))
-            cmds.addAttr(destNode, ln=destAttr, at='message')
+            nextIndex = rig_attr.getNextAvailableElement(
+                "{}.{}".format(sourceNode, sourceAttr)
+            )
+            cmds.addAttr(destNode, ln=destAttr, at="message")
             cmds.connectAttr(nextIndex, "{}.{}".format(destNode, destAttr))
 
     # otherwise create a simple message connection.
     else:
-        cmds.addAttr(destNode, ln=destAttr, at='message')
-        cmds.connectAttr("{}.{}".format(sourceNode, sourceAttr), "{}.{}".format(destNode, destAttr))
+        cmds.addAttr(destNode, ln=destAttr, at="message")
+        cmds.connectAttr(
+            "{}.{}".format(sourceNode, sourceAttr), "{}.{}".format(destNode, destAttr)
+        )
 
 
 def addMessageListConnection(sourceNode, dataList, sourceAttr, dataAttr=None):
@@ -149,14 +155,18 @@ def addMessageListConnection(sourceNode, dataList, sourceAttr, dataAttr=None):
     dataList = common.toList(dataList)
     for dataNode in dataList:
         if cmds.objExists("{}.{}".format(dataNode, dataAttr)):
-            raise RuntimeError("The desination '{}.{}' already exist".format(dataNode, dataAttr))
+            raise RuntimeError(
+                "The desination '{}.{}' already exist".format(dataNode, dataAttr)
+            )
     if not cmds.objExists("{}.{}".format(sourceNode, sourceAttr)):
-        cmds.addAttr(sourceNode, ln=sourceAttr, at='message', m=True)
+        cmds.addAttr(sourceNode, ln=sourceAttr, at="message", m=True)
     if dataAttr is None:
         dataAttr = sourceAttr
     for dataNode in dataList:
-        nextIndex = rig_attr.getNextAvailableElement("{}.{}".format(sourceNode, sourceAttr))
-        cmds.addAttr(dataNode, ln=dataAttr, at='message')
+        nextIndex = rig_attr.getNextAvailableElement(
+            "{}.{}".format(sourceNode, sourceAttr)
+        )
+        cmds.addAttr(dataNode, ln=dataAttr, at="message")
         cmds.connectAttr(nextIndex, "{}.{}".format(dataNode, dataAttr))
 
 
@@ -198,16 +208,26 @@ def validateDataType(val):
             val = literal_eval(val)
         except:
             return "string"
-        if issubclass(type(val), dict): return 'dict'
-        if issubclass(type(val), list): return 'list'
-        if issubclass(type(val), tuple): return 'list'
-    if issubclass(type(val), unicode): return 'string'
-    if issubclass(type(val), bool): return 'bool'
-    if issubclass(type(val), float): return 'float'
-    if issubclass(type(val), int): return 'int'
-    if issubclass(type(val), dict): return 'dict'
-    if issubclass(type(val), list): return 'list'
-    if issubclass(type(val), tuple): return 'list'
+        if issubclass(type(val), dict):
+            return "dict"
+        if issubclass(type(val), list):
+            return "list"
+        if issubclass(type(val), tuple):
+            return "list"
+    if issubclass(type(val), unicode):
+        return "string"
+    if issubclass(type(val), bool):
+        return "bool"
+    if issubclass(type(val), float):
+        return "float"
+    if issubclass(type(val), int):
+        return "int"
+    if issubclass(type(val), dict):
+        return "dict"
+    if issubclass(type(val), list):
+        return "list"
+    if issubclass(type(val), tuple):
+        return "list"
 
 
 class MetaNode(object):
@@ -231,18 +251,22 @@ class MetaNode(object):
         :rtype: str | float | list | dict
         """
         if not cmds.objExists("{}.{}".format(self.node, attr)):
-            raise RuntimeError("Attribute {} does not exist on the node {}".format(attr, self.node))
+            raise RuntimeError(
+                "Attribute {} does not exist on the node {}".format(attr, self.node)
+            )
 
         attrType = cmds.getAttr("{}.{}".format(self.node, attr), type=True)
 
         # TODO : what are we gonnna do with message attributes?!??
-        if attrType == 'message':
+        if attrType == "message":
             return None
 
         value = cmds.getAttr("{}.{}".format(self.node, attr), silent=True)
-        if attrType == 'string':
+        if attrType == "string":
             try:
-                value = self.deserializeComplex(value)  # if the data is a string try to deserialize it.
+                value = self.deserializeComplex(
+                    value
+                )  # if the data is a string try to deserialize it.
             except:
                 pass
         return value
@@ -257,10 +281,13 @@ class MetaNode(object):
         """
         if excludedAttrs is None:
             excludedAttrs = list()
-        userAttrs = list([str(a) for a in cmds.listAttr(self.node, ud=True) or [] if '.' not in a])
+        userAttrs = list(
+            [str(a) for a in cmds.listAttr(self.node, ud=True) or [] if "." not in a]
+        )
         data = OrderedDict()
         for attr in userAttrs:
-            if attr in EXCLUDED_JSON_ATTRS + excludedAttrs: continue
+            if attr in EXCLUDED_JSON_ATTRS + excludedAttrs:
+                continue
             data[attr] = self.getData(attr)
         return data
 
@@ -274,23 +301,24 @@ class MetaNode(object):
         :param lock: lock the attributes from the channelbox.
         """
 
-        dataTypeDict = {'string': {'dt': 'string'},
-                        'unicode': {'dt': 'string'},
-                        'int': {'at': 'long'},
-                        'long': {'at': 'long'},
-                        'bool': {'at': 'bool'},
-                        'float': {'at': 'double'},
-                        'double': {'at': 'double'},
-                        'enum': {'at': 'enum'},
-                        'list': {'dt': 'string'},
-                        'dict': {'dt': 'string'}
-                        }
+        dataTypeDict = {
+            "string": {"dt": "string"},
+            "unicode": {"dt": "string"},
+            "int": {"at": "long"},
+            "long": {"at": "long"},
+            "bool": {"at": "bool"},
+            "float": {"at": "double"},
+            "double": {"at": "double"},
+            "enum": {"at": "enum"},
+            "list": {"dt": "string"},
+            "dict": {"dt": "string"},
+        }
 
         if not attrType or attrType not in dataTypeDict:
             attrType = validateDataType(value)
             if attrType is None:
                 return
-        if attrType == 'dict' or attrType == "list":
+        if attrType == "dict" or attrType == "list":
             value = self.serializeComplex(value)
             attrType = validateDataType(value)
         # if the attribute does not exist then add the attribute
@@ -329,7 +357,9 @@ class MetaNode(object):
         :return: serialized data
         """
         if len(data) > 32700:
-            logger.warning('Length of string is over 16bit Maya Attr Template limit - lock this after setting it!')
+            logger.warning(
+                "Length of string is over 16bit Maya Attr Template limit - lock this after setting it!"
+            )
         return json.dumps(data)
 
     def deserializeComplex(self, data):

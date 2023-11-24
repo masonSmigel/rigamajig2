@@ -47,15 +47,21 @@ def findComponents(path: str = COMPONENTS_PATH) -> Dict[str, ModuleType]:
 
         if filePath.suffix == ".py" and filePath.name not in EXCLUDED_FILES:
             module = process.importModuleFromPath(filePath)
-            components = process.getSubclassesFromModule(module=module, classType=base.BaseComponent)
+            components = process.getSubclassesFromModule(
+                module=module, classType=base.BaseComponent
+            )
 
             logger.debug(f"Module:{module}: components: {components}")
 
             if components:
                 if len(components) > 1:
-                    logger.warning(f"Component modules should only contain one Component class. {module.__name__}")
+                    logger.warning(
+                        f"Component modules should only contain one Component class. {module.__name__}"
+                    )
 
-                componentType = formatComponentTypeFromModule(modulePath=module.__name__)
+                componentType = formatComponentTypeFromModule(
+                    modulePath=module.__name__
+                )
                 componentLookup[componentType] = module
     return componentLookup
 
@@ -84,13 +90,19 @@ def createComponentClassInstance(componentType: str) -> ComponentType:
     moduleObject = componentLookup.get(componentKey)
 
     if not moduleObject:
-        raise ValueError(f"Component type {componentType} is not valid. Valid Types are {componentLookup.keys()}")
+        raise ValueError(
+            f"Component type {componentType} is not valid. Valid Types are {componentLookup.keys()}"
+        )
 
-    componentInstances = process.getSubclassesFromModule(moduleObject, classType=base.BaseComponent)
+    componentInstances = process.getSubclassesFromModule(
+        moduleObject, classType=base.BaseComponent
+    )
     return common.getFirst(componentInstances)
 
 
-def getComponentLookupKey(componentType: str, componentLookup: Dict[str, ModuleType]) -> str:
+def getComponentLookupKey(
+    componentType: str, componentLookup: Dict[str, ModuleType]
+) -> str:
     """
     Format the component type into a lookup key to use to retrieve the proper module.
     This is a bit of a hack to ensure we are always getting a lookup key that is up-to-date with the

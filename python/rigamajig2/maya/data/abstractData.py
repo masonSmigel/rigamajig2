@@ -39,7 +39,8 @@ class AbstractData(object):
         """
         if not isinstance(other, AbstractData):
             raise TypeError(
-                "{0} is of type {1}. It must be of type AbstractData" "or inherit from it.".format(other, type(other))
+                "{0} is of type {1}. It must be of type AbstractData"
+                "or inherit from it.".format(other, type(other))
             )
 
         # Copy the data and comp the two dictionares
@@ -61,7 +62,8 @@ class AbstractData(object):
         """
         if not isinstance(other, AbstractData):
             raise TypeError(
-                "{0} is of type {1}. It must be of type AbstractData" "or inherit from it.".format(other, type(other))
+                "{0} is of type {1}. It must be of type AbstractData"
+                "or inherit from it.".format(other, type(other))
             )
 
         # Copy the data and comp the two dictionares
@@ -142,7 +144,7 @@ class AbstractData(object):
         writeData = OrderedDict(
             user=getpass.getuser(),
             type=self.__class__.__name__,
-            time=strftime("%Y-%m-%d %H:%M:%S", gmtime())
+            time=strftime("%Y-%m-%d %H:%M:%S", gmtime()),
         )
         writeData["data"] = self._data
         data = json.dumps(writeData, indent=4, ensure_ascii=False)
@@ -162,7 +164,9 @@ class AbstractData(object):
         self._filepath = filepath
 
         logger = logging.getLogger(self.__module__)
-        logger.info(f"{self.__class__.__name__} saved to : {filepath} ({len(self._data)} node(s))")
+        logger.info(
+            f"{self.__class__.__name__} saved to : {filepath} ({len(self._data)} node(s))"
+        )
 
     def read(self, filepath):
         """

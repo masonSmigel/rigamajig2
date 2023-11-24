@@ -137,7 +137,9 @@ def getSkinCluster(obj: str) -> str:
     """
     skins = getAllSkinClusters(obj)
 
-    assert len(skins) < 2, "Cannot use getSkinCluster on Stacked Skins. Please use get all Skinclusters instead"
+    assert (
+        len(skins) < 2
+    ), "Cannot use getSkinCluster on Stacked Skins. Please use get all Skinclusters instead"
     skin = skins[0] if len(skins) else None
     if skin:
         # This is a tip from Charles Wardlaw,
@@ -179,7 +181,9 @@ def getMfnShape(mesh):
         return om.MFnNurbsCurve(mObj)
 
 
-def getCompleteComponents(shape: Union[str, om.MFnMesh, om.MFnNurbsCurve]) -> om.MFnSingleIndexedComponent:
+def getCompleteComponents(
+    shape: Union[str, om.MFnMesh, om.MFnNurbsCurve]
+) -> om.MFnSingleIndexedComponent:
     """
     Wrapper to get the complete component data from a mesh
 
@@ -248,7 +252,12 @@ def getWeights(mesh: str) -> Tuple[Dict[str, Dict[int, float]], int]:
     return weightDict, vertexCount
 
 
-def setWeights(mesh: str, skincluster: str, weightDict: Dict[str, Dict[int, float]], compressed=True):
+def setWeights(
+    mesh: str,
+    skincluster: str,
+    weightDict: Dict[str, Dict[int, float]],
+    compressed=True,
+):
     """
     Set the skin cluster weights of a given mesh
 
@@ -323,7 +332,9 @@ def getBlendWeights(mesh: str) -> Dict[int, float]:
     return weightList
 
 
-def setBlendWeights(mesh: str, skincluster: str, weightDict: Dict[int, float], compressed: bool = True):
+def setBlendWeights(
+    mesh: str, skincluster: str, weightDict: Dict[int, float], compressed: bool = True
+):
     """
     Set the Blended weights
 
@@ -368,7 +379,9 @@ def getMatrixConnections(mesh: str, attribute: str = "bindPreMatrix") -> List[st
     matrixInputs = list()
     for i in range(len(getInfluenceJoints(skinCls))):
         matrixAttr = "{}[{}]".format(skinClusterMatrixAttr, i)
-        matrixInputConnection = cmds.listConnections(matrixAttr, plugs=True, s=True, d=False)
+        matrixInputConnection = cmds.listConnections(
+            matrixAttr, plugs=True, s=True, d=False
+        )
 
         # append the result to a list of matricies
         matrixInputs.append(matrixInputConnection[0] if matrixInputConnection else None)
@@ -399,7 +412,9 @@ def getMatrixValues(mesh: str, attribute="bindPreMatrix") -> List[List[float]]:
     return matrixValues
 
 
-def setMatrixConnections(skinCluster: str, connectionsList: List[str], attribute: str = "bindPreMatrix"):
+def setMatrixConnections(
+    skinCluster: str, connectionsList: List[str], attribute: str = "bindPreMatrix"
+):
     """
     Set the preBind Matrix connections of a skin cluster
 
@@ -411,14 +426,21 @@ def setMatrixConnections(skinCluster: str, connectionsList: List[str], attribute
         if bindInput:
             try:
                 matrixAttr = "{}.{}[{}]".format(skinCluster, attribute, i)
-                connections = cmds.listConnections(matrixAttr, s=True, d=False, plugs=True) or list()
+                connections = (
+                    cmds.listConnections(matrixAttr, s=True, d=False, plugs=True)
+                    or list()
+                )
                 if bindInput not in connections:
-                    cmds.connectAttr(bindInput, "{}.{}[{}]".format(skinCluster, attribute, i), f=True)
+                    cmds.connectAttr(
+                        bindInput, "{}.{}[{}]".format(skinCluster, attribute, i), f=True
+                    )
             except RuntimeError:
                 pass
 
 
-def setMatrixValues(skinCluster: str, valuesList: List[List[float]], attribute: str = "bindPreMatrx"):
+def setMatrixValues(
+    skinCluster: str, valuesList: List[List[float]], attribute: str = "bindPreMatrx"
+):
     """
     Try to set the inital values of all connections for the matrix or bindPreMatrix
     """
@@ -440,7 +462,9 @@ def getInfluenceJoints(skinCluster: str):
         skinCluster = getMfnSkin(skinCluster)
 
     infPathArray = skinCluster.influenceObjects()
-    infuenceNameArray = [infPathArray[i].partialPathName() for i in range(len(infPathArray))]
+    infuenceNameArray = [
+        infPathArray[i].partialPathName() for i in range(len(infPathArray))
+    ]
 
     return infuenceNameArray
 
@@ -496,7 +520,13 @@ def transferSkinCluster(sourceMesh: str, targetMesh: str, targetSkin: str):
     setBlendWeights(targetMesh, skincluster=targetSkin, weightDict=blendedWeights)
 
     # copy the skin cluster settings
-    attrs = ["skinningMethod", "dqsSupportNonRigid", "normalizeWeights", "maxInfluences", "maintainMaxInfluences"]
+    attrs = [
+        "skinningMethod",
+        "dqsSupportNonRigid",
+        "normalizeWeights",
+        "maxInfluences",
+        "maintainMaxInfluences",
+    ]
     for attr in attrs:
         value = cmds.getAttr("{}.{}".format(sourceSkinCluster, attr))
         cmds.setAttr("{}.{}".format(targetSkin, attr), value)
@@ -521,7 +551,9 @@ def stackSkinCluster(sourceMesh: str, targetMesh: str, skinName: Optional[str] =
         # no skins yet-- make sure to use this command
         sourceInfluences = getInfluenceJoints(sourceSkin)
         targetSkinName = skinName or targetMesh + "_skinCluster"
-        targetSkin = cmds.skinCluster(sourceInfluences, targetMesh, tsb=True, mi=3, dr=4.0, n=targetSkinName)[0]
+        targetSkin = cmds.skinCluster(
+            sourceInfluences, targetMesh, tsb=True, mi=3, dr=4.0, n=targetSkinName
+        )[0]
 
     # set the weight distribution to neighbors
     cmds.setAttr("{}.weightDistribution".format(targetSkin), 1)
@@ -579,12 +611,21 @@ def copySkinClusterAndInfluences(
                     cmds.skinCluster(tgtSkinCluster, edit=True, addInfluence=influence)
 
         # copy the skin cluster settings
-        attrs = ["skinningMethod", "dqsSupportNonRigid", "normalizeWeights", "maxInfluences", "maintainMaxInfluences"]
+        attrs = [
+            "skinningMethod",
+            "dqsSupportNonRigid",
+            "normalizeWeights",
+            "maxInfluences",
+            "maintainMaxInfluences",
+        ]
         for attr in attrs:
             value = cmds.getAttr("{}.{}".format(srcSkinCluster, attr))
             cmds.setAttr("{}.{}".format(tgtSkinCluster, attr), value)
 
-        kwargs = {"surfaceAssociation": surfaceMode, "influenceAssociation": influenceMode}
+        kwargs = {
+            "surfaceAssociation": surfaceMode,
+            "influenceAssociation": influenceMode,
+        }
         if uvSpace:
             sourceUVSet = cmds.polyUVSet(sourceMesh, q=True, currentUVSet=True)[0]
             DestUvSet = cmds.polyUVSet(tgtMesh, q=True, currentUVSet=True)[0]
@@ -592,8 +633,17 @@ def copySkinClusterAndInfluences(
             kwargs["uv"] = [sourceUVSet, DestUvSet]
 
         # copy the skin weights
-        cmds.copySkinWeights(sourceSkin=srcSkinCluster, destinationSkin=tgtSkinCluster, normalize=True, **kwargs)
-        print("weights copied: {}({}) -> {}({})".format(sourceMesh, srcSkinCluster, tgtMesh, tgtSkinCluster))
+        cmds.copySkinWeights(
+            sourceSkin=srcSkinCluster,
+            destinationSkin=tgtSkinCluster,
+            normalize=True,
+            **kwargs,
+        )
+        print(
+            "weights copied: {}({}) -> {}({})".format(
+                sourceMesh, srcSkinCluster, tgtMesh, tgtSkinCluster
+            )
+        )
 
         return tgtSkinCluster
 
@@ -617,7 +667,9 @@ def connectExistingBPMs(skinCluster: str, influences: List[str] = None):
         bpmInfluence = influence.replace("bind", "bpm")
         if cmds.objExists(bpmInfluence):
             cmds.connectAttr(
-                "{}.worldInverseMatrix".format(bpmInfluence), "{}.bindPreMatrix[{}]".format(skinCluster, index), f=True
+                "{}.worldInverseMatrix".format(bpmInfluence),
+                "{}.bindPreMatrix[{}]".format(skinCluster, index),
+                f=True,
             )
         else:
             logger.warning("No Bpm exists for {}".format(influence))

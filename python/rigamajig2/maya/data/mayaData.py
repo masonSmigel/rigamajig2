@@ -12,7 +12,8 @@ logger = logging.getLogger(__name__)
 
 
 class MayaData(abstract_data.AbstractData):
-    """ Class to store  maya data"""
+    """Class to store  maya data"""
+
     def gatherData(self, node):
         """
         This method will gather data from the maya node passed as an argument.

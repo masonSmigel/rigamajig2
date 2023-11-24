@@ -5,8 +5,7 @@
     file: openFolder.py
     author: masonsmigel
     date: 08/2022
-    description: 
-
+    description:
 """
 import platform
 

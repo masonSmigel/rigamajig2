@@ -49,7 +49,11 @@ class BasicTree(base.BaseComponent):
         :param skipJoints: List of joints to skip from adding a control to. They must be an end joint.
         """
         super(BasicTree, self).__init__(
-            name=name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+            name=name,
+            input=input,
+            size=size,
+            rigParent=rigParent,
+            componentTag=componentTag,
         )
 
         self.side = common.getSide(name)
@@ -59,10 +63,14 @@ class BasicTree(base.BaseComponent):
         self.addSdk = False
         self.skipJoints = []
 
-        self.defineParameter(parameter="controlShape", value=self.controlShape, dataType="string")
+        self.defineParameter(
+            parameter="controlShape", value=self.controlShape, dataType="string"
+        )
         self.defineParameter(parameter="addTrs", value=self.addTrs, dataType="bool")
         self.defineParameter(parameter="addSdk", value=self.addSdk, dataType="bool")
-        self.defineParameter(parameter="skipJoints", value=self.skipJoints, dataType="list")
+        self.defineParameter(
+            parameter="skipJoints", value=self.skipJoints, dataType="list"
+        )
 
     def _initialHierarchy(self):
         """build the initial hierarchy"""
@@ -70,7 +78,9 @@ class BasicTree(base.BaseComponent):
 
         # create a dictionary of the parents for the component
         self.hierarchyDict = OrderedDict()
-        childJoints = cmds.listRelatives(self.input[0], allDescendents=True, type="joint")
+        childJoints = cmds.listRelatives(
+            self.input[0], allDescendents=True, type="joint"
+        )
         allJoints = [self.input[0]] + childJoints
         for i in range(len(allJoints)):
             jointDict = OrderedDict()
@@ -88,7 +98,7 @@ class BasicTree(base.BaseComponent):
             self.hierarchyDict[jnt] = jointDict
 
         # create the controls for the joints
-        for jnt, data in self.hierarchyDict.items():
+        for jnt, _ in self.hierarchyDict.items():
             ctl = control.createAtObject(
                 name=jnt.rsplit("_", 1)[0],
                 shape=self.controlShape,
@@ -125,6 +135,8 @@ class BasicTree(base.BaseComponent):
         """Create the connection"""
         # connect the rig to is rigParent
         if cmds.objExists(self.rigParent):
-            firstKey, firstItem = list(self.hierarchyDict.items())[0]
+            _, firstItem = list(self.hierarchyDict.items())[0]
             baseControl = firstItem["control"]
-            transform.connectOffsetParentMatrix(self.rigParent, baseControl.orig, mo=True)
+            transform.connectOffsetParentMatrix(
+                self.rigParent, baseControl.orig, mo=True
+            )

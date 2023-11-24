@@ -16,7 +16,7 @@ import rigamajig2.shared.common as common
 
 
 class HirachyData(maya_data.MayaData):
-    """ This class to save and load maya DAG heirarchy data"""
+    """This class to save and load maya DAG heirarchy data"""
 
     def __init__(self):
         """
@@ -32,16 +32,18 @@ class HirachyData(maya_data.MayaData):
         """
         super(HirachyData, self).gatherData(node)
         data = OrderedDict()
-        data['hierarchy'] = hierarchy.DictHierarchy.getHirarchy(node)
+        data["hierarchy"] = hierarchy.DictHierarchy.getHirarchy(node)
 
         self._data[node].update(data)
 
     def applyData(self, nodes):
-
+        """Apply the hierarchy data"""
         nodes = common.toList(nodes)
 
         for node in nodes:
             if node not in self._data:
                 continue
-            nodeHierarchy = hierarchy.DictHierarchy(hierarchy=self._data[node]['hierarchy'])
+            nodeHierarchy = hierarchy.DictHierarchy(
+                hierarchy=self._data[node]["hierarchy"]
+            )
             nodeHierarchy.create()

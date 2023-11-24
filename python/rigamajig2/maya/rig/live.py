@@ -12,8 +12,8 @@ import rigamajig2.maya.node as node
 import rigamajig2.maya.transform as transform
 import rigamajig2.shared.common as common
 
-MIRROR_GRP_NAME = 'liveMirror_hrc'
-PIN_HRC_NAME = 'rigamajig_pin_hrc'
+MIRROR_GRP_NAME = "liveMirror_hrc"
+PIN_HRC_NAME = "rigamajig_pin_hrc"
 
 
 def createlivePoleVector(matchList, poleVectorNode=None):
@@ -30,99 +30,135 @@ def createlivePoleVector(matchList, poleVectorNode=None):
 
     # if we dont have a poleVectorNode then make one.
     if not poleVectorNode:
-        poleVectorNode = cmds.spaceLocator(name=matchList[1] + '_pvPos_' + common.TARGET)[0]
+        poleVectorNode = cmds.spaceLocator(
+            name=matchList[1] + "_pvPos_" + common.TARGET
+        )[0]
         cmds.setAttr("{}.overrideEnabled".format(poleVectorNode), 1)
         cmds.setAttr("{}.overrideColor".format(poleVectorNode), 28)
     if not cmds.objExists(poleVectorNode):
-        raise RuntimeError("The poleVector node '{}' does not exist in the scene".format(poleVectorNode))
+        raise RuntimeError(
+            "The poleVector node '{}' does not exist in the scene".format(
+                poleVectorNode
+            )
+        )
 
     # set some attributes on the poleVector Node
     cmds.setAttr("{}.inheritsTransform".format(poleVectorNode), False)
-    for attr in ["{}{}".format(x, y) for x in 'trs' for y in 'xyz']:
-        if attr.startswith('t'):
-            cmds.setAttr('{}.{}'.format(poleVectorNode, attr), lock=True)
+    for attr in ["{}{}".format(x, y) for x in "trs" for y in "xyz"]:
+        if attr.startswith("t"):
+            cmds.setAttr("{}.{}".format(poleVectorNode, attr), lock=True)
         else:
-            cmds.setAttr('{}.{}'.format(poleVectorNode, attr), lock=True, k=False, cb=False)
+            cmds.setAttr(
+                "{}.{}".format(poleVectorNode, attr), lock=True, k=False, cb=False
+            )
 
     # check if the attribute "magnitude" exists. if not add it
-    if not cmds.objExists("{}.{}".format(poleVectorNode, 'pvMag')):
-        cmds.addAttr(poleVectorNode, ln='pvMag', at='float', dv=0, k=True)
+    if not cmds.objExists("{}.{}".format(poleVectorNode, "pvMag")):
+        cmds.addAttr(poleVectorNode, ln="pvMag", at="float", dv=0, k=True)
 
     # get the world space factors of the three points
-    start = node.decomposeMatrix("{}.worldMatrix".format(matchList[0]), name=matchList[0])
+    start = node.decomposeMatrix(
+        "{}.worldMatrix".format(matchList[0]), name=matchList[0]
+    )
     mid = node.decomposeMatrix("{}.worldMatrix".format(matchList[1]), name=matchList[1])
     end = node.decomposeMatrix("{}.worldMatrix".format(matchList[2]), name=matchList[2])
 
     # get the line and point vectors
-    line = node.plusMinusAverage3D(["{}.outputTranslate".format(end),
-                                    "{}.outputTranslate".format(start)],
-                                   operation='sub',
-                                   name=matchList[1] + "_line")
-    point = node.plusMinusAverage3D(["{}.outputTranslate".format(mid),
-                                     "{}.outputTranslate".format(start)],
-                                    operation='sub',
-                                    name=matchList[1] + "_point")
+    line = node.plusMinusAverage3D(
+        ["{}.outputTranslate".format(end), "{}.outputTranslate".format(start)],
+        operation="sub",
+        name=matchList[1] + "_line",
+    )
+    point = node.plusMinusAverage3D(
+        ["{}.outputTranslate".format(mid), "{}.outputTranslate".format(start)],
+        operation="sub",
+        name=matchList[1] + "_point",
+    )
 
-    pointLine = node.vectorProduct("{}.output3D".format(line),
-                                   "{}.output3D".format(point),
-                                   operation='dot',
-                                   name=matchList[1] + 'pointXLine')
-    lineLine = node.vectorProduct("{}.output3D".format(line),
-                                  "{}.output3D".format(line),
-                                  operation='dot',
-                                  name=matchList[1] + 'lineXLine')
+    pointLine = node.vectorProduct(
+        "{}.output3D".format(line),
+        "{}.output3D".format(point),
+        operation="dot",
+        name=matchList[1] + "pointXLine",
+    )
+    lineLine = node.vectorProduct(
+        "{}.output3D".format(line),
+        "{}.output3D".format(line),
+        operation="dot",
+        name=matchList[1] + "lineXLine",
+    )
 
-    scaleValue = node.multiplyDivide("{}.output".format(pointLine),
-                                     "{}.output".format(lineLine),
-                                     operation='div',
-                                     name=matchList[1] + 'scaleValue')
-    projVec = node.multiplyDivide('{}.output3D'.format(line),
-                                  "{}.output".format(scaleValue),
-                                  name=matchList[1] + "_proj")
-    projVecStart = node.plusMinusAverage3D(['{}.output'.format(projVec),
-                                            '{}.outputTranslate'.format(start)],
-                                           name=matchList[1] + "_projVec")
+    scaleValue = node.multiplyDivide(
+        "{}.output".format(pointLine),
+        "{}.output".format(lineLine),
+        operation="div",
+        name=matchList[1] + "scaleValue",
+    )
+    projVec = node.multiplyDivide(
+        "{}.output3D".format(line),
+        "{}.output".format(scaleValue),
+        name=matchList[1] + "_proj",
+    )
+    projVecStart = node.plusMinusAverage3D(
+        ["{}.output".format(projVec), "{}.outputTranslate".format(start)],
+        name=matchList[1] + "_projVec",
+    )
 
-    offsetVec = node.plusMinusAverage3D(["{}.outputTranslate".format(mid),
-                                         "{}.output3D".format(projVecStart)],
-                                        operation='sub',
-                                        name=matchList[1] + '_offset')
-    offsetVecNormal = node.vectorProduct("{}.output3D".format(offsetVec),
-                                         normalize=True,
-                                         operation='none',
-                                         name=matchList[1] + '_norm')
+    offsetVec = node.plusMinusAverage3D(
+        ["{}.outputTranslate".format(mid), "{}.output3D".format(projVecStart)],
+        operation="sub",
+        name=matchList[1] + "_offset",
+    )
+    offsetVecNormal = node.vectorProduct(
+        "{}.output3D".format(offsetVec),
+        normalize=True,
+        operation="none",
+        name=matchList[1] + "_norm",
+    )
 
     # get the length between the two start and end (AKA the magnitude of the vector)
-    midDist = cmds.createNode('distanceBetween', name=matchList[1] + '_mag_' + common.DISTANCEBETWEEN)
-    cmds.connectAttr('{}.outputTranslate'.format(start), "{}.point1".format(midDist))
-    cmds.connectAttr('{}.outputTranslate'.format(mid), "{}.point2".format(midDist))
+    midDist = cmds.createNode(
+        "distanceBetween", name=matchList[1] + "_mag_" + common.DISTANCEBETWEEN
+    )
+    cmds.connectAttr("{}.outputTranslate".format(start), "{}.point1".format(midDist))
+    cmds.connectAttr("{}.outputTranslate".format(mid), "{}.point2".format(midDist))
 
-    endDist = cmds.createNode('distanceBetween', name=matchList[2] + '_mag_' + common.DISTANCEBETWEEN)
-    cmds.connectAttr('{}.outputTranslate'.format(mid), "{}.point1".format(endDist))
-    cmds.connectAttr('{}.outputTranslate'.format(end), "{}.point2".format(endDist))
+    endDist = cmds.createNode(
+        "distanceBetween", name=matchList[2] + "_mag_" + common.DISTANCEBETWEEN
+    )
+    cmds.connectAttr("{}.outputTranslate".format(mid), "{}.point1".format(endDist))
+    cmds.connectAttr("{}.outputTranslate".format(end), "{}.point2".format(endDist))
 
-    fullDist = node.addDoubleLinear("{}.distance".format(midDist), "{}.distance".format(endDist),
-                                    name=matchList[1] + 'addDist')
+    fullDist = node.addDoubleLinear(
+        "{}.distance".format(midDist),
+        "{}.distance".format(endDist),
+        name=matchList[1] + "addDist",
+    )
 
-    outMag = node.addDoubleLinear("{}.output".format(fullDist),
-                                  "{}.pvMag".format(poleVectorNode),
-                                  name=matchList[1] + '_pvMag')
+    outMag = node.addDoubleLinear(
+        "{}.output".format(fullDist),
+        "{}.pvMag".format(poleVectorNode),
+        name=matchList[1] + "_pvMag",
+    )
 
-    magVec = node.multiplyDivide("{}.output".format(offsetVecNormal),
-                                 ["{}.output".format(outMag) for _ in range(3)],
-                                 name=matchList[0] + '_mag')
-    pvPos = node.plusMinusAverage3D(["{}.output".format(magVec),
-                                     "{}.outputTranslate".format(mid)],
-                                    name=matchList[1] + '_pvPos')
+    magVec = node.multiplyDivide(
+        "{}.output".format(offsetVecNormal),
+        ["{}.output".format(outMag) for _ in range(3)],
+        name=matchList[0] + "_mag",
+    )
+    pvPos = node.plusMinusAverage3D(
+        ["{}.output".format(magVec), "{}.outputTranslate".format(mid)],
+        name=matchList[1] + "_pvPos",
+    )
 
     # connect our pvPos to the poleVectorNode
     cmds.connectAttr("{}.output3D".format(pvPos), "{}.t".format(poleVectorNode), f=True)
 
-    meta.tag(poleVectorNode, 'guide')
+    meta.tag(poleVectorNode, "guide")
     return poleVectorNode
 
 
-def createLiveMirror(jointList, axis='x', mode='rotate'):
+def createLiveMirror(jointList, axis="x", mode="rotate"):
     """
     Create a live mirror between a joint and its mirror
     :param jointList: list of joints to mirror
@@ -132,10 +168,12 @@ def createLiveMirror(jointList, axis='x', mode='rotate'):
     :return: list of mirrored joints
     """
     jointList = common.toList(jointList)
-    suf = '_lm'
+    suf = "_lm"
     # Validate cmds which to mirror axis,
-    if axis.lower() not in ('x', 'y', 'z'):
-        raise ValueError("Keyword Argument: 'axis' not of accepted value ('x', 'y', 'z').")
+    if axis.lower() not in ("x", "y", "z"):
+        raise ValueError(
+            "Keyword Argument: 'axis' not of accepted value ('x', 'y', 'z')."
+        )
 
     for jnt in jointList:
         if not cmds.objExists(jnt):
@@ -146,11 +184,13 @@ def createLiveMirror(jointList, axis='x', mode='rotate'):
             raise RuntimeError("Node not found: {}".format(mirrorJnt))
 
         # Create the mirror setup and nodes
-        mirrorTgt = cmds.createNode('transform', n=mirrorJnt + suf + '_' + common.TARGET)
+        mirrorTgt = cmds.createNode(
+            "transform", n=mirrorJnt + suf + "_" + common.TARGET
+        )
         cmds.delete(cmds.parentConstraint(mirrorJnt, mirrorTgt, mo=False))
 
         if not cmds.objExists(MIRROR_GRP_NAME):
-            cmds.createNode('transform', n=MIRROR_GRP_NAME)
+            cmds.createNode("transform", n=MIRROR_GRP_NAME)
         cmds.parent(mirrorTgt, MIRROR_GRP_NAME)
 
         # create the node network to mirror the position
@@ -158,89 +198,136 @@ def createLiveMirror(jointList, axis='x', mode='rotate'):
         inversePos = node.multiplyDivide(
             "{}.outputTranslate".format(dcmp),
             [-1, -1, -1],
-            name=jnt + '_invertPos' + suf)
+            name=jnt + "_invertPos" + suf,
+        )
 
         # Issolate the x, y and z vectors.
         xVector = node.vectorProduct(
             "{}.outputTranslate".format(dcmp),
-            [1, 0, 0], operation='dot',
-            name=jnt + 'XVec' + suf)
+            [1, 0, 0],
+            operation="dot",
+            name=jnt + "XVec" + suf,
+        )
         yVector = node.vectorProduct(
             "{}.outputTranslate".format(dcmp),
             [0, 1, 0],
-            operation='dot',
-            name=jnt + 'YVec' + suf)
+            operation="dot",
+            name=jnt + "YVec" + suf,
+        )
         zVector = node.vectorProduct(
             "{}.outputTranslate".format(dcmp),
             [0, 0, 1],
-            operation='dot',
-            name=jnt + 'ZVec' + suf)
+            operation="dot",
+            name=jnt + "ZVec" + suf,
+        )
         # scale the vectors by 2
         scaled = node.multiplyDivide(
-            ["{}.outputX".format(xVector), "{}.outputX".format(yVector), "{}.outputX".format(zVector)],
+            [
+                "{}.outputX".format(xVector),
+                "{}.outputX".format(yVector),
+                "{}.outputX".format(zVector),
+            ],
             [2, 2, 2],
-            name=jnt + 'dotScaled')
+            name=jnt + "dotScaled",
+        )
         # invert the isolated vectors
-        invTotal = node.plusMinusAverage3D(["{}.output".format(inversePos),
-                                            "{}.output".format(scaled)],
-                                           name=jnt + '_total' + suf)
+        invTotal = node.plusMinusAverage3D(
+            ["{}.output".format(inversePos), "{}.output".format(scaled)],
+            name=jnt + "_total" + suf,
+        )
 
         # create the network for the mirror rotation
-        quatInvert = cmds.createNode("quatInvert", n=jnt + '_quatInvert' + suf)
-        cmds.connectAttr("{}.outputQuat".format(dcmp), "{}.inputQuat".format(quatInvert))
+        quatInvert = cmds.createNode("quatInvert", n=jnt + "_quatInvert" + suf)
+        cmds.connectAttr(
+            "{}.outputQuat".format(dcmp), "{}.inputQuat".format(quatInvert)
+        )
 
-        if axis == 'x':
-            posList = ["{}.outputX".format(inversePos), '{}.output3Dy'.format(invTotal),
-                       '{}.output3Dz'.format(invTotal)]
-            quatList = ["{}.outputQuatX".format(dcmp), "{}.outputQuatY".format(quatInvert),
-                        "{}.outputQuatZ".format(quatInvert), "{}.outputQuatW".format(quatInvert)]
-        if axis == 'y':
-            posList = ['{}.output3Dx'.format(invTotal), "{}.outputY".format(inversePos),
-                       '{}.output3Dz'.format(invTotal)]
-            quatList = ["{}.outputQuatX".format(quatInvert), "{}.outputQuatY".format(dcmp),
-                        "{}.outputQuatZ".format(quatInvert), "{}.outputQuatW".format(quatInvert)]
-        if axis == 'z':
-            posList = ['{}.output3Dx'.format(invTotal), "{}.output3Dy".format(invTotal),
-                       '{}.outputZ'.format(inversePos)]
-            quatList = ["{}.outputQuatX".format(quatInvert), "{}.outputQuatY".format(quatInvert),
-                        "{}.outputQuatZ".format(dcmp), "{}.outputQuatW".format(quatInvert)]
+        if axis == "x":
+            posList = [
+                "{}.outputX".format(inversePos),
+                "{}.output3Dy".format(invTotal),
+                "{}.output3Dz".format(invTotal),
+            ]
+            quatList = [
+                "{}.outputQuatX".format(dcmp),
+                "{}.outputQuatY".format(quatInvert),
+                "{}.outputQuatZ".format(quatInvert),
+                "{}.outputQuatW".format(quatInvert),
+            ]
+        if axis == "y":
+            posList = [
+                "{}.output3Dx".format(invTotal),
+                "{}.outputY".format(inversePos),
+                "{}.output3Dz".format(invTotal),
+            ]
+            quatList = [
+                "{}.outputQuatX".format(quatInvert),
+                "{}.outputQuatY".format(dcmp),
+                "{}.outputQuatZ".format(quatInvert),
+                "{}.outputQuatW".format(quatInvert),
+            ]
+        if axis == "z":
+            posList = [
+                "{}.output3Dx".format(invTotal),
+                "{}.output3Dy".format(invTotal),
+                "{}.outputZ".format(inversePos),
+            ]
+            quatList = [
+                "{}.outputQuatX".format(quatInvert),
+                "{}.outputQuatY".format(quatInvert),
+                "{}.outputQuatZ".format(dcmp),
+                "{}.outputQuatW".format(quatInvert),
+            ]
 
         # Compose the mirrored position into a matrix to get a proper offset
-        rotOrder = ['xyz', 'yzx', 'zxy', 'xzy', 'yxz', 'zyx'][cmds.getAttr("{}.rotateOrder".format(mirrorJnt))]
+        rotOrder = ["xyz", "yzx", "zxy", "xzy", "yxz", "zyx"][
+            cmds.getAttr("{}.rotateOrder".format(mirrorJnt))
+        ]
 
         compMatrix = node.composeMatrix(
             inputTranslate=posList,
             inputQuat=quatList,
             eulerRotation=False,
             rotateOrder=rotOrder,
-            name=jnt + '_mirrorMatrix' + suf)
+            name=jnt + "_mirrorMatrix" + suf,
+        )
 
         # Calculate the offset
-        worldInverseMatrix = om2.MMatrix(cmds.getAttr('{}.{}'.format(jnt, 'worldInverseMatrix')))
-        matrix = om2.MMatrix(cmds.getAttr('{}.{}'.format(mirrorTgt, 'worldMatrix')))
-        offsetMatrix = (matrix * worldInverseMatrix)
+        worldInverseMatrix = om2.MMatrix(
+            cmds.getAttr("{}.{}".format(jnt, "worldInverseMatrix"))
+        )
+        matrix = om2.MMatrix(cmds.getAttr("{}.{}".format(mirrorTgt, "worldMatrix")))
+        offsetMatrix = matrix * worldInverseMatrix
 
-        node.multMatrix([
-            "{}.outputMatrix".format(compMatrix),
-            "{}.parentInverseMatrix".format(mirrorTgt)],
+        node.multMatrix(
+            [
+                "{}.outputMatrix".format(compMatrix),
+                "{}.parentInverseMatrix".format(mirrorTgt),
+            ],
             outputs=mirrorTgt,
-            t=True,
-            r=False,
-            name=mirrorTgt + '_mirrorPos' + suf
-            )
-        node.multMatrix([
-            list(offsetMatrix),
-            "{}.outputMatrix".format(compMatrix),
-            "{}.parentInverseMatrix".format(mirrorTgt)],
+            translate=True,
+            rotate=False,
+            name=mirrorTgt + "_mirrorPos" + suf,
+        )
+        node.multMatrix(
+            [
+                list(offsetMatrix),
+                "{}.outputMatrix".format(compMatrix),
+                "{}.parentInverseMatrix".format(mirrorTgt),
+            ],
             outputs=mirrorTgt,
-            t=False,
-            r=True,
-            name=mirrorTgt + '_mirrorRot' + suf
-            )
+            translate=False,
+            rotate=True,
+            name=mirrorTgt + "_mirrorRot" + suf,
+        )
 
         # connect our mirror target with a parent constraint
-        cmds.pointConstraint(mirrorTgt, mirrorJnt, n=mirrorJnt + common.POINTCONSTRAINT, mo=False)
-        cmds.orientConstraint(mirrorTgt, mirrorJnt, n=mirrorJnt + common.ORIENTCONSTRAINT, mo=True)
+        cmds.pointConstraint(
+            mirrorTgt, mirrorJnt, n=mirrorJnt + common.POINTCONSTRAINT, mo=False
+        )
+        cmds.orientConstraint(
+            mirrorTgt, mirrorJnt, n=mirrorJnt + common.ORIENTCONSTRAINT, mo=True
+        )
 
 
 @rigamajig2.maya.decorators.oneUndo
@@ -260,7 +347,7 @@ def pin(nodes=None):
     pinHrc = PIN_HRC_NAME
     if not cmds.objExists(pinHrc):
         pinHrc = cmds.createNode("transform", name=pinHrc)
-    rig_attr.lockAndHide(pinHrc, rig_attr.TRANSFORMS + ['v'])
+    rig_attr.lockAndHide(pinHrc, rig_attr.TRANSFORMS + ["v"])
 
     for node in nodes:
         if cmds.objExists("{}.__isPinned__".format(node)):
@@ -271,18 +358,22 @@ def pin(nodes=None):
         pinTrs = cmds.spaceLocator(name=node + "_pin")[0]
         transform.matchTransform(node, pinTrs)
         cmds.parent(pinTrs, pinHrc)
-        rig_attr.lockAndHide(pinTrs, rig_attr.TRANSFORMS + ['v'])
+        rig_attr.lockAndHide(pinTrs, rig_attr.TRANSFORMS + ["v"])
         cmds.parentConstraint(pinTrs, node, mo=True)
         rig_attr.lock(node, rig_attr.TRANSFORMS)
 
         # store the color information before the pin.
         data = dict()
-        data['prePin_overrideEnabled'] = cmds.getAttr("{}.overrideEnabled".format(node))
-        data['prePin_overrideRGBColors'] = cmds.getAttr("{}.overrideRGBColors".format(node))
-        if data['prePin_overrideRGBColors']:
-            data['prePin_overrideColorRGB'] = cmds.getAttr("{}.overrideColorRGB".format(node))[0]
+        data["prePin_overrideEnabled"] = cmds.getAttr("{}.overrideEnabled".format(node))
+        data["prePin_overrideRGBColors"] = cmds.getAttr(
+            "{}.overrideRGBColors".format(node)
+        )
+        if data["prePin_overrideRGBColors"]:
+            data["prePin_overrideColorRGB"] = cmds.getAttr(
+                "{}.overrideColorRGB".format(node)
+            )[0]
         else:
-            data['prePin_overrideColor'] = cmds.getAttr("{}.overrideColor".format(node))
+            data["prePin_overrideColor"] = cmds.getAttr("{}.overrideColor".format(node))
 
         metaNode = meta.MetaNode(pinTrs)
         metaNode.setDataDict(data, hide=True, lock=True)
@@ -309,40 +400,42 @@ def unpin(nodes=None):
         if not cmds.objExists("{}.__isPinned__".format(node)):
             continue
 
-        parentConst = cmds.ls(cmds.listConnections("{}.tx".format(node)), type='parentConstraint')[0] or None
+        parentConst = (
+            cmds.ls(
+                cmds.listConnections("{}.tx".format(node)), type="parentConstraint"
+            )[0]
+            or None
+        )
         if parentConst:
-            pinTrs = cmds.ls(cmds.listConnections("{}.target[0].targetParentMatrix".format(parentConst)),
-                             type='transform')[0] or None
+            pinTrs = (
+                cmds.ls(
+                    cmds.listConnections(
+                        "{}.target[0].targetParentMatrix".format(parentConst)
+                    ),
+                    type="transform",
+                )[0]
+                or None
+            )
 
         # delete the parent constraint
         rig_attr.unlock(node, rig_attr.TRANSFORMS)
         cmds.delete(parentConst)
 
-        # retreive color information and set it back
-        metaNode = meta.MetaNode(pinTrs)
-        # colorData = metaNode.getAllData()
-
         cmds.setAttr("{0}.{1}".format(node, "overrideEnabled"), True)
         cmds.setAttr("{0}.{1}".format(node, "overrideRGBColors"), 0)
         cmds.setAttr("{0}.{1}".format(node, "overrideColor"), 0)
 
-        # for key in list(colorData.keys()):
-        #     attribute = key.split("_")[-1]
-        #     if isinstance(colorData[key], (list, tuple)):
-        #         cmds.setAttr("{0}.{1}".format(node, attribute), *colorData[key])
-        #     else:
-        #         cmds.setAttr("{0}.{1}".format(node, attribute), colorData[key])
-
-        # Remove the pinned tag so this node can be re-pined in the future.
         cmds.deleteAttr("{}.__isPinned__".format(node))
         cmds.delete(pinTrs)
 
     # check if the pin hrc is empty. If it is we can delete it.
-    if len(cmds.listRelatives(PIN_HRC_NAME, c=True) or list()) == 0:
+    if not cmds.listRelatives(PIN_HRC_NAME, children=True):
         cmds.delete(PIN_HRC_NAME)
 
 
-def slideBetweenTransforms(target, start, end, attrHolder=None, attrName='position', defaultValue=0.5):
+def slideBetweenTransforms(
+    target, start, end, attrHolder=None, attrName="position", defaultValue=0.5
+):
     """
     Slide a transform between two other transforms with an attribute
 
@@ -358,8 +451,20 @@ def slideBetweenTransforms(target, start, end, attrHolder=None, attrName='positi
         attrHolder = target
 
     const = cmds.pointConstraint(start, end, target, mo=False)[0]
-    rig_attr.createAttr(attrHolder, attrName, "float", defaultValue, minValue=0, maxValue=1, keyable=True)
-    cmds.connectAttr("{}.{}".format(attrHolder, attrName), "{}.{}".format(const, "target[1].targetWeight"), f=True)
+    rig_attr.createAttr(
+        attrHolder,
+        attrName,
+        "float",
+        defaultValue,
+        minValue=0,
+        maxValue=1,
+        keyable=True,
+    )
+    cmds.connectAttr(
+        "{}.{}".format(attrHolder, attrName),
+        "{}.{}".format(const, "target[1].targetWeight"),
+        f=True,
+    )
 
     revInputAttr = "{}.{}".format(attrHolder, attrName)
     revOutputNode = "{}.{}".format(const, "target[0].targetWeight")
@@ -367,7 +472,14 @@ def slideBetweenTransforms(target, start, end, attrHolder=None, attrName='positi
     return const
 
 
-def createLiveCurve(transforms, degree=3, form="Open", curveName='curve', parent=None, displayType='temp'):
+def createLiveCurve(
+    transforms,
+    degree=3,
+    form="Open",
+    curveName="curve",
+    parent=None,
+    displayType="temp",
+):
     """
     Create a curve through a list of transforms and connect each transforms to a coresponsing CV of the curve.
 
@@ -379,23 +491,33 @@ def createLiveCurve(transforms, degree=3, form="Open", curveName='curve', parent
     :param displayType: Set the display type. Valid values are: 'norm', 'temp', 'ref'
     :return: name of the curve created
     """
-    crv = curve.createCurveFromTransform(transforms, degree=degree, form=form, parent=parent, name=curveName)
+    crv = curve.createCurveFromTransform(
+        transforms, degree=degree, form=form, parent=parent, name=curveName
+    )
     curveShape = cmds.listRelatives(crv, s=True) or []
 
     for i, transform in enumerate(transforms):
-        mm = cmds.createNode('multMatrix', n=curveName + "_0_mm")
-        dcmp = cmds.createNode('decomposeMatrix', n=curveName + "_0_dcmp")
+        multMatrix = cmds.createNode("multMatrix", n=curveName + "_0_mm")
+        dcmp = cmds.createNode("decomposeMatrix", n=curveName + "_0_dcmp")
 
         # connect the attributes
-        cmds.connectAttr(transform + '.worldMatrix', mm + ".matrixIn[0]", f=True)
-        cmds.connectAttr(crv + '.worldInverseMatrix', mm + ".matrixIn[1]", f=True)
-        cmds.connectAttr(mm + '.matrixSum', dcmp + '.inputMatrix')
-        cmds.connectAttr(dcmp + '.outputTranslate',  '{}.controlPoints[{}]'.format(curveShape[0], i), f=True)
+        cmds.connectAttr(
+            transform + ".worldMatrix", multMatrix + ".matrixIn[0]", f=True
+        )
+        cmds.connectAttr(
+            crv + ".worldInverseMatrix", multMatrix + ".matrixIn[1]", f=True
+        )
+        cmds.connectAttr(multMatrix + ".matrixSum", dcmp + ".inputMatrix")
+        cmds.connectAttr(
+            dcmp + ".outputTranslate",
+            "{}.controlPoints[{}]".format(curveShape[0], i),
+            f=True,
+        )
 
     # set the curve display type
-    displayTypeDict = {'norm': 0, 'temp': 1, 'ref': 2}
+    displayTypeDict = {"norm": 0, "temp": 1, "ref": 2}
 
-    cmds.setAttr(crv + '.overrideEnabled', 1)
-    cmds.setAttr(crv + '.overrideDisplayType', displayTypeDict[displayType])
+    cmds.setAttr(crv + ".overrideEnabled", 1)
+    cmds.setAttr(crv + ".overrideDisplayType", displayTypeDict[displayType])
 
     return crv

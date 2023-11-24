@@ -10,6 +10,7 @@ import rigamajig2.maya.attr as attr
 
 logger = logging.getLogger(__name__)
 
+
 def getPlugInput(plug):
     """
     Returns the input of a plug
@@ -19,7 +20,9 @@ def getPlugInput(plug):
     :rtype: str
     """
     plugList = list()
-    for sourcePlug in cmds.listConnections(plug, source=True, destination=False, plugs=True) or []:
+    for sourcePlug in (
+        cmds.listConnections(plug, source=True, destination=False, plugs=True) or []
+    ):
         plugList.append(str(sourcePlug))
     return plugList
 
@@ -33,7 +36,9 @@ def getPlugOutput(plug):
     :rtype: str
     """
     plugList = list()
-    for sourcePlug in cmds.listConnections(plug, source=False, destination=True, plugs=True) or []:
+    for sourcePlug in (
+        cmds.listConnections(plug, source=False, destination=True, plugs=True) or []
+    ):
         plugList.append(str(sourcePlug))
     return plugList
 
@@ -53,22 +58,22 @@ def connectPlugs(source, destination):
     mdgModifier.doIt()
 
 
-def connectTransforms(source, destination, t=True, r=True, s=True):
+def connectTransforms(source, destination, translate=True, rotate=True, scale=True):
     """
     Connect the transform plugs between two nodes.
 
     :param str source: node on the source end of the connection
     :param str destination: node on the destination end of the connection
-    :param bool t:
-    :param bool r:
-    :param bool s:
+    :param bool translate:
+    :param bool rotate:
+    :param bool scale:
     """
     attrs = list()
-    if t:
+    if translate:
         attrs += ["tx", "ty", "tz"]
-    if r:
+    if rotate:
         attrs += ["rx", "ry", "rz"]
-    if s:
+    if scale:
         attrs += ["sx", "sy", "sz"]
 
     for attr in attrs:
@@ -84,4 +89,8 @@ def connectPlugs2(source, destination):
     if attr.isCompound(source) == attr.isCompound(destination):
         cmds.connectAttr(source, destination, f=True)
     else:
-        logger.error('Cannot connect compound and non-compound attributes: {} to {}'.format(source, destination))
+        logger.error(
+            "Cannot connect compound and non-compound attributes: {} to {}".format(
+                source, destination
+            )
+        )

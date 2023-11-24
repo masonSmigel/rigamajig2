@@ -37,11 +37,16 @@ class JointData(node_data.NodeData):
         data = OrderedDict()
         parent = cmds.listRelatives(node, parent=True)
 
-        data['parent'] = parent[0] if parent else None
-        data['jointOrient'] = [round(value, 4) for value in cmds.getAttr("{0}.jo".format(node))[0]]
-        data['preferredAngle'] = [round(value, 4) for value in cmds.getAttr("{0}.preferredAngle".format(node))[0]]
-        data['drawStyle'] = cmds.getAttr("{0}.drawStyle".format(node))
-        data['radius'] = cmds.getAttr("{0}.radius".format(node))
+        data["parent"] = parent[0] if parent else None
+        data["jointOrient"] = [
+            round(value, 4) for value in cmds.getAttr("{0}.jo".format(node))[0]
+        ]
+        data["preferredAngle"] = [
+            round(value, 4)
+            for value in cmds.getAttr("{0}.preferredAngle".format(node))[0]
+        ]
+        data["drawStyle"] = cmds.getAttr("{0}.drawStyle".format(node))
+        data["radius"] = cmds.getAttr("{0}.radius".format(node))
 
         self._data[node].update(data)
 
@@ -57,7 +62,9 @@ class JointData(node_data.NodeData):
 
         for node in nodes:
             if "parent" in self._data[node]:
-                if self._data[node]["parent"] and cmds.objExists(self._data[node]["parent"]):
+                if self._data[node]["parent"] and cmds.objExists(
+                    self._data[node]["parent"]
+                ):
                     # check to make sure the node isnt already parented to the parent
                     parents = cmds.listRelatives(node, p=True) or []
                     if self._data[node]["parent"] not in parents:

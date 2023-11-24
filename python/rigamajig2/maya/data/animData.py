@@ -25,7 +25,7 @@ if sys.version_info.major >= 3:
 
 
 class AnimData(maya_data.MayaData):
-    """ This class to save and load  animation data"""
+    """This class to save and load  animation data"""
 
     def __init__(self):
         """
@@ -72,10 +72,10 @@ class AnimData(maya_data.MayaData):
                 mfnAnimCurve = oma.MFnAnimCurve(connectedNodeMObject)
                 data[attrName] = OrderedDict()
 
-                data[attrName]['animCurveType'] = mfnAnimCurve.animCurveType
-                data[attrName]['preInfinity'] = mfnAnimCurve.preInfinityType
-                data[attrName]['postInfinity'] = mfnAnimCurve.postInfinityType
-                data[attrName]['weightedTangents'] = mfnAnimCurve.isWeighted
+                data[attrName]["animCurveType"] = mfnAnimCurve.animCurveType
+                data[attrName]["preInfinity"] = mfnAnimCurve.preInfinityType
+                data[attrName]["postInfinity"] = mfnAnimCurve.postInfinityType
+                data[attrName]["weightedTangents"] = mfnAnimCurve.isWeighted
 
                 # find the number of keys in the animation curve
                 numKeys = mfnAnimCurve.numKeys
@@ -108,7 +108,9 @@ class AnimData(maya_data.MayaData):
                     # in tangent
                     inTangentType = mfnAnimCurve.inTangentType(keyIndex)
                     inTangentTypeList.append(inTangentType)
-                    inTangentAngleWeight = mfnAnimCurve.getTangentAngleWeight(keyIndex, 1)
+                    inTangentAngleWeight = mfnAnimCurve.getTangentAngleWeight(
+                        keyIndex, 1
+                    )
                     inTangentMAngle = om.MAngle(inTangentAngleWeight[0])
                     inTangentAngleValue = inTangentMAngle.value
                     inTangentAngleList.append(inTangentAngleValue)
@@ -117,21 +119,23 @@ class AnimData(maya_data.MayaData):
                     # out Tangent
                     outTangentType = mfnAnimCurve.outTangentType(keyIndex)
                     outTangentTypeList.append(outTangentType)
-                    outTangentAngleWeight = mfnAnimCurve.getTangentAngleWeight(keyIndex, 0)
+                    outTangentAngleWeight = mfnAnimCurve.getTangentAngleWeight(
+                        keyIndex, 0
+                    )
                     outTangentMAngle = om.MAngle(outTangentAngleWeight[0])
                     outTangentAngleValue = outTangentMAngle.value
                     outTangentAngleList.append(outTangentAngleValue)
                     outTangentWeightList.append(outTangentAngleWeight[1])
 
-                data[attrName]['timeList'] = timeList
-                data[attrName]['valueList'] = valueList
-                data[attrName]['inTangentTypeList'] = inTangentTypeList
-                data[attrName]['inTangentAngleList'] = inTangentAngleList
-                data[attrName]['inTangentWeightList'] = inTangentWeightList
-                data[attrName]['outTangentTypeList'] = outTangentTypeList
-                data[attrName]['outTangentAngleList'] = outTangentAngleList
-                data[attrName]['outTangentWeightList'] = outTangentWeightList
-                data[attrName]['lockedTangents'] = lockedTangentsList
+                data[attrName]["timeList"] = timeList
+                data[attrName]["valueList"] = valueList
+                data[attrName]["inTangentTypeList"] = inTangentTypeList
+                data[attrName]["inTangentAngleList"] = inTangentAngleList
+                data[attrName]["inTangentWeightList"] = inTangentWeightList
+                data[attrName]["outTangentTypeList"] = outTangentTypeList
+                data[attrName]["outTangentAngleList"] = outTangentAngleList
+                data[attrName]["outTangentWeightList"] = outTangentWeightList
+                data[attrName]["lockedTangents"] = lockedTangentsList
 
         self._data[node].update(data)
 
@@ -159,7 +163,7 @@ class AnimData(maya_data.MayaData):
 
             # apply the data
             for attribute in attributes:
-                if attribute == 'dagPath':
+                if attribute == "dagPath":
                     continue
 
                 # get an MPlug for the current plug
@@ -178,36 +182,71 @@ class AnimData(maya_data.MayaData):
 
                 if newAnimCurve:
                     mfnAnimCurve = oma.MFnAnimCurve()
-                    mfnAnimCurve.create(currentMPlug, self._data[node][attribute]['animCurveType'])
+                    mfnAnimCurve.create(
+                        currentMPlug, self._data[node][attribute]["animCurveType"]
+                    )
 
-                mfnAnimCurve.setPreInfinityType(self._data[node][attribute]['preInfinity'])
-                mfnAnimCurve.setPostInfinityType(self._data[node][attribute]['postInfinity'])
-                mfnAnimCurve.setIsWeighted(self._data[node][attribute]['weightedTangents'])
+                mfnAnimCurve.setPreInfinityType(
+                    self._data[node][attribute]["preInfinity"]
+                )
+                mfnAnimCurve.setPostInfinityType(
+                    self._data[node][attribute]["postInfinity"]
+                )
+                mfnAnimCurve.setIsWeighted(
+                    self._data[node][attribute]["weightedTangents"]
+                )
 
                 mTimeList = om.MTimeArray()
                 mDoubleValueList = om.MDoubleArray()
 
-                for keyIndex in range(len(self._data[node][attribute]['timeList'])):
-                    mTimeList.append(om.MTime(self._data[node][attribute]['timeList'][keyIndex], om.MTime.uiUnit()))
-                    mDoubleValueList.append(self._data[node][attribute]['valueList'][keyIndex])
+                for keyIndex in range(len(self._data[node][attribute]["timeList"])):
+                    mTimeList.append(
+                        om.MTime(
+                            self._data[node][attribute]["timeList"][keyIndex],
+                            om.MTime.uiUnit(),
+                        )
+                    )
+                    mDoubleValueList.append(
+                        self._data[node][attribute]["valueList"][keyIndex]
+                    )
 
                 mfnAnimCurve.addKeys(mTimeList, mDoubleValueList, 0, 0, 1)
 
-                for keyIndex in range(len(self._data[node][attribute]['timeList'])):
-                    mfnAnimCurve.setInTangentType(keyIndex, self._data[node][attribute]['inTangentTypeList'][keyIndex])
-                    mfnAnimCurve.setOutTangentType(keyIndex,
-                                                   self._data[node][attribute]['outTangentTypeList'][keyIndex])
+                for keyIndex in range(len(self._data[node][attribute]["timeList"])):
+                    mfnAnimCurve.setInTangentType(
+                        keyIndex,
+                        self._data[node][attribute]["inTangentTypeList"][keyIndex],
+                    )
+                    mfnAnimCurve.setOutTangentType(
+                        keyIndex,
+                        self._data[node][attribute]["outTangentTypeList"][keyIndex],
+                    )
 
-                    mfnAnimCurve.setTangentsLocked(keyIndex, self._data[node][attribute]['lockedTangents'][keyIndex])
+                    mfnAnimCurve.setTangentsLocked(
+                        keyIndex,
+                        self._data[node][attribute]["lockedTangents"][keyIndex],
+                    )
 
-                    inTangentAngle = om.MAngle(self._data[node][attribute]['inTangentAngleList'][keyIndex])
-                    outTangentAngle = om.MAngle(self._data[node][attribute]['outTangentAngleList'][keyIndex])
+                    inTangentAngle = om.MAngle(
+                        self._data[node][attribute]["inTangentAngleList"][keyIndex]
+                    )
+                    outTangentAngle = om.MAngle(
+                        self._data[node][attribute]["outTangentAngleList"][keyIndex]
+                    )
 
                     mfnAnimCurve.setAngle(keyIndex, inTangentAngle, 1)
                     mfnAnimCurve.setAngle(keyIndex, outTangentAngle, 0)
 
-                    mfnAnimCurve.setWeight(keyIndex, self._data[node][attribute]['inTangentWeightList'][keyIndex], 1)
-                    mfnAnimCurve.setWeight(keyIndex, self._data[node][attribute]['outTangentWeightList'][keyIndex], 0)
+                    mfnAnimCurve.setWeight(
+                        keyIndex,
+                        self._data[node][attribute]["inTangentWeightList"][keyIndex],
+                        1,
+                    )
+                    mfnAnimCurve.setWeight(
+                        keyIndex,
+                        self._data[node][attribute]["outTangentWeightList"][keyIndex],
+                        0,
+                    )
 
                 # clear out attributes if getting from file
                 if gatherAttrsFromFile:

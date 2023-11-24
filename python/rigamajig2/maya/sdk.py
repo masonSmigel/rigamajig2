@@ -12,15 +12,17 @@ from rigamajig2.shared import common
 
 logger = logging.getLogger(__name__)
 
-SDKNODETYPES = ['animCurveUU', 'animCurveUA', 'animCurveUL', 'animCurveUT']
-DEFAULT_SDK_TYPE = 'animCurveUU'
+SDKNODETYPES = ["animCurveUU", "animCurveUA", "animCurveUL", "animCurveUT"]
+DEFAULT_SDK_TYPE = "animCurveUU"
 
-TANGENT_TYPE_DICT = {"linear": oma.MFnAnimCurve.kTangentLinear,
-                     "auto": oma.MFnAnimCurve.kTangentAuto,
-                     "fast": oma.MFnAnimCurve.kTangentFast,
-                     "slow": oma.MFnAnimCurve.kTangentSlow,
-                     "step": oma.MFnAnimCurve.kTangentStep,
-                     "clamp": oma.MFnAnimCurve.kTangentClamped}
+TANGENT_TYPE_DICT = {
+    "linear": oma.MFnAnimCurve.kTangentLinear,
+    "auto": oma.MFnAnimCurve.kTangentAuto,
+    "fast": oma.MFnAnimCurve.kTangentFast,
+    "slow": oma.MFnAnimCurve.kTangentSlow,
+    "step": oma.MFnAnimCurve.kTangentStep,
+    "clamp": oma.MFnAnimCurve.kTangentClamped,
+}
 
 
 def getSdkNode(driver, driven, type=None):
@@ -61,13 +63,12 @@ def getSdkDriver(sdk):
     :rtype: str
     """
     if not cmds.ls(sdk, type=SDKNODETYPES):
-        logger.error('{} is not an SDK node'.format(sdk))
-        return
+        logger.error("{} is not an SDK node".format(sdk))
+        return None
     connList = cmds.listConnections(sdk, s=True, d=False, p=True, scn=True)
     if connList:
         return common.getFirst(connList)
-    else:
-        return None
+    return None
 
 
 def getSdkDriven(sdk):
@@ -79,12 +80,14 @@ def getSdkDriven(sdk):
     :rtype: str
     """
     if not cmds.ls(sdk, type=SDKNODETYPES):
-        logger.error('{} is not an SDK node'.format(sdk))
-        return
+        logger.error("{} is not an SDK node".format(sdk))
+        return None
     connList = cmds.listConnections(sdk, s=False, d=True, p=True, scn=True)
 
-    if cmds.nodeType(connList[0]) == 'blendWeighted':
-        connList = cmds.listConnections(connList[0].split('.', 1)[0], s=False, d=True, p=True, scn=True)
+    if cmds.nodeType(connList[0]) == "blendWeighted":
+        connList = cmds.listConnections(
+            connList[0].split(".", 1)[0], s=False, d=True, p=True, scn=True
+        )
 
     if connList:
         return connList[0]
@@ -93,7 +96,14 @@ def getSdkDriven(sdk):
 
 
 # TODO:
-def createSdk(driverPlug, drivenPlug, values, preInfinity=False, postInfinity=False, tangent='linear'):
+def createSdk(
+    driverPlug,
+    drivenPlug,
+    values,
+    preInfinity=False,
+    postInfinity=False,
+    tangent="linear",
+):
     """
     Create an SDK connection
 
@@ -110,7 +120,9 @@ def createSdk(driverPlug, drivenPlug, values, preInfinity=False, postInfinity=Fa
     driverNode, driverAttr = driverPlug.split(".")
     drivenNode, drivenAttr = drivenPlug.split(".")
 
-    animCurveName = '{}_{}_{}_{}_animCurve'.format(driverNode, driverAttr, drivenNode, drivenAttr)
+    animCurveName = "{}_{}_{}_{}_animCurve".format(
+        driverNode, driverAttr, drivenNode, drivenAttr
+    )
     animCurveNode = cmds.createNode(DEFAULT_SDK_TYPE, n=animCurveName)
 
     mObject = general.getMObject(animCurveNode)
@@ -139,25 +151,33 @@ def createSdk(driverPlug, drivenPlug, values, preInfinity=False, postInfinity=Fa
         mfnAnimCurve.setInTangentType(i, TANGENT_TYPE_DICT[tangent])
         mfnAnimCurve.setOutTangentType(i, TANGENT_TYPE_DICT[tangent])
 
-    connected = cmds.listConnections(drivenPlug, source=True, destination=False, skipConversionNodes=True)
+    connected = cmds.listConnections(
+        drivenPlug, source=True, destination=False, skipConversionNodes=True
+    )
     if connected:
         nodeType = cmds.nodeType(connected[0])
 
         # if the input is a set driven key then created a blendweighted node to add the values together
         if nodeType in SDKNODETYPES:
             blendWeightedNode = createBlendWeightedNode(drivenPlug)
-            nextInput = attr.getNextAvailableElement("{}.input".format(blendWeightedNode))
+            nextInput = attr.getNextAvailableElement(
+                "{}.input".format(blendWeightedNode)
+            )
             cmds.connectAttr("{}.output".format(animCurveNode), nextInput)
 
         # if a blend weighted node is connected then connect the animCurve into the next available input
-        elif nodeType == 'blendWeighted':
+        elif nodeType == "blendWeighted":
             blendWeightedNode = connected[0]
-            nextInput = attr.getNextAvailableElement("{}.input".format(blendWeightedNode))
+            nextInput = attr.getNextAvailableElement(
+                "{}.input".format(blendWeightedNode)
+            )
             cmds.connectAttr("{}.output".format(animCurveNode), nextInput)
 
         # if the connected plug is not a animCurve or a blendWeighted node then throw an error.
         else:
-            raise Exception("{} is already connected to {}".format(drivenPlug, connected[0]))
+            raise Exception(
+                "{} is already connected to {}".format(drivenPlug, connected[0])
+            )
 
     # if nothing is connected we can connect directly to the driver plug
     else:
@@ -178,10 +198,20 @@ def createBlendWeightedNode(drivenPlug):
     drivenNode, drivenAttr = drivenPlug.split(".")
     # get the connected node. dont skip the conversion nodes in the case of connection to a rotation.
     # also get a unit conversion node. later we will check if the first node is a unit conversion and if it is delete it.
-    connected = cmds.listConnections(drivenPlug, source=True, destination=False, plugs=True, skipConversionNodes=True)
-    unitConvert = cmds.listConnections(drivenPlug, source=True, destination=False, plugs=True, skipConversionNodes=False)
+    connected = cmds.listConnections(
+        drivenPlug, source=True, destination=False, plugs=True, skipConversionNodes=True
+    )
+    unitConvert = cmds.listConnections(
+        drivenPlug,
+        source=True,
+        destination=False,
+        plugs=True,
+        skipConversionNodes=False,
+    )
 
-    blendWeightedNode = cmds.createNode("blendWeighted", n="{}_{}_blendWeighted".format(drivenNode, drivenAttr))
+    blendWeightedNode = cmds.createNode(
+        "blendWeighted", n="{}_{}_blendWeighted".format(drivenNode, drivenAttr)
+    )
 
     # if the drivenPlug has an incoming connection connect it to the blendWeightedNode
     if connected:
@@ -189,7 +219,7 @@ def createBlendWeightedNode(drivenPlug):
         # a node can only have one given input so we can get the first index of the connected list
         cmds.connectAttr(connected[0], nextPlug, f=True)
 
-    if cmds.nodeType(unitConvert[0]) == 'unitConversion':
+    if cmds.nodeType(unitConvert[0]) == "unitConversion":
         cmds.delete(unitConvert)
 
     # connect the blendWeighted to the drivenPlug

@@ -5,8 +5,7 @@
     file: basicArray.py
     author: masonsmigel
     date: 10/2022
-    description: 
-
+    description:
 """
 import maya.cmds as cmds
 
@@ -44,7 +43,9 @@ class BasicArray(base.BaseComponent):
         :param controlShape: Control shape to apply. Default: "cube"
         :param worldOrient: Orient the control to the world. Default: False
         """
-        super(BasicArray, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
+        super(BasicArray, self).__init__(
+            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
+        )
 
         self.side = common.getSide(self.name)
         self.controlShape = "sphere"
@@ -55,10 +56,18 @@ class BasicArray(base.BaseComponent):
         self.addSdk = False
         self.addBpm = False
 
-        self.defineParameter(parameter="controlShape", value=self.controlShape, dataType="string")
-        self.defineParameter(parameter="worldOrient", value=self.worldOrient, dataType="bool")
-        self.defineParameter(parameter="addSpaces", value=self.addSpaces, dataType="bool")
-        self.defineParameter(parameter="spaceType", value=self.spaceType, dataType="string")
+        self.defineParameter(
+            parameter="controlShape", value=self.controlShape, dataType="string"
+        )
+        self.defineParameter(
+            parameter="worldOrient", value=self.worldOrient, dataType="bool"
+        )
+        self.defineParameter(
+            parameter="addSpaces", value=self.addSpaces, dataType="bool"
+        )
+        self.defineParameter(
+            parameter="spaceType", value=self.spaceType, dataType="string"
+        )
         self.defineParameter(parameter="addTrs", value=self.addTrs, dataType="bool")
         self.defineParameter(parameter="addSdk", value=self.addSdk, dataType="bool")
         self.defineParameter(parameter="addBpm", value=self.addBpm, dataType="bool")
@@ -71,7 +80,9 @@ class BasicArray(base.BaseComponent):
         for i in range(len(self.input)):
             jointNameStr = "joint{}Name".format(i)
             self.controlNameAttrs.append(jointNameStr)
-            self.defineParameter(parameter=jointNameStr, value=inputBaseNames[i], dataType="string")
+            self.defineParameter(
+                parameter=jointNameStr, value=inputBaseNames[i], dataType="string"
+            )
 
     def _initialHierarchy(self):
         """Build the initial hierarchy"""
@@ -80,11 +91,15 @@ class BasicArray(base.BaseComponent):
         self.basicComponentList = list()
         for i in range(len(self.input)):
             if self.side:
-                componentName = getattr(self, self.controlNameAttrs[i]) + "_" + self.side
+                componentName = (
+                    getattr(self, self.controlNameAttrs[i]) + "_" + self.side
+                )
             else:
                 componentName = getattr(self, self.controlNameAttrs[i])
 
-            component = basic.Basic(name=componentName, input=[self.input[i]], rigParent=self.rigParent)
+            component = basic.Basic(
+                name=componentName, input=[self.input[i]], rigParent=self.rigParent
+            )
             component.defineParameter("controlShape", self.controlShape)
             component.defineParameter("worldOrient", self.worldOrient)
             component.defineParameter("addSpaces", self.addSpaces)
@@ -93,7 +108,9 @@ class BasicArray(base.BaseComponent):
             component.defineParameter("addBpm", self.addBpm)
 
             component.initializeComponent()
-            cmds.container(self.container, edit=True, force=True, addNode=component.getContainer())
+            cmds.container(
+                self.container, edit=True, force=True, addNode=component.getContainer()
+            )
             meta.tag(component.getContainer(), "subComponent")
             self.basicComponentList.append(component)
 
@@ -108,7 +125,9 @@ class BasicArray(base.BaseComponent):
 
             if self.addBpm:
                 self.bpmHierarchy = cmds.createNode(
-                    "transform", name="{}_bpm_hrc".format(self.name), parent=self.rootHierarchy
+                    "transform",
+                    name="{}_bpm_hrc".format(self.name),
+                    parent=self.rootHierarchy,
                 )
                 cmds.parent(component.bpmHierarchy, self.bpmHierarchy)
 

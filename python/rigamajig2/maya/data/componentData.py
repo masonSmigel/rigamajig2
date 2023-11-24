@@ -16,7 +16,7 @@ from rigamajig2.shared import common
 
 
 class ComponentData(abstract_data.AbstractData):
-    """ Class to gather and store component data """
+    """Class to gather and store component data"""
 
     def __init__(self):
         """
@@ -34,7 +34,8 @@ class ComponentData(abstract_data.AbstractData):
                 raise NotImplementedError
             else:
                 raise TypeError(
-                    f"{node} Failed: Component Data can only be gathered from a component class or a container")
+                    f"{node} Failed: Component Data can only be gathered from a component class or a container"
+                )
         data = node.getComponentData()
         componentName = data["name"]
         # add the component data to the main dictionary
@@ -50,7 +51,7 @@ class ComponentData(abstract_data.AbstractData):
 
         createdInstances = []
         for node in nodes:
-            moduleType = self._data[node]['type']
+            moduleType = self._data[node]["type"]
 
             componentClass = componentManager.createComponentClassInstance(moduleType)
             componentInstance = componentClass.fromData(self._data[node])

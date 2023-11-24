@@ -5,22 +5,27 @@ import logging
 
 import maya.cmds as cmds
 
+from rigamajig2.shared.common import getFirst
+
 logger = logging.getLogger(__name__)
+
 
 def deleteAllNamespace():
     """
     Delete all namespaces from a scene
     """
-    toExclude = ('UI', 'shared')
+    toExclude = ("UI", "shared")
     namespaceDict = {}
 
-    namespacesFound = cmds.namespaceInfo(':', listOnlyNamespaces=True, recurse=True, fn=True)
+    namespacesFound = cmds.namespaceInfo(
+        ":", listOnlyNamespaces=True, recurse=True, fn=True
+    )
     for namespace in namespacesFound:
         if namespace in toExclude:
             continue
         namespaceDict.setdefault(len(namespace.split(":")), []).append(namespace)
 
-    for i, lvl in enumerate(reversed(namespaceDict.keys())):
+    for _, lvl in enumerate(reversed(namespaceDict.keys())):
         for namespace in namespaceDict[lvl]:
             cmds.namespace(removeNamespace=namespace, mergeNamespaceWithParent=True)
 
@@ -70,6 +75,6 @@ def getNamespace(node):
     """
     namespaces = node.split(":")[:-1]
 
-    if len(namespaces) > 0:
-        return namespaces[0]
+    if namespaces:
+        return getFirst(namespaces)
     return None

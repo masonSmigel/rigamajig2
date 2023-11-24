@@ -25,7 +25,13 @@ MIDDLE = "md"
 TOP = "tp"
 BOTTOM = "bt"
 
-LOCATIONS = {"front": FRONT, "back": BACK, "middle": MIDDLE, "top": TOP, "bottom": BOTTOM}
+LOCATIONS = {
+    "front": FRONT,
+    "back": BACK,
+    "middle": MIDDLE,
+    "top": TOP,
+    "bottom": BOTTOM,
+}
 
 # Project path Constants
 CURRENT_FILE = __file__.replace("\\", "/")
@@ -114,7 +120,13 @@ SIMULATION = "sim"
 DELIMINATOR = "_"
 # pylint:disable=line-too-long
 NAMETEMPLATE = (
-    "{BASE}" + DELIMINATOR + "{SIDE}" + DELIMINATOR + "{LOCATION}{WARBLE}{INDEX}" + DELIMINATOR + "{EXTENSION}"
+    "{BASE}"
+    + DELIMINATOR
+    + "{SIDE}"
+    + DELIMINATOR
+    + "{LOCATION}{WARBLE}{INDEX}"
+    + DELIMINATOR
+    + "{EXTENSION}"
 )
 PADDING = 2
 MAXITTERATIONS = 2000

@@ -44,7 +44,11 @@ def wipeKeys(nodes, attributes=None, reset=False):
             plug = "{}.{}".format(node, attribute)
             # if the plug doesnt exist we can skip it and give a warning
             if not cmds.objExists(plug):
-                logger.warning("The attribute '{}' does not exist. Cannot wipe non-existant attributes".format(plug))
+                logger.warning(
+                    "The attribute '{}' does not exist. Cannot wipe non-existant attributes".format(
+                        plug
+                    )
+                )
                 continue
 
             # cut the keyframes
@@ -87,10 +91,11 @@ def bake(nodes, start=None, end=None, attributes=None):
         removeBakedAnimFromLayer=False,
         bakeOnOverrideLayer=False,
         minimizeRotation=True,
-        sampleBy=1.0)
+        sampleBy=1.0,
+    )
 
     if attributes:
-        kwargs['at'] = attributes
+        kwargs["at"] = attributes
 
     # bake the nodes with the given attribute list
     cmds.bakeResults(nodes, **kwargs)

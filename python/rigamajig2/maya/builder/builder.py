@@ -11,7 +11,7 @@
 import logging
 import os
 import time
-import typing
+from typing import *
 
 import maya.api.OpenMaya as om2
 import maya.cmds as cmds
@@ -28,8 +28,8 @@ from rigamajig2.maya.builder import dataIO
 from rigamajig2.maya.builder import model
 from rigamajig2.maya.components import base
 
-_Component = typing.Type[base.BaseComponent]
-_StringList = typing.List[str]
+_Component = Type[base.BaseComponent]
+_StringList = List[str]
 
 logger = logging.getLogger(__name__)
 
@@ -79,7 +79,7 @@ class Builder(object):
         if rigFile:
             self.setRigFile(rigFile)
 
-    def getAvailableComponents(self) -> typing.List[str]:
+    def getAvailableComponents(self) -> List[str]:
         """Get all available components"""
         return self._availableComponents
 
@@ -94,11 +94,11 @@ class Builder(object):
             return os.path.realpath(os.path.join(self.rigEnvironment, filepath))
 
     @property
-    def archetypeParent(self) -> str or typing.List[str]:
+    def archetypeParent(self) -> str or List[str]:
         return self._archetypeParent
 
     @archetypeParent.setter
-    def archetypeParent(self, value: str or typing.List[str]):
+    def archetypeParent(self, value: str or List[str]):
         self._archetypeParent = value
 
     @property
@@ -121,47 +121,47 @@ class Builder(object):
         self._modelFile = value
 
     @property
-    def jointFiles(self) -> typing.List[path.RelativePath]:
+    def jointFiles(self) -> List[path.RelativePath]:
         return self._jointFiles
 
     @jointFiles.setter
-    def jointFiles(self, value: typing.List[path.RelativePath]):
+    def jointFiles(self, value: List[path.RelativePath]):
         logger.debug(f"Set joint files to: {value}")
         self._jointFiles = value
 
     @property
-    def guideFiles(self) -> typing.List[path.RelativePath]:
+    def guideFiles(self) -> List[path.RelativePath]:
         return self._guideFiles
 
     @guideFiles.setter
-    def guideFiles(self, value: typing.List[path.RelativePath]):
+    def guideFiles(self, value: List[path.RelativePath]):
         logger.debug(f"Set guide files to: {value}")
         self._guideFiles = value
 
     @property
-    def componentFiles(self) -> typing.List[path.RelativePath]:
+    def componentFiles(self) -> List[path.RelativePath]:
         return self._componentFiles
 
     @componentFiles.setter
-    def componentFiles(self, value: typing.List[path.RelativePath]):
+    def componentFiles(self, value: List[path.RelativePath]):
         logger.debug(f"Set component files to: {value}")
         self._componentFiles = value
 
     @property
-    def controlShapeFiles(self) -> typing.List[path.RelativePath]:
+    def controlShapeFiles(self) -> List[path.RelativePath]:
         return self._controlShapeFiles
 
     @controlShapeFiles.setter
-    def controlShapeFiles(self, value: typing.List[path.RelativePath]):
+    def controlShapeFiles(self, value: List[path.RelativePath]):
         logger.debug(f"Set controlShape files to: {value}")
         self._controlShapeFiles = value
 
     @property
-    def poseReadersFiles(self) -> typing.List[path.RelativePath]:
+    def poseReadersFiles(self) -> List[path.RelativePath]:
         return self._poseReadersFiles
 
     @poseReadersFiles.setter
-    def poseReadersFiles(self, value: typing.List[path.RelativePath]):
+    def poseReadersFiles(self, value: List[path.RelativePath]):
         logger.debug(f"Set pose Reader files to: {value}")
 
         self._poseReadersFiles = value
@@ -182,11 +182,11 @@ class Builder(object):
         self._skinsFile = value
 
     @property
-    def deformerFiles(self) -> typing.List[path.RelativePath]:
+    def deformerFiles(self) -> List[path.RelativePath]:
         return self._deformerFiles
 
     @deformerFiles.setter
-    def deformerFiles(self, value: typing.List[path.RelativePath]):
+    def deformerFiles(self, value: List[path.RelativePath]):
         logger.debug(f"Set deformer files to: {value}")
         self._deformerFiles = value
 
@@ -229,7 +229,7 @@ class Builder(object):
         self._outputFileType = value
 
     @property
-    def localPreScripts(self) -> typing.List[path.RelativePath]:
+    def localPreScripts(self) -> List[path.RelativePath]:
         """List of pre scripts local to this rig file"""
         return self._localPreScripts
 
@@ -242,7 +242,7 @@ class Builder(object):
         self._localPreScripts = relativeScriptList
 
     @property
-    def localPostScripts(self) -> typing.List[path.RelativePath]:
+    def localPostScripts(self) -> List[path.RelativePath]:
         """List of post scripts local to this rig file"""
         return self._localPostScripts
 
@@ -255,7 +255,7 @@ class Builder(object):
         self._localPostScripts = relativeScriptList
 
     @property
-    def localPubScripts(self) -> typing.List[path.RelativePath]:
+    def localPubScripts(self) -> List[path.RelativePath]:
         """List of publish scripts local to this rig file"""
         return self._localPubScripts
 
@@ -704,11 +704,11 @@ class Builder(object):
         """Get the rig file"""
         return self.rigFile
 
-    def getComponentList(self) -> typing.List[_Component]:
+    def getComponentList(self) -> List[_Component]:
         """Get a list of all components in the builder"""
         return self.componentList
 
-    def getPublishFileInfo(self) -> tuple[None, None] or tuple[str, str]:
+    def getPublishFileInfo(self) -> Tuple[str, str]:
         """
         Get the directory and filename for the output rig file.
 
@@ -802,7 +802,7 @@ class Builder(object):
     # --------------------------------------------------------------------------------
     # SET
     # --------------------------------------------------------------------------------
-    def setComponents(self, components: typing.List[_Component]) -> None:
+    def setComponents(self, components: List[_Component]) -> None:
         """
         Set the `componentList`
 
@@ -811,7 +811,7 @@ class Builder(object):
         components = common.toList(components)
         self.componentList = components
 
-    def appendComponents(self, components: typing.List[_Component]) -> None:
+    def appendComponents(self, components: List[_Component]) -> None:
         """
         append a component
 
@@ -905,7 +905,7 @@ class Builder(object):
         logger.info(f"data saved to : {self.rigFile}")
 
     @staticmethod
-    def getRigData(rigFile: str, key: str) -> typing.Any:
+    def getRigData(rigFile: str, key: str) -> Any:
         """
         read the data from the self.rig_file. Kept here for compatibility of old code. Should probably be deleted!
 

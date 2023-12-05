@@ -55,10 +55,10 @@ def splitBlendshapeTargets(
     splitJoints = common.toList(splitJoints)
 
     if skinFile:
-        skinData = skin_data.SkinData()
-        skinData.read(skinFile)
+        skinObject = skin_data.SkinData()
+        skinObject.read(skinFile)
 
-        data = skinData.getData()
+        data = skinObject.getData()
         skinClusterNode = skinCluster.getSkinCluster(splitMesh)
         skinWeights = data.get(skinClusterNode).get("weights")
         vertexCount = data.get(skinClusterNode).get("vertexCount")

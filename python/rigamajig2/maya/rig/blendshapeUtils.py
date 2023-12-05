@@ -15,6 +15,7 @@ import maya.cmds as cmds
 from rigamajig2.maya import attr
 from rigamajig2.maya import blendshape
 from rigamajig2.maya import skinCluster
+from rigamajig2.maya.data import skinData
 from rigamajig2.shared import common
 
 Multiuse = Union[List[str], str]
@@ -55,11 +56,11 @@ def splitBlendshapeTargets(
     splitJoints = common.toList(splitJoints)
 
     if skinFile:
-        skinObject = skin_data.SkinData()
+        skinObject = skinData.SkinData()
         skinObject.read(skinFile)
 
         data = skinObject.getData()
-        skinClusterNode = skinCluster.getSkinCluster(splitMesh)
+        skinClusterNode = skinCluster.getSkinCluster(splitMesh) or common.getFirst(skinObject.getKeys())
         skinWeights = data.get(skinClusterNode).get("weights")
         vertexCount = data.get(skinClusterNode).get("vertexCount")
 
@@ -67,9 +68,7 @@ def splitBlendshapeTargets(
         skinClusterNode = skinCluster.getSkinCluster(splitMesh)
 
         if not skinClusterNode:
-            raise Exception(
-                "Your split mesh ({}) MUST have a skinCluster".format(splitMesh)
-            )
+            raise Exception(f"Your split mesh ({splitMesh}) MUST have a skinCluster")
 
         skinWeights, vertexCount = skinCluster.getWeights(splitMesh)
 
@@ -92,12 +91,8 @@ def splitBlendshapeTargets(
         blendshapeDict = dict()
         blendshapeDict["baseWeights"] = outputWeights
 
-        blendshapeNode = blendshape.create(
-            temporaryBaseMesh, targets=targets, origin="local"
-        )
-        blendshape.setWeights(
-            blendshapeNode, weights=blendshapeDict, targets=["baseWeights"]
-        )
+        blendshapeNode = blendshape.create(temporaryBaseMesh, targets=targets, origin="local")
+        blendshape.setWeights(blendshapeNode, weights=blendshapeDict, targets=["baseWeights"])
 
         targetsList = blendshape.getTargetList(blendshapeNode)
 

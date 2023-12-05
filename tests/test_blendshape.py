@@ -8,14 +8,16 @@
     description:
 
 """
-import pathlib
 import random
+from pathlib import Path
 
 import maya.cmds as cmds
 import pytest
 
 from rigamajig2.maya import blendshape
+from rigamajig2.maya import skinCluster
 from rigamajig2.maya.data import blendshapeData
+from rigamajig2.maya.rig import blendshapeUtils
 from rigamajig2.shared.common import getFirst
 from rigamajig2.shared.pytestUtils import assertAlmostEqual, getTempFilePath
 
@@ -130,7 +132,7 @@ def test_exportBlendshapeData(testScene, dataPath):
     data.gatherData(baseGeo)
     data.write(dataPath)
 
-    assert pathlib.Path(dataPath).is_file() and len(data.getData()) > 0
+    assert Path(dataPath).is_file() and len(data.getData()) > 0
 
 
 def test_importBlendshapeData(testScene, dataPath):
@@ -146,3 +148,39 @@ def test_importBlendshapeData(testScene, dataPath):
 
     blendshapeNode = getFirst(blendshape.getBlendshapeNodes(sphere))
     assert cmds.objExists(blendshapeNode) and bool(blendshape.getTargetList(blendshapeNode))
+
+
+def test_splitBlendshapeTargets(testScene):
+    baseGeo, blendshapeNode, target = testScene
+
+    splitMesh = getFirst(cmds.polySphere(constructionHistory=False, name="splitMesh"))
+    leftJoint = cmds.createNode("joint", name="l")
+    rightJoint = cmds.createNode("joint", name="r")
+
+    cmds.setAttr(f"{leftJoint}.tx", 1)
+    cmds.setAttr(f"{rightJoint}.tx", -1)
+
+    skinCluster.createSkinCluster(geometry=splitMesh, influences=[leftJoint, rightJoint], maxInfluences=1)
+
+    splitTargets = blendshapeUtils.splitBlendshapeTargets(
+        [target], splitMesh=splitMesh, splitJoints=[leftJoint, rightJoint]
+    )
+
+    assert len(splitTargets) == 2
+
+
+def test_splitBlendshapeTargetsFromFile(testScene):
+    baseGeo, blendshapeNode, target = testScene
+
+    splitMesh = getFirst(cmds.polySphere(constructionHistory=False, name="splitMesh"))
+    leftJoint = cmds.createNode("joint", name="l")
+    rightJoint = cmds.createNode("joint", name="r")
+
+    splitTargets = blendshapeUtils.splitBlendshapeTargets(
+        targets=[target],
+        splitMesh=splitMesh,
+        splitJoints=[leftJoint, rightJoint],
+        skinFile=str(Path(__file__).parent / 'splitBlendshapeWeights.json')
+    )
+
+    assert len(splitTargets) == 2

@@ -53,14 +53,14 @@ class PathSelector(QtWidgets.QWidget):
         self.pathLineEdit.editingFinished.connect(self.emitPathUpdatedSignal)
 
         self.selectPathButton = QtWidgets.QPushButton()
-        self.selectPathButton.setIcon(Resources.getIcon(":returnArrow.png"))
+        self.selectPathButton.setIcon(Resources.getIcon(":icons/general/dots-three"))
         self.selectPathButton.setFixedSize(24, 19)
         self.selectPathButton.setToolTip(self.caption)
         self.selectPathButton.setFlat(True)
         self.selectPathButton.clicked.connect(self.pickPath)
 
         self.showInFolderButton = QtWidgets.QPushButton()
-        self.showInFolderButton.setIcon(Resources.getIcon(":fileOpen.png"))
+        self.showInFolderButton.setIcon(Resources.getIcon(":icons/general/folder-open"))
         self.showInFolderButton.setFixedSize(24, 19)
         self.showInFolderButton.setToolTip("Show in Folder")
         self.showInFolderButton.setFlat(True)

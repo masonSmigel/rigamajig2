@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xml:space="preserve"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;">
+    <g id="trash.svg">
+        <rect x="0" y="0" width="256" height="256" style="fill:none;"/>
+        <path d="M216,56L40,56" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M104,104L104,168" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M152,104L152,168" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M200,56L200,208C200,212.389 196.389,216 192,216L64,216C59.611,216 56,212.389 56,208L56,56" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M168,56L168,40C168,31.223 160.777,24 152,24L104,24C95.223,24 88,31.223 88,40L88,56" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+    </g>
+</svg>

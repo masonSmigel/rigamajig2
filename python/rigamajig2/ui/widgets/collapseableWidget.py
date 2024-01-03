@@ -10,6 +10,8 @@
 """
 from PySide2 import QtWidgets, QtGui, QtCore
 
+from rigamajig2.ui.resources import Resources
+
 darkPalette = QtGui.QPalette()
 
 # base
@@ -42,8 +44,8 @@ class CollapsibleHeader(QtWidgets.QWidget):
     """
     Collapsible Header. Used in the collapseable widget.
     """
-    COLLASPED_PIXMAP = QtGui.QPixmap(':teRightArrow.png')
-    EXPANDED_PIXMAP = QtGui.QPixmap(':teDownArrow.png')
+    COLLAPSED_PIXMAP = Resources.iconToPixmap(Resources.getIcon(":icons/general/caret-right"), size=(32, 32))
+    EXPANDED_PIXMAP = Resources.iconToPixmap(Resources.getIcon(":icons/general/caret-down"), size=(32, 32))
 
     clicked = QtCore.Signal()
 
@@ -62,7 +64,8 @@ class CollapsibleHeader(QtWidgets.QWidget):
         self.hasCheckBox = addCheckbox
 
         self.iconLabel = QtWidgets.QLabel()
-        self.iconLabel.setFixedWidth(self.COLLASPED_PIXMAP.width())
+        self.iconLabel.setMaximumSize(self.COLLAPSED_PIXMAP.width(), self.COLLAPSED_PIXMAP.height())
+        self.iconLabel.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Minimum)
 
         self.checkbox = None
         if addCheckbox:
@@ -110,7 +113,7 @@ class CollapsibleHeader(QtWidgets.QWidget):
         if self._expanded:
             self.iconLabel.setPixmap(self.EXPANDED_PIXMAP)
         else:
-            self.iconLabel.setPixmap(self.COLLASPED_PIXMAP)
+            self.iconLabel.setPixmap(self.COLLAPSED_PIXMAP)
 
     def mouseReleaseEvent(self, event):
         """Emit a signal on mouse release"""

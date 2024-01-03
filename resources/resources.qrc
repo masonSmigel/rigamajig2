@@ -1,52 +1,67 @@
 <!DOCTYPE RCC>
 <RCC version="1.0">
     <qresource>
-        <file alias="arm.png">icons/components/arm.png</file>
-        <file alias="basic.png">icons/components/basic.png</file>
-        <file alias="brow.png">icons/components/brow.png</file>
-        <file alias="chain.png">icons/components/chain.png</file>
-        <file alias="cog.png">icons/components/cog.png</file>
-        <file alias="eyelid.png">icons/components/eyelid.png</file>
-        <file alias="hand.png">icons/components/hand.png</file>
-        <file alias="jaw.png">icons/components/jaw.png</file>
-        <file alias="leg.png">icons/components/leg.png</file>
-        <file alias="limb.png">icons/components/limb.png</file>
-        <file alias="lips.png">icons/components/lips.png</file>
-        <file alias="lookAt.png">icons/components/lookAt.png</file>
-        <file alias="main.png">icons/components/main.png</file>
-        <file alias="neck.png">icons/components/neck.png</file>
-        <file alias="spine.png">icons/components/spine.png</file>
-        <file alias="squash.png">icons/components/squash.png</file>
+        <file alias="icons/components/arm">icons/components/arm.png</file>
+        <file alias="icons/components/basic">icons/components/basic.png</file>
+        <file alias="icons/components/brow">icons/components/brow.png</file>
+        <file alias="icons/components/chain">icons/components/chain.png</file>
+        <file alias="icons/components/cog">icons/components/cog.png</file>
+        <file alias="icons/components/eyelid">icons/components/eyelid.png</file>
+        <file alias="icons/components/hand">icons/components/hand.png</file>
+        <file alias="icons/components/jaw">icons/components/jaw.png</file>
+        <file alias="icons/components/leg">icons/components/leg.png</file>
+        <file alias="icons/components/limb">icons/components/limb.png</file>
+        <file alias="icons/components/lips">icons/components/lips.png</file>
+        <file alias="icons/components/lookAt">icons/components/lookAt.png</file>
+        <file alias="icons/components/main">icons/components/main.png</file>
+        <file alias="icons/components/neck">icons/components/neck.png</file>
+        <file alias="icons/components/spine">icons/components/spine.png</file>
+        <file alias="icons/components/squash">icons/components/squash.png</file>
 
-        <file alias="importModel.png">icons/builder/importModel.png</file>
-        <file alias="loadAllSkins.png">icons/builder/loadAllSkins.png</file>
-        <file alias="loadComponents.png">icons/builder/loadComponents.png</file>
-        <file alias="loadControls.png">icons/builder/loadControls.png</file>
-        <file alias="loadDeformers.png">icons/builder/loadDeformers.png</file>
-        <file alias="loadDeformLayers.png">icons/builder/loadDeformLayers.png</file>
-        <file alias="loadGuides.png">icons/builder/loadGuides.png</file>
-        <file alias="loadJoints.png">icons/builder/loadJoints.png</file>
-        <file alias="loadPsd.png">icons/builder/loadPsd.png</file>
-        <file alias="loadSkinCluster.png">icons/builder/loadSkinCluster.png</file>
-        <file alias="openModel.png">icons/builder/openModel.png</file>
-        <file alias="mirrorControls.png">icons/builder/mirrorControls.png</file>
-        <file alias="manageDeformLayers.png">icons/builder/manageDeformLayers.png</file>
+        <file alias="importModel.png">icons/builder/importModel.svg</file>
+        <file alias="loadComponents.png">icons/builder/loadComponents.svg</file>
+        <file alias="loadControls.png">icons/builder/loadControls.svg</file>
+        <file alias="loadDeformers.png">icons/builder/loadDeformers.svg</file>
+        <file alias="loadDeformLayers.png">icons/builder/loadDeformLayers.svg</file>
+        <file alias="loadGuides.png">icons/builder/loadGuides.svg</file>
+        <file alias="loadJoints.png">icons/builder/loadJoints.svg</file>
+        <file alias="loadPsd.png">icons/builder/loadPsd.svg</file>
+        <file alias="loadSkinCluster.png">icons/builder/loadSkinCluster.svg</file>
+        <file alias="openModel.png">icons/builder/openModel.svg</file>
+        <file alias="mirrorControls.png">icons/builder/mirrorControls.svg</file>
+        <file alias="manageDeformLayers.png">icons/builder/manageDeformLayers.svg</file>
 
-        <file alias="saveComponents.png">icons/builder/saveComponents.png</file>
-        <file alias="saveControls.png">icons/builder/saveControls.png</file>
-        <file alias="saveDeformers.png">icons/builder/saveDeformers.png</file>
-        <file alias="saveDeformLayers.png">icons/builder/saveDeformLayers.png</file>
-        <file alias="saveGuides.png">icons/builder/saveGuides.png</file>
-        <file alias="saveJoints.png">icons/builder/saveJoints.png</file>
-        <file alias="savePsd.png">icons/builder/savePsd.png</file>
-        <file alias="saveSkinCluster.png">icons/builder/saveSkinCluster.png</file>
+        <file alias="saveComponents.png">icons/builder/saveComponents.svg</file>
+        <file alias="saveControls.png">icons/builder/saveControls.svg</file>
+        <file alias="saveDeformers.png">icons/builder/saveDeformers.svg</file>
+        <file alias="saveDeformLayers.png">icons/builder/saveDeformLayers.svg</file>
+        <file alias="saveGuides.png">icons/builder/saveGuides.svg</file>
+        <file alias="saveJoints.png">icons/builder/saveJoints.svg</file>
+        <file alias="savePsd.png">icons/builder/savePsd.svg</file>
+        <file alias="saveSkinCluster.png">icons/builder/saveSkinCluster.svg</file>
 
         <file alias="hidden.png">icons/general/hidden.png</file>
         <file alias="visible.png">icons/general/visible.png</file>
         <file alias="partiallyVisible.png">icons/general/partiallyVisible.png</file>
-        <file alias="load.png">icons/general/load.png</file>
-        <file alias="save.png">icons/general/save.png</file>
-        <file alias="returnArrow.png">icons/general/returnArrow.png</file>
+        <file alias="icons/general/folder-open">icons/general/folder-open.svg</file>
+        <file alias="icons/general/folder-search">icons/general/folder-search.svg</file>
+        <file alias="icons/general/save">icons/general/save.svg</file>
+        <file alias="icons/general/file-plus">icons/general/file-plus.svg</file>
+        <file alias="icons/general/file">icons/general/file.svg</file>
+        <file alias="icons/general/refresh">icons/general/refresh.svg</file>
+        <file alias="icons/general/trash">icons/general/trash.svg</file>
+        <file alias="icons/general/plus">icons/general/plus.svg</file>
+        <file alias="icons/general/clock-countdown">icons/general/clock-countdown.svg</file>
+        <file alias="icons/general/dots-three">icons/general/dots-three.svg</file>
+        <file alias="icons/general/caret-right">icons/general/caret-right.svg</file>
+        <file alias="icons/general/caret-down">icons/general/caret-down.svg</file>
+        <file alias="icons/general/caret-up">icons/general/caret-up.svg</file>
+        <file alias="icons/general/caret-left">icons/general/caret-left.svg</file>
+        <file alias="icons/general/skip-forward">icons/general/skip-forward.svg</file>
+        <file alias="icons/general/presentation-chart">icons/general/presentation-chart.svg</file>
+        <file alias="icons/general/scatter-plot">icons/general/scatter-plot.svg</file>
+        <file alias="icons/general/chart-line-up">icons/general/chart-line-up.svg</file>
+        <file alias="icons/general/one-person-run">icons/general/one-person-run.svg</file>
 
         <file alias="breakpointChecked.png">icons/general/breakpointChecked.png</file>
         <file alias="breakpointCheckedPress.png">icons/general/breakpointCheckedPress.png</file>
@@ -55,13 +70,12 @@
         <file alias="breakpointUnchecked.png">icons/general/breakpointUnchecked.png</file>
         <file alias="statusGood.png">icons/general/statusGood.png</file>
 
-
+        <file alias="icons/git/github">icons/git/github.svg</file>
         <file alias="branch.png">icons/git/branch.png</file>
         <file alias="branchActive.png">icons/git/branchActive.png</file>
         <file alias="fileAdded.png">icons/git/fileAdded.png</file>
         <file alias="fileDeleted.png">icons/git/fileDeleted.png</file>
         <file alias="fileModified.png">icons/git/fileModified.png</file>
-
 
     </qresource>
 </RCC>

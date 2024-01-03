@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xml:space="preserve"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;">
+    <g id="arrow-counter-clockwise.svg">
+        <rect x="0" y="0" width="256" height="256" style="fill:none;"/>
+        <path d="M24,56L24,104L72,104" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M67.59,192C83.918,207.409 105.539,216.001 127.99,216.001C176.265,216.001 215.99,176.276 215.99,128.001C215.99,79.726 176.265,40.001 127.99,40.001C104.662,40.001 82.266,49.277 65.77,65.77L24,104" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+    </g>
+</svg>

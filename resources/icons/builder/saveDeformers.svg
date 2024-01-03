@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 241 240" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xml:space="preserve"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;">
+    <g transform="matrix(1,0,0,1,-5750,0)">
+        <g id="saveDeformers" transform="matrix(1,0,0,1,-279.687,0)">
+            <rect x="6030" y="0" width="240" height="240" style="fill:none;"/>
+            <g clip-path="url(#_clip1)">
+                <g id="floppy-disk.svg" transform="matrix(0.585355,0,0,0.585355,6031.01,-0.51063)">
+                    <path d="M216,91.31L216,208C216,212.389 212.389,216 208,216L48,216C43.611,216 40,212.389 40,208L40,48C40,43.611 43.611,40 48,40L164.69,40C166.808,40.001 168.841,40.843 170.34,42.34L213.66,85.66C215.157,87.159 215.999,89.192 216,91.31Z" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+                    <path d="M80,216L80,152C80,147.611 83.611,144 88,144L168,144C172.389,144 176,147.611 176,152L176,216" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+                    <path d="M152,72L96,72" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+                </g>
+                <g transform="matrix(0.679744,0,0,0.679744,6180.86,151.536)">
+                    <g transform="matrix(1,0,0,1,-120,-120)">
+
+                        <g clip-path="url(#_clip2)">
+                            <path d="M120,16.3C62.7,16.3 16.3,62.7 16.3,120C16.3,177.3 62.7,223.7 120,223.7C177.3,223.7 223.7,177.3 223.7,120C223.7,62.7 177.3,16.3 120,16.3ZM120,207.4C71.7,207.4 32.6,168.3 32.6,120C32.6,71.7 71.7,32.6 120,32.6C168.3,32.6 207.4,71.7 207.4,120C207.4,168.3 168.3,207.4 120,207.4Z" style="fill:rgb(189,189,189);fill-rule:nonzero;stroke:rgb(58,58,58);stroke-width:8px;stroke-linejoin:miter;stroke-miterlimit:10;"/>
+                            <rect x="0" y="0" width="240" height="240" style="fill:none;"/>
+                            <g>
+                                <path d="M216.2,116L216.2,124L23.8,124L23.8,116L216.2,116M224.2,108L15.8,108L15.8,132L224.2,132L224.2,108Z" style="fill:rgb(58,58,58);fill-rule:nonzero;"/>
+                                <path d="M124,23.8L124,216.2L116,216.2L116,23.8L124,23.8M132,15.8L108,15.8L108,224.2L132,224.2L132,15.8Z" style="fill:rgb(58,58,58);fill-rule:nonzero;"/>
+                                <rect x="23.8" y="116" width="192.4" height="8" style="fill:rgb(189,189,189);"/>
+                                <rect x="116" y="23.8" width="8" height="192.4" style="fill:rgb(189,189,189);"/>
+                                <rect x="194.3" y="100.3" width="39.4" height="39.4" style="fill:rgb(174,156,219);"/>
+                                <path d="M229.7,104.3L229.7,135.7L198.3,135.7L198.3,104.3L229.7,104.3M237.7,96.3L190.3,96.3L190.3,143.7L237.7,143.7L237.7,96.3Z" style="fill:rgb(58,58,58);fill-rule:nonzero;"/>
+                                <rect x="100.3" y="194.3" width="39.4" height="39.4" style="fill:rgb(174,156,219);"/>
+                                <path d="M135.7,198.3L135.7,229.7L104.3,229.7L104.3,198.3L135.7,198.3M143.7,190.3L96.3,190.3L96.3,237.7L143.7,237.7L143.7,190.3Z" style="fill:rgb(58,58,58);fill-rule:nonzero;"/>
+                                <rect x="166.5" y="168.7" width="39.4" height="39.4" style="fill:rgb(174,156,219);"/>
+                                <path d="M201.9,172.7L201.9,204.1L170.5,204.1L170.5,172.7L201.9,172.7M209.9,164.7L162.5,164.7L162.5,212.1L209.9,212.1L209.9,164.7Z" style="fill:rgb(58,58,58);fill-rule:nonzero;"/>
+                                <rect x="166.5" y="34.1" width="39.4" height="39.4" style="fill:rgb(174,156,219);"/>
+                                <path d="M201.9,38.1L201.9,69.5L170.5,69.5L170.5,38.1L201.9,38.1M209.9,30.1L162.5,30.1L162.5,77.5L209.9,77.5L209.9,30.1Z" style="fill:rgb(58,58,58);fill-rule:nonzero;"/>
+                                <rect x="100.3" y="100.3" width="39.4" height="39.4" style="fill:rgb(174,156,219);"/>
+                                <path d="M135.7,104.3L135.7,135.7L104.3,135.7L104.3,104.3L135.7,104.3M143.7,96.3L96.3,96.3L96.3,143.7L143.7,143.7L143.7,96.3Z" style="fill:rgb(58,58,58);fill-rule:nonzero;"/>
+                                <rect x="100.3" y="6.6" width="39.4" height="39.4" style="fill:rgb(174,156,219);"/>
+                                <path d="M135.7,10.6L135.7,42L104.3,42L104.3,10.6L135.7,10.6M143.7,2.6L96.3,2.6L96.3,50L143.7,50L143.7,2.6Z" style="fill:rgb(58,58,58);fill-rule:nonzero;"/>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

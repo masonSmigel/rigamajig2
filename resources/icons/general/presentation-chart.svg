@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xml:space="preserve"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;">
+    <g id="presentation-chart.svg">
+        <rect x="0" y="0" width="256" height="256" style="fill:none;"/>
+        <path d="M224,56C224,51.585 220.415,48 216,48L40,48C35.585,48 32,51.585 32,56L32,176C32,180.415 35.585,184 40,184L216,184C220.415,184 224,180.415 224,176L224,56Z" style="fill:none;stroke:white;stroke-width:16px;"/>
+        <path d="M160,184L192,224" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M96,184L64,224" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M96,120L96,144" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M128,104L128,144" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M160,88L160,144" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M128,48L128,24" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+    </g>
+</svg>

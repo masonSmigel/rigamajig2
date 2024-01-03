@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xml:space="preserve"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;">
+    <g id="skip-forward.svg">
+        <rect x="0" y="0" width="256" height="256" style="fill:none;"/>
+        <path d="M200,40L200,216" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M56,47.88L56,208.12C56.089,212.446 59.672,215.956 63.998,215.956C65.478,215.956 66.93,215.545 68.19,214.77L196.3,134.65C198.596,133.223 199.996,130.704 199.996,128C199.996,125.296 198.596,122.777 196.3,121.35L68.19,41.23C66.93,40.455 65.478,40.044 63.998,40.044C59.672,40.044 56.089,43.554 56,47.88Z" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+    </g>
+</svg>

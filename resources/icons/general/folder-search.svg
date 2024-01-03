@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xml:space="preserve"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;">
+    <g id="folder.svg">
+        <rect x="0" y="0" width="256" height="256" style="fill:none;"/>
+        <path d="M216.89,208L39.38,208C35.336,207.989 32.011,204.664 32,200.62L32,80L216,80C220.389,80 224,83.611 224,88L224,200.89C224,204.79 220.79,208 216.89,208Z" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        <path d="M32,80L32,56C32,51.611 35.611,48 40,48L92.69,48C94.808,48.001 96.841,48.843 98.34,50.34L128,80" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+    </g>
+    <g id="magnifying-glass.svg" transform="matrix(0.346817,0,0,0.346817,83.6074,103.468)">
+        <circle cx="112" cy="112" r="80" style="fill:none;stroke:white;stroke-width:43.25px;"/>
+        <path d="M168.57,168.57L224,224" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:43.25px;"/>
+    </g>
+</svg>

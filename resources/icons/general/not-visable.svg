@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xml:space="preserve"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;">
+    <g id="dots-three.svg">
+        <g id="eye-closed.svg">
+            <rect x="0" y="0" width="256" height="256" style="fill:none;"/>
+            <path d="M32,104C48.81,124.81 79.63,152 128,152C176.37,152 207.19,124.81 224,104" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+            <path d="M224,168L200.62,127.09" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+            <path d="M160,192L152.91,149.45" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+            <path d="M96,192L103.09,149.45" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+            <path d="M32,168L55.38,127.09" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        </g>
+    </g>
+</svg>

@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!DOCTYPE svg PUBLIC "-//W3C//DTD SVG 1.1//EN" "http://www.w3.org/Graphics/SVG/1.1/DTD/svg11.dtd">
+<svg width="100%" height="100%" viewBox="0 0 256 256" version="1.1" xmlns="http://www.w3.org/2000/svg"
+     xml:space="preserve"
+     style="fill-rule:evenodd;clip-rule:evenodd;stroke-linecap:round;stroke-linejoin:round;">
+    <g id="skip-forward.svg">
+        <rect x="0" y="0" width="256" height="256" style="fill:none;"/>
+        <g id="github-logo.svg">
+            <rect x="0" y="0" width="256" height="256" style="fill:none;"/>
+            <path d="M119.83,56C110.283,41.06 93.73,31.996 76,32C68.137,45.595 66.852,62.049 72.51,76.7C67.038,84.758 64.076,94.26 64,104L64,112C64,138.332 85.668,160 112,160L160,160C186.332,160 208,138.332 208,112L208,104C207.924,94.26 204.962,84.758 199.49,76.7C205.148,62.049 203.863,45.595 196,32C178.27,31.996 161.717,41.06 152.17,56L119.83,56Z" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+            <path d="M104,232L104,192C104,174.445 118.445,160 136,160C153.555,160 168,174.445 168,192L168,232" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+            <path d="M104,208L72,208C54.445,208 40,193.555 40,176C40,158.445 25.555,144 8,144" style="fill:none;fill-rule:nonzero;stroke:white;stroke-width:16px;"/>
+        </g>
+    </g>
+</svg>

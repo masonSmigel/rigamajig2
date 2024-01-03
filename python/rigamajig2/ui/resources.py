@@ -35,6 +35,9 @@ class Resources:
         """
         if not size:
             size = icon.actualSize(QSize())
+        else:
+            size = QSize(*size)
 
-        pixmap = QIcon(icon).pixmap(QSize(*size))
-        return pixmap
+        pixmap = QIcon(icon).pixmap(size)
+        scaledPixmap = pixmap.scaled(size)
+        return scaledPixmap

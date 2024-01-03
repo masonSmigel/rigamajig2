@@ -7,53 +7,31 @@
     date: 08/2023
     description: 
 """
-import sys
 
 from PySide2 import QtWidgets, QtCore
-from maya import OpenMayaUI as omui, cmds as cmds
-from shiboken2 import wrapInstance
 
 from rigamajig2.maya.builder import core
+from rigamajig2.ui.widgets import mayaDialog
 from rigamajig2.ui.widgets import pathSelector
 
 
-class CreateRigEnvDialog(QtWidgets.QDialog):
-    """ Create new rig environment dialog"""
+class CreateRigEnvDialog(mayaDialog.MayaDialog):
+    """Create new rig environment dialog"""
+
     WINDOW_TITLE = "Create Rig Enviornment"
+    WINDOW_SIZE = (375, 135)
 
     newRigEnviornmentCreated = QtCore.Signal(str)
 
     rigFileResult = None
 
-    def showDialog(self):
-        """ Show the dialog"""
-        self.exec_()
-
     def __init__(self):
-        """ Constructor for the rig file creation"""
-        if sys.version_info.major < 3:
-            mayaMainWindow = wrapInstance(long(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
-        else:
-            mayaMainWindow = wrapInstance(int(omui.MQtUtil.mainWindow()), QtWidgets.QWidget)
-
-        super(CreateRigEnvDialog, self).__init__(mayaMainWindow)
+        """Constructor for the rig file creation"""
+        super(CreateRigEnvDialog, self).__init__()
         self.rigEnvironment = None
 
-        self.setWindowTitle(self.WINDOW_TITLE)
-        if cmds.about(ntOS=True):
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        elif cmds.about(macOS=True):
-            self.setProperty("saveWindowPref", True)
-            self.setWindowFlags(self.windowFlags() ^ QtCore.Qt.WindowContextHelpButtonHint)
-        self.setFixedSize(375, 135)
-
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
-        self.updateCreateMethod()
-
-    def createWidgets(self):
-        """ Create Widgets"""
+    def __create__(self):
+        """Create Widgets"""
         self.fromArchetypeRadioButton = QtWidgets.QRadioButton("New From Archetype")
         self.fromExistingRadioButton = QtWidgets.QRadioButton("Clone Existing")
         self.fromArchetypeRadioButton.setChecked(True)
@@ -72,8 +50,8 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         self.createButton = QtWidgets.QPushButton("Create")
         self.cancelButton = QtWidgets.QPushButton("Cancel")
 
-    def createLayouts(self):
-        """ Create Layouts"""
+    def __layout__(self):
+        """Create Layouts"""
         mainLayout = QtWidgets.QVBoxLayout(self)
         mainLayout.setContentsMargins(6, 6, 6, 6)
         mainLayout.setSpacing(4)
@@ -108,8 +86,8 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         mainLayout.addLayout(rigNameLayout)
         mainLayout.addLayout(buttonLayout)
 
-    def createConnections(self):
-        """ Create Connections"""
+    def __connect__(self):
+        """Create Connections"""
         self.fromArchetypeRadioButton.toggled.connect(self.updateCreateMethod)
         self.fromExistingRadioButton.toggled.connect(self.updateCreateMethod)
 
@@ -138,15 +116,13 @@ class CreateRigEnvDialog(QtWidgets.QDialog):
         if self.fromArchetypeRadioButton.isChecked():
             archetype = self.archetypeComboBox.currentText()
             rigFile = core.newRigEnvironmentFromArchetype(
-                newEnv=destinationRigEnvironment,
-                archetype=archetype,
-                rigName=rigName)
+                newEnv=destinationRigEnvironment, archetype=archetype, rigName=rigName
+            )
         else:
             sourceEnvironment = self.sourcePath.getPath()
             rigFile = core.createRigEnvironment(
-                sourceEnvironment=sourceEnvironment,
-                targetEnvironment=destinationRigEnvironment,
-                rigName=rigName)
+                sourceEnvironment=sourceEnvironment, targetEnvironment=destinationRigEnvironment, rigName=rigName
+            )
         # noinspection PyUnresolvedReferences
         self.newRigEnviornmentCreated.emit(rigFile)
 

@@ -48,6 +48,7 @@ def getNiceName(string):
 
 class EditComponentDialog(mayaDialog.MayaDialog):
     """Edit component dialog UI"""
+
     WINDOW_TITLE = "Edit Component: "
 
     WINDOW_SIZE = (340, 600)
@@ -61,8 +62,8 @@ class EditComponentDialog(mayaDialog.MayaDialog):
 
         self.currentComponent: BaseComponent or None = None
 
-    def createWidgets(self):
-        """ Create Widgets"""
+    def __create__(self):
+        """Create Widgets"""
         self.nameLineEdit = QtWidgets.QLineEdit()
         self.nameLineEdit.setReadOnly(True)
         self.typeLineEdit = QtWidgets.QLineEdit()
@@ -73,8 +74,8 @@ class EditComponentDialog(mayaDialog.MayaDialog):
 
         self.closeButton = QtWidgets.QPushButton("Close")
 
-    def createLayouts(self):
-        """ Create Layouts"""
+    def __layout__(self):
+        """Create Layouts"""
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self.mainLayout.setContentsMargins(4, 4, 4, 4)
         self.mainLayout.setSpacing(4)
@@ -95,7 +96,9 @@ class EditComponentDialog(mayaDialog.MayaDialog):
         self.componentFormLayout = QtWidgets.QFormLayout()
 
         componentGroupBox = QtWidgets.QGroupBox("Parameters")
-        componentGroupBox.setAutoFillBackground(True)
+        # componentGroupBox.setHidden(True)
+        componentGroupBox.setAutoFillBackground(False)
+        componentGroupBox.setFlat(True)
 
         # scrollable area
         bodyWidget = QtWidgets.QWidget()
@@ -123,8 +126,8 @@ class EditComponentDialog(mayaDialog.MayaDialog):
         self.mainLayout.addWidget(componentGroupBox)
         self.mainLayout.addLayout(lowButtonsLayout)
 
-    def createConnections(self):
-        """ Create Connections"""
+    def __connect__(self):
+        """Create Connections"""
         self.selectContainerButton.clicked.connect(self._selectContainer)
         self.closeButton.clicked.connect(self.close)
 
@@ -255,7 +258,7 @@ class EditComponentDialog(mayaDialog.MayaDialog):
         mel.eval(melCmd, lowestPriority=True)
 
     def closeEvent(self, *args, **kwargs):
-        """ Add a close event to emit the signal whenever the window is closed"""
+        """Add a close event to emit the signal whenever the window is closed"""
         self.windowClosedSignal.emit(True)
 
     def clearWidgets(self):

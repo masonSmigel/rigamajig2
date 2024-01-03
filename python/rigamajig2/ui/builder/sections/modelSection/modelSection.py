@@ -15,7 +15,7 @@ from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import scriptManager
 from rigamajig2.shared import common
 from rigamajig2.ui.builder import style as ui_constants
-from rigamajig2.ui.builder.customs import builderSection, scriptRunner
+from rigamajig2.ui.builder.customs import section, scriptRunner
 from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import pathSelector
 
@@ -23,7 +23,7 @@ from rigamajig2.ui.widgets import pathSelector
 # MAYA
 
 
-class ModelSection(builderSection.BuilderSection):
+class ModelSection(section.BuilderSection):
     """Model layout for the builder UI"""
 
     WIDGET_TITLE = "Model/ Setup Scene"

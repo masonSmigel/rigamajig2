@@ -24,7 +24,7 @@ from rigamajig2.ui.widgets import mayaDialog, mayaMessageBox, collapseableWidget
 logger = logging.getLogger(__name__)
 
 
-DEFORMTREE_STYLESHEET = (f"""
+DEFORMTREE_STYLESHEET = f"""
                     QTreeView {{
                         spacing: 5px;
                     }}
@@ -61,11 +61,10 @@ DEFORMTREE_STYLESHEET = (f"""
                         image: url(:partiallyVisible.png);
                     }}
                     
-                    """)
+                    """
 
 
 class DeformLayersTreeWidget(QtWidgets.QTreeWidget):
-
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.setSelectionMode(QtWidgets.QAbstractItemView.ExtendedSelection)
@@ -127,7 +126,7 @@ class DeformLayerMeshTreeItem(QtWidgets.QTreeWidgetItem):
 
 
 class DeformerTreeItem(QtWidgets.QTreeWidgetItem):
-    """ Class for deformers in the treeWidget"""
+    """Class for deformers in the treeWidget"""
 
     def __init__(self, deformerName, parent=None):
         super(DeformerTreeItem, self).__init__(parent)
@@ -148,7 +147,7 @@ class DeformerTreeItem(QtWidgets.QTreeWidgetItem):
         self.setEnvelope(cmds.getAttr(f"{self.deformerName}.envelope"))
 
     def setEnvelope(self, value):
-        """ Set the envelope value"""
+        """Set the envelope value"""
         if value:
             cmds.setAttr(f"{self.deformerName}.envelope", True)
             destaturatedColor = [v * 0.78 for v in [176, 157, 219]]
@@ -168,7 +167,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
 
         self.updateLayerGroups()
 
-    def createActions(self):
+    def __actions__(self):
         self.selectNodeAction = QtWidgets.QAction("Select Node")
         self.selectNodeAction.setIcon(Resources.getIcon(":selectModel.png"))
         self.selectNodeAction.triggered.connect(self.selectNodes)
@@ -208,8 +207,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         self.createNewLayerGroupAction.setIcon(Resources.getIcon(":QR_add.png"))
         self.createNewLayerGroupAction.triggered.connect(partial(self.performSetNewLayerGroup))
 
-    def createWidgets(self):
-
+    def __create__(self):
         self.layerGroupComboBox = QtWidgets.QComboBox()
         self.layerGroupComboBox.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Minimum)
 
@@ -241,7 +239,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         self.deformerUtilsHeader = collapseableWidget.CollapsibleWidget("Deformer Utilities")
         self.connectBpmsButton = QtWidgets.QPushButton("Connect BPMs on Skins")
 
-    def createLayouts(self):
+    def __layout__(self):
         mainLayout = QtWidgets.QVBoxLayout(self)
 
         layerGroupLayout = QtWidgets.QHBoxLayout()
@@ -263,7 +261,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         mainLayout.addWidget(self.deformerUtilsHeader)
         self.deformerUtilsHeader.addWidget(self.connectBpmsButton)
 
-    def createConnections(self):
+    def __connect__(self):
         self.filterButton.clicked.connect(self.toggleFilteredTreeWidget)
         self.refreshButton.clicked.connect(self.refreshButtonClicked)
         self.layerGroupComboBox.currentTextChanged.connect(self.updateTreeWidgetFromLayerGroup)
@@ -272,7 +270,6 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         self.connectBpmsButton.clicked.connect(self.connectBindPreMatrix)
 
     def _deformLayerTreeContextMenu(self, position):
-
         items = self.deformLayersTree.selectedItems()
         menu = QtWidgets.QMenu(self.deformLayersTree)
 
@@ -333,7 +330,6 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
                     deformLayerMeshItems = self.getTreeWidgetItemsByType(DeformLayerMeshTreeItem)
                     targetItem = None
                     for eachTargetItem in deformLayerMeshItems:
-
                         if eachTargetItem.text(0) == otherDeformLayer:
                             targetItem = eachTargetItem
                     transferAction.triggered.connect(partial(self.performTransferDeformer, item, targetItem))
@@ -358,7 +354,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         menu.exec_(self.deformLayersTree.mapToGlobal(position))
 
     def _createLayerGroupMenu(self, menu):
-        """ Create the layerGroup menu"""
+        """Create the layerGroup menu"""
         layerGroupMenu = QtWidgets.QMenu(menu)
         layerGroupMenu.setTitle("Set Layer group... ")
 
@@ -423,7 +419,6 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             self.layerGroupComboBox.addItem(layerGroup)
 
     def updateTreeWidgetFromLayerGroup(self, layerGroup):
-
         if not layerGroup:
             return
         # we need to get the max number of layers
@@ -432,7 +427,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         self.updateTreeWidget(meshesInLayerGroup)
 
     def updateTreeWidget(self, meshList):
-        """ Update the deformer Tree Widget based on the input list of meshes"""
+        """Update the deformer Tree Widget based on the input list of meshes"""
         self.deformLayersTree.clear()
 
         # get the number of layers to add
@@ -447,7 +442,6 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
 
         # # now add the meshes
         for mesh in meshList:
-
             renderMeshItem = DeformerRenderMeshTreeItem(mesh)
             self.deformLayersTree.insertTopLevelItem(0, renderMeshItem)
 
@@ -461,17 +455,18 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             deformLayers = deformLayerObj.getDeformationLayers()
 
             # if there are no deform layers we can just continue
-            if not deformLayers: continue
+            if not deformLayers:
+                continue
 
             for i, deformLayerMesh in enumerate(deformLayers):
-                deformLayerMeshItem = DeformLayerMeshTreeItem(deformLayerMesh=deformLayerMesh,
-                                                              model=deformLayerObj.model)
+                deformLayerMeshItem = DeformLayerMeshTreeItem(
+                    deformLayerMesh=deformLayerMesh, model=deformLayerObj.model
+                )
                 renderMeshItem.addChild(deformLayerMeshItem)
 
                 # get deformer stack for each deformLayerMesh
                 deformerStack = deformer.getDeformerStack(deformLayerMesh)
                 for eachDeformer in deformerStack:
-
                     # check to see if this is part of the deform layer chain (a blendshape connecting the previous layer)
                     if meta.hasTag(eachDeformer, tag=deformLayer.DEFORM_LAYER_BSHP_TAG):
                         continue
@@ -499,7 +494,6 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         return item
 
     def toggleFilteredTreeWidget(self):
-
         if self.filterButton.isChecked():
             items = self.deformLayersTree.selectedItems()
 
@@ -617,7 +611,8 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         :return:
         """
         item = self.lastSelectedItem()
-        if not item: return
+        if not item:
+            return
 
         parentItem = item.parent()
 
@@ -670,9 +665,9 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         deformerName = item.text(0)
         sourceMesh = item.parent().text(0)
         targetMesh = targetItem.text(0)
-        newDeformer = deformLayer.transferAllDeformerTypes(deformerName=deformerName,
-                                                           sourceGeo=sourceMesh,
-                                                           targetGeo=targetMesh)
+        newDeformer = deformLayer.transferAllDeformerTypes(
+            deformerName=deformerName, sourceGeo=sourceMesh, targetGeo=targetMesh
+        )
         if newDeformer:
             newDeformerItem = DeformerTreeItem(newDeformer)
             targetItem.insertChild(0, newDeformerItem)
@@ -688,7 +683,8 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         :return:
         """
         items = self.selectedItems()
-        if not items: return
+        if not items:
+            return
 
         for item in items:
             if not isinstance(item, DeformerTreeItem):
@@ -705,9 +701,10 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
 
     @QtCore.Slot()
     def deleteDeformers(self):
-        """ Delete the selected deformers"""
+        """Delete the selected deformers"""
         items = self.selectedItems()
-        if not items: return
+        if not items:
+            return
 
         for item in items:
             if not isinstance(item, DeformerTreeItem):
@@ -730,7 +727,7 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
 
     @QtCore.Slot()
     def performAddLayer(self, allowSceneSelection=True):
-        """ add layers from the selected nodes"""
+        """add layers from the selected nodes"""
         items = self.selectedItems()
 
         renderModels = set()
@@ -750,7 +747,8 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         confirm = mayaMessageBox.MayaMessageBox(
             title="Add new Deform Layers",
             message=f"Are you sure you want to add new deform layers to {len(renderModels)} meshes",
-            icon="help")
+            icon="help",
+        )
         confirm.setButtonsYesNoCancel()
         result = confirm.exec_()
 
@@ -807,6 +805,6 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
         self.layerGroupComboBox.setCurrentText(layerGroup)
 
     def showEvent(self, e):
-        """ When the window is shown reset it"""
+        """When the window is shown reset it"""
         super(DeformLayerDialog, self).showEvent(e)
         self.updateLayerGroups()

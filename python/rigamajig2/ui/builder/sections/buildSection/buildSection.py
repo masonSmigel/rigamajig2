@@ -18,17 +18,17 @@ from rigamajig2.maya.builder.constants import PSD, POST_SCRIPT
 # RIGAMAJIG2
 from rigamajig2.shared import common
 from rigamajig2.ui.builder import style
-from rigamajig2.ui.builder.customs import dataLoader, builderSection, scriptRunner
+from rigamajig2.ui.builder.customs import dataLoader, section, scriptRunner
 from rigamajig2.ui.resources import Resources
 
 
-class BuildSection(builderSection.BuilderSection):
-    """ Build layout for the builder UI """
+class BuildSection(section.BuilderSection):
+    """Build layout for the builder UI"""
 
     WIDGET_TITLE = "Build Rig"
 
     def createWidgets(self):
-        """ Create Widgets """
+        """Create Widgets"""
 
         self.completeButton = QtWidgets.QPushButton("Build Rig")
         self.completeButton.setFixedHeight(45)
@@ -43,7 +43,8 @@ class BuildSection(builderSection.BuilderSection):
             fileFilter=common.JSON_FILTER,
             fileMode=1,
             dataFilteringEnabled=True,
-            dataFilter=["PSDData"])
+            dataFilter=["PSDData"],
+        )
 
         self.loadPsdButton = QtWidgets.QPushButton("Load Pose Readers")
         self.loadPsdButton.setIcon(Resources.getIcon(":loadPsd.png"))
@@ -62,7 +63,7 @@ class BuildSection(builderSection.BuilderSection):
         self.postScriptRunner = scriptRunner.ScriptRunner(title="Post-Scripts:")
 
     def createLayouts(self):
-        """ Create Layouts """
+        """Create Layouts"""
 
         buildLayout = QtWidgets.QHBoxLayout()
         buildLayout.addWidget(self.buildButton)
@@ -87,7 +88,7 @@ class BuildSection(builderSection.BuilderSection):
         self.mainWidget.addWidget(self.postScriptRunner)
 
     def createConnections(self):
-        """ Create Connections """
+        """Create Connections"""
         self.postScriptRunner.scriptsUpdated.connect(self._setLocalPostScripts)
         self.psdDataLoader.filesUpdated.connect(self._setPoseReadersFiles)
         self.completeButton.clicked.connect(self._onCompleteBuild)
@@ -99,7 +100,7 @@ class BuildSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _setBuilder(self, builder):
-        """ Set the builder """
+        """Set the builder"""
         super()._setBuilder(builder)
         self.psdDataLoader.clear()
         self.postScriptRunner.clearScript()
@@ -113,39 +114,39 @@ class BuildSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _runWidget(self):
-        """ Run this widget from the builder breakpoint runner """
+        """Run this widget from the builder breakpoint runner"""
         self._onCompleteBuild()
         self._onLoadPoseReaders()
         self.postScriptRunner.executeAllScripts()
 
     @QtCore.Slot()
     def _onBuilderBuild(self):
-        """ Execute the builder build function """
+        """Execute the builder build function"""
         self.builder.build()
 
     @QtCore.Slot()
     def _onBuilderConnect(self):
-        """ Execute the builder connect function """
+        """Execute the builder connect function"""
         self.builder.connect()
 
     @QtCore.Slot()
     def _onBuilderFinalize(self):
-        """ Execute the builder finalize function """
+        """Execute the builder finalize function"""
         self.builder.finalize()
 
     @QtCore.Slot()
     def _onLoadPoseReaders(self):
-        """ Load pose reader setup from JSON using the builder """
+        """Load pose reader setup from JSON using the builder"""
         self.builder.loadPoseReaders(replace=self.loadPsdModeCheckbox.currentIndex())
 
     @QtCore.Slot()
     def _onSavePoseReaders(self):
-        """ Save pose reader setup to JSON using the builder """
+        """Save pose reader setup to JSON using the builder"""
         dataIO.savePoseReaders(self.psdDataLoader.getFileList(absolute=True))
 
     @QtCore.Slot()
     def _onCompleteBuild(self):
-        """ Execute a complete rig build (steps initialize - finalize) """
+        """Execute a complete rig build (steps initialize - finalize)"""
         self.builder.initialize()
         self.builder.build()
         self.builder.connect()
@@ -170,4 +171,3 @@ class BuildSection(builderSection.BuilderSection):
 
         self.builder.localPostScripts = localPostScripts
         self.postRigFileModifiedEvent()
-

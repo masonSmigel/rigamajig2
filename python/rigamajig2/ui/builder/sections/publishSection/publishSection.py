@@ -17,38 +17,35 @@ from rigamajig2.maya.builder import scriptManager
 # RIGAMAJIG2
 from rigamajig2.shared import common
 from rigamajig2.ui.builder import style
-from rigamajig2.ui.builder.customs import builderSection, scriptRunner
+from rigamajig2.ui.builder.customs import section, scriptRunner
 from rigamajig2.ui.widgets import mayaMessageBox, pathSelector
 
 
-class PublishSection(builderSection.BuilderSection):
-    """ Publish layout for the builder UI """
+class PublishSection(section.BuilderSection):
+    """Publish layout for the builder UI"""
 
     WIDGET_TITLE = "Publish"
 
     def createWidgets(self):
-        """ Create Widgets"""
+        """Create Widgets"""
         self.pubScriptRunner = scriptRunner.ScriptRunner(title="Publish-Scripts:")
 
         self.outFileSuffix = QtWidgets.QLineEdit()
         self.outFileSuffix.setPlaceholderText("_rig")
 
         self.outPathSelector = pathSelector.PathSelector(
-            "out file:",
-            caption="Select a location to save",
-            fileFilter=common.MAYA_FILTER,
-            fileMode=2
+            "out file:", caption="Select a location to save", fileFilter=common.MAYA_FILTER, fileMode=2
         )
         self.dryPublishButton = QtWidgets.QPushButton("Dry Publish Rig")
         self.publishButton = QtWidgets.QPushButton("Publish Rig")
         self.publishButton.setFixedHeight(style.LARGE_BTN_HEIGHT)
 
         self.outFileTypeComboBox = QtWidgets.QComboBox()
-        self.outFileTypeComboBox.addItem('ma')
-        self.outFileTypeComboBox.addItem('mb')
+        self.outFileTypeComboBox.addItem("ma")
+        self.outFileTypeComboBox.addItem("mb")
 
     def createLayouts(self):
-        """ Create Layouts"""
+        """Create Layouts"""
         self.mainWidget.addSpacing(4)
         self.mainWidget.addWidget(self.pubScriptRunner)
 
@@ -65,7 +62,7 @@ class PublishSection(builderSection.BuilderSection):
         self.mainWidget.addWidget(self.publishButton)
 
     def createConnections(self):
-        """ Create Connections """
+        """Create Connections"""
         self.pubScriptRunner.scriptsUpdated.connect(self._setLocalPubScripts)
         self.outPathSelector.pathUpdated.connect(self._setOutputFilePath)
         self.outFileSuffix.textChanged.connect(self._setOutputFileSuffix)
@@ -76,7 +73,7 @@ class PublishSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _setBuilder(self, builder):
-        """ Set the active builder """
+        """Set the active builder"""
         super()._setBuilder(builder)
         self.outPathSelector.setRelativePath(self.builder.getRigEnvironment())
 
@@ -105,12 +102,12 @@ class PublishSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _runWidget(self):
-        """ Run this widget from the builder breakpoint runner"""
+        """Run this widget from the builder breakpoint runner"""
         self.pubScriptRunner.executeAllScripts()
 
     @QtCore.Slot()
     def _onDryPublish(self):
-        """ run all the _publish steps without saving the file"""
+        """run all the _publish steps without saving the file"""
         self.builder.run(publish=True, savePublish=False)
 
     @QtCore.Slot()
@@ -122,7 +119,8 @@ class PublishSection(builderSection.BuilderSection):
         confirmPublishMessage = mayaMessageBox.MayaMessageBox(
             title="Publish the Rig",
             message="Proceeding will rebuild a fresh rig from saved data overwriting any existing published rigs.",
-            icon="warning")
+            icon="warning",
+        )
         confirmPublishMessage.setButtonsSaveDiscardCancel()
 
         # if the user escapes from the publish

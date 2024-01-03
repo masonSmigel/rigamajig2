@@ -19,7 +19,7 @@ from rigamajig2.maya.builder import constants
 from rigamajig2.maya.builder import dataIO
 from rigamajig2.shared import common
 from rigamajig2.ui.builder import style
-from rigamajig2.ui.builder.customs import builderSection, dataLoader
+from rigamajig2.ui.builder.customs import section, dataLoader
 from rigamajig2.ui.builder.sections.setupSection.customs import componentTree
 from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import QPushButton, mayaMessageBox
@@ -28,7 +28,7 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 
-class SetupSection(builderSection.BuilderSection):
+class SetupSection(section.BuilderSection):
     """Initalize layout for the builder UI"""
 
     WIDGET_TITLE = "Setup Rig"

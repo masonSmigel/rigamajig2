@@ -16,12 +16,15 @@ from PySide2 import QtCore
 from PySide2 import QtWidgets
 from shiboken2 import wrapInstance
 
+from rigamajig2.ui.palettes import RigamajigPalette
+
 
 class MayaDialog(QtWidgets.QDialog):
-    """ Dialog for the mocap import """
-    WINDOW_TITLE = "Maya Dialog"
+    """Dialog for the mocap import"""
 
+    WINDOW_TITLE = "Maya Dialog"
     WINDOW_SIZE = (600, 400)
+    PALETTE = RigamajigPalette.palette
 
     dlg_instance = None
 
@@ -54,23 +57,35 @@ class MayaDialog(QtWidgets.QDialog):
 
         self.setMinimumSize(*self.WINDOW_SIZE)
 
-        self.createActions()
-        self.createWidgets()
-        self.createLayouts()
-        self.createConnections()
+        if self.PALETTE:
+            self.setPalette(self.PALETTE)
 
-    def createActions(self):
-        """ Create Actions """
-        pass
+        self.__actions__()
+        self.__menus__()
+        self.__create__()
+        self.__layout__()
+        self.__configure__()
+        self.__connect__()
 
-    def createWidgets(self):
+    def __actions__(self):
+        """Create Actions"""
+        ...
+
+    def __menus__(self):
+        """Create Actions"""
+        ...
+
+    def __create__(self):
         """Create widgets"""
-        pass
+        ...
 
-    def createLayouts(self):
+    def __layout__(self):
         """Create layouts"""
-        pass
+        ...
 
-    def createConnections(self):
+    def __configure__(self):
+        ...
+
+    def __connect__(self):
         """Create Pyside connections"""
-        pass
+        ...

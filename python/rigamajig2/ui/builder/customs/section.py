@@ -12,11 +12,10 @@ from PySide2 import QtCore
 from PySide2 import QtGui
 from PySide2 import QtWidgets
 
-# RIGAMAJIG2
 from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import collapseableWidget
 
-breakpointStylesheet = (f"""
+breakpointStylesheet = f"""
                     QCheckBox {{
                         spacing: 5px;
                     }}
@@ -49,12 +48,11 @@ breakpointStylesheet = (f"""
                     QCheckBox::indicator:checked:pressed {{
                         image: url(:breakpointCheckedPress.png);
                     }}
-                    """)
+                    """
 
 
 class BuilderHeader(collapseableWidget.CollapsibleWidget):
     headerCheckedColor = QtGui.QColor(78, 116, 125)
-    headerDefaultColor = QtWidgets.QPushButton().palette().color(QtGui.QPalette.Button)
 
     def __init__(self, text, parent=None, addCheckbox=True):
         super(BuilderHeader, self).__init__(text, parent, addCheckbox)
@@ -74,26 +72,25 @@ class BuilderHeader(collapseableWidget.CollapsibleWidget):
     def setChecked(self, checked):
         super(BuilderHeader, self).setChecked(checked)
 
-        color = self.headerCheckedColor if checked else self.headerDefaultColor
+        color = self.headerCheckedColor if checked else self.palette().color(QtGui.QPalette.Button)
         self.setHeaderBackground(color=color)
 
 
-
 class BuilderSection(QtWidgets.QWidget):
-    """ Model layout for the builder UI """
+    """Model layout for the builder UI"""
 
     WIDGET_TITLE = "Builder Widget"
 
     def __init__(self, builderDialog):
-        """ Constructor"""
-        super(BuilderSection, self).__init__()
+        """Constructor"""
+        super(BuilderSection, self).__init__(parent=builderDialog)
 
         self.builderDialog = builderDialog
 
         self.builder = None
         self.rigEnvironment = None
 
-        self.mainWidget = BuilderHeader(text=self.WIDGET_TITLE, addCheckbox=True)
+        self.mainWidget = BuilderHeader(text=self.WIDGET_TITLE, addCheckbox=True, parent=self)
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.setSpacing(0)
@@ -120,7 +117,7 @@ class BuilderSection(QtWidgets.QWidget):
         self.builder = builder
 
     def createWidgets(self):
-        """ Create widgets"""
+        """Create widgets"""
         pass
 
     def createLayouts(self):
@@ -132,7 +129,7 @@ class BuilderSection(QtWidgets.QWidget):
         pass
 
     def closeEvent(*args, **kwargs):
-        """ setup anything to handle in the close event. """
+        """setup anything to handle in the close event."""
         pass
 
     def isChecked(self):
@@ -140,7 +137,7 @@ class BuilderSection(QtWidgets.QWidget):
         return self.mainWidget.isChecked()
 
     def setChecked(self, value):
-        """ Accessor method to set the value of the checkbox"""
+        """Accessor method to set the value of the checkbox"""
         self.mainWidget.setChecked(value)
 
     def postRigFileModifiedEvent(self):

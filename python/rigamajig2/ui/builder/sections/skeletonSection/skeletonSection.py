@@ -23,7 +23,7 @@ from rigamajig2.maya.components.base import GUIDE_STEP
 from rigamajig2.maya.rig import live
 from rigamajig2.shared import common
 from rigamajig2.ui.builder import style
-from rigamajig2.ui.builder.customs import dataLoader, builderSection
+from rigamajig2.ui.builder.customs import dataLoader, section
 from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import QPushButton, Qslider, mayaMessageBox
 
@@ -31,7 +31,7 @@ logger = logging.getLogger(__name__)
 
 
 # pylint: disable= too-many-instance-attributes
-class SkeletonSection(builderSection.BuilderSection):
+class SkeletonSection(section.BuilderSection):
     """Joint layout for the builder UI"""
 
     WIDGET_TITLE = "Skeleton"

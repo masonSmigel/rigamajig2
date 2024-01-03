@@ -35,8 +35,8 @@ from rigamajig2.ui.builder.sections import (
     publishSection,
 )
 from rigamajig2.ui.resources import Resources
-from rigamajig2.ui.widgets import QLine, mayaMessageBox, pathSelector, stateImageWidget
-from rigamajig2.ui.widgets.workspace_control import DockableUI
+from rigamajig2.ui.widgets import mayaMessageBox, pathSelector, stateImageWidget
+from rigamajig2.ui.widgets.mayaDialog import MayaDialog
 
 MAYA_FILTER = "Maya Files (*.ma *.mb);;Maya ASCII (*.ma);;Maya Binary (*.mb)"
 JSON_FILTER = "Json Files (*.json)"
@@ -47,13 +47,10 @@ EDIT_BG_WIDGET_COLOR = QtGui.QColor(70, 70, 80)
 logger = logging.getLogger(__name__)
 
 
-class BuilderDialog(DockableUI):
+class BuilderDialog(MayaDialog):
     """Builder dialog"""
 
     WINDOW_TITLE = "Rigamajig2 Builder  {}".format(rigamajig2.version)
-
-    # rigFileModified = "rigFileModifiedEvent"
-    # rigFileSaved = "rigFileSavedEvent"
 
     rigFileModifiedSignal = QtCore.Signal()
     rigFileSavedSignal = QtCore.Signal()
@@ -83,7 +80,7 @@ class BuilderDialog(DockableUI):
     def rigFileIsModified(self):
         return self._rigFileIsModified
 
-    def createMenus(self):
+    def __menus__(self):
         """create menu actions"""
         self.mainMenu = QtWidgets.QMenuBar()
 
@@ -118,7 +115,7 @@ class BuilderDialog(DockableUI):
         helpMenu.addAction(self.actions.showDocumentationAction)
         helpMenu.addAction(self.actions.showAboutAction)
 
-    def createWidgets(self):
+    def __create__(self):
         """Create Widgets"""
         self.rigPathSelector = pathSelector.PathSelector(
             caption="Select a Rig File", fileFilter="Rig Files (*.rig)", fileMode=1
@@ -127,7 +124,6 @@ class BuilderDialog(DockableUI):
 
         self.assetNameLineEdit = QtWidgets.QLineEdit()
         self.assetNameLineEdit.setPlaceholderText("asset_name")
-
         self.archetypeBaseLabel = QtWidgets.QLabel("None")
 
         self.builderSections = [
@@ -140,27 +136,16 @@ class BuilderDialog(DockableUI):
             publishSection.PublishSection(self),
         ]
 
-        self.runSelectedButton = QtWidgets.QPushButton(Resources.getIcon(":execute.png"), "Run Selected")
-        self.runSelectedButton.setToolTip("Run Rig steps up to the break point")
-        self.runSelectedButton.setFixedSize(120, 22)
+        self.scrollArea = QtWidgets.QScrollArea()
+        self.rigEnvironmentGroupbox = QtWidgets.QGroupBox("Rig Environment")
+        self.buildGroupBox = QtWidgets.QGroupBox("Build")
 
-        self.runButton = QtWidgets.QPushButton(Resources.getIcon(":executeAll.png"), "Run")
-        self.runButton.setToolTip("Run all build steps.")
-        self.runButton.setFixedSize(80, 22)
-
-        self.publishButton = QtWidgets.QPushButton(Resources.getIcon(":sourceScript.png"), "Publish")
-        self.publishButton.setToolTip("Publish the rig. This will build the rig and save it.")
-        self.publishButton.setFixedSize(80, 22)
-
-        self.openScriptEditorButton = QtWidgets.QPushButton()
-        self.openScriptEditorButton.setFixedSize(18, 18)
-        self.openScriptEditorButton.setFlat(True)
-        self.openScriptEditorButton.setIcon(Resources.getIcon(":cmdWndIcon.png"))
-
+        self.runSelectedButton = QtWidgets.QPushButton("Run Selected")
+        self.runButton = QtWidgets.QPushButton("Run")
+        self.publishButton = QtWidgets.QPushButton("Publish")
         self.statusLine = QtWidgets.QStatusBar()
 
-    def createLayouts(self):
-        """Create Layouts"""
+    def __layout__(self):
         rigFileLayout = QtWidgets.QHBoxLayout()
         rigFileLayout.addWidget(self.rigPathSelector)
         rigFileLayout.addWidget(self.rigFileSaveStatus)
@@ -184,11 +169,8 @@ class BuilderDialog(DockableUI):
         buildLayout.addStretch()
 
         # groups
-        rigEnvironmentGroup = QtWidgets.QGroupBox("Rig Environment")
-        rigEnvironmentGroup.setLayout(rigEnvironmentLayout)
-
-        buildGroup = QtWidgets.QGroupBox("Build")
-        buildGroup.setLayout(buildLayout)
+        self.rigEnvironmentGroupbox.setLayout(rigEnvironmentLayout)
+        self.buildGroupBox.setLayout(buildLayout)
 
         # lower persistent buttons (AKA close)
         lowButtonsLayout = QtWidgets.QVBoxLayout()
@@ -199,7 +181,6 @@ class BuilderDialog(DockableUI):
         runButtonLayout.addStretch()
         runButtonLayout.addWidget(self.runSelectedButton)
 
-        lowButtonsLayout.addWidget(QLine.QLine())
         lowButtonsLayout.addLayout(runButtonLayout)
         lowButtonsLayout.addWidget(self.statusLine)
 
@@ -207,23 +188,39 @@ class BuilderDialog(DockableUI):
         bodyWidget = QtWidgets.QWidget()
         bodyLayout = QtWidgets.QVBoxLayout(bodyWidget)
         bodyLayout.setContentsMargins(0, 0, 0, 0)
-        bodyLayout.addWidget(rigEnvironmentGroup)
-        bodyLayout.addWidget(buildGroup)
+        bodyLayout.addWidget(self.rigEnvironmentGroupbox)
+        bodyLayout.addWidget(self.buildGroupBox)
 
-        bodyScrollArea = QtWidgets.QScrollArea()
-        bodyScrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
-        bodyScrollArea.setWidgetResizable(True)
-        bodyScrollArea.setWidget(bodyWidget)
+        self.scrollArea.setWidget(bodyWidget)
 
         # main layout
         mainLayout = QtWidgets.QVBoxLayout(self)
         mainLayout.setContentsMargins(4, 4, 4, 4)
         mainLayout.setSpacing(4)
         mainLayout.setMenuBar(self.mainMenu)
-        mainLayout.addWidget(bodyScrollArea)
+        mainLayout.addWidget(self.scrollArea)
         mainLayout.addLayout(lowButtonsLayout)
 
-    def createConnections(self):
+    def __configure__(self):
+        self.scrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
+        self.scrollArea.setWidgetResizable(True)
+
+        self.rigEnvironmentGroupbox.setStyle(QtWidgets.QStyleFactory.create('plastique'))
+        self.buildGroupBox.setStyle(QtWidgets.QStyleFactory.create('plastique'))
+
+        self.runSelectedButton.setIcon(Resources.getIcon(":execute.png"))
+        self.runSelectedButton.setToolTip("Run Rig steps up to the break point")
+        self.runSelectedButton.setFixedSize(120, 22)
+
+        self.runButton.setIcon(Resources.getIcon(":executeAll.png"))
+        self.runButton.setToolTip("Run all build steps.")
+        self.runButton.setFixedSize(80, 22)
+
+        self.publishButton.setIcon(Resources.getIcon(":sourceScript.png"))
+        self.publishButton.setToolTip("Publish the rig. This will build the rig and save it.")
+        self.publishButton.setFixedSize(80, 22)
+
+    def __connect__(self):
         """Create Connections"""
 
         # setup each widget with a connection to uncheck all over widgets when one is checked.

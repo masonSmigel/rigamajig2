@@ -17,24 +17,22 @@ from rigamajig2.maya.builder import dataIO
 from rigamajig2.maya.builder.constants import SKINS, SHAPES, DEFORMERS, DEFORM_LAYERS, DEFORMER_DATA_TYPES
 from rigamajig2.shared import common
 from rigamajig2.ui.builder import style
-from rigamajig2.ui.builder.customs import builderSection, dataLoader
+from rigamajig2.ui.builder.customs import section, dataLoader
 from rigamajig2.ui.deformLayerManager.dialogs import deformationLayerDialog
 from rigamajig2.ui.resources import Resources
 from rigamajig2.ui.widgets import pathSelector
 
 
-class DeformationSection(builderSection.BuilderSection):
-    """ Deformation layout for the builder UI """
+class DeformationSection(section.BuilderSection):
+    """Deformation layout for the builder UI"""
 
     WIDGET_TITLE = "Deformations"
 
     def createWidgets(self):
-        """ Create Widgets"""
+        """Create Widgets"""
         self.deformLayerPathSelector = pathSelector.PathSelector(
-            "layers:",
-            caption='Select a deformationLayer file',
-            fileFilter=common.JSON_FILTER,
-            fileMode=1)
+            "layers:", caption="Select a deformationLayer file", fileFilter=common.JSON_FILTER, fileMode=1
+        )
 
         self.loadDeformLayersButton = QtWidgets.QPushButton("Load Deform Layers")
         self.loadDeformLayersButton.setIcon(Resources.getIcon(":loadDeformLayers.png"))
@@ -44,10 +42,8 @@ class DeformationSection(builderSection.BuilderSection):
         self.manageDeformLayersButton.setIcon(Resources.getIcon(":manageDeformLayers.png"))
 
         self.skinPathSelector = pathSelector.PathSelector(
-            "skin:",
-            caption="Select the skin weight folder",
-            fileFilter=common.JSON_FILTER,
-            fileMode=2)
+            "skin:", caption="Select the skin weight folder", fileFilter=common.JSON_FILTER, fileMode=2
+        )
         self.loadAllSkinButton = QtWidgets.QPushButton("Load All Skins")
         self.loadAllSkinButton.setIcon(Resources.getIcon(":loadSkinCluster.png"))
         self.loadSingleSkinButton = QtWidgets.QPushButton("Load Skin")
@@ -69,7 +65,7 @@ class DeformationSection(builderSection.BuilderSection):
         self.saveDeformLayersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
         self.manageDeformLayersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
-        self.skinEditWidget = rigamajig2.ui.widgets.collapseableWidget.CollapsibleWidget('Edit Skin Cluster')
+        self.skinEditWidget = rigamajig2.ui.widgets.collapseableWidget.CollapsibleWidget("Edit Skin Cluster")
         self.skinEditWidget.setHeaderBackground(style.EDIT_BG_HEADER_COLOR)
         self.skinEditWidget.setDarkPallete()
 
@@ -83,7 +79,8 @@ class DeformationSection(builderSection.BuilderSection):
             fileFilter=common.JSON_FILTER,
             fileMode=1,
             dataFilteringEnabled=True,
-            dataFilter=DEFORMER_DATA_TYPES)
+            dataFilter=DEFORMER_DATA_TYPES,
+        )
 
         # grow the widget a little bit. We will be loading alot of data.
         self.deformersDataLoader.changeTreeWidgetSize(40)
@@ -99,7 +96,7 @@ class DeformationSection(builderSection.BuilderSection):
         self.loadDeformersButton.setIconSize(style.LARGE_BTN_ICON_SIZE)
 
     def createLayouts(self):
-        """ Create Layouts"""
+        """Create Layouts"""
 
         deformLayerLayout = QtWidgets.QHBoxLayout()
         deformLayerLayout.setContentsMargins(0, 0, 0, 0)
@@ -142,7 +139,7 @@ class DeformationSection(builderSection.BuilderSection):
         self.mainWidget.addLayout(deformersButtonLayout)
 
     def createConnections(self):
-        """ Create Connections"""
+        """Create Connections"""
         self.deformLayerPathSelector.pathUpdated.connect(self._setDeformLayerFile)
         self.skinPathSelector.pathUpdated.connect(self._setSkinFiles)
         self.deformersDataLoader.filesUpdated.connect(self._setDeformerFiles)
@@ -161,7 +158,7 @@ class DeformationSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _setBuilder(self, builder):
-        """ Set a builder for intialize widget"""
+        """Set a builder for intialize widget"""
         super()._setBuilder(builder)
         self.deformLayerPathSelector.setRelativePath(self.builder.getRigEnvironment())
         self.skinPathSelector.setRelativePath(self.builder.getRigEnvironment())
@@ -187,7 +184,7 @@ class DeformationSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _runWidget(self):
-        """ Run this widget from the builder breakpoint runner"""
+        """Run this widget from the builder breakpoint runner"""
         self._onLoadDeformationLayers()
         self._onLoadAllSkins()
         self._onLoadDeformerData()
@@ -195,12 +192,12 @@ class DeformationSection(builderSection.BuilderSection):
     # CONNECTIONS
     @QtCore.Slot()
     def _onLoadDeformationLayers(self):
-        """ Save load pose reader setup from json using the builder """
+        """Save load pose reader setup from json using the builder"""
         self.builder.loadDeformationLayers()
 
     @QtCore.Slot()
     def _onSaveDeformationLayers(self):
-        """ Save pose reader setup to json using the builder """
+        """Save pose reader setup to json using the builder"""
         dataIO.saveDeformationLayers(self.deformLayerPathSelector.getPath())
 
     @QtCore.Slot()
@@ -221,7 +218,7 @@ class DeformationSection(builderSection.BuilderSection):
             caption="Select a skin file",
             fileFilter=common.JSON_FILTER,
             okc="Select",
-            dir=self.skinPathSelector.getPath()
+            dir=self.skinPathSelector.getPath(),
         )
         if filepath:
             dataIO.loadSingleSkin(filepath[0])
@@ -233,7 +230,7 @@ class DeformationSection(builderSection.BuilderSection):
 
     @QtCore.Slot()
     def _onCopySkins(self):
-        """ Copy Skin weights"""
+        """Copy Skin weights"""
         src = cmds.ls(sl=True)[0]
         dst = cmds.ls(sl=True)[1:]
         skinCluster.copySkinClusterAndInfluences(src, dst)

@@ -89,7 +89,7 @@ class GitDialog(mayaDialog.MayaDialog):
             self.loadCommitHistory()
             self.updateWatcherFiles(self.repo)
 
-    def createWidgets(self):
+    def __create__(self):
         # Label to display the current repo
         self.repoLabel = QtWidgets.QLineEdit()
         self.repoLabel.setDisabled(True)
@@ -125,7 +125,7 @@ class GitDialog(mayaDialog.MayaDialog):
         # setup a file watcher
         self.watcher = QtCore.QFileSystemWatcher()
 
-    def createLayouts(self):
+    def __layout__(self):
         layout = QtWidgets.QVBoxLayout(self)
 
         gitRepoLabel = QtWidgets.QLabel("Git Repo:")
@@ -155,7 +155,7 @@ class GitDialog(mayaDialog.MayaDialog):
         layout.addWidget(historyLabel)
         layout.addWidget(self.commitHistory)
 
-    def createConnections(self):
+    def __connect__(self):
         self.refreshAllButton.clicked.connect(self.loadFilesChangedSinceLastCommit)
         self.commitButton.clicked.connect(self.commitChanges)
         self.watcher.fileChanged.connect(self.loadFilesChangedSinceLastCommit)

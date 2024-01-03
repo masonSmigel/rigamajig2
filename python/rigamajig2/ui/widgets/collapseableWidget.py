@@ -10,6 +10,7 @@
 """
 from PySide2 import QtWidgets, QtGui, QtCore
 
+from rigamajig2.ui.palettes import DarkPalette
 from rigamajig2.ui.resources import Resources
 
 darkPalette = QtGui.QPalette()
@@ -60,7 +61,6 @@ class CollapsibleHeader(QtWidgets.QWidget):
 
         self.setAutoFillBackground(True)
         self.setBackgroundColor(None)
-
         self.hasCheckBox = addCheckbox
 
         self.iconLabel = QtWidgets.QLabel()
@@ -86,7 +86,7 @@ class CollapsibleHeader(QtWidgets.QWidget):
         self.setExpanded(False)
 
     def setText(self, text):
-        """ Set the header text"""
+        """Set the header text"""
         self.textLabel.setText("<b>{0}<b>".format(text))
 
     def setChecked(self, checked):
@@ -94,9 +94,9 @@ class CollapsibleHeader(QtWidgets.QWidget):
         self.checkbox.setChecked(checked)
 
     def setBackgroundColor(self, color=None):
-        """ Set the header background"""
+        """Set the header background"""
         if not color:
-            color = QtWidgets.QPushButton().palette().color(QtGui.QPalette.Button)
+            color = self.palette().color(QtGui.QPalette.Button)
 
         pallete = self.palette()
         pallete.setColor(QtGui.QPalette.Window, color)
@@ -107,7 +107,7 @@ class CollapsibleHeader(QtWidgets.QWidget):
         return self._expanded
 
     def setExpanded(self, expanded):
-        """ set the expanded state of the header"""
+        """set the expanded state of the header"""
         self._expanded = expanded
 
         if self._expanded:
@@ -132,7 +132,7 @@ class CollapsibleWidget(QtWidgets.QWidget):
     def __init__(self, text, parent=None, addCheckbox=False):
         super(CollapsibleWidget, self).__init__(parent)
 
-        self.headerWidget = CollapsibleHeader(text, addCheckbox=addCheckbox)
+        self.headerWidget = CollapsibleHeader(text, addCheckbox=addCheckbox, parent=self)
         self.headerWidget.clicked.connect(self.onHeaderClicked)
 
         self.bodyWidget = QtWidgets.QWidget()
@@ -143,7 +143,7 @@ class CollapsibleWidget(QtWidgets.QWidget):
         # set the background color
         self.setAutoFillBackground(True)
         pallete = self.palette()
-        pallete.setColor(self.backgroundRole(), pallete.color(QtGui.QPalette.Background).lighter(110))
+        pallete.setColor(self.backgroundRole(), pallete.color(QtGui.QPalette.Mid))
         self.setPalette(pallete)
 
         self.mainLayout = QtWidgets.QVBoxLayout(self)
@@ -151,48 +151,48 @@ class CollapsibleWidget(QtWidgets.QWidget):
         self.mainLayout.addWidget(self.headerWidget)
         self.mainLayout.addWidget(self.bodyWidget)
 
-        # set the size policy so collapseable widgets size correctly
-        # when parented to another collapseable widget
+
+
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
 
         self.setExpanded(False)
 
     def addWidget(self, widget):
-        """ override default addWidget to add one to the body widget instead"""
+        """override default addWidget to add one to the body widget instead"""
         self.bodyLayout.addWidget(widget)
 
     def addLayout(self, layout):
-        """ override default addLayout to add one to the body widget instead"""
+        """override default addLayout to add one to the body widget instead"""
         self.bodyLayout.addLayout(layout)
 
     def addSpacing(self, spacing=10):
-        """ Override the default addSpacing to add one to the body widget instead"""
+        """Override the default addSpacing to add one to the body widget instead"""
         self.bodyLayout.addSpacing(spacing)
 
     def setExpanded(self, expanded):
-        """ Set the expanded state of the UI"""
+        """Set the expanded state of the UI"""
         self.headerWidget.setExpanded(expanded)
         self.bodyWidget.setVisible(expanded)
 
     def setChecked(self, checked):
-        """ Set the checked state of the UI"""
+        """Set the checked state of the UI"""
         self.headerWidget.checkbox.setChecked(checked)
 
     def setHeaderBackground(self, color):
-        """ Set the header color """
+        """Set the header color"""
         self.headerWidget.setBackgroundColor(color)
 
     def setDarkPallete(self):
-        """ Set the background color of the pallete"""
-        self.setPalette(darkPalette)
-        self.setAutoFillBackground(True)
+        """Set the background color of the pallete"""
+        self.setPalette(DarkPalette.palette)
+        self.headerWidget.setBackgroundColor()
 
     def onHeaderClicked(self):
-        """ expand or close the ui when the header is clicked"""
+        """expand or close the ui when the header is clicked"""
         self.setExpanded(not self.headerWidget.isExpanded())
 
     def isChecked(self):
-        """Return the state of the checkbox if one exists. """
+        """Return the state of the checkbox if one exists."""
         if self.headerWidget.hasCheckBox:
             if self.headerWidget.checkbox.isChecked():
                 return True

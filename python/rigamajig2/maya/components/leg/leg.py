@@ -231,11 +231,16 @@ class Leg(limb.Limb):
     def _setupAnimAttrs(self):
         """setup animation attributes"""
 
+
         # connect the foot ik attributes to the foot control
         attr.addSeparator(self.limbIk.name, "----")
         attr.driveAttribute("roll", self.paramsHierarchy, self.limbIk.name)
-        attr.driveAttribute("bank", self.paramsHierarchy, self.limbIk.name)
-        attr.driveAttribute("ballSwivel", self.paramsHierarchy, self.limbIk.name)
+        if self.side == 'l':
+            attr.driveAttribute("bank", self.paramsHierarchy, self.limbIk.name)
+            attr.driveAttribute("ballSwivel", self.paramsHierarchy, self.limbIk.name)
+        else:
+            attr.driveAttribute("bank", self.paramsHierarchy, self.limbIk.name, multiplier=-1)
+            attr.driveAttribute("ballSwivel", self.paramsHierarchy, self.limbIk.name, multiplier=-1)
         attr.driveAttribute("ballAngle", self.paramsHierarchy, self.limbIk.name)
         attr.driveAttribute("toeStraightAngle", self.paramsHierarchy, self.limbIk.name)
 

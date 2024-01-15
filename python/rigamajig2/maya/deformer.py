@@ -7,8 +7,9 @@ import maya.OpenMaya as om
 import maya.OpenMayaAnim as oma
 import maya.cmds as cmds
 
-import rigamajig2.maya.mesh
-import rigamajig2.maya.shape
+from rigamajig2.maya import curve
+from rigamajig2.maya import mesh
+from rigamajig2.maya import shape
 from rigamajig2.shared import common
 
 logger = logging.getLogger(__name__)
@@ -44,14 +45,14 @@ def isSetMember(deformer, geo):
 
     :param str deformer: name of the deformer to check
     :param str geo: name of the geometry to compare against
-    :return: True if the the given deformer a set member of the deformer
+    :return: True if the given deformer a set member of the deformer
     :rtype: bool
     """
-    shape = geo
+    geoShape = geo
     if cmds.nodeType(geo) == "transform":
-        shape = cmds.listRelatives(geo, s=True, ni=True)[0]
+        geoShape = cmds.listRelatives(geo, s=True, ni=True)[0]
 
-    if shape in getAffectedGeo(deformer):
+    if geoShape in getAffectedGeo(deformer):
         return True
     else:
         return False
@@ -71,9 +72,7 @@ def getDeformShape(node):
     if len(shapes) == 1:
         return shapes[0]
     else:
-        realShapes = [
-            x for x in shapes if not cmds.getAttr("{}.intermediateObject".format(x))
-        ]
+        realShapes = [x for x in shapes if not cmds.getAttr("{}.intermediateObject".format(x))]
         return realShapes[0] if len(realShapes) else None
 
 
@@ -89,18 +88,10 @@ def reorderToTop(geometry, deformer):
         stack = getDeformerStack(geo)
 
         if len(stack) < 2:
-            logger.warning(
-                "Only One deformer found on geometry {}. Nothing to reorder".format(
-                    geometry
-                )
-            )
+            logger.warning("Only One deformer found on geometry {}. Nothing to reorder".format(geometry))
 
         if deformer not in stack:
-            logger.error(
-                "Deformer '{}' was not found on the geometry '{}'".format(
-                    deformer, geometry
-                )
-            )
+            logger.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geometry))
             continue
 
         stack = [d for d in stack if d != deformer]
@@ -125,14 +116,10 @@ def reorderToBottom(geometry, deformer):
         stack = getDeformerStack(geometry)
 
         if len(stack) < 2:
-            logger.warning(
-                "Only One deformer found on geometry {}. Nothing to reorder".format(geo)
-            )
+            logger.warning("Only One deformer found on geometry {}. Nothing to reorder".format(geo))
 
         if deformer not in stack:
-            logger.error(
-                "Deformer '{}' was not found on the geometry '{}'".format(deformer, geo)
-            )
+            logger.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geo))
             continue
 
         stack = [d for d in stack if d != deformer]
@@ -156,18 +143,10 @@ def reorderSlide(geometry, deformer, up=True):
         stack = getDeformerStack(geo)
 
         if len(stack) < 2:
-            logger.warning(
-                "Only One deformer found on geometry {}. Nothing to reorder".format(
-                    geometry
-                )
-            )
+            logger.warning("Only One deformer found on geometry {}. Nothing to reorder".format(geometry))
 
         if deformer not in stack:
-            logger.error(
-                "Deformer '{}' was not found on the geometry '{}'".format(
-                    deformer, geometry
-                )
-            )
+            logger.error("Deformer '{}' was not found on the geometry '{}'".format(deformer, geometry))
             continue
 
         if stack.index(deformer) == 0 and up:
@@ -175,9 +154,7 @@ def reorderSlide(geometry, deformer, up=True):
         if stack.index(deformer) == len(stack) - 1 and not up:
             return
 
-        neighbor = (
-            stack[stack.index(deformer) - 1] if up else stack[stack.index(deformer) + 1]
-        )
+        neighbor = stack[stack.index(deformer) - 1] if up else stack[stack.index(deformer) + 1]
         # reorder the deformer
         if up:
             cmds.reorderDeformers(deformer, neighbor, geo)
@@ -244,9 +221,7 @@ def getDeformersForShape(geo, ignoreTypes=None, ignoreTweaks=True):
     for deformer in geometryFilters:
         # first lets try to use this using the old version from Maya2020.
         # if that fails we can ty another method.
-        deformerSet = (
-            cmds.ls(cmds.listConnections(deformer), type="objectSet") or list()
-        )
+        deformerSet = cmds.ls(cmds.listConnections(deformer), type="objectSet") or list()
         if deformerSet:
             if deformerSet[0] in shapeSets:
                 # in almost every case we
@@ -267,9 +242,7 @@ def getOrigShape(node):
     :return: orig shape or orig shape output plug
     """
     deformShape = getDeformShape(node)
-    origShape = common.getFirst(
-        cmds.deformableShape(deformShape, originalGeometry=True)
-    )
+    origShape = common.getFirst(cmds.deformableShape(deformShape, originalGeometry=True))
 
     origShape = origShape.split(".")[0]
     return origShape
@@ -289,18 +262,47 @@ def createCleanGeo(geo, name=None):
 
     dupGeo = cmds.rename(dupGeo, name)
     origShape = getOrigShape(geo)
+
+    if shape.getType(dupGeo) == shape.MESH:
+        return createCleanMesh(dupGeo, origShape)
+    elif shape.getType(dupGeo) == shape.CURVE:
+        return createCleanCurve(dupGeo, origShape)
+    else:
+        raise NotImplementedError(f"Shape types other than {[shape.MESH, shape.CURVE]} are not currently supported")
+
+
+def createCleanMesh(dupGeo, origShape) -> str:
+    """Create a clean version of geo for a mesh"""
     shapes = cmds.listRelatives(dupGeo, s=True)
 
     # get the point positions of the orig shape
-    origPoints = rigamajig2.maya.mesh.getVertPositions(origShape, world=False)
+    origPoints = mesh.getVertPositions(origShape, world=False)
 
     # delete all intermediate shapes
-    for shape in shapes:
-        if cmds.getAttr("{}.intermediateObject".format(shape)):
-            cmds.delete(shape)
+    for eachShape in shapes:
+        if cmds.getAttr("{}.intermediateObject".format(eachShape)):
+            cmds.delete(eachShape)
 
     # set the point positions the ones from the orig shape
-    rigamajig2.maya.mesh.setVertPositions(dupGeo, vertList=origPoints, world=False)
+    mesh.setVertPositions(dupGeo, vertList=origPoints, world=False)
+
+    return dupGeo
+
+
+def createCleanCurve(dupGeo, origShape) -> str:
+    """Create a clean version of geo for a nurbs curve"""
+    shapes = cmds.listRelatives(dupGeo, s=True)
+
+    # get the point positions of the orig shape
+    origPoints = curve.getCvPositions(origShape, world=False)
+
+    # delete all intermediate shapes
+    for eachShape in shapes:
+        if cmds.getAttr("{}.intermediateObject".format(eachShape)):
+            cmds.delete(eachShape)
+
+    # set the point positions the ones from the orig shape
+    curve.setCvPositions(dupGeo, cvList=origPoints, world=False)
 
     return dupGeo
 
@@ -340,7 +342,7 @@ def getAffectedGeo(deformer):
     selList = om.MSelectionList()
     selList.add(deformer)
     deformerObj = om.MObject()
-    selList.getDependNode(0, mObject)
+    selList.getDependNode(0, deformerObj)
 
     deformFn = oma.MFnGeometryFilter(deformerObj)
 
@@ -366,7 +368,7 @@ def getGeoIndex(deformer, geo):
         logger.error("object '{}' is not a deformer".format(deformer))
         return
 
-    geo = rigamajig2.maya.shape.getShapes(geo)
+    geo = shape.getShapes(geo)
     if not geo:
         return
     deformedGeometry = cmds.deformer(deformer, q=1, g=1, gi=1)
@@ -403,7 +405,7 @@ def getWeights(deformer, geometry=None):
     if not geometry:
         geometry = common.getFirst(getAffectedGeo(deformer))
 
-    pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
+    pointCount = shape.getPointCount(geometry) - 1
 
     geometryIndex = getGeoIndex(deformer, geometry)
 
@@ -433,7 +435,7 @@ def setWeights(deformer, weights, geometry=None):
 
     :param deformer: deformer to set the weights of
     :param weights: list of weights to set
-    :param geometry: Optional- geometry to set the attributes of.
+    :param geometry: Optional - geometry to set the attributes of.
                 If ommited the first geometry of the deformer will be used.
     """
     if not isDeformer(deformer):
@@ -442,18 +444,16 @@ def setWeights(deformer, weights, geometry=None):
 
     if not geometry:
         geometry = common.getFirst(getAffectedGeo(deformer))
-    pointCount = rigamajig2.maya.shape.getPointCount(geometry) - 1
+    pointCount = shape.getPointCount(geometry) - 1
 
     geometryIndex = getGeoIndex(deformer, geometry)
     if geometryIndex is None:
-        raise Exception(
-            f"The geometry '{geometry}' is not part of the deformer set for '{deformer}'"
-        )
+        raise Exception(f"The geometry '{geometry}' is not part of the deformer set for '{deformer}'")
 
     tmpWeights = list()
     for i in range(pointCount + 1):
         # we need to check if there are weights in the dictionary. We can use get to check and return None if
-        # there is not a key for the specified weight. After that we can check if the weight == None. If we does
+        # there is not a key for the specified weight. After that we can check if the weight == None. If we do
         # we replace it with 1.0 since we stripped out any values at 1.0 when we gathered the weights
         if weights.get(i) is not None:
             tmpWeight = weights.get(i)
@@ -477,7 +477,7 @@ def addGeoToDeformer(deformer, geo):
     Add a geometry to an existing deformer
 
     :param str deformer: deformer to add the new geo to
-    :param str geo: geo to add to the deformer
+    :param str geo: geo add to the deformer
     """
     if not isDeformer(deformer):
         logger.error("object '{}' is not a deformer".format(deformer))
@@ -523,12 +523,8 @@ def transferDeformer(deformer, sourceMesh, targetMesh):
         logger.error("object '{}' does not exist".format(geo))
         return
 
-    if not rigamajig2.maya.shape.getPointCount(
-        sourceMesh
-    ) == rigamajig2.maya.shape.getPointCount(targetMesh):
-        logger.error(
-            f"'{sourceMesh}' and '{targetMesh}' meshes do not match vertex count"
-        )
+    if not shape.getPointCount(sourceMesh) == shape.getPointCount(targetMesh):
+        logger.error(f"'{sourceMesh}' and '{targetMesh}' meshes do not match vertex count")
 
     addGeoToDeformer(deformer=deformer, geo=targetMesh)
 

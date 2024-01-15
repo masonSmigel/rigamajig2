@@ -83,9 +83,7 @@ def create(
     elif deformOrder == deformer.DeformOrder.foc:
         data["foc"] = True
 
-    blendshapeNode = cmds.blendShape(base, name=blendshapeName, origin=origin, **data)[
-        0
-    ]
+    blendshapeNode = cmds.blendShape(base, name=blendshapeName, origin=origin, **data)[0]
 
     # add the blendshape targets
     for target in targets:
@@ -198,9 +196,7 @@ def addEmptyTarget(
     return plug
 
 
-def addInbetween(
-    blendshape, targetGeo, targetName, base=None, weight=0.5, absolute=True
-) -> str:
+def addInbetween(blendshape, targetGeo, targetName, base=None, weight=0.5, absolute=True) -> str:
     """
     Add a new target inbetween to the specified blendShape target
 
@@ -302,9 +298,7 @@ def getTargetList(blendshape: str) -> List[str]:
     return common.toList(targetList)
 
 
-def hasTargetGeo(
-    blendShape: str, target: str, base: str = None, inbetween: float = None
-) -> bool:
+def hasTargetGeo(blendShape: str, target: str, base: str = None, inbetween: float = None) -> bool:
     """
     Check if the specified blendShape target has live target geometry.
 
@@ -361,9 +355,7 @@ def getTargetGeo(
         + str(wtIndex)
         + "].inputGeomTarget"
     )
-    targetGeoConn = cmds.listConnections(
-        targetGeoAttr, shapes=True, destination=False, plugs=plugs
-    )
+    targetGeoConn = cmds.listConnections(targetGeoAttr, shapes=True, destination=False, plugs=plugs)
 
     if not targetGeoConn:
         targetGeoConn = [""]
@@ -409,9 +401,7 @@ def renameTarget(blendshape: str, target: str, newName: str) -> None:
 
     allAliases = cmds.aliasAttr(blendshape, query=True)
     if target not in allAliases:
-        raise ValueError(
-            "BlendShape node '{}' doesn't have an alias '{}'".format(blendshape, target)
-        )
+        raise ValueError("BlendShape node '{}' doesn't have an alias '{}'".format(blendshape, target))
     oldAliasIndex = allAliases.index(target) + 1
     oldAliasAttr = allAliases[oldAliasIndex]
     cmds.aliasAttr(newName, "{}.{}".format(blendshape, oldAliasAttr))
@@ -443,11 +433,7 @@ def getTargetName(blendshape, targetGeometry):
     )
 
     if not targetConnections.count(blendshape):
-        raise Exception(
-            "Target geometry {} is not connected to blendshape {}".format(
-                targetShape, blendshape
-            )
-        )
+        raise Exception("Target geometry {} is not connected to blendshape {}".format(targetShape, blendshape))
 
     targetConnectionIndex = targetConnections.index(blendshape)
     targetConnectionAttr = targetConnections[targetConnectionIndex - 1]
@@ -461,9 +447,7 @@ def getTargetName(blendshape, targetGeometry):
     )[0]
 
     targetIndex = int(targetConnectionPlug.split(".")[2].split("[")[1].split("]")[0])
-    targetAlias = cmds.aliasAttr(
-        "{}.weight[{}]".format(blendshape, targetIndex), query=True
-    )
+    targetAlias = cmds.aliasAttr("{}.weight[{}]".format(blendshape, targetIndex), query=True)
 
     return targetAlias
 
@@ -514,9 +498,7 @@ def getWeights(blendshape, targets=None, geometry=None):
     for target in targets:
         targetIndex = getTargetIndex(blendshape, target)
 
-        targetAttr = "{}.it[0].itg[{}].tw[0:{}]".format(
-            blendshape, targetIndex, pointCount
-        )
+        targetAttr = "{}.it[0].itg[{}].tw[0:{}]".format(blendshape, targetIndex, pointCount)
         attrDefaultTest = "{}.it[0].itg[{}].tw[*]".format(blendshape, targetIndex)
         if not cmds.objExists(attrDefaultTest):
             values = [1 for _ in range(pointCount + 1)]
@@ -573,9 +555,7 @@ def setWeights(
     if not targets:
         targets = getTargetList(blendshape) + ["baseWeights"]
     if not geometry:
-        geometry = common.getFirst(
-            cmds.blendShape(blendshape, query=True, geometry=True)
-        )
+        geometry = common.getFirst(cmds.blendShape(blendshape, query=True, geometry=True))
 
     targets = common.toList(targets)
 
@@ -599,9 +579,7 @@ def setWeights(
                     tmpWeight = 1.0
                 tmpWeights.append(tmpWeight)
 
-            targetAttr = "{}.inputTarget[0].baseWeights[0:{}]".format(
-                blendshape, pointCount
-            )
+            targetAttr = "{}.inputTarget[0].baseWeights[0:{}]".format(blendshape, pointCount)
             cmds.setAttr(targetAttr, *tmpWeights)
         else:
             tmpWeights = list()
@@ -617,9 +595,7 @@ def setWeights(
                 tmpWeights.append(tmpWeight)
 
             targetIndex = getTargetIndex(blendshape, target)
-            targetAttr = "{}.inputTarget[0].itg[{}].tw[0:{}]".format(
-                blendshape, targetIndex, pointCount
-            )
+            targetAttr = "{}.inputTarget[0].itg[{}].tw[0:{}]".format(blendshape, targetIndex, pointCount)
             cmds.setAttr(targetAttr, *tmpWeights)
 
 
@@ -659,9 +635,7 @@ def inbetweenToIti(inbetween) -> int:
     return int((float(inbetween) * 1000) + 5000)
 
 
-def getInputTargetItemAttr(
-    blendshape: str, baseIndex: int, targetIndex: int, inputTargetItem: int = None
-):
+def getInputTargetItemAttr(blendshape: str, baseIndex: int, targetIndex: int, inputTargetItem: int = None):
     """
     Get the input target item attribute for a blendshape
 
@@ -702,28 +676,17 @@ def getDelta(
 
     inputTargetItem = 6000 if not inbetween else inbetweenToIti(inbetween)
 
-    inputTargetItemPlug = getInputTargetItemAttr(
-        blendshape, baseIndex, targetIndex, inputTargetItem
-    )
+    inputTargetItemPlug = getInputTargetItemAttr(blendshape, baseIndex, targetIndex, inputTargetItem)
     geoTargetPlug = "{}.igt".format(inputTargetItemPlug)
 
     deltaPointList = dict()
 
-    if (
-        len(
-            cmds.listConnections(geoTargetPlug, source=True, destination=False)
-            or list()
-        )
-        > 0
-    ):
-        inputShape = cmds.listConnections(
-            geoTargetPlug, source=True, destination=False, plugs=True
-        )
+    if len(cmds.listConnections(geoTargetPlug, source=True, destination=False) or list()) > 0:
+        inputShape = cmds.listConnections(geoTargetPlug, source=True, destination=False, plugs=True)
         inputShape = inputShape[0].split(".")[0]
-
-        targetPoints = mesh.getVertPositions(inputShape, world=False)
-
         origShape = deformer.getOrigShape(base)
+         # TODO: add a check to support live connections to nurbs curves as well.
+        targetPoints = mesh.getVertPositions(inputShape, world=False)
         origPoints = mesh.getVertPositions(origShape, world=False)
 
         deltaPointList = dict()
@@ -741,9 +704,7 @@ def getDelta(
 
     else:
         pointsTarget = cmds.getAttr("{}.ipt".format(inputTargetItemPlug))
-        componentsTarget = common.flattenList(
-            cmds.getAttr("{}.ict".format(inputTargetItemPlug))
-        )
+        componentsTarget = common.flattenList(cmds.getAttr("{}.ict".format(inputTargetItemPlug)))
 
         for point, componentTarget in zip(pointsTarget, componentsTarget):
             vertexId = componentTarget.split("[")[-1].split("]")[0]
@@ -787,25 +748,18 @@ def setDelta(
 
     inputTargetItem = 6000 if not inbetween else inbetweenToIti(inbetween)
 
-    inputTargetItemPlug = getInputTargetItemAttr(
-        blendshape, baseIndex, targetIndex, inputTargetItem
-    )
+    inputTargetItemPlug = getInputTargetItemAttr(blendshape, baseIndex, targetIndex, inputTargetItem)
     geoTargetPlug = "{}.igt".format(inputTargetItemPlug)
 
-    if (
-        len(
-            cmds.listConnections(geoTargetPlug, source=True, destination=False)
-            or list()
-        )
-        > 0
-    ):
-        raise Warning(
-            "{}.{} has a live blendshape connection".format(blendshape, target)
-        )
+    if len(cmds.listConnections(geoTargetPlug, source=True, destination=False) or list()) > 0:
+        raise Warning("{}.{} has a live blendshape connection".format(blendshape, target))
 
     else:
         pointsList = [deltaDict[p] for p in list(deltaDict.keys())]
-        componentsList = ["vtx[{}]".format(p) for p in list(deltaDict.keys())]
+        if shape.getType(base) == shape.MESH:
+            componentsList = ["vtx[{}]".format(p) for p in list(deltaDict.keys())]
+        elif shape.getType(base) == shape.CURVE:
+            componentsList = ["cv[{}]".format(p) for p in list(deltaDict.keys())]
 
         cmds.setAttr(
             f"{inputTargetItemPlug}.inputPointsTarget",
@@ -879,35 +833,23 @@ def regenerateTarget(blendshape, target, inbetween=None, connect=True):
     # get the input target item index
     inputTargetItem = 6000 if not inbetween else inbetweenToIti(inbetween)
 
-    inputTargetItemPlug = "{}.it[{}].itg[{}].iti[{}]".format(
-        blendshape, baseIndex, targetIndex, inputTargetItem
-    )
+    inputTargetItemPlug = "{}.it[{}].itg[{}].iti[{}]".format(blendshape, baseIndex, targetIndex, inputTargetItem)
 
     # check if an inputTargetItem exists for the given inbetween
     if inputTargetItem not in getInputTargetItemList(blendshape, target):
-        raise ValueError(
-            "No inbetween exists for '{}.{}' at the inbetween {}".format(
-                blendshape, target, inbetween
-            )
-        )
+        raise ValueError("No inbetween exists for '{}.{}' at the inbetween {}".format(blendshape, target, inbetween))
 
     # check if the plug is already connected to geometry
-    if cmds.listConnections(
-        "{}.igt".format(inputTargetItemPlug), source=True, destination=False, plugs=True
-    ):
+    if cmds.listConnections("{}.igt".format(inputTargetItemPlug), source=True, destination=False, plugs=True):
         print("{}.{} is already connected to input geometry".format(blendshape, target))
         return
 
     # if its not we can reconstruct the delta then connect it to the inputGeometryTarget plug.
     else:
-        ibName = "{}_ib{}".format(
-            target, str(inbetween).replace(".", "_").replace("-", "neg")
-        )
+        ibName = "{}_ib{}".format(target, str(inbetween).replace(".", "_").replace("-", "neg"))
         targetGeoName = target if not inbetween else ibName
         deltaDict = getDelta(blendshape, target, inbetween=inbetween)
-        targetGeo = reconstructTargetFromDelta(
-            blendshape, deltaDict=deltaDict, name=targetGeoName
-        )
+        targetGeo = reconstructTargetFromDelta(blendshape, deltaDict=deltaDict, name=targetGeoName)
 
         targetGeoShape = cmds.listRelatives(targetGeo, shapes=True)[0]
         if connect:
@@ -961,18 +903,14 @@ def transferBlendshape(
         setDelta(blendshape=targetBlendshape, target=target, deltaDict=baseDelta)
 
         # transfer each inbetween
-        for iti in getInputTargetItemList(
-            blendshape=blendshape, target=target, base=base
-        ):
+        for iti in getInputTargetItemList(blendshape=blendshape, target=target, base=base):
             # if the index is the base (6000) we can skip it since we already transferred it.
             if iti == 6000:
                 continue
 
             wt = itiToInbetween(iti)
 
-            inbetweenDelta = getDelta(
-                blendshape=blendshape, target=target, inbetween=wt
-            )
+            inbetweenDelta = getDelta(blendshape=blendshape, target=target, inbetween=wt)
             addEmptyTarget(blendshape=targetBlendshape, target=target, inbetween=wt)
             setDelta(
                 blendshape=targetBlendshape,
@@ -985,13 +923,9 @@ def transferBlendshape(
         cmds.setAttr(f"{targetBlendshape}.{target}", targetValue)
 
         if copyConnections:
-            inputTargetConnections = common.getLast(
-                connection.getPlugInput(f"{blendshape}.{target}")
-            )
+            inputTargetConnections = common.getLast(connection.getPlugInput(f"{blendshape}.{target}"))
             if inputTargetConnections:
-                cmds.connectAttr(
-                    inputTargetConnections, f"{targetBlendshape}.{target}", force=True
-                )
+                cmds.connectAttr(inputTargetConnections, f"{targetBlendshape}.{target}", force=True)
             outputs = connection.getPlugOutput(f"{blendshape}.{target}")
             for output in outputs:
                 cmds.connectAttr(f"{targetBlendshape}.{target}", output, force=True)

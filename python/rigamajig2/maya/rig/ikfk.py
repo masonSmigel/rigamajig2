@@ -1010,5 +1010,5 @@ class IkFkFoot(IkFkBase):
         transform.matchTranslate(self._outPiviot, self.__pivotDict["out"])
         transform.matchTranslate(toeJoint, self.__pivotDict["end"])
         transform.matchTranslate(ballJoint, self.__pivotDict["ball"])
-        transform.matchTranslate(ankleJoint, self.__pivotDict["ankle"])
         transform.matchTranslate(ballJoint, self.__pivotDict["toe"])
+        transform.matchTranslate(ankleJoint, self.__pivotDict["ankle"])

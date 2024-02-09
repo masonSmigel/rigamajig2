@@ -335,7 +335,7 @@ def mirror(joints: Multiuse, axis="x", mode="rotate", zeroRotation=True):
                     cmds.makeIdentity(destination, apply=1, r=1)
                 except:
                     raise RuntimeError(
-                        "Could not zeroRotation out {}".format(destination)
+                        "Could not zero rotation out {}".format(destination)
                     )
 
             # set prefered angle

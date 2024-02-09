@@ -200,7 +200,7 @@ class Leg(limb.Limb):
         cmds.parent(self.footIkFk.getPivotDict()["toe"], self.toesIk.name)
 
         cmds.parent(self.ballIk.orig, self.footIkFk.getPivotDict()["ball"])
-        cmds.parent(self.footIkFk.getPivotDict()["ankle"], self.ballIk.name)
+        cmds.parent(self.footIkFk.getPivotDict()["ankle"], self.ballIk.name, relative=True)
 
         # setup the toes
         transform.connectOffsetParentMatrix(

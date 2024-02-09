@@ -581,26 +581,26 @@ class Limb(base.BaseComponent):
         # create a visability control for the ikGimble control
         attr.createAttr(
             self.limbIk.name,
-            longName="gimble",
+            longName="gimbal",
             attributeType="bool",
             value=0,
             keyable=False,
             channelBox=True,
         )
         control.connectControlVisiblity(
-            self.limbIk.name, driverAttr="gimble", controls=self.limbGimbleIk.name
+            self.limbIk.name, driverAttr="gimbal", controls=self.limbGimbleIk.name
         )
 
         attr.createAttr(
             self.joint3Fk.name,
-            longName="gimble",
+            longName="gimbal",
             attributeType="bool",
             value=0,
             keyable=False,
             channelBox=True,
         )
         control.connectControlVisiblity(
-            self.joint3Fk.name, driverAttr="gimble", controls=self.joint3GimbleFk.name
+            self.joint3Fk.name, driverAttr="gimbal", controls=self.joint3GimbleFk.name
         )
 
     def _connect(self):
@@ -688,10 +688,6 @@ class Limb(base.BaseComponent):
         attr.lockAndHide(self.spacesHierarchy, attr.TRANSFORMS + ["v"])
         attr.lockAndHide(self.ikfk.getGroup(), attr.TRANSFORMS + ["v"])
         attr.lockAndHide(self.paramsHierarchy, attr.TRANSFORMS + ["v"])
-
-    def _setControlAttributes(self):
-        """Set some attributes to values that make more sense for the inital setup."""
-        cmds.setAttr("{}.{}".format(self.ikfkControl.name, "softStretch"), 0.2)
 
     # --------------------------------------------------------------------------------
     # helper functions to shorten functions.

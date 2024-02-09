@@ -1,6 +1,7 @@
 """
 Ik FK switcher
 """
+import logging
 import sys
 import time
 
@@ -17,7 +18,7 @@ from rigamajig2.maya import meta
 from rigamajig2.maya.rig import control
 from rigamajig2.shared import common
 
-logger = logger.getLogger(__name__)
+logger = logging.getLogger(__name__)
 
 
 VALID_IKFK_COMPONENTS = ["arm.arm", "leg.leg", "limb.limb"]

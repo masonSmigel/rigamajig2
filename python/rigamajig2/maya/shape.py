@@ -5,6 +5,11 @@ import maya.cmds as cmds
 
 import rigamajig2.shared.common as common
 
+MESH = "mesh"
+CURVE = "nurbsCurve"
+SURFACE = "nurbsSurface"
+MIXED = "mixed"
+
 
 def getType(node):
     """

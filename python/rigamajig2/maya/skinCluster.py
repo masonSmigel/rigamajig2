@@ -637,6 +637,7 @@ def copySkinClusterAndInfluences(
             sourceSkin=srcSkinCluster,
             destinationSkin=tgtSkinCluster,
             normalize=True,
+            noMirror=True,
             **kwargs,
         )
         print(

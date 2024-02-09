@@ -521,7 +521,7 @@ class Lips(base.BaseComponent):
                 name="{}_trsTarget".format(guideName),
                 p=self.targetHierarchy,
             )
-            transform.matchTransform(guide, targetLoc)
+            transform.matchTranslate(guide, targetLoc)
 
             targetCurve = (
                 self.botHighCurve if "lower" in guideName else self.topHighCurve

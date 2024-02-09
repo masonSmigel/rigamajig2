@@ -55,6 +55,7 @@ class Arm(limb.Limb):
             parent=self.limbGimbleIk.name,
             shape="plus",
             position=transform.getTranslate(self.input[3], worldSpace=True),
+            rotation=cmds.xform(self.input[3], query=True, worldSpace=True, rotation=True) if self.localOrientIk else None
         )
 
     def _rigSetup(self):

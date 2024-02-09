@@ -54,6 +54,7 @@ class Neck(base.BaseComponent):
 
         self.neckName = "neck"
         self.headName = "head"
+        self.addSkull = False
 
         self.defineParameter(parameter="neckName", value="neck", dataType="string")
         self.defineParameter(parameter="headName", value="head", dataType="string")
@@ -63,6 +64,9 @@ class Neck(base.BaseComponent):
         )
         self.defineParameter(
             parameter="headSpaces", value=self.headSpaces, dataType="dict"
+        )
+        self.defineParameter(
+            parameter="addSkull", value=self.addSkull, dataType="bool"
         )
 
     def _createBuildGuides(self):
@@ -148,7 +152,7 @@ class Neck(base.BaseComponent):
             size=self.size,
             color="yellow",
             parent=self.headGimble.name,
-            shape="cube",
+            shape="cube" if self.addSkull else None,
             shapeAim="x",
             xformObj=self.skullGuide,
         )

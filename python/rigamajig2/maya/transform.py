@@ -290,7 +290,10 @@ def blendedOffsetParentMatrix(
         "{}.offsetParentMatrix".format(driven),
         f=True,
     )
-    cmds.setAttr("{}.envelope".format(blendMatrix), blend)
+    if type(blend) == str:
+        cmds.connectAttr(blend, "{}.envelope".format(blendMatrix) )
+    else:
+        cmds.setAttr("{}.envelope".format(blendMatrix), blend)
 
     return blendMatrix
 

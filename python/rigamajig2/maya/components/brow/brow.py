@@ -56,31 +56,22 @@ class Brow(base.BaseComponent):
         :param rigParent: connect the component to a rigParent
         :param browSpans: The number of spans from the inner brow to the outer brow.
         """
-        super(Brow, self).__init__(
-            name, input=input, size=size, rigParent=rigParent, componentTag=componentTag
-        )
+        super(Brow, self).__init__(name, input=input, size=size, rigParent=rigParent, componentTag=componentTag)
         self.side = common.getSide(self.name)
 
         self.browSpans = 8
+        self.addSdk = False
         self.browAllName = [x.split("_")[0] for x in self.input][0]
 
-        self.defineParameter(
-            parameter="browSpans", value=self.browSpans, dataType="int"
-        )
-
-        self.defineParameter(
-            parameter="browAllName", value=self.browAllName, dataType="string"
-        )
+        self.defineParameter(parameter="addSdk", value=self.addSdk, dataType="bool")
+        self.defineParameter(parameter="browSpans", value=self.browSpans, dataType="int")
+        self.defineParameter(parameter="browAllName", value=self.browAllName, dataType="string")
 
     def _createBuildGuides(self):
         """Create the build guides"""
-        self.guidesHierarchy = cmds.createNode(
-            "transform", name="{}_guide".format(self.name)
-        )
+        self.guidesHierarchy = cmds.createNode("transform", name="{}_guide".format(self.name))
 
-        basePos = cmds.xform(
-            self.input[0], query=True, worldSpace=True, translation=True
-        )
+        basePos = cmds.xform(self.input[0], query=True, worldSpace=True, translation=True)
 
         # create the curve guides
 
@@ -88,9 +79,7 @@ class Brow(base.BaseComponent):
         midpoint = (float(self.browSpans - 1) * 0.5) * (GUIDE_SCALE * 2)
         guideSize = self.size * GUIDE_SCALE
 
-        parent = cmds.createNode(
-            "transform", name="{}_spans".format(self.name), parent=self.guidesHierarchy
-        )
+        parent = cmds.createNode("transform", name="{}_spans".format(self.name), parent=self.guidesHierarchy)
 
         self.browGuideList = list()
         for i in range(self.browSpans):
@@ -120,9 +109,7 @@ class Brow(base.BaseComponent):
 
         self.browControlGuides = list()
         curveName = "{}_guideCrv".format(self.name)
-        browGuideCurve = live.createLiveCurve(
-            self.browGuideList, curveName=curveName, parent=self.guidesHierarchy
-        )
+        browGuideCurve = live.createLiveCurve(self.browGuideList, curveName=curveName, parent=self.guidesHierarchy)
 
         browControlNames = ["inn", "furrow", "mid", "arch", "out"]
         browControlParams = [0, 0.05, 0.37, 0.75, 1]
@@ -140,9 +127,7 @@ class Brow(base.BaseComponent):
 
             minParam, maxParam = curve.getRange(browGuideCurve)
             param = maxParam * browControlParams[i]
-            pointOnCurveInfo = curve.attatchToCurve(
-                guide, browGuideCurve, toClosestParam=False, parameter=param
-            )
+            pointOnCurveInfo = curve.attatchToCurve(guide, browGuideCurve, toClosestParam=False, parameter=param)
 
             # create a slide attribute, so we can easily slide the controls along the shape of the eyelid
             slideAttr = attr.createAttr(
@@ -171,6 +156,7 @@ class Brow(base.BaseComponent):
             side=self.side,
             shape="square",
             orig=True,
+            sdk=self.addSdk,
             xformObj=self.input[0],
             parent=self.controlHierarchy,
         )
@@ -183,6 +169,7 @@ class Brow(base.BaseComponent):
                 shape="square",
                 orig=True,
                 trs=True,
+                sdk=self.addSdk,
                 parent=self.browAll.name,
                 shapeAim="z",
                 xformObj=guide,
@@ -228,9 +215,7 @@ class Brow(base.BaseComponent):
         for i, guide in enumerate(self.browGuideList):
             guideName = guide.split("_guide")[0]
 
-            endJoint = cmds.createNode(
-                "joint", name="{}_bind".format(guideName), parent=self.input[0]
-            )
+            endJoint = cmds.createNode("joint", name="{}_bind".format(guideName), parent=self.input[0])
             transform.matchTranslate(guide, endJoint)
             joint.setRadius([endJoint], GUIDE_SCALE)
             meta.tag(endJoint, "bind")
@@ -250,9 +235,7 @@ class Brow(base.BaseComponent):
 
             # we also want to create a tilt joint if this is the first joint
             if i == 0:
-                tiltJoint = cmds.createNode(
-                    "joint", name="{}_tilt_bind".format(guideName), parent=self.input[0]
-                )
+                tiltJoint = cmds.createNode("joint", name="{}_tilt_bind".format(guideName), parent=self.input[0])
                 transform.matchTranslate(guide, tiltJoint)
                 joint.setRadius([tiltJoint], GUIDE_SCALE)
                 meta.tag(tiltJoint, "bind")
@@ -277,9 +260,7 @@ class Brow(base.BaseComponent):
         cmds.setAttr("{}.scale[0]".format(wire1), 0)
 
         # setup the main brow transformations
-        self.jntHierarchy = cmds.createNode(
-            "transform", name="{}_joints".format(self.name), parent=self.rootHierarchy
-        )
+        self.jntHierarchy = cmds.createNode("transform", name="{}_joints".format(self.name), parent=self.rootHierarchy)
         self.setupDriverCurve()
 
         # setup the tilt trs connections
@@ -292,9 +273,7 @@ class Brow(base.BaseComponent):
 
         driverJoints = list()
         for ctl in self.browControls:
-            jnt = cmds.createNode(
-                "joint", name=ctl.name + "_driver", parent=self.jntHierarchy
-            )
+            jnt = cmds.createNode("joint", name=ctl.name + "_driver", parent=self.jntHierarchy)
             transform.matchTransform(ctl.name, jnt)
             transform.connectOffsetParentMatrix(ctl.name, jnt)
 
@@ -329,12 +308,8 @@ class Brow(base.BaseComponent):
             value=0.9,
         )
 
-        browMidReverse = node.reverse(
-            midFollow, name="{}_browMidFollow".format(self.name)
-        )
-        browFurrowReverse = node.reverse(
-            furrowFollow, name="{}_browFurrowFollow".format(self.name)
-        )
+        browMidReverse = node.reverse(midFollow, name="{}_browMidFollow".format(self.name))
+        browFurrowReverse = node.reverse(furrowFollow, name="{}_browFurrowFollow".format(self.name))
 
         # connect the constraints
         const1 = cmds.parentConstraint(
@@ -356,18 +331,14 @@ class Brow(base.BaseComponent):
 
         # connect the furrow follow
         cmds.connectAttr(furrowFollow, "{}.w0".format(const2[0]))
-        cmds.connectAttr(
-            "{}.outputX".format(browFurrowReverse), "{}.w1".format(const2[0])
-        )
+        cmds.connectAttr("{}.outputX".format(browFurrowReverse), "{}.w1".format(const2[0]))
 
     def _connect(self):
         """connect to the rig parent"""
 
         if cmds.objExists(self.rigParent):
             # connect the browAll
-            transform.connectOffsetParentMatrix(
-                self.rigParent, self.browAll.orig, mo=True
-            )
+            transform.connectOffsetParentMatrix(self.rigParent, self.browAll.orig, mo=True)
 
     def _finalize(self):
         """Finalize the rig setup"""

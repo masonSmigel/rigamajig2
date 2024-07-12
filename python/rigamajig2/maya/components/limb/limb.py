@@ -745,8 +745,11 @@ class Limb(base.BaseComponent):
     def __negateUpperLimbTwist(self, uppSpline):
         # calculate an inverted rotation to negate the upp twist start.
         # This gives a more natural twist down the limb
+        offsetMatrix = transform.offsetMatrix(f"{self.input[1]}.worldMatrix", f"{self.input[0]}.worldMatrix")
+
         twistMultMatrix, twistDecompose = node.multMatrix(
             inputs=[
+                list(offsetMatrix),
                 "{}.worldMatrix".format(self.input[1]),
                 "{}.worldInverseMatrix".format(self.input[0]),
             ],
@@ -791,9 +794,7 @@ class Limb(base.BaseComponent):
             )
             rotateOrder = cmds.getAttr("{}.rotateOrder".format(self.input[1]))
             negatedRotateOrder = transform.ROTATEORDER_NEGATED[rotateOrder]
-            negatedRotateOrderIndex = transform.ROTATEORDER_NEGATED.index(
-                negatedRotateOrder
-            )
+            negatedRotateOrderIndex = transform.ROTATEORDER.index(negatedRotateOrder)
             cmds.setAttr(
                 "{}.{}".format(uppSpline._startTwist, "rotateOrder"),
                 negatedRotateOrderIndex,

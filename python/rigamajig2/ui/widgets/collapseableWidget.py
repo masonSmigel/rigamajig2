@@ -142,16 +142,14 @@ class CollapsibleWidget(QtWidgets.QWidget):
 
         # set the background color
         self.setAutoFillBackground(True)
-        pallete = self.palette()
-        pallete.setColor(self.backgroundRole(), pallete.color(QtGui.QPalette.Mid))
-        self.setPalette(pallete)
+        palette = self.palette()
+        palette.setColor(self.backgroundRole(), palette.color(QtGui.QPalette.Background).lighter(110))
+        self.setPalette(palette)
 
         self.mainLayout = QtWidgets.QVBoxLayout(self)
         self.mainLayout.setContentsMargins(0, 0, 0, 0)
         self.mainLayout.addWidget(self.headerWidget)
         self.mainLayout.addWidget(self.bodyWidget)
-
-
 
         self.setSizePolicy(QtWidgets.QSizePolicy.Minimum, QtWidgets.QSizePolicy.Fixed)
 

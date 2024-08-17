@@ -735,14 +735,16 @@ class DeformLayerDialog(mayaDialog.MayaDialog):
             topItemText = self.getTopLevelItem(item).text(0)
             renderModels.add(topItemText)
 
-        sceneSelection = cmds.ls(sl=True)
+        allowSceneSelection = not bool(renderModels)
+
+        sceneSelection = cmds.ls(selection=True)
         if sceneSelection and allowSceneSelection:
-            for s in sceneSelection:
+            for each in sceneSelection:
                 # ensure the selected node is not a deform layer
-                if cmds.objExists(f"{s}.{deformLayer.LAYER_ATTR}"):
+                if cmds.objExists(f"{each}.{deformLayer.LAYER_ATTR}"):
                     continue
 
-                renderModels.add(s)
+                renderModels.add(each)
 
         confirm = mayaMessageBox.MayaMessageBox(
             title="Add new Deform Layers",

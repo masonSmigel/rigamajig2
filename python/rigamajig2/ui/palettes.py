@@ -19,31 +19,61 @@ class RigamajigPalette:
 
     # base
     palette.setColor(QPalette.WindowText, QColor(220, 220, 220))
-    palette.setColor(QPalette.Button, QColor(68, 68, 70))
-    palette.setColor(QPalette.Light, QColor(180, 180, 180))
-    palette.setColor(QPalette.Midlight, QColor(43, 43, 45))
-    palette.setColor(QPalette.Dark, QColor(35, 35, 37))
-    palette.setColor(QPalette.Text, QColor(180, 180, 180))
-    palette.setColor(QPalette.BrightText, QColor(220, 220, 220))
+    # palette.setColor(QPalette.Button, QColor(82, 82, 86))
+    # palette.setColor(QPalette.Light, QColor(180, 180, 180))
+    # palette.setColor(QPalette.Midlight, QColor(43, 43, 45))
+    # palette.setColor(QPalette.Dark, QColor(35, 35, 37))
+    palette.setColor(QPalette.Text, QColor(220, 220, 220))
+    palette.setColor(QPalette.BrightText, QColor(240, 240, 240))
     palette.setColor(QPalette.ButtonText, QColor(220, 220, 220))
-    palette.setColor(QPalette.Base, QColor(38, 38, 41))
-    palette.setColor(QPalette.AlternateBase, QColor(44, 44, 48))
-    palette.setColor(QPalette.Mid, QColor(63, 63, 65))
-    palette.setColor(QPalette.Shadow, QColor(20, 20, 22))
-    palette.setColor(QPalette.Link, QColor(56, 252, 196))
-    palette.setColor(QPalette.ToolTipBase, QColor(42, 42, 44))
-    palette.setColor(QPalette.ToolTipText, QColor(180, 180, 180))
-    palette.setColor(QPalette.LinkVisited, QColor(80, 80, 80))
-    palette.setColor(QPalette.Background, QColor(56, 56, 58))
-    palette.setColor(QPalette.Window, QColor(56, 56, 58))
+    # palette.setColor(QPalette.Base, QColor(38, 38, 41))
+    # palette.setColor(QPalette.AlternateBase, QColor(44, 44, 48))
+    # palette.setColor(QPalette.Mid, QColor(68, 68, 70))
+    # palette.setColor(QPalette.Shadow, QColor(20, 20, 22))
+    # palette.setColor(QPalette.Link, QColor(56, 252, 196))
+    # palette.setColor(QPalette.ToolTipBase, QColor(42, 42, 44))
+    # palette.setColor(QPalette.ToolTipText, QColor(220, 220, 220))
+    # palette.setColor(QPalette.LinkVisited, QColor(80, 80, 80))
+    # palette.setColor(QPalette.Background, QColor(60, 60, 62))
+    # palette.setColor(QPalette.Window, QColor(50, 50, 52))
 
     # disabled
     palette.setColor(QPalette.Disabled, QPalette.WindowText, QColor(127, 127, 127))
     palette.setColor(QPalette.Disabled, QPalette.Text, QColor(127, 127, 127))
     palette.setColor(QPalette.Disabled, QPalette.ButtonText, QColor(127, 127, 127))
     palette.setColor(QPalette.Disabled, QPalette.Highlight, QColor(80, 80, 80))
-    palette.setColor(QPalette.Disabled, QPalette.HighlightedText, QColor(127, 127, 127))
+    palette.setColor(QPalette.Disabled, QPalette.HighlightedText, QColor(150, 150, 150))
 
+
+class RigamajigPaletteDark:
+    palette = QPalette()
+
+    # base
+    palette.setColor(QPalette.WindowText, QColor(220, 220, 220))
+    palette.setColor(QPalette.Button, QColor(82, 82, 86))
+    palette.setColor(QPalette.Light, QColor(180, 180, 180))
+    palette.setColor(QPalette.Midlight, QColor(43, 43, 45))
+    palette.setColor(QPalette.Dark, QColor(35, 35, 37))
+    palette.setColor(QPalette.Text, QColor(220, 220, 220))
+    palette.setColor(QPalette.BrightText, QColor(240, 240, 240))
+    palette.setColor(QPalette.ButtonText, QColor(220, 220, 220))
+    palette.setColor(QPalette.Base, QColor(38, 38, 41))
+    palette.setColor(QPalette.AlternateBase, QColor(44, 44, 48))
+    palette.setColor(QPalette.Mid, QColor(68, 68, 70))
+    palette.setColor(QPalette.Shadow, QColor(20, 20, 22))
+    palette.setColor(QPalette.Link, QColor(56, 252, 196))
+    palette.setColor(QPalette.ToolTipBase, QColor(42, 42, 44))
+    palette.setColor(QPalette.ToolTipText, QColor(220, 220, 220))
+    palette.setColor(QPalette.LinkVisited, QColor(80, 80, 80))
+    palette.setColor(QPalette.Background, QColor(60, 60, 62))
+    # palette.setColor(QPalette.Window, QColor(50, 50, 52))
+
+    # disabled
+    palette.setColor(QPalette.Disabled, QPalette.WindowText, QColor(127, 127, 127))
+    palette.setColor(QPalette.Disabled, QPalette.Text, QColor(127, 127, 127))
+    palette.setColor(QPalette.Disabled, QPalette.ButtonText, QColor(127, 127, 127))
+    palette.setColor(QPalette.Disabled, QPalette.Highlight, QColor(80, 80, 80))
+    palette.setColor(QPalette.Disabled, QPalette.HighlightedText, QColor(150, 150, 150))
 
 
 class DarkPalette:

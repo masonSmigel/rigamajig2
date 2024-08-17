@@ -587,6 +587,7 @@ def copySkinClusterAndInfluences(
     srcSkinCluster = getSkinCluster(sourceMesh)
     srcInfluences = getInfluenceJoints(srcSkinCluster)
 
+    copiedSkinClusters = []
     for tgtMesh in targetMeshes:
         tgtSkinCluster = getSkinCluster(tgtMesh)
 
@@ -645,8 +646,9 @@ def copySkinClusterAndInfluences(
                 sourceMesh, srcSkinCluster, tgtMesh, tgtSkinCluster
             )
         )
+        copiedSkinClusters.append((tgtSkinCluster))
 
-        return tgtSkinCluster
+    return copiedSkinClusters
 
 
 def connectExistingBPMs(skinCluster: str, influences: List[str] = None):

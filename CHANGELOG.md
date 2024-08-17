@@ -1,5 +1,27 @@
 # Change Log
 
+## 1.3.2 
+
+### Added: 
+* pylint and black reformatting on maya and shared modules
+* updating icons and reorganizing UI sections
+* added the option to pass an attribute string into the `blendedOffsetParentMatrix` 
+function to drive the blend
+* Added the option to not build the skull control on the neck component 
+* 
+
+### Changed: 
+* updated the split `splitBlendshapeTargets` function and added pytest for it.
+* `copySkinClusterAndInfluences` now returns a list of all target skinclusters
+
+
+### Fixed: 
+* fixed typehints on the builder
+* properly mirror the band and swivel attributes on the ik foot component. 
+* fixed a bug in twist decomposition by auto orienting the auto-wrist control. 
+   updated the parent rotation order negation to work properly
+* fixed aa bug causing incorrect ik matching on the leg component.
+
 ## 1.3.1
 
 ### Added:

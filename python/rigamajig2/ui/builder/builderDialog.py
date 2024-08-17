@@ -205,9 +205,6 @@ class BuilderDialog(MayaDialog):
         self.scrollArea.setFrameShape(QtWidgets.QFrame.NoFrame)
         self.scrollArea.setWidgetResizable(True)
 
-        self.rigEnvironmentGroupbox.setStyle(QtWidgets.QStyleFactory.create('plastique'))
-        self.buildGroupBox.setStyle(QtWidgets.QStyleFactory.create('plastique'))
-
         self.runSelectedButton.setIcon(Resources.getIcon(":execute.png"))
         self.runSelectedButton.setToolTip("Run Rig steps up to the break point")
         self.runSelectedButton.setFixedSize(120, 22)

@@ -96,11 +96,7 @@ def smoothSkinCluster(polyMesh, intensity=0.1, itterations=30):
             cmds.loadPlugin("ngSkinTools2")
         import ngSkinTools2.api as ngst
     except:
-        raise Warning(
-            "Unable to load ngSkinTools2 python module. Cannot smooth mesh {}".format(
-                polyMesh
-            )
-        )
+        raise Warning("Unable to load ngSkinTools2 python module. Cannot smooth mesh {}".format(polyMesh))
 
     # we need a layer reference for this, so we'll take first layer from our sample mesh
     layers = ngst.init_layers(polyMesh)
@@ -150,15 +146,9 @@ class DeformationCage(object):
         outputGeoName = "{}_output_cageGeo".format(self.name)
 
         # store the heirarchy into class variables to reuse later
-        self.rootHierarchy = cmds.createNode(
-            "transform", name=rootName, parent=self.parent
-        )
-        self.controlsHierarchy = cmds.createNode(
-            "transform", name=controlsName, parent=self.rootHierarchy
-        )
-        self.outputGeoHierarchy = cmds.createNode(
-            "transform", name=outputGeoName, parent=self.rootHierarchy
-        )
+        self.rootHierarchy = cmds.createNode("transform", name=rootName, parent=self.parent)
+        self.controlsHierarchy = cmds.createNode("transform", name=controlsName, parent=self.rootHierarchy)
+        self.outputGeoHierarchy = cmds.createNode("transform", name=outputGeoName, parent=self.rootHierarchy)
 
     def createCageControlPoints(self, size=1, color="slategray", orientToNormal=True):
         """
@@ -168,16 +158,10 @@ class DeformationCage(object):
         :param orientToNormal: orient the controls to the vertex normals
         """
         if not mesh.isMesh(self.cageMesh):
-            raise ValueError(
-                "The provided mesh MUST be a polyMesh. {} is not a poly mesh".format(
-                    self.cageMesh
-                )
-            )
+            raise ValueError("The provided mesh MUST be a polyMesh. {} is not a poly mesh".format(self.cageMesh))
         skin = skinCluster.getSkinCluster(self.cageMesh)
         if not skin:
-            raise Exception(
-                "the input mesh: {} must have a skincluster.".format(self.cageMesh)
-            )
+            raise Exception("the input mesh: {} must have a skincluster.".format(self.cageMesh))
 
         # check the max influences for a skin cluster
         # if len(cmds.skinCluster(skin, q=True, mi=True)) > 2:
@@ -271,18 +255,14 @@ class DeformationCage(object):
                 # driver2 = currentInfluences[-1]
                 # transform.blendedOffsetParentMatrix(driver1, driver2, ctl.orig, mo=True, blend=weight)
             else:
-                transform.connectOffsetParentMatrix(
-                    currentInfluences[0], ctl.orig, mo=True
-                )
+                transform.connectOffsetParentMatrix(currentInfluences[0], ctl.orig, mo=True)
 
             # add the important data to out lists
             self.controlList.append(ctl)
             self.bindJointList.append(bind)
             self.bpmJointList.append(bpm)
 
-        logger.info(
-            "Create a new control cage with {} points".format(len(self.controlList))
-        )
+        logger.info("Create a new control cage with {} points".format(len(self.controlList)))
 
     def createConnectivityDisplay(self):
         """
@@ -313,10 +293,8 @@ class DeformationCage(object):
             control1 = self.controlList[point[0]].name
             control2 = self.controlList[point[1]].name
 
-            lineName = "cageLine_{}_{}".format(point[0], point[1])
-            displayLine = control.createDisplayLine(
-                point1=control1, point2=control2, parent=None, name=lineName
-            )
+            lineName = "{}_cageLine_{}_{}".format(self.name, point[0], point[1])
+            displayLine = control.createDisplayLine(point1=control1, point2=control2, parent=None, name=lineName)
             shape = cmds.listRelatives(displayLine, s=True)[0]
             cmds.parent(shape, cageTransform, r=True, s=True)
             cmds.delete(displayLine)
@@ -327,12 +305,8 @@ class DeformationCage(object):
         """
         meshesToBind = common.toList(meshesToBind)
 
-        lowOutput = cmds.duplicate(
-            self.cageMesh, name="{}_low_output".format(self.name)
-        )[0]
-        highOutput = cmds.duplicate(
-            self.cageMesh, name="{}_high_output".format(self.name)
-        )[0]
+        lowOutput = cmds.duplicate(self.cageMesh, name="{}_low_output".format(self.name))[0]
+        highOutput = cmds.duplicate(self.cageMesh, name="{}_high_output".format(self.name))[0]
         cmds.parent([lowOutput, highOutput], self.outputGeoHierarchy)
 
         # subdivide the high output a couple times so we can smooth it!
@@ -360,9 +334,7 @@ class DeformationCage(object):
         # now that we have the bind mesh we can
         for geo in meshesToBind:
             # create a duplicate to store the copied skin data
-            tempDup = cmds.duplicate(
-                geo, name="{}_tempToCopy".format(geo), renameChildren=True
-            )
+            tempDup = cmds.duplicate(geo, name="{}_tempToCopy".format(geo), renameChildren=True)
             cmds.parent(tempDup, world=True)
 
             # copy the skin data to the duplicate

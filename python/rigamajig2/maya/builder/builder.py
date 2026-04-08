@@ -746,7 +746,7 @@ class Builder(object):
             return f"{self.rigName}{self.outputFileSuffix or ''}_v{version:03d}.{self.outputFileType}"
         return f"{self.rigName}{self.outputFileSuffix or ''}.{self.outputFileType}"
 
-    def getExistingVersions(self) -> list[str] or None:
+    def getExistingVersions(self) -> List[str] or None:
         """
         Get a list of all existing versions in the currently set output directory.
 
